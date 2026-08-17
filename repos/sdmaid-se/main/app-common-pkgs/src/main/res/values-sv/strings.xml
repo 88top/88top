@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="pkgrepo_invalid_inventory_error_title">Ogiltig appinventering</string>
-    <string name="pkgrepo_invalid_inventory_error_description">Systemet gav en ogiltig lista över installerade appar till SD Maid.</string>
-</resources>

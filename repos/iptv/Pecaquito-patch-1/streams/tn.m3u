@@ -1,5 +1,0 @@
-#EXTM3U
-#EXTINF:-1 tvg-id="JawharaTV.tn",JAWHARA TV (720p) [Not 24/7]
-https://streaming.toutech.net/live/jtv/index.m3u8
-#EXTINF:-1 tvg-id="MosaiqueFM.tn",Mosaïque FM (480p) [Not 24/7]
-https://webcam.mosaiquefm.net:1936/mosatv/studio/playlist.m3u8

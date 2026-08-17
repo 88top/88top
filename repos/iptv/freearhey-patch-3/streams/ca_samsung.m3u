@@ -1,7 +1,0 @@
-#EXTM3U
-#EXTINF:-1 tvg-id="InsightTV.nl@SD",Insight TV (720p)
-https://insighttv-samsung-canada.amagi.tv/playlist.m3u8
-#EXTINF:-1 tvg-id="InWonder.nl@SD",InWonder (720p)
-https://inwonder-samsung-canada.amagi.tv/playlist.m3u8
-#EXTINF:-1 tvg-id="",The Jack Hannah Channel
-https://littonjackhannah-samsungca.amagi.tv/playlist.m3u8
