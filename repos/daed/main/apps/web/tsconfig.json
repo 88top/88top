@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "baseUrl": "./",
+    "paths": { "~/*": ["src/*"] },
+    "types": ["vitest/globals"],
+    "allowImportingTsExtensions": true,
+    "ignoreDeprecations": "6.0"
+  },
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "include": ["src"]
+}

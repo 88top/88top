@@ -1,0 +1,68 @@
+name: Build and Release Tauri App
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    runs-on: windows-latest
+    steps:
+
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 安装 Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: 安装依赖
+        run: npm install
+
+      # === 构建离线版 ===
+      - name: 编译离线版
+        run: npm run tauri build
+
+      # === 备份离线版产物 ===
+      - name: 备份离线产物
+        run: |
+          New-Item -ItemType Directory -Force -Path "release-backup"
+          Copy-Item src-tauri\target\release\bundle\nsis\*.exe release-backup\
+          Copy-Item src-tauri\target\release\bundle\msi\*.msi release-backup\
+          Copy-Item src-tauri\target\release\yahei-alarm-clock.exe release-backup\yahei-alarm-clock-offline.exe
+
+      # === 构建单文件在线版 ===
+      - name: 编译单文件绿色版
+        run: |
+          npm run tauri build -- --config '{\"build\":{\"frontendDist\":\"../ui2\"}}'
+
+      # === 打包两个版本 ===
+      - name: 打包两个版本 zip
+        run: |
+          Compress-Archive -Path "src-tauri/target/release/yahei-alarm-clock.exe" -DestinationPath YaheiAlarmClock-SingleFile.zip -Force
+          New-Item -ItemType Directory -Force -Path portable
+          Copy-Item release-backup\yahei-alarm-clock-offline.exe portable\yahei-alarm-clock.exe
+          Copy-Item ui -Destination portable\ui -Recurse -Force
+          Compress-Archive -Path portable\* -DestinationPath YaheiAlarmClock-Portable.zip -Force
+
+      - name: 删除旧 Release
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release delete v1.0.0 --yes --cleanup-tag
+
+      - name: 创建 Release 并上传文件
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create v1.0.0 `
+            --title "极简雅黑桌面闹钟 v1.0.0" `
+            --notes "离线完整版（带 ui 文件夹） + 单文件绿色便携版（在线资源）" `
+            release-backup/YaheiAlarmClock_1.0.0_x64-setup.exe `
+            release-backup/YaheiAlarmClock_1.0.0_x64_en-US.msi `
+            YaheiAlarmClock-SingleFile.zip `
+            YaheiAlarmClock-Portable.zip

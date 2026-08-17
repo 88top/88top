@@ -1,0 +1,73 @@
+{
+  "name": "@zy/vlc",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "libVLC native addon for Electron with renderer API",
+  "main": "lib/types.cjs",
+  "module": "lib/types.mjs",
+  "types": "lib/types.d.mts",
+  "exports": {
+    ".": {
+      "types": "./lib/types.d.mts",
+      "import": "./lib/types.mjs",
+      "require": "./lib/types.cjs",
+      "default": "./lib/types.mjs"
+    },
+    "./control": {
+      "types": "./lib/control.d.mts",
+      "import": "./lib/control.mjs",
+      "require": "./lib/control.cjs",
+      "default": "./lib/control.mjs"
+    },
+    "./renderer": {
+      "types": "./lib/renderer.d.mts",
+      "import": "./lib/renderer.mjs",
+      "require": "./lib/renderer.cjs",
+      "default": "./lib/renderer.mjs"
+    },
+    "./constants": {
+      "types": "./lib/constants.d.mts",
+      "import": "./lib/constants.mjs",
+      "require": "./lib/constants.cjs",
+      "default": "./lib/constants.mjs"
+    },
+    "./renderer.css": "./lib/renderer.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "build"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "npm run clean && npm run build:native && npm run build:ts && npm run build:css ",
+    "build:css": "lessc src/renderer/style/index.less lib/renderer.css",
+    "build:ts": "tsdown",
+    "build:native": "napi build --manifest-path native/Cargo.toml --release --output-dir build/Release",
+    "clean": "rimraf build lib",
+    "dev": "electron example/electron.cjs",
+    "install": "npm run build",
+    "postinstall": "node -e \"try { require('./build/Release/vlc_native.node'); } catch(e) { require('child_process').execSync('npm run build:native', {stdio: 'inherit'}); }\"",
+    "prepublishOnly": "npm run build",
+    "typecheck": "tsc --noEmit"
+  },
+  "napi": {
+    "binaryName": "vlc_native"
+  },
+  "peerDependencies": {
+    "@electron-toolkit/preload": ">3.0.0",
+    "core-js": ">=3.12.1",
+    "electron": ">32.0.0"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.6.2",
+    "@types/node": "^25.7.0",
+    "json5": "^2.2.3",
+    "less": "^4.6.4",
+    "rimraf": "^6.1.3",
+    "tsdown": "^0.20.3",
+    "typescript": "^5.8.3"
+  }
+}

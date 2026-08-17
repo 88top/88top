@@ -1,0 +1,4 @@
+provider: github
+owner: Hiram-Wong
+repo: zyfun
+updaterCacheDirName: zyfun-updater

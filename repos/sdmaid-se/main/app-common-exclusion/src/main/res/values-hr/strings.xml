@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exclusion_manager_title">Upravitelj izuzetaka</string>
+    <string name="exclusion_manager_desc">Upravljajte izuzecima datoteka i aplikacija.</string>
+    <string name="exclusion_explanation_body1">Isključite datoteke i aplikacije kako biste ih zaštitili od SD Maid alata, ili kako biste preskočili nevažne stavke i ubrzali operacije.</string>
+    <string name="exclusion_add_new_hint">Još nema isključenja. Koristite + gumb kako biste stvorili jedno, ili isključite stavke iz rezultata bilo kojeg alata.</string>
+    <string name="exclusion_create_action">Stvori izuzetak</string>
+    <string name="exclusion_edit_action">Uredi izuzetak</string>
+    <string name="exclusion_type_package">Izuzimanje aplikacije</string>
+    <string name="exclusion_type_path">Izuzimanje putanje</string>
+    <string name="exclusion_type_segment">Izuzimanje segmenta</string>
+    <string name="exclusion_tags_alltools">Svi alati</string>
+    <string name="exclusion_target_label">Meta izuzimanja</string>
+    <string name="exclusion_editor_path_change_action">Dodirnite za promjenu putanje</string>
+    <string name="exclusion_option_allow_partial">Dopusti djelomična podudaranja</string>
+    <string name="exclusion_option_ignore_casing">Zanemari velika/mala slova</string>
+    <string name="exclusion_editor_affected_tools_label">Pogođeni alati</string>
+    <string name="exclusion_editor_path_explanation">Izuzimanje putanje sprječava SD Maid da dalje obrađuje sve odgovarajuće putanje. To se odnosi na datoteke, mape i podmape.</string>
+    <string name="exclusion_editor_pkg_explanation">Izuzimanje aplikacije sprječava SD Maid da obradi podudarajuće pakete.</string>
+    <string name="exclusion_editor_segment_explanation">Izuzimanje na temelju segmenta slično je izuzimanju putanje, ali dopušta djelomična podudaranja. Primjer: \"DCIM/Camera\" izuzima \"/sdcard/DCIM/Camera/photo.png\".</string>
+    <string name="exclusion_editor_remove_confirmation_message">Ukloniti ovaj izuzetak?</string>
+    <string name="exclusion_reset_default_exclusions">Vrati zadane izuzetke</string>
+    <string name="exclusion_import_action">Uvezi izuzetke</string>
+    <string name="exclusion_export_action">Izvezi izuzetke</string>
+    <string name="exclusion_create_pkg_hint">Upotrijebite alat Kontrola aplikacija za stvaranje izuzetaka aplikacija.</string>
+    <string name="exclusion_create_path_hint">Upotrijebite alat \"Analizator pohrane\" za stvaranje izuzetaka putanja.</string>
+    <string name="exclusion_create_segment_hint">Pronađite segment imena, npr. \"DCIM/Camera\".</string>
+    <string name="exclusion_show_defaults_action">Prikaži zadano</string>
+    <plurals name="exclusion_import_success_x_items">
+        <item quantity="one">%d isključenje uvezeno</item>
+        <item quantity="few">%d isključenja uvezena</item>
+        <item quantity="other">%d isključenja uvezeno</item>
+    </plurals>
+    <plurals name="exclusion_export_success_x_items">
+        <item quantity="one">%d isključenje izvezeno</item>
+        <item quantity="few">%d isključenja izvezena</item>
+        <item quantity="other">%d isključenja izvezeno</item>
+    </plurals>
+</resources>

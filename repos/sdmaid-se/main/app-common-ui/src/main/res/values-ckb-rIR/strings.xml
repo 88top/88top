@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_select_paths_title">هەڵبژاردنی ڕێگاکان</string>
+    <string name="picker_selected_paths_title">ڕێگاکانی هەڵبژێردراو</string>
+    <string name="picker_unsaved_confirmation_message">گۆڕانکاریەکان بەتاڵ بکرێت؟</string>
+    <plurals name="picker_selected_paths_subtitle">
+        <item quantity="one">%d ڕێگا هەڵبژێردراوە</item>
+        <item quantity="other">%d ڕێگا هەڵبژێردراوە</item>
+    </plurals>
+    <string name="picker_home_action">بەشی دەرەنجام</string>
+    <string name="picker_select_hint">شتێک هەڵگرەوە بۆ هەڵبژاردن</string>
+    <string name="tour_action_next">دواتر</string>
+    <string name="tour_action_previous">پێشوو</string>
+    <string name="tour_action_cancel">تێپەڕاندن</string>
+    <string name="tour_confirm_title">گەشتەکە تێپەڕێنیت؟</string>
+    <string name="tour_confirm_message">دەتوانیت لە رێکخستندا گەشتەکان کاتێخی دووبارە چالاک بکەیتەوە.</string>
+    <string name="tour_confirm_continue">گەشت بەردەوام بکە</string>
+    <string name="tour_confirm_dont_show_this_tour">ئەم گەشتە پیشان مەدە</string>
+    <string name="tour_confirm_disable_all">هەموو گەشتەکان ناچالاک بکە</string>
+    <string name="navigation_unknown_destination_title">شاشە بەردەست نیە</string>
+    <string name="navigation_unknown_destination_message">ئەم شاشەیە نەتوانێت بکرایەوە.</string>
+</resources>

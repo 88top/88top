@@ -1,0 +1,83 @@
+# 🖥️ Develop
+
+## IDE Setup
+
+### VSCode like
+
+- Editor: [VS Code](https://code.visualstudio.com), etc. Any VS Code compatible editor.
+- Recommended extensions are listed in [`.vscode/extensions.json`](/.vscode/extensions.json).
+
+## Project Setup
+
+### Install
+
+```bash
+pnpm install
+```
+
+### Development
+
+### Setup Rust
+
+Download [rust-lang](https://forge.rust-lang.org/infra/other-installation-methods.html) and install
+
+### Setup Node.js
+
+The required Node.js version is defined in `.node-version`. Use a version manager like [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to install it automatically:
+
+```bash
+nvm install
+```
+
+### Setup pnpm
+
+The pnpm version is locked in the `packageManager` field of `package.json`. Just enable corepack and it will use the correct version automatically:
+
+```bash
+corepack enable
+```
+
+### Install Dependencies
+
+```bash
+pnpm install
+```
+
+### ENV
+
+```bash
+cp .env.example .env
+```
+
+### Start
+
+```bash
+pnpm dev
+```
+
+### Debug
+
+```bash
+pnpm debug
+```
+
+Then input chrome://inspect in browser
+
+### Test
+
+```bash
+pnpm test
+```
+
+### Build
+
+```bash
+# For windows
+$ pnpm build:win
+
+# For macOS
+$ pnpm build:mac
+
+# For Linux
+$ pnpm build:linux
+```

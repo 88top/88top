@@ -1,0 +1,55 @@
+<i>SD Maid 2/SE</i> är din Androids betrodda assistent för att hålla den ren och snygg.
+
+Ingen är perfekt och inte Android heller.
+
+* Appar som du redan har tagit bort lämnar något bakom sig.
+* Loggar, kraschrapporter och andra filer du inte vill ha skapas ständigt.
+* Din lagring samlar på sig filer och mappar du inte känner igen.
+* Duplicerade foton i ditt galleri.
+
+Låt oss inte fortsätta räkna upp… Låt SD Maid 2/SE hjälpa dig!
+
+SD Maid 2/SE är en app- och filhanterare som vet vilka appar som skapade filer på din enhet. Den jämför filer med installerade appar för att hjälpa dig att frigöra lagringsutrymme på ett säkert sätt.
+
+✨ Rensa upp efter att ha avinstallerat appar
+
+Om appar skapar filer utanför sina utsedda mappar kan filerna finnas kvar även efter att apparna avinstallerats. Verktyget "CorpseFinder" hittar app-rester, berättar vilken app de tillhörde och hjälper dig ta bort dem.
+
+🔍 Sök igenom din enhet på ett smart sätt
+
+Filtrera efter tomma mappar, temporära filer, redan installerade appar med mera. Du kan till och med skapa din egna sökkriterier. Verktyget "SystemCleaner" söker automatiskt och raderar filer baserat på olika kriterier.
+
+🧹 Ta bort onödiga filer och dolda cachar
+
+Miniatyrbilder, papperskorgar, offlinecachar med mera: Om appar inte städar upp efter sig gör den här appen det. Verktyget "AppCleaner" hittar appar med onödiga filer.
+
+📦 Hantera alla dina appar
+
+Få en fullständig lista över alla appar installerade på din enhet. Aktiverad, inaktiverad, användar- eller systemapp: ingen app kan gömma sig för dig. Verktyget "AppControl" är en apphanterare som låter dig söka, sortera och kontrollera dina appar.
+
+📊 Vad är det som tar upp all ditt utrymme
+
+Lagringshantering kan vara komplext med appar, media, system och andra filer på enhetslagring, SD-kort och USB-enheter. "StorageAnalyzer" är en filhanterare som visar hur utrymme används på din enhet och förenklar hanteringen av din lagring.
+
+📷 Hitta duplicerad data
+
+Duplicerade nedladdningar, foton skickade via sociala medier eller bara liknande bilder från samma scen: med tiden kan kopior hopa sig. Verktyget "Deduplicator" hittar filer som är identiska eller liknande och hjälper dig ta bort extra kopior.
+
+👆 Rensa enkelt med en svepning
+
+Välj en mapp och gå igenom filer en i taget med enkla svepningar för att behålla, ta bort eller hoppa över. Verktyget "Swiper" låter dig granska alla beslut innan något raderas, och du kan spara en session för att fortsätta senare.
+
+🗄️ Spara utrymme utan att ta bort foton
+
+Foton kan ta upp mycket lagringsutrymme, men du vill inte alltid ta bort dem. Verktyget "Media Squeeze" komprimerar dina bilder med justerbara kvalitetsinställningar för att frigöra utrymme medan du behåller dina foton.
+
+Denna app är annons-fri. Vissa funktioner kräver en betald uppgradering.
+
+SD Maid 2/SE är efterträdaren till SD Maid 1/Legacy.
+Optimerad för nyare Android-versioner och fokuserad på att städa upp.
+
+Den här appen har valfria funktioner som använder AccessibilityService API för att automatisera tråkiga åtgärder.
+Med hjälp av AccessibilityService API kan den här appen klicka på knappar åt dig för att utföra åtgärder i flera appar, t.ex. radera cacher.
+Den här appen använder inte AccessibilityService API för att samla in information.
+
+SD Maid 2/SE är en fil- och städapp.

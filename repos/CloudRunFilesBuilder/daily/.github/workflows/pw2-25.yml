@@ -1,0 +1,176 @@
+#=================================================
+# https://github.com/wukongdaily/RunFilesBuilder
+# Description: Build RunFiles using GitHub Actions
+# Lisence: MIT
+# Author: wukongdaily
+# Blog: wkdaily.cpolar.cn
+#=================================================
+
+name: Build 25.12 Passwall2
+
+on:
+  schedule:
+    - cron: "15 22 * * *"  # 北京时间早上 6 点
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Clone makeself repository
+        run: git clone https://github.com/megastep/makeself.git
+
+      - name: Fetch latest release tag from Passwall2
+        id: fetch_latest_tag
+        run: |
+          latest_tag=$(curl -s https://api.github.com/repos/Openwrt-Passwall/openwrt-passwall2/releases/latest | jq -r '.tag_name')
+          echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
+
+      - name: Download latest Passwall2 files
+        run: |
+          set -euxo pipefail
+
+          latest_tag=$(curl -s https://api.github.com/repos/Openwrt-Passwall/openwrt-passwall2/releases/latest | jq -r '.tag_name')
+          echo "tag name is $latest_tag"
+
+          mkdir -p downloads
+          cd downloads
+
+          # 下载 x86_64 apk
+          curl -L --fail --retry 5 --retry-delay 3 \
+            -o passwall_packages_apk_x86_64.zip \
+            "https://github.com/Openwrt-Passwall/openwrt-passwall2/releases/download/${latest_tag}/passwall_packages_apk_x86_64.zip"
+
+          # 下载 aarch64 a53 apk
+          curl -L --fail --retry 5 --retry-delay 3 \
+            -o passwall_packages_apk_aarch64_cortex-a53.zip \
+            "https://github.com/Openwrt-Passwall/openwrt-passwall2/releases/download/${latest_tag}/passwall_packages_apk_aarch64_cortex-a53.zip"
+
+          # 下载 aarch64_generic apk
+          curl -L --fail --retry 5 --retry-delay 3 \
+            -o passwall_packages_apk_aarch64_generic.zip \
+            "https://github.com/Openwrt-Passwall/openwrt-passwall2/releases/download/${latest_tag}/passwall_packages_apk_aarch64_generic.zip"
+
+          # 下载 luci app apk
+          luci_url=$(curl -s https://api.github.com/repos/Openwrt-Passwall/openwrt-passwall2/releases/latest \
+            | jq -r '.assets[] | select(.name | test("luci-app-passwall2.*\\.apk$")) | .browser_download_url' | head -1)
+          
+          echo "luci_url = $luci_url"
+          curl -L --fail --retry 5 --retry-delay 3 \
+            -o luci-app-passwall2.apk \
+            "$luci_url"
+
+          # 下载 luci 简体中文语言包 apk
+          zh_url=$(curl -s https://api.github.com/repos/Openwrt-Passwall/openwrt-passwall2/releases/latest \
+            | jq -r '.assets[] | select(.name | test("^luci-i18n-passwall2-zh-cn.*\\.apk$")) | .browser_download_url' | head -1)
+          
+          echo "zh_url = $zh_url"
+          curl -L --fail --retry 5 --retry-delay 3 \
+            -o luci-i18n-passwall2-zh-cn.apk \
+            "$zh_url"
+
+          echo "=== 下载完成 ==="
+          ls -lh
+      - name: Organize files for x86_64
+        run: |
+          mkdir -p passwall_x86_64/depends passwall_x86_64/main
+          unzip downloads/passwall_packages_apk_x86_64.zip -d passwall_x86_64/depends
+          rm downloads/passwall_packages_apk_x86_64.zip
+          cp downloads/luci-*.apk passwall_x86_64/main/
+
+      - name: Organize files for aarch64_cortex-a53
+        run: |
+          mkdir -p passwall_aarch64-a53/depends passwall_aarch64-a53/main
+          unzip downloads/passwall_packages_apk_aarch64_cortex-a53.zip -d passwall_aarch64-a53/depends
+          rm downloads/passwall_packages_apk_aarch64_cortex-a53.zip
+          cp downloads/luci-*.apk passwall_aarch64-a53/main/
+
+      - name: Organize files for aarch64_generic
+        run: |
+          mkdir -p passwall_aarch64_generic/depends passwall_aarch64_generic/main
+          unzip downloads/passwall_packages_apk_aarch64_generic.zip -d passwall_aarch64_generic/depends
+          rm downloads/passwall_packages_apk_aarch64_generic.zip
+          cp downloads/luci-*.apk passwall_aarch64_generic/main/
+
+      - name: Create install.sh scripts
+        run: |
+          cat <<EOF > passwall_x86_64/install.sh
+          #!/bin/sh
+          apk update
+          if [ $? -ne 0 ]; then
+              echo "update failed"
+              exit 1
+          fi
+          apk add iptables-mod-tproxy
+          apk add iptables-mod-socket
+          apk add iptables-mod-iprange
+          apk add iptables-mod-conntrack-extra
+          apk add --allow-untrusted depends/*.apk
+          apk add --allow-untrusted main/*.apk
+          EOF
+          chmod +x passwall_x86_64/install.sh
+          cp passwall_x86_64/install.sh passwall_aarch64-a53/install.sh
+          cp passwall_x86_64/install.sh passwall_aarch64_generic/install.sh
+
+      - name: Move passwall2 directories to makeself
+        run: |
+          mv passwall_x86_64 makeself/
+          mv passwall_aarch64-a53 makeself/
+          mv passwall_aarch64_generic makeself/
+
+      - name: Create self-extracting packages
+        run: |
+          cd makeself
+          ./makeself.sh passwall_x86_64/ 25-passwall2_x86_64_${{ env.LATEST_TAG }}.run "by github action" ./install.sh
+          ./makeself.sh passwall_aarch64-a53/ 25-passwall2_aarch64_a53_${{ env.LATEST_TAG }}.run "by github action" ./install.sh
+          ./makeself.sh passwall_aarch64_generic/ 25-passwall2_aarch64_generic_${{ env.LATEST_TAG }}.run "by github action" ./install.sh
+
+      - name: Check file sizes
+        run: |
+          ls -lh makeself/*.run
+
+      - name: Preparing release name
+        run: |
+          release_name=$(TZ="Asia/Shanghai" date +'%Y-%m-%d %H:%M Build')
+          echo "RELEASE_NAME=$release_name" >> $GITHUB_ENV
+
+      - name: Fetch latest release details
+        id: fetch_release_details
+        run: |
+          extra_content="![Github](https://img.shields.io/badge/Passwall2.run-123456?logo=github&logoColor=fff&labelColor=green&style=for-the-badge) [![Github](https://img.shields.io/badge/国内加速站下载-FC7C0D?logo=github&logoColor=fff&labelColor=000&style=for-the-badge)](https://wkdaily.cpolar.cn/archives/1) ![GitHub Downloads (all assets, specific tag)](https://img.shields.io/github/downloads/wukongdaily/RunFilesBuilder/${{ env.LATEST_TAG }}/total?style=for-the-badge&labelColor=black&color=%2325c2a0)"
+          release_notes=$(curl -s https://api.github.com/repos/Openwrt-Passwall/openwrt-passwall2/releases/latest | jq -r '.body')
+          if [ -z "$release_notes" ]; then
+            release_notes="No release notes available."
+          fi
+          echo -e "$extra_content\n\n$release_notes" > release_notes.md
+
+      - name: Print release notes
+        run: |
+          cat release_notes.md
+
+      - name: Set tag name
+        id: vars
+        run: |
+          TODAY=$(date -u -d '+8 hour' +'%Y-%m-%d')
+          echo "tag_name=$TODAY" >> $GITHUB_ENV
+          
+      - name: Upload run files as release assets
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ env.tag_name }}
+          name: "Daily Build - ${{ env.tag_name }}"
+          files: makeself/*.run
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: |
+             <p align="left">
+              <img src="https://img.shields.io/github/downloads/wkccd/CloudRunFilesBuilder/${{ env.tag_name }}/total?style=for-the-badge&label=%E4%BB%8A%E6%97%A5%E4%B8%8B%E8%BD%BD%E6%AC%A1%E6%95%B0&labelColor=blue&color=black"/>
+              <a href="https://wkdaily.cpolar.cn/archives/1">
+                <img src="https://img.shields.io/badge/可套用国内加速站下载-FC7C0D?logo=github&logoColor=fff&labelColor=000&style=for-the-badge"/>
+              </a>
+             </p>
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

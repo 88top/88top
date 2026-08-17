@@ -1,0 +1,76 @@
+const XtermDark = {
+  name: 'XtermDark',
+  black: '#040404',
+  red: '#d84a33',
+  green: '#5da602',
+  yellow: '#eebb6e',
+  blue: '#417ab3',
+  magenta: '#e5c499',
+  cyan: '#bdcfe5',
+  white: '#dbded8',
+  brightBlack: '#685656',
+  brightRed: '#d76b42',
+  brightGreen: '#99b52c',
+  brightYellow: '#ffb670',
+  brightBlue: '#97d7ef',
+  brightMagenta: '#aa7900',
+  brightCyan: '#bdcfe5',
+  brightWhite: '#e4d5c7',
+  background: '#393939',
+  foreground: '#feffff',
+  selectionBackground: '#606060',
+  cursor: '#feffff',
+};
+
+const XtermLight = {
+  name: 'XtermLight',
+  black: '#000000',
+  red: '#c82829',
+  green: '#718c00',
+  yellow: '#eab700',
+  blue: '#4271ae',
+  magenta: '#8959a8',
+  cyan: '#3e999f',
+  white: '#ffffff',
+  brightBlack: '#000000',
+  brightRed: '#c82829',
+  brightGreen: '#718c00',
+  brightYellow: '#eab700',
+  brightBlue: '#4271ae',
+  brightMagenta: '#8959a8',
+  brightCyan: '#3e999f',
+  brightWhite: '#ffffff',
+  background: '#e8e8e8',
+  foreground: '#4d4d4c',
+  selectionBackground: '#d6d6d6',
+  cursor: '#4d4d4c',
+};
+
+const XtermSearchDark = {
+  widgetBackground: '#252526',
+  widgetForeground: '#cccccc',
+  widgetShadow: 'rgba(0, 0, 0, 0.36)',
+  inputBackground: '#3c3c3c',
+  inputForeground: '#cccccc',
+  inputOptionActiveBackground: '#585959',
+  inputOptionHoverBackground: '#4c4d4d',
+  toolbarHoverBackground: 'rgba(90, 93, 94, 0.31)',
+};
+
+const XtermSearchLight = {
+  widgetBackground: '#f3f3f3',
+  widgetForeground: '#616161',
+  widgetShadow: 'rgba(0, 0, 0, 0.16)',
+  inputBackground: '#ffffff',
+  inputForeground: '#616161',
+  inputOptionActiveBackground: '#e1e1e1',
+  inputOptionHoverBackground: '#cccccc',
+  toolbarHoverBackground: 'rgba(184, 184, 184, 0.31)',
+};
+
+export default {
+  XtermDark,
+  XtermLight,
+  XtermSearchDark,
+  XtermSearchLight,
+};

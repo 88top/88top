@@ -1,0 +1,92 @@
+package eu.darken.sdmse.common.pkgs
+
+import android.content.Context
+import android.graphics.drawable.Drawable
+import androidx.annotation.DrawableRes
+import androidx.annotation.Keep
+import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
+import eu.darken.sdmse.common.ca.CaString
+import eu.darken.sdmse.common.ca.caString
+import eu.darken.sdmse.common.io.R
+import eu.darken.sdmse.common.pkgs.features.AppStore
+
+@Keep
+sealed class AKnownPkg(override val id: Pkg.Id) : Pkg {
+    constructor(rawPkgId: String) : this(Pkg.Id(rawPkgId))
+
+    @get:StringRes open val labelRes: Int? = null
+
+    @get:DrawableRes
+    protected open val fallbackIconRes: Int = R.drawable.ic_default_app_icon_24
+
+    override val label: CaString?
+        get() = caString { context ->
+            context.packageManager.getLabel2(id)?.let { return@caString it }
+
+            labelRes?.let { return@caString context.getString(it) }
+
+            id.name
+        }
+
+    override val icon: ((Context) -> Drawable)? = { context ->
+        context.packageManager.getIcon2(id)
+            ?: ContextCompat.getDrawable(context, fallbackIconRes)
+            ?: ContextCompat.getDrawable(context, R.drawable.ic_default_app_icon_24)!!
+    }
+
+    data object AndroidSystem : AKnownPkg("android")
+
+    data object GooglePlay : AKnownPkg("com.android.vending"), AppStore {
+        override val fallbackIconRes: Int = R.drawable.ic_baseline_gplay_24
+        override val storeLabel: String = "Google Play"
+        override val urlGenerator: ((Pkg.Id) -> String) = {
+            "https://play.google.com/store/apps/details?id=${it.name}"
+        }
+    }
+
+    data object VivoAppStore : AKnownPkg("com.vivo.appstore"), AppStore {
+        override val storeLabel: String = "Vivo App Store"
+    }
+
+    data object OppoMarket : AKnownPkg("com.oppo.market"), AppStore {
+        override val storeLabel: String = "Oppo Market"
+    }
+
+    data object HuaweiAppGallery : AKnownPkg("com.huawei.appmarket"), AppStore {
+        override val storeLabel: String = "Huawei AppGallery"
+    }
+
+    data object SamsungAppStore : AKnownPkg("com.sec.android.app.samsungapps"), AppStore {
+        override val storeLabel: String = "Samsung Galaxy Store"
+    }
+
+    data object XiaomiAppStore : AKnownPkg("com.xiaomi.mipicks"), AppStore {
+        override val storeLabel: String = "Xiaomi GetApps"
+    }
+
+    data object FDroid : AKnownPkg("org.fdroid.fdroid"), AppStore {
+        override val storeLabel: String = "F-Droid"
+        override val urlGenerator: ((Pkg.Id) -> String) = {
+            "https://f-droid.org/packages/${it.name}"
+        }
+    }
+
+    companion object {
+        val values: List<AKnownPkg> = listOf(
+            AndroidSystem,
+            GooglePlay,
+            VivoAppStore,
+            OppoMarket,
+            HuaweiAppGallery,
+            SamsungAppStore,
+            XiaomiAppStore,
+            FDroid,
+        )
+
+        val APP_STORES by lazy { values.filterIsInstance<AppStore>() }
+        val OEM_STORES by lazy { APP_STORES - GooglePlay }
+    }
+}
+
+fun Pkg.Id.toKnownPkg(): Pkg? = AKnownPkg.values.singleOrNull { it.id == this@toKnownPkg }

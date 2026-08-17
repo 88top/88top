@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_select_paths_title">Vælg stier</string>
+    <string name="picker_selected_paths_title">Valgte stier</string>
+    <string name="picker_unsaved_confirmation_message">Kassér ændringer?</string>
+    <plurals name="picker_selected_paths_subtitle">
+        <item quantity="one">%d sti valgt</item>
+        <item quantity="other">%d stier valgt</item>
+    </plurals>
+    <string name="picker_home_action">Dataområder</string>
+    <string name="picker_select_hint">Hold et element nede for at vælge det</string>
+    <string name="tour_action_next">Næste</string>
+    <string name="tour_action_previous">Forrige</string>
+    <string name="tour_action_cancel">Spring over</string>
+    <string name="tour_confirm_title">Spring rundvisningen over?</string>
+    <string name="tour_confirm_message">Du kan altid genaktivere rundvisninger fra Indstillinger.</string>
+    <string name="tour_confirm_continue">Fortsæt rundvisning</string>
+    <string name="tour_confirm_dont_show_this_tour">Vis ikke denne rundvisning</string>
+    <string name="tour_confirm_disable_all">Deaktiver alle rundvisninger</string>
+    <string name="navigation_unknown_destination_title">Skærm utilgængelig</string>
+    <string name="navigation_unknown_destination_message">Denne skærm kunne ikke åbnes.</string>
+</resources>

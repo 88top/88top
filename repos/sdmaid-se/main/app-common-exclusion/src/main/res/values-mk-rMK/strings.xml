@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exclusion_manager_title">Менаџер на исклучоци</string>
+    <string name="exclusion_manager_desc">Управувајте со исклучоци за датотеки и апликации.</string>
+    <string name="exclusion_explanation_body1">Исклучете датотеки и апликации за да ги заштитите од алатките на SD Maid, или за да ги прескочите неважните ставки и да ги забрзате операциите.</string>
+    <string name="exclusion_add_new_hint">Сè уште нема исклучувања. Користете го копчето + за да создадете едно, или исклучете ставки од резултатите на која било алатка.</string>
+    <string name="exclusion_create_action">Создади исклучок</string>
+    <string name="exclusion_edit_action">Уреди исклучок</string>
+    <string name="exclusion_type_package">Исклучок за апликација</string>
+    <string name="exclusion_type_path">Исклучок за патека</string>
+    <string name="exclusion_type_segment">Исклучок за сегмент</string>
+    <string name="exclusion_tags_alltools">Сите алатки</string>
+    <string name="exclusion_target_label">Цел на исклучок</string>
+    <string name="exclusion_editor_path_change_action">Допрете за промена на патека</string>
+    <string name="exclusion_option_allow_partial">Дозволи делумни совпаѓања</string>
+    <string name="exclusion_option_ignore_casing">Игнорирај големина на букви</string>
+    <string name="exclusion_editor_affected_tools_label">Засегнати алатки</string>
+    <string name="exclusion_editor_path_explanation">Исклучок за патека го спречува SD Maid од понатамошна обработка на совпаднати патеки. Ова важи за датотеки, папки и подпапки.</string>
+    <string name="exclusion_editor_pkg_explanation">Исклучок за апликација го спречува SD Maid од обработка на совпаднати пакети.</string>
+    <string name="exclusion_editor_segment_explanation">Исклучок базиран на сегмент е сличен на исклучок за патека но дозволува делумни совпаѓања. Пример: \"DCIM/Camera\" исклучува \"/sdcard/DCIM/Camera/photo.png\".</string>
+    <string name="exclusion_editor_remove_confirmation_message">Отстрани го овој исклучок?</string>
+    <string name="exclusion_reset_default_exclusions">Врати стандардни исклучоци</string>
+    <string name="exclusion_import_action">Увези исклучоци</string>
+    <string name="exclusion_export_action">Извези исклучоци</string>
+    <string name="exclusion_create_pkg_hint">Користете ја алатката AppControl за создавање исклучоци за апликации.</string>
+    <string name="exclusion_create_path_hint">Користете ја алатката StorageAnalyzer за создавање исклучоци за патеки.</string>
+    <string name="exclusion_create_segment_hint">Се совпаѓа со дел од името, на пр. „DCIM/Camera“.</string>
+    <string name="exclusion_show_defaults_action">Прикажи стандардни</string>
+    <plurals name="exclusion_import_success_x_items">
+        <item quantity="one">%d исклучување увезено</item>
+        <item quantity="other">%d исклучувања увезени</item>
+    </plurals>
+    <plurals name="exclusion_export_success_x_items">
+        <item quantity="one">%d исклучување извезено</item>
+        <item quantity="other">%d исклучувања извезени</item>
+    </plurals>
+</resources>

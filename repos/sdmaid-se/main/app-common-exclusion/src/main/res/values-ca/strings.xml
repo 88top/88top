@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exclusion_manager_title">Gestor d\'exclusions</string>
+    <string name="exclusion_manager_desc">Gestiona les exclusions de fitxers i aplicacions.</string>
+    <string name="exclusion_explanation_body1">Exclou fitxers i aplicacions per protegir-los de les eines de SD Maid, o omet elements irrellevants per accelerar les operacions.</string>
+    <string name="exclusion_add_new_hint">Encara no hi ha exclusions. Fes servir el botó + per crear-ne una, o exclou elements dels resultats de qualsevol eina.</string>
+    <string name="exclusion_create_action">Crea una exclusió</string>
+    <string name="exclusion_edit_action">Edita l\'exclusió</string>
+    <string name="exclusion_type_package">Exclusió d\'aplicacions</string>
+    <string name="exclusion_type_path">Exclusió de rutes</string>
+    <string name="exclusion_type_segment">Exclusió de segment</string>
+    <string name="exclusion_tags_alltools">Totes les eines</string>
+    <string name="exclusion_target_label">Objectiu d\'exclusió</string>
+    <string name="exclusion_editor_path_change_action">Toqueu per canviar la ruta</string>
+    <string name="exclusion_option_allow_partial">Permet coincidències parcials</string>
+    <string name="exclusion_option_ignore_casing">Ignora les maj. i min.</string>
+    <string name="exclusion_editor_affected_tools_label">Eines afectades</string>
+    <string name="exclusion_editor_path_explanation">Una exclusió de ruta impedeix que l\'SD Maid continuï processant les rutes coincidents. Això s\'aplica als fitxers, carpetes i subcarpetes.</string>
+    <string name="exclusion_editor_pkg_explanation">Una exclusió d\'aplicació impedeix que l\'SD Maid processi els paquets coincidents.</string>
+    <string name="exclusion_editor_segment_explanation">Una exclusió basada en segments és similar a una exclusió de ruta, però permet coincidències parcials. Exemple: «DCIM/Camera» exclou «/sdcard/DCIM/Camera/photo.png».</string>
+    <string name="exclusion_editor_remove_confirmation_message">Voleu eliminar aquesta exclusió?</string>
+    <string name="exclusion_reset_default_exclusions">Restaura les exclusions per defecte</string>
+    <string name="exclusion_import_action">Importa exclusions</string>
+    <string name="exclusion_export_action">Exporta exclusions</string>
+    <string name="exclusion_create_pkg_hint">Utilitzeu l\'eina de Control d\'aplicacions per crear exclusions d\'aplicacions.</string>
+    <string name="exclusion_create_path_hint">Utilitzeu l\'eina Analitzador d\'emmagatzematge per crear exclusions de rutes.</string>
+    <string name="exclusion_create_segment_hint">Coincideix amb un segment de nom, com \"DCIM/Camera\".</string>
+    <string name="exclusion_show_defaults_action">Mostra els valors per defecte</string>
+    <plurals name="exclusion_import_success_x_items">
+        <item quantity="one">S\'ha importat %d exclusió</item>
+        <item quantity="other">S\'han importat %d exclusions</item>
+    </plurals>
+    <plurals name="exclusion_export_success_x_items">
+        <item quantity="one">S\'ha exportat %d exclusió</item>
+        <item quantity="other">S\'han exportat %d exclusions</item>
+    </plurals>
+</resources>
