@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="swiper_label">Swiper</string>
+    <string name="swiper_tool_description">ഫോർഡർുകൾ വേഗതിൽ വൃത്തിയാക്കുക — ഫയലുകൾ സൂക്ഷിക്കാൻ, ഡിലീറ്റ് ചെയ്യാൻ, അഥവാ ഒഴിവാക്കാൻ സ്വൈപ്പ് ചെയ്യുക.</string>
+    <string name="swiper_dashcard_description">ഒരു ഫയൽ എക്സ്പ്ലോറർറർസറ്റുമിക്കാർ വേഗതിൽ നിർദ്ദിഷ്ട ഫോർഡർുകൾ വൃത്തിയാക്കുക — ഓരോ ഫയൽ സ്വൈപ്പ് ചെയ്യുക.</string>
+    <string name="swiper_start_action">സ്വൈപ്പിംഗ് തുടങ്ങുക</string>
+    <string name="swiper_continue_action">സെഷൻ തുടരുക</string>
+    <string name="swiper_sessions_description">3 ലളുതായ ഘട്ടങ്ങളിൽ ഫയലുകൾ പരിശോധിക്കുക:\n\n1. സ്കാൻ ചെയ്യാൻ ഒരു ഫോർഡർ തിരഞ്ഞെടുക്കുക\n2. ഫയലുകൾ സൂക്ഷിക്കാൻ, ഡിലീറ്റ് ചെയ്യാൻ, അഥവാ ഒഴിവാക്കാൻ സ്വൈപ്പ് ചെയ്യുക\n3. നിങ്ങളുടെ തിരഞ്ഞെടുപ്പുകൾ പരിശോധിച്ച് സ്ഥിരീകരിക്കുക\n\nഅവസാന ഡിലീറ്റ് ബടൺൺൺൺൺൺൺൺണ് ടാപ് ചെയ്യുന്നതു വരെ ഒന്നും നീക്കപ്പെഡുന്നില്ല.</string>
+    <string name="swiper_select_folders_action">ഫോർഡർുകൾ തിരഞ്ഞെടുക്കുക</string>
+    <plurals name="swiper_result_x_items_found">
+        <item quantity="one">%d ഇനം കണ്ടെത്തി</item>
+        <item quantity="other">%d ഇനങ്ങൾ കണ്ടെത്തി</item>
+    </plurals>
+    <plurals name="swiper_result_x_items_deleted">
+        <item quantity="one">%d ഇനം ഡിലീറ്റ് ചെയ്തു</item>
+        <item quantity="other">%d ഇനങ്ങൾ ഡിലീറ്റ് ചെയ്തു</item>
+    </plurals>
+    <plurals name="swiper_result_x_items_failed">
+        <item quantity="one">%d ഇനം പരാജയപ്പെട്ടു</item>
+        <item quantity="other">%d ഇനങ്ങൾ പരാജയപ്പെട്ടു</item>
+    </plurals>
+    <string name="swiper_item_position">%2$d-ൽ #%1$d</string>
+    <string name="swiper_keep_action">സൂക്ഷിക്കുക</string>
+    <string name="swiper_skip_action">ഒഴിവാക്കുക</string>
+    <string name="swiper_review_action">പരിശോധിക്കുക</string>
+    <string name="swiper_status_title">തീരുമാനങ്ങൾ പരിശോധിക്കുക</string>
+    <string name="swiper_status_action_keep_selected">തിരഞ്ഞെടുത്തദ് സൂക്ഷിക്കുക</string>
+    <string name="swiper_status_action_delete_selected">തിരഞ്ഞെടുത്തവ ഇല്ലാതാക്കുക</string>
+    <string name="swiper_status_action_reset_selected">തിരഞ്ഞെടുത്തദ് റീസെറ്റ് ചെയ്യുക</string>
+    <string name="swiper_delete_confirmation_title">ഫയലുകൾ ഡിലീറ്റ് ചെയ്യണോ?</string>
+    <plurals name="swiper_delete_confirmation_message">
+        <item quantity="one">%2$s ഈ %1$d ഫയൽ സ്ഥിരമായി ഡിലീറ്റ് ചെയ്യും. ഈ പ്രവർത്തി തിരിച്ചെടുക്കാൻ കഴിയില്ല.</item>
+        <item quantity="other">%2$s ഈ %1$d ഫയലുകൾ സ്ഥിരമായി ഡിലീറ്റ് ചെയ്യും. ഈ പ്രവർത്തി തിരിച്ചെടുക്കാൻ കഴിയില്ല.</item>
+    </plurals>
+    <plurals name="swiper_delete_confirmation_message_partial_undecided">
+        <item quantity="one">%d തീരുമാനിക്കാത്ത ഇനം പിന്നീടുള്ള പരിശോധനക്കായി ബാക്കി നിർക്കും.</item>
+        <item quantity="other">%d തീരുമാനിക്കാത്ത ഇനങ്ങൾ പിന്നീടുള്ള പരിശോധനക്കായി ബാക്കി നിർക്കും.</item>
+    </plurals>
+    <string name="swiper_delete_confirmation_sensitive_root_warning">ഈ സെഷൻ ഒരു മുഴുവൻ സംഭരണ വോള്യത്തെ ലക്ഷ്യമിടുന്നു — ഇവിടെ ഇല്ലാതാക്കൽ ആ സംഭരണത്തിലെ എല്ലാ ഫോൾഡറിലേക്കും വ്യാപിക്കുന്നു.</string>
+    <plurals name="swiper_delete_confirmation_more_folders">
+        <item quantity="one">…കൂടാതെ %d കൂടുതൽ ഫോൾഡർ</item>
+        <item quantity="other">…കൂടാതെ %d കൂടുതൽ ഫോൾഡറുകൾ</item>
+    </plurals>
+    <string name="swiper_delete_confirmation_checkbox">ഈ ഫയലുകൾ സ്ഥിരമായി ഇല്ലാതാക്കപ്പെടുമെന്ന് ഞാൻ മനസ്സിലാക്കുന്നു.</string>
+    <string name="swiper_sensitive_root_warning_title">മുഴുവൻ സ്റ്റോറേജ് സ്കാൻ ചെയ്യണോ?</string>
+    <string name="swiper_sensitive_root_warning_message">%1$s സ്കാൻ ചെയ്യുന്നത് ഈ സ്റ്റോറേജിലെ എല്ലാ ഫയലുകളും ഉൾപ്പെടുത്തുന്നു — ഫോട്ടോകൾ, ഡോക്യുമെന്റുകൾ, ഡൗൺലോഡ്, ആപ്പ് മീഡിയ, എന്നിവ. തുടരണോ?</string>
+    <string name="swiper_sensitive_root_warning_continue_action">എന്തായാലും തുടരുക</string>
+    <string name="swiper_session_risky_label">മുഴുവൻ സ്റ്റോറേജ് സ്കാൻ</string>
+    <string name="swiper_session_risky_info_message">ഈ സെഷൻ സ്റ്റോറേജ് വോളിയത്തിന്റെ റൂട്ടിലേക്ക് ലക്ഷ്യം വയ്ക്കുന്നു, അതിനാൽ ആ സ്റ്റോറേജിലെ എല്ലാ ഫയലും പരിധിയിൽ വരുന്നു — ഫോട്ടോകൾ, ഡോക്യുമെന്റുകൾ, ഡൗൺലോഡ്, ആപ്പ് മീഡിയ, എന്നിവ.\n\nമുഴുവൻ സ്റ്റോറേജ് സ്കാനുകൾ നിരവധി വസ്തുക്കൾ തിരിച്ചെത്തിക്കും, നിങ്ങൾ അവലോകനം ചെയ്യാൻ ഉദ്ദേശിച്ചിരിക്കാത്ത ഫയലുകൾ ഉൾപ്പെടെ. സ്കാൻ ചെറുതാക്കാൻ ഫയൽ-തരം ഫിൽട്ടർ പ്രയോഗിക്കുക.</string>
+    <string name="swiper_delete_x_action">%1$d ഡിലീറ്റ് ചെയ്യുക</string>
+    <string name="swiper_settings_swap_directions_title">സ്വൈപ്പ് ദിശകൾ മാറ്റുക</string>
+    <string name="swiper_settings_swap_directions_summary">സൂക്ഷിക്കാൻ ഇടത്ത് സ്വൈപ്പ്, ഡിലീറ്റ് ചെയ്യാൻ വലത്ത്.</string>
+    <string name="swiper_settings_show_details_title">ഫയൽ വിവരങ്ങൾ കാണിക്കുക</string>
+    <string name="swiper_settings_show_details_summary">സ്വൈപ്പ് സ്ക്രീനിൽ ഫയൽ പേര്, വലുപ്പം, താരിഖ് എന്നിവ പ്രദർശിപ്പിക്കുക.</string>
+    <string name="swiper_settings_haptic_feedback_title">ഹാപ്റിക് ഫീഡ്ബാക്ക്</string>
+    <string name="swiper_settings_haptic_feedback_summary">സൂക്ഷിക്കുക അഥവാ ഡിലീറ്റ് തീരുമാനം എടുക്കുമ്പോൾ വൈബ്രേറ്റ് ചെയ്യുക.</string>
+    <string name="swiper_discard_session_confirmation_title">സെഷൻ ഉപേക്ഷിക്കണോ?</string>
+    <string name="swiper_discard_session_confirmation_message">എല്ലാ തീരുമാനങ്ങളും നഷ്ടപ്പെടും. തീർച്ചയാണോ?</string>
+    <string name="swiper_no_preview_available">പ്രിവ്യൂ ലഭ്യമല്ല</string>
+    <plurals name="swiper_dashcard_session_context">
+        <item quantity="one">%1$d ദിവസം മുൻപാക്കുള്ള സെഷൻ തുടരുക (%2$d%% തീർന്നു)</item>
+        <item quantity="other">%1$d ദിവസം മുൻപാക്കുള്ള സെഷൻ തുടരുക (%2$d%% തീർന്നു)</item>
+    </plurals>
+    <plurals name="swiper_dashcard_x_sessions">
+        <item quantity="one">%d സെഷൻ</item>
+        <item quantity="other">%d സെഷനുകൾ</item>
+    </plurals>
+    <plurals name="swiper_dashcard_x_undecided_items">
+        <item quantity="one">%d തീരുമാനിക്കാത്ത ഇനം</item>
+        <item quantity="other">%d തീരുമാനിക്കാത്ത ഇനങ്ങൾ</item>
+    </plurals>
+    <string name="swiper_session_timestamps">%1$s തുടങ്ങിയത്, അവസാന ആക്റിവിറ്റി ഓരീ %2$s</string>
+    <string name="swiper_session_remove_action">സെഷൻ നീക്കം ചെയ്യുക</string>
+    <string name="swiper_sessions_empty_hint">ഒരു ഫോർഡർ തിരഞ്ഞെടുത്ത് സ്വൈപ്പിംഗ് തുടങ്ങാൻ + ടാപ് ചെയ്യുക</string>
+    <string name="swiper_sessions_upgrade_body">ഈ പരിധികൾ നീക്കാൻ അപ്ഗ്രേഡ് ചെയ്ത് വികസനം തുണ്ണുക. സ്വതന്ത്ര പതിപ്പ് ഇവയിൽ പരിമിതപ്പെടുന്നു:</string>
+    <plurals name="swiper_sessions_upgrade_files_limit">
+        <item quantity="one">സെഷനു %d ഫയൽ</item>
+        <item quantity="other">സെഷനു %d ഫയലുകൾ</item>
+    </plurals>
+    <plurals name="swiper_sessions_upgrade_sessions_limit">
+        <item quantity="one">%d സെഷൻ</item>
+        <item quantity="other">%d സെഷനുകൾ</item>
+    </plurals>
+    <string name="swiper_session_default_label">സെഷൻ #%d</string>
+    <string name="swiper_session_rename_title">സെഷൻ പേര് മാറ്റുക</string>
+    <string name="swiper_session_rename_hint">ഈ സെഷനിന് ഒരു പേര് നൽകുക</string>
+    <string name="swiper_sessions_current_sessions">നിലവിലുള്ള സെഷനുകൾ</string>
+    <string name="swiper_session_paths_label">പാതകൾ</string>
+    <plurals name="swiper_session_paths_more">
+        <item quantity="one">…കൂടാതെ %d കൂടി</item>
+        <item quantity="other">…കൂടാതെ %d കൂടി</item>
+    </plurals>
+    <string name="swiper_session_status_label">നില</string>
+    <plurals name="swiper_session_status_to_keep">
+        <item quantity="one">സൂക്ഷിക്കാൻ %d</item>
+        <item quantity="other">സൂക്ഷിക്കാൻ %d</item>
+    </plurals>
+    <plurals name="swiper_session_status_to_delete">
+        <item quantity="one">ഡിലീറ്റ് ചെയ്യാൻ %d</item>
+        <item quantity="other">ഡിലീറ്റ് ചെയ്യാൻ %d</item>
+    </plurals>
+    <plurals name="swiper_session_status_undecided">
+        <item quantity="one">തീരുമാനിക്കാത്തത് %d</item>
+        <item quantity="other">തീരുമാനിക്കാത്തത് %d</item>
+    </plurals>
+    <plurals name="swiper_session_status_kept">
+        <item quantity="one">%d സൂക്ഷിച്ചു</item>
+        <item quantity="other">%d സൂക്ഷിച്ചു</item>
+    </plurals>
+    <plurals name="swiper_session_status_deleted">
+        <item quantity="one">%d ഡിലീറ്റ് ചെയ്തു</item>
+        <item quantity="other">%d ഡിലീറ്റ് ചെയ്തു</item>
+    </plurals>
+    <string name="swiper_exclude_confirmation_message">Swiper സ്കാനുകളിൽ നിന്ന് \"%1$s\" ഒഴിവാക്കണോ?</string>
+    <string name="swiper_sessions_header_title">വൃത്തിയാക്കാൻ തയാറാണോ?</string>
+    <string name="swiper_sessions_suggestions_label">ഇവിടെ തുടങ്ങാൻ ശ്രമിക്കുക:</string>
+    <string name="swiper_sessions_suggestion_downloads">ഡൗൺലോഡുകൾ ഫോർഡർ</string>
+    <string name="swiper_sessions_suggestion_screenshots">സ്ക്രീന്ഷോട്ടുകൾ</string>
+    <string name="swiper_sessions_suggestion_camera">ക്യാമറ റോർ</string>
+    <string name="swiper_stamp_keep_1">സൂക്ഷിക്കുക!</string>
+    <string name="swiper_stamp_keep_2">നൽകെട്ടത്!</string>
+    <string name="swiper_stamp_keep_3">പറയുക!</string>
+    <string name="swiper_stamp_keep_4">സേവ് ചെയ്യുക!</string>
+    <string name="swiper_stamp_delete_1">വേണ്ട!</string>
+    <string name="swiper_stamp_delete_2">പോകു!</string>
+    <string name="swiper_stamp_delete_3">ചവറ്!</string>
+    <string name="swiper_stamp_delete_4">ഇല്ലാതാക്കുക!</string>
+    <string name="swiper_stamp_skip_1">ഒഴിവാക്കുക!</string>
+    <string name="swiper_stamp_skip_2">ഉമ്മ്!</string>
+    <string name="swiper_stamp_skip_3">പിന്നീട്!</string>
+    <string name="swiper_stamp_skip_4">ഇരിക്കും!</string>
+    <string name="swiper_stamp_undo_1">പഴയപടിയാക്കുക!</string>
+    <string name="swiper_stamp_undo_2">പിർവായി!</string>
+    <string name="swiper_stamp_undo_3">ഊപ്സ്!</string>
+    <string name="swiper_stamp_undo_4">കാത്തിരിക്കൂ!</string>
+    <string name="swiper_gesture_overlay_dismiss">ആരംഭിക്കാൻ എവിടെയും ടാപ്പ് ചെയ്യുക</string>
+    <string name="swiper_gesture_overlay_left_delete">← ഇല്ലാതാക്കുക</string>
+    <string name="swiper_gesture_overlay_right_keep">സൂക്ഷിക്കുക →</string>
+    <string name="swiper_gesture_overlay_left_keep">← സൂക്ഷിക്കുക</string>
+    <string name="swiper_gesture_overlay_right_delete">ഇല്ലാതാക്കുക →</string>
+    <string name="swiper_gesture_overlay_up_skip">↑ ഒഴിവാക്കുക</string>
+    <string name="swiper_gesture_overlay_down_undo">↓ പഴയപടിയാക്കുക</string>
+    <string name="swiper_help_title">Swiper എങ്ങനെ പ്രവർത്തിക്കുന്നു</string>
+    <string name="swiper_help_message">ഓരോ ഫയലും സ്വൈപ്പ് ചെയ്ത് തീരുമാനമെടുക്കുക:\n\n← ഇടത്തേക്ക് സ്വൈപ്പ്: %1$s\n→ വലത്തേക്ക് സ്വൈപ്പ്: %2$s\n↑ മുകളിലേക്ക് സ്വൈപ്പ്: ഒഴിവാക്കുക\n↓ താഴേക്ക് സ്വൈപ്പ്: പഴയപടിയാക്കുക (ആദ്യ സ്വൈപ്പിന് ശേഷം)\n\nതാഴെ ഉള്ള ബട്ടണുകളും ഉപയോഗിക്കാം.\n\nതീർന്നാൽ, നിങ്ങളുടെ എല്ലാ തീരുമാനങ്ങളും കാണാൻ \"അവലോകനം\" ടാപ്പ് ചെയ്യുക. അവലോകന സ്ക്രീനിൽ സ്ഥിരീകരിക്കുന്നത് വരെ ഒന്നും ഇല്ലാതാകില്ല.</string>
+    <string name="swiper_gesture_overlay_dismiss_action">മനസ്സിലായി</string>
+    <string name="swiper_file_type_filter_title">ഈ ഫയൽ തരങ്ങൾ മാത്രം കാണിക്കുക</string>
+    <string name="swiper_file_type_filter_hint">നിങ്ങൾ കാണാൻ ആഗ്രഹിക്കുന്ന തരങ്ങൾ തിരഞ്ഞെടുക്കുക. ഒന്നും തിരഞ്ഞെടുത്തില്ലെങ്കിൽ, എല്ലാ ഫയലുകളും കാണിക്കും.</string>
+    <string name="swiper_file_type_category_images">ചിത്രങ്ങൾ</string>
+    <string name="swiper_file_type_category_images_subtitle">jpg, png, gif, webp, heic…</string>
+    <string name="swiper_file_type_category_videos">വീഡിയോകൾ</string>
+    <string name="swiper_file_type_category_videos_subtitle">mp4, mkv, avi, mov, webm…</string>
+    <string name="swiper_file_type_category_audio">ഓഡിയോ</string>
+    <string name="swiper_file_type_category_audio_subtitle">mp3, flac, aac, ogg, wav…</string>
+    <string name="swiper_file_type_category_documents">ഡോക്യുമെന്റുകൾ</string>
+    <string name="swiper_file_type_category_documents_subtitle">pdf, doc, xlsx, txt, epub…</string>
+    <string name="swiper_file_type_category_archives">ആർക്കൈവുകൾ</string>
+    <string name="swiper_file_type_category_archives_subtitle">zip, rar, 7z, tar, apk…</string>
+    <string name="swiper_file_type_filter_apply_action">പ്രയോഗിക്കുക</string>
+    <string name="swiper_file_type_filter_summary">ഫിൽട്ടർ ചെയ്തത്: %1$s</string>
+    <string name="swiper_session_no_matching_files">യോജിക്കുന്ന ഫയലുകൾ ഒന്നും കണ്ടെത്തിയില്ല</string>
+    <string name="swiper_open_externally_action">ബാഹ്യ ആപ്പിൽ തുറക്കുക</string>
+    <!-- Guided tour -->
+    <string name="tour_swiper_gestures_body">ഫയലിന്റെ ഭാവി തീരുമാനിക്കാൻ അത് സ്വൈപ്പ് ചെയ്യുക: പാർശ്വവായായി സൂക്ഷിക്കാനോ ഇല്ലാതാക്കാനോ, മുകളിലോട്ട് ഒഴിവാക്കാനോ, താഴോട്ട് തിരികെയാക്കാനോ ചെയ്യുക. താഴെയുള്ള ബട്ടണുകള് ഇതേ കാര്യം ചെയ്യുന്നു — കൂടാതെ എത് വശം എതേന്ന് കാണിക്കുന്നു.</string>
+    <string name="tour_swiper_openin_body">ഈ ബട്ടൺ ഫയൽ മറ്റൊരു ആപ്പ് തുറക്കുന്നു, തീരുമാനിക്കുന്നതിനുമുമ്പ് അത് പരിശോധിക്കാനായി സൗകര്യകരമാണ്.</string>
+    <string name="tour_swiper_preview_body">ഈ ബട്ടൻ സൂക്ഷ്മമായ നോട്ടത്തിനായി പൂർണ്ണ സ്ക്രീൻ പ്രിവ്യൂ തുറക്കുന്നു.</string>
+    <string name="tour_swiper_actions_body">സ്വൈപ്പ് ചെയ്യാൻ ഇഷ്ടമില്ലേ? ഞങ്ങൾക്കും ബട്ടണുകൾ ഉണ്ട്! സ്കിപ്പ് ഇത് പിന്നീടുള്ളതിനായി തീരുമാനമാകാതെ വിടുന്നു, സ്കിപ്പ് ദീർഘമായി അമർത്തുന്നത് ഒരു ഫയലിനെ ഭാവിയിലെ സ്കാനുകളിൽ നിന്ന് ബഹിഷ്കരിക്കുന്നു. റദ്ദ് ചെയ്യുക നിങ്ങളുടെ അവസാന തിരഞ്ഞെടുപ്പ് തിരിച്ചുകൊണ്ടുവരുന്നു.</string>
+    <string name="tour_swiper_review_body">നിങ്ങളുടെ സൂക്ഷിക്കാനും ഇല്ലാതാക്കാനുമുള്ള തിരഞ്ഞെടുപ്പുകൾ താൽകാലികമായി മാത്രമേ സൂക്ഷിച്ചിട്ടുള്ളൂ. അവ പരിശോധിക്കാനും നിങ്ങൾ തയ്യാറായിരിക്കുമ്പോൾ ഇല്ലാതാക്കലുകൾ നടപ്പിലാക്കാനും പുനരവലോകനം തുറക്കുക.</string>
+</resources>

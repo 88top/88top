@@ -1,0 +1,114 @@
+﻿<adonisControls:AdonisWindow
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+    xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+    xmlns:av="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="av"
+    x:Class="XChrome.forms.MCreateChrome"
+    xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    Title="MCreateChrome"
+    Width="597"
+    Height="350"  
+    d:Height="1700"
+    IconVisibility="Hidden"
+    TitleVisibility="Hidden"
+    ShrinkTitleBarWhenMaximized="False"                      
+    PlaceTitleBarOverContent="True" 
+    Loaded="AdonisWindow_LoadedAsync"
+    WindowStartupLocation="CenterOwner">
+    <!--600-->
+
+    <Grid>
+        <Border BorderBrush="LightGray" Margin="0,15,0,0"  HorizontalAlignment="Center" VerticalAlignment="Top">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <Grid Margin="5" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Content="数量：" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="14" Grid.Column="0" Grid.Row="0"></Label>
+                        <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal">
+                            <TextBox x:Name="num_text" x:FieldModifier="private" HorizontalAlignment="Left" Width="50" Height="30"></TextBox>
+                            <CheckBox x:Name="isRandom" Content="随机环境" Margin="10"></CheckBox>
+                            
+                        </StackPanel>
+                    </Grid>
+                    
+                    
+
+                    
+
+                    <Grid Margin="5" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Content="名称前缀：" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="14" Grid.Column="0" Grid.Row="0"></Label>
+                        <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Horizontal">
+                            <TextBox x:Name="titlepre_text" x:FieldModifier="private" HorizontalAlignment="Left" Width="170" Height="30" ></TextBox>
+                            <Label Content="后缀开始数字：" Margin="10"></Label>
+                            <TextBox x:Name="titleend_num" x:FieldModifier="private" HorizontalAlignment="Left" Width="50" Height="30" ></TextBox>
+                        </StackPanel>
+                    </Grid>
+
+
+                    <Grid Margin="5" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Content="加入分组：" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="14" Grid.Column="0" Grid.Row="0"></Label>
+                        <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Horizontal">
+                            <ComboBox x:Name="groupList" x:FieldModifier="private" Width="150" Height="30" SelectedIndex="0">
+
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+
+                   
+
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Content="加入备注：" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,10,0" FontSize="14" Grid.Column="0" Grid.Row="0"></Label>
+                        <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Horizontal">
+                            <TextBox x:Name="remark_text" HorizontalAlignment="Left" AcceptsReturn="True" VerticalContentAlignment="Top" Width="300" Height="80"  Margin="0,0,0,5" ></TextBox>
+                        </StackPanel>
+                    </Grid>
+
+                    
+                    <Grid Margin="5" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal">
+                            <Button HorizontalAlignment="Center" Click="Button_Click" Height="35" Width="130" Margin="5" VerticalAlignment="Center" Style="{DynamicResource {x:Static adonisUi:Styles.AccentButton}}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <iconPacks:PackIconFontAwesome Kind="CheckSolid" Width="20" Height="15"  VerticalAlignment="Center"  Margin="0,0,4,0"/>
+                                    <TextBlock x:Name="okbtntxt" x:FieldModifier="private" VerticalAlignment="Center" Text=" 确定批量创建 "/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                    
+                    
+
+                </StackPanel>
+            </ScrollViewer>
+            
+            
+            
+        </Border>
+        
+    </Grid>
+
+
+    
+
+</adonisControls:AdonisWindow>

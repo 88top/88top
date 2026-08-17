@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_select_paths_title">Choisir des chemins</string>
+    <string name="picker_selected_paths_title">Chemins choisis</string>
+    <string name="picker_unsaved_confirmation_message">Abandonner les changements ?</string>
+    <plurals name="picker_selected_paths_subtitle">
+        <item quantity="one">%d chemin a été choisi</item>
+        <item quantity="other">%d chemins ont été choisis</item>
+    </plurals>
+    <string name="picker_home_action">Zones des données</string>
+    <string name="picker_select_hint">Maintenez appuyé un élément pour le sélectionner</string>
+    <string name="tour_action_next">Suivant</string>
+    <string name="tour_action_previous">Précédent</string>
+    <string name="tour_action_cancel">Ignorer</string>
+    <string name="tour_confirm_title">Ignorer la visite guidée ?</string>
+    <string name="tour_confirm_message">Vous pouvez réactiver les visites guidées à tout moment dans Paramètres.</string>
+    <string name="tour_confirm_continue">Continuer la visite</string>
+    <string name="tour_confirm_dont_show_this_tour">Ne pas afficher cette visite guidée</string>
+    <string name="tour_confirm_disable_all">Désactiver toutes les visites guidées</string>
+    <string name="navigation_unknown_destination_title">Écran inaccessible</string>
+    <string name="navigation_unknown_destination_message">Cet écran n’a pas pu être ouvert.</string>
+</resources>

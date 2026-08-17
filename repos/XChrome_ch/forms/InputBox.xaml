@@ -1,0 +1,34 @@
+﻿<adonisControls:AdonisWindow
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+    xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+    xmlns:av="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="av"
+    x:Class="XChrome.forms.InputBox"
+    Title="-"
+    Width="518"
+    Height="254"
+    IconVisibility="Hidden"
+    TitleVisibility="Hidden"
+    ShrinkTitleBarWhenMaximized="False"                            
+    PlaceTitleBarOverContent="True" WindowStartupLocation="CenterOwner">
+    <Grid Margin="0,0,0,-5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="21*"/>
+            <ColumnDefinition Width="16*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Button x:Name="okbtn" x:FieldModifier="private"  Content="确定" HorizontalAlignment="Right" Margin="0,4,6,0" Grid.Row="3" VerticalAlignment="Top" Height="33" Width="80" Style="{DynamicResource {x:Static adonisUi:Styles.AccentButton}}" Grid.Column="1" Click="okbtn_Click"/>
+        <Button x:Name="quxiao" Content="取消" HorizontalAlignment="Left" Margin="7,5,0,0" Grid.Row="3" VerticalAlignment="Top" Height="33" Width="63" Click="quxiao_Click"/>
+        <Label x:Name="tip" Content="提示语言：" HorizontalAlignment="Left" Margin="10,7,0,0" Grid.Row="1" VerticalAlignment="Top" Height="30" Width="498" FontSize="18" Grid.ColumnSpan="2"/>
+        <TextBox x:Name="content" AcceptsReturn="True" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="2" TextWrapping="Wrap" Text="" VerticalContentAlignment="Top" VerticalAlignment="Top" Height="84" Width="498" Grid.ColumnSpan="2" FontSize="16" />
+        <ComboBox x:Name="combobox" Visibility="Hidden" Grid.Row="2" Height="30" Margin="10,0,0,0" Width="400" Grid.ColumnSpan="2">
+            
+        </ComboBox>
+    </Grid>
+</adonisControls:AdonisWindow>

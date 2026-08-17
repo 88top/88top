@@ -1,0 +1,11 @@
+<details> <summary> <b>immortalwrt new commit log :rocket: </b> </summary>
+
+#### [:mega: Full Changelog. ](https://github.com/immortalwrt/immortalwrt/compare/3dacd2fb6a48c5963b1026c6a343ec7e67cbf810...ce4e104df06d8dd397d34d053e7d857f5f2f42cd)  
+:heavy_exclamation_mark: The list displays only the latest 15 commit logs.  
+
+SHA|Author|Date|Message
+-|-|-|-
+ce4e104df0|Tianling Shen|Wed Aug 12 11:55:07 2026 +0800|Merge Official Source
+d78c0fd16d|Robert Marko|Fri Jul 17 12:06:45 2026 +0200|uboot-airoha: fix AN7583 pinctrl compatible
+96f1df2152|Mikhail Kshevetskiy|Tue May 19 04:58:53 2026 +0300|uboot-airoha: update to v2026.07
+</details>

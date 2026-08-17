@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_select_paths_title">ပောထ်များ ရွေးချယ်ပါ</string>
+    <string name="picker_selected_paths_title">ရွေးချယ်ပြီးသော ပောထ်များ</string>
+    <string name="picker_unsaved_confirmation_message">ပြင်န်ဆွဲများကို ဖယ်ချမည်လား?</string>
+    <plurals name="picker_selected_paths_subtitle">
+        <item quantity="other">%d ပောထ် ရွေးချယ်ပြီးသည်</item>
+    </plurals>
+    <string name="picker_home_action">တဪဖိုင်နေရာများ</string>
+    <string name="picker_select_hint">ပစ္စည်းတစ်ခုကို ရွေးချယ်ရန် ကိုင်ဆောင်ထားပါ။</string>
+    <string name="tour_action_next">ရှေ့သို့</string>
+    <string name="tour_action_previous">ယခင်သို့</string>
+    <string name="tour_action_cancel">ကျော်သွားပါ</string>
+    <string name="tour_confirm_title">ခရီးစဉ်ကို ကျော်သွားမည်လား?</string>
+    <string name="tour_confirm_message">သင်သည် ဆက်တင်များမှ ခရီးစဉ်များကို အချိန်အခါတွင် ပြန်ဖွင့်နိုင်သည်။</string>
+    <string name="tour_confirm_continue">ထပ်မံ ဆက်လက်ရန်</string>
+    <string name="tour_confirm_dont_show_this_tour">ဤလည်ပတ်မှုကို မျက်နှာစကာ မပြပါနှင့်</string>
+    <string name="tour_confirm_disable_all">လည်ပတ်မှုအားလုံးကို ပိတ်ဆိုင်းရန်</string>
+    <string name="navigation_unknown_destination_title">မျက်နှာပြင် မရရှိနိုင်ပါ။</string>
+    <string name="navigation_unknown_destination_message">ဤမျက်နှာပြင်ကို မဖွင့်နိုင်ခဲ့ပါ။</string>
+</resources>

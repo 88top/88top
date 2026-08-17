@@ -1,0 +1,117 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy -v
+    - go clean -cache
+
+project_name: goecs
+
+builds:
+  - id: universal
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X main.ecsVersion={{.Tag}} -X main.arch={{.Arch}} -checklinkname=0
+    goos:
+      - linux
+      - windows
+      - freebsd
+    goarch:
+      - arm
+      - arm64
+      - 386
+      - amd64
+      - mips
+      - mipsle
+      - mips64
+      - mips64le
+      - ppc64
+      - ppc64le
+      - s390x
+      - riscv64
+    gomips:
+      - softfloat
+    ignore:
+      - goos: windows
+        goarch: arm
+    main: ./
+    binary: goecs
+    hooks:
+      pre:
+        # The cross image starts with limited free disk. Since release targets
+        # are serialized, retaining build caches for earlier architectures only
+        # consumes space and caused v0.1.158 to fail with ENOSPC.
+        - cmd: go clean -cache
+        # Populate geekbench_bins in the cputest module cache with the
+        # platform-specific Geekbench binary so it gets embedded via
+        # //go:embed all:geekbench_bins in cputest's geekbench_embed.go.
+        # Targets linux/amd64, linux/arm64, linux/arm get real binaries;
+        # all other targets get an empty dir → runtime PATH fallback.
+        - cmd: bash scripts/embed_geekbench.sh
+          env:
+            - GOOS={{ .Os }}
+            - GOARCH={{ .Arch }}
+
+  - id: darwin-amd64
+    env:
+      - CGO_ENABLED=1
+      - CC=o64-clang
+      - CXX=o64-clang++
+    ldflags:
+      - -s -w -X main.ecsVersion={{.Tag}} -X main.arch={{.Arch}} -checklinkname=0
+    goos:
+      - darwin
+    goarch:
+      - amd64
+    main: ./
+    binary: goecs
+    hooks:
+      pre:
+        - cmd: go clean -cache
+
+  - id: darwin-arm64
+    env:
+      - CGO_ENABLED=1
+      - CC=oa64-clang
+      - CXX=oa64-clang++
+    ldflags:
+      - -s -w -X main.ecsVersion={{.Tag}} -X main.arch={{.Arch}} -checklinkname=0
+    goos:
+      - darwin
+    goarch:
+      - arm64
+    main: ./
+    binary: goecs
+    hooks:
+      pre:
+        - cmd: go clean -cache
+
+universal_binaries:
+  - name_template: "goecs"
+    replace: false
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  version_template: "goecs"
+
+archives:
+  - name_template: "goecs_{{ .Os }}_{{ .Arch }}"
+    formats:
+      - zip
+    files:
+      - none*
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore"
+      - Merge pull request
+      - Merge branch
+      - go mod tidy
+      - New translations

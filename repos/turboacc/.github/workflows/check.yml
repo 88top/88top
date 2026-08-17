@@ -1,0 +1,132 @@
+name: Sync TurboACC From Upstream
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 23 * * *'
+  repository_dispatch:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: 设置时区
+        run: sudo timedatectl set-timezone "Asia/Shanghai"
+
+      - name: 检出本仓库
+        uses: actions/checkout@v4
+
+      - name: 启用文件权限位比对（mode 也随上游同步）
+        run: git config core.fileMode true
+
+      - name: 克隆上游仓库
+        run: |
+          set -euo pipefail
+          CLONE_PATH="$RUNNER_TEMP/upstream-clone"
+          echo "CLONE_PATH=$CLONE_PATH" >> "$GITHUB_ENV"
+          rm -rf "$CLONE_PATH"
+          mkdir -p "$CLONE_PATH"
+          git clone --depth=1 --single-branch https://github.com/coolsnowwolf/lede "$CLONE_PATH/lede"
+          git clone --depth=1 --single-branch -b "openwrt-25.12" https://github.com/coolsnowwolf/luci "$CLONE_PATH/luci"
+
+      - name: 从上游同步文件到 lede/
+        run: |
+          set -euo pipefail
+          DEST="$(pwd)/lede"
+          LEDE="$CLONE_PATH/lede"
+          LUCI="$CLONE_PATH/luci"
+
+          # 整包目录：先删后拷，完全镜像上游（含上游的删除与文件权限位）
+          sync_dir() {
+            if [ ! -d "$1" ]; then echo "::error::缺少上游目录: $1"; exit 1; fi
+            rm -rf "${DEST:?}/$2"
+            cp -r --preserve=mode "$1" "$DEST/$2"
+          }
+          # 单个文件：覆盖内容并同步权限位
+          sync_file() {
+            if [ ! -f "$1" ]; then echo "::error::缺少上游文件: $1"; exit 1; fi
+            mkdir -p "$DEST/$(dirname "$2")"
+            cp -f --preserve=mode "$1" "$DEST/$2"
+          }
+
+          sync_dir "$LEDE/package/network/services/fullconenat"     "fullconenat"
+          sync_dir "$LEDE/package/network/services/fullconenat-nft" "fullconenat-nft"
+          sync_dir "$LUCI/applications/luci-app-turboacc"           "luci-app-turboacc"
+          sync_dir "$LEDE/package/qca/shortcut-fe"                  "shortcut-fe"
+
+          sync_file "$LEDE/target/linux/generic/hack-6.6/952-add-net-conntrack-events-support-multiple-registrant.patch"  "hack-6.6/952-add-net-conntrack-events-support-multiple-registrant.patch"
+          sync_file "$LEDE/target/linux/generic/hack-6.6/953-net-patch-linux-kernel-to-support-shortcut-fe.patch"         "hack-6.6/953-net-patch-linux-kernel-to-support-shortcut-fe.patch"
+          sync_file "$LEDE/target/linux/generic/hack-6.6/982-add-bcm-fullconenat-support.patch"                           "hack-6.6/982-add-bcm-fullconenat-support.patch"
+          sync_file "$LEDE/target/linux/generic/hack-6.6/983-add-bcm-fullconenat-to-nft.patch"                            "hack-6.6/983-add-bcm-fullconenat-to-nft.patch"
+
+          sync_file "$LEDE/target/linux/generic/hack-6.12/952-add-net-conntrack-events-support-multiple-registrant.patch" "hack-6.12/952-add-net-conntrack-events-support-multiple-registrant.patch"
+          sync_file "$LEDE/target/linux/generic/hack-6.12/953-net-patch-linux-kernel-to-support-shortcut-fe.patch"        "hack-6.12/953-net-patch-linux-kernel-to-support-shortcut-fe.patch"
+          sync_file "$LEDE/target/linux/generic/hack-6.12/982-add-bcm-fullconenat-support.patch"                          "hack-6.12/982-add-bcm-fullconenat-support.patch"
+          sync_file "$LEDE/target/linux/generic/hack-6.12/983-add-bcm-fullconenat-to-nft.patch"                           "hack-6.12/983-add-bcm-fullconenat-to-nft.patch"
+
+          sync_file "$LEDE/target/linux/generic/hack-6.18/952-add-net-conntrack-events-support-multiple-registrant.patch" "hack-6.18/952-add-net-conntrack-events-support-multiple-registrant.patch"
+          sync_file "$LEDE/target/linux/generic/hack-6.18/953-net-patch-linux-kernel-to-support-shortcut-fe.patch"        "hack-6.18/953-net-patch-linux-kernel-to-support-shortcut-fe.patch"
+          sync_file "$LEDE/target/linux/generic/hack-6.18/982-add-bcm-fullconenat-support.patch"                          "hack-6.18/982-add-bcm-fullconenat-support.patch"
+
+          sync_file "$LEDE/package/network/config/firewall/patches/100-fullconenat.patch"                                 "patches/firewall/patches/100-fullconenat.patch"
+          sync_file "$LEDE/package/network/config/firewall/patches/101-bcm-fullconenat.patch"                             "patches/firewall/patches/101-bcm-fullconenat.patch"
+          sync_file "$LEDE/package/network/config/firewall4/patches/001-firewall4-add-support-for-fullcone-nat.patch"     "patches/firewall4/patches/001-firewall4-add-support-for-fullcone-nat.patch"
+          sync_file "$LEDE/package/network/utils/iptables/patches/900-bcm-fullconenat.patch"                              "patches/iptables/patches/900-bcm-fullconenat.patch"
+          sync_file "$LEDE/package/libs/libnftnl/patches/001-libnftnl-add-fullcone-expression-support.patch"              "patches/libnftnl/patches/001-libnftnl-add-fullcone-expression-support.patch"
+          sync_file "$LEDE/package/network/utils/nftables/patches/002-nftables-add-fullcone-expression-support.patch"     "patches/nftables/patches/002-nftables-add-fullcone-expression-support.patch"
+
+          sync_file "$LEDE/target/linux/generic/pending-6.6/613-netfilter_optional_tcp_window_check.patch"                "pending-6.6/613-netfilter_optional_tcp_window_check.patch"
+          sync_file "$LEDE/target/linux/generic/pending-6.12/613-netfilter_optional_tcp_window_check.patch"               "pending-6.12/613-netfilter_optional_tcp_window_check.patch"
+
+      - name: 检测变更并生成摘要
+        id: summary
+        run: |
+          set -euo pipefail
+          git add -A -- lede
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "✅ 与上游一致，无需更新。"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "summary<<__EOF__"
+              git diff --cached --stat -- lede
+              echo "__EOF__"
+            } >> "$GITHUB_OUTPUT"
+            echo "检测到上游更新："
+            git diff --cached --stat -- lede
+          fi
+          git reset -q -- lede
+
+      - name: 创建/更新 Pull Request
+        if: steps.summary.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          add-paths: lede
+          branch: auto-sync/upstream
+          delete-branch: true
+          commit-message: 同步上游 TurboACC 相关文件
+          title: 自动同步上游 TurboACC 相关文件
+          body: |
+            本 PR 由 `Sync TurboACC From Upstream` 工作流自动生成。
+
+            已从上游同步 `lede/` 下的文件，来源：
+            - `coolsnowwolf/lede` (master)
+            - `coolsnowwolf/luci` (openwrt-25.12)
+
+            ### 变更文件
+            ```
+            ${{ steps.summary.outputs.summary }}
+            ```
+
+            > ⚠️ 合并前请确认这些改动不会覆盖本仓库的本地定制。

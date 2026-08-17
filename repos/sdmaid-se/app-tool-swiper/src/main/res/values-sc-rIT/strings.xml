@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="swiper_label">Swiper</string>
+    <string name="swiper_tool_description">Fae òrdine in sas cartellas a sa lestra — iscorre is archìvios pro mantènnere, cantzellare o brincare.</string>
+    <string name="swiper_dashcard_description">Fae òrdine in cartellas ispetzìficas prus a sa lestra de unu esploratore de archìvios — basta iscòrrere cada archìviu.</string>
+    <string name="swiper_start_action">Cumintza a iscòrrere</string>
+    <string name="swiper_continue_action">Sighit sa sessione</string>
+    <string name="swiper_sessions_description">Revisiona is archìvios in 3 passos semplìtzios:\n\n1. Sèbera una cartella de chìrcare\n2. Iscorre is archìvios pro mantènnere, cantzellare o brincare\n3. Revisiona is detzisiones tuas e cunfirma\n\nNo si cantzellat nudda fintzas a cando tocas su butone de cantzellamentu finale.</string>
+    <string name="swiper_select_folders_action">Sèbera cartellas</string>
+    <plurals name="swiper_result_x_items_found">
+        <item quantity="one">%d elementu agatadu</item>
+        <item quantity="other">%d elementos agatados</item>
+    </plurals>
+    <plurals name="swiper_result_x_items_deleted">
+        <item quantity="one">%d elementu cantzelladu</item>
+        <item quantity="other">%d elementos cantzellados</item>
+    </plurals>
+    <plurals name="swiper_result_x_items_failed">
+        <item quantity="one">%d elementu faddidu</item>
+        <item quantity="other">%d elementos faddidos</item>
+    </plurals>
+    <string name="swiper_item_position">#%1$d de %2$d</string>
+    <string name="swiper_keep_action">Mantèni</string>
+    <string name="swiper_skip_action">Brinca</string>
+    <string name="swiper_review_action">Revisa</string>
+    <string name="swiper_status_title">Revisa is detzisiones</string>
+    <string name="swiper_status_action_keep_selected">Mantèni is selecionados</string>
+    <string name="swiper_status_action_delete_selected">Cantzella is selecionados</string>
+    <string name="swiper_status_action_reset_selected">Reseta is selecionados</string>
+    <string name="swiper_delete_confirmation_title">Cantzellare is archìvios?</string>
+    <plurals name="swiper_delete_confirmation_message">
+        <item quantity="one">Custu at a cantzellare in manera permanente %1$d archìviu (%2$s). Custa atzione non si podet annullare.</item>
+        <item quantity="other">Custu at a cantzellare in manera permanente %1$d archìvios (%2$s). Custa atzione non si podet annullare.</item>
+    </plurals>
+    <plurals name="swiper_delete_confirmation_message_partial_undecided">
+        <item quantity="one">%d elementu indetzisu at a abarrare pro sa revisione.</item>
+        <item quantity="other">%d elementos indetzisos ant a abarrare pro sa revisione.</item>
+    </plurals>
+    <string name="swiper_delete_confirmation_sensitive_root_warning">Custa sessione mirat su bolumine de armagadju intelu — is canculladuras dite tocant totu is cartelas de su bolumine.</string>
+    <plurals name="swiper_delete_confirmation_more_folders">
+        <item quantity="one">…e %d cartella prus</item>
+        <item quantity="other">…e %d cartelas prus</item>
+    </plurals>
+    <string name="swiper_delete_confirmation_checkbox">Comprendo chi custos ficheros seran cancullados de manera permanente.</string>
+    <string name="swiper_sensitive_root_warning_title">Scanniu tota sa memoria?</string>
+    <string name="swiper_sensitive_root_warning_message">Su scanniu de %1$s includit omni ficheru in sa memoria — fotografias, documentus, downloadus, media de s\'aplicatzione, e prus. Continuamos?</string>
+    <string name="swiper_sensitive_root_warning_continue_action">Continua de totu</string>
+    <string name="swiper_session_risky_label">Scanniu de tota sa memoria</string>
+    <string name="swiper_session_risky_info_message">Sa sessione est indiriada a sa raighe de sa memoria, ita ca omni ficheru in sa memoria est in ambitu — fotografias, documentus, downloadus, media de s\'aplicatzione, e prus.\n\nSu scanniu de tota sa memoria diat potere torrare tantu elementos, inclusive ficheros chi non ti depas abere pensadu a rreviare. Aprica unu filtru de tzipu de ficheru pro angustare su scanniu.</string>
+    <string name="swiper_delete_x_action">Cantzella %1$d</string>
+    <string name="swiper_settings_swap_directions_title">Iscàmbia is diretzione de iscòrrimentu</string>
+    <string name="swiper_settings_swap_directions_summary">Iscòrre a manu manca pro mantènnere, a manu destra pro cantzellare.</string>
+    <string name="swiper_settings_show_details_title">Mustra is detàllios de s\'archìviu</string>
+    <string name="swiper_settings_show_details_summary">Mustra su nòmine, sa mannesa e sa data de s\'archìviu in s\'ischermu de iscòrrimentu.</string>
+    <string name="swiper_settings_haptic_feedback_title">Resposta àptica</string>
+    <string name="swiper_settings_haptic_feedback_summary">Vibra cando si leat detzisiones de mantènnere o cantzellare.</string>
+    <string name="swiper_discard_session_confirmation_title">Iscartare sa sessione?</string>
+    <string name="swiper_discard_session_confirmation_message">Totu is detzisiones ant a èssere pèrdidas. Ses seguru?</string>
+    <string name="swiper_no_preview_available">Peruna anteprima disponìbile</string>
+    <plurals name="swiper_dashcard_session_context">
+        <item quantity="one">Sighit sa sessione de %1$d die a como (%2$d%% acabadu)</item>
+        <item quantity="other">Sighit sa sessione de %1$d dies a como (%2$d%% acabadu)</item>
+    </plurals>
+    <plurals name="swiper_dashcard_x_sessions">
+        <item quantity="one">%d sessione</item>
+        <item quantity="other">%d sessiones</item>
+    </plurals>
+    <plurals name="swiper_dashcard_x_undecided_items">
+        <item quantity="one">%d elementu indetzisu</item>
+        <item quantity="other">%d elementos indetzisos</item>
+    </plurals>
+    <string name="swiper_session_timestamps">Creadu %1$s, ùrtima atividade %2$s</string>
+    <string name="swiper_session_remove_action">Boga sa sessione</string>
+    <string name="swiper_sessions_empty_hint">Toca + pro selecionare una cartella e cumintzare a iscòrrere</string>
+    <string name="swiper_sessions_upgrade_body">Agiorna pro bòghere custos lìmites e sustènnere s\'isvilupu. Sa versione gratùida est limitada a:</string>
+    <plurals name="swiper_sessions_upgrade_files_limit">
+        <item quantity="one">%d archìviu pro sessione</item>
+        <item quantity="other">%d archìvios pro sessione</item>
+    </plurals>
+    <plurals name="swiper_sessions_upgrade_sessions_limit">
+        <item quantity="one">%d sessione</item>
+        <item quantity="other">%d sessiones</item>
+    </plurals>
+    <string name="swiper_session_default_label">Sessione #%d</string>
+    <string name="swiper_session_rename_title">Torra a numenare sa sessione</string>
+    <string name="swiper_session_rename_hint">Inserta unu nòmine pro custa sessione</string>
+    <string name="swiper_sessions_current_sessions">Sessiones atuales</string>
+    <string name="swiper_session_paths_label">Caminos</string>
+    <plurals name="swiper_session_paths_more">
+        <item quantity="one">…e unu prus</item>
+        <item quantity="other">…e %d prus</item>
+    </plurals>
+    <string name="swiper_session_status_label">Istadu</string>
+    <plurals name="swiper_session_status_to_keep">
+        <item quantity="one">%d de mantènnere</item>
+        <item quantity="other">%d de mantènnere</item>
+    </plurals>
+    <plurals name="swiper_session_status_to_delete">
+        <item quantity="one">%d de cantzellare</item>
+        <item quantity="other">%d de cantzellare</item>
+    </plurals>
+    <plurals name="swiper_session_status_undecided">
+        <item quantity="one">%d indetzisu</item>
+        <item quantity="other">%d indetzisos</item>
+    </plurals>
+    <plurals name="swiper_session_status_kept">
+        <item quantity="one">%d mantenidu</item>
+        <item quantity="other">%d mantenidos</item>
+    </plurals>
+    <plurals name="swiper_session_status_deleted">
+        <item quantity="one">%d cantzelladu</item>
+        <item quantity="other">%d cantzellados</item>
+    </plurals>
+    <string name="swiper_exclude_confirmation_message">Esclùe \"%1$s\" dae is chircas de Swiper?</string>
+    <string name="swiper_sessions_header_title">Prontu a fàghere òrdine?</string>
+    <string name="swiper_sessions_suggestions_label">Proa a cumintzare cun:</string>
+    <string name="swiper_sessions_suggestion_downloads">Cartella de iscarrigamentos</string>
+    <string name="swiper_sessions_suggestion_screenshots">Ischermos catturados</string>
+    <string name="swiper_sessions_suggestion_camera">Rùllu de sa fotocàmera</string>
+    <string name="swiper_stamp_keep_1">Mantèni!</string>
+    <string name="swiper_stamp_keep_2">Bellu!</string>
+    <string name="swiper_stamp_keep_3">Eja!</string>
+    <string name="swiper_stamp_keep_4">Sarba!</string>
+    <string name="swiper_stamp_delete_1">Nono!</string>
+    <string name="swiper_stamp_delete_2">Adiosu!</string>
+    <string name="swiper_stamp_delete_3">Isciuscia!</string>
+    <string name="swiper_stamp_delete_4">Cantzella!</string>
+    <string name="swiper_stamp_skip_1">Brinca!</string>
+    <string name="swiper_stamp_skip_2">Bah!</string>
+    <string name="swiper_stamp_skip_3">A pustis!</string>
+    <string name="swiper_stamp_skip_4">Forsis!</string>
+    <string name="swiper_stamp_undo_1">Annulla!</string>
+    <string name="swiper_stamp_undo_2">Agoa!</string>
+    <string name="swiper_stamp_undo_3">Ops!</string>
+    <string name="swiper_stamp_undo_4">Firma!</string>
+    <string name="swiper_gesture_overlay_dismiss">Toca in cale si siat logu pro cumintzare</string>
+    <string name="swiper_gesture_overlay_left_delete">← Cantzella</string>
+    <string name="swiper_gesture_overlay_right_keep">Mantèni →</string>
+    <string name="swiper_gesture_overlay_left_keep">← Mantèni</string>
+    <string name="swiper_gesture_overlay_right_delete">Cantzella →</string>
+    <string name="swiper_gesture_overlay_up_skip">↑ Brinca</string>
+    <string name="swiper_gesture_overlay_down_undo">↓ Annulla</string>
+    <string name="swiper_help_title">Comente funtzionat Swiper</string>
+    <string name="swiper_help_message">Iscorre cada archìviu pro leare una detzisione:\n\n← Iscorre a manu manca: %1$s\n→ Iscorre a manu dereta: %2$s\n↑ Iscorre a susu: Brinca\n↓ Iscorre a josso: Annulla (a pustis de su primu iscorrimentu)\n\nPodes fintzas impreare is butones in bàsciu.\n\nCando as acabadu, toca \"Revisione\" pro bìdere totu is detzisiones tuas. No si cantzellat nudda fintzas a cando non lu cunfirmas in sa pàgina de revisione.</string>
+    <string name="swiper_gesture_overlay_dismiss_action">Apat cumprèndiu</string>
+    <string name="swiper_file_type_filter_title">Ammustra sos tipos de archiviu solu</string>
+    <string name="swiper_file_type_filter_hint">Controlla sos tipos chi boles bidere. Si nisciunu est controlladu, totos sos archivios sun ammustratos.</string>
+    <string name="swiper_file_type_category_images">Immàgines</string>
+    <string name="swiper_file_type_category_images_subtitle">jpg, png, gif, webp, heic…</string>
+    <string name="swiper_file_type_category_videos">Videos</string>
+    <string name="swiper_file_type_category_videos_subtitle">mp4, mkv, avi, mov, webm…</string>
+    <string name="swiper_file_type_category_audio">Àudio</string>
+    <string name="swiper_file_type_category_audio_subtitle">mp3, flac, aac, ogg, wav…</string>
+    <string name="swiper_file_type_category_documents">Documentos</string>
+    <string name="swiper_file_type_category_documents_subtitle">pdf, doc, xlsx, txt, epub…</string>
+    <string name="swiper_file_type_category_archives">Archivios</string>
+    <string name="swiper_file_type_category_archives_subtitle">zip, rar, 7z, tar, apk…</string>
+    <string name="swiper_file_type_filter_apply_action">Appliga</string>
+    <string name="swiper_file_type_filter_summary">Filtradu: %1$s</string>
+    <string name="swiper_session_no_matching_files">Nisciunu archiviu currispundente agatadu</string>
+    <string name="swiper_open_externally_action">Aberi in app esterna</string>
+    <!-- Guided tour -->
+    <string name="tour_swiper_gestures_body">Passa un archivio pro decider sa sua suerte: de ladu pro mantere o borrai, in artu pro saltare, in bagu pro desfere. Sos bottones de basu faghent sa mesma cosa — e mostrant cuales lados pro cada cosa.</string>
+    <string name="tour_swiper_openin_body">Custu bottone abrit s\'archivio in un\'altu programa, pro che podes verrigare ante de decider.</string>
+    <string name="tour_swiper_preview_body">Custu buttone abrit una previsualizatzione in tota sa pantalla pro una guarda prus achosu.</string>
+    <string name="tour_swiper_actions_body">Non ti pighat de friscare? Nois temes buttones fintzas! Sartare lo lasshet indichisu pro pui tarde, e sa friczone larga de Sartare escludit unu ficheru dsos scannius futuros. Annullare revertit sa tua urtima scelta.</string>
+    <string name="tour_swiper_review_body">Is sellezioni tias de cusserbiri e borrai sunt solu preparadas. Abri Revisioni pro controllare e aplicare is borradas cand ses prontu.</string>
+</resources>

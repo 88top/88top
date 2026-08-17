@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_select_paths_title">Pasirinkti kelius</string>
+    <string name="picker_selected_paths_title">Pasirinkti keliai</string>
+    <string name="picker_unsaved_confirmation_message">Atmesti pakeitimus?</string>
+    <plurals name="picker_selected_paths_subtitle">
+        <item quantity="one">Pasirinktas %d kelias</item>
+        <item quantity="few">Pasirinkti %d keliai</item>
+        <item quantity="many">%d kelių pasirinkta</item>
+        <item quantity="other">Pasirinkta %d kelių</item>
+    </plurals>
+    <string name="picker_home_action">Duomenų sritys</string>
+    <string name="picker_select_hint">Ilgai spustelėkite elementą, norėdami jį pasirinkti</string>
+    <string name="tour_action_next">Kitas</string>
+    <string name="tour_action_previous">Ankstesnis</string>
+    <string name="tour_action_cancel">Praleisti</string>
+    <string name="tour_confirm_title">Praleisti turą?</string>
+    <string name="tour_confirm_message">Turus galite iš naujo įjungti iš Nustatymų bet kada.</string>
+    <string name="tour_confirm_continue">Tęsti turą</string>
+    <string name="tour_confirm_dont_show_this_tour">Nerodyti šio turo</string>
+    <string name="tour_confirm_disable_all">Išjungti visus turus</string>
+    <string name="navigation_unknown_destination_title">Ekranas neprieinamas</string>
+    <string name="navigation_unknown_destination_message">Šio ekrano nepavyko atidaryti.</string>
+</resources>

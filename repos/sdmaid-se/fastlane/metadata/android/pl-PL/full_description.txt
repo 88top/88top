@@ -1,0 +1,55 @@
+<i>SD Maid 2/SE</i> to zaufany asystent twojego Androida, który zadba o czystość i porządek.
+
+Nikt nie jest doskonały, nawet Android.
+
+* Aplikacje, które już usunąłeś, pozostawiają po sobie jakieś ślady.
+* Dzienniki, raporty o awariach i inne niepotrzebne pliki są tworzone na bieżąco.
+* W twojej pamięci gromadzone są pliki i foldery, których nie rozpoznajesz.
+* Duplikaty zdjęć w galerii.
+
+Nie tędy droga… Niech SD Maid 2/SE Ci pomoże!
+
+SD Maid 2/SE to menedżer aplikacji i plików, który wie, które aplikacje utworzyły pliki na twoim urządzeniu. Porównuje pliki z zainstalowanymi aplikacjami, aby pomóc ci bezpiecznie zwolnić miejsce na dysku.
+
+✨ Posprzątaj po odinstalowaniu aplikacji
+
+Jeśli aplikacje tworzą pliki poza wyznaczonymi folderami, pliki mogą pozostać nawet po odinstalowaniu aplikacji. Narzędzie „Wyszukiwanie pozostałości” wyszukuje pozostałości aplikacji, informuje, do której aplikacji należały i pomaga je usunąć.
+
+🔍 Przeszukaj swoje urządzenie w inteligentny sposób
+
+Filtruj puste foldery, pliki tymczasowe, już zainstalowane aplikacje i nie tylko. Możesz nawet utworzyć własne kryteria wyszukiwania. Narzędzie "Sprzątanie systemu" automatycznie przeszukuje i usuwa pliki na podstawie różnych kryteriów.
+
+🧹 Usuń niepotrzebne pliki i ukrytą pamięć podręczną
+
+Miniatury, kosz, pamięci podręczne offline i wiele więcej: jeśli aplikacje nie sprzątają po sobie, ta aplikacja to zrobi. Narzędzie „Sprzątanie aplikacji” wyszukuje aplikacje zawierające zbędne pliki.
+
+📦 Zarządzaj wszystkimi swoimi aplikacjami
+
+Pobierz wyczerpującą listę wszystkich aplikacji zainstalowanych na twoim urządzeniu. Włączona, wyłączona, aplikacja użytkownika lub systemowa: żadna aplikacja nie może się przed tobą ukryć. Narzędzie "Zarządzanie aplikacjami" to menedżer aplikacji umożliwiający wyszukiwanie, sortowanie i kontrolowanie aplikacji.
+
+📊 Co zajmuje całą twoją przestrzeń
+
+Zarządzanie pamięcią może być skomplikowane w przypadku aplikacji, multimediów, systemu i innych plików w pamięci telefonu, kartach SD i urządzeniach USB. "Analiza pamięci" jest menedżerem plików, który wyświetla sposób wykorzystania miejsca na urządzeniu, upraszczając zarządzanie pamięcią.
+
+📷 Znajdź duplikaty danych
+
+Duplikaty pobrań, zdjęcia wysyłane za pośrednictwem mediów społecznościowych lub po prostu podobne zdjęcia tej samej sceny: z czasem kopie mogą się kumulować. Narzędzie "Usuwanie duplikatów" znajduje pliki, które są dokładnie takie same lub podobne i pomaga usunąć dodatkowe kopie.
+
+👆 Posprzątaj jednym gestem
+
+Wybierz folder i przeglądaj pliki pojedynczo, wykonując proste gesty, aby zachować, usunąć lub pominąć. Narzędzie „Przesuwacz” pozwala przejrzeć wszystkie decyzje przed usunięciem czegokolwiek, a sesję można zapisać, by kontynuować później.
+
+🗜️ Zwolnij miejsce bez usuwania zdjęć
+
+Zdjęcia mogą zajmować dużo miejsca, ale nie zawsze chcesz je usuwać. Narzędzie „Kompresja multimediów” zmniejsza rozmiar zdjęć z możliwością wyboru jakości, aby zwolnić miejsce bez ich usuwania.
+
+Ta aplikacja nie zawiera reklam. Niektóre funkcje wymagają płatnego uaktualnienia.
+
+SD Maid 2/SE to następca SD Maid 1/Legacy.
+Zoptymalizowana dla nowszych wersji Androida i skupiona na sprzątaniu.
+
+Ta aplikacja ma opcjonalne funkcje wykorzystujące API usługi ułatwień dostępu do automatyzacji żmudnych czynności.
+Korzystając z interfejsu API usługi ułatwień dostępu, ta aplikacja może klikać przyciski, aby wykonywać operacje w wielu aplikacjach, np. usuwanie pamięci podręcznych.
+Ta aplikacja nie korzysta z interfejsu API usługi ułatwień dostępu w celu gromadzenia informacji.
+
+SD Maid 2/SE to menedżer plików i aplikacja sprzątająca.

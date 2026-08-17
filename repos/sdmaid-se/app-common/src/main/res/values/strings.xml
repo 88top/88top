@@ -1,0 +1,246 @@
+<resources>
+    <string name="app_name">SD Maid SE</string>
+    <!-- Upgraded app title. %1$s is the app name, %2$s the tier qualifier ("Pro" / "FOSS"). Reorder or repunctuate for your language; both placeholders must appear exactly once. -->
+    <string name="app_name_upgraded_template">%1$s %2$s</string>
+
+    <string name="slogan_message_0">At your service.</string>
+    <string name="slogan_message_1">Clean and tidy.</string>
+    <string name="slogan_message_2">Preventing chaos.</string>
+    <string name="slogan_message_3">Doing what is necessary.</string>
+    <string name="slogan_message_4">All your ducks in a row.</string>
+    <string name="slogan_message_5">Spotless.</string>
+    <string name="slogan_message_6">Bytes, be gone!</string>
+    <string name="slogan_message_7">Free space, happy place.</string>
+    <string name="slogan_message_8">Never Gonna Give You Up.</string>
+
+    <string name="general_thank_you_label">Thank you</string>
+
+    <string name="general_error_type_mismatch_msg">Type mismatch: Wanted %1$s, but got %2$s.</string>
+    <string name="general_error_cant_access_msg">Can\'t access %s.</string>
+    <string name="general_error_root_unavailable">Root access is unavailable.</string>    <string name="general_error_no_compatible_app_found_msg">No compatible app found to handle this request.</string>
+    <string name="general_todo_msg">This feature is still being worked on and currently not available.</string>
+    <string name="general_share_action">Share</string>
+    <string name="general_done_action">Done</string>
+    <string name="general_apply_action">Apply</string>
+    <string name="general_copy_action">Copy</string>    <string name="general_cancel_action">Cancel</string>
+    <string name="general_discard_action">Discard</string>
+    <string name="general_reset_action">Reset</string>
+    <string name="general_drag_handle_description">Drag to reorder</string>
+    <string name="general_save_action">Save</string>    <string name="general_gotit_action">Got it</string>
+    <string name="general_fix_action">Fix</string>
+    <string name="general_set_up_action">Set up</string>
+    <string name="general_unavailable_label">Unavailable</string>
+    <string name="general_edit_action">Edit</string>
+    <string name="general_edit_x_action">Edit %s</string>
+    <string name="general_add_action">Add</string>
+    <string name="general_na_label">N/A</string>
+    <string name="general_empty_label">Empty</string>
+    <string name="general_new_badge_label">New</string>
+    <string name="general_dismiss_action">Dismiss</string>
+    <string name="general_manage_action">Manage</string>
+    <string name="general_error_label">Error</string>
+    <string name="general_upgrade_action">Upgrade</string>
+    <string name="general_refresh_action">Refresh</string>
+    <string name="general_retry_action">Retry</string>
+    <string name="general_progress_searching">Searching</string>
+    <string name="general_progress_generating_searchpaths">Generating search paths</string>
+    <string name="general_progress_filtering">Filtering</string>
+    <string name="general_progress_preparing">Preparing</string>
+    <string name="general_progress_processing_x">Processing %s</string>
+    <string name="general_progress_loading">Loading</string>
+    <string name="general_progress_loading_app_data">Loading app data</string>
+    <string name="general_progress_loading_data_areas">Loading data areas</string>
+    <string name="general_progress_loading_egg_0">Still faster than an iPhone</string>
+    <string name="general_progress_loading_egg_1">Downloading more RAM</string>
+    <string name="general_progress_loading_egg_2">Soon™</string>
+    <string name="general_progress_loading_egg_3">The CPU is on a coffee break</string>
+    <string name="general_progress_loading_egg_4">Awaiting data from Pepe Silvia</string>
+    <string name="general_progress_loading_egg_5">Turbo encabulator is initiating</string>
+    <string name="general_progress_loading_egg_6">Passing the butter</string>
+    <string name="general_progress_loading_egg_7">So. How are you holding up?</string>
+    <string name="general_progress_loading_egg_8">Beeping boop bop</string>
+    <string name="general_progress_loading_egg_9">Buffering life choices</string>
+    <string name="general_progress_loading_egg_10">Summoning Cthulhu</string>
+    <string name="general_progress_loading_egg_11">This is fine</string>
+    <string name="general_progress_loading_egg_12">Please hold</string>
+    <string name="general_progress_loading_egg_13">At least you\'re not on hold</string>
+    <string name="general_help_action">Help</string>
+    <string name="general_continue">Continue</string>
+    <string name="general_progress_queued">In queue</string>
+    <string name="general_progress_deleting">Deleting</string>
+    <string name="general_progress_deleting_x">Deleting %s</string>
+    <string name="general_sort_by_title">Sort by</string>
+    <string name="general_sort_reverse_action">Reverse sort mode</string>
+    <string name="general_sort_oldest_first">Oldest first</string>
+    <string name="general_sort_newest_first">Newest first</string>
+    <string name="general_sort_name_asc">Name (A → Z)</string>
+    <string name="general_sort_size_desc">Largest first</string>
+    <string name="general_tag_system">System</string>
+    <string name="general_tag_library">Library</string>
+    <string name="general_navigate_up_action">Navigate up</string>
+    <string name="general_filter_action">Filter</string>
+    <string name="general_filter_by_tags_label">Filter by tags</string>
+    <string name="general_filter_add_action">Add filter</string>
+    <string name="general_filter_remove_x_action">Remove %s filter</string>
+    <string name="general_filter_empty_row_hint">Tap + to filter</string>
+
+    <string name="general_result_success_message">Operation successful</string>
+    <plurals name="general_result_x_space_freed">
+        <item quantity="one">Freed %s space.</item>
+        <item quantity="other">Freed %s space.</item>
+    </plurals>
+
+    <string name="general_options_label">Options</string>
+    <string name="general_details_label">Details</string>
+    <string name="general_view_action">View</string>
+    <string name="general_open_action">Open</string>
+    <string name="general_configure_action">Configure</string>
+    <string name="general_update_action">Update</string>
+    <string name="general_scan_action">Scan</string>
+    <string name="general_close_action">Close</string>
+    <string name="general_delete_action">Delete</string>
+    <string name="general_delete_selected_action">Delete selected</string>
+    <string name="general_show_details_action">Show details</string>
+    <string name="general_toggle_layout_mode">Switch view mode</string>
+
+    <string name="general_delete_confirmation_title">Confirm deletion</string>
+    <string name="general_delete_confirmation_message_x">Delete \"%s\"?</string>
+    <plurals name="general_delete_confirmation_message_selected_x_items">
+        <item quantity="one">Delete %d selected item?</item>
+        <item quantity="other">Delete %d selected items?</item>
+    </plurals>
+    <plurals name="general_delete_success_deleted_x">
+        <item quantity="one">Deleted %d item.</item>
+        <item quantity="other">Deleted %d items.</item>
+    </plurals>
+
+    <string name="general_remove_action">Remove</string>
+    <string name="general_remove_x_action">Remove %s</string>
+    <plurals name="general_remove_success_x_items">
+        <item quantity="one">One item was removed</item>
+        <item quantity="other">%d items were removed</item>
+    </plurals>
+
+    <string name="general_search_action">Search</string>
+    <string name="general_search_no_matches">No matches</string>
+    <string name="general_open_system_settings_action">Open system settings</string>
+    <string name="general_fast_scroller_action">Fast scroller</string>
+
+    <plurals name="result_x_items">
+        <item quantity="one">%s item</item>
+        <item quantity="other">%s items</item>
+    </plurals>
+    <plurals name="result_x_successful">
+        <item quantity="one">%d successful</item>
+        <item quantity="other">%d successful</item>
+    </plurals>
+    <plurals name="result_x_failed">
+        <item quantity="one">%d failed</item>
+        <item quantity="other">%d failed</item>
+    </plurals>
+    <plurals name="x_space_can_be_freed">
+        <item quantity="one">%s can be freed</item>
+        <item quantity="other">%s can be freed</item>
+    </plurals>
+    <string name="general_info_label">Info</string>
+    <string name="general_count_label">Count</string>
+    <string name="general_more_info_action">More info</string>
+    <string name="general_grant_access_action">Grant access</string>
+    <string name="general_enable_service_action">Enable service</string>
+    <string name="general_undo_action">Undo</string>
+
+    <string name="general_list_select_all_action">Select all</string>
+    <plurals name="general_x_selected_count">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+
+    <string name="general_path_label">Path</string>
+    <string name="general_type_label">Type</string>
+    <string name="general_size_label">Size</string>
+    <string name="general_exclude_action">Exclude</string>
+    <string name="general_exclude_selected_action">Exclude selected</string>
+
+    <string name="general_device_label">Device</string>
+
+    <string name="general_settings_title">Settings</string>
+    <string name="general_hints_label">Notice</string>
+
+    <string name="file_type_symbolic_link">Link</string>
+    <string name="file_type_directory">Directory</string>
+    <string name="file_type_file">File</string>
+    <string name="file_type_unknown">Unknown</string>
+
+    <string name="general_progress_ready">Ready</string>
+    <string name="general_progress_done">Done</string>
+
+    <string name="general_rom_type_auto_label">Automatic (default)</string>
+    <plurals name="general_age_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="general_age_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="result_x_files">
+        <item quantity="one">%s file</item>
+        <item quantity="other">%s files</item>
+    </plurals>
+    <string name="general_advice_title">Advice</string>
+    <string name="general_error_invalid_input_label">Invalid input</string>
+    <string name="general_information_for_the_developer">Information for the developer</string>
+    <string name="general_error_report_bug_action">Report bug</string>
+    <string name="general_error_ipc_deadobject_title">Service Connection Lost</string>
+    <string name="general_error_ipc_deadobject_description">The connection to a critical service (e.g. Magisk, Shizuku, or other system-level services) was unexpectedly lost. Please reboot your device. If the issue persists, check for updates or reach out to me so I can fix it.</string>
+    <string name="general_error_upgrade_required_title">Upgrade required</string>
+    <string name="general_error_upgrade_required_description">This feature requires an upgrade. Please upgrade SD Maid SE to use it.</string>
+
+    <string name="general_user_label_owner">Owner</string>
+    <string name="general_user_label_system">System</string>
+    <string name="setup_title">Setup</string>
+    <string name="general_include_multiuser_label">Include other users</string>
+    <string name="general_include_multiuser_summary">Include apps from other user profiles on this device.</string>
+    <string name="general_unsaved_confirmation_message">You have unsaved changes!</string>
+
+    <plurals name="exclusion_x_new_exclusions">
+        <item quantity="one">One exclusion created</item>
+        <item quantity="other">%d exclusions created</item>
+    </plurals>
+
+    <string name="corpsefinder_tool_name">CorpseFinder</string>
+    <string name="systemcleaner_tool_name">SystemCleaner</string>
+    <string name="appcleaner_tool_name">AppCleaner</string>
+    <string name="deduplicator_tool_name">Deduplicator</string>
+    <string name="squeezer_tool_name">Media Squeeze</string>
+    <string name="appcontrol_tool_name">AppControl</string>
+    <string name="analyzer_tool_name">StorageAnalyzer</string>
+    <string name="swiper_tool_name">Swiper</string>
+    <string name="stats_label">History</string>
+    <string name="settings_category_tools_label">Tools</string>
+    <string name="settings_category_filter_generic">Generic filter</string>
+    <string name="settings_category_filter_specific">Specific filter</string>
+    <string name="settings_category_risklevel">Risk level</string>
+    <string name="settings_category_filter">Filter</string>
+    <string name="appcontrol_systemsettings_open_title">Show settings</string>
+    <string name="ui_theme_color_sunset_label">Sunset</string>
+    <string name="ui_theme_color_amoled_label">AMOLED</string>
+
+    <!-- Shown when a feature can only run with privileged access that turned out to be unavailable. -->
+    <string name="access_blocked_root_unavailable">This feature needs root access, but SD Maid couldn\'t get it on this device.</string>
+    <string name="access_blocked_root_declined">This feature needs root access. You can enable it via the setup screen.</string>
+    <string name="access_blocked_root_or_shizuku">This feature needs root or Shizuku access, which isn\'t available on this device.</string>
+
+    <!-- Config backup/restore errors -->
+    <string name="backup_restore_error_invalid_title">Invalid backup file</string>
+    <string name="backup_restore_error_invalid_body">This file is not a valid SD Maid backup or is corrupt.</string>
+    <string name="backup_restore_error_version_body">This backup was created with a newer version of SD Maid. Please update the app and try again.</string>
+    <string name="backup_restore_error_restore_failed_title">Restore failed</string>
+    <string name="backup_restore_error_restore_failed_body">These parts could not be restored: %1$s. Your previous configuration was saved and can be brought back.</string>
+    <string name="backup_restore_error_safety_title">Restore not started</string>
+    <string name="backup_restore_error_safety_body">SD Maid couldn\'t save a safety snapshot of your current configuration, so nothing was changed.</string>
+    <string name="backup_restore_error_busy_title">Please wait</string>
+    <string name="backup_restore_error_busy_body">A cleaning task or another backup operation is currently running. Try again when it has finished.</string>
+    <string name="backup_restore_error_schema_title">Incompatible backup</string>
+    <string name="backup_restore_error_schema_body">The backup\'s database format doesn\'t match this version of SD Maid. Restoring history data is only supported between identical app versions.</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_select_paths_title">ਮਾਰਗ ਚੁਣੋ</string>
+    <string name="picker_selected_paths_title">ਚੁਣੇ ਗਏ ਮਾਰਗ</string>
+    <string name="picker_unsaved_confirmation_message">ਕੀ ਤਬਦੀਲੀਆਂ ਰੱਦ ਕਰਨੀਆਂ ਹਨ?</string>
+    <plurals name="picker_selected_paths_subtitle">
+        <item quantity="one">%d ਮਾਰਗ ਚੁਣਿਆ ਗਿਆ</item>
+        <item quantity="other">%d ਮਾਰਗ ਚੁਣੇ ਗਏ</item>
+    </plurals>
+    <string name="picker_home_action">ਡਾਟਾ ਖੇਤਰ</string>
+    <string name="picker_select_hint">ਆਈਟਮ ਨੂੰ ਚੁਣਨ ਲਈ ਦਬਾਈ ਰੱਖੋ</string>
+    <string name="tour_action_next">ਅਗਲਾ</string>
+    <string name="tour_action_previous">ਪਿਛਲਾ</string>
+    <string name="tour_action_cancel">ਛੱਡੋ</string>
+    <string name="tour_confirm_title">ਟੂਰ ਛੱਡ ਦਿਓ?</string>
+    <string name="tour_confirm_message">ਤੁਸੀਂ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਕਦੇ ਵੀ ਟੂਰ ਨੂੰ ਮੁੜ-ਸਮਰਥ ਕਰ ਸਕਦੇ ਹੋ।</string>
+    <string name="tour_confirm_continue">ਟੂਰ ਜਾਰੀ ਰੱਖੋ</string>
+    <string name="tour_confirm_dont_show_this_tour">ਇਹ ਟੂਰ ਨਾ ਦਿਖਾਓ</string>
+    <string name="tour_confirm_disable_all">ਸਾਰੇ ਟੂਰ ਅਸਮਰਥ ਕਰੋ</string>
+    <string name="navigation_unknown_destination_title">ਸਕ੍ਰੀਨ ਉਪਲਬੱਧ ਨਹੀਂ</string>
+    <string name="navigation_unknown_destination_message">ਇਹ ਸਕ੍ਰੀਨ ਖੋਲੀ ਨਹੀਂ ਜਾ ਸਕਦੀ।</string>
+</resources>

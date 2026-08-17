@@ -1,0 +1,94 @@
+import { isJsonStr, isNil } from '@shared/modules/validate';
+import JSON5 from 'json5';
+import workerpool from 'workerpool';
+
+import drpy from './drpy2.min';
+
+const { action, category, detail, home, homeVod, init, play, proxy, search } = drpy;
+
+['log', 'info', 'warn', 'error', 'debug'].forEach((method) => {
+  const level = method === 'log' ? 'verbose' : method;
+  console[method] = (...msgRaw: any[]) => {
+    const msg = {
+      type: msgRaw.length > 1 ? 'multiple' : 'single',
+      msg: msgRaw,
+    };
+    workerpool.workerEmit({ type: 'log', level, msg });
+  };
+});
+
+const handlers: Record<string, (options?: Record<string, any>) => Promise<any>> = {
+  async init(options) {
+    const resp = init(options);
+    const res = isJsonStr(resp) ? JSON5.parse(resp) : resp;
+    return res;
+  },
+
+  async home() {
+    const resp = home();
+    const res = isJsonStr(resp) ? JSON5.parse(resp) : resp;
+    return res;
+  },
+
+  async homeVod() {
+    const resp = homeVod();
+    const res = isJsonStr(resp) ? JSON5.parse(resp) : resp;
+    return res;
+  },
+
+  async category(options) {
+    const { tid, page, extend } = options!;
+    const resp = category(tid, page, Object.keys(extend).length > 0, Object.keys(extend).length > 0 ? extend : {});
+    const res = isJsonStr(resp) ? JSON5.parse(resp) : resp;
+    return res;
+  },
+
+  async detail(options) {
+    const { ids } = options!;
+    const resp = detail(ids);
+    const res = isJsonStr(resp) ? JSON5.parse(resp) : resp;
+    return res;
+  },
+
+  async play(options) {
+    const { flag, play: input } = options!;
+    const resp = play(flag, input, []);
+    const res = isJsonStr(resp) ? JSON5.parse(resp) : resp;
+    return res;
+  },
+
+  async search(options) {
+    const { wd, page } = options!;
+    const resp = search(wd, false, page);
+    const res = isJsonStr(resp) ? JSON5.parse(resp) : resp;
+    return res;
+  },
+
+  async action(options) {
+    const { action: method, value, timeout } = options!;
+    if (timeout && timeout > 0) globalThis.variable = { timeout };
+    else delete globalThis.variable?.timeout;
+    const resp = action(method, value);
+    const res = isJsonStr(resp) ? JSON5.parse(resp) : resp;
+    return res;
+  },
+
+  async proxy(options) {
+    const resp = proxy(options);
+    const res = isJsonStr(resp) ? JSON5.parse(resp) : resp;
+    return res;
+  },
+};
+
+const main = async (type: string, options?: Record<string, any>) => {
+  try {
+    const handler = handlers[type];
+    if (isNil(handler)) throw new Error(`Method not found for type: ${type}`);
+    return await handler(options);
+  } catch (error) {
+    console.error((error as Error).message);
+    throw error;
+  }
+};
+
+workerpool.worker({ main });

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_select_paths_title">Pilih laluan</string>
+    <string name="picker_selected_paths_title">Laluan dipilih</string>
+    <string name="picker_unsaved_confirmation_message">Anda mempunyai perubahan yang tidak disimpan!</string>
+    <plurals name="picker_selected_paths_subtitle">
+        <item quantity="other">%d laluan dipilih</item>
+    </plurals>
+    <string name="picker_home_action">Rumah</string>
+    <string name="picker_select_hint">Tahan item untuk memilihnya</string>
+    <string name="tour_action_next">Seterusnya</string>
+    <string name="tour_action_previous">Sebelumnya</string>
+    <string name="tour_action_cancel">Langkau</string>
+    <string name="tour_confirm_title">Langkau lawatan?</string>
+    <string name="tour_confirm_message">Anda boleh mengaktifkan semula lawatan bila-bila masa dari Tetapan.</string>
+    <string name="tour_confirm_continue">Teruskan lawatan</string>
+    <string name="tour_confirm_dont_show_this_tour">Jangan tunjukkan lawatan ini</string>
+    <string name="tour_confirm_disable_all">Matikan semua lawatan</string>
+    <string name="navigation_unknown_destination_title">Skrin tidak tersedia</string>
+    <string name="navigation_unknown_destination_message">Skrin ini tidak dapat dibuka.</string>
+</resources>

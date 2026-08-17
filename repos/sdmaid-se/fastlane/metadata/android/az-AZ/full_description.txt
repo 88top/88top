@@ -1,0 +1,55 @@
+<i>SD Maid 2/SE</i> Android-inizi təmiz və səliqəli saxlamaq üçün etibarlı köməkçinizdir.
+
+Heç kim mükəmməl deyil, Android də.
+
+* Artıq silmiş olduğunuz tətbiqlər arxalarında bir şey buraxır.
+* İstəmədiyiniz jurnallar, qəza hesabatları və digər fayllar daim yaradılır.
+* Saxlama yerinə tanımadığınız fayllar və qovluqlar toplanır.
+* Qalereyanizdəki dublikat fotolar.
+
+Burada davam etməyək… SD Maid 2/SE sizə kömək etsin!
+
+SD Maid 2/SE cihazınızda hansı tətbiqlərin fayl yaratdığını bilən tətbiq və fayl meneceridir. Yaddaş sahəsini təhlükəsiz azaltmaq üçün faylları quraşdırılmış tətbiqlərlə müqayisə edir.
+
+✨ Tətbiqləri sildəkdən sonra təmizləyin
+
+Tətbiqlər təyin edilmiş qovluqların xəricində fayllar yaradırsa, tətbiqlər silindikclə belə fayllar qala bilər. "CorpseFinder" aləti tətbiq qalıqlarını tapır, onların hansı tətbiqə aid olduğunu bildirir və onları silməyə kömək edir.
+
+🔍 Cihazınızı açıq fikirlə axtarın
+
+Boş qovluqlar, müəqqəti fayllar, artıq yüklənmiş tətbiqlər və daha çoxu üçün süzgəc. Hətta öz axtarış meyarlarınızı yarada bilərsiniz. "SystemCleaner" aləti müxtəlif meyarlara əsasən faylları avtomatik axtarır və silir.
+
+🧹 Lazımsız faylları və gizli keşləri silin
+
+Miniatürlər, zəbil qutuları, oflayn keşlər və daha çoxu: Tətbiqlər öz arxından təmizləmizsə, bu tətbiq bunu edəcək. "AppCleaner" aləti lazımsız fayllara malik tətbiqləri tapır.
+
+📦 Bütn tətbiqlərinizi idarə edin
+
+Cihazınızda yüklənmiş bütn tətbiqlərin hərtərəfli siyahısını əldə edin. Fəal, deaktiv, istifədəçi və ya sistem tətbiqi: heç bir tətbiq sizdən gizlənə bilməz. "AppControl" aləti tətbiqlərinizi axtarmağa, sıralamağa və idarə etməyə imkan verən tətbiq meneceridir.
+
+📊 Yeriğinizi nə işledir
+
+Yaddaş idarəetməsi mürəkkəb ola bilər: tətbiq, media, sistem və digər fayllara aiddir - cihaz yaddaşı, SD kartlar və USB qurğularda. "StorageAnalyzer" cihazınızda yerin necə istifadə edildiyini göstərən fayl meneceridir və saxlama idarənizi sadələşdirir.
+
+📷 Dublikat məlumatları tapın
+
+Dublikat yükləmələr, sosial media vasəsilə göndərilən fotolar və ya eyni səhnənin oxşar şəkilləri: Zamanı ilə nüsxələr toplanabilir. "Deduplicator" aləti eyni və ya oxşar faylları tapır və əlavə nüsxələri silməyə kömək edir.
+
+👆 Sürüşlə sələqləşdirin
+
+Bir qovluq seçin və saxlamaq, silmək və ya keçmək üçün sadə sürüşlərlə faylları bir-bir nəzərdən keçirin. "Swiper" aləti hər şey silinməzdən əvvəl bütn qərarları nəzərdən keçirməyinizə imkan verir və sesi sonra davam etdirmək üçün saxlaya bilərsiniz.
+
+🗃️ Fotoqraf silmədən yer boşaldın
+
+Fotolar çox yer tuta bilər, lakin onları həmişə silmək istəmirsəniz. "Media Squeeze" aləti şəkillerinizi saxlayıraq yer boşaltmaq üçün tənzimlənə bilən keyfiyyət parametrləri ilə şəkillerinizi sıxışdırır.
+
+Bu tətbiqdə reklam yoxdur. Bəzi xüsusiyyətlər ödənişli yükseltmə tələb edir.
+
+SD Maid 2/SE, SD Maid 1/Legacy-nin davamçısıdır.
+Daha yeni Android versiyaları üçün optimallaşdırılmış və təmizliyə yönəlmiş.
+
+Bu tətbiqin Accessibility Service API-dən istifadə edərək səkilləri avtomatikləşdirmək üçün istəğə bağlı xüsusiyyətləri var.
+Accessibility Service API-dən istifadə edərək bu tətbiq bir neçə tətbiqdə əməliyyatlar aparmaq üçün sizin üçün düymələrə basa bilər, məsələn. keşləri silmək.
+Bu tətbiq məlumat toplamaq üçün Accessibility Service API-dən istifadə etmir.
+
+SD Maid 2/SE Fayl Meneceri və Təmizləyici Tətbiqidir.

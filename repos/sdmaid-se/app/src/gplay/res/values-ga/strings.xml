@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_upgrade_postfix">Pro</string>
+
+    <string name="upgrades_dashcard_title">Uasghrádú SD Maid</string>
+    <string name="upgrades_dashcard_body">Cuireann SD Maid Pro torthaí níos fearr, tuilleadh gnéithe agus roghanna d\'úsáideoirí cumhachta ar fáil.</string>
+    <string name="upgrades_dashcard_upgrade_action">Uasghrádú</string>
+
+    <string name="upgrades_gplay_unavailable_error_title">Níl Google Play ar fáil</string>
+    <string name="upgrades_gplay_unavailable_error_description">Ní féidir le SD Maid ceangal le Google Play. An bhfuil Google Play suiteáilte agus cothrom le dáta? An bhfuil do Chuntas Google logáilte isteach? Déan iarracht taisce an aip Google Play a ghlanadh agus do ghléas a atosú.</string>
+    <string name="upgrade_screen_preamble">Níl aon fhógraí ag SD Maid agus ní dhíolann sé sonraí úsáideoirí. Tá mo chuid oibre maoinithe agat ❤️.</string>
+    <string name="upgrade_screen_benefits_title">Buntáistí</string>
+    <string name="upgrade_screen_benefits_body">• Glanadh aipeanna 💯\n• Oibríochtaí sceidealta ⏰\n• Roghanna breise do gach uirlis ⚙️\n• Do rialacha scriosadh féin ✍️\n• Forbróir spreagtha 🧙\nagus tuilleadh…</string>
+    <string name="upgrade_screen_subscription_trial_action">Tosaigh triail saor in aisce 14 lá</string>
+    <string name="upgrade_screen_subscription_action">Síntiús</string>
+    <string name="upgrade_screen_iap_action">Ceannach aon uaire</string>
+    <string name="upgrade_screen_thanks_toast">Is tusa an duine is fearr! ❤️</string>
+    <string name="upgrade_screen_restore_purchase_action">Athchóirigh ceannach</string>
+    <string name="upgrade_screen_restore_sync_patience_hint">D\'fhéadfadh sioncronú Play Store am a thógáil. Déan iarracht atosú, taisce Google Play a ghlanadh nó fanacht go simplí.</string>
+    <string name="upgrades_gplay_billing_error_label">Fadhb Google Play</string>
+    <string name="upgrades_gplay_billing_error_description">Bhí fadhb ann le Google Play. Déan iarracht arís níos déanaí nó atosú do ghléas.\n\nSonraí: %s</string>
+    <string name="upgrades_gplay_internal_error_title">Earráid Google Play</string>
+    <string name="upgrades_gplay_internal_error_description">Tharla earráid inmheánach Google Play. Déan iarracht na rudaí seo a leanas:\n\n• Atosaigh do ghléas\n• Glan taisce Google Play Store\n• Déan iarracht arís níos déanaí</string>
+    <string name="upgrades_gplay_network_error_title">Earráid ceangail</string>
+    <string name="upgrades_gplay_network_error_description">Ní féidir ceangal le Google Play. Seiceáil do cheangal idirlín agus déan iarracht arís.</string>
+    <string name="upgrades_gplay_already_owned_error_title">Ceannaithe cheana</string>
+    <string name="upgrades_gplay_already_owned_error_description">Úsáid an rogha \"Athchóirigh ceannach\" chun do cheannach a athchóiriú. Má leanann an fhadhb, déan iarracht taisce Google Play a ghlanadh agus do ghléas a atosú.</string>
+</resources>

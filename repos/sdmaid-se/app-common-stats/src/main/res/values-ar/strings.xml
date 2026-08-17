@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="stats_dash_body_size">
+        <item quantity="zero">تم تحرير %s.</item>
+        <item quantity="one">تم تحرير %s.</item>
+        <item quantity="two">تم تحرير %s.</item>
+        <item quantity="few">تم تحرير %s.</item>
+        <item quantity="many">تم تحرير %s.</item>
+        <item quantity="other">%s تم تحريره.</item>
+    </plurals>
+    <plurals name="stats_dash_body_count">
+        <item quantity="zero">تم معالجة %s عنصر منذ دعوة SD Maid إلى جهازك.</item>
+        <item quantity="one">تم معالجة %s عنصر منذ دعوة SD Maid إلى جهازك.</item>
+        <item quantity="two">تم معالجة %s عنصر منذ دعوة SD Maid إلى جهازك.</item>
+        <item quantity="few">تم معالجة %s عناصر منذ دعوة SD Maid إلى جهازك.</item>
+        <item quantity="many">تم معالجة %s عنصراً منذ دعوة SD Maid إلى جهازك.</item>
+        <item quantity="other">تم معالجة %s عنصر منذ دعوة SD Maid إلى جهازك.</item>
+    </plurals>
+    <string name="stats_report_status_partial_success">تم بنجاح جزئي</string>
+    <string name="stats_report_status_partial_failure">فشل</string>
+    <string name="stats_settings_desc">تكوين إحصائيات SD Maid والتقارير والاحتفاظ بالبيانات.</string>
+    <string name="stats_settings_retention_category">الاحتفاظ</string>
+    <string name="stats_settings_retention_reports_label">التقارير العامة</string>
+    <string name="stats_settings_retention_reports_desc">عدد الأيام قبل حذف تقارير تشغيل SD Maid الأساسية.</string>
+    <string name="stats_settings_retention_paths_label">معلومات المسار التفصيلية</string>
+    <string name="stats_settings_retention_paths_desc">عدد الأيام اللازمة للاحتفاظ بتفاصيل حول المسارات المتأثرة بـ SD Maid.</string>
+    <string name="stats_settings_reset_all_label">إعادة تعيين الكل</string>
+    <string name="stats_settings_reset_all_desc">حذف كافة التقارير وتعيين كافة الإحصائيات وتصفيرها.</string>
+    <string name="stats_affected_paths_label">المسارات المتأثرة</string>
+    <string name="stats_affected_pkgs_label">التطبيقات المتأثرة</string>
+    <string name="stats_dash_body_snapshots_only">تتبع سجل التخزين الخاص بك.</string>
+    <string name="stats_storage_trend_action">اتجاه التخزين</string>
+    <string name="stats_space_history_title">اتجاه التخزين</string>
+    <string name="stats_space_history_range_title">النطاق</string>
+    <string name="stats_space_history_range_7d">7 أيام</string>
+    <string name="stats_space_history_range_30d">30 يومًا</string>
+    <string name="stats_space_history_range_90d">90 يومًا</string>
+    <string name="stats_space_history_storage_title">التخزين</string>
+    <string name="stats_space_history_current_used_label">المستخدم الحالي</string>
+    <string name="stats_space_history_min_label">الحد الأدنى للاستخدام</string>
+    <string name="stats_space_history_max_label">الحد الأقصى للاستخدام</string>
+    <string name="stats_space_history_delta_label">الفارق</string>
+    <string name="stats_space_history_delta_in_x">%1$s في %2$s</string>
+    <string name="stats_space_history_upgrade_title">السجل الكامل ميزة Pro</string>
+    <string name="stats_space_history_upgrade_body">قم بالترقية لإلغاء قفل عرض الاتجاه الكامل لـ 90 يومًا لكل جهاز تخزين.</string>
+    <string name="stats_space_history_marker_freed">تم تحرير %1$s</string>
+    <string name="stats_storage_type_primary">التخزين الأساسي</string>
+    <string name="stats_storage_type_secondary">التخزين الثانوي</string>
+    <string name="stats_storage_type_portable">وحدة تخزين محمولة</string>
+    <string name="stats_space_history_delete_storage_title">حذف سجل التخزين؟</string>
+    <string name="stats_space_history_delete_storage_desc">ستُحذف جميع بيانات الاتجاه لهذا التخزين نهائياً.</string>
+</resources>
