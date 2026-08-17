@@ -1,5 +1,0 @@
-* @daeuniverse/governance
-/src/** @daeuniverse/daed
-/docs/** @daeuniverse/docs
-CHANGELOGS.md @daeuniverse/release
-/.github/** @daeuniverse/infra
