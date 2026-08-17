@@ -1,0 +1,32 @@
+name: Delete repos folder
+
+on:
+  workflow_dispatch:  # 手动触发
+
+jobs:
+  delete-folder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          repository: 88top/88top
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Remove repos folder
+        run: |
+          if [ -d "repos" ]; then
+            git rm -r --cached repos
+            rm -rf repos
+            echo "repos 文件夹已删除"
+          else
+            echo "repos 文件夹不存在，跳过"
+          fi
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git diff --cached --quiet || git commit -m "chore: 删除 repos 文件夹"
+          git push
