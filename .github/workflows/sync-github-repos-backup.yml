@@ -1,14 +1,18 @@
-name: 同步 GitHub 仓库备份(全分支)
+name: 同步 GitHub 仓库备份(全分支·仅公开仓库)
 
 # ★ 与旧版的核心区别 ★
-# 旧版 git clone --depth 1 只拉默认分支的最新一次提交,其他分支完全拿不到。
-# 这一版会先枚举每个仓库的所有分支,再逐个分支单独浅克隆,
-# 目录结构变成: repos/仓库名/分支名/(该分支下的文件)
+# 旧版需要手动配置 SYNC_TOKEN 才能访问私有仓库。
+# 这一版不再需要任何自建 secret,只备份公开(public)仓库,
+# 直接用 Actions 自带的 GITHUB_TOKEN 提高 API 速率限制即可,
+# clone 公开仓库也不需要任何 token。
+#
+# 目录结构: repos/仓库名/分支名/(该分支下的文件)
 # 代价说明(务必确认接受):
 #   1. 仍然是"文件快照",不保留任何一次提交的历史(每个分支只留"当下长什么样")
 #   2. 分支数量越多,耗时和请求次数越多,大仓库多分支会明显拉长运行时间
 #   3. 如果分支名互相前缀冲突(例如同时存在 release 和 release/1.0),
 #      后处理的那个会因为目录路径冲突被跳过,并在日志里明确提示
+#   4. 私有仓库不会被拉取(接口只返回 public 仓库)
 
 on:
   schedule:
@@ -37,7 +41,7 @@ jobs:
     # ██████████████████  ★★★ 需要你手动配置 ★★★  ██████████████████
     # ══════════════════════════════════════════════════════════════════
     env:
-      # ---- 1. 要同步的 GitHub 账户名(必须和生成 SYNC_TOKEN 的账户是同一个,才能拿到私有仓库) ----
+      # ---- 1. 要同步的 GitHub 账户名 ----
       SYNC_USERNAME: "timeflysoon"
 
       # ---- 2. 本地保护名单 ★重要★ ----
@@ -54,9 +58,7 @@ jobs:
     # ══════════════════════════════════════════════════════════════════
     # ██████████████████  ★★★ 配置区到此结束 ★★★  ██████████████████
     # ══════════════════════════════════════════════════════════════════
-    # Token 不在这里配置,必须去仓库 Settings -> Secrets and variables -> Actions
-    # 新建一个名叫 SYNC_TOKEN 的 secret,值填你的 personal access token
-    # 权限至少要包含 repo(经典token)或 Contents 读权限(fine-grained token)
+    # 不再需要任何自建 secret;仅备份公开仓库,列表接口和 clone 都不需要认证。
 
     steps:
       - name: 拉取本仓库(上次备份存档 + 本次要提交的目标)
@@ -93,10 +95,12 @@ jobs:
           done
           rm -rf "$PROTECT_STASH"
 
-      - name: 拉取远程仓库列表(含私有仓库)并逐个仓库、逐个分支 clone
+      - name: 拉取远程公开仓库列表并逐个仓库、逐个分支 clone
         shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.SYNC_TOKEN }}
+          # 用 Actions 自带的 GITHUB_TOKEN 只是为了提高 API 速率限制(5000/小时),
+          # 它没有访问其他用户私有仓库的权限,不会、也不能拉到私有仓库。
+          GH_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           cd ./repos
@@ -104,11 +108,6 @@ jobs:
           USERNAME="$SYNC_USERNAME"
           if [ -z "$USERNAME" ] || [ "$USERNAME" = "你的GitHub用户名" ]; then
             echo "错误: 请先在 yml 顶部 env.SYNC_USERNAME 填写真实用户名"
-            exit 1
-          fi
-
-          if [ -z "${GITHUB_TOKEN:-}" ]; then
-            echo "错误: 未检测到 secrets.SYNC_TOKEN,请先在仓库 Secrets 中配置"
             exit 1
           fi
 
@@ -129,27 +128,25 @@ jobs:
           fi
 
           echo "=========================================="
-          echo "同步账户: $USERNAME"
+          echo "同步账户: $USERNAME(仅公开仓库)"
           echo "本地保护名单: ${LOCAL_PROTECT_LIST:-(无)}"
           echo "远程排除名单: ${REMOTE_EXCLUDE_LIST:-(无)}"
           echo "=========================================="
 
-          # ---- 拉取远程仓库列表(含私有),owner 过滤同旧版 ----
+          # ---- 拉取远程公开仓库列表(type=public,不含私有仓库) ----
           REMOTE_LIST_FILE=$(mktemp)
           PAGE=1
           while true; do
             RESPONSE=$(curl -fsSL \
               -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+              -H "Authorization: Bearer ${GH_API_TOKEN}" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
-              "https://api.github.com/user/repos?per_page=100&page=${PAGE}&visibility=all&affiliation=owner,collaborator,organization_member")
+              "https://api.github.com/users/${USERNAME}/repos?per_page=100&page=${PAGE}&type=public")
 
             PAGE_COUNT=$(echo "$RESPONSE" | jq 'length')
             [ "$PAGE_COUNT" -eq 0 ] && break
 
-            echo "$RESPONSE" | jq -r --arg u "$USERNAME" '
-              .[] | select(.owner.login == $u) | .full_name
-            ' >> "$REMOTE_LIST_FILE"
+            echo "$RESPONSE" | jq -r '.[] | .full_name' >> "$REMOTE_LIST_FILE"
 
             PAGE=$((PAGE + 1))
           done
@@ -157,12 +154,10 @@ jobs:
           sort -u "$REMOTE_LIST_FILE" -o "$REMOTE_LIST_FILE"
 
           REMOTE_COUNT=$(wc -l < "$REMOTE_LIST_FILE" | tr -d ' ')
-          echo "远程共发现 $REMOTE_COUNT 个仓库(含私有,仅 owner 为 $USERNAME 的仓库)"
+          echo "远程共发现 $REMOTE_COUNT 个公开仓库"
 
           if [ "$REMOTE_COUNT" -eq 0 ]; then
-            echo "未获取到任何仓库,请检查:"
-            echo "1) SYNC_USERNAME 是否正确"
-            echo "2) SYNC_TOKEN 是否有效、是否有权限访问对应仓库"
+            echo "未获取到任何仓库,请检查 SYNC_USERNAME 是否正确、该账户下是否有公开仓库"
             exit 1
           fi
 
@@ -199,7 +194,8 @@ jobs:
               continue
             fi
 
-            CLONE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${FULL_NAME}.git"
+            # 公开仓库,直接用不带 token 的 URL 即可 clone
+            CLONE_URL="https://github.com/${FULL_NAME}.git"
 
             # ---- 先枚举该仓库的所有分支 ----
             echo "→ [仓库] $REPO_NAME 枚举分支..."
@@ -257,7 +253,7 @@ jobs:
 
           echo ""
           echo "=========================================="
-          echo "同步完成"
+          echo "同步完成(仅公开仓库)"
           echo "  仓库成功:   $REPO_OK_COUNT"
           echo "  仓库失败:   $REPO_FAIL_COUNT"
           echo "  仓库已排除: $EXCLUDE_COUNT"
@@ -300,26 +296,8 @@ jobs:
             exit 0
           fi
 
-          git commit -m "自动同步备份(全分支) $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git commit -m "自动同步备份(全分支·仅公开仓库) $(date -u '+%Y-%m-%d %H:%M UTC')"
 
           # push 前先 rebase 远程,避免手动操作过备份仓库导致 non-fast-forward 失败
           git pull --rebase
           git push
-
-# ══════════════════════════════════════════════════════════════════
-# ★★★ SYNC_TOKEN 获取与配置步骤(精简版) ★★★
-# ══════════════════════════════════════════════════════════════════
-# 1. 创建 token:GitHub → Settings → Developer settings → Personal access tokens
-#     → Fine-grained tokens → Generate new token
-# 2. 基本信息:随便起个名字,Expiration 建议 90 天,Resource owner 选自己账号
-# 3. Repository access:选 "All repositories"(关键,否则枚不到全部私有仓库)
-# 4. Permissions:Contents → Read-only,其他保持 No access
-# 5. 立即复制:生成后只显示一次,先复制好
-# 6. 打开备份仓库的 Secrets:备份仓库自己的 Settings → Secrets and variables
-#     → Actions(不是个人账号设置页,也不是源仓库的设置页)
-# 7. 新建 Secret:Name 精确填 SYNC_TOKEN,Value 粘贴 token
-# 8. 改 SYNC_USERNAME 并验证:yml 里填真实用户名 → 提交 → Actions 页面
-#    手动 Run workflow → 看日志里"远程共发现 N 个仓库"数量是否符合预期
-#
-# ★ 与旧版共用同一个 SYNC_TOKEN 即可,权限要求完全一样(Contents: Read-only)
-# ══════════════════════════════════════════════════════════════════
