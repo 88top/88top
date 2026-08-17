@@ -1,0 +1,333 @@
+name: 同步 GitHub 仓库备份
+
+on:
+  schedule:
+    # 每天 UTC 3:00(北京时间 11:00)自动执行,可自行调整 cron 表达式
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    # 允许在 Actions 页面手动点 "Run workflow" 触发,方便调试
+
+# 给 GITHUB_TOKEN(用于最后 git push)声明写权限
+# 如果仓库/组织默认权限设置是只读,不加这个 push 会直接失败
+permissions:
+  contents: write
+
+# 防止定时任务和手动触发撞车,或者上一次还没跑完下一次又开始,
+# 同一个仓库同时只允许一个同步任务在跑
+# ★ 修改点 1:取消(cancel)改为排队(queue)。
+#   备份任务宁可多等几分钟,不能被强杀:手动触发会取消正在跑的定时任务,
+#   若它恰好执行到"清空 repos/ 之后、提交之前",当天快照就会被跳过。
+#   如果想保留"新任务直接顶掉旧任务"的行为,改回 true 也可以,代价见上。
+concurrency:
+  group: github-backup-${{ github.repository }}
+  cancel-in-progress: false
+
+# ══════════════════════════════════════════════════════════════════
+# ██████████████████  ★★★ 需要你手动配置 ★★★  ██████████████████
+# ══════════════════════════════════════════════════════════════════
+env:
+  # ---- 1. 要同步的 GitHub 账户名(必须和生成 SYNC_TOKEN 的账户是同一个,才能拿到私有仓库) ----
+  SYNC_USERNAME: "你的GitHub用户名"
+
+  # ---- 2. 本地保护名单 ★重要★ ----
+  # 这里列出的仓库名,无论远程有没有同名仓库,一律不 clone、不覆盖
+  # 用于保护你在这个备份仓库里手动放的、恰好和远程仓库同名的其他内容
+  # 多个名字用空格分隔,没有就留空字符串
+  LOCAL_PROTECT_LIST: ""
+  # 例: LOCAL_PROTECT_LIST: "my-notes readme-assets"
+
+  # ---- 3. 远程排除名单 ★重要★ ----
+  # 这里列出的远程仓库名,完全跳过同步,连 clone 都不会触发
+  # 多个名字用空格分隔,没有就留空字符串
+  REMOTE_EXCLUDE_LIST: ""
+  # 例: REMOTE_EXCLUDE_LIST: "some-huge-repo old-deprecated-project"
+# ══════════════════════════════════════════════════════════════════
+# ██████████████████  ★★★ 配置区到此结束 ★★★  ██████████████████
+# ══════════════════════════════════════════════════════════════════
+# Token 不在这里配置,必须去仓库 Settings -> Secrets and variables -> Actions
+# 新建一个名叫 SYNC_TOKEN 的 secret,值填你的 personal access token
+# 权限至少要包含 repo(经典token)或 Contents 读权限(fine-grained token),
+# 否则即使账户名填对了,私有仓库列表依然会是空的
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取本仓库(上次备份存档 + 本次要提交的目标)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 安装 jq(用于稳定解析 GitHub API 返回的 JSON)
+        # 注:ubuntu-latest 镜像其实预装了 jq(1.6),此步仅为显式声明与保险,可删
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: 清空旧的备份内容,准备全新同步(先保护白名单目录)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ./repos
+
+          # 关键:先把本地保护名单里的目录挪到临时位置,避免下面清空时被一并删除
+          # 这样才能同时做到两件事:
+          #   1. 远程账户删除的仓库 -> 因为清空后不会被重新 clone,本地也跟着自动消失(保持一模一样)
+          #   2. 本地保护名单里的目录 -> 不受这次清空影响,清空完后原样放回
+          PROTECT_STASH=$(mktemp -d)
+          for name in $LOCAL_PROTECT_LIST; do
+            if [ -d "./repos/$name" ]; then
+              mv "./repos/$name" "$PROTECT_STASH/$name"
+              echo "已暂存保护目录: $name"
+            fi
+          done
+
+          rm -rf ./repos
+          mkdir -p ./repos
+
+          for name in $LOCAL_PROTECT_LIST; do
+            if [ -d "$PROTECT_STASH/$name" ]; then
+              mv "$PROTECT_STASH/$name" "./repos/$name"
+              echo "已恢复保护目录: $name"
+            fi
+          done
+          rm -rf "$PROTECT_STASH"
+
+      - name: 拉取远程仓库列表(含私有仓库)并逐个 clone
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.SYNC_TOKEN }}
+        run: |
+          set -euo pipefail
+          cd ./repos
+
+          USERNAME="$SYNC_USERNAME"
+          if [ -z "$USERNAME" ] || [ "$USERNAME" = "你的GitHub用户名" ]; then
+            echo "错误: 请先在 yml 顶部 env.SYNC_USERNAME 填写真实用户名"
+            exit 1
+          fi
+
+          if [ -z "${GITHUB_TOKEN:-}" ]; then
+            echo "错误: 未检测到 secrets.SYNC_TOKEN,请先在仓库 Secrets 中配置"
+            exit 1
+          fi
+
+          # 辅助函数:判断某个仓库名是否在空格分隔的名单里
+          in_list() {
+            local name="$1"
+            local list="$2"
+            for item in $list; do
+              [ "$item" = "$name" ] && return 0
+            done
+            return 1
+          }
+
+          # ★ 强制保护:自动排除"托管这个 workflow 的仓库自己" ★
+          # 原因:这个仓库本身也是你账户下的仓库之一,如果不排除,脚本会把自己 clone 进 ./repos 里,
+          # 而 clone 下来的内容又会在下一次运行时被再次 clone(因为它已经被 commit 回了远程),
+          # 形成"自己套自己"的递归嵌套,长期运行会导致仓库体积不断膨胀甚至崩溃。
+          HOSTING_REPO_NAME="$(echo "${GITHUB_REPOSITORY:-}" | cut -d'/' -f2)"
+          if [ -n "$HOSTING_REPO_NAME" ]; then
+            echo "已自动强制排除本仓库自身: $HOSTING_REPO_NAME(防止递归自我嵌套)"
+          fi
+
+          echo "=========================================="
+          echo "同步账户: $USERNAME"
+          echo "本地保护名单: ${LOCAL_PROTECT_LIST:-(无)}"
+          echo "远程排除名单: ${REMOTE_EXCLUDE_LIST:-(无)}"
+          echo "=========================================="
+
+          # ---- 关键修复:改用 /user/repos(认证用户可访问的仓库,含私有),
+          # 而不是 /users/{username}/repos(只返回该用户的公开仓库)----
+          # 再用 jq 过滤出 owner 确实是 $USERNAME 本人的仓库(排除掉仅作为协作者/组织成员能看到的他人仓库)
+          REMOTE_LIST_FILE=$(mktemp)
+          PAGE=1
+          while true; do
+            RESPONSE=$(curl -fsSL \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/user/repos?per_page=100&page=${PAGE}&visibility=all&affiliation=owner,collaborator,organization_member")
+
+            PAGE_COUNT=$(echo "$RESPONSE" | jq 'length')
+            [ "$PAGE_COUNT" -eq 0 ] && break
+
+            echo "$RESPONSE" | jq -r --arg u "$USERNAME" '
+              .[] | select(.owner.login == $u) | .full_name
+            ' >> "$REMOTE_LIST_FILE"
+
+            PAGE=$((PAGE + 1))
+          done
+
+          sort -u "$REMOTE_LIST_FILE" -o "$REMOTE_LIST_FILE"
+
+          REMOTE_COUNT=$(wc -l < "$REMOTE_LIST_FILE" | tr -d ' ')
+          echo "远程共发现 $REMOTE_COUNT 个仓库(含私有,仅 owner 为 $USERNAME 的仓库)"
+
+          if [ "$REMOTE_COUNT" -eq 0 ]; then
+            echo "未获取到任何仓库,请检查:"
+            echo "1) SYNC_USERNAME 是否正确"
+            echo "2) SYNC_TOKEN 是否有效、是否有权限访问对应仓库"
+            exit 1
+          fi
+
+          CLONE_COUNT=0
+          FAIL_COUNT=0
+          EXCLUDE_COUNT=0
+          PROTECT_COUNT=0
+
+          while IFS= read -r FULL_NAME; do
+            [ -z "$FULL_NAME" ] && continue
+            REPO_NAME="$(echo "$FULL_NAME" | cut -d'/' -f2)"
+
+            if in_list "$REPO_NAME" "$REMOTE_EXCLUDE_LIST" || [ "$REPO_NAME" = "$HOSTING_REPO_NAME" ]; then
+              if [ "$REPO_NAME" = "$HOSTING_REPO_NAME" ]; then
+                echo "→ [SELF-EXCLUDE] $REPO_NAME 是本仓库自身,强制跳过"
+              else
+                echo "→ [EXCLUDE] $REPO_NAME 在远程排除名单里,跳过"
+              fi
+              EXCLUDE_COUNT=$((EXCLUDE_COUNT + 1))
+              continue
+            fi
+
+            if in_list "$REPO_NAME" "$LOCAL_PROTECT_LIST"; then
+              echo "→ [PROTECTED] $REPO_NAME 在本地保护名单里,跳过(不会被覆盖)"
+              PROTECT_COUNT=$((PROTECT_COUNT + 1))
+              continue
+            fi
+
+            if [ -e "$REPO_NAME" ]; then
+              echo "→ [SKIP] $REPO_NAME 已存在同名文件/目录,跳过,不覆盖"
+              FAIL_COUNT=$((FAIL_COUNT + 1))
+              continue
+            fi
+
+            echo "→ [CLONE] $REPO_NAME"
+            # 用 x-access-token 方式带 token 拉取,兼容私有仓库
+            CLONE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${FULL_NAME}.git"
+
+            if git clone --quiet --depth 1 "$CLONE_URL" "$REPO_NAME" 2>&1 | sed 's/^/    /'; then
+              CLONE_COUNT=$((CLONE_COUNT + 1))
+              # 移除子仓库自己的 .git,避免外层仓库把它识别成嵌套仓库引用(gitlink)
+              # 导致代码内容实际提交不上去。代价:只保留最新代码快照,不保留子仓库自己的提交历史。
+              rm -rf "$REPO_NAME/.git"
+              # ★ 修改点 2:空仓库 clone 后只剩空目录,git 不跟踪空目录,备份里会毫无痕迹。
+              #   放一个占位文件,让"远程存在一个空仓库"这件事至少能被看见。
+              if [ -z "$(ls -A "$REPO_NAME")" ]; then
+                touch "$REPO_NAME/.gitkeep"
+              fi
+            else
+              echo "    ⚠ clone 失败"
+              rm -rf "$REPO_NAME" || true
+              FAIL_COUNT=$((FAIL_COUNT + 1))
+            fi
+          done < "$REMOTE_LIST_FILE"
+
+          rm -f "$REMOTE_LIST_FILE"
+
+          echo ""
+          echo "=========================================="
+          echo "同步完成"
+          echo "  成功 clone: $CLONE_COUNT"
+          echo "  失败/冲突:  $FAIL_COUNT"
+          echo "  已排除:     $EXCLUDE_COUNT"
+          echo "  已保护:     $PROTECT_COUNT"
+          echo "=========================================="
+
+      - name: 提交前防御:检测超大文件(>95MiB 直接失败)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # GitHub 硬性限制:仓库里任何单文件 >100MB,整个 push 都会被拒绝。
+          # 后果是"一个仓库的大文件导致所有仓库当天全部备份失败",且没有任何告警。
+          # 提前 5% 阈值拦截,给出明确处理指引。
+          BIG=$(find ./repos -type f -size +95M -printf '%s\t%p\n' | sort -rn | head -20)
+          if [ -n "$BIG" ]; then
+            echo "错误: 检测到超过 95MiB 的文件,git push 大概率会被 GitHub 拒绝:"
+            echo "$BIG"
+            echo ""
+            echo "处理建议:"
+            echo "  1) 在 yml 顶部 REMOTE_EXCLUDE_LIST 里排除含大文件的仓库"
+            echo "  2) 或对该仓库改用 Git LFS / 其他存储方案"
+            exit 1
+          fi
+          echo "通过: 未发现 >95MiB 的文件"
+
+      - name: 提交备份结果
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # ★ 修改点 3(关键修复):必须用 -f(force)。
+          # 被 clone 下来的仓库自带各自的 .gitignore(例如忽略 .env、node_modules),
+          # 普通 `git add` 会"尊重"它们 → 被忽略的文件静默缺失于备份,且毫无报错。
+          # 备份仓库的规则应该只有一个:远程仓库里有什么就备份什么。
+          # 注意:-f 同时也会覆盖备份仓库根目录自身 .gitignore 对 ./repos 的规则,
+          # 如果你确实想在根 .gitignore 里排除 ./repos 下某类文件,请改用别的方式(如 REMOTE_EXCLUDE_LIST)。
+          git add -f ./repos
+
+          if git diff --staged --quiet; then
+            echo "没有变化,无需提交"
+            exit 0
+          fi
+
+          git commit -m "自动同步备份 $(date -u '+%Y-%m-%d %H:%M UTC')"
+
+          # ★ 修改点 4:push 前先 rebase 远程。
+          # 如果你手动编辑/推送过这个备份仓库(比如放入受保护目录),远程会领先本地,
+          # 直接 push 会 non-fast-forward 失败,备份从此停摆。这里先对齐再推。
+          git pull --rebase
+          git push
+
+# ══════════════════════════════════════════════════════════════════
+# ██████████████████  ★★★ SYNC_TOKEN 获取与配置步骤 ★★★  ██████████████████
+# ══════════════════════════════════════════════════════════════════
+#
+# 1. 创建 Fine-grained Personal Access Token
+#    登录 GitHub → 右上角头像 → Settings → 左侧最底部 Developer settings
+#    → Personal access tokens → Fine-grained tokens → 点击 "Generate new token"。
+#    这种类型的 token 权限更精细、更安全,推荐优先使用。
+#
+# 2. 填写 Token 基本信息
+#    Token name 随便起一个能识别用途的名字,比如 "repo-backup-sync"。
+#    Expiration(过期时间)建议选 90 天或自定义更长时间,到期前 GitHub 会提醒你续期;
+#    如果嫌麻烦也可以选 "No expiration",但安全性会降低。
+#    Resource owner 选你自己的账号(如果仓库在组织下,选对应组织,但要注意组织
+#    可能限制 fine-grained token 的使用)。
+#
+# 3. 设置 Repository access(关键步骤)
+#    选择 "All repositories",这样脚本用 /user/repos 接口拉取仓库列表时才能
+#    枚举到你账号下所有仓库(包括私有的)。如果选 "Only select repositories",
+#    token 只能访问你手动勾选的那几个仓库,新建的仓库不会自动被同步进来,
+#    需要手动追加授权。
+#
+# 4. 设置 Permissions(权限范围)
+#    展开 "Repository permissions",找到 "Contents",选择 "Read-only" 即可
+#    (脚本只需要 clone/读取,不需要写远程仓库)。其他权限项保持默认(No access)
+#    不用动,遵循最小权限原则。设置完后拉到最底部点击 "Generate token"。
+#
+# 5. 立即复制 Token
+#    生成后 GitHub 只显示一次这串以 github_pat_ 开头的字符串,离开页面或刷新后
+#    就再也看不到了。务必立刻复制到剪贴板,先别关这个页面(可以先粘到记事本暂存,
+#    配置完 secret 后再清空记事本)。
+#
+# 6. 打开备份仓库的 Secrets 设置
+#    进入你用来存放备份内容的那个仓库(也就是这份 workflow 所在的仓库)
+#    → 顶部 Settings → 左侧 Security 分类下的 "Secrets and variables"
+#    → 点开 "Actions"。注意:这里一定是备份仓库自己的设置页,不是你的个人账号
+#    设置页,也不是被同步的那些源仓库的设置页——secret 是仓库级别的,只有存放
+#    workflow 的这个仓库能用到它。
+#
+# 7. 新建名为 SYNC_TOKEN 的 Secret
+#    在 "Secrets" 标签页(不是 "Variables" 标签页,两者相邻容易点错)点击
+#    "New repository secret"。Name 一栏必须精确填写 SYNC_TOKEN(大小写、下划线
+#    都要和 workflow 里 secrets.SYNC_TOKEN 完全一致),Value 一栏粘贴刚才复制的
+#    token 字符串,点击 "Add secret" 保存。保存后这个值就不再以明文形式展示给
+#    任何人(包括你自己),只能整体替换或删除,无法查看。
+#
+# 8. 填写 SYNC_USERNAME 并验证
+#    回到本 yml 文件里,把 env.SYNC_USERNAME 从占位符改成你的真实 GitHub 用户名,
+#    提交这个改动。然后去仓库的 Actions 页面,手动点一次 "Run workflow" 触发一次
+#    运行,看日志里"远程共发现 N 个仓库"这一行的数字是否符合你账号下实际的仓库
+#    总数(含私有),符合就说明 token 权限配置正确。
+# ══════════════════════════════════════════════════════════════════
