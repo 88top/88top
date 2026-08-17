@@ -1,0 +1,16 @@
+[package]
+name = "yahei-alarm-clock"
+version = "1.0.0"
+description = "极简雅黑桌面闹钟"
+authors = ["you"]
+license = ""
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["devtools"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+time = "=0.3.36"

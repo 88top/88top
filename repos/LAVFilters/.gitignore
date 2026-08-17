@@ -1,0 +1,13 @@
+
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.aps
+*.db
+*.opendb
+
+/ipch
+/bin_*
+/common/includes/version_rev.h
+/.vs

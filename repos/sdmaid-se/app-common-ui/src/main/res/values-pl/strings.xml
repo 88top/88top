@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_select_paths_title">Wybierz ścieżki</string>
+    <string name="picker_selected_paths_title">Wybrane ścieżki</string>
+    <string name="picker_unsaved_confirmation_message">Odrzucić zmiany?</string>
+    <plurals name="picker_selected_paths_subtitle">
+        <item quantity="one">Wybrano %d ścieżkę</item>
+        <item quantity="few">Wybrano %d ścieżki</item>
+        <item quantity="many">Wybrano %d ścieżki</item>
+        <item quantity="other">Wybrano %d ścieżki</item>
+    </plurals>
+    <string name="picker_home_action">Obszary danych</string>
+    <string name="picker_select_hint">Przytrzymaj element, aby go wybrać</string>
+    <string name="tour_action_next">Dalej</string>
+    <string name="tour_action_previous">Wstecz</string>
+    <string name="tour_action_cancel">Pomiń</string>
+    <string name="tour_confirm_title">Pominąć przewodnik?</string>
+    <string name="tour_confirm_message">Przewodniki możesz ponownie włączyć w dowolnym momencie z Ustawień.</string>
+    <string name="tour_confirm_continue">Kontynuuj przewodnik</string>
+    <string name="tour_confirm_dont_show_this_tour">Nie pokazuj tego przewodnika</string>
+    <string name="tour_confirm_disable_all">Wyłącz wszystkie przewodniki</string>
+    <string name="navigation_unknown_destination_title">Ekran niedostępny</string>
+    <string name="navigation_unknown_destination_message">Nie można otworzyć tego ekranu.</string>
+</resources>

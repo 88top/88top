@@ -1,0 +1,55 @@
+<i>SD Maid 2/SE</i> adalah asisten tepercaya untuk Android Anda, menjaga agar tetap bersih dan rapi.
+
+Tiada yang sempurna dan itu termasuk Android.
+
+* Aplikasi yang baru saja dihapus meninggalkan beberapa jejak.
+* Log, laporan kesalahan, dan berkas-berkas lain yang tidak Anda inginkan terus-menerus dibuat.
+* Penyimpanan Anda mengumpulkan berkas dan folder yang tidak Anda kenali.
+* Foto duplikat di galeri Anda.
+
+Mari kita tidak lanjutkan... Biarkan SD Maid 2/SE membantu Anda!
+
+SD Maid 2/SE adalah aplikasi dan pengelola file yang dapat mendeteksi aplikasi mana saja yang telah membuat file di perangkat Anda. Ini membandingkan file dengan aplikasi yang terpasang untuk membantu Anda membebaskan ruang penyimpanan dengan aman.
+
+✨ Bersihkan sisa setelah Anda menghapus aplikasi
+
+Jika aplikasi membuat file di luar folder khususnya, file-file itu bisa tetap tinggal meski aplikasinya sudah dihapus. Alat "CorpseFinder" menemukan sisa-sisa aplikasi, memberitahu aplikasi mana yang menjadi pemiliknya, dan membantu menghapusnya.
+
+🔍 Pindai perangkat Anda secara cerdas
+
+Filter untuk folder kosong, file sementara, aplikasi terpasang, dan lainnya. Anda bahkan bisa membuat kriteria pencarian sendiri. Alat "PembersihSistem" secara otomatis mencari dan menghapus file berdasarkan berbagai kriteria.
+
+🧹 Hapus file yang tidak diperlukan dan cache tersembunyi
+
+Thumbnail, tempat sampah, cache offline, dan lainnya: Jika aplikasi tidak membersihkan diri sendiri, aplikasi ini akan melakukannya untuk Anda. Alat "AppCleaner" menemukan aplikasi dengan file tak terpakai.
+
+📦 Kelola semua aplikasi Anda
+
+Dapatkan daftar lengkap semua aplikasi yang terpasang di perangkat Anda. Aplikasi aktif, nonaktif, milik pengguna, atau sistem: tidak ada yang dapat tersembunyi dari Anda. Alat "AppControl" adalah pengelola aplikasi yang memungkinkan Anda mencari, menyortir, dan mengendalikan aplikasi.
+
+📊 Apa saja yang menggunakan ruang penyimpanan anda
+
+Manajemen penyimpanan bisa rumit dengan aplikasi, media, sistem, dan file lain yang tersebar di penyimpanan perangkat, kartu SD, serta perangkat USB. "StorageAnalyzer" adalah pengelola file yang menunjukkan penggunaan ruang di perangkat Anda, sehingga memudahkan manajemen penyimpanan.
+
+📷 Temukan data duplikat
+
+Unduhan ganda, foto yang dikirim melalui media sosial, atau sekadar foto serupa dari pemandangan yang sama: Seiring waktu, salinan-salinan tersebut bisa menumpuk. Alat "Penghapus Duplikat" menemukan file yang sama persis atau mirip, serta membantu Anda menghapus salinan berlebih.
+
+👆 Rapikan dengan sekali usap
+
+Pilih sebuah folder, lalu telusuri file satu per satu dengan menggeser layar secara sederhana untuk menyimpan, menghapus, atau melewati. Alat "Swiper" memungkinkan Anda meninjau semua keputusan sebelum apa pun dihapus, dan Anda dapat menyimpan sesi untuk dilanjutkan nanti.
+
+🗜️ Hemat ruang tanpa menghapus foto
+
+Foto dapat menggunakan banyak penyimpanan, tetapi Anda tidak selalu ingin menghapusnya. Alat "Media Squeeze" mengompresi gambar Anda dengan pengaturan kualitas yang dapat disesuaikan untuk mengosongkan ruang sambil tetap menyimpan foto Anda.
+
+Aplikasi ini bebas iklan. Beberapa fitur membutuhkan peningkatan berbayar.
+
+SD Maid 2/SE ialah penerus dari SD Maid 1/Lawas.
+Dioptimalkan untuk Android versi terbaru dan difokuskan untuk membersihkan.
+
+Aplikasi ini memiliki fitur opsional yang menggunakan API AccessibilityService untuk mengotomatiskan tugas-tugas yang membosankan.
+Dengan menggunakan API AccessibilityService, aplikasi ini dapat menekan tombol untuk Anda melakukan operasi pada beberapa aplikasi, misalnya. menghapus cache.
+Aplikasi ini tidak menggunakan API AccessibilityService untuk mengumpulkan informasi apa pun.
+
+SD Maid 2/SE adalah Aplikasi Pengelola File & Pembersih.

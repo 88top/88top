@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="swiper_label">Swiper</string>
+    <string name="swiper_tool_description">Αποσυμφόρηση φακέλων γρήγορα — σαρώστε αρχεία για διατήρηση, διαγραφή ή παράλειψη.</string>
+    <string name="swiper_dashcard_description">Αποσυμφόρηση συγκεκριμένων φακέλων πιο γρήγορα από μια εξερεύνηση αρχείων — απλά σαρώστε κάθε αρχείο.</string>
+    <string name="swiper_start_action">Ξεκινήστε σάρωση</string>
+    <string name="swiper_continue_action">Συνέχεια συνεδρίας</string>
+    <string name="swiper_sessions_description">Ελέγξτε αρχεία σε 3 απλά βήματα:\n\n1. Επιλέξτε φάκελο για σάρωση\n2. Σαρώστε αρχεία για διατήρηση, διαγραφή ή παράλειψη\n3. Ελέγξτε τις επιλογές σας και επιβεβαιώστε\n\nΤίποτα δεν αφαιρείται μέχρι να πατήσετε το τελικό κουμπί διαγραφής.</string>
+    <string name="swiper_select_folders_action">Επιλογή φακέλων</string>
+    <plurals name="swiper_result_x_items_found">
+        <item quantity="one">Βρέθηκε %d αντικείμενο</item>
+        <item quantity="other">Βρέθηκαν %d αντικείμενα</item>
+    </plurals>
+    <plurals name="swiper_result_x_items_deleted">
+        <item quantity="one">%d αντικείμενο διαγράφηκε</item>
+        <item quantity="other">%d αντικείμενα διαγράφηκαν</item>
+    </plurals>
+    <plurals name="swiper_result_x_items_failed">
+        <item quantity="one">%d αντικείμενο απέτυχε</item>
+        <item quantity="other">%d αντικείμενα απέτυχαν</item>
+    </plurals>
+    <string name="swiper_item_position">#%1$d από %2$d</string>
+    <string name="swiper_keep_action">Διατήρηση</string>
+    <string name="swiper_skip_action">Παράλειψη</string>
+    <string name="swiper_review_action">Αξιολόγηση</string>
+    <string name="swiper_status_title">Αξιολόγηση αποφάσεων</string>
+    <string name="swiper_status_action_keep_selected">Διατήρηση επιλεγμένων</string>
+    <string name="swiper_status_action_delete_selected">Διαγραφή επιλεγμένου</string>
+    <string name="swiper_status_action_reset_selected">Επαναφορά επιλεγμένων</string>
+    <string name="swiper_delete_confirmation_title">Διαγραφή αρχείων;</string>
+    <plurals name="swiper_delete_confirmation_message">
+        <item quantity="one">Αυτό θα διαγράψει οριστικά %1$d αρχείο (%2$s). Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</item>
+        <item quantity="other">Αυτό θα διαγράψει οριστικά %1$d αρχεία (%2$s). Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</item>
+    </plurals>
+    <plurals name="swiper_delete_confirmation_message_partial_undecided">
+        <item quantity="one">%d αναποφάσιστο αντικείμενο θα παραμείνει για μεταγενέστερη αξιολόγηση.</item>
+        <item quantity="other">%d αναποφάσιστα αντικείμενα θα παραμείνουν για μεταγενέστερη αξιολόγηση.</item>
+    </plurals>
+    <string name="swiper_delete_confirmation_sensitive_root_warning">Αυτή η λειτουργία αφορά ολόκληρο τον όγκο αποθήκευσης — η διαγραφή εδώ εκτείνεται σε κάθε φάκελο αυτής της αποθήκευσης.</string>
+    <plurals name="swiper_delete_confirmation_more_folders">
+        <item quantity="one">…και %d ακόμη φάκελος</item>
+        <item quantity="other">…και %d ακόμη φάκελοι</item>
+    </plurals>
+    <string name="swiper_delete_confirmation_checkbox">Καταλαβαίνω ότι τα αρχεία αυτά θα διαγραφούν μόνιμα.</string>
+    <string name="swiper_sensitive_root_warning_title">Σάρωση ολόκληρης της αποθήκευσης;</string>
+    <string name="swiper_sensitive_root_warning_message">Η σάρωση του %1$s περιλαμβάνει κάθε αρχείο αυτής της αποθήκευσης — φωτογραφίες, έγγραφα, λήψεις, μέσα εφαρμογών και άλλα. Συνέχεια;</string>
+    <string name="swiper_sensitive_root_warning_continue_action">Συνέχεια ούτως ή άλλως</string>
+    <string name="swiper_session_risky_label">Σάρωση ολόκληρης αποθήκευσης</string>
+    <string name="swiper_session_risky_info_message">Αυτή η περίοδος στοχεύει τη ρίζα ενός τόμου αποθήκευσης, επομένως κάθε αρχείο σε αυτήν την αποθήκη είναι στο εύρος — φωτογραφίες, έγγραφα, λήψεις, μέσα εφαρμογών και πολλά άλλα.\n\nΟι σαρώσεις ολόκληρης αποθήκης μπορούν να επιστρέψουν πολλά στοιχεία, συμπεριλαμβανομένων αρχείων που μπορεί να μην σκοπεύετε να εξετάσετε. Εφαρμόστε ένα φίλτρο τύπου αρχείου για να περιορίσετε τη σάρωση.</string>
+    <string name="swiper_delete_x_action">Διαγραφή %1$d</string>
+    <string name="swiper_settings_swap_directions_title">Εναλλαγή κατευθύνσεων σάρωσης</string>
+    <string name="swiper_settings_swap_directions_summary">Σάρωση αριστερά για διατήρηση, δεξιά για διαγραφή.</string>
+    <string name="swiper_settings_show_details_title">Εμφάνιση λεπτομερειών αρχείου</string>
+    <string name="swiper_settings_show_details_summary">Εμφάνιση ονόματος αρχείου, μεγέθους και ημερομηνίας στην οθόνη σάρωσης.</string>
+    <string name="swiper_settings_haptic_feedback_title">Απτική ανάδραση</string>
+    <string name="swiper_settings_haptic_feedback_summary">Δόνηση κατά τη λήψη αποφάσεων διατήρησης ή διαγραφής.</string>
+    <string name="swiper_discard_session_confirmation_title">Απόρριψη συνεδρίας;</string>
+    <string name="swiper_discard_session_confirmation_message">Όλες οι αποφάσεις θα χαθούν. Είστε σίγουροι;</string>
+    <string name="swiper_no_preview_available">Δεν υπάρχει διαθέσιμη προεπισκόπηση</string>
+    <plurals name="swiper_dashcard_session_context">
+        <item quantity="one">Συνέχεια συνεδρίας από %1$d ημέρα πριν (%2$d%% ολοκληρωμένο)</item>
+        <item quantity="other">Συνέχεια συνεδρίας από %1$d ημέρες πριν (%2$d%% ολοκληρωμένο)</item>
+    </plurals>
+    <plurals name="swiper_dashcard_x_sessions">
+        <item quantity="one">%d συνεδρία</item>
+        <item quantity="other">%d συνεδρίες</item>
+    </plurals>
+    <plurals name="swiper_dashcard_x_undecided_items">
+        <item quantity="one">%d αναποφάσιστο αντικείμενο</item>
+        <item quantity="other">%d αναποφάσιστα αντικείμενα</item>
+    </plurals>
+    <string name="swiper_session_timestamps">Δημιουργήθηκε %1$s, τελευταία δραστηριότητα %2$s</string>
+    <string name="swiper_session_remove_action">Αφαίρεση συνεδρίας</string>
+    <string name="swiper_sessions_empty_hint">Πατήστε + για να επιλέξετε φάκελο και ξεκινήστε τη σάρωση</string>
+    <string name="swiper_sessions_upgrade_body">Αναβαθμίστε για να αφαιρέσετε αυτούς τους περιορισμούς και να υποστηρίξετε την ανάπτυξη. Η δωρεάν έκδοση περιορίζεται σε:</string>
+    <plurals name="swiper_sessions_upgrade_files_limit">
+        <item quantity="one">%d αρχείο ανά συνεδρία</item>
+        <item quantity="other">%d αρχεία ανά συνεδρία</item>
+    </plurals>
+    <plurals name="swiper_sessions_upgrade_sessions_limit">
+        <item quantity="one">%d συνεδρία</item>
+        <item quantity="other">%d συνεδρίες</item>
+    </plurals>
+    <string name="swiper_session_default_label">Συνεδρία #%d</string>
+    <string name="swiper_session_rename_title">Μετονομασία συνεδρίας</string>
+    <string name="swiper_session_rename_hint">Εισάγετε ένα όνομα για αυτή τη συνεδρία</string>
+    <string name="swiper_sessions_current_sessions">Τρέχουσες συνεδρίες</string>
+    <string name="swiper_session_paths_label">Διαδρομές</string>
+    <plurals name="swiper_session_paths_more">
+        <item quantity="one">…και %d ακόμη</item>
+        <item quantity="other">…και %d ακόμη</item>
+    </plurals>
+    <string name="swiper_session_status_label">Κατάσταση</string>
+    <plurals name="swiper_session_status_to_keep">
+        <item quantity="one">%d για διατήρηση</item>
+        <item quantity="other">%d για διατήρηση</item>
+    </plurals>
+    <plurals name="swiper_session_status_to_delete">
+        <item quantity="one">%d για διαγραφή</item>
+        <item quantity="other">%d για διαγραφή</item>
+    </plurals>
+    <plurals name="swiper_session_status_undecided">
+        <item quantity="one">%d αναποφάσιστο</item>
+        <item quantity="other">%d αναποφάσιστα</item>
+    </plurals>
+    <plurals name="swiper_session_status_kept">
+        <item quantity="one">%d διατηρημένο</item>
+        <item quantity="other">%d διατηρημένα</item>
+    </plurals>
+    <plurals name="swiper_session_status_deleted">
+        <item quantity="one">%d διαγραμμένο</item>
+        <item quantity="other">%d διαγραμμένα</item>
+    </plurals>
+    <string name="swiper_exclude_confirmation_message">Εξαίρεση του \"%1$s\" από τις σαρώσεις Swiper;</string>
+    <string name="swiper_sessions_header_title">Έτοιμοι για αποσυμφόρηση;</string>
+    <string name="swiper_sessions_suggestions_label">Δοκιμάστε να ξεκινήσετε με:</string>
+    <string name="swiper_sessions_suggestion_downloads">Φάκελος λήψεων</string>
+    <string name="swiper_sessions_suggestion_screenshots">Στιγμιότυπα οθόνης</string>
+    <string name="swiper_sessions_suggestion_camera">Φωτογραφίες κάμερας</string>
+    <string name="swiper_stamp_keep_1">Κράτα!</string>
+    <string name="swiper_stamp_keep_2">Ωραίο!</string>
+    <string name="swiper_stamp_keep_3">Ναι!</string>
+    <string name="swiper_stamp_keep_4">Σώσε!</string>
+    <string name="swiper_stamp_delete_1">Όχι!</string>
+    <string name="swiper_stamp_delete_2">Αντίο!</string>
+    <string name="swiper_stamp_delete_3">Σκουπίδια!</string>
+    <string name="swiper_stamp_delete_4">Διέγραψε!</string>
+    <string name="swiper_stamp_skip_1">Πέρασε!</string>
+    <string name="swiper_stamp_skip_2">Μπα!</string>
+    <string name="swiper_stamp_skip_3">Αργότερα!</string>
+    <string name="swiper_stamp_skip_4">Ίσως!</string>
+    <string name="swiper_stamp_undo_1">Αναίρεση!</string>
+    <string name="swiper_stamp_undo_2">Πίσω!</string>
+    <string name="swiper_stamp_undo_3">Ωχ!</string>
+    <string name="swiper_stamp_undo_4">Περίμενε!</string>
+    <string name="swiper_gesture_overlay_dismiss">Πατήστε οπουδήποτε για να ξεκινήσετε</string>
+    <string name="swiper_gesture_overlay_left_delete">← Διαγραφή</string>
+    <string name="swiper_gesture_overlay_right_keep">Διατήρηση →</string>
+    <string name="swiper_gesture_overlay_left_keep">← Διατήρηση</string>
+    <string name="swiper_gesture_overlay_right_delete">Διαγραφή →</string>
+    <string name="swiper_gesture_overlay_up_skip">↑ Παράλειψη</string>
+    <string name="swiper_gesture_overlay_down_undo">↓ Αναίρεση</string>
+    <string name="swiper_help_title">Πώς λειτουργεί το Swiper</string>
+    <string name="swiper_help_message">Σαρώστε κάθε αρχείο για να λάβετε μια απόφαση:\n\n← Σάρωση αριστερά: %1$s\n→ Σάρωση δεξιά: %2$s\n↑ Σάρωση πάνω: Παράλειψη\n↓ Σάρωση κάτω: Αναίρεση (μετά την πρώτη σάρωση)\n\nΜπορείτε επίσης να χρησιμοποιήσετε τα κουμπιά στο κάτω μέρος.\n\nΌταν τελειώσετε, πατήστε \"Αξιολόγηση\" για να δείτε όλες τις αποφάσεις σας. Τίποτα δεν διαγράφεται μέχρι να επιβεβαιώσετε στην οθόνη αξιολόγησης.</string>
+    <string name="swiper_gesture_overlay_dismiss_action">Το κατάλαβα</string>
+    <string name="swiper_file_type_filter_title">Εμφάνιση μόνο αυτών των τύπων αρχείων</string>
+    <string name="swiper_file_type_filter_hint">Επιλέξτε τους τύπους που θέλετε να δείτε. Αν δεν επιλεγεί κανένας, εμφανίζονται όλα τα αρχεία.</string>
+    <string name="swiper_file_type_category_images">Εικόνες</string>
+    <string name="swiper_file_type_category_images_subtitle">jpg, png, gif, webp, heic…</string>
+    <string name="swiper_file_type_category_videos">Βίντεο</string>
+    <string name="swiper_file_type_category_videos_subtitle">mp4, mkv, avi, mov, webm…</string>
+    <string name="swiper_file_type_category_audio">Ήχος</string>
+    <string name="swiper_file_type_category_audio_subtitle">mp3, flac, aac, ogg, wav…</string>
+    <string name="swiper_file_type_category_documents">Έγγραφα</string>
+    <string name="swiper_file_type_category_documents_subtitle">pdf, doc, xlsx, txt, epub…</string>
+    <string name="swiper_file_type_category_archives">Αρχεία</string>
+    <string name="swiper_file_type_category_archives_subtitle">zip, rar, 7z, tar, apk…</string>
+    <string name="swiper_file_type_filter_apply_action">Εφαρμογή</string>
+    <string name="swiper_file_type_filter_summary">Φιλτραρισμένα: %1$s</string>
+    <string name="swiper_session_no_matching_files">Δεν βρέθηκαν αντίστοιχα αρχεία</string>
+    <string name="swiper_open_externally_action">Άνοιγμα σε εξωτερική εφαρμογή</string>
+    <!-- Guided tour -->
+    <string name="tour_swiper_gestures_body">Σύρετε ένα αρχείο για να αποφασίσετε την τύχη του: πλάγια για να το κρατήσετε ή να το διαγράψετε, πάνω για να το παραλείψετε, κάτω για να αναιρέσετε. Τα κουμπιά παρακάτω κάνουν το ίδιο — και δείχνουν ποια πλευρά είναι ποια.</string>
+    <string name="tour_swiper_openin_body">Αυτό το κουμπί ανοίγει το αρχείο σε άλλη εφαρμογή, χρήσιμο για να το ελέγξετε πριν αποφασίσετε.</string>
+    <string name="tour_swiper_preview_body">Αυτό το κουμπί ανοίγει μια προεπισκόπηση σε πλήρη οθόνη για πιο προσεκτική εξέταση.</string>
+    <string name="tour_swiper_actions_body">Δεν σας αρέσει το σύρσιμο; Έχουμε και κουμπιά! Το Παράλειψη το αφήνει αναπόφασιστο για αργότερα, και το παρατεταμένο πάτημα στο Παράλειψη αποκλείει ένα αρχείο από μελλοντικές σαρώσεις. Το Αναίρεση ανακαλεί την τελευταία σας επιλογή.</string>
+    <string name="tour_swiper_review_body">Οι επιλογές διατήρησης και διαγραφής σας είναι μόνο προσωρινές. Ανοίξτε την Ανασκόπηση για να τις ελέγξετε και να εφαρμόσετε τις διαγραφές όταν είστε έτοιμοι.</string>
+</resources>

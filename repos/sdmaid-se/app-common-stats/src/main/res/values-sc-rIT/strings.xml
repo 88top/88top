@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="stats_dash_body_size">
+        <item quantity="one">%s est istadu liberadu.</item>
+        <item quantity="other">%s sunt istados liberados.</item>
+    </plurals>
+    <plurals name="stats_dash_body_count">
+        <item quantity="one">%s elementu protzessadu dae cando as invitadu SD Maid in su dispositivu tuo.</item>
+        <item quantity="other">%s elementos protzessados dae cando as invitadu SD Maid in su dispositivu tuo.</item>
+    </plurals>
+    <string name="stats_report_status_partial_success">Sutzessu partziale</string>
+    <string name="stats_report_status_partial_failure">Fallimentu</string>
+    <string name="stats_settings_desc">Cunfigurare istàdisticas, rapòrtos e ritenzione de datos de SD Maid.</string>
+    <string name="stats_settings_retention_category">Ritenzione</string>
+    <string name="stats_settings_retention_reports_label">Rapòrtos generales</string>
+    <string name="stats_settings_retention_reports_desc">Númeru de dies in antis de cantzellare rapòrtos bàsicos de operatzione de SD Maid.</string>
+    <string name="stats_settings_retention_paths_label">Informatziones detalliadas de caminu</string>
+    <string name="stats_settings_retention_paths_desc">Su númeru de dies pro mantenner detàllios a subra de caminos afetados dae SD Maid.</string>
+    <string name="stats_settings_reset_all_label">Ripristinare totu</string>
+    <string name="stats_settings_reset_all_desc">Cantzellare totu is rapòrtos e impostare totu is istàdisticas a tzeru.</string>
+    <string name="stats_affected_paths_label">Caminos afetados</string>
+    <string name="stats_affected_pkgs_label">Aplicatziones afetadas</string>
+    <string name="stats_dash_body_snapshots_only">Monitorende sa cronologia de su memorizamentu tuo.</string>
+    <string name="stats_storage_trend_action">Tendèntzia de Memorizamentu</string>
+    <string name="stats_space_history_title">Tendèntzia de Memorizamentu</string>
+    <string name="stats_space_history_range_title">Intervàllu</string>
+    <string name="stats_space_history_range_7d">7 dies</string>
+    <string name="stats_space_history_range_30d">30 dies</string>
+    <string name="stats_space_history_range_90d">90 dies</string>
+    <string name="stats_space_history_storage_title">Memorizamentu</string>
+    <string name="stats_space_history_current_used_label">Uzadu atuale</string>
+    <string name="stats_space_history_min_label">Uzadu mínimo</string>
+    <string name="stats_space_history_max_label">Uzadu màssimu</string>
+    <string name="stats_space_history_delta_label">Delta</string>
+    <string name="stats_space_history_delta_in_x">%1$s in %2$s</string>
+    <string name="stats_space_history_upgrade_title">Sa cronologia cumpleta est una funtzionalidade Pro</string>
+    <string name="stats_space_history_upgrade_body">Aggiunna pro isviluppare sa visualizatzione de sa tendèntzia de 90 dies pro ogni dispositiu de memorizamentu.</string>
+    <string name="stats_space_history_marker_freed">Liberadu %1$s</string>
+    <string name="stats_storage_type_primary">Archìviu primàriu</string>
+    <string name="stats_storage_type_secondary">Archìviu secundàriu</string>
+    <string name="stats_storage_type_portable">Archìviu portàbile</string>
+    <string name="stats_space_history_delete_storage_title">Cantzellare sa crònaca de su depòsitu?</string>
+    <string name="stats_space_history_delete_storage_desc">Totu is datos de tendentzia de custu depòsitu serant cantzellados permanentemente.</string>
+</resources>

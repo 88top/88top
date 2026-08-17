@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="automation_accessibility_service_description">Os utilizadores com necessidades especiais de acessibilidade podem ativar este serviço para permitir que o SD Maid automatize tarefas que, de outra forma, exigiriam uma interação manual repetitiva (por exemplo, a eliminação da cache).\n\nExemplo: se pedir ao SD Maid para parar várias aplicações, este serviço pode abrir o ecrã de definições de cada aplicação, encontrar o botão \'Forçar paragem\' e tocar-lhe.\n\nO SD Maid mostrará sempre claramente quando estiver a usar este serviço e permitirá cancelar imediatamente qualquer interação.\n\nNenhuma ação será efetuada sem aprovação prévia. Este serviço pode ser desativado a qualquer momento sem efeitos adversos.</string>
+    <string name="automation_screenoverlay_explanation">O SD Maid está a interagir com o dispositivo. Não é possível utilizar o ecrã ao mesmo tempo. Aguarde até a operação terminar ou cancele-a.</string>
+    <string name="automation_screenoverlay_explanation_tv">O SD Maid está a interagir com o dispositivo. Não é possível usar o ecrã ao mesmo tempo. Aguarde até a operação terminar ou prima o botão Home para cancelar.</string>
+    <string name="automation_screenoverlay_explanation_nocancel">O SD Maid está a interagir com o dispositivo. Não é possível usar o ecrã ao mesmo tempo. Aguarde até a operação terminar.</string>
+    <string name="automation_active_title">SD Maid está a trabalhar</string>
+    <string name="automation_error_no_consent_title">Erro de automação</string>
+    <string name="automation_error_no_consent_body">O serviço de acessibilidade não está configurado. Conclua a configuração e dê consentimento.</string>
+    <string name="automation_error_not_enabled_title">O serviço não está ativado</string>
+    <string name="automation_error_not_enabled_body">O serviço de acessibilidade está desativado. Ative-o novamente.</string>
+    <string name="automation_error_not_running_title">O serviço não está em execução</string>
+    <string name="automation_error_not_running_body">O serviço de acessibilidade não está a funcionar. Tente reiniciar o dispositivo.</string>
+    <string name="automation_error_screen_unavailable_title">Ecrã indisponível</string>
+    <string name="automation_error_screen_unavailable_body">A operação foi cancelada porque o ecrã ficou indisponível (por exemplo, ecrã desligado ou ecrã de bloqueio ativo).</string>
+    <string name="automation_error_compatibility_title">Compatibilidade de automação</string>
+    <string name="automation_error_compatibility_body">O SD Maid não conseguiu interpretar a estrutura do ecrã. Se isto continuar a acontecer, o idioma ou a configuração podem não ser totalmente suportados. Procure atualizações ou contacte-me para que eu possa corrigir o problema.</string>
+    <string name="automation_error_timeout_title">Tempo limite da automação</string>
+    <string name="automation_error_timeout_body">O SD Maid não concluiu todos os passos dentro do limite de tempo. Se isto continuar a acontecer, talvez seja necessário adaptar a aplicação ao seu dispositivo. Procure atualizações ou contacte-me para que possa corrigir o problema.</string>
+    <string name="automation_error_overlay_title">Sobreposição da automação</string>
+    <string name="automation_error_overlay_body">O SD Maid não pôde mostrar a sobreposição de automação. Verifique as permissões e tente reiniciar o seu dispositivo.</string>
+    <string name="automation_error_scheduler_title">Falha na automação agendada</string>
+    <string name="automation_error_scheduler_body">Uma tarefa agendada tentou utilizar o serviço de acessibilidade, mas este não estava disponível. Se não precisar disto, desative a opção \"Serviço de acessibilidade\" nas definições do agendador.</string>
+    <string name="automation_error_no_settings_title">Ecrã de definições indisponível</string>
+    <string name="automation_error_no_settings_body">Esta aplicação do sistema não tem um ecrã de definições. Não é possível limpar a cache através do serviço de acessibilidade. Exclua-a para acelerar a limpeza da cache.</string>
+    <string name="automation_error_disabled_app_title">A aplicação está desativada</string>
+    <string name="automation_error_disabled_app_body">O seu dispositivo não abrirá o ecrã de definições de aplicações desativadas, portanto a cache não pode ser apagada através do serviço de acessibilidade. Ative a aplicação ou use root ou Shizuku/ADB em vez disso.</string>
+    <string name="automation_error_interference_title">Ecrã de definições bloqueado</string>
+    <string name="automation_error_interference_body">Outra aplicação (%1$s) está a bloquear o ecrã de definições do sistema, por isso o SD Maid não pode continuar. Desative o bloqueio de aplicações ou proteção de ecrã dessa aplicação para as definições do sistema e tente novamente.</string>
+    <string name="automation_loading">A preparar automação através do serviço de acessibilidade</string>
+    <string name="automation_progress_find_ok_confirmation">A tentar confirmar a ação anterior (palavras-chave: %s)</string>
+</resources>

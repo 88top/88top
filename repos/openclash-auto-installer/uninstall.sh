@@ -1,0 +1,330 @@
+#!/bin/sh
+set -eu
+
+TARGET="${1:-}"
+DELETE_CONFIG=0
+
+log() {
+    printf '%s\n' "==> $*"
+}
+
+warn() {
+    printf '%s\n' "[WARN] $*" >&2
+}
+
+die() {
+    printf '%s\n' "[ERROR] $*" >&2
+    exit 1
+}
+
+detect_pkg_mgr() {
+    if command -v opkg >/dev/null 2>&1; then
+        printf 'opkg'
+    elif command -v apk >/dev/null 2>&1; then
+        printf 'apk'
+    else
+        die "未检测到 opkg 或 apk，当前系统暂不支持"
+    fi
+}
+
+pkg_installed() {
+    PKG_MGR="$1"
+    PKG="$2"
+
+    case "$PKG_MGR" in
+        opkg)
+            opkg list-installed 2>/dev/null | grep -q "^$PKG - "
+            ;;
+        apk)
+            apk info -e "$PKG" >/dev/null 2>&1
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+remove_pkg_if_installed() {
+    PKG_MGR="$1"
+    PKG="$2"
+    MANUAL_CMD=""
+
+    if ! pkg_installed "$PKG_MGR" "$PKG"; then
+        log "未安装 $PKG，跳过"
+        return 0
+    fi
+
+    case "$PKG_MGR" in
+        opkg)
+            MANUAL_CMD="opkg remove $PKG"
+            if ! OUTPUT="$(opkg remove "$PKG" 2>&1)"; then
+                printf '%s\n' "$OUTPUT"
+                warn "移除 $PKG 失败"
+            else
+                printf '%s\n' "$OUTPUT"
+            fi
+            ;;
+        apk)
+            MANUAL_CMD="apk del $PKG"
+            apk del "$PKG" || warn "移除 $PKG 失败"
+            ;;
+    esac
+
+    if pkg_installed "$PKG_MGR" "$PKG"; then
+        die "$PKG 仍未卸载成功，请检查依赖关系或手动执行: $MANUAL_CMD"
+    fi
+}
+
+remove_paths() {
+    for path in "$@"; do
+        rm -rf "$path" 2>/dev/null || true
+    done
+}
+
+stop_disable_service() {
+    SVC="$1"
+
+    if [ -x "/etc/init.d/$SVC" ]; then
+        /etc/init.d/"$SVC" stop >/dev/null 2>&1 || true
+        /etc/init.d/"$SVC" disable >/dev/null 2>&1 || true
+        log "已停止并禁用服务: $SVC"
+    else
+        log "未发现服务脚本: $SVC，跳过"
+    fi
+}
+
+refresh_web() {
+    remove_paths \
+        /tmp/luci-* \
+        /tmp/.luci* \
+        /tmp/etc/config/ucitrack \
+        /var/run/luci-indexcache
+
+    if [ -x /etc/init.d/rpcd ]; then
+        /etc/init.d/rpcd restart >/dev/null 2>&1 || warn "rpcd 重启失败"
+    fi
+
+    warn "请刷新页面或切换一次左侧菜单，插件入口会自动更新；如仍未生效，再重新登录 LuCI"
+}
+
+remove_openclash_core() {
+    if [ -f /etc/openclash/core/clash_meta ]; then
+        rm -f /etc/openclash/core/clash_meta
+        log "已删除 /etc/openclash/core/clash_meta"
+    else
+        warn "未发现 clash_meta 内核文件，跳过"
+    fi
+}
+
+safe_uninstall_passwall() {
+    PKG_MGR="$1"
+    log "开始安全卸载 PassWall（仅卸载主包）"
+
+    stop_disable_service passwall
+    remove_pkg_if_installed "$PKG_MGR" luci-i18n-passwall-zh-cn
+    remove_pkg_if_installed "$PKG_MGR" luci-app-passwall
+
+    if [ "$DELETE_CONFIG" -eq 1 ]; then
+        log "删除 PassWall 配置文件"
+        remove_paths /etc/config/passwall
+    else
+        warn "默认保留 /etc/config/passwall 配置文件"
+    fi
+
+    log "PassWall 安全卸载完成"
+}
+
+safe_uninstall_passwall2() {
+    PKG_MGR="$1"
+    log "开始安全卸载 PassWall2（仅卸载主包）"
+
+    stop_disable_service passwall2
+    remove_pkg_if_installed "$PKG_MGR" luci-i18n-passwall2-zh-cn
+    remove_pkg_if_installed "$PKG_MGR" luci-app-passwall2
+
+    if [ "$DELETE_CONFIG" -eq 1 ]; then
+        log "删除 PassWall2 配置文件"
+        remove_paths /etc/config/passwall2
+    else
+        warn "默认保留 /etc/config/passwall2 配置文件"
+    fi
+
+    log "PassWall2 安全卸载完成"
+}
+
+safe_uninstall_nikki() {
+    PKG_MGR="$1"
+    log "开始安全卸载 Nikki（仅卸载主包）"
+
+    stop_disable_service nikki
+    remove_pkg_if_installed "$PKG_MGR" luci-i18n-nikki-zh-cn
+    remove_pkg_if_installed "$PKG_MGR" luci-app-nikki
+    remove_pkg_if_installed "$PKG_MGR" nikki
+    remove_pkg_if_installed "$PKG_MGR" mihomo-meta
+
+    if [ "$DELETE_CONFIG" -eq 1 ]; then
+        log "删除 Nikki 配置文件"
+        remove_paths /etc/config/nikki
+    else
+        warn "默认保留 /etc/config/nikki 配置文件"
+    fi
+
+    log "Nikki 安全卸载完成"
+}
+
+safe_uninstall_smartdns() {
+    PKG_MGR="$1"
+    log "开始安全卸载 SmartDNS（仅卸载主包）"
+
+    stop_disable_service smartdns
+    remove_pkg_if_installed "$PKG_MGR" app-meta-smartdns
+    remove_pkg_if_installed "$PKG_MGR" luci-i18n-smartdns-zh-cn
+    remove_pkg_if_installed "$PKG_MGR" luci-app-smartdns
+    remove_pkg_if_installed "$PKG_MGR" smartdns
+
+    if [ "$DELETE_CONFIG" -eq 1 ]; then
+        log "删除 SmartDNS 配置文件"
+        remove_paths /etc/config/smartdns
+    else
+        warn "默认保留 /etc/config/smartdns 配置文件"
+    fi
+
+    log "SmartDNS 安全卸载完成"
+}
+
+safe_uninstall_mosdns() {
+    PKG_MGR="$1"
+    log "开始安全卸载 MosDNS（仅卸载主包）"
+
+    stop_disable_service mosdns
+    remove_pkg_if_installed "$PKG_MGR" luci-i18n-mosdns-zh-cn
+    remove_pkg_if_installed "$PKG_MGR" luci-app-mosdns
+    remove_pkg_if_installed "$PKG_MGR" mosdns
+
+    if [ "$DELETE_CONFIG" -eq 1 ]; then
+        log "删除 MosDNS 配置文件"
+        remove_paths /etc/config/mosdns /etc/mosdns
+    else
+        warn "默认保留 /etc/config/mosdns 和 /etc/mosdns 配置文件"
+    fi
+
+    log "MosDNS 安全卸载完成"
+}
+
+safe_uninstall_daed() {
+    PKG_MGR="$1"
+    log "开始安全卸载 daed"
+
+    stop_disable_service luci_daed
+    stop_disable_service daed
+    remove_pkg_if_installed "$PKG_MGR" luci-i18n-daed-zh-cn
+    remove_pkg_if_installed "$PKG_MGR" luci-app-daed
+    remove_pkg_if_installed "$PKG_MGR" daed
+    remove_paths /usr/bin/daed /usr/share/daed /etc/init.d/daed /var/log/daed
+
+    if [ "$DELETE_CONFIG" -eq 1 ]; then
+        log "删除 daed 配置目录和 LuCI 配置"
+        remove_paths /etc/daed /etc/config/daed
+    else
+        warn "默认保留 /etc/daed 配置目录"
+    fi
+
+    log "daed 安全卸载完成"
+}
+
+safe_uninstall_openclash() {
+    PKG_MGR="$1"
+    log "开始安全卸载 OpenClash（仅卸载主包）"
+
+    stop_disable_service openclash
+    remove_pkg_if_installed "$PKG_MGR" luci-app-openclash
+    remove_openclash_core
+
+    if [ "$DELETE_CONFIG" -eq 1 ]; then
+        log "删除 OpenClash 配置目录"
+        remove_paths /etc/config/openclash /etc/openclash
+    else
+        warn "默认保留 /etc/openclash 配置目录，以避免误删订阅和配置"
+    fi
+
+    log "OpenClash 安全卸载完成"
+}
+
+usage() {
+    cat <<'EOF_USAGE'
+用法:
+  sh uninstall.sh passwall [--delete-config]
+  sh uninstall.sh passwall2 [--delete-config]
+  sh uninstall.sh nikki [--delete-config]
+  sh uninstall.sh smartdns [--delete-config]
+  sh uninstall.sh mosdns [--delete-config]
+  sh uninstall.sh daed [--delete-config]
+  sh uninstall.sh openclash [--delete-config]
+
+说明:
+  默认执行安全卸载，只移除主包，不动共享依赖。
+  --delete-config 会额外删除对应插件的配置文件。
+EOF_USAGE
+}
+
+parse_args() {
+    [ -n "$TARGET" ] || {
+        usage
+        exit 1
+    }
+
+    shift || true
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --delete-config)
+                DELETE_CONFIG=1
+                ;;
+            -h|--help|help)
+                usage
+                exit 0
+                ;;
+            *)
+                die "未知参数: $1"
+                ;;
+        esac
+        shift
+    done
+}
+
+main() {
+    parse_args "$@"
+    PKG_MGR="$(detect_pkg_mgr)"
+    log "检测到包管理器: $PKG_MGR"
+
+    case "$TARGET" in
+        passwall)
+            safe_uninstall_passwall "$PKG_MGR"
+            ;;
+        passwall2)
+            safe_uninstall_passwall2 "$PKG_MGR"
+            ;;
+        nikki)
+            safe_uninstall_nikki "$PKG_MGR"
+            ;;
+        smartdns)
+            safe_uninstall_smartdns "$PKG_MGR"
+            ;;
+        mosdns)
+            safe_uninstall_mosdns "$PKG_MGR"
+            ;;
+        daed)
+            safe_uninstall_daed "$PKG_MGR"
+            ;;
+        openclash)
+            safe_uninstall_openclash "$PKG_MGR"
+            ;;
+        *)
+            die "不支持的安全卸载目标: $TARGET"
+            ;;
+    esac
+
+    refresh_web
+    log "安全卸载流程完成"
+}
+
+main "$@"

@@ -1,0 +1,55 @@
+<i>SD Maid 2/SE</i> is de vertrouwde assistent van je Android om deze schoon en netjes te houden.
+
+Niemand is perfect en Android ook niet.
+
+* Apps die je al hebt verwijderd, laten iets achter.
+* Er worden voortdurend logs, crashrapporten en andere bestanden aangemaakt die je niet nodig hebt.
+* Je opslagruimte verzamelt bestanden en mappen die je niet herkent.
+* Dubbele foto's in je galerij.
+
+Laten we hier niet verder op ingaan... Laat SD Maid 2/SE je helpen!
+
+SD Maid 2/SE is een app- en bestandsbeheerder die weet welke apps bestanden op je apparaat hebben gemaakt. Het vergelijkt bestanden met geïnstalleerde apps om opslagruimte vrij te maken.
+
+✨ Ruim op na het verwijderen van apps
+
+Als apps bestanden buiten de aangewezen mappen maken, kunnen de bestanden blijven staan, zelfs nadat de apps zijn verwijderd. De tool "CorpseFinder" vindt app-resten, vertelt je bij welke app ze hoorden en helpt je ze te verwijderen.
+
+🔍 Zoek op een slimme manier op je apparaat
+
+Filter op lege mappen, tijdelijke bestanden, reeds geïnstalleerde apps en meer. Je kunt zelfs jouw eigen zoekcriteria maken. Het hulpprogramma "SystemCleaner" zoekt en verwijdert automatisch bestanden op basis van verschillende criteria.
+
+🧹 Verwijder overbodige bestanden en verborgen caches
+
+Miniaturen, prullenbakken, offline caches en meer: ​​als apps zichzelf niet opruimen, dan zal deze app dat wel doen. Het hulpprogramma "AppCleaner" vindt apps met vervangbare bestanden.
+
+📦 Beheer al je apps
+
+Krijg een uitgebreide lijst van alle apps die op je apparaat zijn geïnstalleerd. Ingeschakeld, uitgeschakeld, gebruikers- of systeem-app: geen enkele app kan zich voor je verbergen. Het hulpmiddel "AppControl" is een app-manager waarmee je apps kunt zoeken, sorteren en beheren.
+
+📊 Wat gebruikt al je ruimte
+
+Opslagbeheer kan complex zijn met apps, media, systeembestanden en andere bestanden op je apparaatgeheugen, SD-kaarten en USB-apparaten. "StorageAnalyzer" is een bestandsbeheerder die weergeeft hoeveel ruimte er op je apparaat wordt gebruikt, waardoor je opslagbeheer eenvoudiger wordt.
+
+📷 Vind dubbele gegevens
+
+Dubbele downloads, foto's verzonden via sociale media of gewoon vergelijkbare foto's van dezelfde scène: na verloop van tijd kunnen kopieën zich ophopen. Het hulpprogramma "Deduplicator" vindt bestanden die precies hetzelfde of vergelijkbaar zijn en helpt je extra kopieën te verwijderen.
+
+👆 Ruim op met één veegbeweging
+
+Selecteer een map en blader één voor één door de bestanden met eenvoudige veegbewegingen om ze te bewaren, te verwijderen of over te slaan. De "Swiper"-tool laat u alle beslissingen bekijken voordat er iets wordt verwijderd, en u kunt een sessie opslaan om later verder te gaan.
+
+🗜️ Bespaar ruimte zonder foto's te verwijderen
+
+Foto's kunnen veel opslagruimte in beslag nemen, maar je wilt ze niet altijd verwijderen. De "Media Squeeze"-tool comprimeert je afbeeldingen met instelbare kwaliteitsinstellingen om ruimte vrij te maken terwijl je je foto's behoudt.
+
+Deze app is advertentievrij. Voor sommige functies is een betaalde upgrade vereist.
+
+SD Maid 2/SE is de opvolger van SD Maid 1/Legacy.
+Geoptimaliseerd voor nieuwere Android-versies en gericht op opschonen.
+
+Deze app heeft optionele functies die gebruik maken van de Toegankelijkheidsservice API om vervelende acties te automatiseren.
+Met behulp van de AccessibilityService API kan deze app op knoppen klikken waarmee u bewerkingen in meerdere apps kunt uitvoeren, bijv. caches aan het verwijderen.
+Deze app maakt geen gebruik van de Toegankelijkheidsservice API om informatie te verzamelen.
+
+SD Maid 2/SE is een bestandsbeheerder- en opschoonapp.

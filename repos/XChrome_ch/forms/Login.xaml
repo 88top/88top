@@ -1,0 +1,29 @@
+﻿<adonisControls:AdonisWindow
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+    xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+    xmlns:av="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="av"
+    x:Class="XChrome.forms.Login"
+    Title="登陆"
+    Width="499"
+    Height="246"
+    IconVisibility="Hidden"
+    TitleVisibility="Hidden"
+    Loaded="AdonisWindow_Loaded"
+    ShrinkTitleBarWhenMaximized="False"                            
+    PlaceTitleBarOverContent="True" WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <TextBox x:Name="loginma" HorizontalAlignment="Left" Margin="94,42,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="357"/>
+        <Label Content="登陆码" HorizontalAlignment="Left" Margin="39,45,0,0" VerticalAlignment="Top" FontSize="14"/>
+        <TextBlock x:Name="tip" LineHeight="20" HorizontalAlignment="Left" Margin="39,78,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Height="78" Width="432" FontSize="13">
+            啊哦~遇到问题：<LineBreak/>
+                1.本软件是免费且开源的，你可以去  <Hyperlink x:Name="gogithub_url" NavigateUri="http://www.example.com" RequestNavigate="gogithub_url_RequestNavigate">github项目页</Hyperlink> 自己下载并去掉该页面<LineBreak/>
+                2.你也可以加入本社群，在群公告有当前免费登陆码,<Hyperlink x:Name="goqq_url" NavigateUri="http://www.example.com" RequestNavigate="goqq_url_RequestNavigate">点击加入</Hyperlink> ，或者手动加QQ群：30286103
+
+        </TextBlock>
+        <Button Content=" 确 定 " HorizontalAlignment="Left" Margin="169,173,0,0" VerticalAlignment="Top" Height="34" Width="130" Click="Button_Click"/>
+
+    </Grid>
+</adonisControls:AdonisWindow>

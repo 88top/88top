@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scheduler_label">Planner</string>
+    <string name="scheduler_execution_label">Volgende uitvoering (ongeveer)</string>
+    <string name="scheduler_execution_last_label">Laatste uitvoering</string>
+    <string name="scheduler_settings_label">Planner</string>
+    <string name="scheduler_settings_summary">Pas de instellingen voor de planner aan.</string>
+    <string name="scheduler_new_schedule_action">Planning maken</string>
+    <string name="scheduler_schedule_name_label">Naam planning</string>
+    <string name="scheduler_schedule_toggle_enabled">Planning is ingeschakeld</string>
+    <string name="scheduler_schedule_toggle_disabled">Planning is uitgeschakeld</string>
+    <string name="scheduler_edit_schedule_action">Bewerk planning</string>
+    <string name="scheduler_schedule_time_label">Geschatte tijd</string>
+    <string name="scheduler_schedule_repeat_label">Herhaal interval in dagen</string>
+    <string name="scheduler_schedule_default_name">Standaard planning</string>
+    <string name="scheduler_current_schedule_x_at_x">%1$s rond %2$s</string>
+    <string name="scheduler_schedule_next_at_x">Gepland voor %s</string>
+    <string name="scheduler_schedule_last_at_x">Laatst uitgevoerd op %s</string>
+    <plurals name="scheduler_schedule_repeat_x_days">
+        <item quantity="one">Dagelijks</item>
+        <item quantity="other">Elke %d dagen</item>
+    </plurals>
+    <string name="scheduler_inaccurate_execution_hint">Verwachte uitvoeringstijden zijn bij benadering. Schema\'s kunnen worden vertraagd of versneld als dit de batterij spaart.</string>
+    <string name="scheduler_no_active_schedules_subtitle">Geen actieve planningen</string>
+    <string name="scheduler_setting_nopowersaving_title">Overslaan bij bijna lege batterij</string>
+    <string name="scheduler_setting_nopowersaving_summary">Als het apparaat in de energiebesparende modus staat, wordt de geplande uitvoering overgeslagen.</string>
+    <string name="scheduler_setting_charging_title">Overslaan wanneer niet wordt opgeladen</string>
+    <string name="scheduler_setting_charging_summary">Als het apparaat niet wordt opgeladen, wordt de geplande uitvoering overgeslagen.</string>
+    <string name="scheduler_setting_automation_title">Toegankelijkheidsservice</string>
+    <string name="scheduler_setting_automation_summary">Neem acties op die gebruikmaken van een toegankelijkheidsservice. Dit vereist dat SD Maid met je scherm kan communiceren (d.w.z. dat het ontgrendeld is) wanneer de taken worden uitgevoerd.</string>
+    <string name="scheduler_notification_channel_label">Planner</string>
+    <string name="scheduler_notification_title">Geplande taak</string>
+    <string name="scheduler_notification_message">Wordt uitgevoerd: \"%s\"</string>
+    <string name="scheduler_notification_result_channel_label">Planner-resultaten</string>
+    <string name="scheduler_notification_result_title">Planner is klaar</string>
+    <string name="scheduler_notification_result_success_message">Alle geplande taken werden succesvol uitgevoerd.</string>
+    <string name="scheduler_notification_result_failure_message">Sommige geplande taken zijn mislukt of er zijn fouten opgetreden. Probeer ze handmatig uit te voeren.</string>
+    <string name="scheduler_notification_result_skipped_screen_unavailable">Overgeslagen, scherm was uit of vergrendeld</string>
+    <string name="scheduler_acs_screenlocked_hint_title">App-reiniging kan worden overgeslagen</string>
+    <string name="scheduler_acs_screenlocked_hint_body">App-reiniging gebruikt de toegankelijkheidsservice, waarvoor het scherm moet zijn ontgrendeld. Geplande taken terwijl het apparaat is vergrendeld, worden overgeslagen.\n\nGebruik Shizuku of root voor achtergrondreiniging, of plan het in voor wanneer je het apparaat gebruikt.</string>
+    <string name="scheduler_acs_screenlocked_hint_systemapps_title">Systeemapps kunnen worden overgeslagen</string>
+    <string name="scheduler_acs_screenlocked_hint_systemapps_body">Shizuku reinigt de meeste caches op de achtergrond, maar systeemapps hebben de toegankelijkheidsservice nodig, waarvoor het scherm moet zijn ontgrendeld. Als \'Systeemapps opnemen\' is ingeschakeld, worden deze overgeslagen wanneer het apparaat is vergrendeld.\n\nZet \'Systeemapps opnemen\' uit, of voer het schema uit terwijl het apparaat is ontgrendeld.</string>
+    <string name="scheduler_commands_after_schedule_label">Opdrachten na het plannen</string>
+    <string name="scheduler_commands_after_schedule_desc">Android-shellopdrachten die aan het einde van een planning worden uitgevoerd.</string>
+    <string name="scheduler_battery_optimization_hint">Overweeg om batterij-optimalisaties voor SD Maid uit te schakelen als je problemen ondervindt met uitvoering op de achtergrond.</string>
+    <!-- Guided tour -->
+    <string name="tour_scheduler_intro_body">SD Maid kan volgens een schema schoonmaken. Kies een moment en welke hulpmiddelen moeten worden uitgevoerd, en het werk gebeurt op de achtergrond — je hoeft de app (bijna) niet te openen.</string>
+    <string name="tour_scheduler_create_body">Tik hier om een nieuw schema te maken, stel vervolgens in wanneer het wordt uitgevoerd en welke hulpmiddelen moeten worden opgenomen.</string>
+</resources>

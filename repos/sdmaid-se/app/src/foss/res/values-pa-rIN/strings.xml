@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="upgrades_dashcard_title">SD Maid SE ਅੱਪਗ੍ਰੇਡ ਕਰੋ</string>
+    <string name="upgrades_dashcard_body">ਵਾਧੂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਅਨਲੌਕ ਕਰੋ ਅਤੇ ਨਿਰੰਤਰ ਵਿਕਾਸ ਦਾ ਸਮਰਥਨ ਕਰਨ ਲਈ ਸਰਪ੍ਰਸਤ ਬਣੋ!</string>
+    <string name="upgrades_dashcard_upgrade_action">ਅੱਪਗ੍ਰੇਡ ਕਰੋ</string>
+    <string name="upgrade_screen_title">SD Maid ਨੂੰ ਸਮਰਥਨ ਕਰੋ</string>
+    <string name="upgrade_screen_preamble">SD Maid ਵਿੱਚ ਕੋਈ ਵਿਗਿਆਪਨ ਨਹੀਂ ਹਨ ਅਤੇ ਇਹ ਉਪਭੋਗਤਾ ਡੇਟਾ ਨਹੀਂ ਵੇਚਦਾ। ਨਿਰੰਤਰ ਵਿਕਾਸ ਸਿਰਫ਼ ਤੁਹਾਡੇ ਦੁਆਰਾ ਹੀ ਸੰਭਵ ਹੈ।</string>
+    <string name="upgrade_screen_how_title">ਮਦਦ ਕਿਵੇਂ ਕਰੀਏ</string>
+    <string name="upgrade_screen_how_body">ਸਰਪ੍ਰਸਤ ਬਣੋ ਅਤੇ ਵਿਕਾਸ ਨੂੰ ਸਪਾਂਸਰ ਕਰੋ! ਸਾਰੀਆਂ ਵਾਧੂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਕਰਨ ਅਤੇ ਮੇਰੀ GitHub ਸਪਾਂਸਰ ਪ੍ਰੋਫਾਈਲ ਖੋਲ੍ਹਣ ਲਈ ਹੇਠਾਂ ਦਿੱਤੇ ਬਟਨ \'ਤੇ ਟੈਪ ਕਰੋ।</string>
+    <string name="upgrade_screen_why_title">ਅਪਗ੍ਰੇਡ ਲਾਭ</string>
+    <string name="upgrade_screen_why_body">• ਐਪ ਕੈਸ਼ ਅਤੇ ਜੰਕ ਸਫ਼ਾਈ\n• ਡੁਪਲੀਕੇਟ ਫ਼ਾਈਲ ਹਟਾਉਣਾ\n• ਫ਼ੋਟੋ ਅਤੇ ਵੀਡੀਓ ਕੰਪਰੈਸ਼ਨ\n• ਪੁਰਾਣੀਆਂ ਫ਼ਾਈਲਾਂ ਨੂੰ ਸਵਾਈਪ ਕਰਕੇ ਹਟਾਉਣਾ\n• ਵਿੱਜਟ ਦੁਆਰਾ ਇਕ-ਟੈਪ ਸਫ਼ਾਈ\n• ਸਫ਼ਾਈ ਸਮਾਂ ਨਿਰਧਾਰਤ ਕਰਨਾ\n• ਕਸਟਮ ਫ਼ਿਲਟਰ ਅਤੇ ਨਿਯਮ\n• ਸਟੋਰੇਜ ਸੁਝਾਵਾਂ ਅਤੇ ਇਤਿਹਾਸ\n• ਐਪ ਦੁਆਰਾ ਹੋਰ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਅਤੇ ਨਿਯੰਤਰਣ\n• ਖੁੱਲ੍ਹੇ-ਸਰੋਤ ਕੰਮ ਲਈ ਸਮਰਥਨ</string>
+    <string name="upgrade_screen_sponsor_action">ਵਿਕਾਸ ਨੂੰ ਸਪਾਂਸਰ ਕਰੋ</string>
+    <string name="upgrade_screen_sponsor_action_hint">ਬਦਲਵੇਂ ਵਿਗਿਆਪਨ, ਵਿਸ਼ਲੇਸ਼ਣ ਅਤੇ Google Play ਹਨ 🙁</string>
+    <string name="upgrade_screen_thanks_toast">ਓਪਨ-ਸੋਰਸ ਵਿਕਾਸ ਦਾ ਸਮਰਥਨ ਕਰਨ ਲਈ ਤੁਹਾਡਾ ਧੰਨਵਾਦ ❤️</string>
+    <string name="upgrade_screen_sponsor_return_too_quick">ਪਹਿਲਾਂ ਹੀ ਵਾਪਸ? ਤੁਹਾਡਾ ਸਮਰਥਨ SD Maid ਨੂੰ ਜ਼ਿੰਦਾ ਰੱਖਦਾ ਹੈ!</string>
+    <string name="upgrade_screen_status_free_title">ਮੁਫ਼ਤ ਸੰਸਕਰਣ</string>
+    <string name="upgrade_screen_status_free_body">ਤੁਸੀਂ SD Maid ਦੇ ਮੁਫ਼ਤ ਸੰਸਕਰਣ ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੇ ਹੋ। ਵਿਕਾਸ ਨੂੰ ਸਮਰਥਨ ਦੇ ਕੇ ਵਾਧੂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਖੋਲ੍ਹਿਆ ਜਾ ਸਕਦਾ ਹੈ।</string>
+    <string name="upgrade_screen_status_free_action">ਅਪਗ੍ਰੇਡ ਦੇ ਵਿਕਲਪ ਦੇਖੋ</string>
+    <string name="upgrade_screen_status_upgraded_title">ਅਪਗ੍ਰੇਡ ਸਰਗਰਮ</string>
+    <string name="upgrade_screen_status_upgraded_body">ਸਾਰੀਆਂ ਵਾਧੂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਅਨਲਾਕ ਹਨ। ਓਪਨ-ਸੋਰਸ ਵਿਕਾਸ ਨੂੰ ਸਮਰਥਨ ਕਰਨ ਲਈ ਧੰਨਵਾਦ ❤️</string>
+    <string name="upgrade_screen_supporter_since">%s ਤੋਂ ਸਮਰਥਕ</string>
+    <string name="upgrade_screen_recurring_title">ਇਸ ਨੂੰ ਜਾਰੀ ਰੱਖੋ</string>
+    <string name="upgrade_screen_recurring_body">SD Maid ਅਪਡੇਟਾਂ ਅਤੇ ਠੀਕ ਕਰਨ ਦੁਆਰਾ ਵਿਕਸਿਤ ਹੋ ਰਿਹਾ ਹੈ। ਜੇ ਤੁਸੀਂ ਇਸ ਨੂੰ ਬਣਾਈ ਰੱਖਣਾ ਚਾਹੁੰਦੇ ਹੋ, ਤਾਂ GitHub Sponsors ਰਾਹੀਂ ਦੁਹਰਾਏ ਜਾਣ ਵਾਲੇ ਦਾਨ \'ਤੇ ਵਿਚਾਰ ਕਰੋ।</string>
+    <string name="upgrade_screen_recurring_action">GitHub Sponsors ਖੋਲ੍ਹੋ</string>
+</resources>
