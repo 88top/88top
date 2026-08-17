@@ -27,13 +27,13 @@ concurrency:
 # ══════════════════════════════════════════════════════════════════
 env:
   # ---- 1. 要同步的 GitHub 账户名(必须和生成 SYNC_TOKEN 的账户是同一个,才能拿到私有仓库) ----
-  SYNC_USERNAME: "你的GitHub用户名"
+  SYNC_USERNAME: "timeflysoon"
 
   # ---- 2. 本地保护名单 ★重要★ ----
   # 这里列出的仓库名,无论远程有没有同名仓库,一律不 clone、不覆盖
   # 用于保护你在这个备份仓库里手动放的、恰好和远程仓库同名的其他内容
   # 多个名字用空格分隔,没有就留空字符串
-  LOCAL_PROTECT_LIST: ""
+  LOCAL_PROTECT_LIST: "88top temp rule"
   # 例: LOCAL_PROTECT_LIST: "my-notes readme-assets"
 
   # ---- 3. 远程排除名单 ★重要★ ----
