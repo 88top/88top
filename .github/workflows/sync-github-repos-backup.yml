@@ -33,7 +33,7 @@ env:
   # 这里列出的仓库名,无论远程有没有同名仓库,一律不 clone、不覆盖
   # 用于保护你在这个备份仓库里手动放的、恰好和远程仓库同名的其他内容
   # 多个名字用空格分隔,没有就留空字符串
-  LOCAL_PROTECT_LIST: "88top temp rule XChrome"
+  LOCAL_PROTECT_LIST: "88top temp rule"
   # 例: LOCAL_PROTECT_LIST: "my-notes readme-assets"
 
   # ---- 3. 远程排除名单 ★重要★ ----
