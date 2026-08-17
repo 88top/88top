@@ -15,6 +15,7 @@ import eu.darken.sdmse.common.sharedresource.adoptChildResource
 import eu.darken.sdmse.common.storage.PathMapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.plus
 import okio.FileHandle
 import okio.IOException
@@ -113,21 +114,21 @@ class GatewaySwitch @Inject constructor(
         }
     }
 
-    override suspend fun lookupFiles(path: APath): Collection<APathLookup<APath>> {
-        return lookupFiles(path, Type.CURRENT)
+    override suspend fun lookupFiles(path: APath): Flow<APathLookup<APath>> {
+        return useGateway(path) { lookupFiles(path) }
     }
 
     suspend fun lookupFiles(path: APath, type: Type): Collection<APathLookup<APath>> {
         val mapped = path.toTargetType(type)
         return try {
-            useGateway(mapped) { lookupFiles(mapped) }
+            useGateway(mapped) { lookupFiles(mapped) }.toList()
         } catch (oge: ReadException) {
             if (type != Type.AUTO) throw oge
             log(TAG, WARN) { "lookupFiles(...): Original lookup failed, try alternative: ${oge.asLog()}" }
 
             val fallback = path.toAlternative()
             try {
-                useGateway(fallback) { lookupFiles(fallback) }
+                useGateway(fallback) { lookupFiles(fallback) }.toList()
             } catch (e: ReadException) {
                 log(TAG, WARN) { "lookupFiles(...): Alternative lookup failed either: ${e.asLog()}" }
                 throw oge
@@ -135,25 +136,21 @@ class GatewaySwitch @Inject constructor(
         }
     }
 
-    override suspend fun lookupFilesFlow(path: APath): Flow<APathLookup<APath>> {
-        return useGateway(path) { lookupFilesFlow(path) }
-    }
-
-    override suspend fun lookupFilesExtended(path: APath): Collection<APathLookupExtended<APath>> {
-        return lookupFilesExtended(path, Type.CURRENT)
+    override suspend fun lookupFilesExtended(path: APath): Flow<APathLookupExtended<APath>> {
+        return useGateway(path) { lookupFilesExtended(path) }
     }
 
     suspend fun lookupFilesExtended(path: APath, type: Type): Collection<APathLookupExtended<APath>> {
         val mapped = path.toTargetType(type)
         return try {
-            useGateway(mapped) { lookupFilesExtended(mapped) }
+            useGateway(mapped) { lookupFilesExtended(mapped) }.toList()
         } catch (oge: ReadException) {
             if (type != Type.AUTO) throw oge
             log(TAG, WARN) { "lookupFilesExtended(...): Original lookup failed, try alternative: ${oge.asLog()}" }
 
             val fallback = path.toAlternative()
             try {
-                useGateway(fallback) { lookupFilesExtended(fallback) }
+                useGateway(fallback) { lookupFilesExtended(fallback) }.toList()
             } catch (e: ReadException) {
                 log(TAG, WARN) { "lookupFilesExtended(...): Alternative lookup failed either: ${e.asLog()}" }
                 throw oge
@@ -176,7 +173,7 @@ class GatewaySwitch @Inject constructor(
         return useGateway(path) { du(path, options) }
     }
 
-    override suspend fun listFiles(path: APath): Collection<APath> {
+    override suspend fun listFiles(path: APath): Flow<APath> {
         return useGateway(path) { listFiles(path) }
     }
 
@@ -213,6 +210,14 @@ class GatewaySwitch @Inject constructor(
     }
 
     override suspend fun createSymlink(linkPath: APath, targetPath: APath): Boolean {
+        // The gateway is picked by the link path, but the target is handed to it unchecked: a
+        // mismatched pair would reach the gateway as the wrong path type and fail there (or worse,
+        // be silently misinterpreted).
+        if (linkPath.pathType != targetPath.pathType) {
+            throw IllegalArgumentException(
+                "Can't create symlink across path types: linkPath is ${linkPath.pathType}, targetPath is ${targetPath.pathType}"
+            )
+        }
         return useGateway(linkPath) { createSymlink(linkPath, targetPath) }
     }
 

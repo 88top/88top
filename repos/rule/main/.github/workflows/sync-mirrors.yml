@@ -78,54 +78,43 @@ jobs:
           chmod 600 ~/.ssh/known_hosts
           echo "✅ SSH配置完成"
 
-      - name: 3. 验证SSH连接
-        run: |
-          echo "验证SSH密钥连接..."
-          EXIT_CODE=0
-          for entry in $SSH_HOSTS; do
-            ALIAS="${entry%%:*}"
-            echo "测试连接: $ALIAS ..."
-            if (ssh -T git@${ALIAS} 2>&1 || true) | grep -qi "successfully authenticated"; then
-              echo "✅ $ALIAS 连接成功"
-            else
-              echo "❌ $ALIAS 连接失败"
-              EXIT_CODE=1
-            fi
-          done
-          if [ $EXIT_CODE -eq 0 ]; then
-            echo "✅ 所有SSH连接验证通过"
-          else
-            echo "❌ SSH连接验证失败"
-            exit 1
-          fi
-
-      - name: 4. 配置Git
+      - name: 3. 配置Git
         run: |
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
           git config --global init.defaultBranch main
           echo "✅ Git配置完成"
 
-      - name: 5. 克隆源仓库
+      - name: 4. 克隆源仓库并执行镜像同步
+        id: sync_step
         run: |
-          echo "正在克隆源仓库: $SOURCE_REPO"
-          CLONE_START=$(date +%s)
+          # 通用重试函数：retry <最大次数> <间隔秒数> <要执行的命令...>
+          retry() {
+            local max="$1" interval="$2"; shift 2
+            local i
+            for i in $(seq 1 "$max"); do
+              echo "尝试 $i/$max..."
+              if "$@"; then
+                return 0
+              elif [ "$i" -lt "$max" ]; then
+                echo "失败，${interval}秒后重试..."
+                sleep "$interval"
+              fi
+            done
+            return 1
+          }
+
+          echo "=== 克隆源仓库: $SOURCE_REPO ==="
           REPO_DIR="${SOURCE_REPO_NAME}.git"
-          MAX_RETRY=3
-          for i in $(seq 1 $MAX_RETRY); do
-            echo "克隆尝试 $i/$MAX_RETRY..."
-            rm -rf "$REPO_DIR" 2>/dev/null || true
-            if git clone --mirror "$SOURCE_REPO" "$REPO_DIR"; then
-              echo "✅ 克隆成功，耗时: $(($(date +%s) - CLONE_START))秒"
-              break
-            elif [ $i -eq $MAX_RETRY ]; then
-              echo "❌ 克隆失败（已达最大重试次数）"
-              exit 1
-            else
-              echo "克隆失败，10秒后重试..."
-              sleep 10
-            fi
-          done
+          CLONE_START=$(date +%s)
+
+          rm -rf "$REPO_DIR" 2>/dev/null || true
+          if ! retry 3 10 git clone --mirror "$SOURCE_REPO" "$REPO_DIR"; then
+            echo "❌ 克隆失败（已达最大重试次数）"
+            exit 1
+          fi
+          echo "✅ 克隆成功，耗时: $(($(date +%s) - CLONE_START))秒"
+
           cd "$REPO_DIR"
           git config --unset-all remote.origin.fetch 2>/dev/null || true
           git config --add remote.origin.fetch '+refs/heads/*:refs/heads/*'
@@ -136,36 +125,23 @@ jobs:
           echo " 标签: $(git for-each-ref refs/tags --format='%(refname)' | wc -l)"
           echo " 大小: $(du -sh . | cut -f1)"
 
-      - name: 6. 执行镜像同步
-        id: sync_step
-        run: |
-          cd "${SOURCE_REPO_NAME}.git"
+          echo ""
           echo "=== 开始同步镜像仓库 $(date '+%Y-%m-%d %H:%M:%S') UTC ==="
           SYNC_START_TIME=$(date +%s)
           FAIL_COUNT=0
+
           for TARGET_REPO in $TARGET_REPOS; do
             echo "=== 推送镜像到: $TARGET_REPO ==="
             REPO_START_TIME=$(date +%s)
-            PUSH_SUCCESS=false
-            MAX_RETRY=2
-            for i in $(seq 1 $MAX_RETRY); do
-              echo "推送尝试 $i/$MAX_RETRY..."
-              if timeout 300 git push --mirror "$TARGET_REPO"; then
-                echo "✅ 推送成功，耗时: $(($(date +%s) - REPO_START_TIME))秒"
-                PUSH_SUCCESS=true
-                break
-              elif [ $i -eq $MAX_RETRY ]; then
-                echo "❌ 推送失败（已达最大重试次数）"
-              else
-                echo "推送失败，10秒后重试..."
-                sleep 10
-              fi
-            done
-            if [ "$PUSH_SUCCESS" = false ]; then
+
+            if retry 2 10 timeout 300 git push --mirror "$TARGET_REPO"; then
+              echo "✅ 推送成功，耗时: $(($(date +%s) - REPO_START_TIME))秒"
+            else
+              echo "❌ 推送失败（已达最大重试次数）"
               FAIL_COUNT=$((FAIL_COUNT + 1))
-              echo "⚠️ 标记此仓库同步失败"
             fi
           done
+
           echo "=== 同步完成，总耗时: $(($(date +%s) - SYNC_START_TIME))秒 ==="
           if [ $FAIL_COUNT -gt 0 ]; then
             echo "❌ 有 ${FAIL_COUNT} 个仓库同步失败"
@@ -174,7 +150,7 @@ jobs:
             echo "✅ 所有仓库同步成功"
           fi
 
-      - name: 7. 清理敏感数据
+      - name: 5. 清理敏感数据
         if: always()
         run: |
           echo "清理SSH密钥文件..."
@@ -185,26 +161,28 @@ jobs:
           rm -f ~/.ssh/config ~/.ssh/known_hosts
           echo "✅ 敏感数据清理完成"
 
-      - name: 8. 生成运行报告
+      - name: 6. 生成运行报告
         if: always()
         run: |
-          echo "## 🚀 镜像同步任务报告" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**运行信息**:" >> $GITHUB_STEP_SUMMARY
-          echo "- 触发方式: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- 运行状态: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
-          echo "- 源仓库: $SOURCE_REPO" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**同步目标**:" >> $GITHUB_STEP_SUMMARY
-          for repo in $TARGET_REPOS; do
-            echo "- $repo" >> $GITHUB_STEP_SUMMARY
-          done
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [[ "${{ steps.sync_step.outcome }}" == "success" ]]; then
-            echo "✅ **执行结果**: 同步成功" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ **执行结果**: 同步失败，请查看日志排查问题" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "---" >> $GITHUB_STEP_SUMMARY
-          echo "报告生成时间: $(date '+%Y-%m-%d %H:%M:%S') UTC" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## 🚀 镜像同步任务报告"
+            echo ""
+            echo "**运行信息**:"
+            echo "- 触发方式: ${{ github.event_name }}"
+            echo "- 运行状态: ${{ job.status }}"
+            echo "- 源仓库: $SOURCE_REPO"
+            echo ""
+            echo "**同步目标**:"
+            for repo in $TARGET_REPOS; do
+              echo "- $repo"
+            done
+            echo ""
+            if [[ "${{ steps.sync_step.outcome }}" == "success" ]]; then
+              echo "✅ **执行结果**: 同步成功"
+            else
+              echo "❌ **执行结果**: 同步失败，请查看日志排查问题"
+            fi
+            echo ""
+            echo "---"
+            echo "报告生成时间: $(date '+%Y-%m-%d %H:%M:%S') UTC"
+          } >> $GITHUB_STEP_SUMMARY

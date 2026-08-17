@@ -1,0 +1,81 @@
+name: Delete repos folder (via API)
+
+on:
+  workflow_dispatch:  # 手动触发
+
+jobs:
+  delete-folder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete repos folder via Git Trees API
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: 88top/88top
+        run: |
+          set -e
+
+          echo "获取默认分支..."
+          DEFAULT_BRANCH=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/$REPO" | jq -r '.default_branch')
+          echo "默认分支: $DEFAULT_BRANCH"
+
+          echo "获取最新 commit sha..."
+          LATEST_COMMIT_SHA=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/$REPO/git/ref/heads/$DEFAULT_BRANCH" | jq -r '.object.sha')
+          echo "最新 commit: $LATEST_COMMIT_SHA"
+
+          echo "获取该 commit 对应的 tree sha..."
+          BASE_TREE_SHA=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/$REPO/git/commits/$LATEST_COMMIT_SHA" | jq -r '.tree.sha')
+          echo "base tree: $BASE_TREE_SHA"
+
+          echo "创建新 tree（删除 repos 节点）..."
+          NEW_TREE_SHA=$(curl -s -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/json" \
+            "https://api.github.com/repos/$REPO/git/trees" \
+            -d "{
+              \"base_tree\": \"$BASE_TREE_SHA\",
+              \"tree\": [
+                {
+                  \"path\": \"repos\",
+                  \"mode\": \"040000\",
+                  \"type\": \"tree\",
+                  \"sha\": null
+                }
+              ]
+            }" | jq -r '.sha')
+          echo "新 tree: $NEW_TREE_SHA"
+
+          if [ "$NEW_TREE_SHA" == "null" ] || [ -z "$NEW_TREE_SHA" ]; then
+            echo "创建新 tree 失败，请检查 repos 是否存在于根目录，或 token 权限"
+            exit 1
+          fi
+
+          echo "创建新 commit..."
+          NEW_COMMIT_SHA=$(curl -s -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/json" \
+            "https://api.github.com/repos/$REPO/git/commits" \
+            -d "{
+              \"message\": \"chore: 删除 repos 文件夹\",
+              \"tree\": \"$NEW_TREE_SHA\",
+              \"parents\": [\"$LATEST_COMMIT_SHA\"]
+            }" | jq -r '.sha')
+          echo "新 commit: $NEW_COMMIT_SHA"
+
+          if [ "$NEW_COMMIT_SHA" == "null" ] || [ -z "$NEW_COMMIT_SHA" ]; then
+            echo "创建 commit 失败"
+            exit 1
+          fi
+
+          echo "更新分支引用..."
+          UPDATE_RESULT=$(curl -s -X PATCH \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/json" \
+            "https://api.github.com/repos/$REPO/git/refs/heads/$DEFAULT_BRANCH" \
+            -d "{\"sha\": \"$NEW_COMMIT_SHA\", \"force\": false}")
+
+          echo "$UPDATE_RESULT" | jq .
+
+          echo "完成：repos 文件夹已从仓库中删除"
