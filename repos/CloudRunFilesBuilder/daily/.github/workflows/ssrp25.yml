@@ -1,0 +1,156 @@
+name: Build 25.12 SSRP
+
+permissions:
+  contents: write
+
+on:
+  schedule:
+    - cron: "20 22 * * *"  # 北京时间早上 6 点 20
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        arch:
+          - x86_64
+          - aarch64_generic
+          - aarch64_cortex-a53
+
+    runs-on: ubuntu-latest
+
+    env:
+      OPENWRT_VER: openwrt-25.12
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y makeself curl wget
+
+      - name: Prepare
+        run: |
+          mkdir -p work makeself
+
+          cat > work/install.sh <<'EOF'
+          #!/bin/sh
+          cd "$(dirname "$0")" || exit 1
+          apk update
+          apk add kmod-nft-tproxy
+          apk add kmod-nft-socket
+          apk add xray-core
+          apk add --allow-untrusted ./*.apk || exit 1
+
+          # install mihomo core
+          if [ -f "mihomo.gz" ]; then
+              echo "Installing mihomo core..."
+              gzip -dc mihomo.gz > /usr/bin/mihomo || exit 1
+              chmod +x /usr/bin/mihomo
+          fi
+          
+          EOF
+          chmod +x work/install.sh
+
+      - name: Download packages
+        shell: bash
+        run: |
+          BASE_URL="https://opkg.cooluc.com/${OPENWRT_VER}/${{ matrix.arch }}"
+
+          download_apk() {
+            pkg="$1"
+            file=$(curl -fsSL "$BASE_URL/" | grep -oE "${pkg}-[^\"']+\.apk" | head -n1)
+            if [ -z "$file" ]; then
+              echo "Cannot find $pkg"
+              exit 1
+            fi
+            wget -q --show-progress -P work "$BASE_URL/$file"
+
+            if [ "$pkg" = "luci-app-ssr-plus" ]; then
+                VERSION=$(echo "$file" | sed -E 's/^luci-app-ssr-plus-(.*)\.apk$/\1/')
+                echo "PACKAGE_VERSION=$VERSION" >> "$GITHUB_ENV"
+                echo "Version: $VERSION"
+            fi
+          }
+
+          PACKAGES=(
+            luci-app-ssr-plus
+            luci-i18n-ssr-plus-zh-cn
+            shadowsocksr-libev-ssr-check
+            shadowsocksr-libev-ssr-local
+            shadowsocksr-libev-ssr-nat
+            shadowsocksr-libev-ssr-redir
+            shadowsocksr-libev-ssr-server
+            chinadns-ng
+            dns2tcp
+            ipt2socks
+            lua-neturl
+          )
+
+          for p in "${PACKAGES[@]}"; do
+            download_apk "$p"
+          done
+
+      - name: Download Mihomo Core
+        shell: bash
+        run: |
+          MIHOMO_VERSION=$(curl -fsSL https://api.github.com/repos/MetaCubeX/mihomo/releases/latest \
+            | grep '"tag_name"' \
+            | cut -d '"' -f4)
+
+          echo "Latest Mihomo: ${MIHOMO_VERSION}"
+
+          case "${{ matrix.arch }}" in
+            x86_64)
+              FILE="mihomo-linux-amd64-v1-${MIHOMO_VERSION}.gz"
+              ;;
+            aarch64_generic|aarch64_cortex-a53)
+              FILE="mihomo-linux-arm64-${MIHOMO_VERSION}.gz"
+              ;;
+            *)
+              echo "Unsupported architecture: ${{ matrix.arch }}"
+              exit 1
+              ;;
+          esac
+
+          URL="https://github.com/MetaCubeX/mihomo/releases/download/${MIHOMO_VERSION}/${FILE}"
+
+          echo "Downloading:"
+          echo "$URL"
+
+          wget -q --show-progress \
+            -O work/mihomo.gz \
+            "$URL"
+
+          echo "Downloaded files:"
+          ls -lh work/
+
+      - name: Build run
+        run: |
+          makeself --quiet work makeself/25-SSRP-mihomo-${{ matrix.arch }}-${{ env.PACKAGE_VERSION }}.run "SSRP" ./install.sh
+
+
+      - name: Set tag name
+        id: vars
+        run: |
+          TODAY=$(date -u -d '+8 hour' +'%Y-%m-%d')
+          echo "tag_name=$TODAY" >> $GITHUB_ENV
+
+      - name: Upload run files as release assets
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ env.tag_name }}
+          name: "Daily Build - ${{ env.tag_name }}"
+          files: makeself/*.run
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: |
+             <p align="left">
+              <img src="https://img.shields.io/github/downloads/wkccd/CloudRunFilesBuilder/${{ env.tag_name }}/total?style=for-the-badge&label=%E4%BB%8A%E6%97%A5%E4%B8%8B%E8%BD%BD%E6%AC%A1%E6%95%B0&labelColor=blue&color=black"/>
+              <a href="https://wkdaily.cpolar.cn/archives/1">
+                <img src="https://img.shields.io/badge/可套用国内加速站下载-FC7C0D?logo=github&logoColor=fff&labelColor=000&style=for-the-badge"/>
+              </a>
+             </p>
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

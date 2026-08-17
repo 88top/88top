@@ -1,0 +1,55 @@
+<i>SD Maid 2/SE</i>, Android'inizin temiz ve düzenli kalmasını sağlayan güvenilir yardımcısıdır.
+
+Kimse mükemmel değildir ve Android de öyle.
+
+* Kaldırdığınız uygulamalar geride bir şeyler bırakır.
+* Günlükler, çökme raporları ve istemediğiniz diğer dosyalar sürekli olarak oluşturulur.
+* Depolama alanınız tanımadığınız dosya ve klasörler ile dolup taşıyor.
+* Galerinizdeki tekrarlanmış fotoğrafları.
+
+Burada devam etmeyelim... SD Maid 2/SE size yardımcı olsun!
+
+SD Maid 2/SE, cihazınızda hangi uygulamaların dosya oluşturduğunu bilen bir uygulama ve dosya yöneticisidir. Depolama alanını güvenle boşaltmanıza yardımcı olmak için dosyaları yüklü uygulamalarla karşılaştırır.
+
+✨ Uygulamaları kaldırdıktan sonra kalıntıları temizleyin
+
+Uygulamalar belirlenen klasörlerin dışında dosyalar oluşturursa, uygulamalar kaldırıldıktan sonra bile dosyalar kalabilir. "Artık Bulucu" aracı uygulama kalıntılarını bulur, hangi uygulamaya ait olduklarını söyler ve bunları silmenize yardımcı olur.
+
+🔍 Cihazınızı akıllı bir şekilde tarayın
+
+Boş klasörleri, geçici dosyaları, önceden yüklenmiş uygulamaları ve daha fazlasını filtreleyin. Kendi arama kriterlerinizi bile oluşturabilirsiniz. "Sistem Temizleyicisi" aracı, çeşitli kriterlere göre dosyaları otomatik olarak arar ve siler.
+
+🧹 Gereksiz dosyaları ve gizli önbellekleri silin
+
+Resim önizlemeleri, çöp kutuları, çevrimdışı önbellekler ve daha fazlası: Eğer uygulamalar kendi arkalarını temizlemezlerse, bu uygulama temizleyecektir. "Uygulama Temizleyici" aracı, harcanabilir dosyalara sahip uygulamaları bulur.
+
+📦 Tüm uygulamalarınızı yönetin
+
+Cihazınızda yüklü tüm uygulamaların kapsamlı bir listesini alın. Etkin, devre dışı, kullanıcı veya sistem uygulaması: hiçbir uygulama sizden saklanamaz. "Uygulama Kontrolü" aracı, uygulamalarınızı aramanıza, sıralamanıza ve yönetmenize olanak tanıyan bir uygulama yöneticisidir.
+
+📊 Tüm alanınızı ne kullanıyor?
+
+Depolama yönetimi, cihaz depolama alanı, SD kartlar ve USB aygıtlarındaki uygulamalar, medya, sistem ve diğer dosyalarla karmaşık olabilir. "Depolama Analizcisi" cihazınızda nasıl alan kullanıldığını gösteren ve depolama yönetiminizi basitleştiren bir dosya yöneticisidir.
+
+📷 Yinelenen verileri bulun
+
+Yinelenen indirmeler, sosyal medya aracılığıyla gönderilen fotoğraflar veya aynı sahnenin benzer resimleri: Zaman içinde kopyalar birikebilir. "Tekilleyici" aracı, tamamen aynı veya benzer olan dosyaları bulur ve fazladan kopyaları silmenize yardımcı olur.
+
+👆 Bir kayırmayla düzenle
+
+Bir klasör seçin ve dosyaları tutmak, silmek veya atlamak için basit kayırmalarla tek tek inceleyin. "Swiper" aracı, hiçbir şey silinmeden önce tüm kararları incelemenizi sağlar ve daha sonra devam etmek için oturumu kaydedebilirsiniz.
+
+🗄️ Fotoğrafları silmeden alan tasarrufu yapın
+
+Fotoğraflar çok fazla depolama alanı kaplayabilir, ancak onları her zaman silmek istemezsiniz. "Media Squeeze" aracı, resimlerinizi ayarlanabilir kalite ayarlarıyla sıkıştırarak fotoğraflarınızı saklarken depolama alanı boşaltmanızı sağlar.
+
+Bu uygulama reklam içermez. Bazı özellikler ücretli yükseltme gerektirir.
+
+SD Maid 2/SE, SD Maid 1/Legacy'nin yeni sürümüdür.
+Daha yeni Android sürümleri için optimize edilmiş ve temizliğe odaklanmıştır.
+
+Bu uygulama, sıkıcı eylemleri otomatikleştirmek için AccessibilityService API'sini kullanan isteğe bağlı özelliklere sahiptir.
+AccessibilityService API'sini kullanan bu uygulama, birden fazla uygulama üzerinde işlem gerçekleştirmeniz için düğmelere tıklayabilir, örn. önbellekleri silme.
+Bu uygulama bilgi toplamak için AccessibilityService API'sini kullanmaz.
+
+SD Maid 2/SE bir Dosya Yöneticisi ve Temizleyici Uygulamasıdır.

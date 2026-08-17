@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_upgraded">SD Maid SE Pro</string>
+    <string name="app_name_upgrade_postfix">Pro</string>
+    <string name="upgrade_feature_requires_pro">SD Maid SE Proが必要です</string>
+    <string name="upgrades_dashcard_title">SD Maidをアップグレード</string>
+    <string name="upgrades_dashcard_body">SD Maid Proは、パワーユーザーにより良い結果、より多くの機能、オプションを提供します。</string>
+    <string name="upgrades_dashcard_upgrade_action">アップグレード</string>
+    <string name="upgrades_gplay_unavailable_error_title">Google Playは利用できません</string>
+    <string name="upgrades_gplay_unavailable_error_description">SD Maid は Google Play に接続できません。 Google Playはインストールされており、最新の状態ですか? あなたのGoogleアカウントはログインしていますか? Google Playアプリのキャッシュをクリアしてデバイスを再起動してみてください。</string>
+    <string name="upgrades_no_purchases_found_check_account">購入が確認できませんでした。正しいアカウントを使用していますでしょうか？</string>
+    <string name="upgrade_screen_title">SD Maid SE Proを入手</string>
+    <string name="upgrade_screen_preamble">SDメイドは広告がなく、ユーザーデータを販売していません。私の作品はあなたによって賄われています❤️。</string>
+    <string name="upgrade_screen_benefits_title">優位点</string>
+    <string name="upgrade_screen_benefits_body">• アプリの整頓 💯\n• 予定されている動作 ⏰\n• すべてのツールに追加オプション ⚙️\n• あなただけの削除ルール ✍️\n• 意欲的な開発🧙\nそれ以外にも…</string>
+    <string name="upgrade_screen_how_title">オプション</string>
+    <string name="upgrade_screen_how_body">サブスクリプションは14日間の無料トライアルから始まり、その後1年に1回課金されます。\n試用版もサブスクリプションもいつでもキャンセル可能です。</string>
+    <string name="upgrade_screen_subscription_trial_action">14日間の無料トライアルを開始</string>
+    <string name="upgrade_screen_subscription_action">登録</string>
+    <string name="upgrade_screen_subscription_action_hint">サブスクライブには年 %s 円かかります。</string>
+    <string name="upgrade_screen_iap_action">1 回限りの購入</string>
+    <string name="upgrade_screen_iap_action_hint">一回限りの購入には %sがかかります。</string>
+    <string name="upgrade_screen_thanks_toast">あなたが一番です! ❤️</string>
+    <string name="nudge_betagoodbye_title">SD Maid 2/SE v1 🥳</string>
+    <string name="nudge_betagoodbye_body">一緒になって、初公開までこぎつけました！ご協力ありがとうございました！もちろん開発は続きますが、より安定したビルドに切り替えたい場合は、今すぐ切り替えられます。Google Playのテストをオプトアウトすることで、これを実現できます。</string>
+    <string name="nudge_betagoodbye_hint">メモ: テスト中につけられた評価は私だけが見ることができますので、もしよろしければSDメイドに公開評価をしていただければ幸いです。</string>
+    <string name="nudge_betagoodbye_positive_action">オプトアウト</string>
+    <string name="nudge_betagoodbye_negative_action">テスト中</string>
+</resources>

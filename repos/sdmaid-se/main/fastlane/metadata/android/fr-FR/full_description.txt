@@ -1,0 +1,55 @@
+<i>SD Maid 2/SE</i>, l'assistante de confiance de votre Android, pour le garder propre et bien rangé.
+
+Personne n'est parfait et Android non plus.
+
+* Les applis désinstallées laissent des traces.
+* Des journaux, relevés de plantage et autres fichiers indésirables sont créés en permanence.
+* Des fichiers et dossiers inconnus s'accumulent sur votre appareil.
+* Des photos en double dans votre galerie.
+
+Laissez SD Maid 2/SE vous aider.
+
+SD Maid 2/SE est une appli et gestionnaire de fichiers qui identifie quelles applis ont créé quels fichiers sur votre appareil. Il compare les fichiers aux applis installées pour vous aider à libérer de l'espace en toute sécurité.
+
+✨ Nettoyer après désinstallation
+
+Si des applis créent des fichiers hors de leurs dossiers désignés, ces fichiers subsistent après désinstallation. L'outil "CorpseFinder" trouve les restes d'applis, vous indique à quelle appli ils appartenaient et vous aide à les supprimer.
+
+🔍 Rechercher intelligemment
+
+Cherchez les dossiers vides, fichiers temporaires, applis installées et plus. Créez vos propres critères de recherche. L'outil "SystemCleaner" cherche et supprime automatiquement des fichiers selon différents critères.
+
+🧹 Supprimer fichiers superflus et caches
+
+Miniatures, corbeilles, caches hors ligne et plus : si les applis laissent des traces, "AppCleaner" fait le ménage. Le « Nettoyeur d’applis » trouve les applis avec des fichiers superflus.
+
+📦 Gérer toutes vos applis
+
+Obtenez la liste complète des applis installées sur votre appareil. Liste complète des applis installées : activées, désactivées, utilisateur ou système — aucune ne vous échappe. L'outil "AppControl" vous permet de rechercher, trier et contrôler vos applis.
+
+📊 Ce qui utilise votre espace
+
+La gestion du stockage peut être complexe avec les applis, médias et fichiers sur la mémoire interne, les cartes SD et les périphériques USB. L'outil "StorageAnalyzer" affiche l'utilisation de l'espace sur votre appareil.
+
+📷 Trouver des données dupliquées
+
+Téléchargements, photos de réseaux sociaux, images similaires : les copies s'accumulent. L'outil "Deduplicator" trouve les fichiers identiques ou similaires et vous aide à supprimer les copies en trop.
+
+👆 Désencombrer d'un balayage
+
+Choisissez un dossier et parcourez les fichiers un par un en balayant pour garder, supprimer ou ignorer. L'outil "Swiper" vous permet d'examiner vos décisions avant toute suppression et de sauvegarder une session pour la reprendre plus tard.
+
+🗜️ Libérer de l'espace sans supprimer de photos
+
+Les photos peuvent occuper beaucoup de place, mais vous ne voulez pas forcément les supprimer. L'outil "Media Squeeze" compresse vos images avec des paramètres de qualité réglables pour libérer de l'espace tout en conservant vos photos.
+
+SD Maid ne sert aucune publicité. Certaines fonctions sont réservées à la version payante.
+
+SD Maid 2/SE succède à SD Maid 1/Legacy.
+Optimisée pour les versions récentes d'Android et axée sur le nettoyage.
+
+Cette appli propose des fonctions facultatives utilisant l'API AccessibilityService pour automatiser des actions fastidieuses.
+Grâce à l'API AccessibilityService, cette appli peut cliquer sur des boutons à votre place pour effectuer des opérations sur plusieurs applis, par exemple la suppression des caches. suppression des caches.
+Cette appli n'utilise pas l'API AccessibilityService pour recueillir des informations.
+
+SD Maid 2/SE est une appli de gestion des fichiers et de nettoyage.

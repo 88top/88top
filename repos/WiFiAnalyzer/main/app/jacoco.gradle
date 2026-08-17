@@ -1,0 +1,92 @@
+/*
+ * WiFiAnalyzer
+ * Copyright (C) 2015 - 2026 VREM Software Development <VREMSoftwareDevelopment@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ */
+
+jacoco {
+    toolVersion = "0.8.14"
+}
+
+def executionPath = 'outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec'
+
+def fileFilter = [
+        '**/R.class',
+        '**/R$*.class',
+        '**/BuildConfig.*',
+        '**/databinding/*.*',
+        '**/Manifest*.*',
+        '**/*Test*.*',
+        'android/**/*.*',
+        '**/*$DefaultImpls.class'
+]
+
+def classKotlinDir = project.file("build/tmp/kotlin-classes/debug")
+def mainKotlinSrc = project.file("src/main/kotlin")
+def debugTree = fileTree(dir: classKotlinDir, excludes: fileFilter)
+
+tasks.withType(Test).configureEach {
+    jacoco.includeNoLocationClasses = true
+    jacoco.excludes = ['jdk.internal.*']
+}
+
+def jacocoReportProvider = tasks.register('jacocoTestReport', JacocoReport) {
+    dependsOn('testDebugUnitTest')
+    reports {
+        csv.required = false
+        xml.required = true
+        html.required = true
+    }
+    sourceDirectories.from = files([mainKotlinSrc])
+    classDirectories.from = files([debugTree])
+    executionData.from = fileTree(dir: project.file("build"), includes: [executionPath])
+}
+
+def jacocoCoverageVerificationProvider = tasks.register('jacocoTestCoverageVerification', JacocoCoverageVerification) {
+    dependsOn(jacocoReportProvider)
+    sourceDirectories.from = files([[mainKotlinSrc]])
+    classDirectories.from = files([debugTree])
+    executionData.from = fileTree(dir: project.file("build"), includes: [executionPath])
+    violationRules {
+        failOnViolation = true
+        rule {
+            element = 'BUNDLE'
+            limit {
+                counter = 'INSTRUCTION'
+                minimum = 0.98
+            }
+            limit {
+                counter = 'BRANCH'
+                minimum = 0.95
+            }
+            limit {
+                counter = 'COMPLEXITY'
+                minimum = 0.96
+            }
+            limit {
+                counter = 'LINE'
+                minimum = 0.99
+            }
+            limit {
+                counter = 'METHOD'
+                minimum = 0.98
+            }
+            limit {
+                counter = 'CLASS'
+                minimum = 0.99
+            }
+        }
+    }
+}

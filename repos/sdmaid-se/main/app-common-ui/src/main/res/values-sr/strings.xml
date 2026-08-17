@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_select_paths_title">Изаберите путање</string>
+    <string name="picker_selected_paths_title">Изабране путање</string>
+    <string name="picker_unsaved_confirmation_message">Одбацити измене?</string>
+    <plurals name="picker_selected_paths_subtitle">
+        <item quantity="one">%d путања изабрана</item>
+        <item quantity="few">%d путање изабране</item>
+        <item quantity="other">%d путања изабрано</item>
+    </plurals>
+    <string name="picker_home_action">Области података</string>
+    <string name="picker_select_hint">Држите ставку да је изаберете</string>
+    <string name="tour_action_next">Даље</string>
+    <string name="tour_action_previous">Претходно</string>
+    <string name="tour_action_cancel">Прескочи</string>
+    <string name="tour_confirm_title">Прескочити туру?</string>
+    <string name="tour_confirm_message">Можете поново омогућити туре било када из Подешавања.</string>
+    <string name="tour_confirm_continue">Наставите туру</string>
+    <string name="tour_confirm_dont_show_this_tour">Не приказуј ову туру</string>
+    <string name="tour_confirm_disable_all">Онемогући све туре</string>
+    <string name="navigation_unknown_destination_title">Екран недоступан</string>
+    <string name="navigation_unknown_destination_message">Овај екран није могао бити отворен.</string>
+</resources>

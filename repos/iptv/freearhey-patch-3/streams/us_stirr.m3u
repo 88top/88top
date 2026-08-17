@@ -1,0 +1,57 @@
+#EXTM3U
+#EXTINF:-1 tvg-id="",Biz Talk Today TV (1080p)
+https://d3htp73xsa9p15.cloudfront.net/scheduler/scheduleMaster/445.m3u8
+#EXTINF:-1 tvg-id="",Craftsy (1080p)
+https://linear-492.frequency.stream/dist/stirr/492/hls/master/playlist.m3u8
+#EXTINF:-1 tvg-id="ElectricNow.us@SD",Electric Now (720p)
+https://elec-en-stirr.otteravision.com/elec/en/elec_en.m3u8
+#EXTINF:-1 tvg-id="",Equus TV (1080p)
+https://d2gwqf8gdwq1zs.cloudfront.net/scheduler/scheduleMaster/426.m3u8
+#EXTINF:-1 tvg-id="FreebieTV.us@SD",Freebie TV (720p)
+https://d26pp4b7ojtlyn.cloudfront.net/scheduler/scheduleMaster/187.m3u8
+#EXTINF:-1 tvg-id="",GenB TV (1080p)
+https://bad-badiv-stirr.otteravision.com/bad/badiv/badiv.m3u8
+#EXTINF:-1 tvg-id="HumorMill.us@SD",Humor Mill TV (1080p)
+https://du1gyxfing4ke.cloudfront.net/scheduler/scheduleMaster/152.m3u8
+#EXTINF:-1 tvg-id="JewishLifeTelevision.us@SD",Jewish Life Television (1080p)
+https://jlt-jltv-stirr.otteravision.com/jlt/jltv/jltv.m3u8
+#EXTINF:-1 tvg-id="LawCrime.us@SD",Law & Crime (720p)
+https://cdn.lawandcrime.net/rewind/playlist.m3u8
+#EXTINF:-1 tvg-id="",My Money (1080p)
+https://d3bqd6nz14unwy.cloudfront.net/scheduler/scheduleMaster/468.m3u8
+#EXTINF:-1 tvg-id="NTDTVEnglish.us@USA",NTD TV English (1080p)
+https://amg17596-ntdtv-amg17596c1-stirr-us-4738.playouts.now.amagi.tv/ntd.m3u8
+#EXTINF:-1 tvg-id="",Omstars (1080p)
+https://d1too6m5v9oyet.cloudfront.net/scheduler/scheduleMaster/281.m3u8
+#EXTINF:-1 tvg-id="OnTV4U.us@SD",OnTV4U (1080p) [Geo-blocked]
+https://stirr.b-cdn.net/stirr/playlist.m3u8
+#EXTINF:-1 tvg-id="",Our Vinyl (1080p)
+https://d29rvfbwwm1vce.cloudfront.net/scheduler/scheduleMaster/459.m3u8
+#EXTINF:-1 tvg-id="PlymouthRockTV.ca@SD",Plymouth Rock TV (1080p)
+https://d30au7974f7qoa.cloudfront.net/scheduler/scheduleMaster/419.m3u8
+#EXTINF:-1 tvg-id="PopstarTV.us@SD",Popstar! TV (1080p)
+https://linear-10.frequency.stream/dist/stirr/10/hls/master/playlist.m3u8
+#EXTINF:-1 tvg-id="PursuitUP.us@SD",PursuitUP (1080p)
+https://linear-205.frequency.stream/dist/stirr/205/hls/master/playlist.m3u8
+#EXTINF:-1 tvg-id="RightNowTV.us@SD",RightNow TV (720p)
+https://2-fss-1.streamhoster.com/pl_154/amlst:205448-2145652/rightnowtv.m3u8
+#EXTINF:-1 tvg-id="RVTV.us@HD",RVTV (1080p) [Geo-blocked]
+https://rvtv-stirr.b-cdn.net/rvtv-on-stirr/playlist.m3u8
+#EXTINF:-1 tvg-id="ShopLC.us@SD",Shop LC (1080p)
+https://cdn-shop-lc-01.vos360.video/Content/HLS_HLS/Live/channel(ShopLCStirrTV)/master.m3u8
+#EXTINF:-1 tvg-id="",Speed Sport 1 (1080p)
+https://linear-599.frequency.stream/dist/stirr/599/hls/master/playlist.m3u8
+#EXTINF:-1 tvg-id="",Stellar TV (1080p)
+https://d3kddmbw1dqgzz.cloudfront.net/scheduler/scheduleMaster/332.m3u8
+#EXTINF:-1 tvg-id="",Surfing+ (1080p)
+https://dr4jwhk0sty71.cloudfront.net/scheduler/scheduleMaster/444.m3u8
+#EXTINF:-1 tvg-id="SwerveSports.us@SD",Swerve Sports (1080p)
+https://linear-253.frequency.stream/dist/stirr/253/hls/master/playlist.m3u8
+#EXTINF:-1 tvg-id="",The Grappling Network (1080p)
+https://d1vwakhda3vp6p.cloudfront.net/scheduler/scheduleMaster/236.m3u8
+#EXTINF:-1 tvg-id="WildTV.ca@SD",Wild TV (1080p)
+https://dfhsahpa45kk2.cloudfront.net/scheduler/scheduleMaster/476.m3u8
+#EXTINF:-1 tvg-id="WineWatchesWhiskey.us@HD",Wine Watches & Whiskey (1080p)
+https://www-on-stirr.b-cdn.net/Wine-Watches-and-Whiskey/playlist.m3u8
+#EXTINF:-1 tvg-id="",Zoomer TV (1080p)
+https://d3p8ecnk6t4t73.cloudfront.net/scheduler/scheduleMaster/316.m3u8

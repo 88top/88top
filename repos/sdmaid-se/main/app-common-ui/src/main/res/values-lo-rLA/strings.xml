@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_select_paths_title">ເລືອກທາງ</string>
+    <string name="picker_selected_paths_title">ທາງທີ່ເລືອກໄວ້</string>
+    <string name="picker_unsaved_confirmation_message">ປະໄວ້ການ຺່ນ?</string>
+    <plurals name="picker_selected_paths_subtitle">
+        <item quantity="other">%d ທາງຖືກເລືອກ</item>
+    </plurals>
+    <string name="picker_home_action">ພື້ນທີ່ຂໍ້ມູນ</string>
+    <string name="picker_select_hint">ຖືລາຍການເພື່ອເລືອກມັນ</string>
+    <string name="tour_action_next">ຕໍ່ໄປ</string>
+    <string name="tour_action_previous">ກໍ່ນ</string>
+    <string name="tour_action_cancel">ຂ້າມ</string>
+    <string name="tour_confirm_title">ຂ້າມການທ່ຽວທໍງບໍ?</string>
+    <string name="tour_confirm_message">ທ່ານສາມາດເປີດໃຊ້ການທ່ຽວທໍງໄດ້ທຸກເວລາຈາກການຕັ້ງຄ່າ.</string>
+    <string name="tour_confirm_continue">ສືບຕໍ່ການທ່ຽວທໍງ</string>
+    <string name="tour_confirm_dont_show_this_tour">ຢ່າສະແດງການທ່ຽວທໍງນີ້</string>
+    <string name="tour_confirm_disable_all">ປິດການທ່ຽວທໍງທັງໝົດ</string>
+    <string name="navigation_unknown_destination_title">ໜ້າຈໍບໍ່ພ້ອມໃຊ້ໄດ້</string>
+    <string name="navigation_unknown_destination_message">ໜ້າຈໍນີ້ບໍ່ສາມາດເປິດໄດ້.</string>
+</resources>

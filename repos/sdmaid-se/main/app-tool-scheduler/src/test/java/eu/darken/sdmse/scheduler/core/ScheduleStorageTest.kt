@@ -1,0 +1,207 @@
+package eu.darken.sdmse.scheduler.core
+
+import android.content.Context
+import eu.darken.sdmse.common.files.core.local.deleteRecursivelySafe
+import eu.darken.sdmse.common.serialization.SerializationIOModule
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Test
+import testhelpers.BaseTest
+import testhelpers.coroutine.TestDispatcherProvider
+import testhelpers.json.toComparableJson
+import java.io.File
+import java.time.Duration
+import java.time.Instant
+
+class ScheduleStorageTest : BaseTest() {
+    private val testDir = File(IO_TEST_BASEDIR, "schedule-storage-test")
+    private val context: Context = mockk<Context>().apply {
+        every { filesDir } returns testDir
+    }
+
+    @AfterEach
+    fun cleanup() {
+        testDir.deleteRecursivelySafe()
+    }
+
+    private fun create() = ScheduleStorage(
+        context = context,
+        dispatcherProvider = TestDispatcherProvider(),
+        json = SerializationIOModule().json()
+    )
+
+    @Test
+    fun `load empty`() = runTest {
+        create().load() shouldBe null
+    }
+
+    @Test
+    fun `serialization - minimal data`() = runTest {
+        val schedule = Schedule(
+            id = "1234id",
+            createdAt = Instant.EPOCH,
+        )
+        create().apply {
+            load() shouldBe null
+            save(setOf(schedule))
+            load() shouldBe setOf(schedule)
+            val saveFile = provideBackupPath().listFiles()!!.single { it.extension == "json" }
+            saveFile.readText().toComparableJson() shouldBe """
+                [
+                    {
+                        "id": "1234id",
+                        "createdAt": "1970-01-01T00:00:00Z",
+                        "hour": 22,
+                        "minute": 0,
+                        "label": "",
+                        "repeatInterval": "PT72H",
+                        "corpsefinderEnabled": false,
+                        "systemcleanerEnabled": false,
+                        "appcleanerEnabled": false,
+                        "commandsAfterSchedule": []
+                    }
+                ]
+            """.toComparableJson()
+            saveFile.delete()
+            load() shouldBe null
+        }
+    }
+
+    @Test
+    fun `corrupt main file with valid backup restores from backup`() = runTest {
+        val schedule = Schedule(
+            id = "backup-id",
+            createdAt = Instant.EPOCH,
+        )
+        create().apply {
+            save(setOf(schedule))
+        }
+
+        val dir = File(testDir, "scheduler/schedules")
+        val mainFile = File(dir, "schedules-v1.json")
+        val backupFile = File(dir, "schedules-v1.json.backup")
+
+        // Corrupt the main file, keep valid backup
+        val validJson = mainFile.readText()
+        backupFile.writeText(validJson)
+        mainFile.writeText("{corrupt json!@#\$")
+
+        create().apply {
+            load() shouldBe setOf(schedule)
+        }
+
+        // Backup should have been restored as main and deleted
+        mainFile.readText() shouldBe validJson
+        backupFile.exists() shouldBe false
+    }
+
+    @Test
+    fun `corrupt main file with no backup returns null`() = runTest {
+        val schedule = Schedule(
+            id = "no-backup-id",
+            createdAt = Instant.EPOCH,
+        )
+        create().apply {
+            save(setOf(schedule))
+        }
+
+        val dir = File(testDir, "scheduler/schedules")
+        val mainFile = File(dir, "schedules-v1.json")
+        val backupFile = File(dir, "schedules-v1.json.backup")
+
+        // Corrupt main, delete backup
+        mainFile.writeText("{corrupt json!@#\$")
+        backupFile.delete()
+
+        create().apply {
+            load() shouldBe null
+        }
+
+        mainFile.exists() shouldBe false
+    }
+
+    @Test
+    fun `both files corrupt returns null and deletes both`() = runTest {
+        val schedule = Schedule(
+            id = "both-corrupt-id",
+            createdAt = Instant.EPOCH,
+        )
+        create().apply {
+            save(setOf(schedule))
+        }
+
+        val dir = File(testDir, "scheduler/schedules")
+        val mainFile = File(dir, "schedules-v1.json")
+        val backupFile = File(dir, "schedules-v1.json.backup")
+
+        mainFile.writeText("{corrupt main!@#\$")
+        backupFile.writeText("{corrupt backup!@#\$")
+
+        create().apply {
+            load() shouldBe null
+        }
+
+        mainFile.exists() shouldBe false
+        backupFile.exists() shouldBe false
+    }
+
+    @Test
+    fun `empty main file returns null`() = runTest {
+        val dir = File(testDir, "scheduler/schedules")
+        dir.mkdirs()
+        val mainFile = File(dir, "schedules-v1.json")
+        mainFile.writeText("")
+
+        create().apply {
+            load() shouldBe null
+        }
+
+        mainFile.exists() shouldBe false
+    }
+
+    @Test
+    fun `serialization - full data`() = runTest {
+        val schedule = Schedule(
+            id = "full-id",
+            createdAt = Instant.parse("2024-01-15T10:00:00Z"),
+            scheduledAt = Instant.parse("2024-01-15T12:00:00Z"),
+            hour = 22,
+            minute = 30,
+            label = "Nightly Cleanup",
+            repeatInterval = Duration.ofDays(1),
+            userZone = "Europe/Berlin",
+            useCorpseFinder = true,
+            useSystemCleaner = true,
+            useAppCleaner = true,
+            commandsAfterSchedule = listOf("reboot"),
+            executedAt = Instant.parse("2024-01-14T21:30:00Z"),
+        )
+        create().apply {
+            save(setOf(schedule))
+            load() shouldBe setOf(schedule)
+            val saveFile = provideBackupPath().listFiles()!!.single { it.extension == "json" }
+            saveFile.readText().toComparableJson() shouldBe """
+                [
+                    {
+                        "id": "full-id",
+                        "createdAt": "2024-01-15T10:00:00Z",
+                        "scheduledAt": "2024-01-15T12:00:00Z",
+                        "hour": 22,
+                        "minute": 30,
+                        "label": "Nightly Cleanup",
+                        "repeatInterval": "PT24H",
+                        "userZone": "Europe/Berlin",
+                        "corpsefinderEnabled": true,
+                        "systemcleanerEnabled": true,
+                        "appcleanerEnabled": true,
+                        "commandsAfterSchedule": ["reboot"],
+                        "executedAt": "2024-01-14T21:30:00Z"
+                    }
+                ]
+            """.toComparableJson()
+        }
+    }
+}

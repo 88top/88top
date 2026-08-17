@@ -1,0 +1,15 @@
+# hanwckf/bl-mt798x
+211b89848fbe383f371433e7cb1889ab  mt7986_clx_s20p-fip_legacy-and-fit_20241010.bin
+4d8d53245b7ca442c0698ec7fa6bd436  mt7986_clx_s20p-fip_pve_20260113.bin
+
+# Yuzhii0718/bl-mt798x-dhcpd (20260407-115847)
+65f94cd19e4753a20c32f3fcd414362e  fip-mt7986_clx_s20p_2025-Yuzhii-dhcpd.bin
+
+# Yuzhii0718/bl-mt798x-dhcpd (20260403-230439)
+fd0633f9954ad663549ba12d8a33e733  fip-mt7986_clx_s20p_SP1-Yuzhii-dhcpd.bin
+511d4fdf78b85692d84943a3783fc6c4  fip-mt7986_clx_s20p_SP2-Yuzhii-dhcpd.bin
+
+
+
+# bl2 (20260407-115847)
+50ee37e1b1d0cb6e67391243595befe2  bl2-mt7986_clx_s20p_2025.img

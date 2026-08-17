@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exclusion_manager_title">بەڕێوەبەری دەرخستنەکان</string>
+    <string name="exclusion_manager_desc">پالپشتی بیکار هێنانی پاڵاوتن بۆ پەڕگە و بەرنامە.</string>
+    <string name="exclusion_explanation_body1">فایل و ئەپلیکێشنەکان بخەژێ لە ئامرازەکانی SD Maid بپارێزە، یان بۆ تێپەڕاندنی شتە ناپێوەندەکان و خێراکردنی کردارەکان.</string>
+    <string name="exclusion_add_new_hint">هێشتا هیچ بخەژێیەک نیە. دوگمەی + بەکاربھێنە بۆ درووستکردنی یەکێک، یان کردارەکان لە ئەنجامی هەر ئامرازێک بخەژێ.</string>
+    <string name="exclusion_create_action">دروستکردنی دەرخستن</string>
+    <string name="exclusion_edit_action">پالپشتی پاڵاوتن دەست بکە</string>
+    <string name="exclusion_type_package">ئەپ exclusion</string>
+    <string name="exclusion_type_path">پاڵاوتنی ڕێ</string>
+    <string name="exclusion_type_segment">دەرخستنی هەرپار</string>
+    <string name="exclusion_tags_alltools">هەموو ئامرازەکان</string>
+    <string name="exclusion_target_label">ئامانجی دەرخستن</string>
+    <string name="exclusion_editor_path_change_action">بکە بۆ گۆڕینی ڕێگا</string>
+    <string name="exclusion_option_allow_partial">ڕێگەدان بە گونجاندنی بەشێک</string>
+    <string name="exclusion_option_ignore_casing">چاوپۆشی لە پیتە گەورە و بچووکەکان</string>
+    <string name="exclusion_editor_affected_tools_label">ئامرازە کاریگەرەکان</string>
+    <string name="exclusion_editor_path_explanation">پاڵاوتنی ڕێ SD Maid پاڵاوت دەکات لە پالپشتی دەست بکاری بۆ هیچ ڕێی گونجاو. ئەمە بۆ پەڕگە، فۆڵدەر و ژێر فۆڵدەر جێبەجێ دەکات.</string>
+    <string name="exclusion_editor_pkg_explanation">دەرخستنی ئەپێک ڕێگەی SD Maid لەوە دەگرێت هیچ پاکێجێکی کە دەگونجێت پرۆسەس بکات.</string>
+    <string name="exclusion_editor_segment_explanation">پاڵاوتنی بنیاتی سەتگۆڕ شتێک نیشتر لە پاڵاوتنی ڕێ بەڵام پاڵاوت دەکات بۆ هێڵکی ئەندۆ. نمونە: \"DCIM/Camera\" پاڵاوت دەکات \"/sdcard/DCIM/Camera/photo.png\".</string>
+    <string name="exclusion_editor_remove_confirmation_message">ئەم پاڵاوتنە لابکە؟</string>
+    <string name="exclusion_reset_default_exclusions">گەڕاندنەوە default exclusions</string>
+    <string name="exclusion_import_action">هاوردن exclusions</string>
+    <string name="exclusion_export_action">هەناردن exclusions</string>
+    <string name="exclusion_create_pkg_hint">کۆمەڵە AppControl بەکاربهێنە بۆ دروستکردنی پاڵاوتنی بەرنامە.</string>
+    <string name="exclusion_create_path_hint">کۆمەڵە StorageAnalyzer بەکاربهێنە بۆ دروستکردنی پاڵاوتنی ڕێ.</string>
+    <string name="exclusion_create_segment_hint">بڕگەیەکی ناو یاریدە بکە، وەک \"DCIM/Camera\".</string>
+    <string name="exclusion_show_defaults_action">نیشاندان defaults</string>
+    <plurals name="exclusion_import_success_x_items">
+        <item quantity="one">%d دەرەترکردن هاوردەکرا</item>
+        <item quantity="other">%d دەرەترکردن هاوردەکران</item>
+    </plurals>
+    <plurals name="exclusion_export_success_x_items">
+        <item quantity="one">%d دەرەترکردن هەناردەکرا</item>
+        <item quantity="other">%d دەرەترکردن هەناردەکران</item>
+    </plurals>
+</resources>

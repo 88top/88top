@@ -1,0 +1,101 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyVersion>1.15</AssemblyVersion>
+    <FileVersion>1.15</FileVersion>
+    <ApplicationIcon>xchrome.ico</ApplicationIcon>
+    <Copyright>瑞雪社区--刹那</Copyright>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\dl.png" />
+    <None Remove="Resources\hj.png" />
+    <None Remove="Resources\hsz.png" />
+    <None Remove="Resources\jb.png" />
+    <None Remove="Resources\more.png" />
+    <None Remove="Resources\qk.png" />
+    <None Remove="Resources\xchrome.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="xchrome.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\hsz.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\dl.png" />
+    <Resource Include="Resources\hj.png" />
+    <Resource Include="Resources\jb.png" />
+    <Resource Include="Resources\more.png" />
+    <Resource Include="Resources\qk.png" />
+    <Resource Include="Resources\xchrome.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AdonisUI.ClassicTheme" Version="1.17.1" />
+    <PackageReference Include="AutoHotkey.Interop" Version="1.0.0.1" />
+    <PackageReference Include="Autoupdater.NET.Official" Version="1.9.2" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="log4net" Version="3.0.3" />
+    <PackageReference Include="MahApps.Metro.IconPacks" Version="5.1.0" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.44.0" />
+    <PackageReference Include="MouseKeyHook" Version="5.7.1" />
+    <PackageReference Include="Pipelines.Sockets.Unofficial" Version="2.2.8" />
+    <PackageReference Include="SqlSugarCore" Version="5.1.4.178" />
+    <PackageReference Include="System.IO.Pipelines" Version="10.0.0-preview.1.25080.5" />
+    <PackageReference Include="System.Management" Version="9.0.2" />
+    <PackageReference Include="ToastNotifications" Version="2.5.1" />
+    <PackageReference Include="ToastNotifications.Messages" Version="2.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="forms\MCreateChrome.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Resource1.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resource1.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Settings1.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings1.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resource1.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource1.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Settings1.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings1.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="forms\MCreateChrome.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
+</Project>

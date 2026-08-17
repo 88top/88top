@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_select_paths_title">Seletzionare caminos</string>
+    <string name="picker_selected_paths_title">Caminos seletzionados</string>
+    <string name="picker_unsaved_confirmation_message">Iscartare cambiamentos?</string>
+    <plurals name="picker_selected_paths_subtitle">
+        <item quantity="one">%d caminu seletzionadu</item>
+        <item quantity="other">%d caminos seletzionados</item>
+    </plurals>
+    <string name="picker_home_action">Zonas de datos</string>
+    <string name="picker_select_hint">Mantene un elementu pro che lu seggias</string>
+    <string name="tour_action_next">Prossima</string>
+    <string name="tour_action_previous">Anteriore</string>
+    <string name="tour_action_cancel">Salta</string>
+    <string name="tour_confirm_title">Saltare sa vìsita?</string>
+    <string name="tour_confirm_message">Podes reabilitare sas vìsitas in ununale momento dae is Definitziones.</string>
+    <string name="tour_confirm_continue">Continua sa tura</string>
+    <string name="tour_confirm_dont_show_this_tour">Non mustrare custa tura</string>
+    <string name="tour_confirm_disable_all">Disativa totu is turis</string>
+    <string name="navigation_unknown_destination_title">Ischermada non disponìbile</string>
+    <string name="navigation_unknown_destination_message">Custa ischermada no podit esse abrita.</string>
+</resources>

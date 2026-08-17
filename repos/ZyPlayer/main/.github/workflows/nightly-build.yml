@@ -1,0 +1,306 @@
+name: Nightly Build
+
+on:
+  schedule:
+    - cron: '0 17 * * *' # 1:00 BJ Time
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  check-repository:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ github.repository == 'Hiram-Wong/zyfun' }}
+      should_build: ${{ steps.check.outputs.should_build }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Check repository & build condition
+        id: check
+        shell: bash
+        run: |
+          echo "Running in repository: ${{ github.repository }}"
+
+          SHOULD_RUN=$([[ "${{ github.repository }}" == "Hiram-Wong/zyfun" ]] && echo true || echo false)
+          echo "should_run=$SHOULD_RUN" >> "$GITHUB_OUTPUT"
+
+          if [[ "$SHOULD_RUN" != "true" ]]; then
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Manual trigger always builds
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Check if any commits landed in the last 25 hours
+          LAST_COMMIT_TS=$(git log -1 --format='%ct')
+          NOW=$(date +%s)
+
+          if (( NOW - LAST_COMMIT_TS < 90000 )); then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  cleanup-artifacts:
+    needs: check-repository
+    if: |
+      needs.check-repository.outputs.should_run == 'true' &&
+      needs.check-repository.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          cutoff_ts=$(date -d "14 days ago" +%s)
+
+          gh api repos/$REPO/actions/artifacts --paginate | \
+          jq -r --argjson cutoff "$cutoff_ts" '
+            .artifacts[]
+            | select(.name | startswith("zyfun-nightly-"))
+            | select((.created_at | fromdateiso8601) < $cutoff)
+            | .id
+          ' | while read -r artifact_id; do
+            echo "Deleting artifact $artifact_id"
+            gh api repos/$REPO/actions/artifacts/$artifact_id -X DELETE
+          done
+
+  metadata:
+    needs: check-repository
+    if: |
+      needs.check-repository.outputs.should_run == 'true' &&
+      needs.check-repository.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      date: ${{ steps.meta.outputs.date }}
+      sha: ${{ steps.meta.outputs.sha }}
+      short_sha: ${{ steps.meta.outputs.short_sha }}
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Resolve build metadata
+        id: meta
+        shell: bash
+        run: |
+          SHA=$(git rev-parse HEAD)
+          echo "Building at $SHA"
+
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          echo "short_sha=${SHA:0:7}" >> $GITHUB_OUTPUT
+          echo "date=$(TZ=Asia/Shanghai date +'%Y%m%d')" >> $GITHUB_OUTPUT
+
+  nightly-build:
+    needs:
+      - check-repository
+      - metadata
+    if: |
+      needs.check-repository.outputs.should_run == 'true' &&
+      needs.check-repository.outputs.should_build == 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            name: mac-arm64
+            platform: mac
+            arch: arm64
+            build_command: pnpm build:mac:arm64
+          - os: macos-15-intel
+            name: mac-x64
+            platform: mac
+            arch: x64
+            build_command: pnpm build:mac:x64
+          - os: windows-latest
+            name: win-x64
+            platform: win
+            arch: x64
+            build_command: pnpm build:win:x64
+          - os: windows-11-arm
+            name: win-arm64
+            platform: win
+            arch: arm64
+            build_command: pnpm build:win:arm64
+          - os: ubuntu-latest
+            name: linux-x64
+            platform: linux
+            arch: x64
+            build_command: pnpm build:linux:x64
+          - os: ubuntu-24.04-arm
+            name: linux-arm64
+            platform: linux
+            arch: arm64
+            build_command: pnpm build:linux:arm64
+      fail-fast: false
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.metadata.outputs.sha }}
+          fetch-depth: 1
+
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-${{ runner.arch }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-pnpm-
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Fix macOS dependencies
+        if: matrix.platform == 'mac'
+        shell: bash
+        run: |
+          brew install python-setuptools
+
+      - name: Fix Linux dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm libevdev-dev libxtst-dev libx11-dev libxfixes-dev libwayland-dev
+
+      - name: Prepare env file
+        shell: bash
+        run: cp -f .env.example .env
+
+      - name: Build
+        shell: bash
+        run: |
+          ${{ matrix.build_command }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: --max-old-space-size=8192
+
+      - name: Rename artifacts
+        shell: bash
+        run: |
+          mkdir -p renamed-artifacts
+
+          DATE="${{ needs.metadata.outputs.date }}"
+          PREFIX="zyfun-nightly-${DATE}"
+
+          copy_first() {
+            local pattern="$1"
+            local target="$2"
+            local source
+            source=$(find dist -name "$pattern" -type f -print -quit)
+            if [ -n "$source" ]; then
+              cp "$source" "renamed-artifacts/$target"
+            fi
+          }
+
+          case "${{ matrix.name }}" in
+            win-x64)
+              copy_first "*-x64-setup.exe" "${PREFIX}-win-x64-setup.exe"
+              copy_first "*-x64-portable.exe" "${PREFIX}-win-x64-portable.exe"
+              ;;
+
+            win-arm64)
+              copy_first "*-arm64-setup.exe" "${PREFIX}-win-arm64-setup.exe"
+              copy_first "*-arm64-portable.exe" "${PREFIX}-win-arm64-portable.exe"
+              ;;
+
+            mac-arm64)
+              copy_first "*-arm64.dmg" "${PREFIX}-mac-arm64.dmg"
+              ;;
+
+            mac-x64)
+              copy_first "*-x64.dmg" "${PREFIX}-mac-x64.dmg"
+              ;;
+
+            linux-x64)
+              copy_first "*-x86_64.AppImage" "${PREFIX}-linux-x64.AppImage"
+              copy_first "*-amd64.deb" "${PREFIX}-linux-x64.deb"
+              copy_first "*-x86_64.rpm" "${PREFIX}-linux-x64.rpm"
+              ;;
+
+            linux-arm64)
+              copy_first "*-arm64.AppImage" "${PREFIX}-linux-arm64.AppImage"
+              copy_first "*-arm64.deb" "${PREFIX}-linux-arm64.deb"
+              copy_first "*-arm64.rpm" "${PREFIX}-linux-arm64.rpm"
+              ;;
+          esac
+
+      - name: Show uploaded files
+        shell: bash
+        run: |
+          echo "Files to upload:"
+
+          if [ -d renamed-artifacts ]; then
+            find renamed-artifacts -type f
+          fi
+
+          echo "Total files:"
+          find renamed-artifacts -type f | wc -l
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: zyfun-nightly-${{ needs.metadata.outputs.date }}-${{ matrix.name }}
+          path: renamed-artifacts/*
+          if-no-files-found: ignore
+          retention-days: 3
+          compression-level: 8
+
+  build-summary:
+    needs:
+      - check-repository
+      - metadata
+      - nightly-build
+    if: always() && needs.check-repository.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create summary report
+        shell: bash
+        env:
+          SHOULD_BUILD: ${{ needs.check-repository.outputs.should_build }}
+          BUILD_RESULT: ${{ needs.nightly-build.result }}
+          BUILD_DATE: ${{ needs.metadata.outputs.date }}
+          BUILD_SHA: ${{ needs.metadata.outputs.sha }}
+          SHORT_SHA: ${{ needs.metadata.outputs.short_sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo "## Nightly Build"
+            echo ""
+
+            if [[ "$SHOULD_BUILD" != "true" ]]; then
+              echo "- No commits in the last 25 hours"
+            else
+              echo "- Commit: \`${SHORT_SHA}\`"
+              echo "- SHA: \`${BUILD_SHA}\`"
+              echo "- Date: \`${BUILD_DATE}\`"
+              echo "- Status: \`${BUILD_RESULT}\`"
+              echo "- Download: [Actions Artifacts](${RUN_URL})"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
