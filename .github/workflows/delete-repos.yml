@@ -12,13 +12,24 @@ jobs:
         with:
           repository: 88top/88top
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Remove repos folder
         run: |
+          set -x
+          echo "当前目录内容："
+          ls -la
+
           if [ -d "repos" ]; then
-            git rm -r --cached repos
+            echo "找到 repos 文件夹，统计文件数量..."
+            find repos -type f | wc -l
+
+            echo "直接删除文件夹（不逐文件走 git rm，速度更快）..."
             rm -rf repos
+
+            echo "将变更加入暂存区..."
+            git add -A
+
             echo "repos 文件夹已删除"
           else
             echo "repos 文件夹不存在，跳过"
@@ -26,7 +37,13 @@ jobs:
 
       - name: Commit and push changes
         run: |
+          set -x
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git diff --cached --quiet || git commit -m "chore: 删除 repos 文件夹"
-          git push
+
+          if git diff --cached --quiet; then
+            echo "没有需要提交的变更"
+          else
+            git commit -m "chore: 删除 repos 文件夹"
+            git push
+          fi
