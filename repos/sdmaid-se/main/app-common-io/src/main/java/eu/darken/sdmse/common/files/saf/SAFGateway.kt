@@ -24,6 +24,8 @@ import eu.darken.sdmse.common.files.isFile
 import eu.darken.sdmse.common.sharedresource.SharedResource
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
@@ -107,20 +109,48 @@ class SAFGateway @Inject constructor(
         }
         val targetName = targetSafPath.segments.last()
 
-        val targetParentDocFile: SAFDocFile = targetSafPath.segments
-            .mapIndexed { index, segment ->
-                val segmentSafPath = targetSafPath.copy(
-                    segments = targetSafPath.segments.drop(targetSafPath.segments.size - index)
-                )
-                val segmentDocFile = findDocFile(segmentSafPath)
-                if (!segmentDocFile.exists) {
-                    log(TAG) { "Create parent folder $segmentSafPath" }
-                    segmentDocFile.createDirectory(segment)
+        val match = targetSafPath.findPermission(contentResolver.persistedUriPermissions)
+        if (match == null) {
+            log(TAG, VERBOSE) { "No UriPermission match for $targetSafPath" }
+            throw MissingUriPermissionException(path = targetSafPath)
+        }
+        if (match.missingSegments.isEmpty()) {
+            throw WriteException("Can't create the granted tree root itself", targetSafPath)
+        }
+
+        // The granted document is the deepest ancestor we can address directly, anything below it
+        // may still be missing. Walking down from the volume root instead would fail for any grant
+        // that is narrower than the volume, e.g. one on Android/data.
+        var targetParentDocFile = SAFDocFile.fromTreeUri(context, contentResolver, match.permission.uri)
+
+        match.missingSegments.dropLast(1).forEach { segment ->
+            val existing = targetParentDocFile.findFile(segment)
+            targetParentDocFile = when {
+                existing == null -> {
+                    log(TAG) { "Creating missing parent folder $segment for $targetSafPath" }
+                    val created = targetParentDocFile.createDirectory(segment)
+                    val createdName = created.name
+                    if (createdName != segment) {
+                        // Providers may sanitize or uniquify a name (ExternalStorageProvider does both),
+                        // which would put the target below a folder we didn't ask for.
+                        log(TAG, WARN) { "Parent folder $segment was created as $createdName, removing it again" }
+                        try {
+                            created.delete()
+                        } catch (e: Exception) {
+                            log(TAG, WARN) { "Failed to remove renamed parent folder $created: ${e.asLog()}" }
+                        }
+                        throw WriteException(
+                            "Unexpected name change: Wanted parent folder $segment, but got $createdName",
+                            targetSafPath,
+                        )
+                    }
+                    created
                 }
 
-                segmentDocFile
+                existing.isDirectory -> existing
+                else -> throw WriteException("Parent folder $segment is not a directory", targetSafPath)
             }
-            .last()
+        }
 
         val existing = targetParentDocFile.findFile(targetName)
 
@@ -164,39 +194,99 @@ class SAFGateway @Inject constructor(
 
         log(TAG, VERBOSE) { "delete(recursive=$recursive): $path" }
 
-        val queue = LinkedList(listOf(lookup(path)))
+        // Every failure is a failed delete, including the lookups and enumerations it needs.
+        // Callers like CorpseFinder only handle WriteException, a ReadException escaping from here
+        // would abort their whole run instead of just this target.
+        try {
+            val target = lookup(path)
 
-        while (!queue.isEmpty()) {
-            val lookUp = queue.removeFirst()
+            when {
+                !target.isDirectory -> deleteDocument(target.docFile, path)
 
-            if (lookUp.isDirectory) {
-                val newBatch = try {
-                    lookupFiles(lookUp.lookedUp).toList()
-                } catch (e: IOException) {
-                    log(TAG, ERROR) { "Failed to read directory to delete $lookUp: $e" }
-                    throw ReadException(path = path, cause = e)
+                recursive -> deleteTreeCascading(target)
+
+                else -> {
+                    // Best-effort refusal, see the APathGateway.delete contract: a child that appears
+                    // after this check can still be taken by a provider that cascades.
+                    val hasChildren = target.docFile.hasChildren()
+                    currentCoroutineContext().ensureActive()
+
+                    if (hasChildren) throw WriteException("Directory not empty", path)
+
+                    deleteDocument(target.docFile, path)
                 }
-                queue.addAll(newBatch)
-            } else {
-                var success = try {
-                    lookUp.docFile.delete()
-                } catch (e: Exception) {
-                    throw WriteException(path = path, cause = e)
-                }
-
-                if (!success) {
-                    success = try {
-                        !lookUp.docFile.exists
-                    } catch (e: IOException) {
-                        log(TAG, ERROR) { "Failed to perform exists() check $lookUp: $e" }
-                        throw ReadException(path = path, cause = e)
-                    }
-                    if (success) log(TAG, WARN) { "Tried to delete file, but it's already gone: $path" }
-                }
-
-                if (!success) throw IOException("Document delete() call returned false")
             }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            log(TAG, ERROR) { "delete($path) failed: ${e.asLog()}" }
+            throw if (e is WriteException) e else WriteException(path = path, cause = e)
         }
+    }
+
+    /**
+     * Deletes a directory and everything below it.
+     *
+     * The fast path is a single delete on the directory itself: AOSP's `FileSystemProvider` removes
+     * the whole subtree, and the platform allows (but does not promise) that. A provider that
+     * refuses, fails or only gets part way through falls back to a post-order walk, where every
+     * directory is already empty by the time it is deleted.
+     */
+    private suspend fun deleteTreeCascading(target: SAFPathLookup) {
+        currentCoroutineContext().ensureActive()
+
+        val cascaded = try {
+            target.docFile.delete()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            log(TAG, WARN) { "Cascading delete of ${target.lookedUp} failed: ${e.asLog()}" }
+            false
+        }
+
+        currentCoroutineContext().ensureActive()
+
+        // Under a dry-run SAFDocFile.delete deletes nothing and reports the document as still there,
+        // which counts as a cascade here, so the fallback and its real deletions never run.
+        if (cascaded) return
+
+        if (!target.docFile.existsStrict()) {
+            log(TAG, WARN) { "Tried to delete directory, but it's already gone: ${target.lookedUp}" }
+            return
+        }
+
+        log(TAG, WARN) { "Provider didn't cascade ${target.lookedUp}, deleting children individually" }
+        deleteTreePostOrder(target.docFile, target.lookedUp)
+    }
+
+    /**
+     * Deletes [docFile] and everything below it, children before their parents.
+     *
+     * The walk runs on the [SAFDocFile]s the provider itself handed out. Document ids are opaque in
+     * general, they can't be rebuilt from display names, and a provider whose ids aren't path derived
+     * is exactly the kind that doesn't cascade, i.e. the only reason this fallback exists. [root] is
+     * carried along for log and exception context only.
+     */
+    private suspend fun deleteTreePostOrder(docFile: SAFDocFile, root: SAFPath) {
+        if (docFile.isDirectory) {
+            docFile.listFiles().forEach { deleteTreePostOrder(it, root) }
+        }
+        deleteDocument(docFile, root)
+    }
+
+    private suspend fun deleteDocument(docFile: SAFDocFile, path: SAFPath) {
+        currentCoroutineContext().ensureActive()
+
+        if (docFile.delete()) return
+
+        // Providers report a failure for a document that is already gone, but only a query that
+        // actually answers may turn that into a success.
+        if (!docFile.existsStrict()) {
+            log(TAG, WARN) { "Tried to delete, but it's already gone: $path" }
+            return
+        }
+
+        throw IOException("Document delete() call returned false")
     }
 
     override suspend fun canWrite(path: SAFPath): Boolean = runIO {
@@ -236,6 +326,8 @@ class SAFGateway @Inject constructor(
             ).also {
                 if (Bugs.isTrace) log(TAG, VERBOSE) { "Looked up: $it" }
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             log(TAG, WARN) { "lookup($path) failed." }
             throw ReadException(path = path, cause = e)
@@ -282,6 +374,8 @@ class SAFGateway @Inject constructor(
             val name = it.name ?: it.uri.pathSegments.last().split('/').last()
             path.child(name)
         }
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         log(TAG, WARN) { "$label($path) failed." }
         throw ReadException(path = path, cause = e)
@@ -342,6 +436,14 @@ class SAFGateway @Inject constructor(
             }
 
             newBatch
+                .filter { child ->
+                    // Same semantic as the local gateway's DirectLocalWalker filter
+                    val excluded = options.pathDoesNotContain?.any { child.path.contains(it) } == true
+                    if (Bugs.isTrace) {
+                        if (excluded) log(TAG, VERBOSE) { "Skipping (pathDoesNotContain): $child" }
+                    }
+                    !excluded
+                }
                 .filter {
                     val allowed = options.onFilter?.invoke(it) ?: true
                     if (Bugs.isTrace) {
@@ -385,6 +487,7 @@ class SAFGateway @Inject constructor(
                     lookupFiles(lookUp.lookedUp).toList()
                 } catch (e: IOException) {
                     log(TAG, ERROR) { "Failed to read $lookUp: $e" }
+                    if (options.abortOnError) throw e
                     emptyList()
                 }
 

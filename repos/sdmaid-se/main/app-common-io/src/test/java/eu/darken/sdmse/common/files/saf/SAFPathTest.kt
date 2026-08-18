@@ -109,6 +109,21 @@ class SAFPathTest : BaseTest() {
     }
 
     @Test
+    fun `path uri`() {
+        SAFPath.build(testUri).pathUri.toString() shouldBe testUri
+        SAFPath.build(testUri, "files").pathUri.toString() shouldBe "$testUri%3Afiles"
+        SAFPath.build(testUri, "files", "cache").pathUri.toString() shouldBe "$testUri%3Afiles%2Fcache"
+    }
+
+    @Test
+    fun `path uri with a segment repeating the last one`() {
+        // Separators are placed by position: an earlier segment repeating the last one used to lose
+        // its separator and get glued to its successor, which misroutes findPermission.
+        SAFPath.build(testUri, "files", "cache", "files").pathUri
+            .toString() shouldBe "$testUri%3Afiles%2Fcache%2Ffiles"
+    }
+
+    @Test
     fun `force typing`() {
         val original = RawPath.build("test", "file")
 

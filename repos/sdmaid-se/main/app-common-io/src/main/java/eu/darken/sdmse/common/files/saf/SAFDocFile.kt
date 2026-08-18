@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.ParcelFileDescriptor
+import android.os.RemoteException
 import android.provider.DocumentsContract
 import android.system.Os
 import android.system.StructStat
@@ -39,6 +40,34 @@ data class SAFDocFile(
 
     val exists: Boolean
         get() = queryForString(DocumentsContract.Document.COLUMN_DOCUMENT_ID) != null
+
+    /**
+     * Like [exists], but a failing query raises instead of reading as "does not exist".
+     *
+     * Only for verifying a mutation: a delete that returned false must not be reported as success
+     * just because the query that was supposed to prove it never got an answer.
+     *
+     * [ContentResolver.query] can't carry that distinction: it hands back a null cursor both for a
+     * document the provider says is gone and for a provider it never reached. So the provider is
+     * addressed through a client instead - no client means nobody to ask, and only a null cursor
+     * from a live one counts as "missing" (`DocumentsProvider.query` returns null after catching
+     * the [FileNotFoundException] from `queryDocument`).
+     */
+    @SuppressLint("Recycle")
+    fun existsStrict(): Boolean {
+        val client = resolver.acquireUnstableContentProviderClient(uri)
+            ?: throw IOException("provider unavailable for $uri")
+
+        return try {
+            client
+                .query(uri, arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID), null, null, null)
+                .useQuietly { c -> c != null && c.moveToFirst() && !c.isNull(0) }
+        } catch (e: RemoteException) {
+            throw IOException("existsStrict() failed for $uri", e)
+        } finally {
+            client.close()
+        }
+    }
 
     private val mimeType: String? by lazy { queryForString(DocumentsContract.Document.COLUMN_MIME_TYPE) }
 
@@ -144,6 +173,30 @@ data class SAFDocFile(
         requireNotNull(foundUris) { "Unable to list files for $uri" }
 
         return foundUris.map { SAFDocFile(context, resolver, it) }
+    }
+
+    /**
+     * Whether this document has at least one child, answered by the child cursor alone.
+     *
+     * No per-child metadata is queried, so a child that vanishes while we ask can't turn the answer
+     * into an unrelated lookup failure. Query failures propagate: "we couldn't ask" must not read as
+     * "the directory is empty".
+     */
+    @SuppressLint("Recycle")
+    fun hasChildren(): Boolean {
+        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(uri, DocumentsContract.getDocumentId(uri))
+
+        val cursor = resolver.query(
+            childrenUri,
+            arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID),
+            null,
+            null,
+            null
+        )
+
+        requireNotNull(cursor) { "Unable to list files for $uri" }
+
+        return cursor.useQuietly { it.moveToFirst() }
     }
 
     fun delete(): Boolean = try {
@@ -255,9 +308,10 @@ data class SAFDocFile(
                 if (crumbs.isNotEmpty() && !this.endsWith(Uri.encode(File.separator))) {
                     append(Uri.encode(File.separator))
                 }
-                crumbs.forEach {
-                    if (it != crumbs.first()) append(Uri.encode(File.separator))
-                    append(Uri.encode(it))
+                crumbs.forEachIndexed { index, crumb ->
+                    // By position, not by value: a later crumb may repeat the first one
+                    if (index != 0) append(Uri.encode(File.separator))
+                    append(Uri.encode(crumb))
                 }
             }
             return uriBuilder.toString().toUri()
