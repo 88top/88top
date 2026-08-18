@@ -16,9 +16,9 @@ name: 同步 GitHub 仓库备份(全分支 · 自动识别公开/私有 · SSH�
 #    (SSH 无法列出"账户下有哪些仓库",只能在已知仓库名的前提下 clone)。
 #
 # 3. SSH 兜底(可选):个别仓库偶发因权限原因导致 token 方式
-#    git ls-remote 失败时,若配置了 SSH_PRIVATE_KEY,自动改用 SSH 重试一次,
-#    成功则该仓库单独走 SSH 完成克隆,不影响其他仓库继续走 token。
-#    未配置 SSH_PRIVATE_KEY 完全不受影响,行为等同没有这个功能。
+#    git ls-remote 失败时,若配置了 SSH_PRIVATE_KEY_TIMEFLYSOON,自动改用
+#    SSH 重试一次,成功则该仓库单独走 SSH 完成克隆,不影响其他仓库继续走 token。
+#    未配置 SSH_PRIVATE_KEY_TIMEFLYSOON 完全不受影响,行为等同没有这个功能。
 #
 # 4. 统计口径说明(避免误解):
 #    "仓库成功" = token 方式成功的仓库数 + SSH 兜底成功的仓库数 之和,
@@ -88,7 +88,7 @@ jobs:
         env:
           SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
           PUBLIC_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY_TIMEFLYSOON: ${{ secrets.SSH_PRIVATE_KEY_TIMEFLYSOON }}
         run: |
           set -euo pipefail
           cd ./repos
@@ -135,13 +135,13 @@ jobs:
 
           # ---------- SSH 兜底初始化(可选) ----------
           SSH_AVAILABLE=0
-          if [ -n "${SSH_PRIVATE_KEY:-}" ]; then
+          if [ -n "${SSH_PRIVATE_KEY_TIMEFLYSOON:-}" ]; then
             mkdir -p ~/.ssh && chmod 700 ~/.ssh
-            echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+            echo "$SSH_PRIVATE_KEY_TIMEFLYSOON" > ~/.ssh/id_ed25519
             chmod 600 ~/.ssh/id_ed25519
             ssh-keyscan -H github.com >> ~/.ssh/known_hosts 2>/dev/null
             SSH_AVAILABLE=1
-            echo "已配置 SSH 兜底(SSH_PRIVATE_KEY)"
+            echo "已配置 SSH 兜底(SSH_PRIVATE_KEY_TIMEFLYSOON)"
           fi
 
           in_list() { local n="$1" l="$2"; for i in $l; do [ "$i" = "$n" ] && return 0; done; return 1; }
@@ -398,8 +398,8 @@ jobs:
 #   勾选 repo + workflow → 复制 → 备份仓库 Settings → Secrets and variables
 #   → Actions → New repository secret → Name: SYNC_TOKEN
 #
-# SSH_PRIVATE_KEY(可选,个别仓库 token 失效时兜底):
+# SSH_PRIVATE_KEY_TIMEFLYSOON(可选,个别仓库 token 失效时兜底):
 #   用你账户已部署的 SSH key 公钥内容即可(无需新建),
 #   复制私钥完整内容(含 BEGIN/END 两行)→ 同样加进备份仓库 Secrets
-#   → Name: SSH_PRIVATE_KEY
+#   → Name: SSH_PRIVATE_KEY_TIMEFLYSOON
 # ============================================================
