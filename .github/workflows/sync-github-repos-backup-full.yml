@@ -73,12 +73,12 @@ jobs:
           mkdir -p ./repos
           STASH=$(mktemp -d)
           for name in $LOCAL_PROTECT_LIST; do
-            [ -d "./repos/$name" ] && mv "./repos/$name" "$STASH/$name"
+            if [ -d "./repos/$name" ]; then mv "./repos/$name" "$STASH/$name"; fi
           done
           rm -rf ./repos
           mkdir -p ./repos
           for name in $LOCAL_PROTECT_LIST; do
-            [ -d "$STASH/$name" ] && mv "$STASH/$name" "./repos/$name"
+            if [ -d "$STASH/$name" ]; then mv "$STASH/$name" "./repos/$name"; fi
           done
           rm -rf "$STASH"
 
@@ -94,7 +94,10 @@ jobs:
           cd ./repos
 
           USERNAME="$SYNC_USERNAME"
-          [ -z "$USERNAME" ] && { echo "错误: 请填写 SYNC_USERNAME"; exit 1; }
+          if [ -z "$USERNAME" ]; then
+            echo "错误: 请填写 SYNC_USERNAME"
+            exit 1
+          fi
 
           # ---------- 第一步: 判定运行模式 ----------
           MODE="public"
@@ -124,7 +127,10 @@ jobs:
             echo "未配置 SYNC_TOKEN → 公开模式"
           fi
 
-          MODE_LABEL="仅公开仓库"; [ "$MODE" = "full" ] && MODE_LABEL="公开+私有全量"
+          MODE_LABEL="仅公开仓库"
+          if [ "$MODE" = "full" ]; then
+            MODE_LABEL="公开+私有全量"
+          fi
           echo "★ 本次运行模式: ${MODE_LABEL} ★"
 
           # ---------- SSH 兜底初始化(可选) ----------
@@ -151,7 +157,8 @@ jobs:
                 -H "Authorization: Bearer ${AUTH_TOKEN}" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
                 "https://api.github.com/user/repos?per_page=100&page=${PAGE}&visibility=all&affiliation=owner,collaborator,organization_member")
-              N=$(echo "$R" | jq 'length'); [ "$N" -eq 0 ] && break
+              N=$(echo "$R" | jq 'length')
+              if [ "$N" -eq 0 ]; then break; fi
               echo "$R" | jq -r --arg u "$USERNAME" '.[] | select(.owner.login==$u) | .full_name' >> "$LIST"
               PAGE=$((PAGE+1))
             done
@@ -162,7 +169,8 @@ jobs:
                 -H "Authorization: Bearer ${PUBLIC_TOKEN}" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
                 "https://api.github.com/users/${USERNAME}/repos?per_page=100&page=${PAGE}&type=public")
-              N=$(echo "$R" | jq 'length'); [ "$N" -eq 0 ] && break
+              N=$(echo "$R" | jq 'length')
+              if [ "$N" -eq 0 ]; then break; fi
               echo "$R" | jq -r '.[] | .full_name' >> "$LIST"
               PAGE=$((PAGE+1))
             done
@@ -170,7 +178,10 @@ jobs:
           sort -u "$LIST" -o "$LIST"
           TOTAL=$(wc -l < "$LIST" | tr -d ' ')
           echo "远程共发现 $TOTAL 个仓库"
-          [ "$TOTAL" -eq 0 ] && { echo "未获取到任何仓库,请检查 SYNC_USERNAME / SYNC_TOKEN"; exit 1; }
+          if [ "$TOTAL" -eq 0 ]; then
+            echo "未获取到任何仓库,请检查 SYNC_USERNAME / SYNC_TOKEN"
+            exit 1
+          fi
 
           # ---------- 第三步: 逐仓库同步 ----------
           OK=0; FAIL=0; EXCLUDED=0; PROTECTED=0
@@ -179,7 +190,7 @@ jobs:
           IDX=0
 
           while IFS= read -r FULL_NAME; do
-            [ -z "$FULL_NAME" ] && continue
+            if [ -z "$FULL_NAME" ]; then continue; fi
             IDX=$((IDX+1))
             NAME="$(echo "$FULL_NAME" | cut -d'/' -f2)"
             echo ""
@@ -216,7 +227,9 @@ jobs:
               echo "    ✗ 枚举分支失败:"; sed 's/^/      /' "$ERR"; rm -f "$ERR"
               echo "    → 常见原因: SYNC_TOKEN(classic)已过期/撤销、该仓库需要单独 SAML SSO 授权、"
               echo "       或该仓库对该 token 存在其他访问限制"
-              [ "$SSH_AVAILABLE" = "1" ] && echo "       (SSH 兜底同样失败,请检查该仓库/账户的 SSH 授权)"
+              if [ "$SSH_AVAILABLE" = "1" ]; then
+                echo "       (SSH 兜底同样失败,请检查该仓库/账户的 SSH 授权)"
+              fi
               FAIL=$((FAIL+1)); FAIL_REPOS="$FAIL_REPOS $NAME"; continue
             fi
 
@@ -228,14 +241,16 @@ jobs:
             BTOTAL=$(echo "$BRANCHES" | wc -l | tr -d ' ')
             RBOK=0; RBFAIL=0
             while IFS= read -r B; do
-              [ -z "$B" ] && continue
+              if [ -z "$B" ]; then continue; fi
               DIR="$NAME/$B"
               if [ -e "$DIR" ]; then
                 echo "      ⚠️ $B 目录冲突,跳过"; RBFAIL=$((RBFAIL+1)); continue
               fi
               if git clone --quiet --depth 1 --single-branch --branch "$B" "$URL" "$DIR" 2>&1 | sed 's/^/        /'; then
                 rm -rf "$DIR/.git"
-                [ -z "$(ls -A "$DIR")" ] && touch "$DIR/.gitkeep"
+                if [ -z "$(ls -A "$DIR")" ]; then
+                  touch "$DIR/.gitkeep"
+                fi
                 RBOK=$((RBOK+1))
               else
                 rm -rf "$DIR" || true
@@ -258,8 +273,8 @@ jobs:
           echo "  ✅ 仓库成功: $OK   ❌ 仓库失败: $FAIL"
           echo "  🚫 已排除:   $EXCLUDED   🔒 已保护: $PROTECTED"
           echo "  🌿 分支成功: $BR_OK   ⚠️ 分支失败: $BR_FAIL"
-          [ -n "$SSH_REPOS" ] && echo "  🔑 SSH兜底成功: $SSH_REPOS"
-          [ -n "$FAIL_REPOS" ] && echo "  ⚠️ 枚举失败: $FAIL_REPOS"
+          if [ -n "$SSH_REPOS" ]; then echo "  🔑 SSH兜底成功: $SSH_REPOS"; fi
+          if [ -n "$FAIL_REPOS" ]; then echo "  ⚠️ 枚举失败: $FAIL_REPOS"; fi
           echo "=========================================="
 
           {
@@ -318,8 +333,12 @@ jobs:
           ⚠️ 分支失败: ${BACKUP_BRANCH_FAIL:-N/A}
           EOF
 
-          [ -n "${BACKUP_SSH_FALLBACK_REPOS:-}" ] && { echo ""; echo "🔑 SSH兜底成功: ${BACKUP_SSH_FALLBACK_REPOS}"; } >> ./BACKUP_STATUS.txt
-          [ -n "${BACKUP_AUTH_FAIL_REPOS:-}" ] && { echo ""; echo "⚠️ 枚举失败: ${BACKUP_AUTH_FAIL_REPOS}"; } >> ./BACKUP_STATUS.txt
+          if [ -n "${BACKUP_SSH_FALLBACK_REPOS:-}" ]; then
+            { echo ""; echo "🔑 SSH兜底成功: ${BACKUP_SSH_FALLBACK_REPOS}"; } >> ./BACKUP_STATUS.txt
+          fi
+          if [ -n "${BACKUP_AUTH_FAIL_REPOS:-}" ]; then
+            { echo ""; echo "⚠️ 枚举失败: ${BACKUP_AUTH_FAIL_REPOS}"; } >> ./BACKUP_STATUS.txt
+          fi
           echo "========================================" >> ./BACKUP_STATUS.txt
           cat ./BACKUP_STATUS.txt
 
@@ -329,7 +348,10 @@ jobs:
         run: |
           set -euo pipefail
           CN="$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')"
-          TRIGGER="定时任务"; [ "${{ github.event_name }}" = "workflow_dispatch" ] && TRIGGER="手动触发"
+          TRIGGER="定时任务"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TRIGGER="手动触发"
+          fi
           {
             echo "## 📊 仓库备份报告"
             echo "**时间**: ${CN}(北京) ｜ **触发**: ${TRIGGER} ｜ **模式**: \`${BACKUP_MODE_LABEL:-N/A}\`"
@@ -343,8 +365,14 @@ jobs:
             echo "| 🌿 分支成功 | ${BACKUP_BRANCH_OK:-N/A} |"
             echo "| ⚠️ 分支失败 | ${BACKUP_BRANCH_FAIL:-N/A} |"
             echo "| 📦 远程总数 | ${BACKUP_REMOTE_COUNT:-N/A} |"
-            [ -n "${BACKUP_SSH_FALLBACK_REPOS:-}" ] && { echo ""; echo "**🔑 SSH兜底成功**: ${BACKUP_SSH_FALLBACK_REPOS}"; }
-            [ -n "${BACKUP_AUTH_FAIL_REPOS:-}" ] && { echo ""; echo "**⚠️ 枚举失败**: ${BACKUP_AUTH_FAIL_REPOS}"; }
+            if [ -n "${BACKUP_SSH_FALLBACK_REPOS:-}" ]; then
+              echo ""
+              echo "**🔑 SSH兜底成功**: ${BACKUP_SSH_FALLBACK_REPOS}"
+            fi
+            if [ -n "${BACKUP_AUTH_FAIL_REPOS:-}" ]; then
+              echo ""
+              echo "**⚠️ 枚举失败**: ${BACKUP_AUTH_FAIL_REPOS}"
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: 提交备份结果
@@ -371,7 +399,7 @@ jobs:
 #   → Actions → New repository secret → Name: SYNC_TOKEN
 #
 # SSH_PRIVATE_KEY(可选,个别仓库 token 失效时兜底):
-#   用你账户已部署的 SSH key 私钥内容即可(无需新建),
+#   用你账户已部署的 SSH key 公钥内容即可(无需新建),
 #   复制私钥完整内容(含 BEGIN/END 两行)→ 同样加进备份仓库 Secrets
 #   → Name: SSH_PRIVATE_KEY
 # ============================================================
