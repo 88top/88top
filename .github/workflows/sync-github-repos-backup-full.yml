@@ -1,4 +1,4 @@
-name: 同步 GitHub 仓库备份(全分支)
+name: 同步 GitHub 仓库备份(全分支·自动识别公开/私有)
 
 # ★ 与旧版的核心区别 ★
 # 旧版 git clone --depth 1 只拉默认分支的最新一次提交,其他分支完全拿不到。
@@ -10,7 +10,15 @@ name: 同步 GitHub 仓库备份(全分支)
 #   3. 如果分支名互相前缀冲突(例如同时存在 release 和 release/1.0),
 #      后处理的那个会因为目录路径冲突被跳过,并在日志里明确提示
 #
-# ★ 本版修复的问题 ★
+# ★ 本版新增: SYNC_TOKEN 自动降级,不用再维护两份 yml ★
+# 运行时会自动检测并验证 secrets.SYNC_TOKEN:
+#   - 没配置 SYNC_TOKEN,或配置了但校验不通过(过期/无效/权限不足/
+#     对应账户和 SYNC_USERNAME 不一致) → 自动降级为"仅备份公开仓库",
+#     改用 Actions 自带的 GITHUB_TOKEN,不需要任何自建 secret,不报错、不中断
+#   - SYNC_TOKEN 存在且校验通过 → 自动升级为"公开+私有全量备份"
+# 不再需要分别维护 public 版和 full 版两份 workflow,这一份自适应两种场景。
+#
+# ★ 上一版修复的问题(本版保留) ★
 # 旧版枚举分支时用了 `git ls-remote ... 2>/dev/null | ... || true`,
 # 把 clone/认证失败(403/404/token 无效等)和"仓库真的没有任何分支"
 # 这两种完全不同的情况混为一谈 —— 两者在日志里都表现为 BRANCH_LIST
@@ -46,7 +54,9 @@ jobs:
     # ██████████████████  ★★★ 需要你手动配置 ★★★  ██████████████████
     # ══════════════════════════════════════════════════════════════════
     env:
-      # ---- 1. 要同步的 GitHub 账户名(必须和生成 SYNC_TOKEN 的账户是同一个,才能拿到私有仓库) ----
+      # ---- 1. 要同步的 GitHub 账户名 ----
+      # 公开模式下只用来拉该账户的公开仓库;私有模式下还会用来核对
+      # SYNC_TOKEN 对应的账户是否正好是这一个,防止误配到别人的 token
       SYNC_USERNAME: "timeflysoon"
 
       # ---- 2. 本地保护名单 ★重要★ ----
@@ -63,9 +73,11 @@ jobs:
     # ══════════════════════════════════════════════════════════════════
     # ██████████████████  ★★★ 配置区到此结束 ★★★  ██████████████████
     # ══════════════════════════════════════════════════════════════════
-    # Token 不在这里配置,必须去仓库 Settings -> Secrets and variables -> Actions
-    # 新建一个名叫 SYNC_TOKEN 的 secret,值填你的 personal access token
-    # 权限至少要包含 repo(经典token)或 Contents 读权限(fine-grained token)
+    # SYNC_TOKEN 是可选的,不配置也能正常运行(自动降级为仅备份公开仓库)。
+    # 想备份私有仓库,才需要去仓库 Settings -> Secrets and variables -> Actions
+    # 新建一个名叫 SYNC_TOKEN 的 secret,值填你的 personal access token,
+    # 权限至少要包含 repo(经典token)或 Contents 读权限(fine-grained token)。
+    # 具体获取步骤见文件末尾的说明。
 
     steps:
       - name: 拉取本仓库(上次备份存档 + 本次要提交的目标)
@@ -102,10 +114,11 @@ jobs:
           done
           rm -rf "$PROTECT_STASH"
 
-      - name: 拉取远程仓库列表(含私有仓库)并逐个仓库、逐个分支 clone
+      - name: 自动识别公开/私有模式,拉取远程仓库列表并逐个仓库、逐个分支 clone
         shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.SYNC_TOKEN }}
+          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
+          PUBLIC_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           cd ./repos
@@ -116,10 +129,48 @@ jobs:
             exit 1
           fi
 
-          if [ -z "${GITHUB_TOKEN:-}" ]; then
-            echo "错误: 未检测到 secrets.SYNC_TOKEN,请先在仓库 Secrets 中配置"
-            exit 1
+          # ---- 自动检测并验证 SYNC_TOKEN,决定本次运行模式 ----
+          # MODE=full  : 备份公开+私有全部仓库,clone 时带 SYNC_TOKEN 认证
+          # MODE=public: 仅备份公开仓库,clone 不需要任何 token
+          MODE="public"
+          AUTH_TOKEN=""
+
+          if [ -z "${SYNC_TOKEN:-}" ]; then
+            echo "未检测到 secrets.SYNC_TOKEN,本次自动按【仅公开仓库】模式运行"
+          else
+            echo "检测到 secrets.SYNC_TOKEN,正在校验其有效性..."
+            TOKEN_CHECK_FILE=$(mktemp)
+            HTTP_CODE=$(curl -s -o "$TOKEN_CHECK_FILE" -w '%{http_code}' \
+              --connect-timeout 15 --max-time 30 \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${SYNC_TOKEN}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/user" || echo "000")
+
+            if [ "$HTTP_CODE" = "200" ]; then
+              TOKEN_LOGIN=$(jq -r '.login // empty' "$TOKEN_CHECK_FILE" 2>/dev/null || echo "")
+              if [ "$TOKEN_LOGIN" = "$USERNAME" ]; then
+                MODE="full"
+                AUTH_TOKEN="$SYNC_TOKEN"
+                echo "SYNC_TOKEN 校验通过(账户: $TOKEN_LOGIN),本次按【公开+私有全量】模式运行"
+              else
+                echo "警告: SYNC_TOKEN 有效,但对应账户($TOKEN_LOGIN)与 SYNC_USERNAME($USERNAME) 不一致"
+                echo "为避免拉到错误账户的仓库,自动降级为【仅公开仓库】模式"
+              fi
+            else
+              echo "警告: SYNC_TOKEN 校验失败(HTTP $HTTP_CODE),可能已失效/过期/被撤销"
+              echo "自动降级为【仅公开仓库】模式,不中断本次运行"
+            fi
+            rm -f "$TOKEN_CHECK_FILE"
           fi
+
+          echo ""
+          if [ "$MODE" = "full" ]; then
+            echo "★ 本次运行模式: 公开 + 私有 全量备份 ★"
+          else
+            echo "★ 本次运行模式: 仅公开仓库 ★"
+          fi
+          echo ""
 
           # 辅助函数:判断某个仓库名是否在空格分隔的名单里
           in_list() {
@@ -143,35 +194,63 @@ jobs:
           echo "远程排除名单: ${REMOTE_EXCLUDE_LIST:-(无)}"
           echo "=========================================="
 
-          # ---- 拉取远程仓库列表(含私有),owner 过滤同旧版 ----
+          # ---- 拉取远程仓库列表: 按 MODE 走不同接口 ----
           REMOTE_LIST_FILE=$(mktemp)
           PAGE=1
-          while true; do
-            RESPONSE=$(curl -fsSL \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              "https://api.github.com/user/repos?per_page=100&page=${PAGE}&visibility=all&affiliation=owner,collaborator,organization_member")
 
-            PAGE_COUNT=$(echo "$RESPONSE" | jq 'length')
-            [ "$PAGE_COUNT" -eq 0 ] && break
+          if [ "$MODE" = "full" ]; then
+            while true; do
+              RESPONSE=$(curl -fsSL --connect-timeout 15 --max-time 30 \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer ${AUTH_TOKEN}" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                "https://api.github.com/user/repos?per_page=100&page=${PAGE}&visibility=all&affiliation=owner,collaborator,organization_member")
 
-            echo "$RESPONSE" | jq -r --arg u "$USERNAME" '
-              .[] | select(.owner.login == $u) | .full_name
-            ' >> "$REMOTE_LIST_FILE"
+              PAGE_COUNT=$(echo "$RESPONSE" | jq 'length')
+              [ "$PAGE_COUNT" -eq 0 ] && break
 
-            PAGE=$((PAGE + 1))
-          done
+              echo "$RESPONSE" | jq -r --arg u "$USERNAME" '
+                .[] | select(.owner.login == $u) | .full_name
+              ' >> "$REMOTE_LIST_FILE"
+
+              PAGE=$((PAGE + 1))
+            done
+          else
+            # 公开模式: Authorization 只是用 Actions 自带的 GITHUB_TOKEN 提高 API 速率限制,
+            # 不代表需要认证 —— 公开仓库列表接口和 clone 本身都不需要任何 token
+            while true; do
+              RESPONSE=$(curl -fsSL --connect-timeout 15 --max-time 30 \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer ${PUBLIC_TOKEN}" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                "https://api.github.com/users/${USERNAME}/repos?per_page=100&page=${PAGE}&type=public")
+
+              PAGE_COUNT=$(echo "$RESPONSE" | jq 'length')
+              [ "$PAGE_COUNT" -eq 0 ] && break
+
+              echo "$RESPONSE" | jq -r '.[] | .full_name' >> "$REMOTE_LIST_FILE"
+
+              PAGE=$((PAGE + 1))
+            done
+          fi
 
           sort -u "$REMOTE_LIST_FILE" -o "$REMOTE_LIST_FILE"
 
           REMOTE_COUNT=$(wc -l < "$REMOTE_LIST_FILE" | tr -d ' ')
-          echo "远程共发现 $REMOTE_COUNT 个仓库(含私有,仅 owner 为 $USERNAME 的仓库)"
+          if [ "$MODE" = "full" ]; then
+            echo "远程共发现 $REMOTE_COUNT 个仓库(含私有,仅 owner 为 $USERNAME 的仓库)"
+          else
+            echo "远程共发现 $REMOTE_COUNT 个公开仓库"
+          fi
 
           if [ "$REMOTE_COUNT" -eq 0 ]; then
             echo "未获取到任何仓库,请检查:"
             echo "1) SYNC_USERNAME 是否正确"
-            echo "2) SYNC_TOKEN 是否有效、是否有权限访问对应仓库"
+            if [ "$MODE" = "full" ]; then
+              echo "2) SYNC_TOKEN 对应账户下是否确实存在仓库"
+            else
+              echo "2) 该账户下是否确实有公开仓库"
+            fi
             exit 1
           fi
 
@@ -209,7 +288,12 @@ jobs:
               continue
             fi
 
-            CLONE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${FULL_NAME}.git"
+            if [ "$MODE" = "full" ]; then
+              CLONE_URL="https://x-access-token:${AUTH_TOKEN}@github.com/${FULL_NAME}.git"
+            else
+              # 公开仓库,不带 token 的地址即可 clone
+              CLONE_URL="https://github.com/${FULL_NAME}.git"
+            fi
 
             # ---- 先枚举该仓库的所有分支 ----
             # ★ 关键修复: 不再用 2>/dev/null 吞掉报错、也不再用 || true 强制当成功。
@@ -225,8 +309,12 @@ jobs:
               echo "    ✗ git ls-remote 失败,无法枚举分支,真实报错如下:"
               sed 's/^/      /' "$LS_REMOTE_ERR"
               rm -f "$LS_REMOTE_ERR"
-              echo "    → 常见原因: SYNC_TOKEN 无效/过期、Repository access 没勾选到这个仓库、"
-              echo "       fine-grained token 需要额外做组织 SSO 授权、或该仓库对该 token 确实不可见"
+              if [ "$MODE" = "full" ]; then
+                echo "    → 常见原因: SYNC_TOKEN 无效/过期、Repository access 没勾选到这个仓库、"
+                echo "       fine-grained token 需要额外做组织 SSO 授权、或该仓库对该 token 确实不可见"
+              else
+                echo "    → 常见原因: 网络波动、该仓库刚好在本次请求时不可访问"
+              fi
               REPO_FAIL_COUNT=$((REPO_FAIL_COUNT + 1))
               AUTH_FAIL_REPOS="$AUTH_FAIL_REPOS $REPO_NAME"
               continue
@@ -284,7 +372,7 @@ jobs:
 
           echo ""
           echo "=========================================="
-          echo "同步完成"
+          echo "同步完成(模式: $([ "$MODE" = "full" ] && echo '公开+私有全量' || echo '仅公开仓库'))"
           echo "  仓库成功:   $REPO_OK_COUNT"
           echo "  仓库失败:   $REPO_FAIL_COUNT"
           echo "  仓库已排除: $EXCLUDE_COUNT"
@@ -294,10 +382,13 @@ jobs:
           echo "  分支失败:   $BRANCH_FAIL_COUNT"
           if [ -n "$AUTH_FAIL_REPOS" ]; then
             echo "  ------------------------------------"
-            echo "  ⚠ 以下仓库因 git ls-remote 失败(疑似认证/权限问题)被跳过:"
+            echo "  ⚠ 以下仓库因 git ls-remote 失败被跳过:"
             echo "   $AUTH_FAIL_REPOS"
           fi
           echo "=========================================="
+
+          # 把本次运行模式写到文件里,方便下一步提交时使用的 commit message 引用
+          echo "$MODE" > /tmp/backup_mode.txt
 
       - name: 提交前防御:检测超大文件(>95MiB 直接失败)
         shell: bash
@@ -332,7 +423,12 @@ jobs:
             exit 0
           fi
 
-          git commit -m "自动同步备份(全分支) $(date -u '+%Y-%m-%d %H:%M UTC')"
+          MODE_LABEL="仅公开仓库"
+          if [ -f /tmp/backup_mode.txt ] && [ "$(cat /tmp/backup_mode.txt)" = "full" ]; then
+            MODE_LABEL="公开+私有全量"
+          fi
+
+          git commit -m "自动同步备份(全分支·${MODE_LABEL}) $(date -u '+%Y-%m-%d %H:%M UTC')"
 
           # push 前先 rebase 远程,避免手动操作过备份仓库导致 non-fast-forward 失败
           git pull --rebase
