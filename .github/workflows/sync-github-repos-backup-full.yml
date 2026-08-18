@@ -1,0 +1,357 @@
+name: 同步 GitHub 仓库备份(全分支)
+
+# ★ 与旧版的核心区别 ★
+# 旧版 git clone --depth 1 只拉默认分支的最新一次提交,其他分支完全拿不到。
+# 这一版会先枚举每个仓库的所有分支,再逐个分支单独浅克隆,
+# 目录结构变成: repos/仓库名/分支名/(该分支下的文件)
+# 代价说明(务必确认接受):
+#   1. 仍然是"文件快照",不保留任何一次提交的历史(每个分支只留"当下长什么样")
+#   2. 分支数量越多,耗时和请求次数越多,大仓库多分支会明显拉长运行时间
+#   3. 如果分支名互相前缀冲突(例如同时存在 release 和 release/1.0),
+#      后处理的那个会因为目录路径冲突被跳过,并在日志里明确提示
+#
+# ★ 本版修复的问题 ★
+# 旧版枚举分支时用了 `git ls-remote ... 2>/dev/null | ... || true`,
+# 把 clone/认证失败(403/404/token 无效等)和"仓库真的没有任何分支"
+# 这两种完全不同的情况混为一谈 —— 两者在日志里都表现为 BRANCH_LIST
+# 为空,于是全部被当成"空仓库",只留一个 .gitkeep 占位文件,
+# 私有仓库因认证问题拉取失败时会被静默吞掉,不会报错、也看不到原因。
+# 这一版改为: 先单独判断 git ls-remote 是否成功,失败时打印真实报错
+# 并计入失败统计,只有"命令成功但确实没有分支"才当作空仓库处理。
+
+on:
+  schedule:
+    # 每天 UTC 3:00(北京时间 11:00)自动执行,可自行调整 cron 表达式
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    # 允许在 Actions 页面手动点 "Run workflow" 触发,方便调试
+
+# 给 GITHUB_TOKEN(用于最后 git push)声明写权限
+permissions:
+  contents: write
+
+# 防止定时任务和手动触发撞车,或者上一次还没跑完下一次又开始
+concurrency:
+  group: github-backup-${{ github.repository }}
+  cancel-in-progress: false
+
+# 分支数量多、仓库多时耗时可能明显增加,给足够的超时时间(默认 360 分钟上限)
+# 按需调整,例如仓库和分支特别多可以设更高一些
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    # ══════════════════════════════════════════════════════════════════
+    # ██████████████████  ★★★ 需要你手动配置 ★★★  ██████████████████
+    # ══════════════════════════════════════════════════════════════════
+    env:
+      # ---- 1. 要同步的 GitHub 账户名(必须和生成 SYNC_TOKEN 的账户是同一个,才能拿到私有仓库) ----
+      SYNC_USERNAME: "timeflysoon"
+
+      # ---- 2. 本地保护名单 ★重要★ ----
+      # 这里列出的仓库名,无论远程有没有同名仓库,一律不 clone、不覆盖
+      # 多个名字用空格分隔,没有就留空字符串
+      LOCAL_PROTECT_LIST: "88top"
+      # 例: LOCAL_PROTECT_LIST: "my-notes readme-assets"
+
+      # ---- 3. 远程排除名单 ★重要★ ----
+      # 这里列出的远程仓库名,完全跳过同步,连 clone 都不会触发(排除是仓库级别,不是分支级别)
+      # 多个名字用空格分隔,没有就留空字符串
+      REMOTE_EXCLUDE_LIST: ""
+      # 例: REMOTE_EXCLUDE_LIST: "some-huge-repo old-deprecated-project"
+    # ══════════════════════════════════════════════════════════════════
+    # ██████████████████  ★★★ 配置区到此结束 ★★★  ██████████████████
+    # ══════════════════════════════════════════════════════════════════
+    # Token 不在这里配置,必须去仓库 Settings -> Secrets and variables -> Actions
+    # 新建一个名叫 SYNC_TOKEN 的 secret,值填你的 personal access token
+    # 权限至少要包含 repo(经典token)或 Contents 读权限(fine-grained token)
+
+    steps:
+      - name: 拉取本仓库(上次备份存档 + 本次要提交的目标)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 安装 jq(用于稳定解析 GitHub API 返回的 JSON)
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: 清空旧的备份内容,准备全新同步(先保护白名单目录)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ./repos
+
+          # 关键:先把本地保护名单里的目录挪到临时位置,避免下面清空时被一并删除
+          PROTECT_STASH=$(mktemp -d)
+          for name in $LOCAL_PROTECT_LIST; do
+            if [ -d "./repos/$name" ]; then
+              mv "./repos/$name" "$PROTECT_STASH/$name"
+              echo "已暂存保护目录: $name"
+            fi
+          done
+
+          rm -rf ./repos
+          mkdir -p ./repos
+
+          for name in $LOCAL_PROTECT_LIST; do
+            if [ -d "$PROTECT_STASH/$name" ]; then
+              mv "$PROTECT_STASH/$name" "./repos/$name"
+              echo "已恢复保护目录: $name"
+            fi
+          done
+          rm -rf "$PROTECT_STASH"
+
+      - name: 拉取远程仓库列表(含私有仓库)并逐个仓库、逐个分支 clone
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.SYNC_TOKEN }}
+        run: |
+          set -euo pipefail
+          cd ./repos
+
+          USERNAME="$SYNC_USERNAME"
+          if [ -z "$USERNAME" ] || [ "$USERNAME" = "你的GitHub用户名" ]; then
+            echo "错误: 请先在 yml 顶部 env.SYNC_USERNAME 填写真实用户名"
+            exit 1
+          fi
+
+          if [ -z "${GITHUB_TOKEN:-}" ]; then
+            echo "错误: 未检测到 secrets.SYNC_TOKEN,请先在仓库 Secrets 中配置"
+            exit 1
+          fi
+
+          # 辅助函数:判断某个仓库名是否在空格分隔的名单里
+          in_list() {
+            local name="$1"
+            local list="$2"
+            for item in $list; do
+              [ "$item" = "$name" ] && return 0
+            done
+            return 1
+          }
+
+          # ★ 强制保护:自动排除"托管这个 workflow 的仓库自己" ★
+          HOSTING_REPO_NAME="$(echo "${GITHUB_REPOSITORY:-}" | cut -d'/' -f2)"
+          if [ -n "$HOSTING_REPO_NAME" ]; then
+            echo "已自动强制排除本仓库自身: $HOSTING_REPO_NAME(防止递归自我嵌套)"
+          fi
+
+          echo "=========================================="
+          echo "同步账户: $USERNAME"
+          echo "本地保护名单: ${LOCAL_PROTECT_LIST:-(无)}"
+          echo "远程排除名单: ${REMOTE_EXCLUDE_LIST:-(无)}"
+          echo "=========================================="
+
+          # ---- 拉取远程仓库列表(含私有),owner 过滤同旧版 ----
+          REMOTE_LIST_FILE=$(mktemp)
+          PAGE=1
+          while true; do
+            RESPONSE=$(curl -fsSL \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/user/repos?per_page=100&page=${PAGE}&visibility=all&affiliation=owner,collaborator,organization_member")
+
+            PAGE_COUNT=$(echo "$RESPONSE" | jq 'length')
+            [ "$PAGE_COUNT" -eq 0 ] && break
+
+            echo "$RESPONSE" | jq -r --arg u "$USERNAME" '
+              .[] | select(.owner.login == $u) | .full_name
+            ' >> "$REMOTE_LIST_FILE"
+
+            PAGE=$((PAGE + 1))
+          done
+
+          sort -u "$REMOTE_LIST_FILE" -o "$REMOTE_LIST_FILE"
+
+          REMOTE_COUNT=$(wc -l < "$REMOTE_LIST_FILE" | tr -d ' ')
+          echo "远程共发现 $REMOTE_COUNT 个仓库(含私有,仅 owner 为 $USERNAME 的仓库)"
+
+          if [ "$REMOTE_COUNT" -eq 0 ]; then
+            echo "未获取到任何仓库,请检查:"
+            echo "1) SYNC_USERNAME 是否正确"
+            echo "2) SYNC_TOKEN 是否有效、是否有权限访问对应仓库"
+            exit 1
+          fi
+
+          REPO_OK_COUNT=0
+          REPO_FAIL_COUNT=0
+          EXCLUDE_COUNT=0
+          PROTECT_COUNT=0
+          BRANCH_OK_COUNT=0
+          BRANCH_FAIL_COUNT=0
+          AUTH_FAIL_REPOS=""
+
+          while IFS= read -r FULL_NAME; do
+            [ -z "$FULL_NAME" ] && continue
+            REPO_NAME="$(echo "$FULL_NAME" | cut -d'/' -f2)"
+
+            if in_list "$REPO_NAME" "$REMOTE_EXCLUDE_LIST" || [ "$REPO_NAME" = "$HOSTING_REPO_NAME" ]; then
+              if [ "$REPO_NAME" = "$HOSTING_REPO_NAME" ]; then
+                echo "→ [SELF-EXCLUDE] $REPO_NAME 是本仓库自身,强制跳过"
+              else
+                echo "→ [EXCLUDE] $REPO_NAME 在远程排除名单里,跳过"
+              fi
+              EXCLUDE_COUNT=$((EXCLUDE_COUNT + 1))
+              continue
+            fi
+
+            if in_list "$REPO_NAME" "$LOCAL_PROTECT_LIST"; then
+              echo "→ [PROTECTED] $REPO_NAME 在本地保护名单里,跳过(不会被覆盖)"
+              PROTECT_COUNT=$((PROTECT_COUNT + 1))
+              continue
+            fi
+
+            if [ -e "$REPO_NAME" ]; then
+              echo "→ [SKIP] $REPO_NAME 已存在同名文件/目录,跳过,不覆盖"
+              REPO_FAIL_COUNT=$((REPO_FAIL_COUNT + 1))
+              continue
+            fi
+
+            CLONE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${FULL_NAME}.git"
+
+            # ---- 先枚举该仓库的所有分支 ----
+            # ★ 关键修复: 不再用 2>/dev/null 吞掉报错、也不再用 || true 强制当成功。
+            # 先把 stderr 单独存下来,再用 git ls-remote 自身的退出码判断成败:
+            #   命令失败(非 0) → 大概率是认证/网络问题,打印真实报错、计入失败,不当空仓库处理
+            #   命令成功但输出为空 → 才是真正意义上的"没有任何分支"的空仓库
+            echo "→ [仓库] $REPO_NAME 枚举分支..."
+            LS_REMOTE_ERR=$(mktemp)
+            if LS_REMOTE_RAW=$(git ls-remote --heads "$CLONE_URL" 2>"$LS_REMOTE_ERR"); then
+              BRANCH_LIST=$(echo "$LS_REMOTE_RAW" | awk '{print $2}' | sed 's#refs/heads/##')
+              rm -f "$LS_REMOTE_ERR"
+            else
+              echo "    ✗ git ls-remote 失败,无法枚举分支,真实报错如下:"
+              sed 's/^/      /' "$LS_REMOTE_ERR"
+              rm -f "$LS_REMOTE_ERR"
+              echo "    → 常见原因: SYNC_TOKEN 无效/过期、Repository access 没勾选到这个仓库、"
+              echo "       fine-grained token 需要额外做组织 SSO 授权、或该仓库对该 token 确实不可见"
+              REPO_FAIL_COUNT=$((REPO_FAIL_COUNT + 1))
+              AUTH_FAIL_REPOS="$AUTH_FAIL_REPOS $REPO_NAME"
+              continue
+            fi
+
+            if [ -z "$BRANCH_LIST" ]; then
+              # 命令确实成功执行,只是没有任何分支,才是真正的空仓库
+              echo "    (空仓库,无分支,放置占位文件)"
+              mkdir -p "$REPO_NAME"
+              touch "$REPO_NAME/.gitkeep"
+              REPO_OK_COUNT=$((REPO_OK_COUNT + 1))
+              continue
+            fi
+
+            REPO_BRANCH_OK=0
+            REPO_BRANCH_FAIL=0
+
+            while IFS= read -r BRANCH; do
+              [ -z "$BRANCH" ] && continue
+              BRANCH_DIR="$REPO_NAME/$BRANCH"
+
+              if [ -e "$BRANCH_DIR" ]; then
+                echo "      ⚠ [$REPO_NAME/$BRANCH] 目录路径冲突(可能是分支名前缀冲突,如 release 与 release/1.0),跳过该分支"
+                REPO_BRANCH_FAIL=$((REPO_BRANCH_FAIL + 1))
+                continue
+              fi
+
+              echo "      → [CLONE 分支] $REPO_NAME/$BRANCH"
+              if git clone --quiet --depth 1 --single-branch --branch "$BRANCH" "$CLONE_URL" "$BRANCH_DIR" 2>&1 | sed 's/^/        /'; then
+                rm -rf "$BRANCH_DIR/.git"
+                if [ -z "$(ls -A "$BRANCH_DIR")" ]; then
+                  touch "$BRANCH_DIR/.gitkeep"
+                fi
+                REPO_BRANCH_OK=$((REPO_BRANCH_OK + 1))
+              else
+                echo "        ⚠ 分支 clone 失败"
+                rm -rf "$BRANCH_DIR" || true
+                REPO_BRANCH_FAIL=$((REPO_BRANCH_FAIL + 1))
+              fi
+            done <<< "$BRANCH_LIST"
+
+            echo "    $REPO_NAME 完成: 成功 $REPO_BRANCH_OK 个分支, 失败 $REPO_BRANCH_FAIL 个分支"
+            BRANCH_OK_COUNT=$((BRANCH_OK_COUNT + REPO_BRANCH_OK))
+            BRANCH_FAIL_COUNT=$((BRANCH_FAIL_COUNT + REPO_BRANCH_FAIL))
+
+            if [ "$REPO_BRANCH_OK" -gt 0 ]; then
+              REPO_OK_COUNT=$((REPO_OK_COUNT + 1))
+            else
+              REPO_FAIL_COUNT=$((REPO_FAIL_COUNT + 1))
+            fi
+
+          done < "$REMOTE_LIST_FILE"
+
+          rm -f "$REMOTE_LIST_FILE"
+
+          echo ""
+          echo "=========================================="
+          echo "同步完成"
+          echo "  仓库成功:   $REPO_OK_COUNT"
+          echo "  仓库失败:   $REPO_FAIL_COUNT"
+          echo "  仓库已排除: $EXCLUDE_COUNT"
+          echo "  仓库已保护: $PROTECT_COUNT"
+          echo "  ------------------------------------"
+          echo "  分支成功:   $BRANCH_OK_COUNT"
+          echo "  分支失败:   $BRANCH_FAIL_COUNT"
+          if [ -n "$AUTH_FAIL_REPOS" ]; then
+            echo "  ------------------------------------"
+            echo "  ⚠ 以下仓库因 git ls-remote 失败(疑似认证/权限问题)被跳过:"
+            echo "   $AUTH_FAIL_REPOS"
+          fi
+          echo "=========================================="
+
+      - name: 提交前防御:检测超大文件(>95MiB 直接失败)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # GitHub 硬性限制:仓库里任何单文件 >100MB,整个 push 都会被拒绝。
+          # 多分支备份下大文件出现概率更高(同一个大文件可能在多个分支里各出现一次)。
+          BIG=$(find ./repos -type f -size +95M -printf '%s\t%p\n' | sort -rn | head -30)
+          if [ -n "$BIG" ]; then
+            echo "错误: 检测到超过 95MiB 的文件,git push 大概率会被 GitHub 拒绝:"
+            echo "$BIG"
+            echo ""
+            echo "处理建议:"
+            echo "  1) 在 yml 顶部 REMOTE_EXCLUDE_LIST 里排除含大文件的仓库"
+            echo "  2) 或对该仓库改用 Git LFS / 其他存储方案"
+            exit 1
+          fi
+          echo "通过: 未发现 >95MiB 的文件"
+
+      - name: 提交备份结果
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 必须用 -f,绕过被 clone 仓库自带的 .gitignore(否则部分文件会被静默忽略、不提交)
+          git add -f ./repos
+
+          if git diff --staged --quiet; then
+            echo "没有变化,无需提交"
+            exit 0
+          fi
+
+          git commit -m "自动同步备份(全分支) $(date -u '+%Y-%m-%d %H:%M UTC')"
+
+          # push 前先 rebase 远程,避免手动操作过备份仓库导致 non-fast-forward 失败
+          git pull --rebase
+          git push
+
+# ══════════════════════════════════════════════════════════════════
+# ★★★ SYNC_TOKEN 获取与配置步骤(精简版) ★★★
+# ══════════════════════════════════════════════════════════════════
+# 1. 创建 token:GitHub → Settings → Developer settings → Personal access tokens
+#     → Fine-grained tokens → Generate new token
+# 2. 基本信息:随便起个名字,Expiration 建议 90 天,Resource owner 选自己账号
+# 3. Repository access:选 "All repositories"(关键,否则枚不到全部私有仓库)
+# 4. Permissions:Contents → Read-only,其他保持 No access
+# 5. 立即复制:生成后只显示一次,先复制好
+# 6. 打开备份仓库的 Secrets:备份仓库自己的 Settings → Secrets and variables
+#     → Actions(不是个人账号设置页,也不是源仓库的设置页)
+# 7. 新建 Secret:Name 精确填 SYNC_TOKEN,Value 粘贴 token
+# 8. 改 SYNC_USERNAME 并验证:yml 里填真实用户名 → 提交 → Actions 页面
+#    手动 Run workflow → 看日志里"远程共发现 N 个仓库"数量是否符合预期
+#
+# ★ 与旧版共用同一个 SYNC_TOKEN 即可,权限要求完全一样(Contents: Read-only)
+# ══════════════════════════════════════════════════════════════════
