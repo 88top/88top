@@ -15,9 +15,9 @@ name: 同步 GitHub 仓库备份(全分支·仅公开仓库)
 #   4. 私有仓库不会被拉取(接口只返回 public 仓库)
 
 on:
-  schedule:
-    # # 每天 UTC 19:00(北京时间次日 3:00)自动执行,可自行调整 cron 表达式
-    # - cron: '0 19 * * *'
+  # schedule:
+  #   # 每天 UTC 19:00(北京时间次日 3:00)自动执行,可自行调整 cron 表达式
+  #   - cron: '0 19 * * *'
   workflow_dispatch:
     # 允许在 Actions 页面手动点 "Run workflow" 触发,方便调试
 
