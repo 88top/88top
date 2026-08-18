@@ -1,4 +1,4 @@
-name: 同步 GitHub 仓库备份(全分支·自动识别公开/私有)
+name: 同步 GitHub 仓库备份(全分支·自动识别公开/私有·SSH兜底)
 
 # ★ 与旧版的核心区别 ★
 # 旧版 git clone --depth 1 只拉默认分支的最新一次提交,其他分支完全拿不到。
@@ -26,6 +26,14 @@ name: 同步 GitHub 仓库备份(全分支·自动识别公开/私有)
 #      几周后回头查某一次备份到底是哪种模式,直接看仓库首页/commit 历史即可,
 #      不用担心 Actions 日志过期(默认 90 天)被清掉
 #   4. 报告步骤加了 if: always(),即使中途失败也能看到已跑到哪一步、卡在哪
+#
+# ★ 本次新增: SSH 兜底方案 ★
+# SYNC_TOKEN(classic token,repo+workflow 权限)理论上应该能访问账户下所有私库,
+# 但个别仓库偶尔会出现 fine-grained/组织权限相关的边缘情况导致 "Repository not found"。
+# 加了 SSH_PRIVATE_KEY(可选)之后:
+#   - 某个仓库用 SYNC_TOKEN 枚举分支失败时,自动改用 SSH 方式重试一次
+#   - SSH 也失败,才真正记为失败,不影响其他仓库继续走 token
+#   - 没配置 SSH_PRIVATE_KEY 完全不受影响,行为和之前一样
 
 on:
   schedule:
@@ -79,6 +87,10 @@ jobs:
     # 想备份私有仓库,才需要去仓库 Settings -> Secrets and variables -> Actions
     # 新建一个名叫 SYNC_TOKEN 的 secret,值填你的 personal access token,
     # 权限至少要包含 repo(经典token)或 Contents 读权限(fine-grained token)。
+    #
+    # SSH_PRIVATE_KEY 同样是可选的,仅在个别仓库用 SYNC_TOKEN 访问失败时兜底用,
+    # 不配置也完全不影响其余仓库的正常备份。
+    #
     # 具体获取步骤见文件末尾的说明。
 
     steps:
@@ -122,6 +134,7 @@ jobs:
         env:
           SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
           PUBLIC_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           set -euo pipefail
           cd ./repos
@@ -180,6 +193,17 @@ jobs:
           echo ""
           echo "★ 本次运行模式: ${MODE_LABEL} ★"
           echo ""
+
+          # ---- 可选:配置 SSH,作为 token 无法访问某些仓库时的兜底方案 ----
+          SSH_AVAILABLE=0
+          if [ -n "${SSH_PRIVATE_KEY:-}" ]; then
+            mkdir -p ~/.ssh && chmod 700 ~/.ssh
+            echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+            chmod 600 ~/.ssh/id_ed25519
+            ssh-keyscan -H github.com >> ~/.ssh/known_hosts 2>/dev/null
+            SSH_AVAILABLE=1
+            echo "已检测到 SSH_PRIVATE_KEY,token 无法访问的仓库将自动尝试 SSH 兜底"
+          fi
 
           # 辅助函数:判断某个仓库名是否在空格分隔的名单里
           in_list() {
@@ -279,6 +303,7 @@ jobs:
           BRANCH_OK_COUNT=0
           BRANCH_FAIL_COUNT=0
           AUTH_FAIL_REPOS=""
+          SSH_FALLBACK_REPOS=""
           REPO_INDEX=0
 
           while IFS= read -r FULL_NAME; do
@@ -325,11 +350,20 @@ jobs:
             # 先把 stderr 单独存下来,再用 git ls-remote 自身的退出码判断成败:
             #   命令失败(非 0) → 大概率是认证/网络问题,打印真实报错、计入失败,不当空仓库处理
             #   命令成功但输出为空 → 才是真正意义上的"没有任何分支"的空仓库
+            # ★ 新增: token 方式失败时,若配置了 SSH_PRIVATE_KEY,自动用 SSH 重试一次
             echo "🌿 枚举分支..."
             LS_REMOTE_ERR=$(mktemp)
             if LS_REMOTE_RAW=$(git ls-remote --heads "$CLONE_URL" 2>"$LS_REMOTE_ERR"); then
               BRANCH_LIST=$(echo "$LS_REMOTE_RAW" | awk '{print $2}' | sed 's#refs/heads/##')
               rm -f "$LS_REMOTE_ERR"
+            elif [ "$SSH_AVAILABLE" = "1" ] && \
+                 SSH_LS_REMOTE_RAW=$(git ls-remote --heads "git@github.com:${FULL_NAME}.git" 2>/dev/null); then
+              echo "    ⚠️ token 方式失败(见下方原始报错),已通过 SSH 兜底访问成功,该仓库改用 SSH 克隆:"
+              sed 's/^/      /' "$LS_REMOTE_ERR"
+              rm -f "$LS_REMOTE_ERR"
+              CLONE_URL="git@github.com:${FULL_NAME}.git"
+              BRANCH_LIST=$(echo "$SSH_LS_REMOTE_RAW" | awk '{print $2}' | sed 's#refs/heads/##')
+              SSH_FALLBACK_REPOS="$SSH_FALLBACK_REPOS $REPO_NAME"
             else
               echo "    ✗ git ls-remote 失败,无法枚举分支,真实报错如下:"
               sed 's/^/      /' "$LS_REMOTE_ERR"
@@ -337,6 +371,11 @@ jobs:
               if [ "$MODE" = "full" ]; then
                 echo "    → 常见原因: SYNC_TOKEN 无效/过期、Repository access 没勾选到这个仓库、"
                 echo "       fine-grained token 需要额外做组织 SSO 授权、或该仓库对该 token 确实不可见"
+                if [ "$SSH_AVAILABLE" = "1" ]; then
+                  echo "       (已尝试 SSH 兜底但同样失败,请检查该仓库是否添加了 Deploy Key / 账号 SSH Key)"
+                else
+                  echo "       可配置 SSH_PRIVATE_KEY secret 作为兜底方案,见文件末尾说明"
+                fi
               else
                 echo "    → 常见原因: 网络波动、该仓库刚好在本次请求时不可访问"
               fi
@@ -412,6 +451,11 @@ jobs:
           echo "  ------------------------------------"
           echo "  🌿 分支成功:   $BRANCH_OK_COUNT"
           echo "  ⚠️ 分支失败:   $BRANCH_FAIL_COUNT"
+          if [ -n "$SSH_FALLBACK_REPOS" ]; then
+            echo "  ------------------------------------"
+            echo "  🔑 以下仓库 token 失败、改用 SSH 兜底成功:"
+            echo "   $SSH_FALLBACK_REPOS"
+          fi
           if [ -n "$AUTH_FAIL_REPOS" ]; then
             echo "  ------------------------------------"
             echo "  ⚠️ 以下仓库因 git ls-remote 失败被跳过:"
@@ -432,6 +476,7 @@ jobs:
             echo "BACKUP_BRANCH_OK=$BRANCH_OK_COUNT"
             echo "BACKUP_BRANCH_FAIL=$BRANCH_FAIL_COUNT"
             echo "BACKUP_AUTH_FAIL_REPOS=$AUTH_FAIL_REPOS"
+            echo "BACKUP_SSH_FALLBACK_REPOS=$SSH_FALLBACK_REPOS"
           } >> "$GITHUB_ENV"
 
       - name: 提交前防御:检测超大文件(>95MiB 直接失败)
@@ -493,6 +538,14 @@ jobs:
           ⚠️ 分支失败:     ${BACKUP_BRANCH_FAIL:-N/A}
           EOF
 
+          if [ -n "${BACKUP_SSH_FALLBACK_REPOS:-}" ]; then
+            {
+              echo ""
+              echo "🔑 以下仓库 token 失败、改用 SSH 兜底成功:"
+              echo "  ${BACKUP_SSH_FALLBACK_REPOS}"
+            } >> ./BACKUP_STATUS.txt
+          fi
+
           if [ -n "${BACKUP_AUTH_FAIL_REPOS:-}" ]; then
             {
               echo ""
@@ -551,6 +604,15 @@ jobs:
             echo "| 📦 远程仓库总数 | ${BACKUP_REMOTE_COUNT:-N/A} | 本次扫描到的仓库总数 |"
             echo ""
 
+            if [ -n "${BACKUP_SSH_FALLBACK_REPOS:-}" ]; then
+              echo "### 🔑 token 失败、SSH 兜底成功的仓库"
+              echo ""
+              for r in $BACKUP_SSH_FALLBACK_REPOS; do
+                echo "- $r"
+              done
+              echo ""
+            fi
+
             if [ -n "${BACKUP_AUTH_FAIL_REPOS:-}" ]; then
               echo "### ⚠️ 枚举分支失败的仓库"
               echo ""
@@ -560,7 +622,7 @@ jobs:
               echo ""
             fi
 
-            echo "> 备份模式判定规则: 只有配置了 \`SYNC_TOKEN\` secret,且校验通过、账户与 \`SYNC_USERNAME\` 一致,才会按【公开+私有全量】运行;否则一律自动降级为【仅公开仓库】,不会中断或报错。"
+            echo "> 备份模式判定规则: 只有配置了 \`SYNC_TOKEN\` secret,且校验通过、账户与 \`SYNC_USERNAME\` 一致,才会按【公开+私有全量】运行;否则一律自动降级为【仅公开仓库】,不会中断或报错。个别仓库若 token 访问失败,配置了 \`SSH_PRIVATE_KEY\` 时会自动尝试 SSH 兜底。"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: 提交备份结果
@@ -585,19 +647,47 @@ jobs:
           git push
 
 # ══════════════════════════════════════════════════════════════════
-# ★★★ SYNC_TOKEN 获取与配置步骤(精简版) ★★★
+# ★★★ SYNC_TOKEN 获取与配置步骤(你当前用的是 classic token) ★★★
 # ══════════════════════════════════════════════════════════════════
 # 1. 创建 token:GitHub → Settings → Developer settings → Personal access tokens
-#     → Fine-grained tokens → Generate new token
-# 2. 基本信息:随便起个名字,Expiration 建议 90 天,Resource owner 选自己账号
-# 3. Repository access:选 "All repositories"(关键,否则枚不到全部私有仓库)
-# 4. Permissions:Contents → Read-only,其他保持 No access
+#     → Tokens (classic) → Generate new token (classic)
+# 2. Token name: 随便填,比如 "Clone Private"
+# 3. Expiration: No expiration(或按需设置)
+# 4. Select scopes:
+#     repo(全选,包括私有仓库访问)
+#     workflow(用于 Actions)
 # 5. 立即复制:生成后只显示一次,先复制好
-# 6. 打开备份仓库的 Secrets:备份仓库自己的 Settings → Secrets and variables
+# 6. 打开备份仓库(88top/88top)的 Secrets:Settings → Secrets and variables
 #     → Actions(不是个人账号设置页,也不是源仓库的设置页)
 # 7. 新建 Secret:Name 精确填 SYNC_TOKEN,Value 粘贴 token
 # 8. 改 SYNC_USERNAME 并验证:yml 里填真实用户名 → 提交 → Actions 页面
 #    手动 Run workflow → 看日志里"远程共发现 N 个仓库"数量是否符合预期
 #
-# ★ 与旧版共用同一个 SYNC_TOKEN 即可,权限要求完全一样(Contents: Read-only)
+# ══════════════════════════════════════════════════════════════════
+# ★★★ SSH_PRIVATE_KEY 获取与配置步骤(可选,仅用于 token 访问失败的兜底) ★★★
+# ══════════════════════════════════════════════════════════════════
+# 只有当某个私库用上面的 SYNC_TOKEN 依然 "Repository not found" 时才需要配这个,
+# 其余仓库不受影响。建议用"仓库专属 Deploy Key",而不是账号级 SSH key,权限更小更安全。
+#
+# 1. 本地生成一对专用密钥(不要用你已有的私人 key):
+#      ssh-keygen -t ed25519 -C "actions-backup" -f ./backup_key -N ""
+#    会生成 backup_key(私钥)和 backup_key.pub(公钥)
+#
+# 2. 把公钥加到出问题的那个仓库(例如 timeflysoon/XChrome)的 Deploy Key:
+#    该仓库 → Settings → Deploy keys → Add deploy key
+#    → 粘贴 backup_key.pub 内容 → 不要勾选 "Allow write access"(只读足够)
+#
+# 3. 把私钥加到备份仓库(88top/88top)的 Secret:
+#    Settings → Secrets and variables → Actions → New repository secret
+#    Name: SSH_PRIVATE_KEY
+#    Value: 粘贴 backup_key 私钥完整内容(含 -----BEGIN... 和 -----END... 两行)
+#
+# 4. 提交 yml → Actions 页面手动 Run workflow,出问题的那个仓库日志应变成:
+#      🌿 枚举分支...
+#          ⚠️ token 方式失败(见下方原始报错),已通过 SSH 兜底访问成功,该仓库改用 SSH 克隆:
+#          ...
+#          共发现 N 个分支
+#
+# 5. 若以后还有别的私库出现同样问题,只需再给那个仓库单独加一次 Deploy Key
+#    (同一把 backup_key 的公钥可以加到多个仓库),不需要再新建 Secret。
 # ══════════════════════════════════════════════════════════════════
