@@ -1,5 +1,10 @@
 name: Cleanup Workflow Runs
 
+# 同一份文件部署到多个账号的仓库时,自动识别当前账号专属的 AUTH_PAT:
+# secret 命名规则固定为 AUTH_PAT_<账号名大写>,例如 timeflysoon → AUTH_PAT_TIMEFLYSOON。
+# 脚本用 $GITHUB_REPOSITORY_OWNER(当前仓库所属账号)自动拼出这个名字去查找,
+# 不需要在文件里写死任何账号名,复制到别的账号仓库也能直接用。
+
 on:
   schedule:
     # 北京时间每周日 00:00
@@ -29,15 +34,36 @@ jobs:
     timeout-minutes: 120
 
     steps:
-      - name: 获取目标仓库列表
-        id: set-repos
+      - name: 解析当前账号专属 Token
+        id: resolve-token
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.AUTH_PAT }}
+          ALL_SECRETS: ${{ toJSON(secrets) }}
         run: |
           set -Eeuo pipefail
 
-          [ -z "${GH_TOKEN:-}" ] && echo "❌ AUTH_PAT 未配置，请检查 Secrets 设置" && exit 1
+          OWNER="$GITHUB_REPOSITORY_OWNER"
+          # 账号名转大写并把非字母数字字符替换成下划线,拼出该账号专属 secret 名
+          OWNER_KEY=$(printf '%s' "$OWNER" | tr '[:lower:]' '[:upper:]' | tr -cs '[:alnum:]' '_')
+          SECRET_NAME="AUTH_PAT_${OWNER_KEY}"
+
+          TOKEN=$(printf '%s' "$ALL_SECRETS" | jq -r --arg k "$SECRET_NAME" '.[$k] // empty')
+
+          if [ -z "$TOKEN" ]; then
+            echo "❌ 未找到 secret ${SECRET_NAME}"
+            echo "请在本仓库 Settings → Secrets and variables → Actions 中添加,值为 ${OWNER} 账号的 classic PAT(需 repo + workflow 权限)"
+            exit 1
+          fi
+
+          echo "::add-mask::$TOKEN"
+          echo "GH_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+          echo "✅ 已识别账号 ${OWNER} 的专属 Token(${SECRET_NAME})"
+
+      - name: 获取目标仓库列表
+        id: set-repos
+        shell: bash
+        run: |
+          set -Eeuo pipefail
 
           API_HEADERS=(
             -H "Authorization: token $GH_TOKEN"
@@ -96,18 +122,18 @@ jobs:
 
           # 校验 Token 是否有效
           if ! api_get_retry "https://api.github.com/user"; then
-            echo "❌ AUTH_PAT 校验失败，网络异常或 GitHub API 暂时不可用"
+            echo "❌ Token 校验失败，网络异常或 GitHub API 暂时不可用"
             exit 1
           fi
 
           case "$HTTP_CODE" in
             200) ;;
             401)
-              echo "❌ AUTH_PAT 无效、已过期，或权限不足"
+              echo "❌ Token 无效、已过期，或权限不足"
               exit 1
               ;;
             *)
-              echo "❌ 无法校验 AUTH_PAT（HTTP $HTTP_CODE）"
+              echo "❌ 无法校验 Token（HTTP $HTTP_CODE）"
               exit 1
               ;;
           esac
@@ -138,7 +164,7 @@ jobs:
               case "$HTTP_CODE" in
                 200) ;;
                 401)
-                  echo "❌ AUTH_PAT 无效、已过期，或权限不足"
+                  echo "❌ Token 无效、已过期，或权限不足"
                   exit 1
                   ;;
                 403)
@@ -191,7 +217,6 @@ jobs:
         env:
           KEEP_DAYS: ${{ github.event.inputs.keep_days || '0' }}
           REPOSITORIES_FILE: ${{ steps.set-repos.outputs.repositories_file }}
-          GH_TOKEN: ${{ secrets.AUTH_PAT }}
         run: |
           set -Eeuo pipefail
 
@@ -440,6 +465,7 @@ jobs:
         if: always()
         shell: bash
         env:
+          OWNER: ${{ github.repository_owner }}
           MODE: ${{ steps.set-repos.outputs.mode }}
           PROCESSED: ${{ steps.cleanup-run.outputs.processed || 0 }}
           COMPLETED: ${{ steps.cleanup-run.outputs.completed || 0 }}
@@ -460,6 +486,7 @@ jobs:
 
           | 项目 | 值 |
           |------|----|
+          | 账号 | $OWNER |
           | 状态 | $ICON $STATUS |
           | 执行时间 | $(date '+%Y-%m-%d %H:%M:%S UTC') |
           | 触发方式 | ${{ github.event_name }} |
@@ -487,7 +514,10 @@ jobs:
 # 1. 创建 PAT：Settings → Developer settings → Personal access tokens
 #    建议权限：repo + workflow
 #
-# 2. 添加 Secret：仓库 → Settings → Secrets → Actions → AUTH_PAT
+# 2. 添加 Secret：本仓库 → Settings → Secrets → Actions
+#    名称固定为 AUTH_PAT_<账号名大写>,例如账号 timeflysoon → AUTH_PAT_TIMEFLYSOON
+#    (脚本用 $GITHUB_REPOSITORY_OWNER 自动识别当前账号并拼出这个名字,同一份文件
+#     部署到任意账号的仓库都无需改动)
 #
 # 3. 手动触发参数：
 #    keep_days   : 0=清理全部，7=保留7天内
