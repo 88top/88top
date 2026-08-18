@@ -1,134 +1,88 @@
-name: 同步 GitHub 仓库备份(全分支·自动识别公开/私有·SSH兜底)
+name: 同步 GitHub 仓库备份(全分支 · 自动识别公开/私有 · SSH兜底)
 
-# ★ 与旧版的核心区别 ★
-# 旧版 git clone --depth 1 只拉默认分支的最新一次提交,其他分支完全拿不到。
-# 这一版会先枚举每个仓库的所有分支,再逐个分支单独浅克隆,
-# 目录结构变成: repos/仓库名/分支名/(该分支下的文件)
-# 代价说明(务必确认接受):
-#   1. 仍然是"文件快照",不保留任何一次提交的历史(每个分支只留"当下长什么样")
-#   2. 分支数量越多,耗时和请求次数越多,大仓库多分支会明显拉长运行时间
-#   3. 如果分支名互相前缀冲突(例如同时存在 release 和 release/1.0),
-#      后处理的那个会因为目录路径冲突被跳过,并在日志里明确提示
+# ============================================================
+# 功能说明
+# ============================================================
+# 1. 按分支备份,不只是默认分支:先枚举每个仓库的所有分支,逐个浅克隆。
+#    目录结构: repos/仓库名/分支名/(该分支下文件)
+#    注意:只保留"当下快照",不含任何提交历史。
 #
-# ★ 本版新增: SYNC_TOKEN 自动降级,不用再维护两份 yml ★
-# 运行时会自动检测并验证 secrets.SYNC_TOKEN:
-#   - 没配置 SYNC_TOKEN,或配置了但校验不通过(过期/无效/权限不足/
-#     对应账户和 SYNC_USERNAME 不一致) → 自动降级为"仅备份公开仓库",
-#     改用 Actions 自带的 GITHUB_TOKEN,不需要任何自建 secret,不报错、不中断
-#   - SYNC_TOKEN 存在且校验通过 → 自动升级为"公开+私有全量备份"
-# 不再需要分别维护 public 版和 full 版两份 workflow,这一份自适应两种场景。
+# 2. SYNC_TOKEN 自动降级,一份 yml 通吃两种场景:
+#    - 未配置 / 校验失败(过期、账户不符等) → 自动降级为【仅公开仓库】模式,
+#      改用 Actions 自带的 GITHUB_TOKEN,不报错、不中断。
+#    - 校验通过 → 升级为【公开+私有全量】模式。
+#    SYNC_TOKEN 的作用:①判定模式 ②调用 GitHub API 拉取仓库列表
+#    ③给公开+私有全量模式下的 clone 做认证。这一步是 SSH 协议做不到的
+#    (SSH 无法列出"账户下有哪些仓库",只能在已知仓库名的前提下 clone)。
 #
-# ★ 本次新增: 清晰的运行日志 + Job Summary 报告 + 仓库内状态文件 ★
-#   1. 每个仓库处理时打印带编号的独立区块(第 N/总数 个),一眼看出进度
-#   2. 运行结束后在 Actions 运行页面顶部生成表格化 Job Summary 报告,
-#      最上面用醒目字段标出"本次到底是全量模式还是仅公开模式"
-#   3. 同时把这份报告写成 BACKUP_STATUS.txt 提交进备份仓库,
-#      几周后回头查某一次备份到底是哪种模式,直接看仓库首页/commit 历史即可,
-#      不用担心 Actions 日志过期(默认 90 天)被清掉
-#   4. 报告步骤加了 if: always(),即使中途失败也能看到已跑到哪一步、卡在哪
+# 3. SSH 兜底(可选):个别仓库偶发因权限原因导致 token 方式
+#    git ls-remote 失败时,若配置了 SSH_PRIVATE_KEY,自动改用 SSH 重试一次,
+#    成功则该仓库单独走 SSH 完成克隆,不影响其他仓库继续走 token。
+#    未配置 SSH_PRIVATE_KEY 完全不受影响,行为等同没有这个功能。
 #
-# ★ 本次新增: SSH 兜底方案 ★
-# SYNC_TOKEN(classic token,repo+workflow 权限)理论上应该能访问账户下所有私库,
-# 但个别仓库偶尔会出现 fine-grained/组织权限相关的边缘情况导致 "Repository not found"。
-# 加了 SSH_PRIVATE_KEY(可选)之后:
-#   - 某个仓库用 SYNC_TOKEN 枚举分支失败时,自动改用 SSH 方式重试一次
-#   - SSH 也失败,才真正记为失败,不影响其他仓库继续走 token
-#   - 没配置 SSH_PRIVATE_KEY 完全不受影响,行为和之前一样
+# 4. 统计口径说明(避免误解):
+#    "仓库成功" = token 方式成功的仓库数 + SSH 兜底成功的仓库数 之和,
+#    两者不重复、不冲突,SSH 兜底成功的仓库会单独在日志/报告里列出来。
+#
+# 5. 运行报告:
+#    - Job Summary(Actions 运行页面顶部表格)
+#    - BACKUP_STATUS.txt(提交进仓库,长期留存,不受 Actions 日志 90 天限制)
+# ============================================================
 
 on:
   schedule:
-    # 每天 UTC 3:00(北京时间 11:00)自动执行,可自行调整 cron 表达式
-    - cron: '0 3 * * *'
-  workflow_dispatch:
-    # 允许在 Actions 页面手动点 "Run workflow" 触发,方便调试
+    - cron: '0 3 * * *'   # 每天 UTC 3:00(北京时间 11:00)
+  workflow_dispatch:        # 允许手动触发
 
 run-name: 仓库备份 (${{ github.event_name == 'workflow_dispatch' && '手动触发' || '定时任务' }})
 
-# 给 GITHUB_TOKEN(用于最后 git push)声明写权限
 permissions:
-  contents: write
+  contents: write   # git push 需要写权限
 
-# 防止定时任务和手动触发撞车,或者上一次还没跑完下一次又开始
 concurrency:
   group: github-backup-${{ github.repository }}
   cancel-in-progress: false
 
-# 分支数量多、仓库多时耗时可能明显增加,给足够的超时时间(默认 360 分钟上限)
-# 按需调整,例如仓库和分支特别多可以设更高一些
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 180   # 分支数量多时耗时会明显增加,按需调整
 
-    # ══════════════════════════════════════════════════════════════════
-    # ██████████████████  ★★★ 需要你手动配置 ★★★  ██████████████████
-    # ══════════════════════════════════════════════════════════════════
+    # ============================================================
+    # ★★★ 需要手动配置的部分 ★★★
+    # ============================================================
     env:
-      # ---- 1. 要同步的 GitHub 账户名 ----
-      # 公开模式下只用来拉该账户的公开仓库;私有模式下还会用来核对
-      # SYNC_TOKEN 对应的账户是否正好是这一个,防止误配到别人的 token
-      SYNC_USERNAME: "timeflysoon"
-
-      # ---- 2. 本地保护名单 ★重要★ ----
-      # 这里列出的仓库名,无论远程有没有同名仓库,一律不 clone、不覆盖
-      # 多个名字用空格分隔,没有就留空字符串
-      LOCAL_PROTECT_LIST: "88top"
-      # 例: LOCAL_PROTECT_LIST: "my-notes readme-assets"
-
-      # ---- 3. 远程排除名单 ★重要★ ----
-      # 这里列出的远程仓库名,完全跳过同步,连 clone 都不会触发(排除是仓库级别,不是分支级别)
-      # 多个名字用空格分隔,没有就留空字符串
-      REMOTE_EXCLUDE_LIST: ""
-      # 例: REMOTE_EXCLUDE_LIST: "some-huge-repo old-deprecated-project"
-    # ══════════════════════════════════════════════════════════════════
-    # ██████████████████  ★★★ 配置区到此结束 ★★★  ██████████████████
-    # ══════════════════════════════════════════════════════════════════
-    # SYNC_TOKEN 是可选的,不配置也能正常运行(自动降级为仅备份公开仓库)。
-    # 想备份私有仓库,才需要去仓库 Settings -> Secrets and variables -> Actions
-    # 新建一个名叫 SYNC_TOKEN 的 secret,值填你的 personal access token,
-    # 权限至少要包含 repo(经典token)或 Contents 读权限(fine-grained token)。
-    #
-    # SSH_PRIVATE_KEY 同样是可选的,仅在个别仓库用 SYNC_TOKEN 访问失败时兜底用,
-    # 不配置也完全不影响其余仓库的正常备份。
-    #
-    # 具体获取步骤见文件末尾的说明。
+      SYNC_USERNAME: "timeflysoon"        # 要同步的 GitHub 账户名
+      LOCAL_PROTECT_LIST: "88top"          # 本地保护名单(空格分隔,不会被覆盖)
+      REMOTE_EXCLUDE_LIST: ""              # 远程排除名单(空格分隔,仓库级别)
+    # ============================================================
 
     steps:
-      - name: 拉取本仓库(上次备份存档 + 本次要提交的目标)
+      - name: 拉取本仓库
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: 安装 jq(用于稳定解析 GitHub API 返回的 JSON)
+      - name: 安装 jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: 清空旧的备份内容,准备全新同步(先保护白名单目录)
+      - name: 清空旧备份内容(先保护白名单目录)
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p ./repos
-
-          # 关键:先把本地保护名单里的目录挪到临时位置,避免下面清空时被一并删除
-          PROTECT_STASH=$(mktemp -d)
+          STASH=$(mktemp -d)
           for name in $LOCAL_PROTECT_LIST; do
-            if [ -d "./repos/$name" ]; then
-              mv "./repos/$name" "$PROTECT_STASH/$name"
-              echo "已暂存保护目录: $name"
-            fi
+            [ -d "./repos/$name" ] && mv "./repos/$name" "$STASH/$name"
           done
-
           rm -rf ./repos
           mkdir -p ./repos
-
           for name in $LOCAL_PROTECT_LIST; do
-            if [ -d "$PROTECT_STASH/$name" ]; then
-              mv "$PROTECT_STASH/$name" "./repos/$name"
-              echo "已恢复保护目录: $name"
-            fi
+            [ -d "$STASH/$name" ] && mv "$STASH/$name" "./repos/$name"
           done
-          rm -rf "$PROTECT_STASH"
+          rm -rf "$STASH"
 
-      - name: 自动识别公开/私有模式,拉取远程仓库列表并逐个仓库、逐个分支 clone
+      - name: 同步仓库(自动识别模式 · 逐仓库逐分支 clone · SSH兜底)
         id: sync
         shell: bash
         env:
@@ -140,61 +94,40 @@ jobs:
           cd ./repos
 
           USERNAME="$SYNC_USERNAME"
-          if [ -z "$USERNAME" ] || [ "$USERNAME" = "你的GitHub用户名" ]; then
-            echo "错误: 请先在 yml 顶部 env.SYNC_USERNAME 填写真实用户名"
-            exit 1
-          fi
+          [ -z "$USERNAME" ] && { echo "错误: 请填写 SYNC_USERNAME"; exit 1; }
 
-          echo "╔══════════════════════════════════════╗"
-          echo "║  🔍 第一步: 检测本次运行模式"
-          echo "╚══════════════════════════════════════╝"
-
-          # ---- 自动检测并验证 SYNC_TOKEN,决定本次运行模式 ----
-          # MODE=full  : 备份公开+私有全部仓库,clone 时带 SYNC_TOKEN 认证
-          # MODE=public: 仅备份公开仓库,clone 不需要任何 token
+          # ---------- 第一步: 判定运行模式 ----------
           MODE="public"
           AUTH_TOKEN=""
 
-          if [ -z "${SYNC_TOKEN:-}" ]; then
-            echo "未检测到 secrets.SYNC_TOKEN,本次自动按【仅公开仓库】模式运行"
-          else
-            echo "检测到 secrets.SYNC_TOKEN,正在校验其有效性..."
-            TOKEN_CHECK_FILE=$(mktemp)
-            HTTP_CODE=$(curl -s -o "$TOKEN_CHECK_FILE" -w '%{http_code}' \
-              --connect-timeout 15 --max-time 30 \
+          if [ -n "${SYNC_TOKEN:-}" ]; then
+            CHECK=$(mktemp)
+            HTTP_CODE=$(curl -s -o "$CHECK" -w '%{http_code}' --connect-timeout 15 --max-time 30 \
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer ${SYNC_TOKEN}" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
               "https://api.github.com/user" || echo "000")
 
             if [ "$HTTP_CODE" = "200" ]; then
-              TOKEN_LOGIN=$(jq -r '.login // empty' "$TOKEN_CHECK_FILE" 2>/dev/null || echo "")
-              if [ "$TOKEN_LOGIN" = "$USERNAME" ]; then
-                MODE="full"
-                AUTH_TOKEN="$SYNC_TOKEN"
-                echo "✅ SYNC_TOKEN 校验通过(账户: $TOKEN_LOGIN),本次按【公开+私有全量】模式运行"
+              LOGIN=$(jq -r '.login // empty' "$CHECK" 2>/dev/null || echo "")
+              if [ "$LOGIN" = "$USERNAME" ]; then
+                MODE="full"; AUTH_TOKEN="$SYNC_TOKEN"
+                echo "✅ SYNC_TOKEN 校验通过(账户: $LOGIN) → 全量模式"
               else
-                echo "⚠️ SYNC_TOKEN 有效,但对应账户($TOKEN_LOGIN)与 SYNC_USERNAME($USERNAME) 不一致"
-                echo "为避免拉到错误账户的仓库,自动降级为【仅公开仓库】模式"
+                echo "⚠️ SYNC_TOKEN 账户($LOGIN)与 SYNC_USERNAME 不一致 → 降级为公开模式"
               fi
             else
-              echo "⚠️ SYNC_TOKEN 校验失败(HTTP $HTTP_CODE),可能已失效/过期/被撤销"
-              echo "自动降级为【仅公开仓库】模式,不中断本次运行"
+              echo "⚠️ SYNC_TOKEN 校验失败(HTTP $HTTP_CODE) → 降级为公开模式"
             fi
-            rm -f "$TOKEN_CHECK_FILE"
-          fi
-
-          if [ "$MODE" = "full" ]; then
-            MODE_LABEL="公开+私有全量"
+            rm -f "$CHECK"
           else
-            MODE_LABEL="仅公开仓库"
+            echo "未配置 SYNC_TOKEN → 公开模式"
           fi
 
-          echo ""
+          MODE_LABEL="仅公开仓库"; [ "$MODE" = "full" ] && MODE_LABEL="公开+私有全量"
           echo "★ 本次运行模式: ${MODE_LABEL} ★"
-          echo ""
 
-          # ---- 可选:配置 SSH,作为 token 无法访问某些仓库时的兜底方案 ----
+          # ---------- SSH 兜底初始化(可选) ----------
           SSH_AVAILABLE=0
           if [ -n "${SSH_PRIVATE_KEY:-}" ]; then
             mkdir -p ~/.ssh && chmod 700 ~/.ssh
@@ -202,427 +135,216 @@ jobs:
             chmod 600 ~/.ssh/id_ed25519
             ssh-keyscan -H github.com >> ~/.ssh/known_hosts 2>/dev/null
             SSH_AVAILABLE=1
-            echo "已检测到 SSH_PRIVATE_KEY,token 无法访问的仓库将自动尝试 SSH 兜底"
+            echo "已配置 SSH 兜底(SSH_PRIVATE_KEY)"
           fi
 
-          # 辅助函数:判断某个仓库名是否在空格分隔的名单里
-          in_list() {
-            local name="$1"
-            local list="$2"
-            for item in $list; do
-              [ "$item" = "$name" ] && return 0
-            done
-            return 1
-          }
-
-          # ★ 强制保护:自动排除"托管这个 workflow 的仓库自己" ★
+          in_list() { local n="$1" l="$2"; for i in $l; do [ "$i" = "$n" ] && return 0; done; return 1; }
           HOSTING_REPO_NAME="$(echo "${GITHUB_REPOSITORY:-}" | cut -d'/' -f2)"
-          if [ -n "$HOSTING_REPO_NAME" ]; then
-            echo "已自动强制排除本仓库自身: $HOSTING_REPO_NAME(防止递归自我嵌套)"
-          fi
 
-          echo "=========================================="
-          echo "同步账户: $USERNAME"
-          echo "本地保护名单: ${LOCAL_PROTECT_LIST:-(无)}"
-          echo "远程排除名单: ${REMOTE_EXCLUDE_LIST:-(无)}"
-          echo "=========================================="
-          echo ""
-          echo "╔══════════════════════════════════════╗"
-          echo "║  📋 第二步: 拉取远程仓库列表"
-          echo "╚══════════════════════════════════════╝"
-
-          # ---- 拉取远程仓库列表: 按 MODE 走不同接口 ----
-          REMOTE_LIST_FILE=$(mktemp)
+          # ---------- 第二步: 拉取远程仓库列表 ----------
+          LIST=$(mktemp)
           PAGE=1
-
           if [ "$MODE" = "full" ]; then
             while true; do
-              RESPONSE=$(curl -fsSL --connect-timeout 15 --max-time 30 \
+              R=$(curl -fsSL --connect-timeout 15 --max-time 30 \
                 -H "Accept: application/vnd.github+json" \
                 -H "Authorization: Bearer ${AUTH_TOKEN}" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
                 "https://api.github.com/user/repos?per_page=100&page=${PAGE}&visibility=all&affiliation=owner,collaborator,organization_member")
-
-              PAGE_COUNT=$(echo "$RESPONSE" | jq 'length')
-              [ "$PAGE_COUNT" -eq 0 ] && break
-
-              echo "$RESPONSE" | jq -r --arg u "$USERNAME" '
-                .[] | select(.owner.login == $u) | .full_name
-              ' >> "$REMOTE_LIST_FILE"
-
-              PAGE=$((PAGE + 1))
+              N=$(echo "$R" | jq 'length'); [ "$N" -eq 0 ] && break
+              echo "$R" | jq -r --arg u "$USERNAME" '.[] | select(.owner.login==$u) | .full_name' >> "$LIST"
+              PAGE=$((PAGE+1))
             done
           else
-            # 公开模式: Authorization 只是用 Actions 自带的 GITHUB_TOKEN 提高 API 速率限制,
-            # 不代表需要认证 —— 公开仓库列表接口和 clone 本身都不需要任何 token
             while true; do
-              RESPONSE=$(curl -fsSL --connect-timeout 15 --max-time 30 \
+              R=$(curl -fsSL --connect-timeout 15 --max-time 30 \
                 -H "Accept: application/vnd.github+json" \
                 -H "Authorization: Bearer ${PUBLIC_TOKEN}" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
                 "https://api.github.com/users/${USERNAME}/repos?per_page=100&page=${PAGE}&type=public")
-
-              PAGE_COUNT=$(echo "$RESPONSE" | jq 'length')
-              [ "$PAGE_COUNT" -eq 0 ] && break
-
-              echo "$RESPONSE" | jq -r '.[] | .full_name' >> "$REMOTE_LIST_FILE"
-
-              PAGE=$((PAGE + 1))
+              N=$(echo "$R" | jq 'length'); [ "$N" -eq 0 ] && break
+              echo "$R" | jq -r '.[] | .full_name' >> "$LIST"
+              PAGE=$((PAGE+1))
             done
           fi
+          sort -u "$LIST" -o "$LIST"
+          TOTAL=$(wc -l < "$LIST" | tr -d ' ')
+          echo "远程共发现 $TOTAL 个仓库"
+          [ "$TOTAL" -eq 0 ] && { echo "未获取到任何仓库,请检查 SYNC_USERNAME / SYNC_TOKEN"; exit 1; }
 
-          sort -u "$REMOTE_LIST_FILE" -o "$REMOTE_LIST_FILE"
-
-          REMOTE_COUNT=$(wc -l < "$REMOTE_LIST_FILE" | tr -d ' ')
-          if [ "$MODE" = "full" ]; then
-            echo "远程共发现 $REMOTE_COUNT 个仓库(含私有,仅 owner 为 $USERNAME 的仓库)"
-          else
-            echo "远程共发现 $REMOTE_COUNT 个公开仓库"
-          fi
-
-          if [ "$REMOTE_COUNT" -eq 0 ]; then
-            echo "未获取到任何仓库,请检查:"
-            echo "1) SYNC_USERNAME 是否正确"
-            if [ "$MODE" = "full" ]; then
-              echo "2) SYNC_TOKEN 对应账户下是否确实存在仓库"
-            else
-              echo "2) 该账户下是否确实有公开仓库"
-            fi
-            exit 1
-          fi
-
-          echo ""
-          echo "╔══════════════════════════════════════╗"
-          echo "║  🚀 第三步: 逐个仓库同步(共 $REMOTE_COUNT 个)"
-          echo "╚══════════════════════════════════════╝"
-
-          REPO_OK_COUNT=0
-          REPO_FAIL_COUNT=0
-          EXCLUDE_COUNT=0
-          PROTECT_COUNT=0
-          BRANCH_OK_COUNT=0
-          BRANCH_FAIL_COUNT=0
-          AUTH_FAIL_REPOS=""
-          SSH_FALLBACK_REPOS=""
-          REPO_INDEX=0
+          # ---------- 第三步: 逐仓库同步 ----------
+          OK=0; FAIL=0; EXCLUDED=0; PROTECTED=0
+          BR_OK=0; BR_FAIL=0
+          FAIL_REPOS=""; SSH_REPOS=""
+          IDX=0
 
           while IFS= read -r FULL_NAME; do
             [ -z "$FULL_NAME" ] && continue
-            REPO_INDEX=$((REPO_INDEX + 1))
-            REPO_NAME="$(echo "$FULL_NAME" | cut -d'/' -f2)"
-
+            IDX=$((IDX+1))
+            NAME="$(echo "$FULL_NAME" | cut -d'/' -f2)"
             echo ""
-            echo "=========================================="
-            echo "📦 处理仓库 ($REPO_INDEX/$REMOTE_COUNT): $FULL_NAME"
-            echo "=========================================="
+            echo "📦 ($IDX/$TOTAL) $FULL_NAME"
 
-            if in_list "$REPO_NAME" "$REMOTE_EXCLUDE_LIST" || [ "$REPO_NAME" = "$HOSTING_REPO_NAME" ]; then
-              if [ "$REPO_NAME" = "$HOSTING_REPO_NAME" ]; then
-                echo "🚫 [SELF-EXCLUDE] $REPO_NAME 是本仓库自身,强制跳过"
-              else
-                echo "🚫 [EXCLUDE] $REPO_NAME 在远程排除名单里,跳过"
-              fi
-              EXCLUDE_COUNT=$((EXCLUDE_COUNT + 1))
-              continue
+            if in_list "$NAME" "$REMOTE_EXCLUDE_LIST" || [ "$NAME" = "$HOSTING_REPO_NAME" ]; then
+              echo "🚫 跳过(排除名单或本仓库自身)"; EXCLUDED=$((EXCLUDED+1)); continue
             fi
-
-            if in_list "$REPO_NAME" "$LOCAL_PROTECT_LIST"; then
-              echo "🔒 [PROTECTED] $REPO_NAME 在本地保护名单里,跳过(不会被覆盖)"
-              PROTECT_COUNT=$((PROTECT_COUNT + 1))
-              continue
+            if in_list "$NAME" "$LOCAL_PROTECT_LIST"; then
+              echo "🔒 跳过(本地保护)"; PROTECTED=$((PROTECTED+1)); continue
             fi
-
-            if [ -e "$REPO_NAME" ]; then
-              echo "⚠️ [SKIP] $REPO_NAME 已存在同名文件/目录,跳过,不覆盖"
-              REPO_FAIL_COUNT=$((REPO_FAIL_COUNT + 1))
-              continue
+            if [ -e "$NAME" ]; then
+              echo "⚠️ 跳过(同名目录已存在)"; FAIL=$((FAIL+1)); continue
             fi
 
             if [ "$MODE" = "full" ]; then
-              CLONE_URL="https://x-access-token:${AUTH_TOKEN}@github.com/${FULL_NAME}.git"
+              URL="https://x-access-token:${AUTH_TOKEN}@github.com/${FULL_NAME}.git"
             else
-              # 公开仓库,不带 token 的地址即可 clone
-              CLONE_URL="https://github.com/${FULL_NAME}.git"
+              URL="https://github.com/${FULL_NAME}.git"
             fi
 
-            # ---- 先枚举该仓库的所有分支 ----
-            # ★ 关键修复: 不再用 2>/dev/null 吞掉报错、也不再用 || true 强制当成功。
-            # 先把 stderr 单独存下来,再用 git ls-remote 自身的退出码判断成败:
-            #   命令失败(非 0) → 大概率是认证/网络问题,打印真实报错、计入失败,不当空仓库处理
-            #   命令成功但输出为空 → 才是真正意义上的"没有任何分支"的空仓库
-            # ★ 新增: token 方式失败时,若配置了 SSH_PRIVATE_KEY,自动用 SSH 重试一次
-            echo "🌿 枚举分支..."
-            LS_REMOTE_ERR=$(mktemp)
-            if LS_REMOTE_RAW=$(git ls-remote --heads "$CLONE_URL" 2>"$LS_REMOTE_ERR"); then
-              BRANCH_LIST=$(echo "$LS_REMOTE_RAW" | awk '{print $2}' | sed 's#refs/heads/##')
-              rm -f "$LS_REMOTE_ERR"
-            elif [ "$SSH_AVAILABLE" = "1" ] && \
-                 SSH_LS_REMOTE_RAW=$(git ls-remote --heads "git@github.com:${FULL_NAME}.git" 2>/dev/null); then
-              echo "    ⚠️ token 方式失败(见下方原始报错),已通过 SSH 兜底访问成功,该仓库改用 SSH 克隆:"
-              sed 's/^/      /' "$LS_REMOTE_ERR"
-              rm -f "$LS_REMOTE_ERR"
-              CLONE_URL="git@github.com:${FULL_NAME}.git"
-              BRANCH_LIST=$(echo "$SSH_LS_REMOTE_RAW" | awk '{print $2}' | sed 's#refs/heads/##')
-              SSH_FALLBACK_REPOS="$SSH_FALLBACK_REPOS $REPO_NAME"
+            # 枚举分支;token 失败时若有 SSH 则自动重试一次
+            ERR=$(mktemp)
+            if RAW=$(git ls-remote --heads "$URL" 2>"$ERR"); then
+              BRANCHES=$(echo "$RAW" | awk '{print $2}' | sed 's#refs/heads/##')
+              rm -f "$ERR"
+            elif [ "$SSH_AVAILABLE" = "1" ] && SRAW=$(git ls-remote --heads "git@github.com:${FULL_NAME}.git" 2>/dev/null); then
+              echo "    ⚠️ token 失败,SSH 兜底成功,改用 SSH 克隆"
+              sed 's/^/      /' "$ERR"; rm -f "$ERR"
+              URL="git@github.com:${FULL_NAME}.git"
+              BRANCHES=$(echo "$SRAW" | awk '{print $2}' | sed 's#refs/heads/##')
+              SSH_REPOS="$SSH_REPOS $NAME"
             else
-              echo "    ✗ git ls-remote 失败,无法枚举分支,真实报错如下:"
-              sed 's/^/      /' "$LS_REMOTE_ERR"
-              rm -f "$LS_REMOTE_ERR"
-              if [ "$MODE" = "full" ]; then
-                echo "    → 常见原因: SYNC_TOKEN 无效/过期、Repository access 没勾选到这个仓库、"
-                echo "       fine-grained token 需要额外做组织 SSO 授权、或该仓库对该 token 确实不可见"
-                if [ "$SSH_AVAILABLE" = "1" ]; then
-                  echo "       (已尝试 SSH 兜底但同样失败,请检查该仓库是否添加了 Deploy Key / 账号 SSH Key)"
-                else
-                  echo "       可配置 SSH_PRIVATE_KEY secret 作为兜底方案,见文件末尾说明"
-                fi
+              echo "    ✗ 枚举分支失败:"; sed 's/^/      /' "$ERR"; rm -f "$ERR"
+              echo "    → 常见原因: SYNC_TOKEN(classic)已过期/撤销、该仓库需要单独 SAML SSO 授权、"
+              echo "       或该仓库对该 token 存在其他访问限制"
+              [ "$SSH_AVAILABLE" = "1" ] && echo "       (SSH 兜底同样失败,请检查该仓库/账户的 SSH 授权)"
+              FAIL=$((FAIL+1)); FAIL_REPOS="$FAIL_REPOS $NAME"; continue
+            fi
+
+            if [ -z "$BRANCHES" ]; then
+              mkdir -p "$NAME" && touch "$NAME/.gitkeep"
+              OK=$((OK+1)); echo "✅ 完成(空仓库)"; continue
+            fi
+
+            BTOTAL=$(echo "$BRANCHES" | wc -l | tr -d ' ')
+            RBOK=0; RBFAIL=0
+            while IFS= read -r B; do
+              [ -z "$B" ] && continue
+              DIR="$NAME/$B"
+              if [ -e "$DIR" ]; then
+                echo "      ⚠️ $B 目录冲突,跳过"; RBFAIL=$((RBFAIL+1)); continue
+              fi
+              if git clone --quiet --depth 1 --single-branch --branch "$B" "$URL" "$DIR" 2>&1 | sed 's/^/        /'; then
+                rm -rf "$DIR/.git"
+                [ -z "$(ls -A "$DIR")" ] && touch "$DIR/.gitkeep"
+                RBOK=$((RBOK+1))
               else
-                echo "    → 常见原因: 网络波动、该仓库刚好在本次请求时不可访问"
+                rm -rf "$DIR" || true
+                RBFAIL=$((RBFAIL+1))
               fi
-              REPO_FAIL_COUNT=$((REPO_FAIL_COUNT + 1))
-              AUTH_FAIL_REPOS="$AUTH_FAIL_REPOS $REPO_NAME"
-              continue
-            fi
+            done <<< "$BRANCHES"
 
-            if [ -z "$BRANCH_LIST" ]; then
-              # 命令确实成功执行,只是没有任何分支,才是真正的空仓库
-              echo "    (空仓库,无分支,放置占位文件)"
-              mkdir -p "$REPO_NAME"
-              touch "$REPO_NAME/.gitkeep"
-              REPO_OK_COUNT=$((REPO_OK_COUNT + 1))
-              echo "✅ $REPO_NAME 完成(空仓库)"
-              continue
-            fi
-
-            BRANCH_TOTAL=$(echo "$BRANCH_LIST" | wc -l | tr -d ' ')
-            echo "    共发现 $BRANCH_TOTAL 个分支"
-
-            REPO_BRANCH_OK=0
-            REPO_BRANCH_FAIL=0
-            BRANCH_INDEX=0
-
-            while IFS= read -r BRANCH; do
-              [ -z "$BRANCH" ] && continue
-              BRANCH_INDEX=$((BRANCH_INDEX + 1))
-              BRANCH_DIR="$REPO_NAME/$BRANCH"
-
-              if [ -e "$BRANCH_DIR" ]; then
-                echo "      ⚠️ [$BRANCH_INDEX/$BRANCH_TOTAL] $BRANCH 目录路径冲突(可能是分支名前缀冲突,如 release 与 release/1.0),跳过该分支"
-                REPO_BRANCH_FAIL=$((REPO_BRANCH_FAIL + 1))
-                continue
-              fi
-
-              echo "      🌱 [$BRANCH_INDEX/$BRANCH_TOTAL] clone 分支: $BRANCH"
-              if git clone --quiet --depth 1 --single-branch --branch "$BRANCH" "$CLONE_URL" "$BRANCH_DIR" 2>&1 | sed 's/^/        /'; then
-                rm -rf "$BRANCH_DIR/.git"
-                if [ -z "$(ls -A "$BRANCH_DIR")" ]; then
-                  touch "$BRANCH_DIR/.gitkeep"
-                fi
-                REPO_BRANCH_OK=$((REPO_BRANCH_OK + 1))
-              else
-                echo "        ⚠️ 分支 clone 失败"
-                rm -rf "$BRANCH_DIR" || true
-                REPO_BRANCH_FAIL=$((REPO_BRANCH_FAIL + 1))
-              fi
-            done <<< "$BRANCH_LIST"
-
-            BRANCH_OK_COUNT=$((BRANCH_OK_COUNT + REPO_BRANCH_OK))
-            BRANCH_FAIL_COUNT=$((BRANCH_FAIL_COUNT + REPO_BRANCH_FAIL))
-
-            if [ "$REPO_BRANCH_OK" -gt 0 ]; then
-              REPO_OK_COUNT=$((REPO_OK_COUNT + 1))
-              echo "✅ $REPO_NAME 完成: 成功 $REPO_BRANCH_OK 个分支, 失败 $REPO_BRANCH_FAIL 个分支"
+            BR_OK=$((BR_OK+RBOK)); BR_FAIL=$((BR_FAIL+RBFAIL))
+            if [ "$RBOK" -gt 0 ]; then
+              OK=$((OK+1)); echo "✅ 完成: 成功 $RBOK / 失败 $RBFAIL 分支"
             else
-              REPO_FAIL_COUNT=$((REPO_FAIL_COUNT + 1))
-              echo "❌ $REPO_NAME 完成: 成功 $REPO_BRANCH_OK 个分支, 失败 $REPO_BRANCH_FAIL 个分支(该仓库无任何分支备份成功)"
+              FAIL=$((FAIL+1)); echo "❌ 完成: 0 个分支成功"
             fi
-
-          done < "$REMOTE_LIST_FILE"
-
-          rm -f "$REMOTE_LIST_FILE"
+          done < "$LIST"
+          rm -f "$LIST"
 
           echo ""
           echo "=========================================="
           echo "🎉 同步完成(模式: ${MODE_LABEL})"
-          echo "  ✅ 仓库成功:   $REPO_OK_COUNT"
-          echo "  ❌ 仓库失败:   $REPO_FAIL_COUNT"
-          echo "  🚫 仓库已排除: $EXCLUDE_COUNT"
-          echo "  🔒 仓库已保护: $PROTECT_COUNT"
-          echo "  ------------------------------------"
-          echo "  🌿 分支成功:   $BRANCH_OK_COUNT"
-          echo "  ⚠️ 分支失败:   $BRANCH_FAIL_COUNT"
-          if [ -n "$SSH_FALLBACK_REPOS" ]; then
-            echo "  ------------------------------------"
-            echo "  🔑 以下仓库 token 失败、改用 SSH 兜底成功:"
-            echo "   $SSH_FALLBACK_REPOS"
-          fi
-          if [ -n "$AUTH_FAIL_REPOS" ]; then
-            echo "  ------------------------------------"
-            echo "  ⚠️ 以下仓库因 git ls-remote 失败被跳过:"
-            echo "   $AUTH_FAIL_REPOS"
-          fi
+          echo "  ✅ 仓库成功: $OK   ❌ 仓库失败: $FAIL"
+          echo "  🚫 已排除:   $EXCLUDED   🔒 已保护: $PROTECTED"
+          echo "  🌿 分支成功: $BR_OK   ⚠️ 分支失败: $BR_FAIL"
+          [ -n "$SSH_REPOS" ] && echo "  🔑 SSH兜底成功: $SSH_REPOS"
+          [ -n "$FAIL_REPOS" ] && echo "  ⚠️ 枚举失败: $FAIL_REPOS"
           echo "=========================================="
 
-          # ---- 把本次运行的所有结果写进 GITHUB_ENV,供后面"生成报告"步骤使用 ----
-          # (同一个 job 内,写进 GITHUB_ENV 的变量会自动成为后续所有 step 的环境变量)
           {
-            echo "BACKUP_MODE=$MODE"
             echo "BACKUP_MODE_LABEL=$MODE_LABEL"
-            echo "BACKUP_REMOTE_COUNT=$REMOTE_COUNT"
-            echo "BACKUP_REPO_OK=$REPO_OK_COUNT"
-            echo "BACKUP_REPO_FAIL=$REPO_FAIL_COUNT"
-            echo "BACKUP_EXCLUDE=$EXCLUDE_COUNT"
-            echo "BACKUP_PROTECT=$PROTECT_COUNT"
-            echo "BACKUP_BRANCH_OK=$BRANCH_OK_COUNT"
-            echo "BACKUP_BRANCH_FAIL=$BRANCH_FAIL_COUNT"
-            echo "BACKUP_AUTH_FAIL_REPOS=$AUTH_FAIL_REPOS"
-            echo "BACKUP_SSH_FALLBACK_REPOS=$SSH_FALLBACK_REPOS"
+            echo "BACKUP_REMOTE_COUNT=$TOTAL"
+            echo "BACKUP_REPO_OK=$OK"
+            echo "BACKUP_REPO_FAIL=$FAIL"
+            echo "BACKUP_EXCLUDE=$EXCLUDED"
+            echo "BACKUP_PROTECT=$PROTECTED"
+            echo "BACKUP_BRANCH_OK=$BR_OK"
+            echo "BACKUP_BRANCH_FAIL=$BR_FAIL"
+            echo "BACKUP_AUTH_FAIL_REPOS=$FAIL_REPOS"
+            echo "BACKUP_SSH_FALLBACK_REPOS=$SSH_REPOS"
           } >> "$GITHUB_ENV"
 
-      - name: 提交前防御:检测超大文件(>95MiB 直接失败)
+      - name: 检测超大文件(>95MiB 直接失败)
         shell: bash
         run: |
           set -euo pipefail
-          # GitHub 硬性限制:仓库里任何单文件 >100MB,整个 push 都会被拒绝。
-          # 多分支备份下大文件出现概率更高(同一个大文件可能在多个分支里各出现一次)。
           BIG=$(find ./repos -type f -size +95M -printf '%s\t%p\n' | sort -rn | head -30)
           if [ -n "$BIG" ]; then
-            echo "错误: 检测到超过 95MiB 的文件,git push 大概率会被 GitHub 拒绝:"
+            echo "错误: 发现超过 95MiB 的文件,push 会被 GitHub 拒绝:"
             echo "$BIG"
-            echo ""
-            echo "处理建议:"
-            echo "  1) 在 yml 顶部 REMOTE_EXCLUDE_LIST 里排除含大文件的仓库"
-            echo "  2) 或对该仓库改用 Git LFS / 其他存储方案"
+            echo "处理建议: REMOTE_EXCLUDE_LIST 排除该仓库,或改用 Git LFS"
             exit 1
           fi
-          echo "通过: 未发现 >95MiB 的文件"
+          echo "通过"
 
-      - name: 生成本次备份报告(BACKUP_STATUS.txt,提交进仓库长期留存)
+      - name: 生成 BACKUP_STATUS.txt
         if: always()
         shell: bash
         run: |
           set -euo pipefail
-          RUN_TIME_UTC="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-          RUN_TIME_CN="$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S 北京时间')"
-          TRIGGER="${{ github.event_name }}"
-
-          REPO_FAIL="${BACKUP_REPO_FAIL:-N/A}"
-          if [ "$REPO_FAIL" = "0" ]; then
-            STATUS_TEXT="✅ 备份任务执行完成"
-          elif [ "$REPO_FAIL" = "N/A" ]; then
-            STATUS_TEXT="❌ 同步步骤未能正常完成,以下数据可能不完整,请查看上面的运行日志"
-          else
-            STATUS_TEXT="⚠️ 备份执行完成,但有 ${REPO_FAIL} 个仓库未成功"
-          fi
+          UTC="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          CN="$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S 北京时间')"
+          FAIL="${BACKUP_REPO_FAIL:-N/A}"
+          if [ "$FAIL" = "0" ]; then STATUS="✅ 备份任务执行完成"
+          elif [ "$FAIL" = "N/A" ]; then STATUS="❌ 同步步骤未完成,请查看运行日志"
+          else STATUS="⚠️ 完成,但有 ${FAIL} 个仓库未成功"; fi
 
           cat > ./BACKUP_STATUS.txt << EOF
           ========================================
           📊 最近一次备份报告
           ========================================
-          备份时间(UTC):   ${RUN_TIME_UTC}
-          备份时间(北京):  ${RUN_TIME_CN}
-          触发方式:        ${TRIGGER}
-          备份模式:        ${BACKUP_MODE_LABEL:-N/A}
-          远程仓库总数:    ${BACKUP_REMOTE_COUNT:-N/A} 个
-
-          状态: ${STATUS_TEXT}
-
+          备份时间(UTC): ${UTC}
+          备份时间(北京): ${CN}
+          备份模式: ${BACKUP_MODE_LABEL:-N/A}
+          远程仓库总数: ${BACKUP_REMOTE_COUNT:-N/A}
+          状态: ${STATUS}
           ----------------------------------------
-          统计明细
-          ----------------------------------------
-          ✅ 仓库成功:     ${BACKUP_REPO_OK:-N/A}
-          ❌ 仓库失败:     ${BACKUP_REPO_FAIL:-N/A}
-          🔒 仓库已保护:   ${BACKUP_PROTECT:-N/A}
-          🚫 仓库已排除:   ${BACKUP_EXCLUDE:-N/A}
-          🌿 分支成功:     ${BACKUP_BRANCH_OK:-N/A}
-          ⚠️ 分支失败:     ${BACKUP_BRANCH_FAIL:-N/A}
+          ✅ 仓库成功: ${BACKUP_REPO_OK:-N/A}
+          ❌ 仓库失败: ${BACKUP_REPO_FAIL:-N/A}
+          🔒 已保护:   ${BACKUP_PROTECT:-N/A}
+          🚫 已排除:   ${BACKUP_EXCLUDE:-N/A}
+          🌿 分支成功: ${BACKUP_BRANCH_OK:-N/A}
+          ⚠️ 分支失败: ${BACKUP_BRANCH_FAIL:-N/A}
           EOF
 
-          if [ -n "${BACKUP_SSH_FALLBACK_REPOS:-}" ]; then
-            {
-              echo ""
-              echo "🔑 以下仓库 token 失败、改用 SSH 兜底成功:"
-              echo "  ${BACKUP_SSH_FALLBACK_REPOS}"
-            } >> ./BACKUP_STATUS.txt
-          fi
-
-          if [ -n "${BACKUP_AUTH_FAIL_REPOS:-}" ]; then
-            {
-              echo ""
-              echo "⚠️ 以下仓库枚举分支失败,未能备份:"
-              echo "  ${BACKUP_AUTH_FAIL_REPOS}"
-            } >> ./BACKUP_STATUS.txt
-          fi
-
+          [ -n "${BACKUP_SSH_FALLBACK_REPOS:-}" ] && { echo ""; echo "🔑 SSH兜底成功: ${BACKUP_SSH_FALLBACK_REPOS}"; } >> ./BACKUP_STATUS.txt
+          [ -n "${BACKUP_AUTH_FAIL_REPOS:-}" ] && { echo ""; echo "⚠️ 枚举失败: ${BACKUP_AUTH_FAIL_REPOS}"; } >> ./BACKUP_STATUS.txt
           echo "========================================" >> ./BACKUP_STATUS.txt
-
           cat ./BACKUP_STATUS.txt
 
-      - name: 生成 Job Summary(Actions 运行页面顶部的可视化报告)
+      - name: 生成 Job Summary
         if: always()
         shell: bash
         run: |
           set -euo pipefail
-          RUN_TIME_CN="$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')"
-          TRIGGER_LABEL="定时任务"
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TRIGGER_LABEL="手动触发"
-          fi
-
-          REPO_FAIL="${BACKUP_REPO_FAIL:-N/A}"
-          if [ "$REPO_FAIL" = "0" ]; then
-            STATUS_TEXT="✅ 备份任务执行完成"
-          elif [ "$REPO_FAIL" = "N/A" ]; then
-            STATUS_TEXT="❌ 同步步骤未能正常完成,以下数据可能不完整,请查看上面的运行日志"
-          else
-            STATUS_TEXT="⚠️ 备份执行完成,但有 ${REPO_FAIL} 个仓库未成功"
-          fi
-
+          CN="$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')"
+          TRIGGER="定时任务"; [ "${{ github.event_name }}" = "workflow_dispatch" ] && TRIGGER="手动触发"
           {
             echo "## 📊 仓库备份报告"
+            echo "**时间**: ${CN}(北京) ｜ **触发**: ${TRIGGER} ｜ **模式**: \`${BACKUP_MODE_LABEL:-N/A}\`"
             echo ""
-            echo "**备份时间**: ${RUN_TIME_CN} (北京时间)"
-            echo ""
-            echo "**触发方式**: ${TRIGGER_LABEL}"
-            echo ""
-            echo "**备份模式**: 🔑 \`${BACKUP_MODE_LABEL:-N/A}\`"
-            echo ""
-            echo "**远程仓库总数**: ${BACKUP_REMOTE_COUNT:-N/A} 个"
-            echo ""
-            echo "**状态**: ${STATUS_TEXT}"
-            echo ""
-            echo "### 📈 备份统计"
-            echo ""
-            echo "| 状态 | 数量 | 说明 |"
-            echo "|---|---|---|"
-            echo "| ✅ 仓库成功 | ${BACKUP_REPO_OK:-N/A} | 至少一个分支备份成功 |"
-            echo "| ❌ 仓库失败 | ${BACKUP_REPO_FAIL:-N/A} | 枚举分支失败 / 目录冲突 / 无分支备份成功 |"
-            echo "| 🔒 仓库已保护 | ${BACKUP_PROTECT:-N/A} | 在本地保护名单里,未覆盖 |"
-            echo "| 🚫 仓库已排除 | ${BACKUP_EXCLUDE:-N/A} | 在远程排除名单里,未同步 |"
-            echo "| 🌿 分支成功 | ${BACKUP_BRANCH_OK:-N/A} | 成功 clone 的分支数 |"
-            echo "| ⚠️ 分支失败 | ${BACKUP_BRANCH_FAIL:-N/A} | 路径冲突 / clone 失败 |"
-            echo "| 📦 远程仓库总数 | ${BACKUP_REMOTE_COUNT:-N/A} | 本次扫描到的仓库总数 |"
-            echo ""
-
-            if [ -n "${BACKUP_SSH_FALLBACK_REPOS:-}" ]; then
-              echo "### 🔑 token 失败、SSH 兜底成功的仓库"
-              echo ""
-              for r in $BACKUP_SSH_FALLBACK_REPOS; do
-                echo "- $r"
-              done
-              echo ""
-            fi
-
-            if [ -n "${BACKUP_AUTH_FAIL_REPOS:-}" ]; then
-              echo "### ⚠️ 枚举分支失败的仓库"
-              echo ""
-              for r in $BACKUP_AUTH_FAIL_REPOS; do
-                echo "- $r"
-              done
-              echo ""
-            fi
-
-            echo "> 备份模式判定规则: 只有配置了 \`SYNC_TOKEN\` secret,且校验通过、账户与 \`SYNC_USERNAME\` 一致,才会按【公开+私有全量】运行;否则一律自动降级为【仅公开仓库】,不会中断或报错。个别仓库若 token 访问失败,配置了 \`SSH_PRIVATE_KEY\` 时会自动尝试 SSH 兜底。"
+            echo "| 状态 | 数量 |"
+            echo "|---|---|"
+            echo "| ✅ 仓库成功 | ${BACKUP_REPO_OK:-N/A} |"
+            echo "| ❌ 仓库失败 | ${BACKUP_REPO_FAIL:-N/A} |"
+            echo "| 🔒 已保护 | ${BACKUP_PROTECT:-N/A} |"
+            echo "| 🚫 已排除 | ${BACKUP_EXCLUDE:-N/A} |"
+            echo "| 🌿 分支成功 | ${BACKUP_BRANCH_OK:-N/A} |"
+            echo "| ⚠️ 分支失败 | ${BACKUP_BRANCH_FAIL:-N/A} |"
+            echo "| 📦 远程总数 | ${BACKUP_REMOTE_COUNT:-N/A} |"
+            [ -n "${BACKUP_SSH_FALLBACK_REPOS:-}" ] && { echo ""; echo "**🔑 SSH兜底成功**: ${BACKUP_SSH_FALLBACK_REPOS}"; }
+            [ -n "${BACKUP_AUTH_FAIL_REPOS:-}" ] && { echo ""; echo "**⚠️ 枚举失败**: ${BACKUP_AUTH_FAIL_REPOS}"; }
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: 提交备份结果
@@ -631,63 +353,25 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # 必须用 -f,绕过被 clone 仓库自带的 .gitignore(否则部分文件会被静默忽略、不提交)
           git add -f ./repos ./BACKUP_STATUS.txt
-
           if git diff --staged --quiet; then
-            echo "没有变化,无需提交"
-            exit 0
+            echo "没有变化,无需提交"; exit 0
           fi
-
           git commit -m "自动同步备份(全分支·${BACKUP_MODE_LABEL:-未知模式}) $(date -u '+%Y-%m-%d %H:%M UTC')"
-
-          # push 前先 rebase 远程,避免手动操作过备份仓库导致 non-fast-forward 失败
           git pull --rebase
           git push
 
-# ══════════════════════════════════════════════════════════════════
-# ★★★ SYNC_TOKEN 获取与配置步骤(你当前用的是 classic token) ★★★
-# ══════════════════════════════════════════════════════════════════
-# 1. 创建 token:GitHub → Settings → Developer settings → Personal access tokens
-#     → Tokens (classic) → Generate new token (classic)
-# 2. Token name: 随便填,比如 "Clone Private"
-# 3. Expiration: No expiration(或按需设置)
-# 4. Select scopes:
-#     repo(全选,包括私有仓库访问)
-#     workflow(用于 Actions)
-# 5. 立即复制:生成后只显示一次,先复制好
-# 6. 打开备份仓库(88top/88top)的 Secrets:Settings → Secrets and variables
-#     → Actions(不是个人账号设置页,也不是源仓库的设置页)
-# 7. 新建 Secret:Name 精确填 SYNC_TOKEN,Value 粘贴 token
-# 8. 改 SYNC_USERNAME 并验证:yml 里填真实用户名 → 提交 → Actions 页面
-#    手动 Run workflow → 看日志里"远程共发现 N 个仓库"数量是否符合预期
+# ============================================================
+# 配置说明
+# ============================================================
+# SYNC_TOKEN(必需,用于私库备份):
+#   GitHub → Settings → Developer settings → Personal access tokens
+#   → Tokens (classic) → Generate new token (classic)
+#   勾选 repo + workflow → 复制 → 备份仓库 Settings → Secrets and variables
+#   → Actions → New repository secret → Name: SYNC_TOKEN
 #
-# ══════════════════════════════════════════════════════════════════
-# ★★★ SSH_PRIVATE_KEY 获取与配置步骤(可选,仅用于 token 访问失败的兜底) ★★★
-# ══════════════════════════════════════════════════════════════════
-# 只有当某个私库用上面的 SYNC_TOKEN 依然 "Repository not found" 时才需要配这个,
-# 其余仓库不受影响。建议用"仓库专属 Deploy Key",而不是账号级 SSH key,权限更小更安全。
-#
-# 1. 本地生成一对专用密钥(不要用你已有的私人 key):
-#      ssh-keygen -t ed25519 -C "actions-backup" -f ./backup_key -N ""
-#    会生成 backup_key(私钥)和 backup_key.pub(公钥)
-#
-# 2. 把公钥加到出问题的那个仓库(例如 timeflysoon/XChrome)的 Deploy Key:
-#    该仓库 → Settings → Deploy keys → Add deploy key
-#    → 粘贴 backup_key.pub 内容 → 不要勾选 "Allow write access"(只读足够)
-#
-# 3. 把私钥加到备份仓库(88top/88top)的 Secret:
-#    Settings → Secrets and variables → Actions → New repository secret
-#    Name: SSH_PRIVATE_KEY
-#    Value: 粘贴 backup_key 私钥完整内容(含 -----BEGIN... 和 -----END... 两行)
-#
-# 4. 提交 yml → Actions 页面手动 Run workflow,出问题的那个仓库日志应变成:
-#      🌿 枚举分支...
-#          ⚠️ token 方式失败(见下方原始报错),已通过 SSH 兜底访问成功,该仓库改用 SSH 克隆:
-#          ...
-#          共发现 N 个分支
-#
-# 5. 若以后还有别的私库出现同样问题,只需再给那个仓库单独加一次 Deploy Key
-#    (同一把 backup_key 的公钥可以加到多个仓库),不需要再新建 Secret。
-# ══════════════════════════════════════════════════════════════════
+# SSH_PRIVATE_KEY(可选,个别仓库 token 失效时兜底):
+#   用你账户已部署的 SSH key 私钥内容即可(无需新建),
+#   复制私钥完整内容(含 BEGIN/END 两行)→ 同样加进备份仓库 Secrets
+#   → Name: SSH_PRIVATE_KEY
+# ============================================================
