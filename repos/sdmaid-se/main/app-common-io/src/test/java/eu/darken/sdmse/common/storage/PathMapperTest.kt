@@ -97,39 +97,58 @@ class PathMapperTest : BaseTest() {
         mapper.toSAFPath(LocalPath.build("/storage/emulated/0/Music")) shouldBe null
     }
 
-    @Test fun `a sibling volume name is matched as a prefix`() = runTest2 {
+    @Test fun `a sibling volume name is not matched as a prefix`() = runTest2 {
         val mapper = mapper(volume("/storage/emulated/0", primaryTreeUri))
 
-        // documents suspect behavior: the volume match is a plain String.startsWith, so
-        // /storage/emulated/01 is treated as being inside /storage/emulated/0. The prefix strip then
-        // doesn't apply either (it looks for a trailing separator), and the whole absolute path ends
-        // up as SAF segments. Correct behavior would be a segment-boundary aware match that returns
-        // null for a sibling volume.
-        mapper.toSAFPath(LocalPath.build("/storage/emulated/01/file")) shouldBe
-            SAFPath.build(primaryTreeUri, "", "storage", "emulated", "01", "file")
+        mapper.toSAFPath(LocalPath.build("/storage/emulated/01/file")) shouldBe null
     }
 
-    @Test fun `traversal segments survive the mapping`() = runTest2 {
+    @Test fun `a sibling user volume is not matched as a prefix`() = runTest2 {
+        val mapper = mapper(volume("/storage/emulated/1", primaryTreeUri))
+
+        mapper.toSAFPath(LocalPath.build("/storage/emulated/10/x")) shouldBe null
+    }
+
+    @Test fun `the volume prefix is only stripped from the front`() = runTest2 {
         val mapper = mapper(volume("/storage/emulated/0", primaryTreeUri))
 
-        // documents suspect behavior: '..' segments are passed through verbatim instead of being
-        // normalized or rejected, so a path that leaves the volume still maps to a SAF path rooted
-        // at that volume's tree uri.
-        mapper.toSAFPath(LocalPath.build("/storage/emulated/0/Android/../../../etc/hosts")) shouldBe
-            SAFPath.build(primaryTreeUri, "Android", "..", "..", "..", "etc", "hosts")
+        mapper.toSAFPath(LocalPath.build("/storage/emulated/0/backup/storage/emulated/0/f")) shouldBe
+            SAFPath.build(primaryTreeUri, "backup", "storage", "emulated", "0", "f")
     }
 
-    @Test fun `overlapping volume roots are resolved by list order, not by specificity`() = runTest2 {
+    @Test fun `a path with traversal segments does not map`() = runTest2 {
+        val mapper = mapper(volume("/storage/emulated/0", primaryTreeUri))
+
+        mapper.toSAFPath(LocalPath.build("/storage/emulated/0/Android/../../../etc/hosts")) shouldBe null
+    }
+
+    @Test fun `a path with a compound traversal segment does not map`() = runTest2 {
+        val mapper = mapper(volume("/storage/emulated/0", primaryTreeUri))
+
+        mapper.toSAFPath(LocalPath.build("/storage/emulated/0", "safe/../../etc")) shouldBe null
+    }
+
+    @Test fun `a path with a current directory segment does not map`() = runTest2 {
+        val mapper = mapper(volume("/storage/emulated/0", primaryTreeUri))
+
+        mapper.toSAFPath(LocalPath.build("/storage/emulated/0/./Music")) shouldBe null
+    }
+
+    @Test fun `names that only look like traversal still map`() = runTest2 {
+        val mapper = mapper(volume("/storage/emulated/0", primaryTreeUri))
+
+        mapper.toSAFPath(LocalPath.build("/storage/emulated/0/foo..bar/.../.nomedia")) shouldBe
+            SAFPath.build(primaryTreeUri, "foo..bar", "...", ".nomedia")
+    }
+
+    @Test fun `overlapping volume roots are resolved by specificity`() = runTest2 {
         val mapper = mapper(
             volume("/storage/emulated", sdcardTreeUri),
             volume("/storage/emulated/0", primaryTreeUri),
         )
 
-        // documents suspect behavior: firstOrNull() takes whichever volume comes first in the
-        // system's list, so the less specific root wins and the path maps to the wrong tree uri.
-        // Correct behavior would be to pick the longest matching volume root.
         mapper.toSAFPath(LocalPath.build("/storage/emulated/0/Music")) shouldBe
-            SAFPath.build(sdcardTreeUri, "0", "Music")
+            SAFPath.build(primaryTreeUri, "Music")
     }
 
     @Test fun `a SAF path maps back to the volume directory plus its segments`() = runTest2 {
@@ -158,13 +177,50 @@ class PathMapperTest : BaseTest() {
         mapper.toLocalPath(SAFPath.build(primaryTreeUri, "Music")) shouldBe null
     }
 
-    @Test fun `traversal segments survive the mapping back`() = runTest2 {
+    @Test fun `a SAF path with traversal segments does not map back`() = runTest2 {
         val mapper = mapper(volume("/storage/emulated/0", primaryTreeUri))
 
-        // documents suspect behavior: the segments are appended verbatim, so a SAF path carrying
-        // '..' resolves to a local path outside the volume it is anchored to.
-        mapper.toLocalPath(SAFPath.build(primaryTreeUri, "..", "..", "etc", "hosts")) shouldBe
-            LocalPath.build("/storage/emulated/0/../../etc/hosts")
+        mapper.toLocalPath(SAFPath.build(primaryTreeUri, "..", "..", "etc", "hosts")) shouldBe null
+    }
+
+    @Test fun `a SAF path with a compound traversal segment does not map back`() = runTest2 {
+        val mapper = mapper(volume("/storage/emulated/0", primaryTreeUri))
+
+        mapper.toLocalPath(SAFPath.build(primaryTreeUri, "safe/../../etc")) shouldBe null
+        mapper.toLocalPath(SAFPath.build(primaryTreeUri, "Android", "../etc")) shouldBe null
+    }
+
+    @Test fun `a SAF path with a current directory segment does not map back`() = runTest2 {
+        val mapper = mapper(volume("/storage/emulated/0", primaryTreeUri))
+
+        mapper.toLocalPath(SAFPath.build(primaryTreeUri, ".", "Music")) shouldBe null
+    }
+
+    @Test fun `SAF names that only look like traversal still map back`() = runTest2 {
+        val mapper = mapper(volume("/storage/emulated/0", primaryTreeUri))
+
+        mapper.toLocalPath(SAFPath.build(primaryTreeUri, "foo..bar", "...", ".nomedia")) shouldBe
+            LocalPath.build("/storage/emulated/0/foo..bar/.../.nomedia")
+    }
+
+    @Test fun `a local path round-trips through the SAF mapping`() = runTest2 {
+        val mapper = mapper(volume("/storage/emulated/0", primaryTreeUri))
+
+        val nested = LocalPath.build("/storage/emulated/0/Android/data/some.pkg")
+        mapper.toLocalPath(mapper.toSAFPath(nested)!!) shouldBe nested
+
+        val volumeRoot = LocalPath.build("/storage/emulated/0")
+        mapper.toLocalPath(mapper.toSAFPath(volumeRoot)!!) shouldBe volumeRoot
+    }
+
+    @Test fun `a SAF path round-trips through the local mapping`() = runTest2 {
+        val mapper = mapper(volume("/storage/emulated/0", primaryTreeUri))
+
+        val nested = SAFPath.build(primaryTreeUri, "Android", "data", "some.pkg")
+        mapper.toSAFPath(mapper.toLocalPath(nested)!!) shouldBe nested
+
+        val volumeRoot = SAFPath.build(primaryTreeUri)
+        mapper.toSAFPath(mapper.toLocalPath(volumeRoot)!!) shouldBe volumeRoot
     }
 
     @Test fun `takePermission persists a read-write grant`() {
@@ -253,26 +309,105 @@ class PathMapperTest : BaseTest() {
         mapper.hasPermission(sdcardTreeUri) shouldBe false
     }
 
-    @Test fun `hasPermission ignores how strong the persisted grant is`() {
+    @Test fun `hasPermission requires a read-write grant`() {
         val mapper = PathMapper(contentResolver, storageManager2)
 
-        // documents suspect behavior: only the uri is compared, the grant's read/write flags are
-        // never looked at. A read-only (or write-only) grant therefore reports as "have permission",
-        // and takePermission() consequently skips upgrading it to the read-write grant the app
-        // needs. Correct behavior would be to require both flags before reporting true.
         every { contentResolver.persistedUriPermissions } returns listOf(
             permission(primaryTreeUri, read = true, write = false),
         )
-        mapper.hasPermission(primaryTreeUri) shouldBe true
+        mapper.hasPermission(primaryTreeUri) shouldBe false
 
         every { contentResolver.persistedUriPermissions } returns listOf(
             permission(primaryTreeUri, read = false, write = true),
         )
-        mapper.hasPermission(primaryTreeUri) shouldBe true
+        mapper.hasPermission(primaryTreeUri) shouldBe false
 
         every { contentResolver.persistedUriPermissions } returns listOf(
             permission(primaryTreeUri, read = true, write = true),
         )
         mapper.hasPermission(primaryTreeUri) shouldBe true
+    }
+
+    @Test fun `takePermission upgrades a read-only grant`() {
+        every { contentResolver.persistedUriPermissions } returns listOf(
+            permission(primaryTreeUri, read = true, write = false),
+        )
+        every { contentResolver.takePersistableUriPermission(any(), any()) } just runs
+        val mapper = PathMapper(contentResolver, storageManager2)
+
+        mapper.takePermission(primaryTreeUri)
+
+        verify {
+            contentResolver.takePersistableUriPermission(
+                primaryTreeUri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+            )
+        }
+    }
+
+    @Test fun `takePermission upgrades a write-only grant`() {
+        every { contentResolver.persistedUriPermissions } returns listOf(
+            permission(primaryTreeUri, read = false, write = true),
+        )
+        every { contentResolver.takePersistableUriPermission(any(), any()) } just runs
+        val mapper = PathMapper(contentResolver, storageManager2)
+
+        mapper.takePermission(primaryTreeUri)
+
+        verify {
+            contentResolver.takePersistableUriPermission(
+                primaryTreeUri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+            )
+        }
+    }
+
+    @Test fun `a failed upgrade keeps the grant we already had`() {
+        every { contentResolver.persistedUriPermissions } returns listOf(
+            permission(primaryTreeUri, read = true, write = false),
+        )
+        every { contentResolver.takePersistableUriPermission(any(), any()) } throws SecurityException("nope")
+        every { contentResolver.releasePersistableUriPermission(any(), any()) } just runs
+        val mapper = PathMapper(contentResolver, storageManager2)
+
+        shouldThrow<SecurityException> { mapper.takePermission(primaryTreeUri) }
+
+        // Only the mode the failed take could have added is released, the pre-existing read survives.
+        verify {
+            contentResolver.releasePersistableUriPermission(
+                primaryTreeUri,
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+            )
+        }
+        verify(exactly = 0) {
+            contentResolver.releasePersistableUriPermission(
+                primaryTreeUri,
+                match { it and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0 },
+            )
+        }
+    }
+
+    @Test fun `a failed upgrade of a write-only grant only releases the read mode`() {
+        every { contentResolver.persistedUriPermissions } returns listOf(
+            permission(primaryTreeUri, read = false, write = true),
+        )
+        every { contentResolver.takePersistableUriPermission(any(), any()) } throws SecurityException("nope")
+        every { contentResolver.releasePersistableUriPermission(any(), any()) } just runs
+        val mapper = PathMapper(contentResolver, storageManager2)
+
+        shouldThrow<SecurityException> { mapper.takePermission(primaryTreeUri) }
+
+        verify {
+            contentResolver.releasePersistableUriPermission(
+                primaryTreeUri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION,
+            )
+        }
+        verify(exactly = 0) {
+            contentResolver.releasePersistableUriPermission(
+                primaryTreeUri,
+                match { it and Intent.FLAG_GRANT_WRITE_URI_PERMISSION != 0 },
+            )
+        }
     }
 }

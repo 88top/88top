@@ -21,6 +21,7 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import androidx.core.graphics.withClip
 import com.patrykandpatrick.vico.views.cartesian.CartesianDrawingContext
+import com.patrykandpatrick.vico.views.cartesian.data.CartesianChartRanges
 import com.patrykandpatrick.vico.views.cartesian.decoration.Decoration
 
 typealias CalculateLabelPosition = (CartesianDrawingContext, SeriesData) -> LabelPosition?
@@ -32,9 +33,17 @@ data class LabelPosition(
     val textAlign: Paint.Align = Paint.Align.CENTER,
 )
 
-internal fun CartesianDrawingContext.canvasY(point: DataPoint): Float {
-    val yRange = ranges.getYRange(null)
-    return layerBounds.bottom - ((point.y - yRange.minY) / yRange.length).toFloat() * layerBounds.height()
+private fun CartesianChartRanges.yRangeOrNull(): CartesianChartRanges.YRange? =
+    try {
+        getYRange(null)
+    } catch (_: NoSuchElementException) {
+        null
+    }
+
+internal fun CartesianDrawingContext.canvasY(point: DataPoint): Float? {
+    val yRange = ranges.yRangeOrNull()?.takeIf { it.length != 0.0 } ?: return null
+    val ratio = (point.y - yRange.minY) / yRange.length
+    return layerBounds.bottom - ratio.toFloat() * layerBounds.height()
 }
 
 internal val configureLabel: ConfigureLabel = { context, position, seriesData, paint ->

@@ -24,14 +24,32 @@ WiFiAnalyzer is an Android application for analyzing WiFi networks. It helps use
 
 clearAdditional repository-specific versions and toolchain (source-of-truth files shown):
 
-- Kotlin: 2.3.20 (top-level `build.gradle` ext.kotlin_version)
-- Android Gradle Plugin (AGP): 9.1.1 (top-level `build.gradle` classpath `com.android.tools.build:gradle:9.1.1`)
- - Note: the top-level `build.gradle` also adds `gradlePluginPortal()` to repositories and includes additional classpath entries used by the build:
-   - `org.jetbrains.kotlin:kotlin-allopen:$kotlin_version`
-   - `com.github.ben-manes:gradle-versions-plugin:0.53.0`
-- Gradle wrapper: 9.4.1 (`gradle/wrapper/gradle-wrapper.properties` distributionUrl)
-- JDK: 21 is used in CI and repository setup (`.github/actions/common-setup/action.yml` and `.github/workflows/*` use setup-java with `java-version: 21`). Note: project `compileOptions` and `kotlinOptions.jvmTarget` are set to Java 17 in `app/build.gradle`.
-- Android compile/target SDK: compileSdk = 36, minSdk = 24 (see `app/build.gradle`).
+- Kotlin: root `build.gradle` (look for `kotlin_version`)
+- Android Gradle Plugin (AGP): root `build.gradle` (look for the `com.android.tools.build:gradle` classpath)
+- Gradle wrapper: `gradle/wrapper/gradle-wrapper.properties` (check `distributionUrl`)
+- JDK used in CI: `.github/actions/common-setup/action.yml` and `.github/workflows/*` (search for `java-version` or `setup-java` usage)
+- Kotlin JVM target, compileSdk, minSdk: `app/build.gradle` (`kotlinOptions.jvmTarget`, `compileSdk`, `minSdkVersion` / `minSdk`)
+- ktlint plugin version: `app/build.gradle` (plugin `org.jlleitschuh.gradle.ktlint` and its `version`)
+
+To extract these values quickly from a bash shell you can run (from the repository root):
+
+```bash
+# Kotlin version
+grep -n "kotlin_version" build.gradle.kts
+
+# AGP classpath
+grep -n "com.android.tools.build:gradle" build.gradle.kts
+
+# Gradle wrapper distribution
+grep -n "distributionUrl" gradle/wrapper/gradle-wrapper.properties
+
+# JDK in CI workflows
+grep -R "java-version" .github
+
+# compileSdk / minSdk / jvmTarget / ktlint plugin
+grep -nE "compileSdk|minSdk|kotlinOptions.jvmTarget|org.jlleitschuh.gradle.ktlint" app/build.gradle.kts
+
+```
 
 ## Project Structure
 

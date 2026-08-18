@@ -41,9 +41,7 @@ class MarkerHandler(
         dataPointToDetail: Map<Long, MutableList<WiFiDetail>>,
         targets: List<CartesianMarker.Target>,
     ): Point {
-        val lineTarget =
-            targets.firstOrNull { it is LineCartesianLayerMarkerTarget } as? LineCartesianLayerMarkerTarget
-                ?: return lastTouch
+        val lineTarget = targets.filterIsInstance<LineCartesianLayerMarkerTarget>().firstOrNull() ?: return lastTouch
         val points = lineTarget.points
         if (points.isEmpty()) return lastTouch
         val markerPoints = points.map { MarkerPoint(DataPoint(it.entry.x.toInt(), it.entry.y.toInt()), it.canvasY) }

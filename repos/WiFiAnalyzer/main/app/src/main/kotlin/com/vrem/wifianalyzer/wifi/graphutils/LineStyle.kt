@@ -67,7 +67,11 @@ class LineLayerFactory {
         rangeProvider: CartesianLayerRangeProvider,
     ): LineCartesianLayer {
         val lineProvider = LineCartesianLayer.LineProvider.series(lines(seriesData))
-        return LineCartesianLayer(lineProvider = lineProvider, rangeProvider = rangeProvider)
+        return LineCartesianLayer(
+            lineProvider = lineProvider,
+            rangeProvider = rangeProvider,
+            drawingModelInterpolator = SnapshotLineDrawingModelInterpolator(),
+        )
     }
 
     internal fun lines(seriesData: List<SeriesData>): List<LineCartesianLayer.Line> =

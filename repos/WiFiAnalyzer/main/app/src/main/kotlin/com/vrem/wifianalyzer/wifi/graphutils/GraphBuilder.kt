@@ -126,6 +126,7 @@ class GraphBuilder(
                         minY = MIN_Y.toDouble(),
                         maxY = maximumPortY.toDouble(),
                     ),
+                drawingModelInterpolator = SnapshotLineDrawingModelInterpolator(),
             )
 
         val chart =

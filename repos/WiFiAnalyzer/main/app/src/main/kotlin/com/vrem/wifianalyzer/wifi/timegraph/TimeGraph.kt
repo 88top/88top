@@ -91,7 +91,7 @@ internal fun calculateLabelPosition(
     if (point.y <= MIN_Y) return null
     return with(context) {
         val canvasX = layerBounds.right - spToPx(2f)
-        LabelPosition(canvasX, canvasY(point), Paint.Align.RIGHT)
+        canvasY(point)?.let { LabelPosition(canvasX, it, Paint.Align.RIGHT) }
     }
 }
 

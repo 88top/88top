@@ -94,6 +94,18 @@ class CalculateLabelPositionTest {
     }
 
     @Test
+    fun unavailableYRangeReturnsNull() {
+        // Arrange
+        val series = withSeriesData()
+        stubContext(populated = false)
+        // Act
+        val actual = calculateLabelPosition(context, series)
+        // Assert
+        assertThat(actual).isNull()
+        verifyContext()
+    }
+
+    @Test
     fun usesMiddleDataPoint() {
         // Arrange
         val dataPoints =
@@ -181,10 +193,11 @@ class CalculateLabelPositionTest {
     private fun stubContext(
         xStep: Double = 1.0,
         isLtr: Boolean = true,
+        populated: Boolean = true,
     ) {
         val ranges =
             MutableCartesianChartRanges().apply {
-                tryUpdate(2400.0, 2500.0, -100.0, 0.0, null)
+                if (populated) tryUpdate(2400.0, 2500.0, -100.0, 0.0, null)
                 this.xStep = xStep
             }
         val dims = MutableCartesianLayerDimensions(xSpacing = 2f)

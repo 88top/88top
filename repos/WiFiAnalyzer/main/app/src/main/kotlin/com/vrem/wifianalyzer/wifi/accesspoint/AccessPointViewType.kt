@@ -21,7 +21,7 @@ import androidx.annotation.LayoutRes
 import com.vrem.wifianalyzer.R
 
 enum class AccessPointViewType(
-    @LayoutRes val layout: Int,
+    @get:LayoutRes @param:LayoutRes val layout: Int,
 ) {
     COMPLETE(R.layout.access_point_view_complete),
     COMPACT(R.layout.access_point_view_compact),

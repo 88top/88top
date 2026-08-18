@@ -29,6 +29,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.doThrow
 import org.mockito.Mockito.times
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -54,7 +55,6 @@ class CanvasYTest {
     @After
     fun tearDown() {
         verify(context).ranges
-        verify(context, times(2)).layerBounds
         verify(ranges).getYRange(null)
         verifyNoMoreInteractions(context, ranges)
     }
@@ -69,6 +69,7 @@ class CanvasYTest {
         // canvasY = bottom - ((y - minY) / length) * height
         // = 200 - ((-50 - -100) / 100) * 200 = 200 - 0.5 * 200 = 100
         assertThat(actual).isEqualTo(100f)
+        verify(context, times(2)).layerBounds
     }
 
     @Test
@@ -79,6 +80,7 @@ class CanvasYTest {
         val actual = context.canvasY(dataPoint)
         // Assert
         assertThat(actual).isEqualTo(200f)
+        verify(context, times(2)).layerBounds
     }
 
     @Test
@@ -89,5 +91,28 @@ class CanvasYTest {
         val actual = context.canvasY(dataPoint)
         // Assert
         assertThat(actual).isEqualTo(0f)
+        verify(context, times(2)).layerBounds
+    }
+
+    @Test
+    fun canvasYWithoutYRangeReturnsNull() {
+        // Arrange
+        doThrow(NoSuchElementException()).whenever(ranges).getYRange(null)
+        val point = DataPoint(5, -50)
+        // Act
+        val actual = context.canvasY(point)
+        // Assert
+        assertThat(actual).isNull()
+    }
+
+    @Test
+    fun canvasYWithZeroLengthRangeReturnsNull() {
+        // Arrange
+        doReturn(MutableCartesianChartRanges.MutableYRange(-100.0, -100.0)).whenever(ranges).getYRange(null)
+        val point = DataPoint(5, -50)
+        // Act
+        val actual = context.canvasY(point)
+        // Assert
+        assertThat(actual).isNull()
     }
 }

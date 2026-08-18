@@ -108,7 +108,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [35]
+        api-level: [35, 36, 37]
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/common-setup

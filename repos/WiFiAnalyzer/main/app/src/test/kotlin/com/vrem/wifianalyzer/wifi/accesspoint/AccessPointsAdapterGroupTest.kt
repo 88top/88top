@@ -38,7 +38,7 @@ import org.mockito.kotlin.whenever
 class AccessPointsAdapterGroupTest {
     private val expandableListView: ExpandableListView = mock()
     private val expandableListAdapter: ExpandableListAdapter = mock()
-    private val wiFiDetailWithChildren = mock<WiFiDetail>()
+    private val wiFiDetail = mock<WiFiDetail>()
     private val settings = INSTANCE.settings
     private val fixture = AccessPointsAdapterGroup()
 
@@ -46,7 +46,7 @@ class AccessPointsAdapterGroupTest {
     fun tearDown() {
         verifyNoMoreInteractions(expandableListView)
         verifyNoMoreInteractions(expandableListAdapter)
-        verifyNoMoreInteractions(wiFiDetailWithChildren)
+        verifyNoMoreInteractions(wiFiDetail)
         INSTANCE.restore()
     }
 
@@ -58,14 +58,14 @@ class AccessPointsAdapterGroupTest {
 
     @Test
     fun afterUpdateWithGroupByChannel() {
-        // setup
+        // Arrange
         val wiFiDetails = withWiFiDetails()
         doReturn(GroupBy.CHANNEL).whenever(settings).groupBy()
         doReturn(expandableListAdapter).whenever(expandableListView).expandableListAdapter
         doReturn(wiFiDetails.size).whenever(expandableListAdapter).groupCount
-        // execute
+        // Act
         fixture.update(wiFiDetails, expandableListView)
-        // validate
+        // Assert
         assertThat(fixture.groupBy).isEqualTo(GroupBy.CHANNEL)
         verify(settings).groupBy()
         verify(expandableListView).expandableListAdapter
@@ -77,23 +77,23 @@ class AccessPointsAdapterGroupTest {
 
     @Test
     fun updateGroupBy() {
-        // setup
+        // Arrange
         doReturn(GroupBy.SSID).whenever(settings).groupBy()
-        // execute
+        // Act
         fixture.updateGroupBy()
-        // validate
+        // Assert
         assertThat(fixture.groupBy).isEqualTo(GroupBy.SSID)
         verify(settings).groupBy()
     }
 
     @Test
     fun updateGroupByWillClearExpandedWhenGroupByIsChanged() {
-        // setup
+        // Arrange
         fixture.expanded.add("TEST")
         doReturn(GroupBy.SSID).whenever(settings).groupBy()
-        // execute
+        // Act
         fixture.updateGroupBy()
-        // validate
+        // Assert
         assertThat(fixture.groupBy).isEqualTo(GroupBy.SSID)
         assertThat(fixture.expanded).isEmpty()
         verify(settings).groupBy()
@@ -101,124 +101,124 @@ class AccessPointsAdapterGroupTest {
 
     @Test
     fun updateGroupByWillNotClearExpandedWhenGroupByIsSame() {
-        // setup
+        // Arrange
         doReturn(GroupBy.SSID).whenever(settings).groupBy()
         fixture.updateGroupBy()
         fixture.expanded.add("TEST")
-        // execute
+        // Act
         fixture.updateGroupBy()
-        // validate
+        // Assert
         assertThat(fixture.expanded).isNotEmpty()
     }
 
     @Test
     fun onGroupExpanded() {
-        // setup
+        // Arrange
         doReturn(GroupBy.SSID).whenever(settings).groupBy()
         fixture.updateGroupBy()
         val wiFiDetails = withWiFiDetails()
-        // execute
+        // Act
         fixture.onGroupExpanded(wiFiDetails, 0)
-        // validate
+        // Assert
         assertThat(fixture.expanded).contains(wiFiDetails[0].wiFiIdentifier.ssid)
     }
 
     @Test
     fun onGroupCollapsed() {
-        // setup
+        // Arrange
         doReturn(GroupBy.SSID).whenever(settings).groupBy()
         fixture.updateGroupBy()
         val wiFiDetails = withWiFiDetails()
         fixture.onGroupExpanded(wiFiDetails, 0)
-        // execute
+        // Act
         fixture.onGroupCollapsed(wiFiDetails, 0)
-        // validate
+        // Assert
         assertThat(fixture.expanded).isEmpty()
     }
 
     @Test
     fun updateWithGroupByNoneDoesNotInteractWithExpandableListView() {
-        // setup
+        // Arrange
         val wiFiDetails = withWiFiDetails()
         doReturn(GroupBy.NONE).whenever(settings).groupBy()
-        // execute
+        // Act
         fixture.update(wiFiDetails, expandableListView)
-        // validate
+        // Assert
         verify(settings).groupBy()
     }
 
     @Test
     fun updateWithExpandableListViewNullDoesNotThrow() {
-        // setup
+        // Arrange
         val wiFiDetails = withWiFiDetails()
         doReturn(GroupBy.CHANNEL).whenever(settings).groupBy()
-        // execute
+        // Act
         fixture.update(wiFiDetails, null)
-        // validate
+        // Assert
         verify(settings).groupBy()
     }
 
     @Test
     fun onGroupExpandedWithGroupByNoneDoesNothing() {
-        // setup
+        // Arrange
         val wiFiDetails = withWiFiDetails()
         doReturn(GroupBy.NONE).whenever(settings).groupBy()
         fixture.updateGroupBy()
-        // execute
+        // Act
         fixture.onGroupExpanded(wiFiDetails, 0)
-        // validate
+        // Assert
         assertThat(fixture.expanded).isEmpty()
     }
 
     @Test
     fun onGroupCollapsedWithGroupByNoneDoesNothing() {
-        // setup
+        // Arrange
         val wiFiDetails = withWiFiDetails()
         doReturn(GroupBy.NONE).whenever(settings).groupBy()
         fixture.updateGroupBy()
         fixture.expanded.add("test")
-        // execute
+        // Act
         fixture.onGroupCollapsed(wiFiDetails, 0)
-        // validate
+        // Assert
         assertThat(fixture.expanded).contains("test")
     }
 
     @Test
     fun onGroupExpandedWithInvalidGroupPositionDoesNothing() {
-        // setup
+        // Arrange
         doReturn(GroupBy.SSID).whenever(settings).groupBy()
         fixture.updateGroupBy()
         val wiFiDetails = withWiFiDetails()
-        // execute
+        // Act
         fixture.onGroupExpanded(wiFiDetails, -1)
         fixture.onGroupExpanded(wiFiDetails, wiFiDetails.size)
-        // validate
+        // Assert
         assertThat(fixture.expanded).isEmpty()
     }
 
     @Test
     fun onGroupCollapsedWithInvalidGroupPositionDoesNothing() {
-        // setup
+        // Arrange
         doReturn(GroupBy.SSID).whenever(settings).groupBy()
         fixture.updateGroupBy()
         val wiFiDetails = withWiFiDetails()
         fixture.expanded.add("test")
-        // execute
+        // Act
         fixture.onGroupCollapsed(wiFiDetails, -1)
         fixture.onGroupCollapsed(wiFiDetails, wiFiDetails.size)
-        // validate
+        // Assert
         assertThat(fixture.expanded).contains("test")
     }
 
     @Test
     fun updateWithEmptyWiFiDetailsDoesNotThrow() {
-        // setup
+        // Arrange
         doReturn(GroupBy.CHANNEL).whenever(settings).groupBy()
         doReturn(expandableListAdapter).whenever(expandableListView).expandableListAdapter
         doReturn(0).whenever(expandableListAdapter).groupCount
-        // execute
+        // Act
         fixture.update(emptyList(), expandableListView)
-        // validate
+        // Assert
         verify(settings).groupBy()
         verify(expandableListView).expandableListAdapter
         verify(expandableListAdapter).groupCount
@@ -226,16 +226,16 @@ class AccessPointsAdapterGroupTest {
 
     @Test
     fun updateExpandsGroupWhenInExpandedSet() {
-        // setup
+        // Arrange
         val wiFiDetails = withWiFiDetails()
         doReturn(GroupBy.CHANNEL).whenever(settings).groupBy()
         fixture.updateGroupBy()
         fixture.expanded.add(GroupBy.CHANNEL.group(wiFiDetails[0]))
         doReturn(expandableListAdapter).whenever(expandableListView).expandableListAdapter
         doReturn(wiFiDetails.size).whenever(expandableListAdapter).groupCount
-        // execute
+        // Act
         fixture.update(wiFiDetails, expandableListView)
-        // validate
+        // Assert
         verify(settings, times(2)).groupBy()
         verify(expandableListView).expandableListAdapter
         verify(expandableListAdapter).groupCount
@@ -245,32 +245,72 @@ class AccessPointsAdapterGroupTest {
     }
 
     @Test
-    fun onGroupCollapsedDoesNotRemoveIfHasChildren() {
-        // setup
+    fun onGroupCollapsedWithNoChildrenDoesNotRemove() {
+        // Arrange
         doReturn(GroupBy.SSID).whenever(settings).groupBy()
         fixture.updateGroupBy()
-        doReturn(false).whenever(wiFiDetailWithChildren).noChildren
-        val wiFiDetails = listOf(wiFiDetailWithChildren)
+        doReturn(false).whenever(wiFiDetail).hasChildren
+        val wiFiDetails = listOf(wiFiDetail)
         fixture.expanded.add("test")
-        // execute
+        // Act
         fixture.onGroupCollapsed(wiFiDetails, 0)
-        // validate
+        // Assert
         assertThat(fixture.expanded).contains("test")
-        verify(wiFiDetailWithChildren).noChildren
+        verify(wiFiDetail).hasChildren
     }
 
     @Test
-    fun onGroupExpandedDoesNotAddIfHasChildren() {
-        // setup
+    fun onGroupExpandedWithNoChildrenDoesNotAdd() {
+        // Arrange
         doReturn(GroupBy.SSID).whenever(settings).groupBy()
         fixture.updateGroupBy()
-        doReturn(false).whenever(wiFiDetailWithChildren).noChildren
-        val wiFiDetails = listOf(wiFiDetailWithChildren)
-        // execute
+        doReturn(false).whenever(wiFiDetail).hasChildren
+        val wiFiDetails = listOf(wiFiDetail)
+        // Act
         fixture.onGroupExpanded(wiFiDetails, 0)
-        // validate
+        // Assert
         assertThat(fixture.expanded).isEmpty()
-        verify(wiFiDetailWithChildren).noChildren
+        verify(wiFiDetail).hasChildren
+    }
+
+    @Test
+    fun updateTogglesUsingEmptyWhenWiFiDetailMissing() {
+        // Arrange
+        val wiFiDetails = listOf(withWiFiDetail()) // size = 1
+        doReturn(GroupBy.CHANNEL).whenever(settings).groupBy()
+        fixture.updateGroupBy()
+        doReturn(expandableListAdapter).whenever(expandableListView).expandableListAdapter
+        doReturn(2).whenever(expandableListAdapter).groupCount
+        fixture.expanded.add(GroupBy.CHANNEL.group(WiFiDetail.EMPTY))
+        // Act
+        fixture.update(wiFiDetails, expandableListView)
+        // Assert
+        verify(settings, times(2)).groupBy()
+        verify(expandableListView).expandableListAdapter
+        verify(expandableListAdapter).groupCount
+        verify(expandableListView).collapseGroup(0)
+        verify(expandableListView).expandGroup(1)
+    }
+
+    @Test
+    fun onGroupExpandedAndCollapsedOnlyAffectsItemsWithChildren() {
+        // Arrange
+        doReturn(GroupBy.SSID).whenever(settings).groupBy()
+        fixture.updateGroupBy()
+        val parentWithChildren = withWiFiDetail() // has children
+        val parentWithoutChildren = WiFiDetail(WiFiIdentifier("SSID-no-kids", "BSSID-no-kids"))
+        val wiFiDetails = listOf(parentWithChildren, parentWithoutChildren)
+        // Act
+        fixture.onGroupExpanded(wiFiDetails, 0)
+        fixture.onGroupExpanded(wiFiDetails, 1)
+        // Assert
+        assertThat(fixture.expanded).contains(GroupBy.SSID.group(parentWithChildren))
+        assertThat(fixture.expanded).doesNotContain(GroupBy.SSID.group(parentWithoutChildren))
+        // Act
+        fixture.onGroupCollapsed(wiFiDetails, 0)
+        fixture.onGroupCollapsed(wiFiDetails, 1)
+        // Assert
+        assertThat(fixture.expanded).isEmpty()
     }
 
     private fun withWiFiDetail(): WiFiDetail =

@@ -81,6 +81,18 @@ class CalculateLabelPositionTest {
     }
 
     @Test
+    fun unavailableYRangeReturnsNull() {
+        // Arrange
+        val series = withSeriesData()
+        stubContext(populated = false)
+        // Act
+        val actual = calculateLabelPosition(context, series)
+        // Assert
+        assertThat(actual).isNull()
+        verifyContext()
+    }
+
+    @Test
     fun canvasXIsCalculated() {
         // Arrange
         val series = withSeriesData()
@@ -151,10 +163,10 @@ class CalculateLabelPositionTest {
         verify(context, atLeastOnce()).spToPx(2f)
     }
 
-    private fun stubContext() {
+    private fun stubContext(populated: Boolean = true) {
         val ranges =
             MutableCartesianChartRanges().apply {
-                tryUpdate(0.0, 100.0, -100.0, 0.0, null)
+                if (populated) tryUpdate(0.0, 100.0, -100.0, 0.0, null)
             }
         doReturn(ranges).whenever(context).ranges
         doReturn(layerBounds).whenever(context).layerBounds

@@ -34,6 +34,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import java.security.MessageDigest
 
@@ -61,11 +62,23 @@ class GraphWrapper(
 ) {
     internal val modelProducer: CartesianChartModelProducer = CartesianChartModelProducer()
     internal val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val snapshotChannel = Channel<List<Coordinates>>(Channel.CONFLATED)
 
     init {
         chartView.modelProducer = modelProducer
         chartView.scrollHandler = graphViewport.scrollHandler
         chartView.zoomHandler = buildZoomHandler()
+        coroutineScope.launch {
+            for (snapshot in snapshotChannel) {
+                modelProducer.runTransaction {
+                    lineModel {
+                        snapshot.forEach { (x, y) ->
+                            series(x = x, y = y)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fun removeSeries(newSeries: Set<WiFiDetail>) {
@@ -140,6 +153,7 @@ class GraphWrapper(
     }
 
     fun destroy() {
+        snapshotChannel.close()
         coroutineScope.cancel()
     }
 
@@ -148,16 +162,7 @@ class GraphWrapper(
         if (populatedEntries.isEmpty()) return
         val existingChart = chartView.chart ?: return
         val populatedData = chartUpdater.sync(populatedEntries, existingChart, graphViewport.rangeProvider)
-        val snapshot = populatedData.toCoordinates()
-        coroutineScope.launch {
-            modelProducer.runTransaction {
-                lineModel {
-                    snapshot.forEach { (x, y) ->
-                        series(x = x, y = y)
-                    }
-                }
-            }
-        }
+        snapshotChannel.trySend(populatedData.toCoordinates())
     }
 
     fun newSeries(wiFiDetail: WiFiDetail): Boolean = !seriesExists(wiFiDetail)

@@ -91,7 +91,7 @@ internal fun calculateLabelPosition(
             drawingStart +
                 layoutDirectionMultiplier * layerDimensions.xSpacing *
                 ((point.x - ranges.minX) / ranges.xStep).toFloat()
-        LabelPosition(canvasX, canvasY(point))
+        canvasY(point)?.let { LabelPosition(canvasX, it) }
     }
 }
 
@@ -130,7 +130,7 @@ internal fun makeGraphWrapper(wiFiBand: WiFiBand): GraphWrapper {
             scrollHandler = ScrollHandler(scalable),
             placeholderDataPoints = listOf(DataPoint(minX, MIN_Y), DataPoint(maxX, MIN_Y)),
             zoomEnabled = scalable,
-            maxZoom = Zoom.x(MIN_VISIBLE_FREQUENCY_RANGE),
+            maxZoom = Zoom.max(Zoom.x(MIN_VISIBLE_FREQUENCY_RANGE), Zoom.Content),
             scalable = scalable,
         )
     val graphWrapper = GraphWrapper(graphViewport, chartView, seriesLabel)

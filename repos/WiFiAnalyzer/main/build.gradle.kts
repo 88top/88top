@@ -16,8 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
 plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.allopen) apply false
+    alias(libs.plugins.ktlint) apply false
 }
 
-include ':app'
+allprojects {
+    tasks.withType<JavaCompile>().configureEach {
+        options.compilerArgs.addAll(listOf("-Xlint:unchecked", "-Xlint:deprecation"))
+    }
+}
+
+tasks.register<Delete>("clean") {
+    group = "build"
+    description = "Deletes the build directory."
+    delete(rootProject.layout.buildDirectory)
+}
