@@ -31,7 +31,7 @@ name: 同步 GitHub 仓库备份(全分支 · 自动识别公开/私有 · SSH�
 
 on:
   schedule:
-    - cron: '0 3 * * *'   # 每天 UTC 3:00(北京时间 11:00)
+    - cron: '0 19 * * *'   # 每天 UTC 3:00(北京时间 11:00)
   workflow_dispatch:        # 允许手动触发
 
 run-name: 仓库备份 (${{ github.event_name == 'workflow_dispatch' && '手动触发' || '定时任务' }})
