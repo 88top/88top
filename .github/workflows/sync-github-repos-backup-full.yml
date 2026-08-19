@@ -17,8 +17,16 @@ on:
   schedule:
     - cron: '0 19 * * *'   # 每天 UTC 19:00(北京时间次日 3:00)
   workflow_dispatch:
+    inputs:
+      backup_mode:
+        description: '备份模式'
+        type: choice
+        options:
+          - 增量备份
+          - 强制全量备份
+        default: 增量备份
 
-run-name: 仓库备份 (${{ github.event_name == 'workflow_dispatch' && '手动触发' || '定时任务' }})
+run-name: 仓库备份 (${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.backup_mode || '增量备份') || '定时任务·增量备份' }})
 
 permissions:
   contents: write
@@ -49,6 +57,8 @@ jobs:
 
       - name: 校验 / 初始化 SYNC_MANIFEST.json
         shell: bash
+        env:
+          BACKUP_MODE_INPUT: ${{ github.event.inputs.backup_mode || '增量备份' }}
         run: |
           set -euo pipefail
           MANIFEST="./SYNC_MANIFEST.json"
@@ -61,6 +71,12 @@ jobs:
           elif [ ! -s "$MANIFEST" ]; then
             VALID=0
           elif ! jq -e 'type == "object"' "$MANIFEST" >/dev/null 2>&1; then
+            VALID=0
+          fi
+
+          # 手动指定"强制全量备份"时,不管 manifest 是否有效,都当成首次运行处理
+          if [ "$BACKUP_MODE_INPUT" = "强制全量备份" ]; then
+            echo "手动指定「强制全量备份」→ 忽略现有 SYNC_MANIFEST.json,本次视为首次运行"
             VALID=0
           fi
 
@@ -380,7 +396,11 @@ jobs:
           if [ -n "$ENUM_LIST_ERROR" ]; then echo "  ⚠️ 仓库列表: $ENUM_LIST_ERROR"; fi
           echo "=========================================="
 
+          SYNC_TYPE_LABEL="增量比对"
+          [ "$FIRST_RUN" = "1" ] && SYNC_TYPE_LABEL="全量覆盖(首次运行/强制全量)"
+
           {
+            echo "BACKUP_SYNC_TYPE=$SYNC_TYPE_LABEL"
             echo "BACKUP_MODE_LABEL=$MODE_LABEL"
             echo "BACKUP_REMOTE_COUNT=$TOTAL"
             echo "BACKUP_REPO_OK=$OK"
@@ -427,6 +447,7 @@ jobs:
             echo "备份时间(UTC): ${UTC}"
             echo "备份时间(北京): ${CN}"
             echo "备份模式: ${BACKUP_MODE_LABEL:-N/A}"
+            echo "同步类型: ${BACKUP_SYNC_TYPE:-N/A}"
             echo "远程仓库总数: ${BACKUP_REMOTE_COUNT:-N/A}"
             echo "状态: ${STATUS}"
             echo "----------------------------------------"
@@ -464,7 +485,7 @@ jobs:
           fi
           {
             echo "## 📊 仓库备份报告"
-            echo "**时间**: ${CN}(北京) ｜ **触发**: ${TRIGGER} ｜ **模式**: \`${BACKUP_MODE_LABEL:-N/A}\`"
+            echo "**时间**: ${CN}(北京) ｜ **触发**: ${TRIGGER} ｜ **模式**: \`${BACKUP_MODE_LABEL:-N/A}\` ｜ **同步类型**: \`${BACKUP_SYNC_TYPE:-N/A}\`"
             echo ""
             echo "| 状态 | 数量 |"
             echo "|---|---|"
