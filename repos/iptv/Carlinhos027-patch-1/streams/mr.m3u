@@ -1,7 +1,0 @@
-#EXTM3U
-#EXTINF:-1 tvg-id="ChinguitTV.mr@SD",Chinguit TV
-https://dvrfl06.bozztv.com/astv-chinguit/index.m3u8
-#EXTINF:-1 tvg-id="ElMedina.mr@SD",El Medina
-https://dvrfl06.bozztv.com/astv-elmedina/index.m3u8
-#EXTINF:-1 tvg-id="ElOussraTV.mr@SD",El Oussra TV
-https://dvrfl06.bozztv.com/astv-elousra/index.m3u8

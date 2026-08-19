@@ -1,4 +1,0 @@
-name: "quickstart"
-tasksDir: ".it-runner/tasks"
-logsDir: ".it-runner/logs"
-cacheDir: ".it-runner/cache"
