@@ -4,6 +4,7 @@ import eu.darken.sdmse.common.files.FileType
 import eu.darken.sdmse.common.files.core.local.File
 import eu.darken.sdmse.common.files.local.LocalPath
 import eu.darken.sdmse.common.files.local.LocalPathLookup
+import eu.darken.sdmse.common.progress.Progress
 import eu.darken.sdmse.squeezer.core.CompressibleVideo
 import eu.darken.sdmse.squeezer.core.ContentId
 import eu.darken.sdmse.squeezer.core.ContentIdentifier
@@ -201,5 +202,100 @@ class VideoProcessorTest : BaseTest() {
         result.success shouldBe emptySet()
         result.failed shouldBe emptyMap()
         result.savedSpace shouldBe 0L
+    }
+
+    /**
+     * The published progress. [VideoProcessor.progress] is throttled, so collecting it drops exactly
+     * the intermediate states these tests are about; [Progress.Client.updateProgress] reads the same
+     * state synchronously and without side effects.
+     */
+    private fun VideoProcessor.currentProgress(): Progress.Data? {
+        var snapshot: Progress.Data? = null
+        updateProgress { snapshot = it; it }
+        return snapshot
+    }
+
+    /** Makes the mocked transaction actually run its produce lambda, i.e. reach the transcoder. */
+    private fun stubTransactionRunningProduce(savedBytes: Long = 5_000_000L) {
+        coEvery { fileTransaction.replace(any(), any(), any()) } coAnswers {
+            thirdArg<suspend (java.io.File) -> Unit>().invoke(java.io.File(tempFolder.root, "temp.mp4"))
+            FileTransaction.Outcome(
+                originalSize = 10_000_000L,
+                replacementSize = 10_000_000L - savedBytes,
+                savedBytes = savedBytes,
+                replaced = true,
+            )
+        }
+    }
+
+    @Test
+    fun `process - transcode progress becomes the sub count`() = runTest {
+        val video = createVideo()
+        stubTransactionRunningProduce()
+        coEvery { videoContentHasher.computeHash(any()) } returns ContentIdentifier.VideoHash(ContentId("h"))
+
+        // Sampled from inside the transcode, i.e. while the item is still in flight. MockK runs
+        // coAnswers blocks with runBlocking, so the item can't be parked on a deferred instead.
+        var onFortyPercent: Progress.Data? = null
+        var onUnavailable: Progress.Data? = null
+        coEvery { videoTranscoder.transcode(any(), any(), any(), any()) } coAnswers {
+            val listener = arg<VideoTranscoder.ProgressListener>(3)
+            listener.onProgress(40)
+            onFortyPercent = subject.currentProgress()
+            // -1 is the transcoder's "no progress available yet", it must not move the ring.
+            listener.onProgress(-1)
+            onUnavailable = subject.currentProgress()
+        }
+
+        subject.process(setOf(video), quality = 80)
+
+        onFortyPercent!!.let {
+            it.subCount shouldBe Progress.Count.Percent(40, 100)
+            it.count.current shouldBe 0L
+            it.count.max shouldBe 1L
+        }
+        onUnavailable!!.subCount shouldBe Progress.Count.Percent(40, 100)
+    }
+
+    @Test
+    fun `process - the state published before the first item keeps the batch counter`() = runTest {
+        // No targets, so the pre-loop publish is the only state: the run's starting position inside
+        // the batch. An Indeterminate here would drop the card's ring from "1 of 3" to spinning.
+        subject.process(emptySet(), quality = 80, itemOffset = 1, itemTotal = 3)
+
+        subject.currentProgress()!!.let {
+            it.count.current shouldBe 1L
+            it.count.max shouldBe 3L
+            it.subCount shouldBe null
+            it.primary.get(RuntimeEnvironment.getApplication()) shouldBe "Preparing"
+        }
+    }
+
+    @Test
+    fun `process - the item counter reaches the last item`() = runTest {
+        val first = createVideo()
+        val secondPath = java.io.File(tempFolder.root, "second.mp4").apply {
+            writeBytes(ByteArray(5_000_000))
+        }.absolutePath
+        val second = createVideo(path = secondPath, size = 5_000_000L)
+
+        coEvery { fileTransaction.replace(any(), any(), any()) } coAnswers {
+            FileTransaction.Outcome(
+                originalSize = 10_000_000L,
+                replacementSize = 5_000_000L,
+                savedBytes = 5_000_000L,
+                replaced = true,
+            )
+        }
+        coEvery { videoContentHasher.computeHash(any()) } returns ContentIdentifier.VideoHash(ContentId("h"))
+
+        subject.process(setOf(first, second), quality = 80)
+
+        val context = RuntimeEnvironment.getApplication()
+        subject.currentProgress()!!.let {
+            it.count.current shouldBe 2L
+            it.count.max shouldBe 2L
+            it.primary.get(context) shouldBe "Processing second.mp4"
+        }
     }
 }

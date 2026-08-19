@@ -3,6 +3,8 @@ package eu.darken.sdmse.squeezer.core.processor
 import android.content.Context
 import android.media.MediaScannerConnection
 import dagger.hilt.android.qualifiers.ApplicationContext
+import eu.darken.sdmse.common.ca.CaString
+import eu.darken.sdmse.common.ca.toCaString
 import eu.darken.sdmse.common.coroutine.DispatcherProvider
 import eu.darken.sdmse.common.datastore.value
 import eu.darken.sdmse.common.debug.Bugs
@@ -13,9 +15,6 @@ import eu.darken.sdmse.common.debug.logging.logTag
 import eu.darken.sdmse.common.files.local.LocalPath
 import eu.darken.sdmse.common.flow.throttleLatest
 import eu.darken.sdmse.common.progress.Progress
-import eu.darken.sdmse.common.progress.updateProgressCount
-import eu.darken.sdmse.common.progress.updateProgressPrimary
-import eu.darken.sdmse.common.progress.updateProgressSecondary
 import eu.darken.sdmse.squeezer.core.CompressibleImage
 import eu.darken.sdmse.squeezer.core.SqueezerEligibility
 import eu.darken.sdmse.squeezer.core.SqueezerSettings
@@ -42,7 +41,12 @@ class ImageProcessor @Inject constructor(
     private val settings: SqueezerSettings,
 ) : Progress.Host, Progress.Client {
 
-    private val progressPub = MutableStateFlow<Progress.Data?>(Progress.Data())
+    // Progress.Data()'s default primary is "Loading". withProgress() starts forwarding before it
+    // calls action() and a StateFlow replays its current value to a new collector, so a bare
+    // default would flash "Loading" before the pre-loop publish below lands.
+    private val progressPub = MutableStateFlow<Progress.Data?>(
+        Progress.Data(primary = eu.darken.sdmse.common.R.string.general_progress_preparing.toCaString())
+    )
     override val progress: Flow<Progress.Data?> = progressPub.throttleLatest(250)
 
     override fun updateProgress(update: (Progress.Data?) -> Progress.Data?) {
@@ -60,15 +64,28 @@ class ImageProcessor @Inject constructor(
         val skippedGuarded: Set<CompressibleImage> = emptySet(),
     )
 
+    /**
+     * [itemOffset] / [itemTotal] carry the position of this batch inside a run that also processes
+     * videos, so the published counter is "file 2 of 10" across both passes instead of restarting.
+     */
     suspend fun process(
         targets: Set<CompressibleImage>,
         quality: Int,
+        itemOffset: Int = 0,
+        itemTotal: Int = targets.size,
     ): Result = withContext(dispatcherProvider.IO) {
-        log(TAG) { "process(${targets.size} images, quality=$quality)" }
+        log(TAG) { "process(${targets.size} images, quality=$quality, offset=$itemOffset, total=$itemTotal)" }
 
-        updateProgressPrimary(eu.darken.sdmse.common.R.string.general_progress_loading)
-        updateProgressSecondary()
-        updateProgressCount(Progress.Count.Indeterminate())
+        updateProgress {
+            (it ?: Progress.Data()).copy(
+                primary = eu.darken.sdmse.common.R.string.general_progress_preparing.toCaString(),
+                secondary = CaString.EMPTY,
+                // Keeps the item counter the caller already published for the previous phase,
+                // otherwise the outer ring drops from "1 of 2" to spinning and then jumps back.
+                count = Progress.Count.Counter(itemOffset, itemTotal),
+                subCount = null,
+            )
+        }
 
         log(TAG, INFO) { "Processing ${targets.size} images" }
 
@@ -78,8 +95,19 @@ class ImageProcessor @Inject constructor(
         var totalSaved = 0L
 
         targets.forEachIndexed { index, image ->
-            updateProgressCount(Progress.Count.Percent(index, targets.size))
-            updateProgressSecondary(image.lookup.userReadablePath)
+            // One publish, not four: progress is exposed through throttleLatest(250), which
+            // conflates. Separate mutations let a fast item show up with the new file name next to
+            // the previous path and counter for up to a throttle window. There is no per-image
+            // progress to report, so the sub-count just spins for the duration of the item.
+            updateProgress {
+                (it ?: Progress.Data()).copy(
+                    primary = eu.darken.sdmse.common.R.string.general_progress_processing_x
+                        .toCaString(image.path.name),
+                    secondary = image.lookup.userReadablePath,
+                    count = Progress.Count.Counter(itemOffset + index, itemTotal),
+                    subCount = Progress.Count.Indeterminate(),
+                )
+            }
 
             // Authoritative HDR/depth guard. The scan already excludes these when the opt-in is off,
             // but re-check against the CURRENT setting here so a photo can't be flattened if the user
@@ -92,6 +120,13 @@ class ImageProcessor @Inject constructor(
             ) {
                 log(TAG, INFO) { "Skipped ${image.path} (HDR/depth preserved)" }
                 skippedGuarded.add(image)
+                // Skipped photos advance the counter too, otherwise the ring stalls across them.
+                updateProgress {
+                    (it ?: Progress.Data()).copy(
+                        count = Progress.Count.Counter(itemOffset + index + 1, itemTotal),
+                        subCount = Progress.Count.Indeterminate(),
+                    )
+                }
                 return@forEachIndexed
             }
 
@@ -128,6 +163,15 @@ class ImageProcessor @Inject constructor(
             } catch (e: Exception) {
                 log(TAG, ERROR) { "Failed to compress ${image.path}: ${e.asLog()}" }
                 failed[image] = e
+            }
+
+            // Every exit path (compressed, skipped, failed) advances the item counter here, so the
+            // ring doesn't stall through FileTransaction's rename/verify and the history write.
+            updateProgress {
+                (it ?: Progress.Data()).copy(
+                    count = Progress.Count.Counter(itemOffset + index + 1, itemTotal),
+                    subCount = Progress.Count.Indeterminate(),
+                )
             }
         }
 

@@ -1,0 +1,527 @@
+{
+  "timeflysoon/2FAGuard": {
+    "main": {
+      "remote_sha": "112da420210e204870b9557d72b73db59d422665"
+    }
+  },
+  "timeflysoon/3x-ui": {
+    "Group_Management": {
+      "remote_sha": "04c6b2722b7b945ed12e743de70c05e5f8663815"
+    },
+    "MySQL-databases": {
+      "remote_sha": "3850e2f070bb3c1227b78dcd1e8a34a89a9e9906"
+    },
+    "main": {
+      "remote_sha": "ec35a6685c55272e6f5ef10c0c40f5ca875258f9"
+    }
+  },
+  "timeflysoon/Actions-FriendlyWrt": {
+    "master": {
+      "remote_sha": "d9db1849202036b19075269fd0247d7e5c972989"
+    }
+  },
+  "timeflysoon/Are-u-ok": {
+    "main": {
+      "remote_sha": "80dd5610d838859d34fa6912335b1c703ea42898"
+    }
+  },
+  "timeflysoon/BaiduPCS-Go": {
+    "dependabot/go_modules/github.com/mattn/go-runewidth-0.0.16": {
+      "remote_sha": "eb910962f4b397c8906b38aaf2b71f956ab14131"
+    },
+    "dependabot/go_modules/github.com/olekukonko/tablewriter-0.0.5": {
+      "remote_sha": "47d2e0b5ca98cd94d83138fa9bcde96a6098d1d3"
+    },
+    "dependabot/go_modules/github.com/urfave/cli-1.22.16": {
+      "remote_sha": "7ec366a9b48f14c80571ca13f1c89a877dea6e99"
+    },
+    "dependabot/go_modules/golang.org/x/crypto-0.37.0": {
+      "remote_sha": "347d8a62bdf932fe57537e1613a27082e4837a22"
+    },
+    "dependabot/go_modules/golang.org/x/sys-0.32.0": {
+      "remote_sha": "f106d4848e32bc0bf80a379d990e9998d77c7042"
+    },
+    "dev": {
+      "remote_sha": "3531e31bb1fe99321083b46e733ccab3ea8f38d7"
+    },
+    "main": {
+      "remote_sha": "d79b2647d7c8e5bff9f0150555725df5f282969d"
+    },
+    "revert-26-main": {
+      "remote_sha": "14634eaad968a4ed885e97936a870193027845ae"
+    }
+  },
+  "timeflysoon/CLX-S20P": {
+    "master": {
+      "remote_sha": "c29153b8b3b0ef4fc4a3a59fcbb81338ae524db4"
+    }
+  },
+  "timeflysoon/ClashMetaForAndroid": {
+    "main": {
+      "remote_sha": "c454d0e73b047d9f4c0173e8d35088f08b65bc98"
+    }
+  },
+  "timeflysoon/CloudRunFilesBuilder": {
+    "daily": {
+      "remote_sha": "9223148f1bdfb725de824f3cf93a1b41feb43832"
+    }
+  },
+  "timeflysoon/CloudSaver": {
+    "main": {
+      "remote_sha": "0f110840cf531546d7bbb8bcec94e47b0f7b7a1e"
+    }
+  },
+  "timeflysoon/Cloudflare-Navihive": {
+    "docs/vitepress-setup": {
+      "remote_sha": "2ffe6ce5bd26643d9796c328c7f42a8126e2368a"
+    },
+    "feature/guest-access": {
+      "remote_sha": "d30788b69f16652153aee5161f854986fee93b2a"
+    },
+    "feature/search-box": {
+      "remote_sha": "ee64c0e38de94f32cdd3ee5a58742c281c0cc6a0"
+    },
+    "main": {
+      "remote_sha": "5dc5679e652aa7ff7ade90dc0e962e9833cd3538"
+    },
+    "v1.0.0": {
+      "remote_sha": "3fa79998cee646730b1ba2d416b94c5e0e03c928"
+    },
+    "v1.1.0": {
+      "remote_sha": "d30788b69f16652153aee5161f854986fee93b2a"
+    }
+  },
+  "timeflysoon/Cloudflare-vless-trojan": {
+    "beta": {
+      "remote_sha": "54d438a311319f4bed62d25b8d6636ac48545273"
+    },
+    "main": {
+      "remote_sha": "25a9017f99a71200843243b8d4e67b2eab1de340"
+    }
+  },
+  "timeflysoon/CloudflareSpeedTest": {
+    "master": {
+      "remote_sha": "1da0c025d7b6f9bf0b2b0cf47a547f65430deab2"
+    }
+  },
+  "timeflysoon/GenP": {
+    "main": {
+      "remote_sha": "5b7c40a93cfa93db18d33913392c3fc4f7f17f86"
+    }
+  },
+  "timeflysoon/ImmortalWrt-ImageBuilder": {
+    "dev": {
+      "remote_sha": "2fad7e1571f35c39831d761a7359480c7e3815e7"
+    },
+    "master": {
+      "remote_sha": "2fad7e1571f35c39831d761a7359480c7e3815e7"
+    }
+  },
+  "timeflysoon/ImmortalWrt-ImageBuilder_x86-64": {
+    "master": {
+      "remote_sha": "61c55c89a9f0b2cdff8b05ef69d73e0e366a8705"
+    }
+  },
+  "timeflysoon/LAVFilters": {
+    "master": {
+      "remote_sha": "63d24baf2316d41ac8b9f8a83f35f6bc0ec42b43"
+    }
+  },
+  "timeflysoon/Microsoft-Activation-Scripts": {
+    "dev": {
+      "remote_sha": "da0b2800d9c783e63af33a6178267ac2201adb2a"
+    },
+    "master": {
+      "remote_sha": "6401d2f36975dc07bcb6d22ea823a8498a75ec01"
+    }
+  },
+  "timeflysoon/MikroTikPatch": {
+    "main": {
+      "remote_sha": "74a6a9c8dd8735c51218f2f563ec273cf3d8baca"
+    }
+  },
+  "timeflysoon/MusicFree": {
+    "Update-Readme-Badgets": {
+      "remote_sha": "39241b05676836a960a5186cd20260c4cda35a38"
+    },
+    "copilot/fix-background-cover-issue": {
+      "remote_sha": "58df1a6bc8176721b7b8032d370cc700719097fc"
+    },
+    "dev": {
+      "remote_sha": "a079d8f9bcc1dad67902871c5330095b4cdd25c7"
+    },
+    "draggable-flatlist": {
+      "remote_sha": "2e8799617988791a9497f7bedc7de5846d857e11"
+    },
+    "feat/play-detail-page-ux": {
+      "remote_sha": "2b8afe352707bd1329869537692915dcf2fb3a17"
+    },
+    "feature/widget": {
+      "remote_sha": "1284687f2530ec77608823503f4ab3e6ab0f64e3"
+    },
+    "local-rntp": {
+      "remote_sha": "9207961071a298d47925340d30a90452932b38f1"
+    },
+    "maotoumao-patch-1": {
+      "remote_sha": "ced206185f4da00636b274f751632010d493dc40"
+    },
+    "maotoumao-patch-2": {
+      "remote_sha": "d93bffbbb5f0ec96ccf884a10cff4bf665492013"
+    },
+    "master": {
+      "remote_sha": "d118b18b3d0c904400f7eea7bf99c0ceec6c1aee"
+    }
+  },
+  "timeflysoon/Nrfr": {
+    "master": {
+      "remote_sha": "c8044fe7d42beea496d66fae43b9683fcf942ce4"
+    }
+  },
+  "timeflysoon/OpenBackRestore": {
+    "master": {
+      "remote_sha": "46ecd0670b240aeef4f7a474768f6bf04b7b4c27"
+    }
+  },
+  "timeflysoon/OpenClash": {
+    "master": {
+      "remote_sha": "c3a33c1d3407956fdf8f0e0b7c1a4c52e6ad9593"
+    }
+  },
+  "timeflysoon/OpenWrtAction": {
+    "main": {
+      "remote_sha": "b909cc346a83aead98d623b267688e793e8f4477"
+    }
+  },
+  "timeflysoon/PVE-manager-status": {
+    "main": {
+      "remote_sha": "2790d3dde44cab402622be167926556c7916fd39"
+    }
+  },
+  "timeflysoon/SSL-Renewal": {
+    "main": {
+      "remote_sha": "fa128b4972d36e70e4af1f2ab96a4bf6af11af41"
+    }
+  },
+  "timeflysoon/Sms": {
+    "main": {
+      "remote_sha": "32a38b3a5947704d5c9a26b6f2c6dd6628b59b6e"
+    }
+  },
+  "timeflysoon/WiFiAnalyzer": {
+    "main": {
+      "remote_sha": "cbb2537d7e5f883966eb020c2937d2e0751faea4"
+    }
+  },
+  "timeflysoon/WinFi": {
+    "main": {
+      "remote_sha": "90356243a47b26f41dfdb6c876f2b2439a3401ff"
+    }
+  },
+  "timeflysoon/XChrome": {
+    "master": {
+      "remote_sha": "fd1be5bdf09293580c404b58e63f8a87c53a9df5"
+    }
+  },
+  "timeflysoon/XChrome_ch": {
+    "master": {
+      "remote_sha": "0c2e210a04d1937ad14ca54f41b2b215c73a6fa9"
+    }
+  },
+  "timeflysoon/ZyPlayer": {
+    "main": {
+      "remote_sha": "d6f79322cebbf257e7b79fbfaeda6507a189ce5e"
+    }
+  },
+  "timeflysoon/apk": {
+    "master": {
+      "remote_sha": "f73fb0a1ab174ddb2bd000ed6b371969cb94492f"
+    }
+  },
+  "timeflysoon/apk-extra": {
+    "main": {
+      "remote_sha": "61af042de3309527a0242943b1f55081b7de5fb7"
+    }
+  },
+  "timeflysoon/clash-rules": {
+    "master": {
+      "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
+    },
+    "release": {
+      "remote_sha": "cc5098b091889ccb8bf45f0a64e5c1ad72163d86"
+    }
+  },
+  "timeflysoon/commonscript": {
+    "master": {
+      "remote_sha": "a2558f47b874237a64173e87c37ca65f971eeef9"
+    }
+  },
+  "timeflysoon/dae": {
+    "main": {
+      "remote_sha": "caa6f5e91776bc86d5b0edc940bb7d264359863c"
+    }
+  },
+  "timeflysoon/daed": {
+    "main": {
+      "remote_sha": "671e65d2fdcd62fe6a3ec18ecda209c5addea898"
+    }
+  },
+  "timeflysoon/ecs": {
+    "master": {
+      "remote_sha": "f89c6281e83affd381ff722ec525b79d64728faa"
+    }
+  },
+  "timeflysoon/edgetunnel": {
+    "main": {
+      "remote_sha": "8652352d90ab3345e9faedb9662549446e9207f2"
+    }
+  },
+  "timeflysoon/github-chinese": {
+    "gh-pages": {
+      "remote_sha": "9be6573a444e1b83acf264252edaf5ee9fe78f0a"
+    }
+  },
+  "timeflysoon/gl-inet-onescript": {
+    "master": {
+      "remote_sha": "2be739fd3a2470e8df13ff15188880f3a794a0d0"
+    }
+  },
+  "timeflysoon/gopeed": {
+    "main": {
+      "remote_sha": "99924296ef2f48633703adce44027826ca453d8a"
+    }
+  },
+  "timeflysoon/img-installer": {
+    "master": {
+      "remote_sha": "361ea6138094a2417e62edd01f73fa1160e93e01"
+    }
+  },
+  "timeflysoon/immortalwrt": {
+    "master": {
+      "remote_sha": "fbef452572985e2cdb5a8843845f767b3bf4883d"
+    },
+    "openwrt-18.06": {
+      "remote_sha": "f7bc84bd30a038b0fd251ce59b6619e5eae94848"
+    },
+    "openwrt-18.06-k5.4": {
+      "remote_sha": "8b50c1df2150be9c2883fca59d0a142b811e7d5d"
+    },
+    "openwrt-21.02": {
+      "remote_sha": "fc9fe90e5a804d7af5449260f2e5b7ae6d414266"
+    },
+    "openwrt-23.05": {
+      "remote_sha": "b0399dc20659225b0bcab1524ccec326c27a06d5"
+    },
+    "openwrt-24.10": {
+      "remote_sha": "9d5928ce8b10901f322fbfe3cf034fd62630f2ec"
+    },
+    "openwrt-25.12": {
+      "remote_sha": "1aaf623a170154f75fbb486c4330902511a08bff"
+    }
+  },
+  "timeflysoon/iptv": {
+    "BellezaEmporium-patch-1": {
+      "remote_sha": "a42edbf15ad941d65888f7355a153db9aec0b0a1"
+    },
+    "Carlinhos027-patch-1": {
+      "remote_sha": "49ca7a19cf5d14b400ccdbc200fd460e315e6470"
+    },
+    "Pecaquito-patch-1": {
+      "remote_sha": "5448f543e4092444f39ec3e1ffc5811f40c1442d"
+    },
+    "freearhey-patch-1": {
+      "remote_sha": "30a76c4b6556b9d33fc82810be9b84e5878c47d2"
+    },
+    "freearhey-patch-3": {
+      "remote_sha": "bc48f0fa9eaa3ff38d9f7a3ae7295d292d0a19d4"
+    },
+    "freearhey-patch-4": {
+      "remote_sha": "abf5faadd7d034aacc8d2d1067cb5ece069a1080"
+    },
+    "freearhey-patch-5": {
+      "remote_sha": "c607ead570a5b2ef14f64f392ecd5a83a6f412b2"
+    },
+    "freearhey-patch-6": {
+      "remote_sha": "50a4db844d832d2285e3494bdfae89699b914440"
+    },
+    "gh-pages": {
+      "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
+    },
+    "master": {
+      "remote_sha": "605971993e592b3be3e904638d70d57c87c375b6"
+    },
+    "what-a-patch-1": {
+      "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
+    }
+  },
+  "timeflysoon/luci-app-daed-runfiles": {
+    "kix": {
+      "remote_sha": "6363d2fb9103361435513475ae93fa6fa0bcad38"
+    }
+  },
+  "timeflysoon/luci-app-run": {
+    "master": {
+      "remote_sha": "18afe330abf11746813c070186020614de35819c"
+    }
+  },
+  "timeflysoon/meta-rules-dat": {
+    "master": {
+      "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
+    },
+    "meta": {
+      "remote_sha": "f0fe2612af8177aea9cb4d57dd48e04f87f83b0d"
+    },
+    "release": {
+      "remote_sha": "54de81139e0128fa1c2f12499b722cb0d0d77d5e"
+    },
+    "sing": {
+      "remote_sha": "c5c226eb4eccb9e85763b8fa1a2e03b865da0e25"
+    }
+  },
+  "timeflysoon/nanopi-openwrt": {
+    "master": {
+      "remote_sha": "d67699cf381853a7d29b60daa44c8e4c38ef1540"
+    }
+  },
+  "timeflysoon/openclash-auto-installer": {
+    "main": {
+      "remote_sha": "04312fde779c76f58c1e3fd04fe328f08d3f9b60"
+    }
+  },
+  "timeflysoon/openwrt-daede": {
+    "main": {
+      "remote_sha": "935028e943e5e0af88fab4791424a774b6e2df74"
+    }
+  },
+  "timeflysoon/quickstart": {
+    "dev": {
+      "remote_sha": "c6c61d673a05544a1404c4913cf7cbcbbd9a332b"
+    },
+    "main": {
+      "remote_sha": "4ef0a5d57d5be3cc9f3cb18c49afd4cdeb41d2c3"
+    }
+  },
+  "timeflysoon/realtek-r8125-dkms": {
+    "main": {
+      "remote_sha": "4a020a6036ead1cefa0fa5427f4bca2c15e80f95"
+    }
+  },
+  "timeflysoon/realtek-r8125-dkms_ch": {
+    "master": {
+      "remote_sha": "9a152bf920334aead090d2fb4d91f67a84923123"
+    },
+    "rc/9.016.00-1": {
+      "remote_sha": "c38ff039cb59ea6d2df7fd9fc113ba873d4af4c5"
+    }
+  },
+  "timeflysoon/rule": {
+    "main": {
+      "remote_sha": "28f7dd7703eeb32b63dced7f67b21a7ac647e5f2"
+    },
+    "release": {
+      "remote_sha": "ac4c134949902a46e9560388b78d144d5d8f88d5"
+    }
+  },
+  "timeflysoon/sdmaid-se": {
+    "appcleaner-acs-poco-clearalldata": {
+      "remote_sha": "805362e5c45459e25497d412d962ff1c1c358e9e"
+    },
+    "appcleaner-aosp-36beta-2056": {
+      "remote_sha": "40b8a89fffcda69e9ad773bb14890dd7b58ee5cd"
+    },
+    "donations": {
+      "remote_sha": "d1ffe2b87a9c57b53088ab9aee1f4f679096b640"
+    },
+    "main": {
+      "remote_sha": "60de86f4537956fc7d64d1b8cca79b6ac066eba0"
+    },
+    "translations-deadend": {
+      "remote_sha": "e483486dff5deef147fed8605b5dfaa1010649f6"
+    }
+  },
+  "timeflysoon/small": {
+    "master": {
+      "remote_sha": "6290db15c7663dd480936a70acd4a45a24b6ce54"
+    }
+  },
+  "timeflysoon/store": {
+    "master": {
+      "remote_sha": "7d68c85c1236d9482b867737eaff425d224b2e79"
+    }
+  },
+  "timeflysoon/store-extra": {
+    "main": {
+      "remote_sha": "9f13e531eb87542c196476bfdb3821dffed0ccf5"
+    }
+  },
+  "timeflysoon/stratumauth_app": {
+    "master": {
+      "remote_sha": "2306d75ad15badd220e5a1ce9b93a8e64e76318c"
+    }
+  },
+  "timeflysoon/sublink-worker": {
+    "claude/base64-to-subscription-011CULJBKw4S4vbfxzqFg5z1": {
+      "remote_sha": "3757599d0dfae58002de2d4dd2af435a297eaf0c"
+    },
+    "dev": {
+      "remote_sha": "442ec8d2892df8ab271e26ccbf3414adb2fe960d"
+    },
+    "main": {
+      "remote_sha": "8dec256584d735267389c0e158872fd1a40c77ec"
+    },
+    "v2": {
+      "remote_sha": "aecf70d6325e28db3fbf86616c30ec976cf2f8ae"
+    }
+  },
+  "timeflysoon/temp": {
+    "main": {
+      "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
+    },
+    "meta": {
+      "remote_sha": "f0fe2612af8177aea9cb4d57dd48e04f87f83b0d"
+    },
+    "release": {
+      "remote_sha": "54de81139e0128fa1c2f12499b722cb0d0d77d5e"
+    }
+  },
+  "timeflysoon/turboacc": {
+    "main": {
+      "remote_sha": "cc029ccf266d807268b3b20522cd30dd2e1e4521"
+    }
+  },
+  "timeflysoon/v2rayN": {
+    "master": {
+      "remote_sha": "7be264c65cde989d2a1ff85ab4b59ca659f0f9c6"
+    },
+    "v7_16": {
+      "remote_sha": "654d7d83d09d1683c60501c9fa853a19c3dd9d6b"
+    }
+  },
+  "timeflysoon/v2rayNG": {
+    "master": {
+      "remote_sha": "f38db32639cea6a02343a07768661ebcb6a0a470"
+    },
+    "v1_10_32": {
+      "remote_sha": "bd6b67cbfc71caa7ed94d2c64e8ac7756af61276"
+    }
+  },
+  "timeflysoon/v2rayfree": {
+    "main": {
+      "remote_sha": "9d8bb8d68f255cdf1c7edb7219d9125a95f2de60"
+    }
+  },
+  "timeflysoon/weasel": {
+    "master": {
+      "remote_sha": "d73f6295e8252ed2f7b9c12bae32e9001b1afdaa"
+    }
+  },
+  "timeflysoon/x-ui": {
+    "main": {
+      "remote_sha": "e94528294daebeed6924709f032676dc6dea0f30"
+    }
+  },
+  "timeflysoon/yahei-alarm-clock": {
+    "main": {
+      "remote_sha": "b035900c0ab97cdf523a1c06d380d5ebd3022bc3"
+    }
+  }
+}

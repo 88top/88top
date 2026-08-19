@@ -32,9 +32,11 @@ import eu.darken.sdmse.squeezer.core.SqueezerEligibility
 import eu.darken.sdmse.squeezer.core.SqueezerPathNormalizer
 import eu.darken.sdmse.squeezer.core.SqueezerSettings
 import eu.darken.sdmse.squeezer.core.hasData
+import eu.darken.sdmse.squeezer.core.tasks.SqueezerProcessTask
 import eu.darken.sdmse.squeezer.core.tasks.SqueezerScanTask
 import eu.darken.sdmse.squeezer.ui.SqueezerListRoute
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -74,9 +76,9 @@ class SqueezerSetupViewModel @Inject constructor(
         settings.scanPaths.flow,
         settings.compressionQuality.flow,
         settings.minAge.flow,
-        squeezer.progress,
+        squeezer.state,
         isLoadingExample,
-    ) { scanPaths, quality, minAge, progress, loadingExample ->
+    ) { scanPaths, quality, minAge, squeezerState, loadingExample ->
         val jpegRatio = compressionEstimator.estimateOutputRatio(CompressibleImage.MIME_TYPE_JPEG, quality)
         val estimatedSavings = jpegRatio?.let { ((1.0 - it) * 100).toInt() }
 
@@ -85,11 +87,21 @@ class SqueezerSetupViewModel @Inject constructor(
             quality = quality,
             minAge = minAge,
             estimatedSavingsPercent = estimatedSavings,
-            progress = progress,
+            progress = squeezerState.progress,
+            // Process results only: `performProcess` prunes the data before `submit()` stores its
+            // result, so there is a window where `lastResult` is still the preceding scan success.
+            // Unfiltered, the card would flash "x items found" before "x items compressed" and
+            // would keep showing scan summaries where a compression receipt belongs.
+            processResult = squeezerState.lastResult as? SqueezerProcessTask.Result,
             isLoadingExample = loadingExample,
             canStartScan = scanPaths.paths.isNotEmpty(),
         )
     }.safeStateIn(
+        // The setup entry stays in the back stack while the list screen runs a compression on top
+        // of it. With the default `WhileSubscribed(5000)` this ViewModel would stop collecting
+        // while it is covered and, on back navigation, resume from its stale pre-navigation value
+        // (progress == null) — flashing the configuration before the progress overlay returns.
+        started = SharingStarted.Eagerly,
         initialValue = State(),
         onError = { State() },
     )
@@ -100,6 +112,7 @@ class SqueezerSetupViewModel @Inject constructor(
         val minAge: Duration = SqueezerSettings.MIN_AGE_DEFAULT,
         val estimatedSavingsPercent: Int? = null,
         val progress: Progress.Data? = null,
+        val processResult: SqueezerProcessTask.Result? = null,
         val isLoadingExample: Boolean = false,
         val canStartScan: Boolean = false,
     )
