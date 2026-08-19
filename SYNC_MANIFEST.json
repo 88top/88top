@@ -440,7 +440,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "f23dcd32646f9698973cba25fb4c6712b4dfc5e9"
+      "remote_sha": "a848a60b3d4306b3fc8c2ac81f50ffd6a52ecbb3"
     }
   },
   "timeflysoon/store": {
@@ -498,7 +498,7 @@
   },
   "timeflysoon/v2rayNG": {
     "master": {
-      "remote_sha": "4aae16a93c81294c51d5da63b0babe8db24495c6"
+      "remote_sha": "57f6b6fe98d73e80f1bd29a5e2626f5611ca6e3c"
     },
     "v1_10_32": {
       "remote_sha": "bd6b67cbfc71caa7ed94d2c64e8ac7756af61276"
