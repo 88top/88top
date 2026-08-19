@@ -2,9 +2,11 @@ name: 同步 GitHub 仓库备份(全分支 · 增量 · 自动识别公开/私�
 
 # 增量备份脚本:
 # - 按分支备份所有仓库(repos/仓库名/分支名/),只保留当下快照,不含提交历史
-# - SYNC_MANIFEST.json 记录每个"仓库/分支"的 remote_sha(上游commit) 与
-#   local_fingerprint(本地内容指纹),每次运行现场比对两者,都一致才跳过,
-#   否则重新 clone 并用 rsync 精准覆盖(只写变化的文件)
+# - SYNC_MANIFEST.json 记录每个"仓库/分支"上次备份时的 remote_sha,每次运行
+#   现场 ls-remote 比对,一致则跳过、不下载;不一致则重新 clone 并用 rsync
+#   精准覆盖(只写变化的文件)
+# - 分支清理用 manifest 里记录过的分支名跟本次远程实际分支名做差集,
+#   支持带 / 的嵌套分支名(如 feature/auth),不依赖遍历本地目录树
 # - 上游删除的仓库/分支,本地与 manifest 同步清理;枚举失败的仓库本地历史保留
 # - AUTH_PAT_TIMEFLYSOON 校验通过则为"公开+私有全量"模式,否则降级为"仅公开仓库"
 # - 可选 SSH_PRIVATE_KEY_TIMEFLYSOON,在 token 枚举分支失败时兜底重试
@@ -38,6 +40,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: 安装依赖(jq / rsync)
         run: sudo apt-get update && sudo apt-get install -y jq rsync
@@ -86,51 +89,61 @@ jobs:
 
           in_list() { local n="$1" l="$2"; for i in $l; do [ "$i" = "$n" ] && return 0; done; return 1; }
 
-          # 对目录下所有文件内容做哈希,顺序无关,用于判断内容是否变化
-          calc_fingerprint() {
-            local dir="$1"
-            if [ ! -d "$dir" ]; then
-              echo "EMPTY_DIR"; return
-            fi
-            local h
-            h=$(find "$dir" -type f -print0 2>/dev/null | sort -z | xargs -0 sha256sum 2>/dev/null | sha256sum | awk '{print $1}')
-            if [ -z "$h" ]; then echo "EMPTY_DIR"; else echo "$h"; fi
+          # 带重试的 curl,失败不触发 set -e 直接杀死整个 job,而是返回状态码由调用方处理
+          curl_retry() {
+            local url="$1" auth_header="$2" attempt=0 rc=1
+            local out; out=$(mktemp)
+            while [ $attempt -lt 3 ]; do
+              attempt=$((attempt+1))
+              set +e
+              curl -fsSL --connect-timeout 15 --max-time 30 \
+                -H "Accept: application/vnd.github+json" \
+                -H "$auth_header" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                "$url" > "$out" 2>/dev/null
+              rc=$?
+              set -e
+              if [ $rc -eq 0 ]; then cat "$out"; rm -f "$out"; return 0; fi
+              sleep $((attempt*2))
+            done
+            rm -f "$out"
+            return $rc
           }
 
-          manifest_get_field() {
-            local repo="$1" branch="$2" field="$3"
-            jq -r --arg r "$repo" --arg b "$branch" --arg f "$field" \
-              '.[$r][$b][$f] // empty' "$MANIFEST"
+          manifest_get_sha() {
+            jq -r --arg r "$1" --arg b "$2" '.[$r][$b].remote_sha // empty' "$MANIFEST"
           }
 
-          manifest_set_branch() {
-            local repo="$1" branch="$2" sha="$3" fp="$4"
+          manifest_set_sha() {
             local tmp; tmp=$(mktemp)
-            jq --arg r "$repo" --arg b "$branch" --arg sha "$sha" --arg fp "$fp" \
-              '.[$r] = ((.[$r] // {}) + {($b): {"remote_sha": $sha, "local_fingerprint": $fp}})' \
+            jq --arg r "$1" --arg b "$2" --arg sha "$3" \
+              '.[$r] = ((.[$r] // {}) + {($b): {"remote_sha": $sha}})' \
               "$MANIFEST" > "$tmp" && mv "$tmp" "$MANIFEST"
           }
 
           manifest_delete_branch() {
-            local repo="$1" branch="$2"
             local tmp; tmp=$(mktemp)
-            jq --arg r "$repo" --arg b "$branch" \
+            jq --arg r "$1" --arg b "$2" \
               'if .[$r] then .[$r] |= del(.[$b]) else . end' \
               "$MANIFEST" > "$tmp" && mv "$tmp" "$MANIFEST"
           }
 
           # 按目录名删除(仓库在远程已消失,拿不到完整 owner/repo)
           manifest_delete_repo_by_name() {
-            local name="$1"
             local tmp; tmp=$(mktemp)
-            jq --arg n "$name" \
+            jq --arg n "$1" \
               'with_entries(select((.key | split("/") | last) != $n))' \
               "$MANIFEST" > "$tmp" && mv "$tmp" "$MANIFEST"
           }
 
+          # manifest 里记录过的分支名(可能是仓库自身没有的历史key)
+          manifest_repo_branches() {
+            jq -r --arg r "$1" '.[$r] // {} | keys[]' "$MANIFEST" 2>/dev/null || true
+          }
+
           HOSTING_REPO_NAME="$(echo "${GITHUB_REPOSITORY:-}" | cut -d'/' -f2)"
 
-          # 判定运行模式:AUTH_PAT_TIMEFLYSOON 校验通过则全量,否则仅公开仓库
+          # ========= 判定运行模式 =========
           MODE="public"
           AUTH_TOKEN=""
 
@@ -164,6 +177,7 @@ jobs:
           fi
           echo "★ 本次运行模式: ${MODE_LABEL} ★"
 
+          # ========= SSH 兜底 =========
           SSH_AVAILABLE=0
           if [ -n "${SSH_PRIVATE_KEY_TIMEFLYSOON:-}" ]; then
             mkdir -p ~/.ssh && chmod 700 ~/.ssh
@@ -174,34 +188,37 @@ jobs:
             echo "已配置 SSH 兜底"
           fi
 
-          # 拉取远程仓库列表
+          # ========= 拉取远程仓库列表(带重试,单页失败不杀整个 job) =========
           LIST=$(mktemp)
           PAGE=1
-          if [ "$MODE" = "full" ]; then
-            while true; do
-              R=$(curl -fsSL --connect-timeout 15 --max-time 30 \
-                -H "Accept: application/vnd.github+json" \
-                -H "Authorization: Bearer ${AUTH_TOKEN}" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                "https://api.github.com/user/repos?per_page=100&page=${PAGE}&visibility=all&affiliation=owner,collaborator,organization_member")
-              N=$(echo "$R" | jq 'length')
-              if [ "$N" -eq 0 ]; then break; fi
+          ENUM_LIST_ERROR=""
+          AUTH_HEADER="Authorization: Bearer ${PUBLIC_TOKEN}"
+          [ "$MODE" = "full" ] && AUTH_HEADER="Authorization: Bearer ${AUTH_TOKEN}"
+
+          while true; do
+            if [ "$MODE" = "full" ]; then
+              API_URL="https://api.github.com/user/repos?per_page=100&page=${PAGE}&visibility=all&affiliation=owner,collaborator,organization_member"
+            else
+              API_URL="https://api.github.com/users/${USERNAME}/repos?per_page=100&page=${PAGE}&type=public"
+            fi
+
+            if ! R=$(curl_retry "$API_URL" "$AUTH_HEADER"); then
+              ENUM_LIST_ERROR="仓库列表在第 $PAGE 页多次重试后仍失败,已用当前已获取到的部分列表继续"
+              echo "⚠️ $ENUM_LIST_ERROR"
+              break
+            fi
+            N=$(echo "$R" | jq 'length')
+            if [ "$N" -eq 0 ]; then break; fi
+            if [ "$MODE" = "full" ]; then
               echo "$R" | jq -r --arg u "$USERNAME" '.[] | select(.owner.login==$u) | .full_name' >> "$LIST"
-              PAGE=$((PAGE+1))
-            done
-          else
-            while true; do
-              R=$(curl -fsSL --connect-timeout 15 --max-time 30 \
-                -H "Accept: application/vnd.github+json" \
-                -H "Authorization: Bearer ${PUBLIC_TOKEN}" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                "https://api.github.com/users/${USERNAME}/repos?per_page=100&page=${PAGE}&type=public")
-              N=$(echo "$R" | jq 'length')
-              if [ "$N" -eq 0 ]; then break; fi
+            else
               echo "$R" | jq -r '.[] | .full_name' >> "$LIST"
-              PAGE=$((PAGE+1))
-            done
-          fi
+            fi
+            PAGE=$((PAGE+1))
+            if [ "$PAGE" -gt 30 ]; then
+              echo "⚠️ 分页超过 30 页,中止分页(防止失控)"; break
+            fi
+          done
           sort -u "$LIST" -o "$LIST"
           TOTAL=$(wc -l < "$LIST" | tr -d ' ')
           echo "远程共发现 $TOTAL 个仓库"
@@ -236,19 +253,26 @@ jobs:
               URL="https://github.com/${FULL_NAME}.git"
             fi
 
+            # 枚举分支;token 失败时若有 SSH 则自动重试一次
+            # (AUTH_TOKEN 已作为 secrets 上下文的值被 Actions 自动加入日志打码列表,
+            #  这里额外用 sed 过滤一遍作为兜底,防止极端情况下打码遗漏)
             ERR=$(mktemp)
             if RAW=$(git ls-remote --heads "$URL" 2>"$ERR"); then
               BRANCHES=$(echo "$RAW" | awk '{print $2}' | sed 's#refs/heads/##')
               rm -f "$ERR"
             elif [ "$SSH_AVAILABLE" = "1" ] && SRAW=$(git ls-remote --heads "git@github.com:${FULL_NAME}.git" 2>/dev/null); then
               echo "    ⚠️ token 失败,SSH 兜底成功,改用 SSH 克隆"
+              sed 's/^/      /' "$ERR" | sed -E 's#x-access-token:[^@]*@#x-access-token:***@#g'
               rm -f "$ERR"
               URL="git@github.com:${FULL_NAME}.git"
               RAW="$SRAW"
               BRANCHES=$(echo "$SRAW" | awk '{print $2}' | sed 's#refs/heads/##')
               SSH_REPOS="$SSH_REPOS $NAME"
             else
-              echo "    ✗ 枚举分支失败:"; sed 's/^/      /' "$ERR"; rm -f "$ERR"
+              echo "    ✗ 枚举分支失败:"
+              sed 's/^/      /' "$ERR" | sed -E 's#x-access-token:[^@]*@#x-access-token:***@#g'
+              rm -f "$ERR"
+              echo "    ℹ️ 本地已有的历史备份(如有)将原样保留"
               echo "$NAME" >> "$ENUM_FAILED_NAMES"
               FAIL=$((FAIL+1)); FAIL_REPOS="$FAIL_REPOS $NAME"; continue
             fi
@@ -263,28 +287,26 @@ jobs:
             while IFS= read -r B; do
               if [ -z "$B" ]; then continue; fi
               echo "$B" >> "$CURRENT_BR_FILE"
-              DIR="$NAME/$B"
+              DIR="$NAME/$B"   # 支持嵌套分支名,如 feature/auth → repoA/feature/auth
 
               REMOTE_SHA=$(echo "$RAW" | awk -v ref="refs/heads/$B" '$2==ref{print $1; exit}')
-              MANIFEST_SHA=$(manifest_get_field "$FULL_NAME" "$B" "remote_sha")
-              MANIFEST_FP=$(manifest_get_field "$FULL_NAME" "$B" "local_fingerprint")
-              CURRENT_FP=$(calc_fingerprint "$DIR")
+              MANIFEST_SHA=$(manifest_get_sha "$FULL_NAME" "$B")
 
-              # 远程 SHA 与本地指纹都对得上,才判定为未变化
-              if [ -n "$MANIFEST_SHA" ] && [ "$MANIFEST_SHA" = "$REMOTE_SHA" ] \
-                 && [ -n "$MANIFEST_FP" ] && [ "$MANIFEST_FP" = "$CURRENT_FP" ]; then
+              # 远程 SHA 一致 且 本地目录确实存在,才判定为未变化(目录存在性检查是免费的,
+              # 用来兜底"manifest 有记录但目录被整体删过"这种极端情况)
+              if [ -n "$MANIFEST_SHA" ] && [ "$MANIFEST_SHA" = "$REMOTE_SHA" ] && [ -d "$DIR" ]; then
                 echo "      ⏭️  $B 未变化,跳过"
                 RBSKIP=$((RBSKIP+1)); continue
               fi
 
               TMPCLONE=$(mktemp -d)
-              if git clone --quiet --depth 1 --single-branch --branch "$B" "$URL" "$TMPCLONE" 2>&1 | sed 's/^/        /'; then
+              if git clone --quiet --depth 1 --single-branch --branch "$B" "$URL" "$TMPCLONE" 2>&1 \
+                  | sed 's/^/        /' | sed -E 's#x-access-token:[^@]*@#x-access-token:***@#g'; then
                 rm -rf "$TMPCLONE/.git"
                 mkdir -p "$DIR"
                 rsync -a --delete "$TMPCLONE/" "$DIR/"
                 if [ -z "$(ls -A "$DIR")" ]; then touch "$DIR/.gitkeep"; fi
-                NEW_FP=$(calc_fingerprint "$DIR")
-                manifest_set_branch "$FULL_NAME" "$B" "$REMOTE_SHA" "$NEW_FP"
+                manifest_set_sha "$FULL_NAME" "$B" "$REMOTE_SHA"
                 echo "      ✏️  $B 已更新"
                 RBOK=$((RBOK+1))
               else
@@ -294,19 +316,19 @@ jobs:
               rm -rf "$TMPCLONE"
             done <<< "$BRANCHES"
 
-            # 本地存在但这次远程枚举不到的分支,视为上游已删除
-            if [ -d "$NAME" ]; then
-              for LOCALBR in "$NAME"/*/; do
-                [ -d "$LOCALBR" ] || continue
-                BRNAME="$(basename "$LOCALBR")"
-                if ! grep -qxF "$BRNAME" "$CURRENT_BR_FILE"; then
-                  echo "      🗑️  远程分支 $BRNAME 已删除,清理本地"
-                  rm -rf "$LOCALBR"
-                  manifest_delete_branch "$FULL_NAME" "$BRNAME"
-                  BR_DELETED=$((BR_DELETED+1))
-                fi
-              done
-            fi
+            # 清理:manifest 里记录过、但这次远程分支列表里已经没有的分支名
+            # (直接用分支名字符串做差集,不依赖遍历本地目录树,天然支持 feature/auth 这类嵌套分支名)
+            while IFS= read -r MB; do
+              [ -z "$MB" ] && continue
+              if ! grep -qxF "$MB" "$CURRENT_BR_FILE"; then
+                echo "      🗑️  远程分支 $MB 已删除,清理本地"
+                rm -rf "$NAME/$MB"
+                manifest_delete_branch "$FULL_NAME" "$MB"
+                BR_DELETED=$((BR_DELETED+1))
+              fi
+            done < <(manifest_repo_branches "$FULL_NAME")
+            # 清理因删除嵌套分支残留下来的空父目录(如 feature/ 下面分支都删完了)
+            find "$NAME" -mindepth 1 -type d -empty -delete 2>/dev/null || true
             rm -f "$CURRENT_BR_FILE"
 
             BR_OK=$((BR_OK+RBOK)); BR_FAIL=$((BR_FAIL+RBFAIL)); BR_SKIP=$((BR_SKIP+RBSKIP))
@@ -318,7 +340,7 @@ jobs:
           done < "$LIST"
           rm -f "$LIST"
 
-          # 清理上游已彻底消失的仓库(排除名单/枚举失败的不动)
+          # ========= 清理上游已彻底消失的仓库(排除名单/枚举失败的不动) =========
           REPO_PURGED=0
           for LOCALDIR in */; do
             [ -d "$LOCALDIR" ] || continue
@@ -343,6 +365,7 @@ jobs:
           echo "  🌿 分支更新: $BR_OK   ⏭️ 分支跳过: $BR_SKIP   ⚠️ 分支失败: $BR_FAIL   🗑️ 分支清理: $BR_DELETED"
           if [ -n "$SSH_REPOS" ]; then echo "  🔑 SSH兜底成功: $SSH_REPOS"; fi
           if [ -n "$FAIL_REPOS" ]; then echo "  ⚠️ 枚举失败(本地历史已保留): $FAIL_REPOS"; fi
+          if [ -n "$ENUM_LIST_ERROR" ]; then echo "  ⚠️ 仓库列表: $ENUM_LIST_ERROR"; fi
           echo "=========================================="
 
           {
@@ -385,35 +408,36 @@ jobs:
           elif [ "$FAIL" = "N/A" ]; then STATUS="❌ 同步步骤未完成,请查看运行日志"
           else STATUS="⚠️ 完成,但有 ${FAIL} 个仓库未成功"; fi
 
-          cat > ./BACKUP_STATUS.txt << EOF
-          ========================================
-          📊 最近一次备份报告
-          ========================================
-          备份时间(UTC): ${UTC}
-          备份时间(北京): ${CN}
-          备份模式: ${BACKUP_MODE_LABEL:-N/A}
-          远程仓库总数: ${BACKUP_REMOTE_COUNT:-N/A}
-          状态: ${STATUS}
-          ----------------------------------------
-          ✅ 仓库成功: ${BACKUP_REPO_OK:-N/A}
-          ❌ 仓库失败: ${BACKUP_REPO_FAIL:-N/A}
-          🗑️ 仓库清理(上游已删除): ${BACKUP_REPO_PURGED:-N/A}
-          🔒 已保护:   ${BACKUP_PROTECT:-N/A}
-          🚫 已排除:   ${BACKUP_EXCLUDE:-N/A}
-          ----------------------------------------
-          🌿 分支更新: ${BACKUP_BRANCH_OK:-N/A}
-          ⏭️ 分支跳过(未变化): ${BACKUP_BRANCH_SKIP:-N/A}
-          ⚠️ 分支失败: ${BACKUP_BRANCH_FAIL:-N/A}
-          🗑️ 分支清理(上游已删除): ${BACKUP_BRANCH_DELETED:-N/A}
-          EOF
-
-          if [ -n "${BACKUP_SSH_FALLBACK_REPOS:-}" ]; then
-            { echo ""; echo "🔑 SSH兜底成功: ${BACKUP_SSH_FALLBACK_REPOS}"; } >> ./BACKUP_STATUS.txt
-          fi
-          if [ -n "${BACKUP_AUTH_FAIL_REPOS:-}" ]; then
-            { echo ""; echo "⚠️ 枚举失败(本地历史已保留): ${BACKUP_AUTH_FAIL_REPOS}"; } >> ./BACKUP_STATUS.txt
-          fi
-          echo "========================================" >> ./BACKUP_STATUS.txt
+          {
+            echo "========================================"
+            echo "📊 最近一次备份报告"
+            echo "========================================"
+            echo "备份时间(UTC): ${UTC}"
+            echo "备份时间(北京): ${CN}"
+            echo "备份模式: ${BACKUP_MODE_LABEL:-N/A}"
+            echo "远程仓库总数: ${BACKUP_REMOTE_COUNT:-N/A}"
+            echo "状态: ${STATUS}"
+            echo "----------------------------------------"
+            echo "✅ 仓库成功: ${BACKUP_REPO_OK:-N/A}"
+            echo "❌ 仓库失败: ${BACKUP_REPO_FAIL:-N/A}"
+            echo "🗑️ 仓库清理(上游已删除): ${BACKUP_REPO_PURGED:-N/A}"
+            echo "🔒 已保护:   ${BACKUP_PROTECT:-N/A}"
+            echo "🚫 已排除:   ${BACKUP_EXCLUDE:-N/A}"
+            echo "----------------------------------------"
+            echo "🌿 分支更新: ${BACKUP_BRANCH_OK:-N/A}"
+            echo "⏭️ 分支跳过(未变化): ${BACKUP_BRANCH_SKIP:-N/A}"
+            echo "⚠️ 分支失败: ${BACKUP_BRANCH_FAIL:-N/A}"
+            echo "🗑️ 分支清理(上游已删除): ${BACKUP_BRANCH_DELETED:-N/A}"
+            if [ -n "${BACKUP_SSH_FALLBACK_REPOS:-}" ]; then
+              echo ""
+              echo "🔑 SSH兜底成功: ${BACKUP_SSH_FALLBACK_REPOS}"
+            fi
+            if [ -n "${BACKUP_AUTH_FAIL_REPOS:-}" ]; then
+              echo ""
+              echo "⚠️ 枚举失败(本地历史已保留): ${BACKUP_AUTH_FAIL_REPOS}"
+            fi
+            echo "========================================"
+          } > ./BACKUP_STATUS.txt
           cat ./BACKUP_STATUS.txt
 
       - name: 生成 Job Summary
@@ -454,6 +478,8 @@ jobs:
 
       - name: 提交备份结果
         shell: bash
+        env:
+          PUSH_BRANCH: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
@@ -463,8 +489,14 @@ jobs:
             echo "没有变化,无需提交"; exit 0
           fi
           git commit -m "自动同步备份(增量·${BACKUP_MODE_LABEL:-未知模式}) $(date -u '+%Y-%m-%d %H:%M UTC')"
-          git pull --rebase
-          git push
+          # rebase 失败降级为 merge,再失败就保留本次 commit 但跳过 push,避免 job 直接报错丢结果
+          if ! git pull --rebase --autostash origin "$PUSH_BRANCH"; then
+            if ! git pull --no-rebase origin "$PUSH_BRANCH"; then
+              echo "⚠️ 与 origin/$PUSH_BRANCH 存在冲突,本次跳过 push,commit 已留在本地(下次运行会重新计算)"
+              exit 0
+            fi
+          fi
+          git push origin "$PUSH_BRANCH"
 
 # AUTH_PAT_TIMEFLYSOON(必需,用于私库备份):
 #   GitHub → Settings → Developer settings → Personal access tokens
@@ -477,5 +509,5 @@ jobs:
 #   → 同样加进备份仓库 Secrets → Name: SSH_PRIVATE_KEY_TIMEFLYSOON
 #
 # SYNC_MANIFEST.json(自动维护,无需手动配置):
-#   记录每个"仓库/分支"的 remote_sha 与 local_fingerprint。
+#   记录每个"仓库/分支"上次备份时的 remote_sha。
 #   若想强制某个分支下次重新拉取,手动删掉该分支对应记录即可。
