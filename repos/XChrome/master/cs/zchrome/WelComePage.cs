@@ -86,38 +86,14 @@ namespace XChrome.cs.zchrome
                     HttpListenerContext context = _listener.GetContext();
                     HttpListenerResponse response = context.Response;
 
-                    // ============【修改点 3：开始】============
-                    // 原逻辑：无论哪个环境打开这个本地首页，标题都写死显示"欢迎"，
-                    // 完全不区分是环境几，多开时每个标签页标题都一样，分不清对应哪个环境。
-                    //
-                    // 现改为：从请求地址的 query string 里取出 id
-                    // （对应 ZChromeClient.cs 修改点2里拼的 ?id=xxx），
-                    // 把标题固定显示为"环境：{id}"。
-                    // 因为这个页面本身不会再被顶层跳转覆盖掉（见 ZChromeClient.cs 修改点1），
-                    // 所以标签页从打开到关闭全程都会一直显示"环境：{id}"，
-                    // 不受 web3tool.vip 这个默认地址能不能访问的影响。
+                    // ============【修改点 3】============
+                    // 从 query string 取 id（对应 ZChromeClient.cs 修改点2），标题固定为"环境：{id}"，不再被顶层跳转覆盖（见 ZChromeClient.cs 修改点1）。
                     string envId = context.Request.QueryString["id"] ?? "";
                     string title = envId != "" ? ("环境：" + envId) : "欢迎";
 
-                    // ============【修改点 4：开始】============
-                    // 需求：在页面上增加一行 IP 归属地查询结果，纯静态页面 + 前端 JS 异步查询，
-                    // 不做整页跳转，不影响标签页标题和页面稳定性。
-                    //
-                    // 查询逻辑：
-                    //   1. 依次尝试两个免费 IP 归属地查询接口（串行，不是同时发出）：
-                    //      ipwho.is -> freeipapi.com
-                    //      任何一级成功即停止，不再调用后面的接口。
-                    //      （曾经加过 ipapi.co 作为第二级，但它偶发人机验证拦截，已剔除。）
-                    //   2. 每一级都带 2.5 秒超时（用 Promise.race 实现），
-                    //      超时也视为失败，直接换下一级，避免某个接口长时间不响应卡住页面。
-                    //   3. 全部查询是在浏览器（该指纹环境）里发起的 fetch 请求，
-                    //      会经过该环境自己的代理出口，查到的是环境实际对外暴露的 IP，
-                    //      不是本机服务器的 IP。
-                    //   4. 两级全部失败才显示"查询失败"。
-                    //
-                    // 注意：两个接口都用 https，避免 Chrome 的"始终使用安全连接"
-                    // 把 http 请求强制升级到 https 导致失败（ip-api.com 免费版只支持 http，故未采用）。
-                    // ============【修改点 4：结束】============
+                    // ============【修改点 5】============
+                    // 静态页改为卡片+表格的"浏览器检测"样式：UA/浏览器/版本/引擎/系统/平台基于 navigator 同步解析，
+                    // IP归属地异步查询（沿用修改点4的 ipwho.is -> freeipapi.com 两级降级逻辑）。不跳转，不影响标签页标题。
 
                     // 构造网页内容
                     string responseString = $@"
@@ -125,22 +101,98 @@ namespace XChrome.cs.zchrome
                         <head>
                             <meta charset='UTF-8'>
                             <title>{title}</title>
+                            <style>
+                                body {{ font-family: -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif; background:#f5f6f8; margin:0; padding:24px 16px; color:#1f2937; }}
+                                h1 {{ font-size:20px; margin:0 0 4px; }}
+                                .sub {{ color:#6b7280; font-size:14px; margin:0 0 20px; }}
+                                .card {{ max-width:640px; margin:0; background:#fff; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; box-shadow:0 1px 2px rgba(0,0,0,0.04); }}
+                                .card-title {{ padding:14px 16px; font-size:16px; font-weight:600; border-left:4px solid #2f6fed; background:#fafafa; }}
+                                table {{ width:100%; border-collapse:collapse; }}
+                                td {{ padding:14px 16px; border-bottom:1px solid #f0f0f0; vertical-align:middle; }}
+                                tr:last-child td {{ border-bottom:none; }}
+                                .label-cell {{ width:110px; text-align:right; }}
+                                .label-main {{ display:block; color:#374151; font-size:14px; }}
+                                .label-sub {{ display:block; font-size:12px; color:#9ca3af; }}
+                                .value-cell {{ color:#111827; font-size:14px; word-break:break-all; padding-right:56px; }}
+                            </style>
                         </head>
                         <body>
                             <h1>{title}</h1>
-                            <p>正在准备指纹环境，进入中...</p>
-                            <p id='ipInfo'>IP归属地：查询中...</p>
+                            <p class='sub'>正在准备指纹环境，进入中...</p>
+
+                            <div class='card'>
+                                <div class='card-title'>浏览器检测</div>
+                                <table>
+                                    <tr>
+                                        <td class='label-cell'><span class='label-main'>用户代理</span><span class='label-sub'>User-Agent</span></td>
+                                        <td class='value-cell' id='uaCell'>检测中...</td>
+                                    </tr>
+                                    <tr>
+                                        <td class='label-cell'><span class='label-main'>浏览器</span><span class='label-sub'>Browser</span></td>
+                                        <td class='value-cell' id='browserCell'>检测中...</td>
+                                    </tr>
+                                    <tr>
+                                        <td class='label-cell'><span class='label-main'>版本</span><span class='label-sub'>Version</span></td>
+                                        <td class='value-cell' id='versionCell'>检测中...</td>
+                                    </tr>
+                                    <tr>
+                                        <td class='label-cell'><span class='label-main'>渲染引擎</span><span class='label-sub'>Engine</span></td>
+                                        <td class='value-cell' id='engineCell'>检测中...</td>
+                                    </tr>
+                                    <tr>
+                                        <td class='label-cell'><span class='label-main'>操作系统</span><span class='label-sub'>System</span></td>
+                                        <td class='value-cell' id='osCell'>检测中...</td>
+                                    </tr>
+                                    <tr>
+                                        <td class='label-cell'><span class='label-main'>系统平台</span><span class='label-sub'>Platform</span></td>
+                                        <td class='value-cell' id='platformCell'>检测中...</td>
+                                    </tr>
+                                    <tr>
+                                        <td class='label-cell'><span class='label-main'>IP归属地</span><span class='label-sub'>IP Location</span></td>
+                                        <td class='value-cell' id='ipCell'>查询中...</td>
+                                    </tr>
+                                </table>
+                            </div>
 
                             <script>
                             (function() {{
-                                var el = document.getElementById('ipInfo');
-                                var TIMEOUT_MS = 2500;
+                                var ua = navigator.userAgent;
 
-                                function showResult(text) {{
-                                    el.textContent = 'IP归属地：' + text;
+                                function setText(id, text) {{
+                                    document.getElementById(id).textContent = text;
                                 }}
 
-                                // 给 fetch 加超时：超过 TIMEOUT_MS 就当作失败，走 catch 逻辑
+                                // ---- 浏览器信息检测（同步，基于 navigator，不发网络请求） ----
+                                setText('uaCell', ua);
+
+                                var browser = 'Unknown', version = '', engine = 'Unknown';
+                                var m;
+                                if ((m = ua.match(/Edg\/([\d.]+)/))) {{ browser = 'Edge'; version = m[1]; engine = 'Blink'; }}
+                                else if ((m = ua.match(/OPR\/([\d.]+)/))) {{ browser = 'Opera'; version = m[1]; engine = 'Blink'; }}
+                                else if ((m = ua.match(/Chrome\/([\d.]+)/))) {{ browser = 'Chrome'; version = m[1]; engine = 'Blink'; }}
+                                else if ((m = ua.match(/Firefox\/([\d.]+)/))) {{ browser = 'Firefox'; version = m[1]; engine = 'Gecko'; }}
+                                else if ((m = ua.match(/Version\/([\d.]+).*Safari/))) {{ browser = 'Safari'; version = m[1]; engine = 'WebKit'; }}
+                                setText('browserCell', browser);
+                                setText('versionCell', version || '未知');
+                                setText('engineCell', engine);
+
+                                var os = '未知';
+                                if (/Windows NT 10\.0/.test(ua)) {{ os = 'Windows 10/11'; }}
+                                else if (/Windows NT 6\.3/.test(ua)) {{ os = 'Windows 8.1'; }}
+                                else if (/Windows NT 6\.1/.test(ua)) {{ os = 'Windows 7'; }}
+                                else if (/Windows/.test(ua)) {{ os = 'Windows'; }}
+                                else if (/Mac OS X/.test(ua)) {{ os = 'macOS'; }}
+                                else if (/Android/.test(ua)) {{ os = 'Android'; }}
+                                else if (/iPhone|iPad/.test(ua)) {{ os = 'iOS'; }}
+                                else if (/Linux/.test(ua)) {{ os = 'Linux'; }}
+                                var bit = /Win64|x64|WOW64/.test(ua) ? '（64位）' : '（32位）';
+                                setText('osCell', os + (os.indexOf('Windows') === 0 ? bit : ''));
+
+                                setText('platformCell', navigator.platform || '未知');
+
+                                // ---- IP归属地查询（异步，两级降级，逻辑与修改点4一致） ----
+                                var TIMEOUT_MS = 2500;
+
                                 function fetchWithTimeout(url) {{
                                     var timeoutPromise = new Promise(function(_, reject) {{
                                         setTimeout(function() {{ reject(new Error('timeout')); }}, TIMEOUT_MS);
@@ -154,7 +206,7 @@ namespace XChrome.cs.zchrome
                                         .then(function(res) {{ return res.json(); }})
                                         .then(function(data) {{
                                             if (data && data.success !== false) {{
-                                                showResult((data.country || '') + ' ' + (data.region || '') + ' ' + (data.city || '') + '（' + data.ip + '）');
+                                                setText('ipCell', (data.country || '') + ' ' + (data.region || '') + ' ' + (data.city || '') + '（' + data.ip + '）');
                                             }} else {{
                                                 trySecondary();
                                             }}
@@ -168,12 +220,12 @@ namespace XChrome.cs.zchrome
                                         .then(function(res) {{ return res.json(); }})
                                         .then(function(data) {{
                                             if (data && data.ipAddress) {{
-                                                showResult((data.countryName || '') + ' ' + (data.regionName || '') + ' ' + (data.cityName || '') + '（' + data.ipAddress + '）');
+                                                setText('ipCell', (data.countryName || '') + ' ' + (data.regionName || '') + ' ' + (data.cityName || '') + '（' + data.ipAddress + '）');
                                             }} else {{
-                                                showResult('查询失败');
+                                                setText('ipCell', '查询失败');
                                             }}
                                         }})
-                                        .catch(function() {{ showResult('查询失败'); }});
+                                        .catch(function() {{ setText('ipCell', '查询失败'); }});
                                 }}
 
                                 tryPrimary();
