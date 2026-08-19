@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="swiper_label">Swiper</string>
+    <string name="swiper_tool_description">폴더를 빠르게 정리하세요 — 파일을 스와이프하여 보관, 삭제 또는 건너뛰기.</string>
+    <string name="swiper_dashcard_description">파일 탐색기보다 빠르게 특정 폴더를 정리하세요 — 각 파일을 스와이프하기만 하면 됩니다.</string>
+    <string name="swiper_start_action">스와이프 시작</string>
+    <string name="swiper_continue_action">세션 계속</string>
+    <string name="swiper_sessions_description">3단계로 파일을 검토하세요:\n\n1. 스캔할 폴더를 선택\n2. 파일을 스와이프하여 보관, 삭제 또는 건너뛰기\n3. 선택 사항을 검토하고 확인\n\n최종 삭제 버튼을 탭하기 전까지는 아무것도 삭제되지 않습니다.</string>
+    <string name="swiper_select_folders_action">폴더 선택</string>
+    <plurals name="swiper_result_x_items_found">
+        <item quantity="other">%d개 항목 발견</item>
+    </plurals>
+    <plurals name="swiper_result_x_items_deleted">
+        <item quantity="other">%d개 항목 삭제됨</item>
+    </plurals>
+    <plurals name="swiper_result_x_items_failed">
+        <item quantity="other">%d개 항목 실패</item>
+    </plurals>
+    <string name="swiper_item_position">#%1$d / %2$d</string>
+    <string name="swiper_keep_action">유지</string>
+    <string name="swiper_skip_action">건너뛰기</string>
+    <string name="swiper_review_action">리뷰</string>
+    <string name="swiper_status_title">결정 검토</string>
+    <string name="swiper_status_action_keep_selected">선택 항목 유지</string>
+    <string name="swiper_status_action_delete_selected">선택한 항목 삭제</string>
+    <string name="swiper_status_action_reset_selected">선택 항목 초기화</string>
+    <string name="swiper_delete_confirmation_title">파일을 삭제하시겠습니까?</string>
+    <plurals name="swiper_delete_confirmation_message">
+        <item quantity="other">%1$d개 파일(%2$s)이 영구적으로 삭제됩니다. 이 작업은 취소할 수 없습니다.</item>
+    </plurals>
+    <plurals name="swiper_delete_confirmation_message_partial_undecided">
+        <item quantity="other">%d개의 미결정 항목은 나중에 검토하기 위해 남습니다.</item>
+    </plurals>
+    <string name="swiper_delete_confirmation_sensitive_root_warning">이 세션은 전체 저장소 볼륨을 대상으로 합니다 — 여기서 삭제하면 해당 저장소의 모든 폴더에 영향을 미칩니다.</string>
+    <plurals name="swiper_delete_confirmation_more_folders">
+        <item quantity="other">…그 외 %d개 폴더</item>
+    </plurals>
+    <string name="swiper_delete_confirmation_checkbox">이 파일들이 영구 삭제될 것임을 이해합니다.</string>
+    <string name="swiper_sensitive_root_warning_title">전체 스토리지를 스캔할까요?</string>
+    <string name="swiper_sensitive_root_warning_message">%1$s 스캔에는 이 스토리지의 모든 파일(사진, 문서, 다운로드, 앱 미디어 등)이 포함됩니다. 계속할까요?</string>
+    <string name="swiper_sensitive_root_warning_continue_action">그래도 계속</string>
+    <string name="swiper_session_risky_label">전체 스토리지 스캔</string>
+    <string name="swiper_session_risky_info_message">이 세션은 스토리지 볼륨의 루트를 대상으로 하므로 해당 스토리지의 모든 파일(사진, 문서, 다운로드, 앱 미디어 등)이 범위에 포함됩니다.\n\n전체 스토리지 스캔은 검토하지 않으려던 파일을 포함하여 많은 항목을 반환할 수 있습니다. 파일 유형 필터를 적용하여 스캔 범위를 좋히세요.</string>
+    <string name="swiper_delete_x_action">%1$d개 삭제</string>
+    <string name="swiper_settings_swap_directions_title">스와이프 방향 바꾸기</string>
+    <string name="swiper_settings_swap_directions_summary">왼쪽으로 스와이프하여 유지, 오른쪽으로 스와이프하여 삭제.</string>
+    <string name="swiper_settings_show_details_title">파일 세부 정보 표시</string>
+    <string name="swiper_settings_show_details_summary">스와이프 화면에 파일 이름, 크기 및 날짜를 표시합니다.</string>
+    <string name="swiper_settings_haptic_feedback_title">햅틱 피드백</string>
+    <string name="swiper_settings_haptic_feedback_summary">유지 또는 삭제 결정 시 진동합니다.</string>
+    <string name="swiper_discard_session_confirmation_title">세션을 삭제하시겠습니까?</string>
+    <string name="swiper_discard_session_confirmation_message">모든 결정이 손실됩니다. 확실합니까?</string>
+    <string name="swiper_no_preview_available">미리보기 없음</string>
+    <plurals name="swiper_dashcard_session_context">
+        <item quantity="other">%1$d일 전 세션 계속 (%2$d%% 완료)</item>
+    </plurals>
+    <plurals name="swiper_dashcard_x_sessions">
+        <item quantity="other">%d개 세션</item>
+    </plurals>
+    <plurals name="swiper_dashcard_x_undecided_items">
+        <item quantity="other">%d개 미결정 항목</item>
+    </plurals>
+    <string name="swiper_session_timestamps">생성: %1$s, 마지막 활동: %2$s</string>
+    <string name="swiper_session_remove_action">세션 제거</string>
+    <string name="swiper_sessions_empty_hint">+를 탭하여 폴더를 선택하고 스와이프를 시작하세요</string>
+    <string name="swiper_sessions_upgrade_body">이 제한을 제거하고 개발을 지원하려면 업그레이드하세요. 무료 버전은 다음으로 제한됩니다:</string>
+    <plurals name="swiper_sessions_upgrade_files_limit">
+        <item quantity="other">세션당 %d개 파일</item>
+    </plurals>
+    <plurals name="swiper_sessions_upgrade_sessions_limit">
+        <item quantity="other">%d개 세션</item>
+    </plurals>
+    <string name="swiper_session_default_label">세션 #%d</string>
+    <string name="swiper_session_rename_title">세션 이름 변경</string>
+    <string name="swiper_session_rename_hint">이 세션의 이름을 입력하세요</string>
+    <string name="swiper_sessions_current_sessions">현재 세션</string>
+    <string name="swiper_session_paths_label">경로</string>
+    <plurals name="swiper_session_paths_more">
+        <item quantity="other">…그리고 %d개 더</item>
+    </plurals>
+    <string name="swiper_session_status_label">상태</string>
+    <plurals name="swiper_session_status_to_keep">
+        <item quantity="other">%d개 유지</item>
+    </plurals>
+    <plurals name="swiper_session_status_to_delete">
+        <item quantity="other">%d개 삭제</item>
+    </plurals>
+    <plurals name="swiper_session_status_undecided">
+        <item quantity="other">%d개 미결정</item>
+    </plurals>
+    <plurals name="swiper_session_status_kept">
+        <item quantity="other">%d개 유지됨</item>
+    </plurals>
+    <plurals name="swiper_session_status_deleted">
+        <item quantity="other">%d개 삭제됨</item>
+    </plurals>
+    <string name="swiper_exclude_confirmation_message">Swiper 스캔에서 \"%1$s\"을(를) 제외하시겠습니까?</string>
+    <string name="swiper_sessions_header_title">정리할 준비가 되셨나요?</string>
+    <string name="swiper_sessions_suggestions_label">이것부터 시작해 보세요:</string>
+    <string name="swiper_sessions_suggestion_downloads">다운로드 폴더</string>
+    <string name="swiper_sessions_suggestion_screenshots">스크린샷</string>
+    <string name="swiper_sessions_suggestion_camera">카메라 롤</string>
+    <string name="swiper_stamp_keep_1">유지!</string>
+    <string name="swiper_stamp_keep_2">좋아!</string>
+    <string name="swiper_stamp_keep_3">예!</string>
+    <string name="swiper_stamp_keep_4">저장!</string>
+    <string name="swiper_stamp_delete_1">아니!</string>
+    <string name="swiper_stamp_delete_2">바이!</string>
+    <string name="swiper_stamp_delete_3">쓰레기!</string>
+    <string name="swiper_stamp_delete_4">삭제!</string>
+    <string name="swiper_stamp_skip_1">건너뛰기!</string>
+    <string name="swiper_stamp_skip_2">흠!</string>
+    <string name="swiper_stamp_skip_3">나중에!</string>
+    <string name="swiper_stamp_skip_4">아마!</string>
+    <string name="swiper_stamp_undo_1">되돌리기!</string>
+    <string name="swiper_stamp_undo_2">뒤로!</string>
+    <string name="swiper_stamp_undo_3">앗!</string>
+    <string name="swiper_stamp_undo_4">잠깐!</string>
+    <string name="swiper_gesture_overlay_dismiss">아무 곳이나 탭하여 시작</string>
+    <string name="swiper_gesture_overlay_left_delete">← 삭제</string>
+    <string name="swiper_gesture_overlay_right_keep">보관 →</string>
+    <string name="swiper_gesture_overlay_left_keep">← 보관</string>
+    <string name="swiper_gesture_overlay_right_delete">삭제 →</string>
+    <string name="swiper_gesture_overlay_up_skip">↑ 건너뛰기</string>
+    <string name="swiper_gesture_overlay_down_undo">↓ 되돌리기</string>
+    <string name="swiper_help_title">Swiper 사용 방법</string>
+    <string name="swiper_help_message">각 파일을 스와이프하여 결정하세요:\n\n← 왼쪽으로 스와이프: %1$s\n→ 오른쪽으로 스와이프: %2$s\n↑ 위로 스와이프: 건너뛰기\n↓ 아래로 스와이프: 되돌리기 (첫 스와이프 이후)\n\n하단 버튼을 사용할 수도 있습니다.\n\n완료되면 \"검토\"를 탭하여 모든 결정을 확인하세요. 검토 화면에서 확인하기 전까지는 아무것도 삭제되지 않습니다.</string>
+    <string name="swiper_gesture_overlay_dismiss_action">확인</string>
+    <string name="swiper_file_type_filter_title">이 파일 형식만 표시</string>
+    <string name="swiper_file_type_filter_hint">보고 싶은 유형을 선택하세요. 아무것도 선택하지 않으면 모든 파일이 표시됩니다.</string>
+    <string name="swiper_file_type_category_images">이미지</string>
+    <string name="swiper_file_type_category_images_subtitle">jpg, png, gif, webp, heic…</string>
+    <string name="swiper_file_type_category_videos">동영상</string>
+    <string name="swiper_file_type_category_videos_subtitle">mp4, mkv, avi, mov, webm…</string>
+    <string name="swiper_file_type_category_audio">오디오</string>
+    <string name="swiper_file_type_category_audio_subtitle">mp3, flac, aac, ogg, wav…</string>
+    <string name="swiper_file_type_category_documents">문서</string>
+    <string name="swiper_file_type_category_documents_subtitle">pdf, doc, xlsx, txt, epub…</string>
+    <string name="swiper_file_type_category_archives">압축 파일</string>
+    <string name="swiper_file_type_category_archives_subtitle">zip, rar, 7z, tar, apk…</string>
+    <string name="swiper_file_type_filter_apply_action">적용</string>
+    <string name="swiper_file_type_filter_summary">필터링됨: %1$s</string>
+    <string name="swiper_session_no_matching_files">일치하는 파일을 찾을 수 없습니다</string>
+    <string name="swiper_open_externally_action">외부 앱에서 열기</string>
+    <!-- Guided tour -->
+    <string name="tour_swiper_gestures_body">파일을 스와이프하여 처리를 결정합니다: 옆으로 스와이프하여 유지 또는 삭제, 위로 스와이프하여 건너뛰기, 아래로 스와이프하여 실행 취소. 아래 버튼도 동일하게 작동하며 어느 쪽이 어느 작업인지 보여줍니다.</string>
+    <string name="tour_swiper_openin_body">이 버튼을 누르면 파일을 다른 앱에서 열 수 있어 결정하기 전에 확인할 수 있습니다.</string>
+    <string name="tour_swiper_preview_body">이 버튼은 전체 화면 미리보기를 열어 더 자세히 볼 수 있습니다.</string>
+    <string name="tour_swiper_actions_body">스와이프가 마음에 들지 않으신가요? 버튼도 있습니다! 건너뛰기를 누르면 나중에 결정하도록 남겨두고, 건너뛰기를 길게 누르면 파일을 향후 스캔에서 제외합니다. 실행 취소를 누르면 마지막 선택을 되돌립니다.</string>
+    <string name="tour_swiper_review_body">보관 및 삭제 선택은 임시로만 저장됩니다. 검토를 열어 확인한 후 준비가 되면 삭제를 적용하세요.</string>
+</resources>

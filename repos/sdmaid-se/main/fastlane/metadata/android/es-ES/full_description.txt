@@ -1,0 +1,55 @@
+<i>SD Maid 2/SE</i> es el asistente de confianza de tu Android, para mantenerlo limpio y ordenado.
+
+Nadie es perfecto y Android tampoco.
+
+* Las aplicaciones desinstaladas dejan restos.
+* Se crean constantemente registros, informes de fallos y otros archivos no deseados.
+* Tu almacenamiento acumula archivos y carpetas que no reconoces.
+* Fotos duplicadas en tu galería.
+
+¡Deja que SD Maid 2/SE te ayude!
+
+SD Maid 2/SE es una aplicación y gestor de archivos que sabe qué aplicaciones han creado qué archivos en tu dispositivo. Compara los archivos con las aplicaciones instaladas para ayudarte a liberar espacio de forma segura.
+
+✨ Limpia después de desinstalar
+
+Si las aplicaciones crean archivos fuera de sus carpetas designadas, estos permanecen tras la desinstalación. La herramienta "CorpseFinder" encuentra esos restos, te dice a qué aplicación pertenecían y te ayuda a eliminarlos.
+
+🔍 Busca en tu dispositivo de forma inteligente
+
+Filtra carpetas vacías, archivos temporales, aplicaciones ya instaladas y más. Crea tus propios criterios de búsqueda. La herramienta "SystemCleaner" busca y elimina archivos automáticamente según distintos criterios.
+
+🧹 Elimina archivos prescindibles y cachés ocultos
+
+Miniaturas, papeleras, cachés sin conexión y más: si las aplicaciones no se limpian solas, "AppCleaner" lo hará. La herramienta "Limpiador de Aplicaciones" encuentra aplicaciones con archivos prescindibles.
+
+📦 Gestiona todas tus aplicaciones
+
+Obtén una lista completa de todas las aplicaciones instaladas en tu dispositivo. Lista completa de todas las aplicaciones instaladas: activadas, desactivadas, de usuario o de sistema — ninguna puede esconderse. La herramienta "AppControl" te permite buscar, ordenar y controlar tus aplicaciones.
+
+📊 ¿Qué ocupa todo tu espacio?
+
+La gestión del almacenamiento es compleja entre aplicaciones, medios y archivos en la memoria del dispositivo, tarjetas SD y USB. La herramienta "StorageAnalyzer" muestra cómo se usa el espacio en tu dispositivo.
+
+📷 Encuentra datos duplicados
+
+Descargas duplicadas, fotos de redes sociales o imágenes similares: las copias se acumulan. La herramienta "Deduplicator" encuentra archivos iguales o similares y te ayuda a eliminar las copias sobrantes.
+
+👆 Desordena con un deslizamiento
+
+Elige una carpeta y revisa los archivos uno a uno con deslizamientos para conservar, eliminar u omitir. La herramienta "Swiper" te permite revisar todas las decisiones antes de eliminar nada, y puedes guardar la sesión para continuar más tarde.
+
+🗜️ Ahorra espacio sin eliminar fotos
+
+Las fotos pueden ocupar mucho almacenamiento, pero no siempre quieres eliminarlas. La herramienta "Media Squeeze" comprime tus imágenes con ajustes de calidad configurables para liberar espacio sin perder tus fotos.
+
+Esta aplicación no tiene publicidad. Algunas funciones requieren la versión de pago.
+
+SD Maid 2/SE es el sucesor de SD Maid 1/Legacy.
+Optimizado para nuevas versiones de Android y enfocado en la limpieza.
+
+Esta aplicación tiene funciones opcionales que utilizan la API AccessibilityService para automatizar acciones tediosas.
+Usando la API AccessibilityService, esta aplicación puede pulsar botones para realizar operaciones en varias aplicaciones, por ejemplo, borrar cachés. borrando la memoria caché.
+Esta aplicación no utiliza la API AccessibilityService para recopilar información.
+
+SD Maid 2/SE es una aplicación de limpieza y gestión de archivos.

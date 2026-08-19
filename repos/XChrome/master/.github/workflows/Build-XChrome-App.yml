@@ -1,0 +1,341 @@
+name: Build XChrome WPF Application
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号 (格式: x.x.x.x)'
+        required: false
+        default: '1.15.0.0'
+
+env:
+  PROJECT_FILE: XChrome.csproj
+  PUBLISH_DIR: ./publish
+  EXE_NAME: XChrome.exe
+  PLAYWRIGHT_DIR: ./bin/Release/net8.0-windows/win-x64/playwright
+  PLAYWRIGHT_BROWSERS_DIR: ./bin/Release/net8.0-windows/win-x64/playwright-browsers
+  
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    env:
+      APP_VERSION: ${{ github.event.inputs.version || '1.15.0.0' }}
+      PORTABLE_DIR: ./XChrome_dist_portable
+      ZIP_NAME: XChrome_${{ github.event.inputs.version || '1.15.0.0' }}.zip
+      
+    steps:
+    # 1. 检出代码
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+  
+    # 2. 安装 .NET SDK
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    # 3. 缓存 NuGet 包
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    # 4. 显示项目信息
+    - name: Show project info
+      run: |
+        echo "项目文件: ${{ env.PROJECT_FILE }}"
+        echo "当前目录: $(pwd)"
+        echo "构建版本: ${{ env.APP_VERSION }}"
+        echo "便携版目录: ${{ env.PORTABLE_DIR }}"
+        echo "压缩包名称: ${{ env.ZIP_NAME }}"
+
+    # 5. 恢复 NuGet 包
+    - name: Restore dependencies
+      run: |
+        echo "恢复 NuGet 包..."
+        dotnet restore "${{ env.PROJECT_FILE }}" --verbosity quiet
+        echo "NuGet包恢复完成"
+
+    # 5.5【关键修复 + 探针】从源头排除 Playwright driver 文件，并在日志中打印排除详情，
+    # 便于确认排除逻辑是否真正生效（而不是靠"发布目录没有独立文件夹"这种无效校验）
+    - name: Exclude Playwright driver from all publish outputs (source-level fix)
+      shell: pwsh
+      run: |
+        echo "生成 Directory.Build.targets，从源头排除 .playwright 相关文件..."
+        $targetsContent = @'
+        <Project>
+          <Target Name="ExcludePlaywrightDriverFromPublish" AfterTargets="ComputeResolvedFilesToPublishList">
+            <ItemGroup>
+              <_PlaywrightFilesToExclude Include="@(ResolvedFileToPublish)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(ResolvedFileToPublish.RelativePath)', '\.playwright'))" />
+            </ItemGroup>
+            <Message Importance="high" Text="[Playwright探针] 匹配到待排除文件数量: @(_PlaywrightFilesToExclude->Count())" />
+            <Message Importance="high" Text="[Playwright探针] 排除文件: %(_PlaywrightFilesToExclude.Identity)" Condition="'@(_PlaywrightFilesToExclude)' != ''" />
+            <ItemGroup>
+              <ResolvedFileToPublish Remove="@(_PlaywrightFilesToExclude)" />
+            </ItemGroup>
+          </Target>
+        </Project>
+        '@
+        Set-Content -Path "./Directory.Build.targets" -Value $targetsContent -Encoding UTF8
+        echo "已生成 Directory.Build.targets："
+        Get-Content "./Directory.Build.targets"
+
+    # 6. 清理 Playwright 冗余文件（二次保险）
+    - name: Clean Playwright redundant files
+      run: |
+        echo "开始清理 Playwright 冗余文件..."
+        if (Test-Path "${{ env.PLAYWRIGHT_DIR }}") {
+          echo "删除 Playwright 文件夹: ${{ env.PLAYWRIGHT_DIR }}"
+          Remove-Item -Path "${{ env.PLAYWRIGHT_DIR }}" -Recurse -Force -ErrorAction SilentlyContinue
+        }
+        if (Test-Path "${{ env.PLAYWRIGHT_BROWSERS_DIR }}") {
+          echo "删除 Playwright 浏览器文件夹: ${{ env.PLAYWRIGHT_BROWSERS_DIR }}"
+          Remove-Item -Path "${{ env.PLAYWRIGHT_BROWSERS_DIR }}" -Recurse -Force -ErrorAction SilentlyContinue
+        }
+        echo "清理调试文件..."
+        Get-ChildItem -Recurse -Include *.pdb, *.log, *.tmp, *.bak | Remove-Item -Force -ErrorAction SilentlyContinue
+        echo "冗余文件清理完成！"
+  
+    # 7. 发布完整可运行单文件 EXE（加 --verbosity normal，确保探针消息一定打印出来）
+    - name: Publish full functional lightweight EXE
+      run: |
+        if (Test-Path "${{ env.PUBLISH_DIR }}") {
+          Remove-Item -Path "${{ env.PUBLISH_DIR }}" -Recurse -Force -ErrorAction SilentlyContinue
+        }
+        New-Item -Path "${{ env.PUBLISH_DIR }}" -ItemType Directory -Force | Out-Null
+      
+        echo "正在发布完整可运行轻量级单文件应用..."
+        echo "使用版本号: ${{ env.APP_VERSION }}"
+      
+        dotnet publish "${{ env.PROJECT_FILE }}" -c Release -r win-x64 --self-contained true `
+          -p:PublishSingleFile=true `
+          -p:IncludeNativeLibrariesForSelfExtract=true `
+          -p:IncludeAllContentForSelfExtract=true `
+          -p:DebugType=None `
+          -p:DebugSymbols=false `
+          -p:AssemblyVersion=${{ env.APP_VERSION }} `
+          -p:FileVersion=${{ env.APP_VERSION }} `
+          -p:EnableCompressionInSingleFile=true `
+          -p:TrimUnusedDependencies=true `
+          --verbosity normal `
+          /p:WarningLevel=0 `
+          /nowarn:CS8602 `
+          /nowarn:CS8629 `
+          /nowarn:CS0168 `
+          /nowarn:CS0169 `
+          /nowarn:CS0649 `
+          /nowarn:CS0414 `
+          /nowarn:NU1701 `
+          /nowarn:NU1603 `
+          /nowarn:NU1604 `
+          -o "${{ env.PUBLISH_DIR }}"
+      
+        echo "发布完成！"
+
+        $leakedPlaywright = Get-ChildItem -Path "${{ env.PUBLISH_DIR }}" -Recurse -Directory -Force -ErrorAction SilentlyContinue |
+          Where-Object { $_.Name -like "*playwright*" -or $_.Name -eq ".playwright" }
+        if ($leakedPlaywright) {
+          echo "⚠️ 警告：单文件发布目录中仍发现 Playwright 相关文件夹！"
+          $leakedPlaywright | ForEach-Object { echo "  - $($_.FullName)" }
+        } else {
+          echo "（提示：此项检查对单文件模式无实际验证意义，请以上方 [Playwright探针] 日志为准）"
+        }
+  
+    # 8. 发布便携版
+    - name: Publish portable version
+      run: |
+        if (Test-Path "${{ env.PORTABLE_DIR }}") {
+          Remove-Item -Path "${{ env.PORTABLE_DIR }}" -Recurse -Force -ErrorAction SilentlyContinue
+        }
+        New-Item -Path "${{ env.PORTABLE_DIR }}" -ItemType Directory -Force | Out-Null
+      
+        echo "正在发布便携版（框架依赖，不含.NET运行时）..."
+        echo "版本号: ${{ env.APP_VERSION }}"
+      
+        dotnet publish "${{ env.PROJECT_FILE }}" -c Release -r win-x64 --self-contained false `
+          /p:WarningLevel=0 `
+          /nowarn:CS8602 `
+          /nowarn:CS8629 `
+          /nowarn:CS0168 `
+          /nowarn:CS0169 `
+          /nowarn:CS0649 `
+          /nowarn:CS0414 `
+          /nowarn:NU1701 `
+          /nowarn:NU1603 `
+          /nowarn:NU1604 `
+          -o "${{ env.PORTABLE_DIR }}"
+      
+        $portablePlaywrightPath = Join-Path -Path "${{ env.PORTABLE_DIR }}" -ChildPath "playwright"
+        if (Test-Path $portablePlaywrightPath) {
+          echo "清理便携版中的 Playwright 文件夹..."
+          Remove-Item -Path $portablePlaywrightPath -Recurse -Force -ErrorAction SilentlyContinue
+        }
+       
+        Get-ChildItem "${{ env.PORTABLE_DIR }}" -Recurse -Include *.pdb, *.log, *.tmp, *.bak | Remove-Item -Force -ErrorAction SilentlyContinue
+       
+        echo "便携版发布完成！"
+        Get-ChildItem "${{ env.PORTABLE_DIR }}" -Recurse | Measure-Object -Property Length -Sum | ForEach-Object {
+          echo "文件总数: $($_.Count)"
+          echo "总大小: $([math]::Round($_.Sum / 1MB, 2)) MB"
+        }
+  
+    # 9. 创建便携版压缩包
+    - name: Create portable zip
+      id: create_zip
+      shell: pwsh
+      run: |
+        echo "正在创建便携版压缩包..."
+        if (-not (Test-Path "${{ env.PORTABLE_DIR }}")) {
+          echo "错误：便携版目录不存在！"
+          exit 1
+        }
+       
+        Get-ChildItem -Path "${{ env.PORTABLE_DIR }}" -Recurse -Directory -Force -ErrorAction SilentlyContinue | Where-Object { 
+          $_.Name -like "*playwright*" -or $_.Name -eq ".playwright"
+        } | ForEach-Object {
+          echo "删除文件夹: $($_.FullName)"
+          Remove-Item -Path $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+        }
+       
+        $absPortablePath = Resolve-Path "${{ env.PORTABLE_DIR }}"
+        $destZip = Join-Path (Get-Location) "${{ env.ZIP_NAME }}"
+        
+        if (Test-Path $destZip) {
+          Remove-Item -Path $destZip -Force -ErrorAction SilentlyContinue
+        }
+        
+        Push-Location $absPortablePath
+        try {
+          Compress-Archive -Path * -DestinationPath $destZip -CompressionLevel Optimal -Force
+        } finally {
+          Pop-Location
+        }
+        
+        if (Test-Path $destZip) {
+          $zipSize = (Get-Item $destZip).Length / 1MB
+          echo "压缩包创建成功: $destZip"
+          echo "压缩包大小: $([math]::Round($zipSize, 2)) MB"
+          echo "zip_path=$destZip" >> $env:GITHUB_OUTPUT
+        } else {
+          echo "错误：压缩包创建失败！"
+          exit 1
+        }
+  
+    # 10. 查找完整 EXE
+    - name: Find full EXE
+      id: prepare_exe
+      run: |
+        $publishExePath = Join-Path -Path "${{ env.PUBLISH_DIR }}" -ChildPath "${{ env.EXE_NAME }}"
+        
+        if (Test-Path $publishExePath) {
+          $targetExe = Get-Item $publishExePath
+        } else {
+          echo "错误：发布目录未找到 EXE！"
+          exit 1
+        }
+      
+        $exeSize = ($targetExe.Length) / 1MB
+        echo "EXE 体积：$([math]::Round($exeSize, 2)) MB"
+        if ($exeSize -lt 10) {
+          echo "错误：EXE 体积过小，为无效空壳文件！"
+          exit 1
+        }
+      
+        $rootExePath = ".\${{ env.EXE_NAME }}"
+        Copy-Item -Path $targetExe.FullName -Destination $rootExePath -Force
+        echo "exe_path=./${{ env.EXE_NAME }}" >> $env:GITHUB_OUTPUT
+  
+    # 11. 计算文件哈希值并获取文件大小
+    - name: Calculate SHA256 checksums and file sizes
+      id: calculate_checksums
+      run: |
+        $exePath = ".\${{ env.EXE_NAME }}"
+        if (Test-Path $exePath) {
+          $exeHash = (Get-FileHash -Path $exePath -Algorithm SHA256).Hash
+          $exeSize = (Get-Item $exePath).Length
+          $exeSizeMB = [math]::Round($exeSize / 1MB, 2)
+          echo "EXE_HASH=$exeHash" >> $env:GITHUB_OUTPUT
+          echo "EXE_SIZE_MB=$exeSizeMB" >> $env:GITHUB_OUTPUT
+        }
+        
+        $zipPath = ".\${{ env.ZIP_NAME }}"
+        if (Test-Path $zipPath) {
+          $zipHash = (Get-FileHash -Path $zipPath -Algorithm SHA256).Hash
+          $zipSize = (Get-Item $zipPath).Length
+          $zipSizeMB = [math]::Round($zipSize / 1MB, 2)
+          echo "ZIP_HASH=$zipHash" >> $env:GITHUB_OUTPUT
+          echo "ZIP_SIZE_MB=$zipSizeMB" >> $env:GITHUB_OUTPUT
+        }
+  
+    # 12. 彻底清理旧的Release和Tag
+    - name: Purge old release and tag
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      continue-on-error: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        $TAG_NAME = "v${{ env.APP_VERSION }}"
+        gh release delete "$TAG_NAME" --yes --cleanup-tag 2>$null
+        $remoteTag = git ls-remote --tags origin "refs/tags/$TAG_NAME" 2>$null
+        if ($remoteTag) {
+            git push origin ":refs/tags/$TAG_NAME" 2>$null
+        }
+        $localTag = git tag -l "$TAG_NAME" 2>$null
+        if ($localTag) {
+            git tag -d "$TAG_NAME" 2>$null
+        }
+      shell: pwsh
+  
+    # 13. 等待API同步
+    - name: Wait for API sync
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      run: Start-Sleep -Seconds 3
+      shell: pwsh
+  
+    # 14. 上传完整构建产物
+    - name: Upload full XChrome application
+      uses: actions/upload-artifact@v4
+      with:
+        name: XChrome-v${{ env.APP_VERSION }}-run-${{ github.run_number }}
+        path: |
+          ${{ env.PUBLISH_DIR }}/
+          ${{ env.PORTABLE_DIR }}/
+          ./${{ env.ZIP_NAME }}
+          ./${{ env.EXE_NAME }}
+        if-no-files-found: error
+        retention-days: 30
+  
+    # 15. 创建纯净的GitHub Release
+    - name: Create New Pure Release
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          ./${{ env.EXE_NAME }}
+          ./${{ env.ZIP_NAME }}
+        tag_name: v${{ env.APP_VERSION }}
+        name: XChrome v${{ env.APP_VERSION }}
+        body: |
+          > 🏗️ 此版本于 **${{ github.run_started_at }}** 重新构建发布
+          
+          ## 📦 文件下载
+          
+          | 文件 | 大小 | SHA256 哈希值 |
+          |------|------|------------------------------------------|
+          | **XChrome.exe** (单文件版) | ${{ steps.calculate_checksums.outputs.EXE_SIZE_MB }} MB | `${{ steps.calculate_checksums.outputs.EXE_HASH }}` |
+          | **${{ env.ZIP_NAME }}** (便携版) | ${{ steps.calculate_checksums.outputs.ZIP_SIZE_MB }} MB | `${{ steps.calculate_checksums.outputs.ZIP_HASH }}` |
+          
+          ---
+          
+          > 📦 **Artifact**: `XChrome-v${{ env.APP_VERSION }}-run-${{ github.run_number }}`
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,96 @@
+package eu.darken.sdmse.common.files
+
+import eu.darken.sdmse.common.sharedresource.HasSharedResource
+import kotlinx.coroutines.flow.Flow
+import okio.FileHandle
+import java.time.Instant
+
+interface APathGateway<
+        P : APath,
+        PLU : APathLookup<P>,
+        PLUE : APathLookupExtended<P>,
+        > : HasSharedResource<Any> {
+
+    suspend fun createDir(path: P)
+
+    suspend fun createFile(path: P)
+
+    /**
+     * See [lookupFiles] for streaming and error semantics.
+     */
+    suspend fun listFiles(path: P): Flow<P>
+
+    suspend fun lookup(path: P): PLU
+
+    suspend fun lookupExtended(path: P): PLUE
+
+    /**
+     * Children are emitted as they are enumerated, so consumers can abort early without paying
+     * for the complete listing of a huge directory.
+     *
+     * A [ReadException] can surface at call time or at collection time:
+     * - NORMAL mode enumerates the directory eagerly at call time (a snapshot), only the per-child
+     *   lookup work is lazy. Re-collecting replays that call-time snapshot.
+     * - ROOT/ADB mode enumerates fully lazily at collection time, each collection re-enumerates.
+     */
+    suspend fun lookupFiles(path: P): Flow<PLU>
+
+    /**
+     * See [lookupFiles] for streaming and error semantics.
+     */
+    suspend fun lookupFilesExtended(path: P): Flow<PLUE>
+
+    suspend fun walk(
+        path: P,
+        options: WalkOptions<P, PLU> = WalkOptions()
+    ): Flow<PLU>
+
+    data class WalkOptions<P : APath, PLU : APathLookup<P>>(
+        val pathDoesNotContain: Set<String>? = null,
+        val onFilter: (suspend (PLU) -> Boolean)? = null,
+        val onError: (suspend (PLU, Exception) -> Boolean)? = null,
+        val followSymlinks: Boolean = false,
+    ) {
+        // followSymlinks is intentionally NOT part of this check: symlink following is valid in
+        // every mode. In ROOT/ADB it runs host-side via DirectLocalWalker (privileged process); in
+        // AUTO, EscalatingWalker escalates symlinks it can't resolve app-side. Only onFilter/onError
+        // force the app-side IndirectLocalWalker, since suspend callbacks can't cross the IPC boundary.
+        val isDirect: Boolean
+            get() = onFilter == null && onError == null
+    }
+
+    suspend fun du(
+        path: P,
+        options: DuOptions<P, PLU> = DuOptions()
+    ): Long
+
+    data class DuOptions<P : APath, PLU : APathLookup<P>>(
+        val abortOnError: Boolean = false,
+    )
+
+    suspend fun exists(path: P): Boolean
+
+    suspend fun canWrite(path: P): Boolean
+
+    suspend fun canRead(path: P): Boolean
+
+    suspend fun file(path: P, readWrite: Boolean): FileHandle
+
+    /**
+     * Deletes [path]. With [recursive] the whole subtree goes, without it a directory that still has
+     * children should be refused with a [WriteException], deleting nothing.
+     *
+     * That refusal is best-effort, not a guarantee. No backend can check emptiness and delete as one
+     * atomic step, so a child that appears in between can still be taken along (a SAF provider
+     * cascades a directory delete). [recursive] = false states intent, it is not a safety interlock.
+     */
+    suspend fun delete(path: P, recursive: Boolean)
+
+    suspend fun createSymlink(linkPath: P, targetPath: P): Boolean
+
+    suspend fun setModifiedAt(path: P, modifiedAt: Instant): Boolean
+
+    suspend fun setPermissions(path: P, permissions: Permissions): Boolean
+
+    suspend fun setOwnership(path: P, ownership: Ownership): Boolean
+}

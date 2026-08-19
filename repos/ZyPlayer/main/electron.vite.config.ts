@@ -1,0 +1,216 @@
+import { resolve } from 'node:path';
+import process from 'node:process';
+
+import { TDesignResolver } from '@tdesign-vue-next/auto-import-resolver';
+import vue from '@vitejs/plugin-vue';
+import vueJsx from '@vitejs/plugin-vue-jsx';
+import { defineConfig } from 'electron-vite';
+import AutoImport from 'unplugin-auto-import/vite';
+import Components from 'unplugin-vue-components/vite';
+import viteVueDevTools from 'vite-plugin-vue-devtools';
+import viteSvgLoader from 'vite-svg-loader';
+
+import pkg from './package.json';
+
+const isDev = process.env.NODE_ENV === 'development';
+const isProd = process.env.NODE_ENV === 'production';
+
+/**
+ * @see https://vitejs.dev/config/
+ * @see https://rolldown.rs/reference/config-options/
+ */
+export default defineConfig({
+  main: {
+    plugins: [],
+    resolve: {
+      alias: {
+        '@main': resolve('src/main'),
+        '@shared': resolve('src/shared'),
+        '@logger': resolve('src/main/services/LoggerService'),
+        '@db': resolve('src/main/services/DatabaseService'),
+        '@server': resolve('src/main/services/FastifyService'),
+        '@pkg': resolve('package.json'),
+      },
+    },
+    build: {
+      rollupOptions: {
+        external: ['bufferutil', 'utf-8-validate', 'electron', ...Object.keys(pkg.dependencies)],
+        input: {
+          index: resolve(__dirname, 'src/main/index.ts'),
+          film_cms_adapter_t3_drpy_worker: resolve(
+            __dirname,
+            'src/main/services/FastifyService/routes/v1/film/cms/adapter/t3Drpy/worker.ts',
+          ),
+          film_cms_adapter_t3_catopen_worker: resolve(
+            __dirname,
+            'src/main/services/FastifyService/routes/v1/film/cms/adapter/t3Catopen/worker.ts',
+          ),
+        },
+        onwarn: (warning, defaultHandler) => {
+          // TODO: We should resolve these warnings instead of ignoring them
+          switch (warning.code) {
+            case 'EVAL':
+            case 'SOURCEMAP_ERROR':
+            case 'COMMONJS_VARIABLE_IN_ESM':
+              return;
+            default:
+              break;
+          }
+
+          // Handle all other warnings normally
+          defaultHandler(warning);
+        },
+        output: {
+          manualChunks: undefined, // Disable code splitting completely-return null to force single file packaging
+          inlineDynamicImports: true, // Inline all dynamic imports, this is a key configuration
+          format: 'cjs',
+        },
+        treeshake: false,
+      },
+      externalizeDeps: {},
+      sourcemap: isDev,
+    },
+    esbuild: isProd ? { legalComments: 'none' } : {},
+    optimizeDeps: {
+      noDiscovery: isDev,
+    },
+    worker: {
+      format: 'es',
+    },
+  },
+  preload: {
+    plugins: [],
+    resolve: {
+      alias: {
+        '@shared': resolve('src/shared'),
+        '@pkg': resolve('package.json'),
+      },
+    },
+    build: {
+      sourcemap: isDev,
+    },
+  },
+  renderer: {
+    plugins: [
+      vue({
+        template: {
+          compilerOptions: {
+            isCustomElement: (tag) => ['webview'].includes(tag),
+          },
+        },
+      }),
+      vueJsx(),
+      AutoImport({
+        resolvers: [
+          TDesignResolver({
+            library: 'vue-next',
+          }),
+          TDesignResolver({
+            library: 'chat',
+          }),
+        ],
+      }),
+      Components({
+        resolvers: [
+          TDesignResolver({
+            library: 'vue-next',
+          }),
+          TDesignResolver({
+            library: 'chat',
+          }),
+        ],
+      }),
+      viteSvgLoader(),
+      ...(isDev ? [viteVueDevTools()] : []),
+    ],
+    resolve: {
+      alias: {
+        '@': resolve('src/renderer/src'),
+        '@pkg': resolve('package.json'),
+        '@renderer': resolve('src/renderer'),
+        '@shared': resolve('src/shared'),
+        '@logger': resolve('src/main/services/LoggerService'),
+      },
+    },
+    optimizeDeps: {
+      include: ['monaco-yaml/yaml.worker.js'],
+      esbuildOptions: {
+        target: 'esnext', // for dev
+      },
+    },
+    worker: {
+      format: 'es',
+    },
+    build: {
+      target: 'esnext', // for build
+      rollupOptions: {
+        external: ['crypto'],
+        input: {
+          index: resolve(__dirname, 'src/renderer/index.html'),
+        },
+        output: {
+          entryFileNames: `assets/entry/[name]_[hash].js`,
+          chunkFileNames: `assets/chunk/[name]_[hash].js`,
+          assetFileNames: `assets/static/[ext]/[name]_[hash].[ext]`,
+          advancedChunks: {
+            groups: [
+              {
+                name: 'vendor_tdesign',
+                test: /[\\/]node_modules[\\/](tdesign-vue-next|tdesign-icons-vue-next|@tdesign-vue-next\/chat)[\\/]/,
+              },
+              {
+                name: 'vendor_vue',
+                test: /[\\/]node_modules[\\/](vue|vue-router|vue-i18n|pinia|pinia-plugin-persistedstate|pinia-shared-state|@vueuse\/core|v3-infinite-loading|emittery)[\\/]/,
+              },
+              {
+                name: 'vendor_crypto',
+                test: /[\\/]node_modules[\\/](crypto-js|he|fflate|node-forge|sm-crypto-v2|uuid)[\\/]/,
+              },
+              {
+                name: 'vendor_video-decoder',
+                test: /[\\/]node_modules[\\/](dashjs|flv\.js|hls\.js|mpegts\.js|shaka-player)[\\/]/,
+              },
+              {
+                name: 'vendor_xgplayer',
+                test: /[\\/]node_modules[\\/](xgplayer|xgplayer-.*)[\\/]/,
+              },
+              {
+                name: 'vendor_artplayer',
+                test: /[\\/]node_modules[\\/](artplayer|artplayer-.*)[\\/]/,
+              },
+            ],
+          },
+        },
+        experimental: {
+          strictExecutionOrder: true,
+        },
+        onwarn: (warning, defaultHandler) => {
+          // TODO: We should resolve these warnings instead of ignoring them
+          switch (warning.code) {
+            case 'EVAL':
+            case 'COMMONJS_VARIABLE_IN_ESM':
+            case 'PLUGIN_TIMINGS':
+              return;
+            default:
+              break;
+          }
+
+          // Handle all other warnings normally
+          defaultHandler(warning);
+        },
+      },
+    },
+    esbuild: isProd ? { legalComments: 'none' } : {},
+    css: {
+      preprocessorOptions: {
+        less: {
+          modifyVars: {
+            hack: `true; @import (reference) "${resolve('src/renderer/src/style/variables.less')}";`,
+          },
+          math: 'strict',
+          javascriptEnabled: true,
+        },
+      },
+    },
+  },
+});

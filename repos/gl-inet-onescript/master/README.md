@@ -1,0 +1,206 @@
+
+# GL-iNet 系列路由器 一键iStoreOS风格化脚本
+[![GitHub](https://img.shields.io/github/license/wukongdaily/gl-inet-onescript.svg?label=LICENSE&logo=github&logoColor=%20)](https://github.com/wukongdaily/gl-inet-onescript/blob/master/LICENSE)
+![GitHub Stars](https://img.shields.io/github/stars/wukongdaily/gl-inet-onescript.svg?style=flat&logo=appveyor&label=Stars&logo=github)
+![GitHub Forks](https://img.shields.io/github/forks/wukongdaily/gl-inet-onescript.svg?style=flat&logo=appveyor&label=Forks&logo=github)
+[![YouTube](https://img.shields.io/badge/YouTube-123456?logo=youtube&labelColor=ff0000)](https://www.youtube.com/watch?v=YlhIdizH0hM)
+[![Bilibili](https://img.shields.io/badge/Bilibili-123456?logo=bilibili&logoColor=fff&labelColor=fb7299)](https://www.bilibili.com/video/BV1GyqmBEEsq/)
+
+
+## 🤔 这是什么？
+
+该项目可以让GL-iNet旗下ARM64平台的路由器在不刷机情况下,一键变成iStoreOS最新风格。<br><br>
+<img alt="Static Badge" src="https://img.shields.io/badge/MT3000-0?style=flat-square&logoColor=8A2BE2&label=%E5%9E%8B%E5%8F%B7&labelColor=000000&color=D94600"> 
+<img alt="Static Badge" src="https://img.shields.io/badge/MT6000-0?style=flat-square&logoColor=8A2BE2&label=%E5%9E%8B%E5%8F%B7&labelColor=000000&color=ff9300">
+<img alt="Static Badge" src="https://img.shields.io/badge/MT2500A-0?style=flat-square&logoColor=8A2BE2&label=%E5%9E%8B%E5%8F%B7&labelColor=000000&color=fffb0d"> 
+<img alt="Static Badge" src="https://img.shields.io/badge/BE3600-0?style=flat-square&logoColor=8A2BE2&label=%E5%9E%8B%E5%8F%B7&labelColor=000000&color=07755a"> 
+<img alt="Static Badge" src="https://img.shields.io/badge/BE6500-0?style=flat-square&logoColor=8A2BE2&label=%E5%9E%8B%E5%8F%B7&labelColor=000000&color=84dce5"> 
+<img alt="Static Badge" src="https://img.shields.io/badge/BE9300-0?style=flat-square&logoColor=8A2BE2&label=%E5%9E%8B%E5%8F%B7&labelColor=000000&color=235ab8"> 
+<img alt="Static Badge" src="https://img.shields.io/badge/MT3600BE-0?style=flat-square&logoColor=8A2BE2&label=%E5%9E%8B%E5%8F%B7&labelColor=000000&color=5e0774"> 
+<img alt="Static Badge" src="https://img.shields.io/badge/MT5000-0?style=flat-square&logoColor=8A2BE2&label=%E5%9E%8B%E5%8F%B7&labelColor=000000&color=8d8ab9"> 
+<img alt="Static Badge" src="https://img.shields.io/badge/Mudi7^E5800-0?style=flat-square&logoColor=8A2BE2&label=%E5%9E%8B%E5%8F%B7&labelColor=000000&color=316EE8"> 
+
+
+
+
+<a href="https://wkdaily.cpolar.top/01" target="_blank">
+  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+       alt="Buy Me A Coffee"
+       style="width:20%; height:auto;">
+</a>
+
+## 🚀 快速上手 
+
+### 一键安装 (推荐)
+
+下载并运行主脚本，会自动检测路由器型号：
+
+```bash
+sh -c "$(curl -fsSL https://cafe.cpolar.cn/wkdaily/gl/raw/branch/main/main.sh)"
+```
+
+主脚本支持自动检测以下机型：
+- GL-iNet BE-6500 / BE-9300 / BE-3600 Luci-23
+- GL-iNet MT-5000 / MT-3600BE Luci-21
+- GL-iNet Mudi 7 (GL-E5800) 
+- GL-iNet MT-2500A / MT-3000 / MT-6000 OP21
+- OP24 MT3000/6000专用脚本 24.10.4
+- OP25 MT3600BE/MT3000/6000专用脚本 25.12.5
+
+### 单独机型脚本
+
+如需单独运行某机型脚本，可使用以下命令：
+####  MT3000脚本 ❤️ Wi-Fi 6 出厂默认系统（luci 21 内核5.4）
+```bash
+sh -c "$(curl -fsSL https://cafe.cpolar.cn/wkdaily/gl/raw/branch/main/gl-inet.sh)"
+
+```
+
+#### 新增 兼容原厂【op24固件】的脚本 (MT3000/6000) Wi-Fi 6 luci 24.10.4 （luci 24 内核6.6）
+
+```bash
+sh -c "$(curl -fsSL https://cafe.cpolar.cn/wkdaily/gl/raw/branch/main/gl-inet-op24.sh)"
+
+```
+
+#### 新增 兼容原厂【op25固件】的脚本 (MT3000/6000) Wi-Fi 6 luci 25.12.5 （内核6.12）
+```bash
+sh -c "$(curl -fsSL https://cafe.cpolar.cn/wkdaily/gl/raw/branch/main/gl-inet-op25.sh)"
+
+```
+
+
+#### 新增 BE6500脚本 (GL-BE6500) ❤️ Wi-Fi 7 (同BE9300通用)
+```bash
+sh -c "$(curl -fsSL https://cafe.cpolar.cn/wkdaily/gl/raw/branch/main/be6500.sh)"
+
+```
+#### 新增 BE3600脚本 (GL-BE3600) Wi-Fi 7
+```bash
+sh -c "$(curl -fsSL https://cafe.cpolar.cn/wkdaily/gl/raw/branch/main/be3600.sh)"
+
+```
+---
+#### ❤️新增 MT-3600BE脚本 (GL-MT3600BE) Wi-Fi 7
+```bash
+sh -c "$(curl -fsSL https://cafe.cpolar.cn/wkdaily/gl/raw/branch/main/mt3600.sh)"
+
+```
+
+#### ❤️新增 MT-5000脚本 (GL-MT5000) 三个2.5G 有线
+```bash
+sh -c "$(curl -fsSL https://cafe.cpolar.cn/wkdaily/gl/raw/branch/main/mt5000.sh)"
+```
+
+#### ❤️新增 Mudi 7 (GL-E5800) _ 5G NR Tri-band Wi-Fi 7 Travel Router (同mt3600脚本通用)
+```bash
+sh -c "$(curl -fsSL https://cafe.cpolar.cn/wkdaily/gl/raw/branch/main/mt3600.sh)"
+```
+
+
+# 带参数调用脚本 一键快捷执行
+```
+sh be3600.sh -q
+```
+[gl-inet.sh](https://cafe.cpolar.cn/wkdaily/gl/raw/branch/main/gl-inet.sh)<br>
+[be3600.sh](https://cafe.cpolar.cn/wkdaily/gl/raw/branch/main/be3600.sh)<br>
+[mt3600.sh](https://cafe.cpolar.cn/wkdaily/gl/raw/branch/main/mt3600.sh)<br>
+[be6500.sh](https://cafe.cpolar.cn/wkdaily/gl/raw/branch/main/be6500.sh)<br>
+[be9300.sh](https://cafe.cpolar.cn/wkdaily/gl/raw/branch/main/be9300.sh)<br>
+[gl-inet-op24.sh](https://cafe.cpolar.cn/wkdaily/gl/raw/branch/main/gl-inet-op24.sh)<br>
+
+
+
+
+## 新手ssh连接注意事项 （known_hosts重复的问题）
+https://github.com/wukongdaily/HowToUseSSH
+
+## 常见问题 https://github.com/wukongdaily/gl-inet-onescript/discussions/53 如8080端口提示拒绝访问
+## 新增：❤️如何使用内网版本的脚本 👉 https://github.com/wukongdaily/gl-inet-onescript/discussions/44
+### 新增：❤️如何下载run格式安装包 👉 [#45](https://github.com/wkccd/CloudRunFilesBuilder/releases)
+### 注意⚠️4.7.0以上版本。如何访问luci界面？
+http://192.168.8.1:8080
+
+
+
+### 辅助视频教程⬇️
+https://www.bilibili.com/video/BV1312bYZEjE
+
+## 🗂️ 引用项目
+
+本项目的开发参照了以下项目，感谢这些开源项目的作者：
+### istore
+https://github.com/linkease/istore
+
+![mt3000](https://github.com/wukongdaily/gl-inet-onescript/assets/143675923/0ff6cb12-0812-4198-b97b-30698da6a8c4)
+
+# 参考视频 点击直达
+[![B 站视频封面](https://i2.hdslb.com/bfs/archive/2fda32c5af12d06fdf5f95afd8384796ac6ec61c.jpg@560w_350h_1c_!web-space-index-topvideo.avif)](https://www.bilibili.com/video/BV1312bYZEjE)
+
+## 更多完整版
+https://www.youtube.com/watch?v=YlhIdizH0hM
+
+## 注意事项
+
+![luci](https://github.com/user-attachments/assets/50fb4566-dbeb-4b32-bec0-9b88e2af098c)
+
+
+# 新增❤️ 使用glibox 内网版的 脚本服务器
+> 支持x86-64 和 arm64 两种平台来搭建，glibox 是基于dufs 制作的内网文件服务器 用于托管本项目的脚本。免得因为网络问题下载失败。看到许多人 不断复用我的脚本 干脆搭建一个内网版本 。
+
+**视频教学**：https://www.bilibili.com/video/BV1eWt3zCE2y
+**视频教学**： https://youtu.be/ee4fANDk_CM
+
+```bash
+docker run -d \
+  --restart unless-stopped \
+  --name glibox \
+  -p 15050:15050 \
+  wukongdaily/glibox
+
+```
+
+
+### 对于MT3000/2500/6000  （ssh连接到路由器内 在路由器内执行）
+
+```bash
+read -p "请输入glibox局域网 IP: " ip && wget -O /tmp/gl.sh http://$ip:15050/glinet/gl-inet.sh && sh /tmp/gl.sh $ip
+
+```
+
+### 对于be3600 （ssh连接到路由器内 在路由器内执行）
+
+```bash
+read -p "请输入glibox局域网 IP: " ip && wget -O /tmp/gl.sh http://$ip:15050/glinet/be3600.sh && sh /tmp/gl.sh $ip
+```
+
+
+### https://hub.docker.com/r/wukongdaily/glibox/tags
+
+<img width="70%" height="70%" alt="image" src="https://github.com/user-attachments/assets/b13fada3-6d5c-4427-b20e-16e44ada5276" />
+
+
+
+
+### 鸣谢
+- https://github.com/VMatrices
+- [高级卸载插件作者VedioTalk](https://xz.vumstar.com/)
+- iStoreOS https://site.istoreos.com
+
+### ✨创意应用-开关快捷定制
+https://github.com/parentalclash/gl-inet-mt3000-openclash-switch
+
+
+
+### 更换最新iStoreOS首页 <2025-12-17> 支持按需显示UI模块
+<img width="3412" height="1472" alt="image" src="https://github.com/user-attachments/assets/9c807485-3e9a-46a5-8f0c-97cdf41053eb" />
+
+---
+
+<img width="2648" height="1666" alt="image" src="https://github.com/user-attachments/assets/e1728a7a-26fc-4bd4-8cb6-43ba20c4b651" />
+
+![截图](https://github.com/user-attachments/assets/93cbe29b-965c-4ff5-9ae9-db23c0066bf7)
+
+![6500](https://github.com/user-attachments/assets/3cc74252-4641-4a39-b01a-6c5ebb13021c)
+
+<img width="3784" height="1740" alt="CleanShot 2026-02-26 at 11 15 41@2x" src="https://github.com/user-attachments/assets/ee1c2898-28dd-43db-82c2-e3756c5be52a" />

@@ -1,0 +1,2 @@
+﻿xchrome目录已经失效，往后会删除
+该目录用的playwright底层，现在迁移刀 zxchrome，用了全自研的

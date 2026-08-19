@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="stats_dash_body_size">
+        <item quantity="one">%s ተልቋል።</item>
+        <item quantity="other">%s ተልቀዋል።</item>
+    </plurals>
+    <plurals name="stats_dash_body_count">
+        <item quantity="one">SD Maidን ወደ መሣሪያዎ ከጋበዙ ጀምሮ %s ንጥል ተሠርቷል።</item>
+        <item quantity="other">SD Maidን ወደ መሣሪያዎ ከጋበዙ ጀምሮ %s ንጥሎች ተሠርተዋል።</item>
+    </plurals>
+    <!-- Dashboard statistics card caption: how long SD Maid has been installed. SD Maid is
+         personified as an invited houseguest (see stats_dash_body_count). Use the INFORMAL
+         register (du / tu / tú) in languages that distinguish it. %d is the count. -->
+    <plurals name="stats_dash_since_days">
+        <item quantity="one">ለ%d ቀን እንግዳዎ ነኝ።</item>
+        <item quantity="other">ለ%d ቀናት እንግዳዎ ነኝ።</item>
+    </plurals>
+    <plurals name="stats_dash_since_weeks">
+        <item quantity="one">ለ%d ሳምንት እንግዳዎ ነኝ።</item>
+        <item quantity="other">ለ%d ሳምንታት እንግዳዎ ነኝ።</item>
+    </plurals>
+    <plurals name="stats_dash_since_months">
+        <item quantity="one">ለ%d ወር እንግዳዎ ነኝ።</item>
+        <item quantity="other">ለ%d ወራት እንግዳዎ ነኝ።</item>
+    </plurals>
+    <plurals name="stats_dash_since_years">
+        <item quantity="one">ለ%d ዓመት እንግዳዎ ነኝ።</item>
+        <item quantity="other">ለ%d ዓመታት እንግዳዎ ነኝ።</item>
+    </plurals>
+    <string name="stats_report_status_partial_success">ከፊል ተሳክቷል</string>
+    <string name="stats_report_status_partial_failure">አልተሳካም</string>
+    <string name="stats_settings_desc">የSD Maid ስታቲስቲክ፣ ሪፖርቶችና የውሂብ ማቆያ ያዋቅሩ።</string>
+    <string name="stats_settings_retention_category">ማቆያ</string>
+    <string name="stats_settings_retention_reports_label">አጠቃላይ ሪፖርቶች</string>
+    <string name="stats_settings_retention_reports_desc">መሠረታዊ SD Maid ተግባር ሪፖርቶችን ከመሰረዝ በፊት የቀኖች ቁጥር።</string>
+    <string name="stats_settings_retention_paths_label">ዝርዝር የመንገድ መረጃ</string>
+    <string name="stats_settings_retention_paths_desc">በSD Maid የተጎዱ መንገዶች ዝርዝሮችን የማቆየት የቀኖች ቁጥር።</string>
+    <string name="stats_settings_reset_all_label">ሁሉንም ዳግም አስጀምር</string>
+    <string name="stats_settings_reset_all_desc">ሁሉንም ሪፖርቶች ስረዝና ሁሉንም ስታቲስቲክ ወደ ዜሮ አስቀምጥ።</string>
+    <string name="stats_affected_paths_label">የተጎዱ መንገዶች</string>
+    <string name="stats_affected_pkgs_label">የተጎዱ መተግበሪያዎች</string>
+    <string name="stats_dash_body_snapshots_only">የማከማቻ ታሪክዎን እየተከታተሉ ነው።</string>
+    <string name="stats_storage_trend_action">የማከማቻ አዝማሚያ</string>
+    <string name="stats_space_history_title">የማከማቻ አዝማሚያ</string>
+    <string name="stats_space_history_range_title">ክልል</string>
+    <string name="stats_space_history_range_7d">7 ቀናት</string>
+    <string name="stats_space_history_range_30d">30 ቀናት</string>
+    <string name="stats_space_history_range_90d">90 ቀናት</string>
+    <string name="stats_space_history_storage_title">ማከማቻ</string>
+    <string name="stats_space_history_current_used_label">በአሁን ጥቅም ላይ ያለ</string>
+    <string name="stats_space_history_min_label">ዝቅተኛ ጥቅም ላይ ያለ</string>
+    <string name="stats_space_history_max_label">ከፍተኛ ጥቅም ላይ ያለ</string>
+    <string name="stats_space_history_delta_label">ለውጥ</string>
+    <string name="stats_space_history_delta_in_x">%1$s በ%2$s</string>
+    <string name="stats_space_history_upgrade_title">ሙሉ ታሪክ የPro ባህሪ ነው</string>
+    <string name="stats_space_history_upgrade_body">ለእያንዳንዱ የማከማቻ መሳሪያ ሙሉ የ90-ቀን አዝማሚያ እይታ ለማግኘት ያሻሽሉ።</string>
+    <string name="stats_space_history_marker_freed">%1$s ነጻ ሆነ</string>
+    <string name="stats_storage_type_primary">ዋና ማጠራቀሚያ</string>
+    <string name="stats_storage_type_secondary">ሁለተኛ ማጠራቀሚያ</string>
+    <string name="stats_storage_type_portable">ተለዋወጂች ማጠራቀሚያ</string>
+    <string name="stats_space_history_delete_storage_title">የማስቀመጫ ታሪክ ይሰርዝ?</string>
+    <string name="stats_space_history_delete_storage_desc">ለዚህ ማስቀመጫ ያሉ ሁሉም የዝንባሌ ውሂቦች በቋሚነት ይሰረዛሉ።</string>
+</resources>

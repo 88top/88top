@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_select_paths_title">Valitse polut</string>
+    <string name="picker_selected_paths_title">Valitut polut</string>
+    <string name="picker_unsaved_confirmation_message">Hylätäänkö muutokset?</string>
+    <plurals name="picker_selected_paths_subtitle">
+        <item quantity="one">%d polku valittu</item>
+        <item quantity="other">%d polkua valittu</item>
+    </plurals>
+    <string name="picker_home_action">Tietoalueet</string>
+    <string name="picker_select_hint">Pidä kohdetta painettuna valitaksesi sen.</string>
+    <string name="tour_action_next">Seuraava</string>
+    <string name="tour_action_previous">Edellinen</string>
+    <string name="tour_action_cancel">Ohita</string>
+    <string name="tour_confirm_title">Ohita kierros?</string>
+    <string name="tour_confirm_message">Voit ottaa kierrokset uudelleen käyttöön asetuksista milloin tahansa.</string>
+    <string name="tour_confirm_continue">Jatka opastusta</string>
+    <string name="tour_confirm_dont_show_this_tour">Älä näytä tätä opastusta</string>
+    <string name="tour_confirm_disable_all">Poista kaikki opastukset käytöstä</string>
+    <string name="navigation_unknown_destination_title">Näyttö ei ole saatavilla</string>
+    <string name="navigation_unknown_destination_message">Tätä näyttöä ei voitu avata.</string>
+</resources>

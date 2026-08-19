@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="stats_dash_body_size">
+        <item quantity="one">%s මුක්ත කර ඇත.</item>
+        <item quantity="other">%s මුක්ත කර ඇත.</item>
+    </plurals>
+    <plurals name="stats_dash_body_count">
+        <item quantity="one">ඔබ ඔබේ උපකරණයට SD Maid ආරාධනා කරමින් %s ංගය මෙහෙයුම් කර ඇත.</item>
+        <item quantity="other">ඔබ ඔබේ උපකරණයට SD Maid ආරාධනා කරමින් %s ංග මෙහෙයුම් කර ඇත.</item>
+    </plurals>
+    <!-- Dashboard statistics card caption: how long SD Maid has been installed. SD Maid is
+         personified as an invited houseguest (see stats_dash_body_count). Use the INFORMAL
+         register (du / tu / tú) in languages that distinguish it. %d is the count. -->
+    <plurals name="stats_dash_since_days">
+        <item quantity="one">දින %d ක් තිස්සේ ඔබගේ අමුත්තා.</item>
+        <item quantity="other">දින %d ක් තිස්සේ ඔබගේ අමුත්තා.</item>
+    </plurals>
+    <plurals name="stats_dash_since_weeks">
+        <item quantity="one">සති %d ක් තිස්සේ ඔබගේ අමුත්තා.</item>
+        <item quantity="other">සති %d ක් තිස්සේ ඔබගේ අමුත්තා.</item>
+    </plurals>
+    <plurals name="stats_dash_since_months">
+        <item quantity="one">මාස %d ක් තිස්සේ ඔබගේ අමුත්තා.</item>
+        <item quantity="other">මාස %d ක් තිස්සේ ඔබගේ අමුත්තා.</item>
+    </plurals>
+    <plurals name="stats_dash_since_years">
+        <item quantity="one">අවුරුදු %d ක් තිස්සේ ඔබගේ අමුත්තා.</item>
+        <item quantity="other">අවුරුදු %d ක් තිස්සේ ඔබගේ අමුත්තා.</item>
+    </plurals>
+    <string name="stats_report_status_partial_success">අර්ධ සාර්ථකත්වය</string>
+    <string name="stats_report_status_partial_failure">අසාර්ථකත්වය</string>
+    <string name="stats_settings_desc">SD Maid හි සංඛ්‍යාලේඛන, වාර්තා සහ දත්ත රඳවා ගැනීම සකසන්න.</string>
+    <string name="stats_settings_retention_category">රඳවා ගැනීම</string>
+    <string name="stats_settings_retention_reports_label">සාමාන්‍ය වාර්තා</string>
+    <string name="stats_settings_retention_reports_desc">මූලික SD Maid මෙහෙයුම් වාර්තා මකා දැමීමට පෙර දින සංඛ්‍යාව.</string>
+    <string name="stats_settings_retention_paths_label">විස්තරාත්මක මාර්ග තොරතුරු</string>
+    <string name="stats_settings_retention_paths_desc">SD Maid විසින් බලපෑමට ලක් වූ මාර්ග පිළිබඳ විස්තර රඳවා ගත යුතු දින සංඛ්‍යාව.</string>
+    <string name="stats_settings_reset_all_label">සියල්ල පුනරාරම්භ කරන්න</string>
+    <string name="stats_settings_reset_all_desc">සියල්ල වාර්තා මකා සියලු සංඛ්‍යාලේඛන ශූන්යමට සවය කරන්න.</string>
+    <string name="stats_affected_paths_label">බලපෑමට ලක්වූ මාර්ග</string>
+    <string name="stats_affected_pkgs_label">බලපෑමට ලක්වූ යෙදුම්</string>
+    <string name="stats_dash_body_snapshots_only">ඔබගේ ගබඩා ඉතිහාසය නිරීක්ෂණය කරමින්.</string>
+    <string name="stats_storage_trend_action">ගබඩා ප්‍රවණතාව</string>
+    <string name="stats_space_history_title">ගබඩා ප්‍රවණතාව</string>
+    <string name="stats_space_history_range_title">පරාසය</string>
+    <string name="stats_space_history_range_7d">දින 7</string>
+    <string name="stats_space_history_range_30d">දින 30</string>
+    <string name="stats_space_history_range_90d">දින 90</string>
+    <string name="stats_space_history_storage_title">ගබඩාව</string>
+    <string name="stats_space_history_current_used_label">වත්මනේ භාවිතා කළ</string>
+    <string name="stats_space_history_min_label">අවම භාවිතා කළ</string>
+    <string name="stats_space_history_max_label">උපරිම භාවිතා කළ</string>
+    <string name="stats_space_history_delta_label">වෙනස</string>
+    <string name="stats_space_history_delta_in_x">%1$s, %2$s හිදී</string>
+    <string name="stats_space_history_upgrade_title">සම්පූර්ණ ඉතිහාසය Pro විශේෂාංගයකි</string>
+    <string name="stats_space_history_upgrade_body">සෑම ගබඩා උපාංගයක් සඳහාම සම්පූර්ණ 90-දින ප්‍රවණතා දසුන අගුළු ඇරීමට උත්සාහ කරන්න.</string>
+    <string name="stats_space_history_marker_freed">නිදහස් කළ %1$s</string>
+    <string name="stats_storage_type_primary">මුලික ආචයනය</string>
+    <string name="stats_storage_type_secondary">ද්විතීය ආචයනය</string>
+    <string name="stats_storage_type_portable">ජංගම ආචයනය</string>
+    <string name="stats_space_history_delete_storage_title">ගබඩා ඉතිහාසය මකන්නද?</string>
+    <string name="stats_space_history_delete_storage_desc">මෙම ගබඩාව සඳහා සියලු ප්‍රවණතා දත්ත ස්ථිරවම මකා දැමෙනු ඇත.</string>
+</resources>

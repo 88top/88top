@@ -1,0 +1,55 @@
+<i>SD Maid 2/SE</i> er traustur aðstoðarmaður fyrir þinn Android, til að halda honum hreinum og snyrtilegu.
+
+Enginn er fullkominn og Android er það ekki heldur.
+
+* Forrit sem þú hefur þegar fjarlægt láta eitthvað eftir.
+* Skrár, hrunameldingär og aðrar skrár sem þú vilt ekki fást stöðugt búnar til.
+* Geymslan þín er að safna skrám og möppum sem þú þekkir ekki.
+* Tvíteknar myndir í galleríinu þínu.
+
+Ætlum við ekki að halda áfram hér… Leyðu SD Maid 2/SE að hjálpa þér!
+
+SD Maid 2/SE er app og skráastjóri sem veit hvaða öppin bjuggu til skrár á tækinu þínu. Hún ber saman skrár með uppsettu öppum til að hjálpa þér að losa geymslupláss á öruggan hátt.
+
+✨ Hreinsaðu eftir því að forrit hafi verið fjarlægð
+
+Ef forrit búa til skrár utan tilnefndra möppa geta skrár verið eftir jafnvel eftir að forrit hafi verið fjarlægð. Verkfærið "CorpseFinder" finnur leifar forrita, segir þér til hvaða forrit þær tilheyrðu og hjálpar þér að eyða þim.
+
+🔍 Leitaðu í tækinu þínu á snjallann hátt
+
+Sía fyrir tómum möppum, bráðabirgðaskrám, þegar uppsettum forritum og fleira. Þú getur jafnvel búð til þín eigin leitarskilyrði. "SystemCleaner" tækið leitar sjálfkrafa og eyðir skrám á grundvelli ýmissa skilyrða.
+
+🧹 Eyðu óþarfum skrám og földum skyndiminnum
+
+Smásmyndir, ruslatunnur, gagnaflutningur án netsambands og fleira: Ef forrit hreinsa ekki eftir sér, þá mun þetta forrit gera það. Verkfærið "AppCleaner" finnur forrit með óþarfum skrám.
+
+📦 Stjórnaðu öllum forritum þínum
+
+Fáðu yfirgripsmikla lista yfir öll forrit sem eru sett upp á tækinu þínu. Virkt, óvirkt, notanda- eða kerfisprogram: ekkert forrit getur falið sig fyrir þér. "AppControl" tækið er appastjóri sem gerir þér kleift að leita, raða og stjórna öppunum þínum.
+
+📊 Hvað er að nota allt plássið
+
+Geymsluumræði getur verið flokið með forritum, miðlægum skrám, kerfissk rám og öðrum skrám á tæki-geymslu, SD-sp jóldum og USB-tækjum. "StorageAnalyzer" er skráastjóri sem sýnir hvernig plássið er notað á tækinu þínu og einfaldari geymslustjórnun.
+
+📷 Finndu tvítekið gögn
+
+Tvíteknar niðurhals, myndir sendar í gegnum samfélagsmeiðla eða bara svipakar myndir af sömu atburðarásinni: Með tímanum geta afrit safnast saman. Verkfærið "Deduplicator" finnur skrár sem eru nákvæmlega eins eða svipaðar og hjálpar þér að eyða aukasafnunum.
+
+👆 Ryðjað í burtu með stroki
+
+Veldu möppu og farðu í gegnum skrár eina í einu með einföldum strokum til að geyma, eyða eða sleppa. "Swiper" tólið leyfir þér að yfirfara allar ákvarðanir áður en nokkuð er eytt, og þú getur vistað lotu til að halda áfram síðar.
+
+🗜️ Sparaðu pláss án þess að eyða myndum
+
+Myndir geta tekið mikið pláss, en þú vilt ekki alltaf fjarlægja þær. "Media Squeeze" tólið þjappar myndunum þínum með stillanlegum gæðastillingum til að losa pláss á meðan þú heldur myndunum þínum.
+
+Þetta forrit hefur engar auglýsingar. Sum aðgerðir krefjast greidds uppfærslu.
+
+SD Maid 2/SE er arftaki SD Maid 1/Legacy.
+Hagrætt fyrir nýrri Android útgáfur og með áherslu á hreinsun.
+
+Þetta forrit hefur valfrálsa aðgerðir sem nota AccessibilityService API til að gera endurtekin verkefni sjálfvirk.
+Með því að nota AccessibilityService API getur þetta forrit smellt á hnappa fyrir þig til að framkvæma aðgerðir á mörgum forritum, td eyðingu gagnasafna.
+Þetta forrit notar ekki AccessibilityService API til að safna upplýsingum.
+
+SD Maid 2/SE er skráastjóri og hreinsiforrit.

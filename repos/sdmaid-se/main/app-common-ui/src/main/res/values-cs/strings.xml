@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_select_paths_title">Vybrat cesty</string>
+    <string name="picker_selected_paths_title">Vybrané cesty</string>
+    <string name="picker_unsaved_confirmation_message">Zahodit změny?</string>
+    <plurals name="picker_selected_paths_subtitle">
+        <item quantity="one">Vybrána %d cesta</item>
+        <item quantity="few">Vybrány %d cesty</item>
+        <item quantity="many">Vybráno %d cest</item>
+        <item quantity="other">Vybráno %d cest</item>
+    </plurals>
+    <string name="picker_home_action">Oblasti dat</string>
+    <string name="picker_select_hint">Pro výběr podržte položku</string>
+    <string name="tour_action_next">Další</string>
+    <string name="tour_action_previous">Předchozí</string>
+    <string name="tour_action_cancel">Přeskočit</string>
+    <string name="tour_confirm_title">Přeskočit prohlídku?</string>
+    <string name="tour_confirm_message">Prohlídky můžete kdykoliv znovu povolit v Nastavení.</string>
+    <string name="tour_confirm_continue">Pokračovat v prohlídce</string>
+    <string name="tour_confirm_dont_show_this_tour">Nezobrazovat tuto prohlídku</string>
+    <string name="tour_confirm_disable_all">Zakázat všechny prohlídky</string>
+    <string name="navigation_unknown_destination_title">Obrazovka je nedostupná</string>
+    <string name="navigation_unknown_destination_message">Tuto obrazovku nelze otevřít.</string>
+</resources>

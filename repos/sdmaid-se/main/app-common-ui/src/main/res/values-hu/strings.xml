@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_select_paths_title">Útvonal kiválasztása</string>
+    <string name="picker_selected_paths_title">Kiválasztott útvonalak</string>
+    <string name="picker_unsaved_confirmation_message">Elveted a változtatásokat?</string>
+    <plurals name="picker_selected_paths_subtitle">
+        <item quantity="one">%d kiválasztott útvonal</item>
+        <item quantity="other">%d kiválasztott útvonal</item>
+    </plurals>
+    <string name="picker_home_action">Adatterületek</string>
+    <string name="picker_select_hint">Tartsd nyomva az elemet a kiválasztásához</string>
+    <string name="tour_action_next">Következő</string>
+    <string name="tour_action_previous">Előző</string>
+    <string name="tour_action_cancel">Kihagyás</string>
+    <string name="tour_confirm_title">Kihagyja a bemutatót?</string>
+    <string name="tour_confirm_message">A bemutatókat a Beállításokban bármikor újra engedélyezheti.</string>
+    <string name="tour_confirm_continue">Bemutató folytatása</string>
+    <string name="tour_confirm_dont_show_this_tour">Ne jelenítse meg ezt a bemutatót</string>
+    <string name="tour_confirm_disable_all">Minden bemutató letiltása</string>
+    <string name="navigation_unknown_destination_title">A képernyő nem érhető el</string>
+    <string name="navigation_unknown_destination_message">Ezt a képernyőt nem sikerült megnyitni.</string>
+</resources>

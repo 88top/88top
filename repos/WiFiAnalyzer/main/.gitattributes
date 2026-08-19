@@ -1,0 +1,15 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text eol=lf
+
+# Denote all files that are truly binary and should not be modified.
+*.png binary
+*.jpg binary
+*.ico binary
+*.jar binary
+*.zip binary
+*.keystore binary
+*.jks binary
+
+# Windows batch files require CRLF; the POSIX wrapper script requires LF.
+*.bat text eol=crlf
+gradlew text eol=lf

@@ -1,0 +1,55 @@
+<i>SD Maid 2/SE</i> je důvěryhodný asistent vašeho systému Android, který jej udržuje v čistotě a pořádku.
+
+Nikdo není dokonalý, ani systém Android.
+
+* Aplikace, které jste již odstranili, po sobě něco zanechávají.
+* Neustále se vytvářejí záznamy, hlášení o pádech a další soubory, které nechcete.
+* Ve vašem úložišti se shromažďují soubory a složky, které neznáte.
+* Duplicitní fotografie v galerii.
+
+Nepokračujte v tom… SD Maid 2/SE vám pomůže!
+
+SD Maid 2/SE je správce aplikací a souborů, který ví, které aplikace vytvořily soubory ve vašem zařízení. Porovnává soubory s nainstalovanými aplikacemi a pomáhá vám bezpečně uvolnit úložiště.
+
+✨ Čištění po odinstalování aplikací
+
+Pokud aplikace vytvářejí soubory mimo určené složky, mohou v nich zůstat i po odinstalování aplikací. Nástroj "Hledač mrtvol" najde pozůstatky aplikací, řekne vám, ke které aplikaci patřily, a pomůže vám je odstranit.
+
+🔍 Vyhledávání v zařízení chytrým způsobem
+
+Filtrujte prázdné složky, dočasné soubory, již nainstalované aplikace a další. Můžete si dokonce vytvořit vlastní kritéria vyhledávání. Nástroj "SystemCleaner" automaticky vyhledává a maže soubory na základě různých kritérií.
+
+🧹 Odstranění postradatelných souborů a skrytých mezipamětí
+
+Náhledy, koše, offline mezipaměti a další: pokud po sobě aplikace neuklízejí samy, pak to udělá tato aplikace. Nástroj "Čistič aplikací" najde aplikace s nepotřebnými soubory.
+
+📦 Správa všech aplikací
+
+Získejte úplný seznam všech aplikací nainstalovaných v zařízení. Povolená, zakázaná, uživatelská nebo systémová aplikace: žádná aplikace se před vámi neschová. Nástroj "AppControl" je správce aplikací, který umožňuje vyhledávat, třídit a ovládat aplikace.
+
+📊 Co využívá veškeré vaše úložiště
+
+Správa úložiště může být složitá díky aplikacím, médiím, systému a dalším souborům v úložišti zařízení, na kartách SD a zařízeních USB. "Analyzátor úložiště" je správce souborů, který zobrazuje využití místa v zařízení a zjednodušuje tak správu úložiště.
+
+📷 Vyhledání duplicitních dat
+
+Duplicitní stahování, fotky odeslané přes sociální sítě nebo pouze podobné obrázky stejné scény: kopie se postupem času mohou hromadit. Nástroj "Odstraňovač duplikátů" najde soubory, které jsou shodné nebo podobné a pomáhá odstranit další kopie.
+
+👆 Uklízení jedním tahem
+
+Vyberte složku a procházejte soubory jeden po druhém jednoduchými pohyby prstem, abyste je mohli ponechat, smazat nebo přeskočit. Nástroj „"Přetahovač" vám umožňuje zkontrolovat všechna rozhodnutí předtím, než dojde k odstranění, a můžete uložit relaci, abyste v ní mohli později pokračovat.
+
+🗜️ Ušetřete místo bez mazání fotek
+
+Fotky mohou zabírat hodně místa, ale ne vždy je chcete smazat. Nástroj "Zmáčknutí médií" komprimuje vaše obrázky s nastavitelnými parametry kvality, aby uvolnil místo a zároveň zachoval vaše fotky.
+
+Tato aplikace je bez reklam. Některé funkce však vyžadují placený upgrade.
+
+SD Maid 2/SE je nástupcem SD Maid 1/Legacy.
+Optimalizováno pro novější verze systému Android a zaměřeno na čištění.
+
+Tato aplikace obsahuje volitelné funkce, které využívají rozhraní API AccessibilityService k automatizaci zdlouhavých operací.
+Pomocí AccessibilityService API může tato aplikaci klikat na tlačítka a provádět operace ve více aplikacích, např. mazání mezipamětí.
+Tato aplikace nepoužívá AccessibilityService API ke shromažďování informací.
+
+SD Maid 2/SE je správce souborů a čistič aplikací.

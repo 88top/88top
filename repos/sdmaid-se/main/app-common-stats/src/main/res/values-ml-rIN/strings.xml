@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="stats_dash_body_size">
+        <item quantity="one">%s സ്വതന്ത്രമാക്കപ്പെട്ടു.</item>
+        <item quantity="other">%s സ്വതന്ത്രമാക്കപ്പെട്ടു.</item>
+    </plurals>
+    <plurals name="stats_dash_body_count">
+        <item quantity="one">നിങ്ങൾ SD Maid ഉപകരണത്തിൽ സ്വാഗതം ചെയ്തതിന് ശേഷം %s ആയടം പ്രക്രിയക്കപ്പെട്ടു.</item>
+        <item quantity="other">നിങ്ങൾ SD Maid ഉപകരണത്തിൽ സ്വാഗതം ചെയ്തതിന് ശേഷം %s ആയടങ്ങൾ പ്രക്രിയക്കപ്പെട്ടു.</item>
+    </plurals>
+    <!-- Dashboard statistics card caption: how long SD Maid has been installed. SD Maid is
+         personified as an invited houseguest (see stats_dash_body_count). Use the INFORMAL
+         register (du / tu / tú) in languages that distinguish it. %d is the count. -->
+    <plurals name="stats_dash_since_days">
+        <item quantity="one">നിങ്ങളുടെ അതിഥി %d നാൾ.</item>
+        <item quantity="other">നിങ്ങളുടെ അതിഥി %d നാൾ.</item>
+    </plurals>
+    <plurals name="stats_dash_since_weeks">
+        <item quantity="one">നിങ്ങളുടെ അതിഥി %d ആഴ്ച.</item>
+        <item quantity="other">നിങ്ങളുടെ അതിഥി %d ആഴ്ച.</item>
+    </plurals>
+    <plurals name="stats_dash_since_months">
+        <item quantity="one">നിങ്ങളുടെ അതിഥി %d മാസം.</item>
+        <item quantity="other">നിങ്ങളുടെ അതിഥി %d മാസം.</item>
+    </plurals>
+    <plurals name="stats_dash_since_years">
+        <item quantity="one">നിങ്ങളുടെ അതിഥി %d വർഷം.</item>
+        <item quantity="other">നിങ്ങളുടെ അതിഥി %d വർഷം.</item>
+    </plurals>
+    <string name="stats_report_status_partial_success">ഭാഗിക വിജയം</string>
+    <string name="stats_report_status_partial_failure">പരാജയം</string>
+    <string name="stats_settings_desc">SD Maidന്റെ സ്റാറ്റിസ്റിക്സും റിപ്പോർട്ടുകൺം ഡേറ്റ റിടെൻഷർം ക്രമീകരിക്കുക.</string>
+    <string name="stats_settings_retention_category">റിടെൻഷർ</string>
+    <string name="stats_settings_retention_reports_label">ജനറൽ റിപ്പോർട്ടുകൾ</string>
+    <string name="stats_settings_retention_reports_desc">അടിസ്ഥാന SD Maid പ്രവർത്തന റിപ്പോർട്ടുകൾ ഇല്ലാതാക്കുന്നതിന് മുമ്പ്യുള്ള ദിവസങ്ങളുടെ എണ്ണം.</string>
+    <string name="stats_settings_retention_paths_label">വിസ്തൃത പാത് വിവരം</string>
+    <string name="stats_settings_retention_paths_desc">SD Maid ബാധിച്ച പാതുകൾകുരിച്ച് വിവരങ്ങൾ സൂക്ഷിക്കുന്ന ദിവസ඙്ങളുടെ എണ്ണം.</string>
+    <string name="stats_settings_reset_all_label">എല്ലാം റീസെറ്റ് ചെയ്യുക</string>
+    <string name="stats_settings_reset_all_desc">എല്ലാ റിപ്പോർട്ടുകൾ ഇല്ലാതാക്കുകയും എല്ലാ സ്റാറ്റിസ്റിക്സും ശൂന്യമാക്കുകയും ചെയ്യുക.</string>
+    <string name="stats_affected_paths_label">ബാധിക്കപ്പെട്ട പാതുകൾ</string>
+    <string name="stats_affected_pkgs_label">ബാധിക്കപ്പെട്ട ആപ്പുകൾ</string>
+    <string name="stats_dash_body_snapshots_only">നിങ്ങളുടെ സ്റ്റോറേജ് ചരിത്രം ട്രാക്ക് ചെയ്യുന്നു.</string>
+    <string name="stats_storage_trend_action">സ്റ്റോറേജ് ട്രെൻഡ്</string>
+    <string name="stats_space_history_title">സ്റ്റോറേജ് ട്രെൻഡ്</string>
+    <string name="stats_space_history_range_title">പരിധി</string>
+    <string name="stats_space_history_range_7d">7 ദിവസങ്ങൾ</string>
+    <string name="stats_space_history_range_30d">30 ദിവസങ്ങൾ</string>
+    <string name="stats_space_history_range_90d">90 ദിവസങ്ങൾ</string>
+    <string name="stats_space_history_storage_title">സ്റ്റോറേജ്</string>
+    <string name="stats_space_history_current_used_label">നിലവിൽ ഉപയോഗിച്ചത്</string>
+    <string name="stats_space_history_min_label">കുറഞ്ഞ ഉപയോഗം</string>
+    <string name="stats_space_history_max_label">പരമാവധി ഉപയോഗം</string>
+    <string name="stats_space_history_delta_label">ഡെൽറ്റ</string>
+    <string name="stats_space_history_delta_in_x">%2$s-ൽ %1$s</string>
+    <string name="stats_space_history_upgrade_title">പൂർണ്ണ ചരിത്രം ഒരു Pro ഫീച്ചറാണ്</string>
+    <string name="stats_space_history_upgrade_body">ഓരോ സ്റ്റോറേജ് ഉപകരണത്തിനും 90-ദിവസ ട്രെൻഡ് വ്യൂ അൺലോക്ക് ചെയ്യാൻ അപ്ഗ്രേഡ് ചെയ്യുക.</string>
+    <string name="stats_space_history_marker_freed">%1$s മോചിപ്പിച്ചു</string>
+    <string name="stats_storage_type_primary">പ്രാഥമിക സ്റ്റോറേജ്</string>
+    <string name="stats_storage_type_secondary">ദ്വിതീയ സ്റ്റോറേജ്</string>
+    <string name="stats_storage_type_portable">പോർട്ടബിൾ സ്റ്റോറേജ്</string>
+    <string name="stats_space_history_delete_storage_title">സ്റ്റോറേജ് ചരിത്രം ഇല്ലാതാക്കണോ?</string>
+    <string name="stats_space_history_delete_storage_desc">ഈ സ്റ്റോറേജിനായുള്ള എല്ലാ ട്രെൻഡ് ഡേറ്റയും സ്ഥിരമായി ഇല്ലാതാക്കും.</string>
+</resources>

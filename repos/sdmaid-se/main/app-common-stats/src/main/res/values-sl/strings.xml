@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="stats_dash_body_size">
+        <item quantity="one">Sproščenih je bilo %s.</item>
+        <item quantity="two">Sproščenih je bilo %s.</item>
+        <item quantity="few">Sproščenih je bilo %s.</item>
+        <item quantity="other">Sproščenih je bilo %s.</item>
+    </plurals>
+    <plurals name="stats_dash_body_count">
+        <item quantity="one">Od kar ste SD Maid povabili v svojo napravo, je bil obdelan %s predmet.</item>
+        <item quantity="two">Od kar ste SD Maid povabili v svojo napravo, sta bila obdelana %s predmeta.</item>
+        <item quantity="few">Od kar ste SD Maid povabili v svojo napravo, so bili obdelani %s-je predmeti.</item>
+        <item quantity="other">Od kar ste SD Maid povabili v svojo napravo, je bilo obdelanih %s predmetov.</item>
+    </plurals>
+    <!-- Dashboard statistics card caption: how long SD Maid has been installed. SD Maid is
+         personified as an invited houseguest (see stats_dash_body_count). Use the INFORMAL
+         register (du / tu / tú) in languages that distinguish it. %d is the count. -->
+    <plurals name="stats_dash_since_days">
+        <item quantity="one">Tvoj gost že %d dan.</item>
+        <item quantity="two">Tvoj gost že %d dneva.</item>
+        <item quantity="few">Tvoj gost že %d dni.</item>
+        <item quantity="other">Tvoj gost že %d dni.</item>
+    </plurals>
+    <plurals name="stats_dash_since_weeks">
+        <item quantity="one">Tvoj gost že %d teden.</item>
+        <item quantity="two">Tvoj gost že %d tedna.</item>
+        <item quantity="few">Tvoj gost že %d tedne.</item>
+        <item quantity="other">Tvoj gost že %d tednov.</item>
+    </plurals>
+    <plurals name="stats_dash_since_months">
+        <item quantity="one">Tvoj gost že %d mesec.</item>
+        <item quantity="two">Tvoj gost že %d meseca.</item>
+        <item quantity="few">Tvoj gost že %d mesece.</item>
+        <item quantity="other">Tvoj gost že %d mesecev.</item>
+    </plurals>
+    <plurals name="stats_dash_since_years">
+        <item quantity="one">Tvoj gost že %d leto.</item>
+        <item quantity="two">Tvoj gost že %d leti.</item>
+        <item quantity="few">Tvoj gost že %d leta.</item>
+        <item quantity="other">Tvoj gost že %d let.</item>
+    </plurals>
+    <string name="stats_report_status_partial_success">Delno uspešno</string>
+    <string name="stats_report_status_partial_failure">Spodletelo</string>
+    <string name="stats_settings_desc">Nastavite statistiko, poročila in shranjevanje podatkov za SD Maid.</string>
+    <string name="stats_settings_retention_category">Shranjevanje</string>
+    <string name="stats_settings_retention_reports_label">Splošna poročila</string>
+    <string name="stats_settings_retention_reports_desc">Št. dni, za kolikor naj se obdržijo osnovna poročila o delovanju SD Maida.</string>
+    <string name="stats_settings_retention_paths_label">Podrobni podatki o poteh</string>
+    <string name="stats_settings_retention_paths_desc">Št. dni, za kolikor naj obdržijo podobnosti o poteh, na katere je vplival SD Maid.</string>
+    <string name="stats_settings_reset_all_label">Ponastavi vse</string>
+    <string name="stats_settings_reset_all_desc">Izbriši vsa poročila in nastavi vso statistiko na nične vrednosti.</string>
+    <string name="stats_affected_paths_label">Obravnavane poti</string>
+    <string name="stats_affected_pkgs_label">Obravnavani programi</string>
+    <string name="stats_dash_body_snapshots_only">Sledenje zgodovini shrambe.</string>
+    <string name="stats_storage_trend_action">Trend shrambe</string>
+    <string name="stats_space_history_title">Trend shrambe</string>
+    <string name="stats_space_history_range_title">Obseg</string>
+    <string name="stats_space_history_range_7d">7 dni</string>
+    <string name="stats_space_history_range_30d">30 dni</string>
+    <string name="stats_space_history_range_90d">90 dni</string>
+    <string name="stats_space_history_storage_title">Shramba</string>
+    <string name="stats_space_history_current_used_label">Trenutno uporabljeno</string>
+    <string name="stats_space_history_min_label">Najmanj uporabljeno</string>
+    <string name="stats_space_history_max_label">Največ uporabljeno</string>
+    <string name="stats_space_history_delta_label">Delta</string>
+    <string name="stats_space_history_delta_in_x">%1$s v %2$s</string>
+    <string name="stats_space_history_upgrade_title">Polna zgodovina je funkcija Pro</string>
+    <string name="stats_space_history_upgrade_body">Nadgradite za odklep celotnega 90-dnevnega prikaza trenda za vsako pomnilniško napravo.</string>
+    <string name="stats_space_history_marker_freed">Sproščeno %1$s</string>
+    <string name="stats_storage_type_primary">Primarna pomnilniška naprava</string>
+    <string name="stats_storage_type_secondary">Sekundarna pomnilniška naprava</string>
+    <string name="stats_storage_type_portable">Prenosna pomnilniška naprava</string>
+    <string name="stats_space_history_delete_storage_title">Izbriši zgodovino pomnilnika?</string>
+    <string name="stats_space_history_delete_storage_desc">Vsi podatki o trendih za ta pomnilnik bodo trajno izbrisani.</string>
+</resources>

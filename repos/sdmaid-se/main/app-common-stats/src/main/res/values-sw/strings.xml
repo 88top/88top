@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="stats_dash_body_size">
+        <item quantity="one">%s imefunguliwa.</item>
+        <item quantity="other">%s zimefunguliwa.</item>
+    </plurals>
+    <plurals name="stats_dash_body_count">
+        <item quantity="one">%s kipengee kimechakatwa tangu ulipoalika SD Maid kwenye kifaa chako.</item>
+        <item quantity="other">%s vipengee vimechakatwa tangu ulipoalika SD Maid kwenye kifaa chako.</item>
+    </plurals>
+    <!-- Dashboard statistics card caption: how long SD Maid has been installed. SD Maid is
+         personified as an invited houseguest (see stats_dash_body_count). Use the INFORMAL
+         register (du / tu / tú) in languages that distinguish it. %d is the count. -->
+    <plurals name="stats_dash_since_days">
+        <item quantity="one">Mgeni wako kwa siku %d.</item>
+        <item quantity="other">Mgeni wako kwa siku %d.</item>
+    </plurals>
+    <plurals name="stats_dash_since_weeks">
+        <item quantity="one">Mgeni wako kwa wiki %d.</item>
+        <item quantity="other">Mgeni wako kwa wiki %d.</item>
+    </plurals>
+    <plurals name="stats_dash_since_months">
+        <item quantity="one">Mgeni wako kwa mwezi %d.</item>
+        <item quantity="other">Mgeni wako kwa miezi %d.</item>
+    </plurals>
+    <plurals name="stats_dash_since_years">
+        <item quantity="one">Mgeni wako kwa mwaka %d.</item>
+        <item quantity="other">Mgeni wako kwa miaka %d.</item>
+    </plurals>
+    <string name="stats_report_status_partial_success">Mafanikio ya kigeni</string>
+    <string name="stats_report_status_partial_failure">Kushindwa</string>
+    <string name="stats_settings_desc">Sanidi takwimu za SD Maid, ripoti na uhifadhi wa data.</string>
+    <string name="stats_settings_retention_category">Uhifadhi</string>
+    <string name="stats_settings_retention_reports_label">Ripoti za jumla</string>
+    <string name="stats_settings_retention_reports_desc">Idadi ya siku kabla ya kufuta ripoti za msingi za shughuli za SD Maid.</string>
+    <string name="stats_settings_retention_paths_label">Maelezo ya kina ya njia</string>
+    <string name="stats_settings_retention_paths_desc">Idadi ya siku za kuhifadhi maelezo kuhusu njia zilizoathiriwa na SD Maid.</string>
+    <string name="stats_settings_reset_all_label">Rudisha zote</string>
+    <string name="stats_settings_reset_all_desc">Futa ripoti zote na weka takwimu zote kuwa sifuri.</string>
+    <string name="stats_affected_paths_label">Njia zilizoathiriwa</string>
+    <string name="stats_affected_pkgs_label">Programu zilizoathiriwa</string>
+    <string name="stats_dash_body_snapshots_only">Inafuatilia historia ya hifadhi yako.</string>
+    <string name="stats_storage_trend_action">Mwenendo wa Hifadhi</string>
+    <string name="stats_space_history_title">Mwenendo wa Hifadhi</string>
+    <string name="stats_space_history_range_title">Kipindi</string>
+    <string name="stats_space_history_range_7d">Siku 7</string>
+    <string name="stats_space_history_range_30d">Siku 30</string>
+    <string name="stats_space_history_range_90d">Siku 90</string>
+    <string name="stats_space_history_storage_title">Hifadhi</string>
+    <string name="stats_space_history_current_used_label">Inayotumiwa sasa</string>
+    <string name="stats_space_history_min_label">Kiwango cha chini kilichotumiwa</string>
+    <string name="stats_space_history_max_label">Kiwango cha juu kilichotumiwa</string>
+    <string name="stats_space_history_delta_label">Tofauti</string>
+    <string name="stats_space_history_delta_in_x">%1$s katika %2$s</string>
+    <string name="stats_space_history_upgrade_title">Historia kamili ni kipengele cha Pro</string>
+    <string name="stats_space_history_upgrade_body">Boresha ili kufungua mwonekano kamili wa mwenendo wa siku 90 kwa kila kifaa cha hifadhi.</string>
+    <string name="stats_space_history_marker_freed">Iliyoachiliwa %1$s</string>
+    <string name="stats_storage_type_primary">Hifadhi ya msingi</string>
+    <string name="stats_storage_type_secondary">Hifadhi ya pili</string>
+    <string name="stats_storage_type_portable">Hifadhi ya kubeba</string>
+    <string name="stats_space_history_delete_storage_title">Futa historia ya hifadhi?</string>
+    <string name="stats_space_history_delete_storage_desc">Data yote ya mwelekeo kwa hifadhi hii itafutwa kabisa.</string>
+</resources>

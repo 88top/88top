@@ -1,0 +1,112 @@
+name: Build OpenWrt 25.12 Packages
+
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  OPENWRT_VER: 25.12.4
+  GCC_VER: 14.3.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install deps
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            build-essential clang flex bison g++ gawk \
+            gcc-multilib g++-multilib gettext git \
+            libncurses5-dev libssl-dev python3 unzip \
+            file wget rsync zstd
+
+      # =========================
+      # Download SDK
+      # =========================
+      - name: Download OpenWrt SDK
+        run: |
+          SDK="openwrt-sdk-${OPENWRT_VER}-x86-64_gcc-${GCC_VER}_musl.Linux-x86_64.tar.zst"
+          URL="https://downloads.openwrt.org/releases/${OPENWRT_VER}/targets/x86/64/$SDK"
+
+          echo "Downloading:"
+          echo "$URL"
+
+          wget -q "$URL" -O sdk.tar.zst
+          tar --zstd -xf sdk.tar.zst
+          mv openwrt-sdk-* sdk
+
+      # =========================
+      # Update feeds
+      # =========================
+      - name: Update feeds
+        run: |
+          cd sdk
+          ./scripts/feeds update -a
+          ./scripts/feeds install luci-app-run
+
+      # =========================
+      # Copy package
+      # =========================
+      - name: Copy luci-app-run
+        run: |
+          cp -r luci-app-run sdk/package/
+
+      # =========================
+      # Build
+      # =========================
+      - name: Build package
+        run: |
+          cd sdk
+          make defconfig
+          make package/luci-app-run/compile V=s -j$(nproc)
+
+      - name: Prepare artifacts
+        run: |
+          mkdir -p dist
+          find sdk/bin -type f -name "luci-app-run*.apk" -print0 | while IFS= read -r -d '' file; do
+            cp -v "$file" dist/
+          done
+
+      # =========================
+      # Upload artifact
+      # =========================
+      - name: Upload artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: luci-app-run-noarch
+          path: dist/
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v7
+        with:
+          path: dist-all
+
+      - name: Flatten artifacts
+        run: |
+          mkdir -p release
+          find dist-all -type f -name "*.apk" -exec cp -v {} release/ \;
+
+      - name: Create tag
+        id: tag
+        run: |
+          echo "tag=v$(date -u +%Y.%m.%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Publish Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: luci-app-run ${{ steps.tag.outputs.tag }}
+          files: release/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

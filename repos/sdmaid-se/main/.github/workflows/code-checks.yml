@@ -1,0 +1,140 @@
+name: Code tests & eval
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - VERSION
+      - version.properties
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-vital:
+    name: Lint vitals
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor: [ Foss,Gplay ]
+        variant: [ Beta,Release ]
+        module: [ app ]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          persist-credentials: false
+      - name: Setup project and build environment
+        uses: ./.github/actions/common-setup
+
+      - name: Check for fatal lint issues
+        run: ./gradlew lintVital${{ matrix.flavor }}${{ matrix.variant }}
+
+  build-modules:
+    name: Build apps
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor: [ Foss,Gplay ]
+        variant: [ Debug ]
+        module: [ app ]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          persist-credentials: false
+      - name: Setup project and build environment
+        uses: ./.github/actions/common-setup
+
+      - name: Build modules
+        run: ./gradlew ${{ matrix.module }}:assemble${{ matrix.flavor }}${{ matrix.variant }}
+
+  test-modules:
+    name: Unit tests
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [ Debug ]
+        flavor: [ testFoss,testGplay ]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          persist-credentials: false
+      - name: Setup project and build environment
+        uses: ./.github/actions/common-setup
+
+      - name: Test modules
+        run: ./gradlew ${{ matrix.flavor }}${{ matrix.variant }}UnitTest
+
+      - name: Upload test results
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
+        if: always()
+        with:
+          name: test-results-${{ matrix.flavor }}-${{ matrix.variant }}
+          path: |
+            **/build/test-results/**/*.xml
+            **/build/reports/tests/**/*
+          retention-days: 1
+
+  test-library-modules:
+    name: Library unit tests
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [ testCommonModules, testToolModules ]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          persist-credentials: false
+      - name: Setup project and build environment
+        uses: ./.github/actions/common-setup
+
+      - name: Test library modules
+        run: ./gradlew ${{ matrix.task }}
+
+      - name: Upload test results
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
+        if: always()
+        with:
+          name: test-results-${{ matrix.task }}
+          path: |
+            **/build/test-results/**/*.xml
+            **/build/reports/tests/**/*
+          retention-days: 1
+
+  check-fastlane-metadata:
+    name: Fastlane metadata
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          persist-credentials: false
+      - name: Validate metadata lengths
+        run: bash fastlane/check_metadata_length.sh
+
+  check-release-tooling:
+    name: Release tooling
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          persist-credentials: false
+      - name: Install bats and shellcheck
+        run: sudo apt-get update -q && sudo apt-get install -y bats shellcheck
+      - name: Shellcheck bump.sh
+        run: shellcheck tools/release/bump.sh
+      - name: Run bump.sh unit tests
+        run: bats tools/release/bump.bats
+      - name: Live consistency check
+        run: bash tools/release/bump.sh --mode=check

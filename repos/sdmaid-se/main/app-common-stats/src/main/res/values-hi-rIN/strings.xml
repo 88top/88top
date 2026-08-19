@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="stats_dash_body_size">
+        <item quantity="one">%s मुक्त किया गया है।</item>
+        <item quantity="other">%s मुक्त किए गए हैं।</item>
+    </plurals>
+    <plurals name="stats_dash_body_count">
+        <item quantity="one">SD Maid को आपके डिवाइस में आमंत्रित करने के बाद से %s आइटम प्रोसेस किया गया।</item>
+        <item quantity="other">SD Maid को आपके डिवाइस में आमंत्रित करने के बाद से %s आइटम प्रोसेस किए गए।</item>
+    </plurals>
+    <!-- Dashboard statistics card caption: how long SD Maid has been installed. SD Maid is
+         personified as an invited houseguest (see stats_dash_body_count). Use the INFORMAL
+         register (du / tu / tú) in languages that distinguish it. %d is the count. -->
+    <plurals name="stats_dash_since_days">
+        <item quantity="one">आपका मेहमान %d दिन से।</item>
+        <item quantity="other">आपका मेहमान %d दिनों से।</item>
+    </plurals>
+    <plurals name="stats_dash_since_weeks">
+        <item quantity="one">आपका मेहमान %d हफ्ते से।</item>
+        <item quantity="other">आपका मेहमान %d हफ्तों से।</item>
+    </plurals>
+    <plurals name="stats_dash_since_months">
+        <item quantity="one">आपका मेहमान %d महीने से।</item>
+        <item quantity="other">आपका मेहमान %d महीनों से।</item>
+    </plurals>
+    <plurals name="stats_dash_since_years">
+        <item quantity="one">आपका मेहमान %d साल से।</item>
+        <item quantity="other">आपका मेहमान %d सालों से।</item>
+    </plurals>
+    <string name="stats_report_status_partial_success">आंशिक सफलता</string>
+    <string name="stats_report_status_partial_failure">असफलता</string>
+    <string name="stats_settings_desc">SD Maid के आंकड़े, रिपोर्ट और डेटा प्रतिधारण को कॉन्फ़िगर करें।</string>
+    <string name="stats_settings_retention_category">प्रतिधारण</string>
+    <string name="stats_settings_retention_reports_label">सामान्य रिपोर्ट</string>
+    <string name="stats_settings_retention_reports_desc">बुनियादी SD Maid ऑपरेशन रिपोर्ट मिटाने से पहले दिनों की संख्या।</string>
+    <string name="stats_settings_retention_paths_label">विस्तृत पथ जानकारी</string>
+    <string name="stats_settings_retention_paths_desc">SD Maid द्वारा प्रभावित पथों के बारे में विवरण रखने के दिनों की संख्या।</string>
+    <string name="stats_settings_reset_all_label">सभी रीसेट करें</string>
+    <string name="stats_settings_reset_all_desc">सभी रिपोर्ट मिटाएं और सभी आंकड़े शून्य पर सेट करें।</string>
+    <string name="stats_affected_paths_label">प्रभावित पथ</string>
+    <string name="stats_affected_pkgs_label">प्रभावित ऐप्स</string>
+    <string name="stats_dash_body_snapshots_only">आपका स्टोरेज इतिहास ट्रैक किया जा रहा है।</string>
+    <string name="stats_storage_trend_action">स्टोरेज ट्रेंड</string>
+    <string name="stats_space_history_title">स्टोरेज ट्रेंड</string>
+    <string name="stats_space_history_range_title">सीमा</string>
+    <string name="stats_space_history_range_7d">7 दिन</string>
+    <string name="stats_space_history_range_30d">30 दिन</string>
+    <string name="stats_space_history_range_90d">90 दिन</string>
+    <string name="stats_space_history_storage_title">स्टोरेज</string>
+    <string name="stats_space_history_current_used_label">वर्तमान उपयोग</string>
+    <string name="stats_space_history_min_label">न्यूनतम उपयोग</string>
+    <string name="stats_space_history_max_label">अधिकतम उपयोग</string>
+    <string name="stats_space_history_delta_label">डेल्टा</string>
+    <string name="stats_space_history_delta_in_x">%1$s में %2$s</string>
+    <string name="stats_space_history_upgrade_title">पूर्ण इतिहास एक Pro सुविधा है</string>
+    <string name="stats_space_history_upgrade_body">प्रत्येक स्टोरेज डिवाइस के लिए पूर्ण 90-दिन का ट्रेंड व्यू अनलॉक करने के लिए अपग्रेड करें।</string>
+    <string name="stats_space_history_marker_freed">%1$s मुक्त किया</string>
+    <string name="stats_storage_type_primary">प्रारंभिक संग्रहण</string>
+    <string name="stats_storage_type_secondary">माध्यमिक संग्रहण</string>
+    <string name="stats_storage_type_portable">पोर्टेबल संग्रहण</string>
+    <string name="stats_space_history_delete_storage_title">स्टोरेज इतिहास हटाएं?</string>
+    <string name="stats_space_history_delete_storage_desc">इस स्टोरेज के लिए सभी ट्रेंड डेटा स्थायी रूप से हटा दिया जाएगा।</string>
+</resources>

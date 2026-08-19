@@ -1,0 +1,55 @@
+<i>SD Maid 2/SE</i> on Androidi usaldusväärne abiline, mis hoiab puhtust ja korda.
+
+Mitte keegi pole täiuslik ja sama kehtib Androidile.
+
+* Juba eemaldatud rakendused jätavad midagi maha.
+* Pidevalt luuakse ebaolulisi logisid, veaaruandeid ja muid faile.
+* Hoiuruumi koguneb võõraid faile ja kaustu.
+* Korduvad pildid galeriis.
+
+Saab ka teisiti... Luba SD Maid 2/SE-l end aidata!
+
+SD Maid 2/SE on seadmesse faile loovaid rakendusi teadev rakendus. See võrdleb faile paigaldatud rakendustega, et aidata salvestusruumi turvaliselt vabastada.
+
+✨ Rakenduste eemaldamisjärgne puhastus
+
+Kui rakendused loovad faile kohtadesse, kus pole nende andmeid, siis need failid püsivad isegi pärast rakenduste eemaldamist. Jäägileidja leiab rakenduse jääke, näitab millisele rakendusele need kuuluvad ja aitab neid kustutada.
+
+🔍 Otsige seadmest nutikalt
+
+Jaota tühje kaustu, ajutisi faile, juba paigaldatud rakendusi ja muud. Saate luua isegi enda otsingutermini. „Süsteemipuhastaja“ otsib ja kustutab faile ise erinevate nõuete alusel.
+
+🧹 Jääkide ja peidetud vahemälude kustutamine
+
+Pisipildid, prügikastid, võrguühenduseta vahemälud jne. Kui rakendused ei korista enda tagant, siis see rakendus teeb seda. Rakendusepuhastaja leiab jääkidega rakendusi.
+
+📦 Hallake kõiki rakendusi
+
+Saate põhjaliku loendi kõikidest seadmesse paigaldatud rakendustest. Lubatud, keelatud, kasutaja või süsteemi rakendus: ükski rakendus ei peida end teie eest. „Rakendusekontroll“ on rakenduste haldur, millega saate neid otsida, eristada ja hallata.
+
+📊 Mis võtab ruumi?
+
+Hoiustamisruumi haldamine võib olla keerukas, kui rakenduste, meediumite, süsteemi ja muud failid on kõikjal seadme hoiustamisruumis, SD-kaartidel ja USB-seadmetel laiali. „Hoiustamisruumi analüüsija” on seadme ruumi kasutamist kirjeldav ja ruumi haldamist hõlbustav failihaldur.
+
+📷 Samasuguste andmete otsimine
+
+Mitu korda allalaaditu, sotsiaalmeedia kaudu saadetud pildid või sama stseeni sarnased pildid. Koopiad võivad aja jooksul koguneda. Koopiate eemaldaja otsib samasuguseid või sarnaseid faile ja aitab kustutada liigseid koopiaid.
+
+👆 Korralda ühe viipega
+
+Vali kaust ja vaata faile ükshaaval lihtsate viibete abil – hoia, kustuta või jäta vahele. Vahendiga „Viipaja“ uudistad kõiki ettepanekuid enne kustutamist ja seansi saab salvestada hiljem jätkamiseks.
+
+🗄️ Säästa ruumi fotosid kustutamata
+
+Fotod võivad võtta palju salvestusruumi, kuid sa ei pruugi neid alati kustutada tahta. Vahend „Meediumi tihendaja“ tihendab pilte reguleeritavate kvaliteediseadetega, et vabastada ruumi pilte kustutamata.
+
+See rakendus on reklaamivaba. Osa võimalusi vajab tasulist täiendust.
+
+SD Maid 2/SE on SD Maid 1/Legacy uus põlvkond.
+Optimeeritud uuemate Androidi versioonide jaoks ja keskendub puhastamisele.
+
+Sellel rakendusel on tüütute tegevuste automatiseerimiseks juurdepääsuteenuse API-t käivitavad lisavõimalused.
+See rakendus klõpsab juurdepääsuteenuse API-ga nuppe, et saaksid toimetada mitmes rakenduses, nt vahemälude kustutamine.
+See rakendus ei kogu juurdepääsuteenuse API-ga teavet.
+
+SD Maid 2/SE on failihaldur ja puhastaja.

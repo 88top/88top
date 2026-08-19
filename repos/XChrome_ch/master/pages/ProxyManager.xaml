@@ -1,0 +1,35 @@
+﻿<Page x:Class="XChrome.pages.ProxyManager"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:local="clr-namespace:XChrome.pages"
+        xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+        xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+        xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      JournalEntry.KeepAlive="True"
+      Title="ProxyManager">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
+        </Grid.RowDefinitions>
+        <!--搜索-->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,5,5,5">
+            <ComboBox Width="150" SelectedIndex="0">
+                <ComboBoxItem Content="全部分组"></ComboBoxItem>
+                <ComboBoxItem Content="xxx"></ComboBoxItem>
+            </ComboBox>
+            <TextBox Margin="10,0,0,0" Width="300" adonisExtensions:WatermarkExtension.Watermark="收入 名称，代理，分类等..." />
+            <Button Margin="10,0,0,0" Content=" 搜索 " Padding="12,4,12,4" 
+             Style="{DynamicResource {x:Static adonisUi:Styles.AccentButton}}"   />
+        </StackPanel>
+
+
+    </Grid>
+</Page>

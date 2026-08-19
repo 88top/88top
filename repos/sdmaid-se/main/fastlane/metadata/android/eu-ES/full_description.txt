@@ -1,0 +1,55 @@
+<i>SD Maid 2/SE</i> is your Android’s trusted assistant, to keep it clean and tidy.
+
+Inor ez da perfektua, eta Android ere ez.
+
+* Aurretik ezabatutako aplikazioek zeozer uzten dute atzean.
+* Ohar batzuk, talkak eta beste fitxategi batzuk etengabe sortzen dira.
+* Zure biltegiratzea ez dituzu ezagutzen fitxategiak eta agentzak biltzen ari da.
+* Galeriaren argazki bikoitzak.
+
+Hemen ez jarraitu… SD Maid 2/SE ustiatzea uzten dute!
+
+SD Maid 2/SE aplikazio eta fitxategi-kudeatzaile bat da, zein aplikaziok sortu dituzten fitxategiak zure gailuan jakitean espezializatua. Instalatutako aplikazioekin fitxategiak alderatzen ditu, biltegiratze-lekua modu seguruan libratzeko aukerak eskaintzeko.
+
+✨ Garbitu aplikazioen desinstalatzearen ondoren
+
+Aplikazioak fitxategiak haiek berezkoa den agentzen kanpo sortzen badituzte, fitxategiak gelditu daitezke aplikazioak desintstalatu ondoren ere. "CorpseFinder" tresnak aplikazioaren hondarrak aurkitzen ditu, zein aplikazioari dagokizkion jakinarazten du eta horien ezabatzean laguntzen du.
+
+🔍 Bilakatu zure gailua modu adimentsuan
+
+Bilatu karpeta hutsak, aldi baterako fitxategiak, instalatutako aplikazioak eta gehiago. Zure bilaketa-kriterio propioak sortu ditzakezu. "SystemCleaner" tresnak gailua automatikoki bilatzen du eta hainbat irizpidetan oinarrituta fitxategiak ezabatzen ditu.
+
+🧹 Ezabatu funtsezinak diren fitxategiak eta ezkutuko cachea
+
+Irudien txikiak, zabalera-ontziak, offline cachea eta gehiago: aplikazioak ez badira garbitzen dute, orduan aplikazio hau egingo du. "AppCleaner" tresnak funtsezinak diren fitxategiak dituzten aplikazioak aurkitzen ditu.
+
+📦 Kudeatu zure aplikazio guztiak
+
+Lortzen zure gailuan instalatutako aplikazio guztien zerrenda umplua. Gaitua, desgaitua, erabiltzaileak edo sistemaren aplikazioa: ez dago aplikaziorik nahastu dezakeena. "AppControl" tresna aplikazioen kudeatzailea da, bilatu, ordenatu eta kontrolatzeko.
+
+📊 Zer erabiltzen ari da zure lekua guztia
+
+Biltegiratze kudeaketa konplexua izan daiteke aplikazioekin, multimedia, sistema eta bestelako fitxategiekin gailu biltegiratzean, SD txarteletan eta USB gailuetan zehar. "StorageAnalyzer" fitxategi-kudeatzailea da, zeintzuk zure gailuko biltegiratzea nola erabiltzen den bistaratzen duen, biltegiratze-kudeaketa sinplifikatzeko.
+
+📷 Aurkitu bikoizko datuak
+
+Bikoizko deskarguak, argazkiak sozialen medioetan bidali, edo besterik gabe, eszena beraren antzeko argazkiak: denborak banatzen dituenean kopiak hel daitezke. "Deduplicator" tresnak berdin edo antzeko fitxategiak aurkitzen ditu eta extra kopiak ezabatzeko laguntzen du.
+
+👆 Antolatu irristada batekin
+
+Aukeratu karpeta bat eta joan fitxategiak banan-banan errepasatzen irristada sinpleen bidez gordetzeko, ezabatzeko edo saltatzeko. "Swiper" tresnak erabaki guztiak berrikusteko aukera ematen dizu ezer ezabatu aurretik, eta saioa gorde dezakezu geroago jarraitzeko.
+
+🗜️ Aurreztu lekua argazkiak ezabatu gabe
+
+Argazkiek biltegiratze asko har dezakete, baina beti ez duzu kendu nahi izaten. "Media Squeeze" tresnak zure irudiak konprimitzeaz arduratzen da kalitate-ezarpen doiekin, lekua askatuz zure argazkiak gordetzen diren bitartean.
+
+Aplikazio hau iragarkirik gabea da. Funtzio batzuk erabiltzeko ordainketa-igoera behar da.
+
+SD Maid 2/SE SD Maid 1/Leged-en ondorengoa da.
+Android bertsio berriagoetarako optimizatua eta garbiketan zentratua.
+
+Aplikazio honek AccessibilityService API erabiltzen duen aukera batzuk ditu, jarduteko errazak automatizatzeko.
+AccessibilityService APIa erabiliz, aplikazio honek botoiak klikatu ditzake zure ordez, hainbat aplikazioetan eragiketak egiteko, adibidez. cache-memoriak ezabatzen.
+Aplikazio honek ez du AccessibilityService APIa informazioa biltzeko erabiltzen.
+
+SD Maid 2/SE fitxategi-kudeatzailea eta garbitzaile aplikazioa da.

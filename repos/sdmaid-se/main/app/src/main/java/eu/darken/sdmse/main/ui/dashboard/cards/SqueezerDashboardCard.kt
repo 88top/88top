@@ -1,0 +1,180 @@
+package eu.darken.sdmse.main.ui.dashboard.cards
+
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.twotone.Cancel
+import androidx.compose.material.icons.twotone.Compress
+import androidx.compose.material.icons.twotone.Tune
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import eu.darken.sdmse.common.R as CommonR
+import eu.darken.sdmse.common.ca.toCaString
+import eu.darken.sdmse.common.compose.asComposable
+import eu.darken.sdmse.common.compose.preview.Preview2
+import eu.darken.sdmse.common.compose.preview.PreviewWrapper
+import eu.darken.sdmse.common.progress.Progress
+
+import eu.darken.sdmse.main.ui.dashboard.cards.common.DashboardActionIconSpacing
+import eu.darken.sdmse.main.ui.dashboard.cards.common.DashboardCard
+import eu.darken.sdmse.main.ui.dashboard.cards.common.DashboardFlatActionButton
+import eu.darken.sdmse.main.ui.dashboard.cards.common.DashboardOutlinedActionButton
+import eu.darken.sdmse.main.ui.dashboard.cards.common.ProgressContainer
+import eu.darken.sdmse.squeezer.core.Squeezer
+import eu.darken.sdmse.squeezer.core.tasks.SqueezerProcessTask
+import eu.darken.sdmse.squeezer.R as SqueezerR
+
+data class SqueezerDashboardCardItem(
+    val data: Squeezer.Data?,
+    val isInitializing: Boolean,
+    val progress: Progress.Data?,
+    val result: SqueezerProcessTask.Result?,
+    val onViewDetails: () -> Unit,
+    val onCancel: () -> Unit,
+) : DashboardItem {
+    override val stableId: Long = this.javaClass.hashCode().toLong()
+}
+
+@Composable
+internal fun SqueezerDashboardCard(item: SqueezerDashboardCardItem) {
+    // The card opens the squeezer setup screen, which renders its configuration before its
+    // progress overlay arrives. Tapping mid-operation would show that configuration for a moment
+    // before the overlay covers it, so the click is disabled while an operation runs.
+    DashboardCard(onClick = item.onViewDetails.takeIf { !item.isInitializing && item.progress == null }) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.TwoTone.Compress,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = stringResource(CommonR.string.squeezer_tool_name),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            if (item.isInitializing) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(16.dp),
+                    strokeWidth = 3.dp,
+                )
+            }
+        }
+
+        if (item.progress == null && item.result == null) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(SqueezerR.string.squeezer_explanation_short),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+
+        if (item.progress != null || item.result != null) {
+            Spacer(modifier = Modifier.height(16.dp))
+            ProgressContainer(
+                modifier = Modifier.fillMaxWidth(),
+                progress = item.progress,
+                resultPrimary = item.result?.primaryInfo?.asComposable(),
+                resultSecondary = item.result?.secondaryInfo?.asComposable()?.takeUnless { it.isBlank() },
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (item.progress != null) {
+            DashboardOutlinedActionButton(
+                onClick = item.onCancel,
+                modifier = Modifier.align(Alignment.End),
+            ) {
+                Icon(
+                    imageVector = Icons.TwoTone.Cancel,
+                    contentDescription = null,
+                )
+                Spacer(modifier = Modifier.width(DashboardActionIconSpacing))
+                Text(text = stringResource(CommonR.string.general_cancel_action))
+            }
+        } else {
+            DashboardFlatActionButton(
+                onClick = item.onViewDetails,
+                enabled = !item.isInitializing,
+                modifier = Modifier.align(Alignment.End),
+            ) {
+                Icon(
+                    imageVector = Icons.TwoTone.Tune,
+                    contentDescription = null,
+                )
+                Spacer(modifier = Modifier.width(DashboardActionIconSpacing))
+                Text(text = stringResource(CommonR.string.general_configure_action))
+            }
+        }
+    }
+}
+
+@Preview2
+@Composable
+private fun SqueezerDashboardCardPreview() {
+    PreviewWrapper {
+        SqueezerDashboardCard(
+            item = SqueezerDashboardCardItem(
+                data = null,
+                isInitializing = false,
+                progress = null,
+                result = null,
+                onViewDetails = {},
+                onCancel = {},
+            ),
+        )
+    }
+}
+
+@Preview2
+@Composable
+private fun SqueezerDashboardCardResultPreview() {
+    PreviewWrapper {
+        SqueezerDashboardCard(
+            item = SqueezerDashboardCardItem(
+                data = null,
+                isInitializing = false,
+                progress = null,
+                result = SqueezerProcessTask.Success(
+                    affectedSpace = 34 * 1024 * 1024L,
+                    affectedPaths = emptySet(),
+                    processedCount = 2,
+                ),
+                onViewDetails = {},
+                onCancel = {},
+            ),
+        )
+    }
+}
+
+@Preview2
+@Composable
+private fun SqueezerDashboardCardProgressPreview() {
+    PreviewWrapper {
+        SqueezerDashboardCard(
+            item = SqueezerDashboardCardItem(
+                data = null,
+                isInitializing = false,
+                progress = Progress.Data(
+                    primary = "Compressing images".toCaString(),
+                    count = Progress.Count.Counter(current = 1, max = 2),
+                ),
+                result = null,
+                onViewDetails = {},
+                onCancel = {},
+            ),
+        )
+    }
+}

@@ -1,0 +1,55 @@
+<i>SD Maid 2/SE</i> é o asistente de confianza do teu Android, para mantelo limpo e ordenado.
+
+Ninguén é perfecto e Android tampouco o é.
+
+* As aplicacións desinstaladas deixan residuos.
+* Rexistros, informes de fallos e outros ficheiros que non queres están creándose constantemente.
+* O teu almacenamento está recopilando ficheiros e carpetas que non recoñeces.
+* Fotos duplicadas na túa galería.
+
+Non continuemos aquí… ¡Deixa que SD Maid 2/SE che axude!
+
+SD Maid 2/SE é un xestor de aplicacións e ficheiros que sabe cales crearon ficheiros no teu dispositivo. Compara ficheiros con aplicacións instaladas para axudarche a liberar espazo de almacenamento de forma segura.
+
+✨ Limpa despois de desinstalar aplicacións
+
+Se as aplicacións crean ficheiros fóra das súas carpetas designadas, os ficheiros poden permanecer incluso despois de desinstalar as aplicacións. A ferramenta "CorpseFinder" busca restos de aplicacións, dícheche a cal aplicación pertencían e axúdache a eliminalos.
+
+🔍 Busca no teu dispositivo da forma máis intelixente
+
+Filtra por carpetas baleiras, ficheiros temporais, aplicacións xa instaladas e máis. Mesmo podes crear os teus propios criterios de busca. A ferramenta "SystemCleaner" busca e elimina ficheiros automaticamente segundo varios criterios.
+
+🧹 Elimina ficheiros dispensables e cachés ocultas
+
+Miniaturas, papeleiras, cachés sen conexión e máis: Se as aplicacións non se limpan despois de si mesmas, entón esta aplicación o fará. A ferramenta "AppCleaner" busca aplicacións con ficheiros dispensables.
+
+📦 Xestiona todas as túas aplicacións
+
+Obtén unha lista completa de todas as aplicacións instaladas no teu dispositivo. Activada, desactivada, aplicación de usuario ou de sistema: ningunha aplicación pode ocultarse de ti. A ferramenta "AppControl" é un xestor de aplicacións que che permite buscar, ordenar e controlar as túas apps.
+
+📊 Que é o que está usando todo o teu espazo
+
+A xestión do almacenamento pode ser complexa con aplicacións, multimedia, sistema e outros ficheiros en dispositivos de almacenamento, tarxetas SD e dispositivos USB. "StorageAnalyzer" é un xestor de ficheiros que mostra como se usa o espazo no teu dispositivo, simplificando a xestión do teu almacenamento.
+
+📷 Busca datos duplicados
+
+Descargas duplicadas, fotos enviadas a través de redes sociais ou só imaxes similares da mesma escena: Co tempo, as copias poden acumularse. A ferramenta "Deduplicator" busca ficheiros que son exactamente iguais ou similares e axúdache a eliminar copias extras.
+
+👆 Ordena cunha pasada
+
+Escolle un cartafol e revía os ficheiros un por un con sinxelos xestos para gardar, eliminar ou omitir. A ferramenta "Swiper" permíeche revisar todas as decisións antes de eliminar nada, e podes gardar unha sesión para continuar despois.
+
+🗃️ Aforrar espazo sen eliminar fotos
+
+As fotos poden ocupar moito almacenamento, pero non sempre queres eliminalas. A ferramenta "Media Squeeze" comprime as túas imaxes con axustes de calidade regulables para liberar espazo mantendo as túas fotos.
+
+Esta aplicación non ten publicidade. Algunhas funcionalidades requiren unha actualización de pago.
+
+SD Maid 2/SE é o sucesor de SD Maid 1/Legacy.
+Optimizado para versións máis novas de Android e enfocado na limpeza.
+
+Esta aplicación ten funcionalidades opcionais que utilizan a API AccessibilityService para automatizar accións tediosas.
+Usando a API AccessibilityService, esta aplicación pode facer clic en botóns para ti para realizar operacións en múltiples aplicacións, por exemplo. eliminando cachés.
+Esta aplicación non utiliza a API AccessibilityService para recopilar información.
+
+SD Maid 2/SE é unha aplicación de xestor de ficheiros e limpador.
