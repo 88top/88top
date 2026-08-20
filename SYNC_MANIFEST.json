@@ -12,7 +12,7 @@
       "remote_sha": "3850e2f070bb3c1227b78dcd1e8a34a89a9e9906"
     },
     "main": {
-      "remote_sha": "0b6a082df1b98d054f881f76ab29465ad48ca3b5"
+      "remote_sha": "a86040fb0cb08cf5fbe825cdd88590e2d432a1e9"
     }
   },
   "timeflysoon/Actions-FriendlyWrt": {
@@ -297,7 +297,7 @@
   },
   "timeflysoon/immortalwrt": {
     "master": {
-      "remote_sha": "c0c50db20e73dd02aedef75bb9e16c16a8b377d1"
+      "remote_sha": "604e315e3ca4a61bad4cc1af0562167752b4deef"
     },
     "openwrt-18.06": {
       "remote_sha": "f7bc84bd30a038b0fd251ce59b6619e5eae94848"
@@ -347,7 +347,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "7545ca61c0f98327ab6da74833a05deeb245f84b"
+      "remote_sha": "485a68cf705543a87dfcd82ef2656afbd3bf4c13"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -490,7 +490,7 @@
   },
   "timeflysoon/v2rayN": {
     "master": {
-      "remote_sha": "2d514ff480f92e01209f286255ad6d85f31add66"
+      "remote_sha": "14e27f3d23e608f7b8e8048104c543d9d8f5b744"
     },
     "v7_16": {
       "remote_sha": "654d7d83d09d1683c60501c9fa853a19c3dd9d6b"
@@ -498,7 +498,7 @@
   },
   "timeflysoon/v2rayNG": {
     "master": {
-      "remote_sha": "57f6b6fe98d73e80f1bd29a5e2626f5611ca6e3c"
+      "remote_sha": "48285e13f31b3b6f930f2855eea68463939de3b4"
     },
     "v1_10_32": {
       "remote_sha": "bd6b67cbfc71caa7ed94d2c64e8ac7756af61276"
@@ -506,7 +506,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "b01d9eefd62d7450c40dcec90ff79c0a06aa49b6"
+      "remote_sha": "c8a3013bb294912bfb9e886f5d118b67c1b957b5"
     }
   },
   "timeflysoon/weasel": {
