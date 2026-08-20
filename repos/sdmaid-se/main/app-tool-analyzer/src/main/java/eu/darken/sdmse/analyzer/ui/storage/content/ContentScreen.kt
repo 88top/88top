@@ -1,6 +1,5 @@
 package eu.darken.sdmse.analyzer.ui.storage.content
 
-import android.content.ActivityNotFoundException
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +14,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
+import androidx.compose.material.icons.automirrored.twotone.OpenInNew
 import androidx.compose.material.icons.automirrored.twotone.ViewList
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.Delete
@@ -47,8 +47,11 @@ import eu.darken.sdmse.analyzer.R
 import eu.darken.sdmse.analyzer.core.content.ContentItem
 import eu.darken.sdmse.analyzer.core.storage.SystemStorageScanner
 import eu.darken.sdmse.analyzer.ui.ContentRoute
+import eu.darken.sdmse.analyzer.ui.storage.preview.previewContentItem
+import eu.darken.sdmse.analyzer.ui.storage.preview.previewDeviceStorage
 import eu.darken.sdmse.common.ByteFormatter
 import eu.darken.sdmse.common.R as CommonR
+import eu.darken.sdmse.common.ca.toCaString
 import eu.darken.sdmse.common.compose.dialog.SdmConfirmDialog
 import eu.darken.sdmse.common.compose.dialog.SdmDialogAction
 import eu.darken.sdmse.common.compose.icons.SdmIcons
@@ -137,15 +140,18 @@ fun ContentScreenHost(
                 }
                 is ContentViewModel.Event.OpenContent -> {
                     runCatching { context.startActivity(event.intent) }
-                        .onFailure { error ->
-                            if (error is ActivityNotFoundException) {
-                                snackScope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = context.getString(CommonR.string.general_error_no_compatible_app_found_msg),
-                                    )
-                                }
+                        .onFailure {
+                            snackScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = context.getString(CommonR.string.general_error_no_compatible_app_found_msg),
+                                )
                             }
                         }
+                }
+                is ContentViewModel.Event.NoExternalAppFound -> snackScope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = context.getString(CommonR.string.general_error_no_compatible_app_found_msg),
+                    )
                 }
                 is ContentViewModel.Event.SwiperSessionCreated -> snackScope.launch {
                     val msg = context.resources.getQuantityString(
@@ -174,6 +180,7 @@ fun ContentScreenHost(
         onCreateFilter = vm::onCreateFilter,
         onCreateSwiperSession = vm::onCreateSwiperSession,
         onLayoutModeToggle = vm::onLayoutModeToggle,
+        onOpenExternally = vm::onOpenExternally,
         onNavigateBack = vm::onNavigateBack,
     )
 
@@ -200,6 +207,7 @@ internal fun ContentScreen(
     onCreateFilter: (Set<ContentItem>) -> Unit = {},
     onCreateSwiperSession: (Set<ContentItem>) -> Unit = {},
     onLayoutModeToggle: () -> Unit = {},
+    onOpenExternally: (APath) -> Unit = {},
     onNavigateBack: () -> Unit = {},
 ) {
     val state by stateSource.collectAsStateWithLifecycle(initialValue = ContentViewModel.State.Loading)
@@ -320,14 +328,16 @@ internal fun ContentScreen(
                                         onClick = { pendingDelete = selectedItems },
                                     )
                                 }
-                                SdmTooltipIconButton(
-                                    icon = SdmIcons.ShieldAdd,
-                                    label = stringResource(CommonR.string.general_exclude_action),
-                                    onClick = {
-                                        onExcludeSelected(selectedItems)
-                                        selection.clear()
-                                    },
-                                )
+                                if (!s.isReadOnly) {
+                                    SdmTooltipIconButton(
+                                        icon = SdmIcons.ShieldAdd,
+                                        label = stringResource(CommonR.string.general_exclude_action),
+                                        onClick = {
+                                            onExcludeSelected(selectedItems)
+                                            selection.clear()
+                                        },
+                                    )
+                                }
                                 if (!s.isReadOnly && noneInaccessible) {
                                     SdmTooltipIconButton(
                                         icon = Icons.TwoTone.Filter,
@@ -371,6 +381,13 @@ internal fun ContentScreen(
                                 )
                             },
                             actions = {
+                                s.externalFolder?.let { target ->
+                                    SdmTooltipIconButton(
+                                        icon = Icons.AutoMirrored.TwoTone.OpenInNew,
+                                        label = stringResource(R.string.analyzer_content_open_externally_action),
+                                        onClick = { onOpenExternally(target) },
+                                    )
+                                }
                                 SdmTooltipIconButton(
                                     icon = when (s.layoutMode) {
                                         LayoutMode.LINEAR -> Icons.TwoTone.GridView
@@ -401,7 +418,7 @@ internal fun ContentScreen(
                                 s.infoBanner?.let { banner ->
                                     item(key = "info-banner") {
                                         ContentInfoBanner(
-                                            modifier = Modifier.padding(horizontal = 16.dp),
+                                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                                             text = banner,
                                         )
                                     }
@@ -510,5 +527,31 @@ private fun LazyGridScope.contentTiles(
 private fun ContentScreenLoadingPreview() {
     PreviewWrapper {
         ContentScreen()
+    }
+}
+
+@Preview2
+@Composable
+private fun ContentScreenInfoBannerListPreview() {
+    val items = listOf(
+        previewContentItem(segments = arrayOf("data", "media", "10", "DCIM", "vacation.mp4"), size = 3L * 1024 * 1024 * 1024),
+        previewContentItem(segments = arrayOf("data", "media", "10", "Music", "playlist.mp3"), size = 8L * 1024 * 1024),
+    )
+    PreviewWrapper {
+        ContentScreen(
+            stateSource = MutableStateFlow(
+                ContentViewModel.State.Ready(
+                    title = "Second user".toCaString(),
+                    subtitle = "/data/media/10".toCaString(),
+                    storage = previewDeviceStorage(),
+                    items = items.map { ContentViewModel.Item(parent = null, content = it, sizeRatio = null) },
+                    layoutMode = LayoutMode.LINEAR,
+                    progress = null,
+                    isReadOnly = true,
+                    infoBanner = R.string.analyzer_storage_content_type_otherusers_info.toCaString(),
+                    externalFolder = null,
+                ),
+            ),
+        )
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.AdminPanelSettings
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
@@ -24,11 +25,14 @@ import eu.darken.sdmse.common.compose.preview.Preview2
 import eu.darken.sdmse.common.compose.preview.PreviewWrapper
 import eu.darken.sdmse.setup.SetupCardContainer
 import eu.darken.sdmse.setup.SetupCardItem
+import eu.darken.sdmse.setup.SetupLimitationBox
+import eu.darken.sdmse.common.R as CommonR
 
 data class RootSetupCardItem(
     override val state: RootSetupModule.Result,
     val onToggleUseRoot: (Boolean?) -> Unit,
     val onHelp: () -> Unit,
+    val onRetry: () -> Unit,
 ) : SetupCardItem
 
 @Composable
@@ -50,28 +54,49 @@ internal fun RootSetupCard(
                 .padding(horizontal = 16.dp),
         )
         if (item.state.useRoot == true) {
-            val ready = item.state.ourService
-            // The probe has settled by the time we render a Result (Loading shows a spinner card
-            // instead), so ourService == false is a definitive "not available" — not "waiting".
-            // We never claim the device isn't rooted: root detection is unreliable, so we only
-            // report our own probe outcome.
-            val stateText = stringResource(
-                if (ready) R.string.setup_root_state_ready_label
-                else R.string.setup_root_state_waiting_label,
-            )
-            Text(
-                text = stateText,
-                style = MaterialTheme.typography.labelMedium,
-                color = if (ready) {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                } else {
-                    MaterialTheme.colorScheme.error
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                textAlign = TextAlign.Center,
-            )
+            // SD Maid asked for root and didn't get it, which is worth explaining and retrying.
+            // Whether a known root manager is installed only picks the wording: hidden or built-in
+            // root shows up as no manager at all.
+            // Result.isComplete deliberately stays as it is: treating "opted into root that does not
+            // work" as incomplete would strand every user who picks "Try to use root access" on an
+            // ordinary unrooted phone, so this box can render on a module that reports itself complete.
+            val failed = item.state.useRoot == true && !item.state.ourService
+
+            if (!failed) {
+                // Reaching this branch means ourService is true, so root is ready. The probe has
+                // settled by the time we render a Result (Loading shows a spinner card instead),
+                // so there is no third "still waiting" state to report here.
+                Text(
+                    text = stringResource(R.string.setup_root_state_ready_label),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    textAlign = TextAlign.Center,
+                )
+            } else {
+                // Start aligned, multi-line explanation instead of the centred one-liner, matching how
+                // the Shizuku card presents its settled failure. No help button of its own: the card
+                // header already carries a help icon pointing at the same wiki page.
+                SetupLimitationBox(
+                    title = stringResource(R.string.setup_root_state_failed_title),
+                    body = stringResource(
+                        if (item.state.isInstalled) R.string.setup_root_state_failed_body
+                        else R.string.setup_root_state_failed_body_nomanager,
+                    ),
+                ) {
+                    // No enabled guard: a refresh drives accessState to Checking, the module maps
+                    // that to Loading, and the whole card is replaced by a loading card while the
+                    // probe runs.
+                    Button(
+                        onClick = item.onRetry,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(CommonR.string.general_retry_action))
+                    }
+                }
+            }
         }
         Column(
             modifier = Modifier
@@ -142,6 +167,45 @@ private fun RootSetupCardPreview() {
                 ),
                 onToggleUseRoot = {},
                 onHelp = {},
+                onRetry = {},
+            ),
+        )
+    }
+}
+
+@Preview2
+@Composable
+private fun RootSetupCardFailedPreview() {
+    PreviewWrapper {
+        RootSetupCard(
+            item = RootSetupCardItem(
+                state = RootSetupModule.Result(
+                    useRoot = true,
+                    isInstalled = true,
+                    ourService = false,
+                ),
+                onToggleUseRoot = {},
+                onHelp = {},
+                onRetry = {},
+            ),
+        )
+    }
+}
+
+@Preview2
+@Composable
+private fun RootSetupCardFailedNoManagerPreview() {
+    PreviewWrapper {
+        RootSetupCard(
+            item = RootSetupCardItem(
+                state = RootSetupModule.Result(
+                    useRoot = true,
+                    isInstalled = false,
+                    ourService = false,
+                ),
+                onToggleUseRoot = {},
+                onHelp = {},
+                onRetry = {},
             ),
         )
     }

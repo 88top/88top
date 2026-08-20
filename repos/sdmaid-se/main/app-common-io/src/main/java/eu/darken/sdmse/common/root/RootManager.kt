@@ -6,9 +6,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import eu.darken.sdmse.common.access.AccessState
 import eu.darken.sdmse.common.coroutine.AppScope
 import eu.darken.sdmse.common.coroutine.DispatcherProvider
+import eu.darken.sdmse.common.datastore.value
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.INFO
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
-import eu.darken.sdmse.common.debug.logging.asLog
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
 import eu.darken.sdmse.common.flow.replayingShare
@@ -16,20 +16,17 @@ import eu.darken.sdmse.common.flow.setupCommonEventHandlers
 import eu.darken.sdmse.common.root.service.RootServiceClient
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -42,66 +39,23 @@ class RootManager @Inject constructor(
     @AppScope private val appScope: CoroutineScope,
     private val dispatcherProvider: DispatcherProvider,
     val serviceClient: RootServiceClient,
-    settings: RootSettings,
+    private val settings: RootSettings,
 ) {
 
-    val binder: Flow<RootServiceClient.Connection?> = settings.useRoot.flow
-        .flatMapLatest {
-            if (it != true) return@flatMapLatest emptyFlow()
+    private val refreshTrigger = MutableStateFlow(0)
 
-            callbackFlow<RootServiceClient.Connection?> {
-                log(TAG, INFO) { "binder upstream: acquiring root service connection..." }
-                val resource = try {
-                    serviceClient.get()
-                } catch (e: Exception) {
-                    log(TAG, WARN) { "binder upstream: acquisition failed: ${e.asLog()}" }
-                    throw e
-                }
-                log(TAG, INFO) { "binder upstream: acquired connection: ${resource.item}" }
+    /** A probe answer is only valid for the setting value and generation it was taken under. */
+    private data class ProbeKey(val useRoot: Boolean?, val generation: Int)
 
-                try {
-                    send(resource.item)
-                } catch (e: Throwable) {
-                    // send() can throw on collector cancellation before awaitClose is registered.
-                    // Release the lease deterministically so we don't leak it.
-                    log(TAG, WARN) { "binder upstream: send() failed, releasing lease: ${e.asLog()}" }
-                    withContext(NonCancellable) { resource.close() }
-                    throw e
-                }
-
-                awaitClose {
-                    log(TAG) { "Closing binder resource" }
-                    resource.close()
-                }
-            }
-        }
-        .catch {
-            log(TAG, WARN) { "RootServiceClient.Connection was unavailable: ${it.asLog()}" }
-            emit(null)
-        }
-        .setupCommonEventHandlers(TAG) { "binder" }
-        .replayingShare(appScope)
-
-    private var cachedState: Boolean? = null
+    private var cached: Pair<ProbeKey, Boolean>? = null
     private val cacheLock = Mutex()
 
-    init {
-        settings.useRoot.flow
-            .mapLatest {
-                log(TAG) { "Root access state: $it" }
-                cacheLock.withLock {
-                    cachedState = null
-                }
-            }
-            .launchIn(appScope)
-    }
+    private val probeInput: Flow<ProbeKey> =
+        combine(settings.useRoot.flow, refreshTrigger) { setting, gen -> ProbeKey(setting, gen) }
 
-    /**
-     * Is the device rooted and we have access?
-     */
-    suspend fun isRooted(): Boolean = withContext(dispatcherProvider.IO) {
+    private suspend fun isRootedFor(key: ProbeKey): Boolean = withContext(dispatcherProvider.IO) {
         cacheLock.withLock {
-            cachedState?.let { return@withContext it }
+            cached?.takeIf { it.first == key }?.let { return@withContext it.second }
 
             val newState = try {
                 serviceClient.get().use { it.item.ipc.checkBase() != null }
@@ -112,15 +66,37 @@ class RootManager @Inject constructor(
                 false
             }
             log(TAG, INFO) { "isRooted=$newState" }
-            newState.also { cachedState = it }
+            newState.also { cached = key to it }
         }
     }
 
     /**
+     * Is the device rooted and we have access?
+     */
+    suspend fun isRooted(): Boolean = isRootedFor(ProbeKey(settings.useRoot.value(), refreshTrigger.value))
+
+    /** Invalidate the memoised probe and make the derived state flows re-evaluate. */
+    fun refresh() {
+        log(TAG) { "refresh()" }
+        // Not suspending and deliberately not taking cacheLock: an in-flight probe holds that lock
+        // across the su bind, and a retry must neither block behind it nor discard its result. The
+        // running probe stores under the old key and is simply never read again.
+        // update {} and not `value += 1`: a SetupManager.refresh() racing a Retry tap can otherwise
+        // have both callers read the same generation and write the same successor, dropping one
+        // refresh — the retry would then reuse the cached answer and silently do nothing.
+        refreshTrigger.update { it + 1 }
+    }
+
+    /** Exists so tests can assert that concurrent refreshes do not lose increments. */
+    internal val currentGeneration: Int get() = refreshTrigger.value
+
+    /**
      * Did the user consent to SD Maid using root and is root available?
      */
-    val useRoot: Flow<Boolean> = settings.useRoot.flow
-        .mapLatest { (it ?: false) && isRooted() }
+    // StateFlow, so equal values are conflated: a retry that changes nothing does not ripple
+    // downstream. [accessState] does re-emit, so the setup card can show the probe running.
+    val useRoot: Flow<Boolean> = probeInput
+        .mapLatest { key -> (key.useRoot ?: false) && isRootedFor(key) }
         .setupCommonEventHandlers(TAG) { "useRoot" }
         .stateIn(
             scope = appScope,
@@ -128,7 +104,7 @@ class RootManager @Inject constructor(
                 stopTimeoutMillis = 10 * 1000,
                 replayExpirationMillis = 0,
             ),
-            initialValue = null
+            initialValue = null,
         )
         .filterNotNull()
 
@@ -137,14 +113,14 @@ class RootManager @Inject constructor(
      * "opted in but unavailable" / "opted out". Shares [isRooted]'s cache, so it does not trigger
      * an additional su bind. [AccessState.Active] is equivalent to [useRoot] being true.
      */
-    val accessState: Flow<AccessState> = settings.useRoot.flow
-        .flatMapLatest { setting ->
-            when (setting) {
+    val accessState: Flow<AccessState> = probeInput
+        .flatMapLatest { key ->
+            when (key.useRoot) {
                 null -> flowOf(AccessState.Undecided)
                 false -> flowOf(AccessState.Declined)
                 true -> flow {
                     emit(AccessState.Checking)
-                    emit(if (isRooted()) AccessState.Active else AccessState.Unavailable)
+                    emit(if (isRootedFor(key)) AccessState.Active else AccessState.Unavailable)
                 }
             }
         }

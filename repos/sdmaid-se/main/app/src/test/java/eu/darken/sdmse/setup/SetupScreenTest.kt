@@ -18,6 +18,7 @@ import eu.darken.sdmse.common.files.local.LocalPath
 import eu.darken.sdmse.common.permissions.Permission
 import eu.darken.sdmse.common.files.saf.SAFPath
 import eu.darken.sdmse.common.pkgs.toPkgId
+import eu.darken.sdmse.common.adb.shizuku.ShizukuServiceState
 import eu.darken.sdmse.setup.automation.AutomationSetupCardItem
 import eu.darken.sdmse.setup.automation.AutomationSetupModule
 import eu.darken.sdmse.setup.inventory.InventorySetupCardItem
@@ -115,7 +116,7 @@ class SetupScreenTest : BaseComposeRobolectricTest() {
     }
 
     @Test
-    fun `inventory card with fake access shows error label, limitation box and open settings button`() {
+    fun `inventory card with an incomplete list shows limitation box and open settings button`() {
         composeRule.setSetupContent {
             SetupScreen(
                 uiState = SetupUiState.Cards(
@@ -123,17 +124,18 @@ class SetupScreenTest : BaseComposeRobolectricTest() {
                         InventorySetupCardItem(
                             state = InventorySetupModule.Result(
                                 missingPermission = emptySet(),
-                                isAccessFaked = true,
+                                access = InventorySetupModule.InventoryAccess.Incomplete,
                                 settingsIntent = Intent(),
                             ),
                             onGrantAction = {},
                             onHelp = {},
+                            onRetry = {},
                         ),
                     ),
                 ),
             )
         }
-        composeRule.onAllNodesWithText(context.getString(R.string.setup_inventory_invalid_label)).assertCountEquals(1)
+        composeRule.onAllNodesWithText(context.getString(R.string.setup_permission_granted_label)).assertCountEquals(0)
         composeRule.onAllNodesWithText(context.getString(R.string.setup_inventory_limitation_title)).assertCountEquals(1)
         composeRule.onAllNodesWithText(context.getString(R.string.setup_inventory_limitation_body)).assertCountEquals(1)
         composeRule.onAllNodesWithText(context.getString(R.string.setup_inventory_limitation_body2)).assertCountEquals(1)
@@ -153,11 +155,12 @@ class SetupScreenTest : BaseComposeRobolectricTest() {
                         InventorySetupCardItem(
                             state = InventorySetupModule.Result(
                                 missingPermission = emptySet(),
-                                isAccessFaked = true,
+                                access = InventorySetupModule.InventoryAccess.Incomplete,
                                 settingsIntent = Intent(),
                             ),
                             onGrantAction = { settingsClicks++ },
                             onHelp = { helpClicks++ },
+                            onRetry = {},
                         ),
                     ),
                 ),
@@ -181,11 +184,12 @@ class SetupScreenTest : BaseComposeRobolectricTest() {
                         InventorySetupCardItem(
                             state = InventorySetupModule.Result(
                                 missingPermission = setOf(Permission.GET_INSTALLED_APPS),
-                                isAccessFaked = false,
+                                access = InventorySetupModule.InventoryAccess.NotChecked,
                                 settingsIntent = Intent(),
                             ),
                             onGrantAction = {},
                             onHelp = {},
+                            onRetry = {},
                         ),
                     ),
                 ),
@@ -193,7 +197,94 @@ class SetupScreenTest : BaseComposeRobolectricTest() {
         }
         composeRule.onAllNodesWithText(context.getString(CommonR.string.general_grant_access_action)).assertCountEquals(1)
         composeRule.onAllNodesWithText(context.getString(R.string.setup_inventory_limitation_title)).assertCountEquals(0)
-        composeRule.onAllNodesWithText(context.getString(R.string.setup_inventory_invalid_label)).assertCountEquals(0)
+        composeRule.onAllNodesWithText(context.getString(R.string.setup_permission_granted_label)).assertCountEquals(0)
+    }
+
+    @Test
+    fun `inventory card with a failed probe shows the retry box and no settings button`() {
+        composeRule.setSetupContent {
+            SetupScreen(
+                uiState = SetupUiState.Cards(
+                    items = listOf(
+                        InventorySetupCardItem(
+                            state = InventorySetupModule.Result(
+                                missingPermission = emptySet(),
+                                access = InventorySetupModule.InventoryAccess.ProbeFailed,
+                                settingsIntent = Intent(),
+                            ),
+                            onGrantAction = {},
+                            onHelp = {},
+                            onRetry = {},
+                        ),
+                    ),
+                ),
+            )
+        }
+        composeRule.onAllNodesWithText(context.getString(R.string.setup_inventory_probe_failed_title))
+            .assertCountEquals(1)
+        composeRule.onAllNodesWithText(context.getString(R.string.setup_inventory_probe_failed_body))
+            .assertCountEquals(1)
+        composeRule.onAllNodesWithText(context.getString(CommonR.string.general_retry_action)).assertCountEquals(1)
+        composeRule.onAllNodesWithText(context.getString(CommonR.string.general_help_action)).assertCountEquals(1)
+        composeRule.onAllNodesWithText(context.getString(CommonR.string.general_open_system_settings_action))
+            .assertCountEquals(0)
+        composeRule.onAllNodesWithText(context.getString(R.string.setup_permission_granted_label)).assertCountEquals(0)
+        composeRule.onAllNodesWithText(context.getString(R.string.setup_inventory_limitation_title)).assertCountEquals(0)
+    }
+
+    @Test
+    fun `inventory card retry button invokes onRetry`() {
+        var retryClicks = 0
+        composeRule.setSetupContent {
+            SetupScreen(
+                uiState = SetupUiState.Cards(
+                    items = listOf(
+                        InventorySetupCardItem(
+                            state = InventorySetupModule.Result(
+                                missingPermission = emptySet(),
+                                access = InventorySetupModule.InventoryAccess.ProbeFailed,
+                                settingsIntent = Intent(),
+                            ),
+                            onGrantAction = {},
+                            onHelp = {},
+                            onRetry = { retryClicks++ },
+                        ),
+                    ),
+                ),
+            )
+        }
+        composeRule.onNodeWithText(context.getString(CommonR.string.general_retry_action)).performClick()
+        composeRule.runOnIdle {
+            assertTrue(retryClicks == 1)
+        }
+    }
+
+    @Test
+    fun `inventory card probe-failed help button invokes onHelp`() {
+        var helpClicks = 0
+        composeRule.setSetupContent {
+            SetupScreen(
+                uiState = SetupUiState.Cards(
+                    items = listOf(
+                        InventorySetupCardItem(
+                            state = InventorySetupModule.Result(
+                                missingPermission = emptySet(),
+                                access = InventorySetupModule.InventoryAccess.ProbeFailed,
+                                settingsIntent = Intent(),
+                            ),
+                            onGrantAction = {},
+                            onHelp = { helpClicks++ },
+                            onRetry = {},
+                        ),
+                    ),
+                ),
+            )
+        }
+        composeRule.onNodeWithText(context.getString(CommonR.string.general_help_action)).performClick()
+        composeRule.runOnIdle {
+            // The container help icon has no text label, so the click unambiguously hit the box button.
+            assertTrue(helpClicks == 1)
+        }
     }
 
     @Test
@@ -207,6 +298,7 @@ class SetupScreenTest : BaseComposeRobolectricTest() {
                             state = RootSetupModule.Result(useRoot = null),
                             onToggleUseRoot = { selection = it },
                             onHelp = {},
+                            onRetry = {},
                         ),
                     ),
                 ),
@@ -217,7 +309,7 @@ class SetupScreenTest : BaseComposeRobolectricTest() {
     }
 
     @Test
-    fun `root card shows definitive not-available label when root probe failed`() {
+    fun `root card shows the failure box when no root manager is detected`() {
         composeRule.setSetupContent {
             SetupScreen(
                 uiState = SetupUiState.Cards(
@@ -230,16 +322,94 @@ class SetupScreenTest : BaseComposeRobolectricTest() {
                             ),
                             onToggleUseRoot = {},
                             onHelp = {},
+                            onRetry = {},
                         ),
                     ),
                 ),
             )
         }
 
-        // The settled probe-failure state is definitive — no "?" guesswork is appended.
-        val notAvailableText = context.getString(R.string.setup_root_state_waiting_label)
-        composeRule.onAllNodesWithText(notAvailableText).assertCountEquals(1)
-        composeRule.onAllNodesWithText("$notAvailableText ?").assertCountEquals(0)
+        composeRule.onAllNodesWithText(context.getString(R.string.setup_root_state_failed_title)).assertCountEquals(1)
+        composeRule.onAllNodesWithText(context.getString(R.string.setup_root_state_failed_body_nomanager))
+            .assertCountEquals(1)
+        composeRule.onAllNodesWithText(context.getString(R.string.setup_root_state_waiting_label)).assertCountEquals(0)
+    }
+
+    @Test
+    fun `root card retry button invokes onRetry`() {
+        var retryClicks = 0
+        composeRule.setSetupContent {
+            SetupScreen(
+                uiState = SetupUiState.Cards(
+                    items = listOf(
+                        RootSetupCardItem(
+                            state = RootSetupModule.Result(
+                                useRoot = true,
+                                isInstalled = true,
+                                ourService = false,
+                            ),
+                            onToggleUseRoot = {},
+                            onHelp = {},
+                            onRetry = { retryClicks++ },
+                        ),
+                    ),
+                ),
+            )
+        }
+
+        composeRule.onNodeWithText(context.getString(CommonR.string.general_retry_action)).performClick()
+        composeRule.runOnIdle { assertTrue(retryClicks == 1) }
+    }
+
+    @Test
+    fun `root card with installed root manager and failed service shows limitation box`() {
+        composeRule.setSetupContent {
+            SetupScreen(
+                uiState = SetupUiState.Cards(
+                    items = listOf(
+                        RootSetupCardItem(
+                            state = RootSetupModule.Result(
+                                useRoot = true,
+                                isInstalled = true,
+                                ourService = false,
+                            ),
+                            onToggleUseRoot = {},
+                            onHelp = {},
+                            onRetry = {},
+                        ),
+                    ),
+                ),
+            )
+        }
+
+        composeRule.onAllNodesWithText(context.getString(R.string.setup_root_state_failed_title)).assertCountEquals(1)
+        composeRule.onAllNodesWithText(context.getString(R.string.setup_root_state_failed_body)).assertCountEquals(1)
+        composeRule.onAllNodesWithText(context.getString(R.string.setup_root_state_waiting_label)).assertCountEquals(0)
+    }
+
+    @Test
+    fun `root card with working root service shows ready label and no limitation box`() {
+        composeRule.setSetupContent {
+            SetupScreen(
+                uiState = SetupUiState.Cards(
+                    items = listOf(
+                        RootSetupCardItem(
+                            state = RootSetupModule.Result(
+                                useRoot = true,
+                                isInstalled = true,
+                                ourService = true,
+                            ),
+                            onToggleUseRoot = {},
+                            onHelp = {},
+                            onRetry = {},
+                        ),
+                    ),
+                ),
+            )
+        }
+
+        composeRule.onAllNodesWithText(context.getString(R.string.setup_root_state_ready_label)).assertCountEquals(1)
+        composeRule.onAllNodesWithText(context.getString(R.string.setup_root_state_failed_title)).assertCountEquals(0)
     }
 
     @Test
@@ -409,7 +579,7 @@ class SetupScreenTest : BaseComposeRobolectricTest() {
                                 isCompatible = true,
                                 isInstalled = true,
                                 basicService = true,
-                                ourService = false,
+                                serviceState = ShizukuServiceState.NotChecked,
                                 alsoHasRoot = true,
                             ),
                             onToggleUseShizuku = {},
@@ -444,7 +614,7 @@ class SetupScreenTest : BaseComposeRobolectricTest() {
                                 isCompatible = true,
                                 isInstalled = true,
                                 basicService = true,
-                                ourService = true,
+                                serviceState = ShizukuServiceState.Available,
                                 alsoHasRoot = false,
                             ),
                             onToggleUseShizuku = {},

@@ -13,6 +13,7 @@ import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
 import eu.darken.sdmse.common.device.DeviceDetective
+import eu.darken.sdmse.common.device.RomType
 import eu.darken.sdmse.common.flow.SingleEventFlow
 import eu.darken.sdmse.common.flow.setupCommonEventHandlers
 import eu.darken.sdmse.common.navigation.routes.DashboardRoute
@@ -62,6 +63,7 @@ class SetupViewModel @Inject constructor(
     private val webpageTool: WebpageTool,
     private val rootSetupModule: RootSetupModule,
     private val shizukuSetupModule: ShizukuSetupModule,
+    private val inventorySetupModule: InventorySetupModule,
     private val deviceDetective: DeviceDetective,
 ) : ViewModel4(dispatcherProvider, TAG) {
 
@@ -79,6 +81,22 @@ class SetupViewModel @Inject constructor(
     init {
         log(TAG) { "Setup init: options=${screenOptionsFlow.value}" }
         setupManager.setDismissed(false)
+    }
+
+    /**
+     * Does this device match the hardware/ROM pattern behind the known upstream Shizuku problem
+     * (RikkaApps/Shizuku#1198), where Shizuku's helper process dies before it can call back?
+     *
+     * Resolved here rather than in the card because [DeviceDetective.getROMType] hits the package
+     * manager, which must not run during recomposition. Lazy + cached: the answer cannot change
+     * while the process lives, and the flow that reads it does not run on the main thread.
+     *
+     * The card only RENDERS the hint after a connection has actually failed (this value is read on
+     * every emission, it is the display that is gated), so a false positive costs one imprecise
+     * sentence rather than a wrong diagnosis.
+     */
+    private val hasKnownShizukuIssueRisk: Boolean by lazy {
+        deviceDetective.isMediatekSoc() || deviceDetective.getROMType() in KNOWN_SHIZUKU_ISSUE_ROMS
     }
 
     val events = SingleEventFlow<SetupEvents>()
@@ -154,6 +172,7 @@ class SetupViewModel @Inject constructor(
                                 onHelp = {
                                     webpageTool.open("https://github.com/d4rken-org/sdmaid-se/wiki/Setup#root-access")
                                 },
+                                onRetry = { launch { rootSetupModule.refresh() } },
                             )
 
                             is SetupModule.State.Loading -> SetupLoadingCardItem(state)
@@ -243,7 +262,9 @@ class SetupViewModel @Inject constructor(
                                             errorEvents.tryEmit(e)
                                         }
                                     }
-                                }
+                                },
+                                onRetry = { launch { shizukuSetupModule.refresh() } },
+                                showKnownIssueHint = hasKnownShizukuIssueRisk,
                             )
 
                             is SetupModule.State.Loading -> SetupLoadingCardItem(state)
@@ -263,7 +284,8 @@ class SetupViewModel @Inject constructor(
                                 },
                                 onHelp = {
                                     webpageTool.open(InventorySetupModule.INFO_URL)
-                                }
+                                },
+                                onRetry = { launch { inventorySetupModule.refresh() } },
                             )
 
                             is SetupModule.State.Loading -> SetupLoadingCardItem(state)
@@ -320,6 +342,7 @@ class SetupViewModel @Inject constructor(
                 Permission.POST_NOTIFICATIONS -> {}
                 Permission.WRITE_SECURE_SETTINGS -> {}
                 Permission.QUERY_ALL_PACKAGES -> {}
+                Permission.INTERACT_ACROSS_USERS -> {}
                 Permission.GET_INSTALLED_APPS -> {}
                 null -> {}
             }
@@ -365,6 +388,9 @@ class SetupViewModel @Inject constructor(
     }
 
     companion object {
+        /** ROMs with the framework modification behind RikkaApps/Shizuku#1198. */
+        private val KNOWN_SHIZUKU_ISSUE_ROMS = setOf(RomType.HYPEROS, RomType.MIUI)
+
         private val TAG = logTag("Setup", "ViewModel")
     }
 }

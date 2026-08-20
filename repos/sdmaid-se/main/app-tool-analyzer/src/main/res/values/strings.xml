@@ -17,6 +17,7 @@
     </plurals>
     <string name="analyzer_content_access_opaque">No direct access available</string>
     <string name="analyzer_content_create_swiper_session_action">Create Swiper session</string>
+    <string name="analyzer_content_open_externally_action">Open in file manager</string>
     <plurals name="analyzer_content_swiper_session_created_x_items">
         <item quantity="one">Swiper session created with %d item</item>
         <item quantity="other">Swiper session created with %d items</item>
@@ -36,10 +37,16 @@
     <string name="analyzer_storage_content_type_media_description">Captured pictures, recorded videos or downloaded data. Any data that doesn\'t belong to a specific app.</string>
     <string name="analyzer_storage_content_type_system_label">System data</string>
     <string name="analyzer_storage_content_type_system_description">System apps and system data. Apps and data from other users, if several user accounts are set on this device.</string>
+    <string name="analyzer_storage_content_type_system_otherusers_hint">Other users couldn\'t be fully measured, so this total may include some of their storage.</string>
     <string name="analyzer_storage_content_type_system_other_label">Other</string>
     <string name="analyzer_storage_content_type_system_info">Files that don\'t fit the Apps or User files categories. Browse only — deletion is not supported. Some areas may be incomplete due to access restrictions.</string>
     <string name="analyzer_storage_content_type_media_readonly_info">Files can\'t be matched to the apps that own them right now. Sizes are shown for reference only — deletion, filters and Swiper are disabled.</string>
     <string name="analyzer_storage_content_type_system_other_desc">System files and other data that SD Maid could not access or categorize. The operating system restricts listing the contents of some areas.</string>
+    <string name="analyzer_storage_content_type_otherusers_label">Other users</string>
+    <string name="analyzer_storage_content_type_otherusers_description">Apps and files that belong to other users or work profiles on this device.</string>
+    <string name="analyzer_storage_content_type_otherusers_user_partial">App data only, shared files of this user are not included.</string>
+    <string name="analyzer_storage_content_type_otherusers_user_unknown">Size unavailable, this user\'s storage can\'t be read.</string>
+    <string name="analyzer_storage_content_type_otherusers_info">Storage of another user on this device. Browse only, deletion is not supported.</string>
     <string name="analyzer_storage_content_app_code_label">App code</string>
     <string name="analyzer_storage_content_app_code_description">Application files, libraries and resources. This space can be freed by uninstalling the app or archiving it (available on newer Android version).</string>
     <string name="analyzer_storage_content_app_data_label">App data</string>
@@ -51,6 +58,24 @@
     <string name="analyzer_app_details_app_occupies_x_on_y">This app occupies %1$s on \"%2$s\".</string>
     <string name="analyzer_app_details_app_is_archived">This app has been archived.</string>
     <string name="analyzer_storage_trend_delta_in_7d">%s in 7d</string>
+    <plurals name="analyzer_storage_forecast_days">
+        <item quantity="one">About %d day of space left at this rate</item>
+        <item quantity="other">About %d days of space left at this rate</item>
+    </plurals>
+
+    <!-- Settings -->
+    <string name="analyzer_settings_storage_category_label">Storage</string>
+    <string name="analyzer_settings_lowstorage_title">Low storage threshold</string>
+    <string name="analyzer_settings_lowstorage_desc">When free space drops below this, SD Maid treats the storage as running out.</string>
+    <string name="analyzer_settings_lowstorage_value_auto">Automatic (currently %1$s)</string>
+    <string name="analyzer_settings_lowstorage_value_auto_unknown">Automatic</string>
+    <string name="analyzer_settings_lowstorage_automatic_action">Automatic</string>
+    <string name="analyzer_settings_lowspace_notification_title">Low space warning</string>
+    <string name="analyzer_settings_lowspace_notification_desc">Get a notification before your storage runs out.</string>
+
+    <!-- Device storage upgrade hint -->
+    <string name="analyzer_lowspace_hint_title">Never get caught out of space</string>
+    <string name="analyzer_lowspace_hint_body">Upgrade to get a warning before your storage runs out, so you can clean up while there is still room to work with.</string>
 
     <!-- Guided tour -->
     <string name="tour_analyzer_intro_body">See what\'s actually filling up your storage. The Analyzer maps out where your space goes. Each of these cards is a storage chip on your device.</string>

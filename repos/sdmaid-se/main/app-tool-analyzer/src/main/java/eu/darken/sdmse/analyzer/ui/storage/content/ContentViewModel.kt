@@ -10,6 +10,7 @@ import eu.darken.sdmse.analyzer.core.content.ContentGroup
 import eu.darken.sdmse.analyzer.core.content.ContentItem
 import eu.darken.sdmse.analyzer.core.device.DeviceStorage
 import eu.darken.sdmse.analyzer.core.storage.categories.AppCategory
+import eu.darken.sdmse.analyzer.core.storage.categories.OtherUsersCategory
 import eu.darken.sdmse.analyzer.core.storage.categories.SystemCategory
 import eu.darken.sdmse.analyzer.core.storage.categories.isContentReadOnly
 import eu.darken.sdmse.analyzer.core.storage.categories.ownsGroup
@@ -102,6 +103,12 @@ class ContentViewModel @Inject constructor(
             ?: false
     }
 
+    private fun Analyzer.Data.isOtherUserGroup(route: ContentRoute): Boolean {
+        return categories[route.storageId]
+            ?.any { it is OtherUsersCategory && it.ownsGroup(route.groupId) }
+            ?: false
+    }
+
     private fun Analyzer.Data.isReadOnlyGroup(route: ContentRoute): Boolean {
         return categories[route.storageId]
             ?.any { it.ownsGroup(route.groupId) && it.isContentReadOnly }
@@ -127,6 +134,7 @@ class ContentViewModel @Inject constructor(
                 }
                 val isReadOnly = data.isReadOnlyGroup(route)
                 val isSystemGroup = data.isSystemGroup(route)
+                val isOtherUserGroup = data.isOtherUserGroup(route)
                 val pkgStat = route.installId?.let { installId ->
                     data.categories[route.storageId]
                         ?.filterIsInstance<AppCategory>()?.singleOrNull()
@@ -143,11 +151,20 @@ class ContentViewModel @Inject constructor(
                     // System content: top-level banner only, mirroring the system category presentation.
                     isSystemGroup -> R.string.analyzer_storage_content_type_system_info.toCaString()
                         .takeIf { currentLevel == null }
+                    // Another user's storage: read-only for a different reason than degraded media,
+                    // so it must not inherit the media wording below.
+                    isOtherUserGroup -> R.string.analyzer_storage_content_type_otherusers_info.toCaString()
                     // Degraded read-only media: keep the banner visible while browsing too, since the group is a
                     // single storage-root item the user must open before seeing any folders.
                     isReadOnly -> R.string.analyzer_storage_content_type_media_readonly_info.toCaString()
                     else -> null
                 }
+                // Only real directories can be handed to a file manager, onItemClick also navigates
+                // into symlinks and unknown types.
+                val externalFolder = currentLevel
+                    ?.takeIf { it.type == FileType.DIRECTORY }
+                    ?.path
+                    ?.takeIf { viewIntentTool.canOpenFolder(it) }
 
                 // Loading frame: no items yet (progress stamped by the outer combine).
                 emit(
@@ -160,6 +177,7 @@ class ContentViewModel @Inject constructor(
                         progress = null,
                         isReadOnly = isReadOnly,
                         infoBanner = infoBanner,
+                        externalFolder = externalFolder,
                     ),
                 )
 
@@ -185,6 +203,7 @@ class ContentViewModel @Inject constructor(
                         progress = null,
                         isReadOnly = isReadOnly,
                         infoBanner = infoBanner,
+                        externalFolder = externalFolder,
                     ),
                 )
             }
@@ -225,6 +244,17 @@ class ContentViewModel @Inject constructor(
         events.emit(Event.OpenContent(intent))
     }
 
+    fun onOpenExternally(path: APath) = launch {
+        log(TAG) { "onOpenExternally($path)" }
+        val intent = viewIntentTool.createForFolder(path)
+        if (intent == null) {
+            log(TAG, WARN) { "onOpenExternally(): No intent for $path" }
+            events.emit(Event.NoExternalAppFound)
+            return@launch
+        }
+        events.emit(Event.OpenContent(intent))
+    }
+
     fun onNavigateBack() {
         log(TAG) { "onNavigateBack()" }
         navigationState.value?.let { cur ->
@@ -253,7 +283,12 @@ class ContentViewModel @Inject constructor(
     }
 
     fun onExcludeSelected(items: Set<ContentItem>) = launch {
+        val route = routeFlow.value ?: return@launch
         log(TAG) { "onExcludeSelected(): ${items.size}" }
+        if (analyzer.data.first().isReadOnlyGroup(route)) {
+            log(TAG, WARN) { "exclude(): Blocked — content is read-only" }
+            return@launch
+        }
         val newExclusions = items.map { PathExclusion(path = it.path) }.toSet()
         if (newExclusions.isEmpty()) return@launch
         exclusionManager.save(newExclusions)
@@ -333,6 +368,7 @@ class ContentViewModel @Inject constructor(
             val progress: Progress.Data?,
             val isReadOnly: Boolean,
             val infoBanner: CaString?,
+            val externalFolder: APath?,
         ) : State
         data object NotFound : State
     }
@@ -342,6 +378,7 @@ class ContentViewModel @Inject constructor(
         data class ExclusionsCreated(val items: List<ContentItem>) : Event
         data class ContentDeleted(val count: Int, val freedSpace: Long) : Event
         data class OpenContent(val intent: Intent) : Event
+        data object NoExternalAppFound : Event
         data class SwiperSessionCreated(val sessionId: String, val itemCount: Int) : Event
     }
 

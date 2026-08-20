@@ -2,6 +2,7 @@ package eu.darken.sdmse.main.ui.dashboard
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.darken.sdmse.analyzer.core.Analyzer
+import eu.darken.sdmse.analyzer.core.AnalyzerSettings
 import eu.darken.sdmse.common.navigation.routes.DeviceStorageRoute
 import eu.darken.sdmse.appcleaner.core.AppCleaner
 import eu.darken.sdmse.appcleaner.core.hasData
@@ -104,6 +105,7 @@ import eu.darken.sdmse.squeezer.core.tasks.SqueezerScanTask
 import eu.darken.sdmse.squeezer.core.tasks.SqueezerTask
 import eu.darken.sdmse.stats.core.Report
 import eu.darken.sdmse.stats.core.SpaceHistoryRepo
+import eu.darken.sdmse.stats.core.SpaceTracker
 import eu.darken.sdmse.stats.core.StatsRepo
 import eu.darken.sdmse.stats.core.StatsSettings
 import eu.darken.sdmse.stats.ui.AffectedFilesRoute
@@ -150,6 +152,7 @@ class DashboardViewModel @Inject constructor(
     internal val appCleaner: AppCleaner,
     internal val appControl: AppControl,
     internal val analyzer: Analyzer,
+    internal val analyzerSettings: AnalyzerSettings,
     debugCardProvider: DebugCardProvider,
     internal val deduplicator: Deduplicator,
     internal val squeezer: Squeezer,
@@ -168,6 +171,7 @@ class DashboardViewModel @Inject constructor(
     internal val statsSettings: StatsSettings,
     internal val curriculumVitae: CurriculumVitae,
     internal val spaceHistoryRepo: SpaceHistoryRepo,
+    internal val spaceTracker: SpaceTracker,
     deviceDetective: DeviceDetective,
 ) : ViewModel4(dispatcherProvider, TAG) {
 

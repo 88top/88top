@@ -43,7 +43,11 @@ import eu.darken.sdmse.setup.SetupRoute
 import eu.darken.sdmse.squeezer.core.Squeezer
 import eu.darken.sdmse.squeezer.core.tasks.SqueezerProcessTask
 import eu.darken.sdmse.squeezer.ui.SqueezerSetupRoute
+import eu.darken.sdmse.stats.core.LowStorage
+import eu.darken.sdmse.stats.core.SpaceTracker
 import eu.darken.sdmse.stats.core.db.SpaceSnapshotEntity
+import eu.darken.sdmse.stats.core.forecast.StorageForecaster
+import eu.darken.sdmse.stats.core.forecast.StorageTrendCalculator
 import eu.darken.sdmse.stats.ui.ReportsRoute
 import eu.darken.sdmse.systemcleaner.core.SystemCleaner
 import eu.darken.sdmse.systemcleaner.core.hasData
@@ -334,32 +338,50 @@ internal fun DashboardViewModel.buildAnalyzerItem(): Flow<AnalyzerDashboardCardI
     (analyzer.data as Flow<Analyzer.Data?>).onStart { emit(null) },
     analyzer.progress.onStart { emit(null) },
     intervalFlow(1.hours)
-        .flatMapLatest { spaceHistoryRepo.getAllHistory(Instant.now() - Duration.ofDays(7)) }
-        .onStart<List<SpaceSnapshotEntity>?> { emit(null) },
-) { data, progress, snapshots ->
+        .flatMapLatest { _ ->
+            // The forecast needs a LIVE reading: sampling is six-hourly, so the newest persisted
+            // row can be hours stale and a download that already crossed the floor would still
+            // read as filling. Re-read per history emission, otherwise a cleanup (which forces a
+            // snapshot, and so a re-emission) would be forecast against pre-cleanup free space.
+            spaceHistoryRepo.getAllHistory(Instant.now() - Duration.ofDays(7))
+                .mapLatest { AnalyzerTrendInput(snapshots = it, primaryStorage = spaceTracker.readPrimaryStorage()) }
+        }
+        .onStart<AnalyzerTrendInput?> { emit(null) },
+    analyzerSettings.lowStorageThresholdBytes.flow,
+) { data, progress, trend, customThreshold ->
+    val primary = trend?.primaryStorage
     AnalyzerDashboardCardItem(
         data = data,
         progress = progress,
-        combinedDelta = snapshots?.let { calculateCombinedDelta(it) },
-        isLoadingTrend = snapshots == null,
+        combinedDelta = trend?.let { calculateCombinedDelta(it.snapshots) },
+        forecast = if (trend != null && primary != null) {
+            StorageForecaster.forecast(
+                history = trend.snapshots.filter { it.storageId == primary.storageId },
+                current = primary,
+                lowStorageThresholdBytes = LowStorage.resolveThreshold(primary.spaceCapacity, customThreshold),
+            )
+        } else {
+            null
+        },
+        isLoadingTrend = trend == null,
         onViewDetails = {
             navTo(DeviceStorageRoute)
         },
     )
 }
 
+internal data class AnalyzerTrendInput(
+    val snapshots: List<SpaceSnapshotEntity>,
+    val primaryStorage: SpaceTracker.StorageSnapshot?,
+)
+
 internal fun calculateCombinedDelta(snapshots: List<SpaceSnapshotEntity>): Long? {
-    val trendGroups = snapshots
+    val totals = snapshots
         .groupBy { it.storageId }
         .values
-        .filter { it.size >= 2 }
-    if (trendGroups.isEmpty()) return null
-    return trendGroups.sumOf { group ->
-        val sorted = group.sortedBy { it.recordedAt }
-        val firstUsed = sorted.first().let { it.spaceCapacity - it.spaceFree }
-        val lastUsed = sorted.last().let { it.spaceCapacity - it.spaceFree }
-        lastUsed - firstUsed
-    }
+        .mapNotNull { StorageTrendCalculator.windowTotal(it) }
+    if (totals.isEmpty()) return null
+    return totals.sum()
 }
 
 internal fun DashboardViewModel.buildSetupCardItem(): Flow<SetupDashboardCardItem?> = setupManager.state

@@ -1,6 +1,7 @@
 package eu.darken.sdmse.main.ui.dashboard
 
 import eu.darken.sdmse.analyzer.core.Analyzer
+import eu.darken.sdmse.analyzer.core.AnalyzerSettings
 import eu.darken.sdmse.appcleaner.core.AppCleaner
 import eu.darken.sdmse.appcleaner.core.AppJunk
 import eu.darken.sdmse.appcleaner.core.tasks.AppCleanerScanTask
@@ -34,6 +35,7 @@ import eu.darken.sdmse.main.ui.dashboard.cards.StatsDashboardCardItem
 import eu.darken.sdmse.main.ui.dashboard.cards.SwiperDashboardCardItem
 import eu.darken.sdmse.main.ui.dashboard.cards.ToolDashboardCardItem
 import eu.darken.sdmse.stats.core.SpaceHistoryRepo
+import eu.darken.sdmse.stats.core.SpaceTracker
 import eu.darken.sdmse.stats.core.StatsRepo
 import eu.darken.sdmse.stats.core.StatsSettings
 import eu.darken.sdmse.stats.core.db.SpaceSnapshotEntity
@@ -125,6 +127,12 @@ internal class DashboardViewModelResilienceTest : BaseTest() {
             every { data } returns srcOr("analyzer", emptyFlow())
             every { progress } returns emptyFlow()
         }
+        // A relaxed mock's flow never emits, which would stall the Analyzer card's combine.
+        val analyzerSettings = mockk<AnalyzerSettings>(relaxed = true).apply {
+            every { lowStorageThresholdBytes } returns mockk(relaxed = true) {
+                every { flow } returns flowOf<Long?>(null)
+            }
+        }
         val schedulerManager = mockk<SchedulerManager>(relaxed = true).apply { every { state } returns emptyFlow() }
         val setupManager = mockk<SetupManager>(relaxed = true).apply { every { state } returns srcOr("setup", emptyFlow()) }
         val areaManager = mockk<DataAreaManager>(relaxed = true).apply { every { latestState } returns srcOr("dataArea", emptyFlow()) }
@@ -180,6 +188,7 @@ internal class DashboardViewModelResilienceTest : BaseTest() {
             appCleaner = appCleaner,
             appControl = appControl,
             analyzer = analyzer,
+            analyzerSettings = analyzerSettings,
             debugCardProvider = debugCardProvider,
             deduplicator = deduplicator,
             squeezer = squeezer,
@@ -198,6 +207,7 @@ internal class DashboardViewModelResilienceTest : BaseTest() {
             statsSettings = statsSettings,
             curriculumVitae = curriculumVitae,
             spaceHistoryRepo = spaceHistoryRepo,
+            spaceTracker = mockk<SpaceTracker>(relaxed = true),
             deviceDetective = mockk(relaxed = true),
         )
 
