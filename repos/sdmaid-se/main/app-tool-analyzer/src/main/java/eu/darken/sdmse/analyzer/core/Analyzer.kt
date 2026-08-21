@@ -32,6 +32,7 @@ import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
 import eu.darken.sdmse.common.debug.logging.asLog
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
+import eu.darken.sdmse.common.files.APath
 import eu.darken.sdmse.common.files.GatewaySwitch
 import eu.darken.sdmse.common.files.MediaStoreTool
 import eu.darken.sdmse.common.files.delete
@@ -55,17 +56,19 @@ import eu.darken.sdmse.setup.isComplete
 import eu.darken.sdmse.stats.core.SpaceTracker
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
@@ -95,13 +98,12 @@ class Analyzer @Inject constructor(
         progressPub.value = update(progressPub.value)
     }
 
-    private val storageDevices = MutableStateFlow(emptySet<DeviceStorage>())
-    private val storageCategories = MutableStateFlow(emptyMap<StorageId, Collection<ContentCategory>>())
-    val data: Flow<Data> = combine(
-        storageDevices,
-        storageCategories,
-    ) { storages, categories ->
-        val allGroups = categories
+    // Storages and categories share a single state holder: a delete publishes new category sizes, a new
+    // device free-space value and a recomputed system residual together. Two flows joined by `combine`
+    // would expose an intermediate frame carrying some of those and not the others.
+    private val coreState = MutableStateFlow(CoreState())
+    val data: Flow<Data> = coreState.map { core ->
+        val allGroups = core.categories
             .map { category ->
                 category.value
                     .map { it.groups }
@@ -113,8 +115,8 @@ class Analyzer @Inject constructor(
             .toMap()
 
         Data(
-            storages = storages,
-            categories = categories,
+            storages = core.storages,
+            categories = core.categories,
             groups = allGroups
         )
     }
@@ -141,7 +143,7 @@ class Analyzer @Inject constructor(
         // the devices cleared (scan start empties them) — either way the condition turns false.
         combine(
             storageSetupModule.state.map { it.isComplete }.distinctUntilChanged(),
-            storageDevices,
+            coreState.map { it.storages }.distinctUntilChanged(),
         ) { setupComplete, devices ->
             setupComplete && devices.any { it.setupIncomplete }
         }
@@ -188,13 +190,12 @@ class Analyzer @Inject constructor(
     private suspend fun scanStorageDevices(task: DeviceStorageScanTask): DeviceStorageScanTask.Result {
         log(TAG, VERBOSE) { "scanStorageDevices(): $task" }
 
-        storageDevices.value = emptySet()
-        storageCategories.value = emptyMap()
+        coreState.update { CoreState() }
 
         val scanner = deviceScanner.get()
         val storages = scanner.withProgress(this) { scan() }
 
-        storageDevices.value = storages
+        coreState.update { it.copy(storages = storages) }
         spaceTracker.recordSnapshot(storages.map {
             SpaceTracker.StorageSnapshot(
                 storageId = it.id.externalId.toString(),
@@ -212,7 +213,7 @@ class Analyzer @Inject constructor(
         // Inventory completeness is checked per-category inside StorageScanner so that media/system
         // scans still succeed when the app inventory is unavailable (e.g. Huawei TAF sandbox).
 
-        val target = storageDevices.value.singleOrNull { it.id == task.target }
+        val target = coreState.value.storages.singleOrNull { it.id == task.target }
             ?: throw IllegalStateException("Couldn't find ${task.target}")
 
         val scanner = storageScanner.get()
@@ -224,8 +225,12 @@ class Analyzer @Inject constructor(
         val stop = System.currentTimeMillis()
         log(TAG) { "scanStorageContents() took ${stop - start}ms" }
 
-        storageCategories.value = storageCategories.value.mutate {
-            this[target.id] = categories
+        coreState.update { state ->
+            state.copy(
+                categories = state.categories.mutate {
+                    this[target.id] = categories
+                },
+            )
         }
 
         return DeviceStorageScanTask.Result(itemCount = 0)
@@ -234,7 +239,7 @@ class Analyzer @Inject constructor(
     private suspend fun deleteContent(task: ContentDeleteTask): ContentDeleteTask.Result {
         log(TAG, VERBOSE) { "deleteContent(): $task" }
 
-        val oldCategory: ContentCategory = storageCategories.value[task.storageId]
+        val oldCategory: ContentCategory = coreState.value.categories[task.storageId]
             ?.singleOrNull { it.ownsGroup(task.groupId) }
             ?: throw IllegalStateException("Can't find category and group for ${task.groupId}")
         val oldGroup = oldCategory.groups.single { it.id == task.groupId }
@@ -268,20 +273,53 @@ class Analyzer @Inject constructor(
             )
         }
 
-        task.targets
-            .filterDistinctRoots()
-            .forEach { target ->
-                log(TAG) { "Deleting $target" }
-                updateProgressSecondary(target.userReadablePath)
-                target.delete(gatewaySwitch, recursive = true)
-                (target as? LocalPath)?.let { mediaStoreTool.notifyDeleted(it) }
+        // Track what actually made it to the filesystem: a failure or cancellation part way through must
+        // still publish the removals that already happened, otherwise the UI keeps listing deleted files
+        // with stale sizes until the next manual refresh.
+        val deletedTargets = mutableSetOf<APath>()
+        var freedSpace = 0L
+        try {
+            task.targets
+                .filterDistinctRoots()
+                .forEach { target ->
+                    log(TAG) { "Deleting $target" }
+                    updateProgressSecondary(target.userReadablePath)
+                    target.delete(gatewaySwitch, recursive = true)
+                    deletedTargets.add(target)
+                    (target as? LocalPath)?.let { mediaStoreTool.notifyDeleted(it) }
+                }
+        } finally {
+            // NonCancellable: applyDeletion() suspends on the authoritative free-space re-read, which
+            // would be skipped on the cancellation path. Costs a few binder calls before a cancelled
+            // delete reports completion.
+            if (deletedTargets.isNotEmpty()) withContext(NonCancellable) {
+                freedSpace = applyDeletion(task, oldCategory, oldGroup, oldPkg, deletedTargets)
+                mediaStoreTool.flush()
             }
+        }
 
+        return ContentDeleteTask.Result(
+            affectedSpace = freedSpace,
+            affectedPaths = task.targets,
+        )
+    }
+
+    /**
+     * Publishes the post-delete state for [deletedTargets] as one atomic update: shrunken content group,
+     * refreshed device free space and a recomputed system residual. Returns the freed space that stats reports.
+     */
+    private suspend fun applyDeletion(
+        task: ContentDeleteTask,
+        oldCategory: ContentCategory,
+        oldGroup: ContentGroup,
+        oldPkg: AppCategory.PkgStat?,
+        deletedTargets: Set<APath>,
+    ): Long {
         var freedSpace = 0L
         val newContents = oldGroup.contents
             .toFlatContent()
             .filter { item ->
-                val deleted = task.targets.any { it.isAncestorOf(item.path) || it.matches(item.path) }
+                val deleted = deletedTargets.any { it.isAncestorOf(item.path) || it.matches(item.path) }
                 if (deleted) freedSpace += item.itemSize ?: 0L
                 !deleted
             }
@@ -317,16 +355,80 @@ class Analyzer @Inject constructor(
             }
         }
 
-        storageCategories.value = storageCategories.value.mutate {
-            this[task.storageId] = this[task.storageId]!!.minus(oldCategory).plus(newCategory)
+        // The authoritative numbers: what the filesystem reports as capacity and free space now. Called
+        // plainly, not through withProgress(), so it doesn't disturb the delete's own progress.
+        val refreshed: DeviceStorage? = try {
+            deviceScanner.get().scan().firstOrNull { it.id == task.storageId }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            log(TAG, WARN) { "applyDeletion(): free-space re-read failed, using accounted delta: ${e.asLog()}" }
+            null
         }
 
-        mediaStoreTool.flush()
+        // Fallback uses the group-size delta, not the flat `freedSpace` sum, so the storage card moves by
+        // exactly what the category card moved by. The two differ for entries whose ContentItem.size is null
+        // but whose itemSize is not (symlinks and other non-file/dir types).
+        val groupSizeDelta = oldGroup.groupSize - newGroup.groupSize
 
-        return ContentDeleteTask.Result(
-            affectedSpace = freedSpace,
-            affectedPaths = task.targets,
-        )
+        coreState.update { state ->
+            val newStorage = state.storages.singleOrNull { it.id == task.storageId }?.let { oldStorage ->
+                when {
+                    // spaceUsed is capacity minus free, so both have to come from the same measurement.
+                    // DeviceStorageScanner can fall back from StorageStatsManager2 to the File API between
+                    // two scans, and those measure different things (whole disk vs data partition) - pairing
+                    // a refreshed free value with the cached capacity would move used space by gigabytes.
+                    // setupIncomplete stays as cached: it says whether the published categories may be
+                    // permission-limited, and a space re-read doesn't rebuild them. scanStorageDevices()
+                    // owns that transition.
+                    refreshed != null -> oldStorage.copy(
+                        spaceCapacity = refreshed.spaceCapacity,
+                        spaceFree = refreshed.spaceFree,
+                    )
+
+                    else -> {
+                        // Clamped against remaining capacity headroom, so the addition can neither overflow
+                        // Long nor push free space beyond the storage's capacity.
+                        val headroom = (oldStorage.spaceCapacity - oldStorage.spaceFree).coerceAtLeast(0L)
+                        oldStorage.copy(spaceFree = oldStorage.spaceFree + groupSizeDelta.coerceIn(0L, headroom))
+                    }
+                }
+            }
+
+            val updatedCategories = state.categories[task.storageId]!!.minus(oldCategory).plus(newCategory)
+
+            // SystemCategory.spaceUsedOverride is a scan-time residual (used bytes minus apps/media/other
+            // users), so it goes stale the moment the device's used bytes change.
+            val finalCategories = when {
+                newStorage == null -> updatedCategories
+                else -> updatedCategories.map { category ->
+                    if (category !is SystemCategory || category.spaceUsedOverride == null) return@map category
+                    category.copy(
+                        spaceUsedOverride = StorageScanner.computeResidual(
+                            spaceUsed = newStorage.spaceUsed,
+                            apps = updatedCategories.filterIsInstance<AppCategory>().sumOf { it.spaceUsed },
+                            media = updatedCategories.filterIsInstance<MediaCategory>().sumOf { it.spaceUsed },
+                            otherUsers = updatedCategories
+                                .filterIsInstance<OtherUsersCategory>()
+                                .sumOf { it.spaceUsed },
+                        ),
+                    )
+                }
+            }
+
+            state.copy(
+                storages = when {
+                    // A delete never adds or removes storages, it only refreshes the target's free space.
+                    newStorage == null -> state.storages
+                    else -> state.storages.map { if (it.id == newStorage.id) newStorage else it }.toSet()
+                },
+                categories = state.categories.mutate {
+                    this[task.storageId] = finalCategories
+                },
+            )
+        }
+
+        return freedSpace
     }
 
     private suspend fun deepScanApp(task: AppDeepScanTask): AppDeepScanTask.Result {
@@ -337,9 +439,9 @@ class Analyzer @Inject constructor(
             throw IncompleteSetupException(SetupModule.Type.INVENTORY)
         }
 
-        val targetStorage = storageDevices.value.singleOrNull { it.id == task.storageId }
+        val targetStorage = coreState.value.storages.singleOrNull { it.id == task.storageId }
             ?: throw IllegalStateException("Couldn't find ${task.storageId}")
-        val targetCategory = storageCategories.first()[targetStorage.id]!!.filterIsInstance<AppCategory>().single()
+        val targetCategory = coreState.value.categories[targetStorage.id]!!.filterIsInstance<AppCategory>().single()
         val targetApp = targetCategory.pkgStats[task.installId]!!
 
         val start = System.currentTimeMillis()
@@ -356,11 +458,15 @@ class Analyzer @Inject constructor(
             return AppDeepScanTask.Result(false)
         }
 
-        storageCategories.value = storageCategories.value.mutate {
-            this[targetStorage.id] = this[targetStorage.id]!!.map { category ->
-                if (category !is AppCategory) return@map category
-                category.copy(pkgStats = category.pkgStats.mutate { replace(task.installId, updatedApp) })
-            }
+        coreState.update { state ->
+            state.copy(
+                categories = state.categories.mutate {
+                    this[targetStorage.id] = this[targetStorage.id]!!.map { category ->
+                        if (category !is AppCategory) return@map category
+                        category.copy(pkgStats = category.pkgStats.mutate { replace(task.installId, updatedApp) })
+                    }
+                },
+            )
         }
 
         return AppDeepScanTask.Result(true)
@@ -369,9 +475,9 @@ class Analyzer @Inject constructor(
     private suspend fun deepScanSystem(task: SystemDeepScanTask): SystemDeepScanTask.Result {
         log(TAG, VERBOSE) { "deepScanSystem(): $task" }
 
-        val targetStorage = storageDevices.value.singleOrNull { it.id == task.storageId }
+        val targetStorage = coreState.value.storages.singleOrNull { it.id == task.storageId }
             ?: throw IllegalStateException("Couldn't find ${task.storageId}")
-        val existingCategory = storageCategories.first()[targetStorage.id]
+        val existingCategory = coreState.value.categories[targetStorage.id]
             ?.filterIsInstance<SystemCategory>()
             ?.singleOrNull()
             ?: throw IllegalStateException("No SystemCategory for ${task.storageId}")
@@ -395,15 +501,24 @@ class Analyzer @Inject constructor(
             return SystemDeepScanTask.Result(false)
         }
 
-        storageCategories.value = storageCategories.value.mutate {
-            this[targetStorage.id] = this[targetStorage.id]!!.map { category ->
-                if (category !is SystemCategory) return@map category
-                updatedCategory
-            }
+        coreState.update { state ->
+            state.copy(
+                categories = state.categories.mutate {
+                    this[targetStorage.id] = this[targetStorage.id]!!.map { category ->
+                        if (category !is SystemCategory) return@map category
+                        updatedCategory
+                    }
+                },
+            )
         }
 
         return SystemDeepScanTask.Result(true)
     }
+
+    internal data class CoreState(
+        val storages: Set<DeviceStorage> = emptySet(),
+        val categories: Map<StorageId, Collection<ContentCategory>> = emptyMap(),
+    )
 
     data class State(
         val data: Data,

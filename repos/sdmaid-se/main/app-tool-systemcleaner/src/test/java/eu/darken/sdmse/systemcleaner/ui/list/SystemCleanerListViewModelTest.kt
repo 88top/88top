@@ -5,11 +5,13 @@ import eu.darken.sdmse.common.files.local.LocalPath
 import eu.darken.sdmse.common.files.local.LocalPathLookup
 import eu.darken.sdmse.common.navigation.NavEvent
 import eu.darken.sdmse.common.progress.Progress
+import eu.darken.sdmse.main.core.SDMTool
 import eu.darken.sdmse.main.core.taskmanager.TaskSubmitter
 import eu.darken.sdmse.systemcleaner.core.FilterContent
 import eu.darken.sdmse.systemcleaner.core.SystemCleaner
 import eu.darken.sdmse.systemcleaner.core.filter.SystemCleanerFilter
 import eu.darken.sdmse.systemcleaner.core.tasks.SystemCleanerProcessingTask
+import eu.darken.sdmse.systemcleaner.core.tasks.SystemCleanerScanTask
 import eu.darken.sdmse.systemcleaner.ui.preview.previewFilterContent
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
@@ -18,9 +20,12 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -39,6 +44,26 @@ class SystemCleanerListViewModelTest : BaseTest() {
         val taskSubmitter: TaskSubmitter,
         val stateFlow: MutableStateFlow<SystemCleaner.State>,
         val progressFlow: MutableStateFlow<Progress.Data?>,
+        val taskStateFlow: MutableStateFlow<TaskSubmitter.State>,
+        /** Builds another ViewModel against the same mocks, i.e. a second entry into the screen. */
+        val newVm: () -> SystemCleanerListViewModel,
+    )
+
+    private fun managedTask(
+        id: String = "task-1",
+        complete: Boolean = false,
+        cancelled: Boolean = false,
+        error: Throwable? = null,
+        toolType: SDMTool.Type = SDMTool.Type.SYSTEMCLEANER,
+    ): TaskSubmitter.ManagedTask = TaskSubmitter.ManagedTask(
+        id = id,
+        toolType = toolType,
+        task = mockk(relaxed = true),
+        queuedAt = Instant.now(),
+        startedAt = Instant.now(),
+        cancelledAt = if (cancelled) Instant.now() else null,
+        completedAt = if (complete) Instant.now() else null,
+        error = error,
     )
 
     private class CollectedEvents<T>(
@@ -81,6 +106,7 @@ class SystemCleanerListViewModelTest : BaseTest() {
 
     private fun harness(
         filterContents: List<FilterContent>? = emptyList(),
+        tasks: Collection<TaskSubmitter.ManagedTask> = emptySet(),
     ): Harness {
         val data = filterContents?.let { SystemCleaner.Data(filterContents = it) }
         val stateFlow = MutableStateFlow(scState(data = data))
@@ -89,13 +115,25 @@ class SystemCleanerListViewModelTest : BaseTest() {
             every { this@apply.state } returns stateFlow
             every { this@apply.progress } returns progressFlow
         }
-        val taskSubmitter = mockk<TaskSubmitter>(relaxed = true)
-        val vm = SystemCleanerListViewModel(
-            dispatcherProvider = TestDispatcherProvider(),
-            systemCleaner = systemCleaner,
-            taskSubmitter = taskSubmitter,
-        )
-        return Harness(vm, systemCleaner, taskSubmitter, stateFlow, progressFlow)
+        // A real flow, not the relaxed mock's empty one: the entry logic waits on
+        // taskSubmitter.state.first { ... }, which against an empty flow dies with
+        // NoSuchElementException inside vmScope - silently, leaving the whole path untested.
+        val taskStateFlow = MutableStateFlow(TaskSubmitter.State(tasks = tasks))
+        val taskSubmitter = mockk<TaskSubmitter>(relaxed = true).apply {
+            every { this@apply.state } returns taskStateFlow
+            // Explicit "accepted": the entry loop only exits on a non-null result, so leaving this
+            // to the relaxed mock would make the loop's exit condition an implementation detail of
+            // MockK. Tests that need a decline re-stub this.
+            coEvery { submitIfToolIdle(any()) } returns mockk<SDMTool.Task.Result>(relaxed = true)
+        }
+        val newVm = {
+            SystemCleanerListViewModel(
+                dispatcherProvider = TestDispatcherProvider(),
+                systemCleaner = systemCleaner,
+                taskSubmitter = taskSubmitter,
+            )
+        }
+        return Harness(newVm(), systemCleaner, taskSubmitter, stateFlow, progressFlow, taskStateFlow, newVm)
     }
 
     private fun previewMatch(path: String, size: Long = 1024L): SystemCleanerFilter.Match.Deletion =
@@ -319,6 +357,248 @@ class SystemCleanerListViewModelTest : BaseTest() {
         val nav = collectNavEvents(h.vm)
 
         h.stateFlow.value = scState(data = null)
+        advanceUntilIdle()
+
+        nav.list shouldBe emptyList()
+        nav.cancel()
+    }
+
+    // ──────────────────────────── entry / cold scan ────────────────────────────
+
+    private fun CoroutineScope.collectErrors(
+        vm: SystemCleanerListViewModel,
+    ): CollectedEvents<Throwable> {
+        val list = mutableListOf<Throwable>()
+        val job = launch(start = CoroutineStart.UNDISPATCHED) {
+            vm.errorEvents.collect { list.add(it) }
+        }
+        return CollectedEvents(list, job)
+    }
+
+    @Test
+    fun `constructing the ViewModel does not push an error into errorEvents`() = runTest2 {
+        // Guards the harness itself: with a relaxed TaskSubmitter mock the entry logic's
+        // first { ... } dies on an empty flow and every entry test below would pass vacuously.
+        val h = harness(filterContents = null)
+        val errors = collectErrors(h.vm)
+        advanceUntilIdle()
+
+        errors.list shouldBe emptyList()
+        errors.cancel()
+    }
+
+    @Test
+    fun `cold entry without data submits exactly one scan`() = runTest2 {
+        val h = harness(filterContents = null)
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { h.taskSubmitter.submitIfToolIdle(SystemCleanerScanTask()) }
+        coVerify(exactly = 1) { h.taskSubmitter.submitIfToolIdle(any()) }
+        // The entry scan must go through the atomic API, never plain submit().
+        coVerify(exactly = 0) { h.taskSubmitter.submit(any()) }
+    }
+
+    @Test
+    fun `entry with data present does not scan`() = runTest2 {
+        val h = harness(listOf(previewFilterContent(identifier = "f", items = listOf(previewMatch("a")))))
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { h.taskSubmitter.submitIfToolIdle(any()) }
+    }
+
+    @Test
+    fun `entry during a task that completes with data does not scan`() = runTest2 {
+        val h = harness(filterContents = null, tasks = setOf(managedTask()))
+        advanceUntilIdle()
+        // Still waiting on the in-flight task, so nothing submitted yet.
+        coVerify(exactly = 0) { h.taskSubmitter.submitIfToolIdle(any()) }
+
+        val fc = previewFilterContent(identifier = "f", items = listOf(previewMatch("a")))
+        h.stateFlow.value = scState(data = SystemCleaner.Data(filterContents = listOf(fc)))
+        h.taskStateFlow.value = TaskSubmitter.State(tasks = setOf(managedTask(complete = true)))
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { h.taskSubmitter.submitIfToolIdle(any()) }
+    }
+
+    @Test
+    fun `entry during a task that completes without data scans`() = runTest2 {
+        // A task can complete normally without ever assigning data. Bailing out on it would strand
+        // the screen on the loading placeholder.
+        val h = harness(filterContents = null, tasks = setOf(managedTask()))
+        advanceUntilIdle()
+
+        h.taskStateFlow.value = TaskSubmitter.State(tasks = setOf(managedTask(complete = true)))
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { h.taskSubmitter.submitIfToolIdle(SystemCleanerScanTask()) }
+    }
+
+    @Test
+    fun `entry during a task that gets cancelled navigates up instead of scanning`() = runTest2 {
+        val h = harness(filterContents = null, tasks = setOf(managedTask()))
+        val nav = collectNavEvents(h.vm)
+        advanceUntilIdle()
+
+        h.taskStateFlow.value = TaskSubmitter.State(
+            tasks = setOf(managedTask(complete = true, cancelled = true)),
+        )
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { h.taskSubmitter.submitIfToolIdle(any()) }
+        nav.list shouldBe listOf(NavEvent.Up)
+        nav.cancel()
+    }
+
+    @Test
+    fun `entry during a task that fails navigates up instead of scanning`() = runTest2 {
+        val h = harness(filterContents = null, tasks = setOf(managedTask()))
+        val nav = collectNavEvents(h.vm)
+        advanceUntilIdle()
+
+        h.taskStateFlow.value = TaskSubmitter.State(
+            tasks = setOf(managedTask(complete = true, error = IllegalStateException("nope"))),
+        )
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { h.taskSubmitter.submitIfToolIdle(any()) }
+        nav.list shouldBe listOf(NavEvent.Up)
+        nav.cancel()
+    }
+
+    @Test
+    fun `two entries racing the same registration produce exactly one scan`() = runTest2 {
+        // Mirrors TaskManager.submitIfToolIdle: registration only happens while the tool has no
+        // incomplete task, and both callers get here before either registered. A ViewModel that
+        // used plain submit() would produce two full scans, the second wiping the first's results.
+        val h = harness(filterContents = null)
+        val registered = mutableListOf<Any>()
+        coEvery { h.taskSubmitter.submitIfToolIdle(any()) } coAnswers {
+            if (registered.isEmpty()) {
+                registered.add(firstArg())
+                mockk<SDMTool.Task.Result>(relaxed = true)
+            } else {
+                // Declined, because the winner's task is in flight by the time we get here.
+                h.taskStateFlow.value = TaskSubmitter.State(tasks = setOf(managedTask()))
+                null
+            }
+        }
+
+        h.newVm()
+        h.newVm()
+        advanceUntilIdle()
+
+        registered.size shouldBe 1
+        coVerify(exactly = 0) { h.taskSubmitter.submit(any()) }
+    }
+
+    @Test
+    fun `an entry scan that fails surfaces the error and shows the empty state`() = runTest2 {
+        val h = harness(filterContents = null)
+        val boom = IllegalStateException("scan blew up")
+        coEvery { h.taskSubmitter.submitIfToolIdle(any()) } throws boom
+
+        val vm = h.newVm()
+        val errors = collectErrors(vm)
+        val nav = collectNavEvents(vm)
+        val stateJob = launch(start = CoroutineStart.UNDISPATCHED) { vm.state.collect { } }
+        advanceUntilIdle()
+
+        errors.list shouldBe listOf(boom)
+        // navUp would dispose this screen's host before it can render the error dialog, so the
+        // user would land on the Dashboard with no indication that anything went wrong.
+        nav.list shouldBe emptyList()
+        // Nothing is going to deliver data anymore: show the empty state, not a forever placeholder.
+        vm.state.value.rows shouldBe emptyList()
+
+        stateJob.cancel()
+        errors.cancel()
+        nav.cancel()
+    }
+
+    @Test
+    fun `an entry scan that is cancelled navigates up`() = runTest2 {
+        val h = harness(filterContents = null)
+        coEvery { h.taskSubmitter.submitIfToolIdle(any()) } throws CancellationException("user cancelled")
+
+        val vm = h.newVm()
+        val nav = collectNavEvents(vm)
+        val errors = collectErrors(vm)
+        advanceUntilIdle()
+
+        nav.list shouldBe listOf(NavEvent.Up)
+        errors.list shouldBe emptyList()
+        nav.cancel()
+        errors.cancel()
+    }
+
+    @Test
+    fun `ViewModel teardown during the entry scan does not navigate up`() = runTest2 {
+        val h = harness(filterContents = null)
+        coEvery { h.taskSubmitter.submitIfToolIdle(any()) } coAnswers {
+            // What teardown looks like from inside the submit: our own job is cancelled. That must
+            // rethrow instead of being read as "the user cancelled the scan" and navigating.
+            currentCoroutineContext().cancel()
+            throw CancellationException("ViewModel cleared")
+        }
+
+        val vm = h.newVm()
+        val nav = collectNavEvents(vm)
+        val stateJob = launch(start = CoroutineStart.UNDISPATCHED) { vm.state.collect { } }
+        advanceUntilIdle()
+
+        nav.list shouldBe emptyList()
+        // Teardown is not a scan failure, so no empty state is faked either.
+        vm.state.value.rows shouldBe null
+
+        stateJob.cancel()
+        nav.cancel()
+    }
+
+    @Test
+    fun `a declined entry submit is retried after the competing task completes without data`() = runTest2 {
+        val h = harness(filterContents = null)
+        val submitted = mutableListOf<Any>()
+        coEvery { h.taskSubmitter.submitIfToolIdle(any()) } coAnswers {
+            submitted.add(firstArg())
+            if (submitted.size == 1) {
+                // Declined: a competing task registered inside the race window and is now in flight.
+                h.taskStateFlow.value = TaskSubmitter.State(tasks = setOf(managedTask(id = "competing")))
+                null
+            } else {
+                mockk<SDMTool.Task.Result>(relaxed = true)
+            }
+        }
+
+        h.newVm()
+        advanceUntilIdle()
+        submitted.size shouldBe 1
+
+        // The competing task completes normally but never assigns data. Treating the decline as
+        // "someone else will deliver" would leave the screen loading forever.
+        h.taskStateFlow.value = TaskSubmitter.State(
+            tasks = setOf(managedTask(id = "competing", complete = true)),
+        )
+        advanceUntilIdle()
+
+        submitted shouldBe listOf(SystemCleanerScanTask(), SystemCleanerScanTask())
+    }
+
+    @Test
+    fun `a cold scan that finds nothing does not navigate up`() = runTest2 {
+        val h = harness(filterContents = null)
+        val nav = collectNavEvents(h.vm)
+        advanceUntilIdle()
+
+        // The scan lands its (empty) result...
+        h.stateFlow.value = scState(data = SystemCleaner.Data(filterContents = emptyList()))
+        advanceUntilIdle()
+        // ...and a progress tick re-emits the same Data through the tool's combine. Without the
+        // dedupe that second identical emission would get past drop(1) and navigate away.
+        h.stateFlow.value = scState(
+            data = SystemCleaner.Data(filterContents = emptyList()),
+            progress = Progress.Data(extra = "tick"),
+        )
         advanceUntilIdle()
 
         nav.list shouldBe emptyList()

@@ -12,7 +12,7 @@
       "remote_sha": "3850e2f070bb3c1227b78dcd1e8a34a89a9e9906"
     },
     "main": {
-      "remote_sha": "a86040fb0cb08cf5fbe825cdd88590e2d432a1e9"
+      "remote_sha": "b051e22e4ac4b5b21a6fb3066e71e203aad98180"
     }
   },
   "timeflysoon/Actions-FriendlyWrt": {
@@ -45,7 +45,7 @@
       "remote_sha": "3531e31bb1fe99321083b46e733ccab3ea8f38d7"
     },
     "main": {
-      "remote_sha": "d79b2647d7c8e5bff9f0150555725df5f282969d"
+      "remote_sha": "ac5c1eff632c0ccbda87a62a8edd3b4b82e572b6"
     },
     "revert-26-main": {
       "remote_sha": "14634eaad968a4ed885e97936a870193027845ae"
@@ -137,7 +137,7 @@
   },
   "timeflysoon/MikroTikPatch": {
     "main": {
-      "remote_sha": "74a6a9c8dd8735c51218f2f563ec273cf3d8baca"
+      "remote_sha": "fc1d950da626f58890722de5416b7181d2cc8b58"
     }
   },
   "timeflysoon/MusicFree": {
@@ -247,7 +247,7 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "7ad21f9c23f7a764e09ef952b742136ebcd976bd"
+      "remote_sha": "5747a36babdf27bb05505b8f53abfce8957e0a18"
     }
   },
   "timeflysoon/commonscript": {
@@ -287,7 +287,7 @@
   },
   "timeflysoon/gopeed": {
     "main": {
-      "remote_sha": "99924296ef2f48633703adce44027826ca453d8a"
+      "remote_sha": "cfdf87c3b8aad398290fac0f8989c1e4f8e4b60d"
     }
   },
   "timeflysoon/img-installer": {
@@ -347,7 +347,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "485a68cf705543a87dfcd82ef2656afbd3bf4c13"
+      "remote_sha": "463d0b6146d462379f10b8d079e8fae4c5094dc5"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -368,13 +368,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "8d7ab039b313617c66969fa15c1490f2646e6650"
+      "remote_sha": "3808e963dc55b6266de2759cc54d6c320e24f1e0"
     },
     "release": {
-      "remote_sha": "1a873849714eceb6d72d7f8970136f1ce9b0f610"
+      "remote_sha": "1cea4eb0bfe77ba209e8b90d1c16a894e0a9e1b3"
     },
     "sing": {
-      "remote_sha": "3a81713d4e51ece9b64703663ad2ceca28f0e946"
+      "remote_sha": "25645c0ab3990e1b47aeeb0d1a0b10ec7d84911d"
     }
   },
   "timeflysoon/nanopi-openwrt": {
@@ -432,7 +432,7 @@
       "remote_sha": "d1ffe2b87a9c57b53088ab9aee1f4f679096b640"
     },
     "main": {
-      "remote_sha": "de732ada3f17a2e594fa659da799fe49d758a2e0"
+      "remote_sha": "68a82b67f0443588d4e20e1eeb5b85b53e5749ba"
     },
     "translations-deadend": {
       "remote_sha": "e483486dff5deef147fed8605b5dfaa1010649f6"
@@ -440,7 +440,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "428e27f1d6dd8d3f6951f6043d36f9bed7a97e97"
+      "remote_sha": "98ad7794e0e10f40a7906129979514ddb35c2345"
     }
   },
   "timeflysoon/store": {
@@ -477,10 +477,10 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "8d7ab039b313617c66969fa15c1490f2646e6650"
+      "remote_sha": "3808e963dc55b6266de2759cc54d6c320e24f1e0"
     },
     "release": {
-      "remote_sha": "1a873849714eceb6d72d7f8970136f1ce9b0f610"
+      "remote_sha": "1cea4eb0bfe77ba209e8b90d1c16a894e0a9e1b3"
     }
   },
   "timeflysoon/turboacc": {
@@ -490,7 +490,7 @@
   },
   "timeflysoon/v2rayN": {
     "master": {
-      "remote_sha": "14e27f3d23e608f7b8e8048104c543d9d8f5b744"
+      "remote_sha": "ebb4bd5daa45478e337a68f0be768fb7045520dc"
     },
     "v7_16": {
       "remote_sha": "654d7d83d09d1683c60501c9fa853a19c3dd9d6b"
@@ -498,7 +498,7 @@
   },
   "timeflysoon/v2rayNG": {
     "master": {
-      "remote_sha": "48285e13f31b3b6f930f2855eea68463939de3b4"
+      "remote_sha": "b77f4ca5683284843bdbcf688fbc304c665f3c72"
     },
     "v1_10_32": {
       "remote_sha": "bd6b67cbfc71caa7ed94d2c64e8ac7756af61276"
@@ -506,7 +506,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "c8a3013bb294912bfb9e886f5d118b67c1b957b5"
+      "remote_sha": "b38175c4f9ff02d6cb61ab276582b0e037669b00"
     }
   },
   "timeflysoon/weasel": {

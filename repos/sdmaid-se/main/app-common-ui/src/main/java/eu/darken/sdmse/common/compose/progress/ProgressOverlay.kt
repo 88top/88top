@@ -11,12 +11,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.twotone.Android
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
@@ -60,6 +64,12 @@ private const val RING_SUB_STROKE_FACTOR = 0.024f
 // TextUnit.Unspecified and for em values).
 private val HERO_HEIGHT_FALLBACK = 52.dp
 
+// Must stay below the height of two bodySmall lines, otherwise the extra slot outgrows the two-line
+// reservation it sits in and drives the block height itself, so the vertically centered column jumps
+// when a payload appears. bodySmall's lineHeight is 16sp, so two lines are ~32dp at fontScale 1.0 and
+// ~27dp at the 0.85 minimum.
+private val PROGRESS_EXTRA_ICON_SIZE = 20.dp
+
 /** Which count supplies the hero number: sub-progress when it is determinate, else the overall count. */
 internal fun heroCount(count: Progress.Count, subCount: Progress.Count?): Progress.Count =
     if (subCount.determinateFraction() != null) subCount!! else count
@@ -76,6 +86,7 @@ internal fun heroCount(count: Progress.Count, subCount: Progress.Count?): Progre
 fun ProgressOverlay(
     data: Progress.Data?,
     modifier: Modifier = Modifier,
+    extraSlot: (@Composable (extra: Any, modifier: Modifier) -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     // Fade the content out as the overlay fades in (over the same window) instead of snapping it to
@@ -104,7 +115,7 @@ fun ProgressOverlay(
             exit = ExitTransition.None,
         ) {
             val current = data ?: Progress.Data()
-            ProgressOverlayPanel(data = current)
+            ProgressOverlayPanel(data = current, extraSlot = extraSlot)
         }
     }
 }
@@ -113,6 +124,7 @@ fun ProgressOverlay(
 private fun ProgressOverlayPanel(
     data: Progress.Data,
     modifier: Modifier = Modifier,
+    extraSlot: (@Composable (extra: Any, modifier: Modifier) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val primary = data.primary.get(context)
@@ -201,16 +213,43 @@ private fun ProgressOverlayPanel(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = if (countText.isNullOrEmpty()) 0.dp else 12.dp),
                 )
-                Text(
-                    text = secondary,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    minLines = 2,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
+                // Height reservation and content are separated on purpose. The reservation is a glyph-free
+                // two-line Text in the same style, so the block's height is constant (no re-centering jump,
+                // same rationale as the note above) and exact at any density or fontScale without a
+                // hand-computed dp value. The real row is centered inside it, so the icon lines up with the
+                // label whether the label renders on one line or wraps to two.
+                Box(
                     modifier = Modifier.padding(top = 6.dp),
-                )
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "",
+                        style = MaterialTheme.typography.bodySmall,
+                        minLines = 2,
+                        maxLines = 2,
+                        modifier = Modifier.clearAndSetSemantics {},
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        val extra = data.extra
+                        if (extraSlot != null && extra != null) {
+                            extraSlot(
+                                extra,
+                                Modifier
+                                    .padding(end = 6.dp)
+                                    .size(PROGRESS_EXTRA_ICON_SIZE),
+                            )
+                        }
+                        Text(
+                            text = secondary,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                    }
+                }
             }
         }
     }
@@ -287,6 +326,56 @@ private fun ProgressOverlayCounterPreview() {
             modifier = Modifier.fillMaxSize(),
         ) {}
     }
+}
+
+private val previewExtraSlot: @Composable (extra: Any, modifier: Modifier) -> Unit = { _, modifier ->
+    Icon(
+        imageVector = Icons.TwoTone.Android,
+        contentDescription = null,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun ProgressOverlayExtraSample(appName: String) {
+    PreviewWrapper {
+        ProgressOverlay(
+            data = Progress.Data(
+                primary = "Scanning apps".toCaString(),
+                secondary = appName.toCaString(),
+                count = Progress.Count.Percent(42, 100),
+                extra = "preview-payload",
+            ),
+            modifier = Modifier.fillMaxSize(),
+            extraSlot = previewExtraSlot,
+        ) {}
+    }
+}
+
+@Preview2
+@Composable
+private fun ProgressOverlayExtraPreview() {
+    ProgressOverlayExtraSample(appName = "SD Maid")
+}
+
+@Preview2
+@Composable
+private fun ProgressOverlayExtraLongLabelPreview() {
+    ProgressOverlayExtraSample(
+        appName = "Some Extremely Long Application Name That Keeps Going And Going Until It Ellipsizes",
+    )
+}
+
+@Preview(showBackground = true, fontScale = 0.85f)
+@Composable
+private fun ProgressOverlayExtraSmallFontPreview() {
+    ProgressOverlayExtraSample(appName = "SD Maid")
+}
+
+@Preview(showBackground = true, fontScale = 1.3f)
+@Composable
+private fun ProgressOverlayExtraLargeFontPreview() {
+    ProgressOverlayExtraSample(appName = "SD Maid")
 }
 
 @Preview(showBackground = true, heightDp = 200)

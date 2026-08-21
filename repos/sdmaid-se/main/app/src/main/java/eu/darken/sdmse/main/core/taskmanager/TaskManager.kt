@@ -220,6 +220,26 @@ class TaskManager @Inject constructor(
 
     override suspend fun submit(task: SDMTool.Task, notifyOnFinish: Boolean): SDMTool.Task.Result {
         log(TAG, INFO) { "submit(): $task (notifyOnFinish=$notifyOnFinish)" }
+        return submitInternal(task, notifyOnFinish, declineIfToolBusy = false)!!
+    }
+
+    override suspend fun submitIfToolIdle(task: SDMTool.Task, notifyOnFinish: Boolean): SDMTool.Task.Result? {
+        log(TAG, INFO) { "submitIfToolIdle(): $task (notifyOnFinish=$notifyOnFinish)" }
+        return submitInternal(task, notifyOnFinish, declineIfToolBusy = true)
+    }
+
+    /**
+     * Shared submit implementation. With [declineIfToolBusy] the "does this tool already have an
+     * incomplete task?" check and the registration happen inside a single [updateTasks] block, i.e.
+     * under [managerLock], so two concurrent callers can't both observe an idle tool and both
+     * register a task. Returns null when the submission was declined, which cannot happen while
+     * [declineIfToolBusy] is false.
+     */
+    private suspend fun submitInternal(
+        task: SDMTool.Task,
+        notifyOnFinish: Boolean,
+        declineIfToolBusy: Boolean,
+    ): SDMTool.Task.Result? {
         val taskId = rngString
 
         // The task's outcome is signalled through this deferred, NOT through the task map: a failing
@@ -289,12 +309,70 @@ class TaskManager @Inject constructor(
 
         job.invokeOnCompletion { log(TAG, VERBOSE) { "Task completion: ${taskEntries.value[taskId]}" } }
         // Safety net for a LAZY job that is cancelled before its body (and with it the finally above)
-        // ever ran — nothing else would ever complete the deferred.
+        // ever ran — nothing else would ever complete the deferred, and nothing would run the entry's
+        // bookkeeping either. A stranded entry is not merely stale: completedAt stays null forever, so
+        // isComplete never turns true and anything waiting for the tool to fall idle waits forever.
         job.invokeOnCompletion { cause ->
             if (!outcome.isCompleted) {
                 outcome.complete(Result.failure(cause ?: IllegalStateException("Task job completed without outcome")))
             }
+            // Cheap pre-check only; the authoritative one runs under managerLock below. A missing
+            // entry means cancellation beat registration, which leaves nothing to clean up.
+            val pending = taskEntries.value[taskId]
+            if (pending == null || pending.isComplete) return@invokeOnCompletion
+            // updateTasks() is suspend and takes managerLock, so it can't run in this handler.
+            appScope.launch {
+                try {
+                    updateTasks {
+                        // The normal finally may have completed the entry while we waited for the lock.
+                        val entry = this[taskId] ?: return@updateTasks
+                        if (entry.isComplete) return@updateTasks
+                        runCatching {
+                            log(TAG, WARN) { "Completing entry whose body never ran: ${task.type}-$taskId" }
+                        }
+                        // Progress is tool-wide, not per-task, and this cleanup runs asynchronously
+                        // (updateTasks is suspend), so a newer task for the same tool may have taken
+                        // over the progress in the meantime — clearing it would drop the dashboard's
+                        // running state and Cancel action for work that is still going. Registration
+                        // takes managerLock too, so any such task is visible here. The rest of the
+                        // cleanup below is entry-specific and always safe to run.
+                        val hasOtherIncompleteTask = values.any {
+                            it.id != taskId &&
+                                    it.toolType == entry.toolType &&
+                                    !it.isComplete
+                        }
+                        if (!hasOtherIncompleteTask) {
+                            // Throwable, not Exception: an Error from a tool's progress reset must
+                            // not skip the resource lock release or the completion publish below.
+                            try {
+                                entry.tool.updateProgress { null }
+                            } catch (e: Throwable) {
+                                runCatching {
+                                    log(TAG, WARN) { "Failed to reset progress for ${task.type}-$taskId: ${e.asLog()}" }
+                                }
+                            }
+                        }
+                        try {
+                            entry.resourceLock?.close()
+                        } catch (e: Throwable) {
+                            runCatching {
+                                log(TAG, WARN) { "Failed to release resource lock for ${task.type}-$taskId: ${e.asLog()}" }
+                            }
+                        }
+                        this[taskId] = entry.copy(
+                            completedAt = Instant.now(),
+                            error = cause,
+                        )
+                    }
+                } catch (e: Throwable) {
+                    runCatching {
+                        log(TAG, ERROR) { "Safety-net bookkeeping failed for ${task.type}-$taskId: ${e.asLog()}" }
+                    }
+                }
+            }
         }
+
+        var declined = false
 
         withContext(NonCancellable) {
             // Any task causes the taskmanager to stay "alive" and with it any depending resources
@@ -305,6 +383,12 @@ class TaskManager @Inject constructor(
             sharedResource.addChild(tool.sharedResource)
 
             updateTasks {
+                if (declineIfToolBusy && values.any { it.toolType == task.type && !it.isComplete }) {
+                    declined = true
+                    log(TAG, INFO) { "submit(): Declined, ${task.type} already has an incomplete task" }
+                    return@updateTasks
+                }
+
                 val entry = TaskEntry(
                     id = taskId,
                     task = task,
@@ -318,7 +402,17 @@ class TaskManager @Inject constructor(
 
                 log(TAG) { "submit(): Queued: $entry" }
             }
+
+            if (declined) {
+                // The job is LAZY and was never registered, so nothing would ever start it.
+                // Cancelling it completes the outcome deferred, and the safety net above no-ops on
+                // the missing entry; the keep-alive taken for it has to go back here.
+                job.cancel()
+                runCatching { keepAlive.close() }
+            }
         }
+
+        if (declined) return null
 
         job.join()
 

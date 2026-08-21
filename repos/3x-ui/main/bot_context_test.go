@@ -15,7 +15,7 @@ import (
 
 const (
 	botContextPath = ".github/claude/repo-context.md"
-	botRubricPath  = ".github/claude/review-rubric.md"
+	reviewPath     = "REVIEW.md"
 	ciWorkflowPath = ".github/workflows/ci.yml"
 )
 
@@ -88,7 +88,8 @@ func TestBotContextNamesRealCIJobs(t *testing.T) {
 }
 
 func TestBotContextNamesRealPaths(t *testing.T) {
-	doc := readRepoFile(t, botContextPath) + readRepoFile(t, botRubricPath)
+	// REVIEW.md briefs the review job the way repo-context.md briefs the
+	// issue bot, so both get their paths pinned.
 	// internal/web/dist and frontend/node_modules are build output: absent from a
 	// fresh clone, created by `make dist-stub` and `npm ci`.
 	generated := map[string]bool{
@@ -97,21 +98,25 @@ func TestBotContextNamesRealPaths(t *testing.T) {
 		"frontend/src/generated/": true,
 	}
 	seen := map[string]bool{}
-	for _, m := range regexp.MustCompile("`([^`]+)`").FindAllStringSubmatch(doc, -1) {
-		p := m[1]
-		if !regexp.MustCompile(`^(internal|frontend|docs|tools|\.github)/`).MatchString(p) ||
-			strings.ContainsAny(p, "*{ ") || generated[p] || seen[p] {
-			continue
-		}
-		seen[p] = true
-		t.Run(p, func(t *testing.T) {
-			if _, err := os.Stat(strings.TrimSuffix(p, "/")); err != nil {
-				t.Errorf("%s names %q, which does not exist; the bot prompts trust this file", botContextPath, p)
+	counts := map[string]int{}
+	for _, src := range []string{botContextPath, reviewPath} {
+		for _, m := range regexp.MustCompile("`([^`]+)`").FindAllStringSubmatch(readRepoFile(t, src), -1) {
+			p := m[1]
+			if !regexp.MustCompile(`^(internal|frontend|docs|tools|\.github)/`).MatchString(p) ||
+				strings.ContainsAny(p, "*{ ") || generated[p] || seen[p] {
+				continue
 			}
-		})
+			seen[p] = true
+			counts[src]++
+			t.Run(p, func(t *testing.T) {
+				if _, err := os.Stat(strings.TrimSuffix(p, "/")); err != nil {
+					t.Errorf("%s names %q, which does not exist; the bot prompts trust this file", src, p)
+				}
+			})
+		}
 	}
-	if len(seen) < 20 {
-		t.Errorf("expected the bot context to name at least 20 repository paths, found %d - has the file been gutted?", len(seen))
+	if counts[botContextPath] < 20 {
+		t.Errorf("expected the bot context to name at least 20 repository paths, found %d - has the file been gutted?", counts[botContextPath])
 	}
 }
 
@@ -146,5 +151,48 @@ func TestBotContextSkipGatesExist(t *testing.T) {
 			}
 			t.Errorf("%s lists %s as a test skip gate, but no .go file under internal/ reads it", botContextPath, g[1])
 		})
+	}
+}
+
+// REVIEW.md tells the reviewer which CI job proves what, and which skip gates
+// mean a green run proved nothing. Both go stale silently on a rename.
+func TestReviewNamesRealCIJobsAndGates(t *testing.T) {
+	doc := readRepoFile(t, reviewPath)
+	ci := readRepoFile(t, ciWorkflowPath)
+	// Hyphenated only: a single-word job name is indistinguishable from prose.
+	jobs := regexp.MustCompile("`([a-z0-9]+(?:-[a-z0-9]+)+)`").FindAllStringSubmatch(doc, -1)
+	if len(jobs) < 2 {
+		t.Fatalf("expected %s to name at least 2 CI jobs in backticks, found %d", reviewPath, len(jobs))
+	}
+	for _, j := range jobs {
+		t.Run(j[1], func(t *testing.T) {
+			if !strings.Contains(ci, "\n  "+j[1]+":\n") {
+				t.Errorf("%s names a CI job %q that %s does not define", reviewPath, j[1], ciWorkflowPath)
+			}
+		})
+	}
+	for _, g := range regexp.MustCompile("`((?:XUI|XRAY)_[A-Z0-9_]+)`").FindAllStringSubmatch(doc, -1) {
+		t.Run(g[1], func(t *testing.T) {
+			if strings.Contains(ci, g[1]) {
+				t.Errorf("%s claims %s is never set in CI, but %s sets it", reviewPath, g[1], ciWorkflowPath)
+			}
+		})
+	}
+}
+
+// The i18n rule is the one REVIEW.md states as a number, so it is the one that
+// goes wrong silently when a locale is added.
+func TestReviewLocaleFileCount(t *testing.T) {
+	doc := readRepoFile(t, reviewPath)
+	m := regexp.MustCompile(`(\d+) locale files`).FindStringSubmatch(doc)
+	if m == nil {
+		t.Fatalf("%s no longer states the i18n rule as \"N locale files\"", reviewPath)
+	}
+	files, err := filepath.Glob("internal/web/translation/*.json")
+	if err != nil {
+		t.Fatalf("glob locales: %v", err)
+	}
+	if got := len(files); m[1] != itoa(got) {
+		t.Errorf("%s tells the reviewer to expect %s locale files, internal/web/translation/ holds %d", reviewPath, m[1], got)
 	}
 }
