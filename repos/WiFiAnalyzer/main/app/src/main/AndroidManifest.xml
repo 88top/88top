@@ -40,10 +40,6 @@
         android:supportsRtl="true"
         android:theme="@style/ThemeSplash">
 
-        <meta-data
-            android:name="android.max_aspect"
-            android:value="2.1" />
-
         <activity
             android:name=".MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

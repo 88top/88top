@@ -69,6 +69,37 @@ data class SAFDocFile(
         }
     }
 
+    /**
+     * Like [name], but a failing query raises instead of reading as "this document has no name".
+     *
+     * Only for checking a name we asked for: a `DocumentsProvider` may hand back a document under a
+     * different display name, and a query nobody answered must not pass as "the provider supplies no
+     * name" - that would let a mangled name through as if it were the one we requested.
+     *
+     * [queryForString] can't carry that distinction, it answers null for every one of those cases.
+     * So the provider is addressed through a client like in [existsStrict] - no client means nobody
+     * to ask - and null is returned only for a row whose `COLUMN_DISPLAY_NAME` really is null.
+     */
+    @SuppressLint("Recycle")
+    fun readDisplayNameStrict(): String? {
+        val client = resolver.acquireUnstableContentProviderClient(uri)
+            ?: throw IOException("provider unavailable for $uri")
+
+        return try {
+            client
+                .query(uri, arrayOf(DocumentsContract.Document.COLUMN_DISPLAY_NAME), null, null, null)
+                .useQuietly { c ->
+                    if (c == null) throw IOException("No cursor for $uri")
+                    if (!c.moveToFirst()) throw IOException("No row for $uri")
+                    if (c.isNull(0)) null else c.getString(0)
+                }
+        } catch (e: RemoteException) {
+            throw IOException("readDisplayNameStrict() failed for $uri", e)
+        } finally {
+            client.close()
+        }
+    }
+
     private val mimeType: String? by lazy { queryForString(DocumentsContract.Document.COLUMN_MIME_TYPE) }
 
     val isFile: Boolean
@@ -173,6 +204,33 @@ data class SAFDocFile(
         requireNotNull(foundUris) { "Unable to list files for $uri" }
 
         return foundUris.map { SAFDocFile(context, resolver, it) }
+    }
+
+    /**
+     * The display names of this document's children, from a single child listing.
+     *
+     * For picking a name that is still free: [findFile] passes a SQL selection that providers like
+     * `ExternalStorageProvider` ignore, so probing N candidates would run N full directory listings,
+     * and a name two children share reads as "not found" there. Rows without a display name are
+     * skipped. Query failures propagate: "we couldn't ask" must not read as "the directory is empty".
+     */
+    @SuppressLint("Recycle")
+    fun listChildDisplayNames(): Set<String> {
+        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(uri, DocumentsContract.getDocumentId(uri))
+
+        val names = resolver.query(
+            childrenUri,
+            arrayOf(DocumentsContract.Document.COLUMN_DISPLAY_NAME),
+            null,
+            null,
+            null
+        )?.useQuietly { cursor ->
+            cursor.asSequence().mapNotNull { it.getString(0) }.toSet()
+        }
+
+        requireNotNull(names) { "Unable to list child names for $uri" }
+
+        return names
     }
 
     /**

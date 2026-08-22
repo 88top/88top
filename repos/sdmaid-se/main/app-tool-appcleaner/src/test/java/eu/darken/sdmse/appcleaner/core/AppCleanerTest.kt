@@ -1,11 +1,13 @@
 package eu.darken.sdmse.appcleaner.core
 
 import eu.darken.sdmse.appcleaner.core.forensics.ExpendablesFilter
+import eu.darken.sdmse.appcleaner.core.forensics.filter.DefaultCachesPublicFilter
 import eu.darken.sdmse.appcleaner.core.scanner.AppScanner
 import eu.darken.sdmse.appcleaner.core.scanner.InaccessibleCache
 import eu.darken.sdmse.appcleaner.core.tasks.AppCleanerProcessingTask
 import eu.darken.sdmse.appcleaner.core.tasks.AppCleanerScanTask
 import eu.darken.sdmse.appcleaner.ui.preview.previewAppJunk
+import eu.darken.sdmse.appcleaner.ui.preview.previewInaccessibleCache
 import eu.darken.sdmse.automation.core.errors.InvalidSystemStateException
 import eu.darken.sdmse.automation.core.errors.NoSettingsWindowException
 import eu.darken.sdmse.appcleaner.ui.preview.previewExpendables
@@ -43,6 +45,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -467,7 +470,7 @@ class AppCleanerTest : BaseTest() {
             every { progress } returns MutableStateFlow<Progress.Data?>(null)
             every { updateProgress(any()) } just Runs
             coEvery {
-                deleteInaccessible(any(), any(), any(), any())
+                deleteInaccessible(any(), any(), any(), any(), any())
             } returns InaccessibleDeleter.InaccDelResult(succesful = emptySet(), failed = emptyMap())
         }
         // Replace the cleaner's deleter provider by rebuilding from scratch with the stubbed
@@ -489,7 +492,7 @@ class AppCleanerTest : BaseTest() {
             every { progress } returns MutableStateFlow<Progress.Data?>(null)
             every { updateProgress(any()) } just Runs
             coEvery {
-                deleteInaccessible(any(), any(), any(), any())
+                deleteInaccessible(any(), any(), any(), any(), any())
             } returns InaccessibleDeleter.InaccDelResult(succesful = emptySet(), failed = emptyMap())
         }
         val rebuilt = rebuildWithDeleter(setup, deleter)
@@ -534,7 +537,11 @@ class AppCleanerTest : BaseTest() {
      * Re-build a cleaner with the same mocks but a different InaccessibleDeleter. Used by chained-
      * task tests where the OneClick/Scheduler path actually walks the deletion code.
      */
-    private fun rebuildWithDeleter(setup: Setup, deleter: InaccessibleDeleter): Setup {
+    private fun rebuildWithDeleter(
+        setup: Setup,
+        deleter: InaccessibleDeleter,
+        filterFactories: Set<ExpendablesFilter.Factory> = emptySet(),
+    ): Setup {
         // Pull the existing scanner+exclusionManager so the rebuilt cleaner shares behaviour. The
         // simpler approach (passing them to setupCleaner) won't work because setupCleaner builds
         // fresh mocks every call — so we just construct a fresh AppCleaner pointing at the same
@@ -575,7 +582,7 @@ class AppCleanerTest : BaseTest() {
             rootManager = rootManager,
             adbManager = adbManager,
             shellOps = shellOps,
-            filterFactories = emptySet(),
+            filterFactories = filterFactories,
             appInventorySetupModule = inventorySetup,
             upgradeRepo = mockUpgradeRepo(pro = true),
         )
@@ -606,13 +613,40 @@ class AppCleanerTest : BaseTest() {
         ),
     )
 
-    private fun acsDeleter(succesful: Set<InstallId>): InaccessibleDeleter =
+    /** A filter that reports every target it is handed as successfully deleted. */
+    private fun deletingFilterFactory(): ExpendablesFilter.Factory {
+        val filter = mockk<ExpendablesFilter>(relaxUnitFun = true).apply {
+            every { identifier } returns DefaultCachesPublicFilter::class
+            every { progress } returns MutableStateFlow<Progress.Data?>(null)
+            every { updateProgress(any()) } just Runs
+            coJustRun { initialize() }
+            coEvery { process(any(), any()) } answers {
+                ExpendablesFilter.ProcessResult(
+                    success = firstArg<Collection<ExpendablesFilter.Match>>(),
+                    failed = emptyList(),
+                )
+            }
+        }
+        return mockk<ExpendablesFilter.Factory>().apply {
+            coEvery { isEnabled() } returns true
+            coEvery { create() } returns filter
+        }
+    }
+
+    private fun acsDeleter(
+        succesful: Set<InstallId>,
+        freedBytes: Map<InstallId, Long> = emptyMap(),
+    ): InaccessibleDeleter =
         mockk<InaccessibleDeleter>(relaxUnitFun = true).apply {
             every { progress } returns MutableStateFlow<Progress.Data?>(null)
             every { updateProgress(any()) } just Runs
             coEvery {
-                deleteInaccessible(any(), any(), any(), any())
-            } returns InaccessibleDeleter.InaccDelResult(succesful = succesful, failed = emptyMap())
+                deleteInaccessible(any(), any(), any(), any(), any())
+            } returns InaccessibleDeleter.InaccDelResult(
+                succesful = succesful,
+                failed = emptyMap(),
+                freedBytes = freedBytes,
+            )
         }
 
     @Test
@@ -633,6 +667,46 @@ class AppCleanerTest : BaseTest() {
     }
 
     @Test
+    fun `ProcessingTask reports the bytes the deleter measured, not the pre-clear size`() = runTest2 {
+        // The pre-clear size is only what the cache claimed to hold. An app can report a
+        // successful clear and keep every byte, and reporting that as freed space is how a
+        // 411MB headline ended up with 212MB of it never leaving the device.
+        val junk = inaccJunk("com.example.measured", itemCount = 12, theoreticalPaths = emptySet())
+        val setup = setupCleaner(scanResults = listOf(junk))
+        val rebuilt = rebuildWithDeleter(
+            setup,
+            acsDeleter(
+                succesful = setOf(installId("com.example.measured")),
+                freedBytes = mapOf(installId("com.example.measured") to 1L * 1024 * 1024),
+            ),
+        )
+
+        rebuilt.cleaner.submit(AppCleanerScanTask())
+        val result = rebuilt.cleaner.submit(AppCleanerProcessingTask(onlyInaccessible = true))
+
+        result.shouldBeInstanceOf<AppCleanerProcessingTask.Success>()
+        // 1MB observed out of the 24MB the scan saw.
+        result.affectedSpace shouldBe 1L * 1024 * 1024
+        // Still a full success at scan scale: measuring bytes must not change what was cleared.
+        result.affectedCount shouldBe 12
+    }
+
+    @Test
+    fun `ProcessingTask falls back to the pre-clear size when nothing was measured`() = runTest2 {
+        val junk = inaccJunk("com.example.unmeasured", itemCount = 12, theoreticalPaths = emptySet())
+        val setup = setupCleaner(scanResults = listOf(junk))
+        // No freedBytes entry: the deleter could not measure this one (query failure, cancelled
+        // observation, a backend that never got there). The reported figure stays as it was.
+        val rebuilt = rebuildWithDeleter(setup, acsDeleter(succesful = setOf(installId("com.example.unmeasured"))))
+
+        rebuilt.cleaner.submit(AppCleanerScanTask())
+        val result = rebuilt.cleaner.submit(AppCleanerProcessingTask(onlyInaccessible = true))
+
+        result.shouldBeInstanceOf<AppCleanerProcessingTask.Success>()
+        result.affectedSpace shouldBe 24L * 1024 * 1024
+    }
+
+    @Test
     fun `ProcessingTask does not overcount when ACS clearing fails`() = runTest2 {
         val junk = inaccJunk("com.example.fail", itemCount = 12, theoreticalPaths = emptySet())
         val setup = setupCleaner(scanResults = listOf(junk))
@@ -648,6 +722,109 @@ class AppCleanerTest : BaseTest() {
     }
 
     @Test
+    fun `a failing ACS stage still records the accessible files it already deleted`() = runTest2 {
+        // The accessible deletions hit the disk before the ACS stage runs, but `internalData` is
+        // only rewritten after it. When the ACS stage throws, that rewrite must still happen or the
+        // dashboard keeps listing files that are gone and advertises space that is already free.
+        val junk = previewAppJunk(
+            pkg = previewInstalled(pkgName = "com.example.mixed", label = "com.example.mixed"),
+            expendables = previewExpendables(),
+            inaccessibleCache = previewInaccessibleCache(pkgName = "com.example.mixed"),
+        )
+        val boom = InvalidSystemStateException("screen went off mid-run")
+        val deleter = mockk<InaccessibleDeleter>(relaxUnitFun = true).apply {
+            every { progress } returns MutableStateFlow<Progress.Data?>(null)
+            every { updateProgress(any()) } just Runs
+            coEvery { deleteInaccessible(any(), any(), any(), any(), any()) } throws boom
+        }
+        val setup = setupCleaner(scanResults = listOf(junk))
+        val rebuilt = rebuildWithDeleter(setup, deleter, filterFactories = setOf(deletingFilterFactory()))
+
+        rebuilt.cleaner.submit(AppCleanerScanTask())
+        val expendableSize = previewExpendables().values.flatten().sumOf { it.expectedGain }
+
+        // The task still fails, with the original exception: the salvage must not mask the failure.
+        shouldThrow<InvalidSystemStateException> {
+            rebuilt.cleaner.submit(AppCleanerProcessingTask())
+        } shouldBe boom
+
+        val after = rebuilt.cleaner.state.first().data!!.junks.single()
+        // Accessible matches were deleted, so they must be gone from the data the dashboard reads.
+        after.expendables.orEmpty().values.flatten().shouldBe(emptyList())
+        // The inaccessible cache survives untouched apart from the public-cache bytes we did delete.
+        after.inaccessibleCache!!.totalSize shouldBe
+            previewInaccessibleCache(pkgName = "com.example.mixed").totalSize - expendableSize
+        // No ACS attempt completed, so nothing may be recorded as a permanent ACS failure.
+        after.acsError shouldBe null
+        after.isUnclearable shouldBe false
+    }
+
+    @Test
+    fun `a cancel during the ACS stage still records the accessible files it already deleted`() = runTest2 {
+        // Cancelling is the likeliest way to interrupt a one-tap run, and it strands the accessible
+        // deletions exactly like a hard failure does. The cancellation itself must still propagate.
+        val junk = previewAppJunk(
+            pkg = previewInstalled(pkgName = "com.example.mixed", label = "com.example.mixed"),
+            expendables = previewExpendables(),
+            inaccessibleCache = previewInaccessibleCache(pkgName = "com.example.mixed"),
+        )
+        val deleter = mockk<InaccessibleDeleter>(relaxUnitFun = true).apply {
+            every { progress } returns MutableStateFlow<Progress.Data?>(null)
+            every { updateProgress(any()) } just Runs
+            coEvery {
+                deleteInaccessible(any(), any(), any(), any(), any())
+            } throws CancellationException("cancelled mid-ACS")
+        }
+        val setup = setupCleaner(scanResults = listOf(junk))
+        val rebuilt = rebuildWithDeleter(setup, deleter, filterFactories = setOf(deletingFilterFactory()))
+
+        rebuilt.cleaner.submit(AppCleanerScanTask())
+        shouldThrow<CancellationException> {
+            rebuilt.cleaner.submit(AppCleanerProcessingTask())
+        }
+
+        val after = rebuilt.cleaner.state.first().data!!.junks.single()
+        after.expendables.orEmpty().values.flatten().shouldBe(emptyList())
+        after.acsError shouldBe null
+    }
+
+    @Test
+    fun `caches cleared before a terminal ACS failure are not re-advertised`() = runTest2 {
+        // The ACS stage clears one app, then dies. The cleared cache must drop out of the data even
+        // though the task fails, or the next dashboard render offers to free bytes that are gone.
+        val cleared = installId("com.example.cleared")
+        val setup = setupCleaner(
+            scanResults = listOf(
+                inaccJunk("com.example.cleared", itemCount = 4, theoreticalPaths = emptySet()),
+                inaccJunk("com.example.later", itemCount = 4, theoreticalPaths = emptySet()),
+            ),
+        )
+        val boom = InvalidSystemStateException("screen went off after the first app")
+        val deleter = mockk<InaccessibleDeleter>(relaxUnitFun = true).apply {
+            every { progress } returns MutableStateFlow<Progress.Data?>(null)
+            every { updateProgress(any()) } just Runs
+            coEvery { deleteInaccessible(any(), any(), any(), any(), any()) } answers {
+                // Report the app that was already cleared, then fail the way the real deleter does.
+                // Index, not lastArg(): this is a suspend function, so the trailing JVM argument is
+                // the Continuation rather than the callback.
+                arg<(InaccessibleDeleter.InaccDelResult) -> Unit>(4)
+                    .invoke(InaccessibleDeleter.InaccDelResult(succesful = setOf(cleared), failed = emptyMap()))
+                throw boom
+            }
+        }
+        val rebuilt = rebuildWithDeleter(setup, deleter)
+
+        rebuilt.cleaner.submit(AppCleanerScanTask())
+        shouldThrow<InvalidSystemStateException> {
+            rebuilt.cleaner.submit(AppCleanerProcessingTask())
+        } shouldBe boom
+
+        // The cleared junk is gone entirely; only the app the run never reached is still listed.
+        val remaining = rebuilt.cleaner.state.first().data!!.junks
+        remaining.map { it.identifier } shouldBe listOf(installId("com.example.later"))
+    }
+
+    @Test
     fun `a junk untouched by a later targeted run keeps its acsError`() = runTest2 {
         val stuck = installId("com.example.stuck")
         val other = installId("com.example.other")
@@ -660,7 +837,7 @@ class AppCleanerTest : BaseTest() {
         val deleter = mockk<InaccessibleDeleter>(relaxUnitFun = true).apply {
             every { progress } returns MutableStateFlow<Progress.Data?>(null)
             every { updateProgress(any()) } just Runs
-            coEvery { deleteInaccessible(any(), any(), any(), any()) } returnsMany listOf(
+            coEvery { deleteInaccessible(any(), any(), any(), any(), any()) } returnsMany listOf(
                 // First run: "stuck" fails permanently, "other" is left over.
                 InaccessibleDeleter.InaccDelResult(
                     succesful = emptySet(),
@@ -692,7 +869,7 @@ class AppCleanerTest : BaseTest() {
         val deleter = mockk<InaccessibleDeleter>(relaxUnitFun = true).apply {
             every { progress } returns MutableStateFlow<Progress.Data?>(null)
             every { updateProgress(any()) } just Runs
-            coEvery { deleteInaccessible(any(), any(), any(), any()) } returnsMany listOf(
+            coEvery { deleteInaccessible(any(), any(), any(), any(), any()) } returnsMany listOf(
                 InaccessibleDeleter.InaccDelResult(
                     succesful = emptySet(),
                     failed = mapOf(stuck to NoSettingsWindowException("no settings window")),
@@ -724,7 +901,7 @@ class AppCleanerTest : BaseTest() {
         val deleter = mockk<InaccessibleDeleter>(relaxUnitFun = true).apply {
             every { progress } returns MutableStateFlow<Progress.Data?>(null)
             every { updateProgress(any()) } just Runs
-            coEvery { deleteInaccessible(any(), any(), any(), any()) } returns InaccessibleDeleter.InaccDelResult(
+            coEvery { deleteInaccessible(any(), any(), any(), any(), any()) } returns InaccessibleDeleter.InaccDelResult(
                 succesful = emptySet(),
                 failed = mapOf(stuck to NoSettingsWindowException("no settings window")),
             )

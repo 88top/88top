@@ -3,7 +3,6 @@ package eu.darken.sdmse.automation.core
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import eu.darken.sdmse.automation.core.animation.AnimationState
 import eu.darken.sdmse.automation.core.animation.AnimationTool
 import eu.darken.sdmse.common.coroutine.DispatcherProvider
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.ERROR
@@ -16,7 +15,6 @@ import eu.darken.sdmse.common.debug.logging.logTag
 import eu.darken.sdmse.common.progress.updateProgressPrimary
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.sync.Mutex
@@ -36,72 +34,66 @@ class AutomationProcessor @AssistedInject constructor(
 
     suspend fun process(task: AutomationTask): AutomationTask.Result = execLock.withLock {
         hasTask = true
-        log(TAG) { "process(): $task" }
-        automationHost.updateProgressPrimary(eu.darken.sdmse.common.R.string.general_progress_loading)
 
-        val factory: AutomationModule.Factory = moduleFactories.singleOrNull { it.isResponsible(task) }
-            ?: throw IllegalStateException("No module found for $task")
-
-        val moduleScope = CoroutineScope(dispatcherProvider.IO + SupervisorJob())
-
-        val module = factory.create(automationHost, moduleScope)
+        var moduleScope: CoroutineScope? = null
 
         try {
-            animationTool.restorePendingState()
-        } catch (e: Exception) {
-            log(TAG, WARN) { "process(): Failed to restore pending animation state: ${e.asLog()}" }
-        }
+            log(TAG) { "process(): $task" }
+            automationHost.updateProgressPrimary(eu.darken.sdmse.common.R.string.general_progress_loading)
 
-        var prevAnimState: AnimationState? = null
+            val factory: AutomationModule.Factory = moduleFactories.singleOrNull { it.isResponsible(task) }
+                ?: throw IllegalStateException("No module found for $task")
 
-        val result = try {
-            if (animationTool.canChangeState()) {
-                log(TAG) { "process(): Disabling animations" }
-                prevAnimState = animationTool.getState()
-                animationTool.persistPendingState(prevAnimState)
-                animationTool.setState(AnimationState.DISABLED)
+            val scope = CoroutineScope(dispatcherProvider.IO + SupervisorJob())
+            moduleScope = scope
+
+            val module = factory.create(automationHost, scope)
+
+            val restoreResult = try {
+                animationTool.restorePendingState()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                log(TAG, WARN) { "process(): Failed to restore pending animation state: ${e.asLog()}" }
+                AnimationTool.RestoreResult.FAILED
             }
 
-            log(TAG, INFO) { "process(): Current animation state: ${animationTool.getState()}" }
-
-            log(TAG, VERBOSE) { "process(): Processing $task via $module" }
-            withContext(dispatcherProvider.IO) {
-                module.process(task)
+            val runModule: suspend () -> AutomationTask.Result = {
+                log(TAG, INFO) { "process(): Current animation state: ${animationTool.getState()}" }
+                log(TAG, VERBOSE) { "process(): Processing $task via $module" }
+                withContext(dispatcherProvider.IO) { module.process(task) }
             }
-        } catch (e: CancellationException) {
-            log(TAG, INFO) { "process(): Task cancelled: $task ($e)" }
-            throw e
-        } catch (e: Exception) {
-            log(TAG, ERROR) { "process(): Task failed: $task\n${e.asLog()}" }
-            throw e
-        } finally {
-            if (prevAnimState != null) {
-                log(TAG) { "process(): Restoring previous animation state" }
-                withContext(NonCancellable) {
-                    var restored = false
-                    try {
-                        animationTool.setState(prevAnimState)
-                        restored = true
-                    } catch (e: Exception) {
-                        log(TAG, ERROR) { "process(): Failed to restore animation state: ${e.asLog()}" }
+
+            val result = try {
+                when {
+                    restoreResult == AnimationTool.RestoreResult.FAILED -> {
+                        log(TAG, WARN) { "process(): Not touching animations, a pending restore is still outstanding" }
+                        runModule()
                     }
-                    if (restored) {
-                        try {
-                            animationTool.clearPendingState()
-                        } catch (e: Exception) {
-                            log(TAG, ERROR) { "process(): Failed to clear pending state: ${e.asLog()}" }
-                        }
+
+                    animationTool.canChangeState() -> {
+                        log(TAG) { "process(): Disabling animations" }
+                        animationTool.withAnimationsDisabled { runModule() }
                     }
+
+                    else -> runModule()
                 }
+            } catch (e: CancellationException) {
+                log(TAG, INFO) { "process(): Task cancelled: $task ($e)" }
+                throw e
+            } catch (e: Exception) {
+                log(TAG, ERROR) { "process(): Task failed: $task\n${e.asLog()}" }
+                throw e
             }
+
+            log(TAG) { "process(): Result is $result" }
+
+            result
+        } finally {
             log(TAG, VERBOSE) { "process(): Canceling module scope..." }
-            moduleScope.cancel()
+            moduleScope?.cancel()
             hasTask = false
         }
-
-        log(TAG) { "process(): Result is $result" }
-
-        result
     }
 
     @AssistedFactory

@@ -83,6 +83,12 @@ class InaccessibleDeleter @Inject constructor(
         targetPkgs: Collection<InstallId>?,
         useAutomation: Boolean,
         isBackground: Boolean,
+        /**
+         * Invoked with whatever was already cleared when this call is about to fail. Caches cleared
+         * before a terminal automation error are genuinely gone, so the caller still has to fold
+         * them into its state instead of discarding them along with the exception.
+         */
+        onPartialResult: (InaccDelResult) -> Unit = {},
     ): InaccDelResult {
         log(TAG, INFO) { "deleteInaccessible() targetPkgs=${targetPkgs?.size}, $useAutomation" }
 
@@ -113,6 +119,7 @@ class InaccessibleDeleter @Inject constructor(
             isAllApps = targetPkgs == null,
             useAutomation = useAutomation,
             isBackground = isBackground,
+            onPartialResult = onPartialResult,
         )
     }
 
@@ -121,12 +128,21 @@ class InaccessibleDeleter @Inject constructor(
         isAllApps: Boolean,
         useAutomation: Boolean,
         isBackground: Boolean,
+        onPartialResult: (InaccDelResult) -> Unit,
     ): InaccDelResult {
         log(TAG) { "${targets.size} inaccessible caches to delete." }
         if (targets.isEmpty()) return InaccDelResult()
 
         val successTargets = mutableListOf<InstallId>()
         val failedTargets = mutableMapOf<InstallId, Exception>()
+        // What each target held before we touched it. The scan-time size is the right baseline for
+        // the ADB backend, which runs first. Targets that survive to the ACS stage are re-based on
+        // the pre-ACS re-query below, so ACS is not credited with what ADB already freed.
+        val baselines = targets.associate { it.identifier to it.inaccessibleCache!!.totalSize }.toMutableMap()
+        val freedBytes = mutableMapOf<InstallId, Long>()
+        // Already empty before any backend ran: a success with nothing to measure. Excluded from
+        // the observation so it keeps contributing its scan-time size, exactly as before.
+        val zeroCacheSkips = mutableSetOf<InstallId>()
 
         if (adbManager.canUseAdbNow() && isAllApps) {
             val adbResult = trimCachesWithAdb(targets)
@@ -141,8 +157,12 @@ class InaccessibleDeleter @Inject constructor(
                 if (currentCache != null && currentCache.totalSize == 0L) {
                     log(TAG) { "Cache now zero, skipping automation: ${junk.identifier}" }
                     successTargets.add(junk.identifier)
+                    zeroCacheSkips.add(junk.identifier)
                     false
                 } else {
+                    // Free re-baseline: this query is made anyway, we just stopped throwing the
+                    // value away. A failed query leaves the scan-time baseline in place.
+                    if (currentCache != null) baselines[junk.identifier] = currentCache.totalSize
                     true
                 }
             }
@@ -187,11 +207,7 @@ class InaccessibleDeleter @Inject constructor(
                     } catch (e: UserCancelledAutomationException) {
                         log(TAG, WARN) { "User cancelled during force-stop; skipping cache clear." }
                         // Honor the cancel as a full stop: don't proceed to clear cache.
-                        successTargets.forEach { failedTargets.remove(it) }
-                        return InaccDelResult(
-                            succesful = successTargets.toSet(),
-                            failed = failedTargets,
-                        )
+                        return buildResult(successTargets, failedTargets)
                     }
                 }
 
@@ -207,6 +223,10 @@ class InaccessibleDeleter @Inject constructor(
                 val result = try {
                     automationManager.submit(acsTask) as ClearCacheTask.Result
                 } catch (e: AutomationUnavailableException) {
+                    // Nothing ran, but fold anyway so the partial-result contract holds uniformly.
+                    successTargets.addAll(successLive)
+                    failedTargets.putAll(failedLive)
+                    onPartialResult(buildResult(successTargets, failedTargets))
                     throw InaccessibleDeletionException(e)
                 } catch (e: UserCancelledAutomationException) {
                     log(TAG, WARN) { "User has cancelled ($e), forwarding live progress: $successLive" }
@@ -214,6 +234,16 @@ class InaccessibleDeleter @Inject constructor(
                         successful = successLive,
                         failed = failedLive,
                     )
+                } catch (e: Exception) {
+                    // Any other terminal automation failure: a compatibility give-up, a locked
+                    // screen, an overlay error, or the caller being cancelled. Caches cleared
+                    // before that point are really cleared, so hand them back before the exception
+                    // travels on, otherwise the next scan still lists them as freeable.
+                    log(TAG, WARN) { "ACS clearing failed, forwarding live progress: $successLive" }
+                    successTargets.addAll(successLive)
+                    failedTargets.putAll(failedLive)
+                    onPartialResult(buildResult(successTargets, failedTargets))
+                    throw e
                 }
 
                 successTargets.addAll(result.successful)
@@ -223,12 +253,125 @@ class InaccessibleDeleter @Inject constructor(
             log(TAG, INFO) { "useAutomation=false" }
         }
 
-        // Clean up contradictory bookkeeping: if an app failed earlier but succeeded later, remove from failed
-        successTargets.forEach { failedTargets.remove(it) }
+        val observationTargets = targets.filter {
+            successTargets.contains(it.identifier) && !zeroCacheSkips.contains(it.identifier)
+        }
+        if (observationTargets.isNotEmpty()) {
+            try {
+                freedBytes.putAll(observeFreedBytes(observationTargets, baselines))
+            } catch (e: Exception) {
+                // This suspends for up to ACS_SETTLE_TIMEOUT, so a cancel landing inside it is not
+                // unlikely. Without this the caller would receive no result at all and would keep
+                // advertising caches that are genuinely gone.
+                log(TAG, WARN) { "Freed-byte observation failed, forwarding what was cleared: ${e.asLog()}" }
+                onPartialResult(buildResult(successTargets, failedTargets, freedBytes))
+                throw e
+            }
+        }
 
+        return buildResult(successTargets, failedTargets, freedBytes)
+    }
+
+    /**
+     * Measures how many bytes each cleared target actually gave up. "Cache cleared" is what a
+     * backend reports, not what StorageStatsManager confirms: an app can report a successful clear
+     * and still hold every byte, and a real clear needs a moment for the numbers to catch up. The
+     * outcome is a number only, no target is reclassified based on what is observed here.
+     */
+    private suspend fun observeFreedBytes(
+        targets: Collection<AppJunk>,
+        baselines: Map<InstallId, Long>,
+    ): Map<InstallId, Long> {
+        log(TAG) { "Observing freed bytes for ${targets.size} targets" }
+
+        val minObserved = mutableMapOf<InstallId, Long>()
+        val lastSample = mutableMapOf<InstallId, Long>()
+        // A read that failed after an earlier one succeeded must not let that earlier value pass as
+        // the final measurement, or a 100MB cache read as 90MB and then unreadable reports 10MB.
+        val failedReads = mutableSetOf<InstallId>()
+
+        // Track the MINIMUM, not the first decrease. A 100MB cache sampled as 90MB and then 0MB
+        // freed 100MB; stopping at the first decrease would report 10MB, which is exactly the kind
+        // of wrong number this observation exists to eliminate.
+        suspend fun sample(junk: AppJunk): Boolean {
+            val id = junk.identifier
+            val current = inaccessibleCacheProvider.determineCache(junk.pkg)
+            if (current == null) {
+                // A failed query won't get better by asking again in a tight loop.
+                log(TAG, WARN) { "Freed-byte sample failed for $id" }
+                failedReads.add(id)
+                return true
+            }
+            val size = current.totalSize
+            minObserved[id] = minOf(minObserved[id] ?: Long.MAX_VALUE, size)
+            val previous = lastSample.put(id, size)
+            val baseline = baselines[id] ?: junk.inaccessibleCache!!.totalSize
+            // Zero is the end state. Otherwise the number has to move off the pre-clear size AND
+            // stop moving before we trust it: StorageStatsManager lags behind a clear, so two reads
+            // 500ms apart can both still report the stale pre-clear size. A target still sitting at
+            // its baseline keeps polling until the budget runs out.
+            return size == 0L || (previous == size && size < baseline)
+        }
+
+        // First pass outside the budget: on a large batch a global timeout can expire mid-round and
+        // leave late targets unsampled, silently back on the optimistic pre-clear figure. Every
+        // target is sampled at least once, always.
+        val pending = mutableListOf<AppJunk>()
+        targets.forEach { if (!sample(it)) pending.add(it) }
+
+        if (pending.isNotEmpty()) {
+            // Rounds rather than one coroutine per target, like the system app re-check above: no
+            // target can be starved of polling by targets that never settle.
+            withTimeoutOrNull(ACS_SETTLE_TIMEOUT) {
+                while (pending.isNotEmpty()) {
+                    log(TAG, VERBOSE) { "Waiting on ${pending.size} cache sizes to settle" }
+                    delay(500)
+                    pending.removeAll(pending.filter { sample(it) })
+                }
+            } ?: log(TAG, WARN) {
+                "Freed-byte observation timed out after $ACS_SETTLE_TIMEOUT for: ${pending.map { it.identifier }}"
+            }
+        }
+
+        return targets.associate { junk ->
+            val id = junk.identifier
+            val baseline = baselines[id] ?: junk.inaccessibleCache!!.totalSize
+            val min = minObserved[id]
+            when {
+                // Never got a single reading, or a reading failed part-way through. Reporting 0
+                // here would tell a user who really did get their space back that nothing happened,
+                // and crediting a half-finished walk-down would under-report just as badly, so fall
+                // back to the pre-clear size and make the failed measurement visible instead of
+                // letting it pass as a real one.
+                id in failedReads || min == null -> {
+                    log(TAG, WARN) { "Freed-byte read failed, falling back to pre-clear size for $id" }
+                    id to baseline
+                }
+
+                else -> {
+                    val freed = (baseline - min).coerceAtLeast(0L)
+                    log(TAG) { "Freed $freed of $baseline bytes (smallest observed: $min) for $id" }
+                    id to freed
+                }
+            }
+        }
+    }
+
+    /**
+     * Snapshots the accumulated per-app outcomes. Also cleans up contradictory bookkeeping: an app
+     * that failed earlier but succeeded later must not stay in [InaccDelResult.failed], or it would
+     * be recorded as a permanent ACS failure and marked unclearable.
+     */
+    private fun buildResult(
+        successTargets: Collection<InstallId>,
+        failedTargets: Map<InstallId, Exception>,
+        freedBytes: Map<InstallId, Long> = emptyMap(),
+    ): InaccDelResult {
+        val successful = successTargets.toSet()
         return InaccDelResult(
-            succesful = successTargets.toSet(),
-            failed = failedTargets,
+            succesful = successful,
+            failed = failedTargets.filterKeys { !successful.contains(it) },
+            freedBytes = freedBytes.filterKeys { successful.contains(it) },
         )
     }
 
@@ -432,6 +575,12 @@ class InaccessibleDeleter @Inject constructor(
     data class InaccDelResult(
         val succesful: Set<InstallId> = emptySet(),
         val failed: Map<InstallId, Exception> = emptyMap(),
+        /**
+         * Bytes that were observed to actually disappear, per app. A missing entry means the
+         * clear was not measured; the caller then falls back to the pre-clear size, which is
+         * what it reported unconditionally before this existed.
+         */
+        val freedBytes: Map<InstallId, Long> = emptyMap(),
     )
 
     companion object {
@@ -439,5 +588,8 @@ class InaccessibleDeleter @Inject constructor(
 
         /** Wall-clock budget for waiting on StorageStatsManager to catch up after a trim. */
         private val SYSTEM_RECHECK_TIMEOUT = 10.seconds
+
+        /** Wall-clock budget for the whole post-clear settle poll that measures freed bytes. */
+        private val ACS_SETTLE_TIMEOUT = 10.seconds
     }
 }

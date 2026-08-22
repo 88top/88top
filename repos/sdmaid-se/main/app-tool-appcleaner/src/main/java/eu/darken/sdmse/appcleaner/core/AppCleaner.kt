@@ -19,6 +19,7 @@ import eu.darken.sdmse.common.coroutine.AppScope
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.INFO
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.VERBOSE
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
+import eu.darken.sdmse.common.debug.logging.asLog
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
 import eu.darken.sdmse.common.files.APath
@@ -51,6 +52,7 @@ import eu.darken.sdmse.main.core.SDMTool
 import eu.darken.sdmse.setup.IncompleteSetupException
 import eu.darken.sdmse.setup.SetupModule
 import eu.darken.sdmse.setup.isComplete
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -302,19 +304,40 @@ class AppCleaner @Inject constructor(
         }
 
 
-        val acsResult = if (task.includeInaccessible) {
-            inaccessibleDeleterProvider.get().withProgress(
-                this,
-                onCompletion = { it }
-            ) {
-                deleteInaccessible(
-                    snapshot = snapshot,
-                    targetPkgs = task.targetPkgs,
-                    useAutomation = task.useAutomation,
-                    isBackground = task.isBackground
-                )
+        // The accessible deletions above already hit the disk, but `internalData` is only rewritten
+        // below. If the ACS stage throws (automation unavailable, screen locked, compatibility
+        // give-up, ...) an early return would strand that rewrite, and the card would keep listing
+        // files that are gone and advertise space that is already free. So capture the failure,
+        // let the bookkeeping run with a null `acsResult` (which folds in the accessible deletions
+        // and leaves the inaccessible caches untouched), and only then propagate.
+        var acsResult: InaccessibleDeleter.InaccDelResult? = null
+        var acsFailure: Exception? = null
+        if (task.includeInaccessible) {
+            try {
+                acsResult = inaccessibleDeleterProvider.get().withProgress(
+                    this,
+                    onCompletion = { it }
+                ) {
+                    deleteInaccessible(
+                        snapshot = snapshot,
+                        targetPkgs = task.targetPkgs,
+                        useAutomation = task.useAutomation,
+                        isBackground = task.isBackground,
+                        // Caches it managed to clear before failing are gone for real; take them so
+                        // the reconciliation below drops them instead of re-advertising them.
+                        onPartialResult = { acsResult = it },
+                    )
+                }
+            } catch (e: Exception) {
+                // Deliberately includes CancellationException: a cancel landing mid-ACS strands the
+                // accessible deletions exactly like any other failure does, and the reconciliation
+                // below contains no suspension points, so it is safe to run on a cancelled
+                // coroutine. The original exception is rethrown unchanged afterwards, so a cancel
+                // is still recorded as a cancel.
+                log(TAG, WARN) { "Inaccessible deletion failed, salvaging accessible results: ${e.asLog()}" }
+                acsFailure = e
             }
-        } else null
+        }
 
         updateProgressPrimary(eu.darken.sdmse.common.R.string.general_progress_filtering)
         updateProgressSecondary(CaString.EMPTY)
@@ -379,10 +402,23 @@ class AppCleaner @Inject constructor(
             }.filter { !it.isEmpty() }
         )
 
+        // `internalData` now reflects the accessible deletions plus whatever the ACS stage reported
+        // before failing, so the failure can surface. The task still fails with the original
+        // exception, exactly as it did before this salvage existed.
+        acsFailure?.let { throw it }
+
+        // `acsResult` is a var (the partial-result callback writes to it), so it won't smart-cast.
+        val acsOutcome = acsResult
+        // Prefer what the deleter actually observed disappearing. The pre-clear size is only a
+        // claim: an app can report a successful cache clear and still hold every byte, which used
+        // to be reported as freed space the user never got back. Apps the deleter could not
+        // measure fall back to the pre-clear size, i.e. the previous behaviour.
         // Force check via !! because we should not have ran automation for any junk without inaccessible data
-        val automationSize = acsResult?.succesful
-            ?.map { inaccessible -> snapshot.junks.single { it.identifier == inaccessible }.inaccessibleCache!! }
-            ?.sumOf { it.totalSize }
+        val automationSize = acsOutcome?.succesful
+            ?.sumOf { inaccessible ->
+                acsOutcome.freedBytes[inaccessible]
+                    ?: snapshot.junks.single { it.identifier == inaccessible }.inaccessibleCache!!.totalSize
+            }
             ?: 0L
         // Count items the same way the scan reported them ("X expendable items found"): the difference between
         // the pre- and post-deletion scan totals. Deriving it from the snapshot avoids re-deriving the

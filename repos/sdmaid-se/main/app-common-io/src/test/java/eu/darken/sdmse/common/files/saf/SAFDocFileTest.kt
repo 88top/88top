@@ -29,6 +29,9 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import testhelpers.BaseTest
 import testhelpers.TestApplication
+import testhelpers.saf.FakeDocumentsProvider
+import testhelpers.saf.LegacyQueryShimProvider
+import testhelpers.saf.SafTestHarness
 import java.io.FileNotFoundException
 import java.time.Instant
 
@@ -229,6 +232,70 @@ class SAFDocFileTest : BaseTest() {
     }
 
     @Test
+    fun `listChildDisplayNames returns every child name`() {
+        val harness = harness(
+            FakeDocumentsProvider.tree {
+                file("dir/one.txt")
+                file("dir/two.txt")
+                dir("dir/sub")
+                file("other.txt")
+            }
+        )
+
+        harness.docFile("dir").listChildDisplayNames() shouldBe setOf("one.txt", "two.txt", "sub")
+        harness.docFile("dir", "sub").listChildDisplayNames() shouldBe emptySet()
+    }
+
+    @Test
+    fun `listChildDisplayNames skips rows without a display name`() {
+        val harness = harness(
+            FakeDocumentsProvider.tree {
+                file("dir/named.txt")
+                file("dir/nameless.txt", nullDisplayName = true)
+            }
+        )
+
+        harness.docFile("dir").listChildDisplayNames() shouldBe setOf("named.txt")
+    }
+
+    @Test
+    fun `listChildDisplayNames answers for a name that two children share`() {
+        // findFile() hands back null for such a name (singleOrNull), which reads as "still free".
+        val harness = harness(FakeDocumentsProvider.tree { file("dir/twin.txt") })
+        harness.provider.addNode(
+            FakeDocumentsProvider.Node(
+                documentId = "root:dir/twin-second",
+                parentId = "root:dir",
+                displayName = "twin.txt",
+                mimeType = "application/octet-stream",
+            )
+        )
+
+        harness.docFile("dir").listChildDisplayNames() shouldBe setOf("twin.txt")
+        harness.docFile("dir").findFile("twin.txt").shouldBeNull()
+    }
+
+    @Test
+    fun `listChildDisplayNames is the snapshot the cursor was built from`() {
+        // A child that vanishes while the listing is consumed stays in the answer, i.e. the result
+        // is advice about a point in time, never a guarantee about the directory right now.
+        val harness = harness(FakeDocumentsProvider.tree { file("dir/gone.txt") })
+        harness.provider.onChildQuery = { harness.provider.removeNode("dir", "gone.txt") }
+
+        harness.docFile("dir").listChildDisplayNames() shouldBe setOf("gone.txt")
+        harness.provider.hasNode("dir", "gone.txt") shouldBe false
+    }
+
+    @Test
+    fun `listChildDisplayNames propagates a failing query`() {
+        // "We couldn't ask" must not read as "every name is free".
+        val harness = harness(FakeDocumentsProvider.tree { file("dir/file.txt") })
+        harness.provider.failChildQueryFor["root:dir"] = RuntimeException("provider is having a bad day")
+
+        shouldThrow<RuntimeException> { harness.docFile("dir").listChildDisplayNames() }
+    }
+
+    @Test
     fun `existsStrict propagates what exists swallows`() {
         val harness = harness(FakeDocumentsProvider.tree { file("dir/file.txt") })
         val docFile = harness.docFile("dir", "file.txt")
@@ -238,6 +305,29 @@ class SAFDocFileTest : BaseTest() {
 
         harness.provider.failNextQueryWith = RuntimeException("provider is having a bad day")
         shouldThrow<RuntimeException> { docFile.existsStrict() }
+    }
+
+    @Test
+    fun `readDisplayNameStrict propagates what name swallows`() {
+        // "We couldn't ask" must not read as "the provider supplies no display name", otherwise a
+        // caller that verifies the name it asked for accepts whatever it got instead.
+        val harness = harness(
+            FakeDocumentsProvider.tree {
+                file("dir/file.txt")
+                file("dir/nameless.txt", nullDisplayName = true)
+            }
+        )
+        val docFile = harness.docFile("dir", "file.txt")
+
+        docFile.readDisplayNameStrict() shouldBe "file.txt"
+        // Only a row that really carries no name answers null.
+        harness.docFile("dir", "nameless.txt").readDisplayNameStrict().shouldBeNull()
+
+        harness.provider.failNextQueryWith = RuntimeException("provider is having a bad day")
+        shouldThrow<RuntimeException> { docFile.readDisplayNameStrict() }
+
+        // A document that isn't there has no name to hand out either, which is not the same as null.
+        shouldThrow<Exception> { harness.docFile("dir", "ghost.txt").readDisplayNameStrict() }
     }
 
     @Test

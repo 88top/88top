@@ -20,6 +20,14 @@ on:
   workflow_dispatch: {}
 
 jobs:
+  license-header:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: license header check
+        run: ./scripts/check-license-headers.sh
+
   ktlint:
     runs-on: ubuntu-24.04
     steps:

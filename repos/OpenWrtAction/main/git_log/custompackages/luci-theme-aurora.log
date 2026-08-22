@@ -1,10 +1,14 @@
 <details> <summary> <b>luci-theme-aurora new commit log :rocket: </b> </summary>
 
-#### [:mega: Full Changelog. ](https://github.com/eamonxg/luci-theme-aurora/compare/e10bd0969c4978ad41495f7e53ac6fd162dda113...6734945523b2de09b78dc6fa338e373dc2a280ef)  
+#### [:mega: Full Changelog. ](https://github.com/eamonxg/luci-theme-aurora/compare/6734945523b2de09b78dc6fa338e373dc2a280ef...2ec31f636358751e88ac009ec2f070c6e3794dd4)  
 :heavy_exclamation_mark: The list displays only the latest 15 commit logs.  
 
 SHA|Author|Date|Message
 -|-|-|-
-6734945|Eamon|Sun Aug 16 22:54:41 2026 +0800|docs: add the same-document router architecture diagram
-664c795|eamonxg|Sun Aug 16 21:38:43 2026 +0800|feat: same-document navigation for view pages via the Navigation API
+2ec31f6|Eamon|Fri Aug 21 14:19:10 2026 +0800|docs: add Chinese development and router guides
+b76241e|Eamon|Thu Aug 20 16:19:21 2026 +0800|feat: palette recents and a ">" logout command (1.2.4)
+b564a20|Eamon|Tue Aug 18 11:52:05 2026 +0800|docs: re-measure the router doc and correct what drifted
+2917edc|Eamon|Tue Aug 18 11:51:49 2026 +0800|perf: add full-load and dispatch benchmark harnesses
+58d6498|Eamon|Mon Aug 17 12:47:44 2026 +0800|fix: hand same-URL navigations to the server, Turbo-shaped progress bar, no focus ring on the landmark
+4e71cb6|Eamon|Mon Aug 17 11:01:57 2026 +0800|fix: declare the used color scheme
 </details>

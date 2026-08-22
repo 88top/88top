@@ -56,4 +56,21 @@ class MimeTypeToolTest : BaseTest() {
             subject.determineMimeType(lookupWithName("data.zzdefinitelynotaformat")) shouldBe MimeTypes.Unknown.value
         }
     }
+
+    @Test
+    fun `fromExtension resolves a bare extension`() {
+        subject.fromExtension("jpg") shouldBe "image/jpeg"
+        subject.fromExtension("JPG") shouldBe "image/jpeg"
+    }
+
+    @Test
+    fun `fromExtension falls back to what the framework assumes`() {
+        // "application/octet-stream" is the value of ContentResolver.MIME_TYPE_DEFAULT, i.e. what the
+        // framework itself assumes for an extension it doesn't know. Declaring that for such an
+        // extension still pairs name and type, which is what keeps a collision counter from landing
+        // behind the extension. The constant isn't resolvable on this compile classpath, so the
+        // literal is pinned instead.
+        MimeTypes.Unknown.value shouldBe "application/octet-stream"
+        subject.fromExtension("zzdefinitelynotaformat") shouldBe "application/octet-stream"
+    }
 }
