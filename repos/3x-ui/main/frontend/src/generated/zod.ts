@@ -90,6 +90,7 @@ export const AllSettingSchema = z.object({
   subJsonEnable: z.boolean(),
   subJsonFinalMask: z.string(),
   subJsonMux: z.string(),
+  subJsonObservatory: z.string(),
   subJsonPath: z.string(),
   subJsonRules: z.string(),
   subJsonURI: z.string(),
@@ -205,6 +206,7 @@ export const AllSettingViewSchema = z.object({
   subJsonEnable: z.boolean(),
   subJsonFinalMask: z.string(),
   subJsonMux: z.string(),
+  subJsonObservatory: z.string(),
   subJsonPath: z.string(),
   subJsonRules: z.string(),
   subJsonURI: z.string(),
@@ -247,6 +249,13 @@ export const AllSettingViewSchema = z.object({
 });
 export type AllSettingView = z.infer<typeof AllSettingViewSchema>;
 
+export const AmneziaWGLogsSchema = z.object({
+  events: z.array(z.string()),
+  peers: z.array(z.lazy(() => PeerActivitySchema)),
+  running: z.boolean(),
+});
+export type AmneziaWGLogs = z.infer<typeof AmneziaWGLogsSchema>;
+
 export const ApiTokenSchema = z.object({
   createdAt: z.number().int(),
   enabled: z.boolean(),
@@ -272,6 +281,7 @@ export type ApiTokenView = z.infer<typeof ApiTokenViewSchema>;
 export const ClientSchema = z.object({
   adTag: z.string().optional(),
   allowedIPs: z.array(z.string()).optional(),
+  allowedIPsByInbound: z.record(z.number().int(), z.array(z.string())).optional(),
   auth: z.string().optional(),
   comment: z.string(),
   created_at: z.number().int().optional(),
@@ -279,6 +289,7 @@ export const ClientSchema = z.object({
   enable: z.boolean(),
   expiryTime: z.number().int(),
   flow: z.string().optional(),
+  forwardedPorts: z.string().optional(),
   group: z.string().optional(),
   id: z.string().optional(),
   keepAlive: z.number().int().optional(),
@@ -320,6 +331,7 @@ export const ClientRecordSchema = z.object({
   enable: z.boolean(),
   expiryTime: z.number().int(),
   flow: z.string(),
+  forwardedPorts: z.string(),
   group: z.string(),
   id: z.number().int(),
   keepAlive: z.number().int(),
@@ -511,7 +523,7 @@ export const InboundSchema = z.object({
   nodeId: z.number().int().nullable().optional(),
   originNodeGuid: z.string().optional(),
   port: z.number().int().min(0).max(65535),
-  protocol: z.enum(['vmess', 'vless', 'trojan', 'shadowsocks', 'wireguard', 'hysteria', 'http', 'mixed', 'tunnel', 'tun', 'mtproto']),
+  protocol: z.enum(['vmess', 'vless', 'trojan', 'shadowsocks', 'wireguard', 'hysteria', 'http', 'mixed', 'tunnel', 'tun', 'mtproto', 'amneziawg']),
   remark: z.string(),
   settings: z.unknown(),
   shareAddr: z.string(),
@@ -548,6 +560,7 @@ export const InboundFallbackSchema = z.object({
 export type InboundFallback = z.infer<typeof InboundFallbackSchema>;
 
 export const InboundOptionSchema = z.object({
+  awgServer: z.lazy(() => ServerSettingsSchema).nullable().optional(),
   enable: z.boolean(),
   id: z.number().int(),
   listen: z.string().optional(),
@@ -701,6 +714,20 @@ export const PanelUpdateStatusSchema = z.object({
 });
 export type PanelUpdateStatus = z.infer<typeof PanelUpdateStatusSchema>;
 
+export const PeerActivitySchema = z.object({
+  allowedIPs: z.string(),
+  down: z.number().int(),
+  email: z.string(),
+  endpoint: z.string(),
+  handshake: z.number().int(),
+  inboundId: z.number().int(),
+  interface: z.string(),
+  online: z.boolean(),
+  tag: z.string(),
+  up: z.number().int(),
+});
+export type PeerActivity = z.infer<typeof PeerActivitySchema>;
+
 export const ProbeResultUISchema = z.object({
   cpuPct: z.number(),
   error: z.string(),
@@ -739,12 +766,65 @@ export const RealityScanResultSchema = z.object({
 });
 export type RealityScanResult = z.infer<typeof RealityScanResultSchema>;
 
+export const ServerSettingsSchema = z.object({
+  contentPaddingAddition: z.string().optional(),
+  disableCookies: z.boolean(),
+  externalInterface: z.string().optional(),
+  h1: z.string(),
+  h2: z.string(),
+  h3: z.string(),
+  h4: z.string(),
+  headerProtectionKey: z.string().optional(),
+  i1: z.string().optional(),
+  i2: z.string().optional(),
+  i3: z.string().optional(),
+  i4: z.string().optional(),
+  i5: z.string().optional(),
+  ipv6Enabled: z.boolean().optional(),
+  ipv6ExternalInterface: z.string().optional(),
+  ipv6Subnet: z.string().optional(),
+  jc: z.number().int(),
+  jmax: z.number().int(),
+  jmin: z.number().int(),
+  keepaliveTimeout: z.string().optional(),
+  maxHandshakeAttempts: z.string().optional(),
+  mtu: z.number().int().optional(),
+  primaryDns: z.string(),
+  privateKey: z.string(),
+  publicKey: z.string(),
+  randomTrailers: z.boolean(),
+  rejectAfterTime: z.string().optional(),
+  rekeyAfterTime: z.string().optional(),
+  rekeyTimeout: z.string().optional(),
+  routeThroughXray: z.boolean().optional(),
+  s1: z.number().int(),
+  s2: z.number().int(),
+  s3: z.number().int(),
+  s4: z.number().int(),
+  secondaryDns: z.string(),
+  subnetCidr: z.number().int(),
+  subnetIp: z.string(),
+});
+export type ServerSettings = z.infer<typeof ServerSettingsSchema>;
+
 export const SettingSchema = z.object({
   id: z.number().int(),
   key: z.string(),
   value: z.string(),
 });
 export type Setting = z.infer<typeof SettingSchema>;
+
+export const SubBalancerSchema = z.object({
+  createdAt: z.number().int(),
+  enabled: z.boolean(),
+  id: z.number().int(),
+  inboundIds: z.array(z.number().int()),
+  remark: z.string().max(256),
+  sortOrder: z.number().int().min(1),
+  strategy: z.enum(['leastLoad', 'leastPing', 'random', 'roundRobin']),
+  updatedAt: z.number().int(),
+});
+export type SubBalancer = z.infer<typeof SubBalancerSchema>;
 
 export const UserSchema = z.object({
   id: z.number().int(),

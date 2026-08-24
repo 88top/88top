@@ -39,6 +39,7 @@ func run(root, outDir string) error {
 				"ClientInbound",
 				"InboundFallback",
 				"Host",
+				"SubBalancer",
 			),
 			AliasAllow: setOf("Protocol"),
 			Overrides: map[string][]walkOverride{
@@ -94,11 +95,17 @@ func run(root, outDir string) error {
 				"ProbeResultUI",
 				"RealityScanResult",
 				"GeodataTokenIssue",
+				"AmneziaWGLogs",
+				"PeerActivity",
 			),
 		},
 		{
 			Path:        resolveRel(root, "internal/web/service/panel"),
 			StructAllow: setOf("ApiTokenView", "PanelUpdateStatus"),
+		},
+		{
+			Path:        resolveRel(root, "internal/amneziawg"),
+			StructAllow: setOf("ServerSettings"),
 		},
 	}
 

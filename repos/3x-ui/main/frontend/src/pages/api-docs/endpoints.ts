@@ -610,6 +610,28 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'POST',
+        path: '/panel/api/server/amneziawglogs/:count',
+        summary:
+          'Return live AmneziaWG peer activity (handshake, endpoint, transfer) plus the panel’s own AmneziaWG event lines.',
+        params: [
+          {
+            name: 'count',
+            in: 'path',
+            type: 'number',
+            desc: 'Maximum peer rows and event lines to return.',
+          },
+          {
+            name: 'filter',
+            in: 'body (form)',
+            type: 'string',
+            desc: 'Keyword filter — only rows/lines containing this string.',
+          },
+        ],
+        body: 'filter=awg1',
+        responseSchema: 'AmneziaWGLogs',
+      },
+      {
+        method: 'POST',
         path: '/panel/api/server/importDB',
         summary:
           'Restore the panel DB from an uploaded backup (multipart form, field name "db"). SQLite panels accept a SQLite database (.db) or a SQLite migration dump (.dump); PostgreSQL panels accept a pg_dump archive (.dump), a SQLite database (.db), or a SQLite migration dump. The panel restarts after restore. Destructive.',
@@ -2185,6 +2207,84 @@ export const sections: readonly Section[] = [
             desc: 'Subscription URL to preview (required).',
           },
         ],
+      },
+    ],
+  },
+
+  {
+    id: 'sub-balancers',
+    title: 'Subscription Balancers',
+    description:
+      'Client-side balancers for the JSON subscription: each enabled balancer is emitted as one extra config document whose members are the proxy outbounds of the selected inbounds (routing.balancers + burstObservatory). Managed in Settings → Sub Balancers.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/sub-balancers',
+        summary: 'List all subscription balancers in sort order (sort_order asc, id asc).',
+        responseSchema: 'SubBalancer',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/sub-balancers',
+        summary:
+          'Create a subscription balancer. It appears in the JSON subscription of every client that sits on at least one selected inbound.',
+        params: [
+          {
+            name: 'remark',
+            in: 'body (form)',
+            type: 'string',
+            desc: 'Display label, used as the config remarks (required).',
+          },
+          {
+            name: 'strategy',
+            in: 'body (form)',
+            type: 'string',
+            desc: 'Balancer strategy: "leastLoad", "leastPing", "roundRobin" or "random" (xray routing balancer strategies). Default "random".',
+          },
+          {
+            name: 'inboundIds',
+            in: 'body (form)',
+            type: 'integer[]',
+            desc: 'Repeated form keys selecting the member inbounds, e.g. inboundIds=1&inboundIds=3 (required, at least one).',
+          },
+          {
+            name: 'sortOrder',
+            in: 'body (form)',
+            type: 'integer',
+            desc: '1-based position in the subscription list, interleaved with the inbounds subSortIndex. Default 1.',
+          },
+          {
+            name: 'enabled',
+            in: 'body (form)',
+            type: 'boolean',
+            desc: 'Whether the balancer is emitted. Default true.',
+          },
+        ],
+        responseSchema: 'SubBalancer',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/sub-balancers/:id',
+        summary:
+          'Update a balancer by id. Accepts the same form fields as create (full-row update, including the enabled toggle).',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Balancer id.' }],
+        responseSchema: 'SubBalancer',
+      },
+      {
+        method: 'DELETE',
+        path: '/panel/api/sub-balancers/:id',
+        summary: 'Delete a balancer by id.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Balancer id.' }],
+        responseSchema: 'SubBalancer',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/sub-balancers/:id/del',
+        summary:
+          'Delete a balancer by id (POST alias of DELETE for clients that cannot send DELETE).',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Balancer id.' }],
+        responseSchema: 'SubBalancer',
       },
     ],
   },
