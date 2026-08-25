@@ -14,9 +14,18 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+concurrency:
+  group: release-publish
+  cancel-in-progress: false
+
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: bash
     container:
       # 1.20 是 Windows 7/8 Server 2008/2012 最后一个支持版本
       image: goreleaser/goreleaser-cross:v1.20
@@ -34,22 +43,38 @@ jobs:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref }}
           fetch-depth: 0
           fetch-tags: true
+          token: ${{ secrets.GHT }}
 
       - name: Verify release ref
+        id: release
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
-          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
-            RELEASE_REF="${{ inputs.release_tag }}"
+          set -euo pipefail
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            RELEASE_TAG="${RELEASE_TAG:?RELEASE_TAG is required for workflow_dispatch}"
           else
-            RELEASE_REF="${GITHUB_REF#refs/tags/}"
+            RELEASE_TAG="${GITHUB_REF#refs/tags/}"
           fi
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid release tag: $RELEASE_TAG" >&2; exit 1; }
           git fetch --force --tags origin
-          git describe --exact-match --tags HEAD
-          TAG_COMMIT=$(git rev-list -n 1 "$RELEASE_REF")
-          HEAD_COMMIT=$(git rev-parse HEAD)
+          TAG_COMMIT="$(git rev-list -n 1 "$RELEASE_TAG")"
+          HEAD_COMMIT="$(git rev-parse HEAD)"
           if [[ "$TAG_COMMIT" != "$HEAD_COMMIT" ]]; then
-            echo "Tag $RELEASE_REF points to $TAG_COMMIT but HEAD is $HEAD_COMMIT"
+            echo "Tag $RELEASE_TAG points to $TAG_COMMIT but HEAD is $HEAD_COMMIT" >&2
             exit 1
           fi
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Verify release version
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.release_tag }}
+        run: |
+          set -euo pipefail
+          VERSION="${RELEASE_TAG#v}"
+          grep -Fq "DefaultVersion = \"v$VERSION\"" api/api.go
+          [ "$(grep -Fc "ECS_VERSION=\"$VERSION\"" goecs.sh)" -eq 2 ]
+          grep -Fq "using default version $VERSION" goecs.sh
 
       - name: Prepare Go build directories
         run: |
@@ -290,37 +315,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GHT }}
           GOPRIVATE: github.com/oneclickvirt/security,github.com/oneclickvirt/privatespeedtest
-
-      - name: Update goecs.sh with new version
-        run: |
-          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
-            VERSION="${{ inputs.release_tag }}"
-            VERSION="${VERSION#v}"
-          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            VERSION="${GITHUB_REF#refs/tags/v}"
-          else
-            VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "0.1.37")
-          fi
-          echo "Using version: $VERSION"
-          FILE="goecs.sh"
-          BRANCH="master"
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global --unset url."git@github.com:".insteadOf || true
-          git fetch origin $BRANCH
-          git checkout $BRANCH
-          if [ ! -f "$FILE" ]; then
-            echo "Error: $FILE not found"
-            exit 1
-          fi
-          sed -i "s/\(_yellow \"Unable to get version info, using default version \).*\(\".*\)/\1$VERSION\2/" "$FILE"
-          sed -i "s/\(ECS_VERSION=\"\).*\(\"\)/\1$VERSION\2/" "$FILE"
-          if git diff --quiet "$FILE"; then
-            echo "No changes detected in $FILE"
-            exit 0
-          fi
-          git add "$FILE"
-          git commit -m "chore: update ECS_VERSION to $VERSION in goecs.sh"
-          git push origin $BRANCH
-        env:
-          GITHUB_TOKEN: ${{ secrets.GHT }}

@@ -1,4 +1,4 @@
-timeflysoon (69, 私有1)                        88alt (69, 私有1)
+timeflysoon (70, 私有0)                        88alt (70, 私有0)
 -------------------------------------------  -------------------------------------
 timeflysoon/2FAGuard                         88alt/2FAGuard
 timeflysoon/3x-ui                            88alt/3x-ui
@@ -43,6 +43,8 @@ timeflysoon/OpenClash                        88alt/OpenClash
 timeflysoon/openclash-auto-installer         88alt/openclash-auto-installer
 timeflysoon/openwrt-daede                    88alt/openwrt-daede
 timeflysoon/OpenWrtAction                    88alt/OpenWrtAction
+timeflysoon/Prism-Browser-Community          88alt/Prism-Browser-Community
+timeflysoon/Prism-Browser-Free               88alt/Prism-Browser-Free
 timeflysoon/PVE-manager-status               88alt/PVE-manager-status
 timeflysoon/quickstart                       88alt/quickstart
 timeflysoon/realtek-r8125-dkms               88alt/realtek-r8125-dkms
@@ -61,11 +63,10 @@ timeflysoon/turboacc                         88alt/turboacc
 timeflysoon/v2rayfree                        88alt/v2rayfree
 timeflysoon/v2rayN                           88alt/v2rayN
 timeflysoon/v2rayNG                          88alt/v2rayNG
+timeflysoon/VirtualBrowser                   88alt/VirtualBrowser
 timeflysoon/weasel                           88alt/weasel
 timeflysoon/WiFiAnalyzer                     88alt/WiFiAnalyzer
 timeflysoon/WinFi                            88alt/WinFi
 timeflysoon/x-ui                             88alt/x-ui
-timeflysoon/XChrome (private)                88alt/XChrome (private)
-timeflysoon/XChrome_ch                       88alt/XChrome_ch
 timeflysoon/yahei-alarm-clock                88alt/yahei-alarm-clock
 timeflysoon/ZyPlayer                         88alt/ZyPlayer
