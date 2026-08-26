@@ -21,7 +21,6 @@ import { proxyForTest, publicProfile, sameProxyIdentity } from './profile-secret
 import type { ProfileBackupManager } from './profile-backup'
 import type { AppSessionTracker } from './app-session'
 import type { UpdateManager } from './update-manager'
-import type { LicenseManager } from './license-manager'
 import type { WorkspaceMigrationManager } from './workspace-migration'
 import type { AnnouncementManager } from './announcement-manager'
 
@@ -37,11 +36,10 @@ interface IpcDependencies {
   workspaceMigration: WorkspaceMigrationManager
   appSession: AppSessionTracker
   updater: UpdateManager
-  licensing: LicenseManager
   announcements: AnnouncementManager
 }
 
-export function registerIpc({ profiles, settings, launcher, kernels, extensions, cookies, logger, backups, workspaceMigration, appSession, updater, licensing, announcements }: IpcDependencies): void {
+export function registerIpc({ profiles, settings, launcher, kernels, extensions, cookies, logger, backups, workspaceMigration, appSession, updater, announcements }: IpcDependencies): void {
   ipcMain.handle('profiles:list', () => profiles.list().map(publicProfile))
   ipcMain.handle('profiles:storage-health', () => profiles.storageHealth())
   ipcMain.handle('profiles:create', async (_event, draft: ProfileDraft) => publicProfile(await profiles.create(draft)))
@@ -358,10 +356,6 @@ export function registerIpc({ profiles, settings, launcher, kernels, extensions,
   if (process.env.PRISM_E2E === '1') {
     ipcMain.handle('diagnostics:e2e-quit', () => app.quit())
   }
-  ipcMain.handle('licensing:status', () => licensing.status())
-  ipcMain.handle('licensing:sync', () => licensing.synchronize())
-  ipcMain.handle('licensing:activate', (_event, activationCode: string) => licensing.activate(activationCode))
-  ipcMain.handle('licensing:deactivate', () => licensing.deactivate())
   ipcMain.handle('extensions:list', () => extensions.list())
   ipcMain.handle('extensions:import-directory', async () => {
     const owner = BrowserWindow.getFocusedWindow()
@@ -369,6 +363,21 @@ export function registerIpc({ profiles, settings, launcher, kernels, extensions,
     const result = owner ? await dialog.showOpenDialog(owner, options) : await dialog.showOpenDialog(options)
     if (result.canceled || !result.filePaths[0]) return null
     return extensions.importDirectory(result.filePaths[0])
+  })
+  // ---- 修改点 17：从 Chrome 应用商店安装。network 是 'direct' / 'system' / 某个环境 id ----
+  ipcMain.handle('extensions:install-from-store', async (_event, extensionId: string, network: string) => {
+    if (network === 'direct') {
+      return extensions.installFromStore(extensionId, null)
+    }
+    if (network === 'system') {
+      // 跟随系统代理：交给 Node/操作系统默认的代理设置（不显式传 agent，NODE 会读取 HTTPS_PROXY 环境变量）
+      return extensions.installFromStore(extensionId, null)
+    }
+    const sourceProfile = profiles.get(network)
+    if (sourceProfile.proxy.protocol === 'direct') {
+      return extensions.installFromStore(extensionId, null)
+    }
+    return extensions.installFromStore(extensionId, sourceProfile.proxy)
   })
   ipcMain.handle('extensions:open-source-folder', async (_event, id: string) => {
     const path = extensions.sourcePath(id)

@@ -18,7 +18,6 @@ import {
 import type { SettingsStore } from './settings-store'
 import type { Logger } from './app-logger'
 import type { AppSettings } from '../shared/types'
-import { kernelRequiresPro } from '../shared/kernel-policy'
 
 const execFileAsync = promisify(execFile)
 const RELEASES_URL = 'https://api.github.com/repos/adryfish/fingerprint-chromium/releases?per_page=10'
@@ -93,7 +92,6 @@ async function findEntry(root: string, predicate: (name: string) => boolean, dep
 export class KernelManager {
   private installingVersion: string | null = null
   private installAbort: AbortController | null = null
-  private canUseProKernel: () => boolean = () => true
 
   constructor(
     private readonly vaultPath: string,
@@ -102,16 +100,6 @@ export class KernelManager {
     private readonly logger?: Logger,
     private readonly kernelUsers: (version: string) => string[] | Promise<string[]> = () => []
   ) {}
-
-  setProKernelAccessCheck(check: () => boolean): void {
-    this.canUseProKernel = check
-  }
-
-  private assertKernelEntitlement(version: string): void {
-    if (kernelRequiresPro(version) && !this.canUseProKernel()) {
-      throw new Error(`Chromium ${version} 是 Prism Pro 内核，请先激活 Pro`)
-    }
-  }
 
   async installed(): Promise<KernelRelease[]> {
     const manifests = await this.installedManifests()
@@ -195,7 +183,6 @@ export class KernelManager {
 
   async install(versionInput: string): Promise<EngineStatus> {
     const version = safeVersion(versionInput)
-    this.assertKernelEntitlement(version)
     if (this.installingVersion) throw new Error(`内核 ${this.installingVersion} 正在安装，请稍候`)
     const existing = await this.readManifest(version)
     if (existing) return this.activate(version)
@@ -246,7 +233,6 @@ export class KernelManager {
     if (this.installingVersion) throw new Error(`内核 ${this.installingVersion} 正在安装，请稍候`)
     const executable = await normalizeBrowserSelection(selection)
     const { version, sourceRoot, executableRelative } = await this.inspectLocalBuild(executable)
-    this.assertKernelEntitlement(version)
     const destination = this.kernelPath(version)
     const existing = await this.readManifest(version)
     if (existing) {
@@ -322,7 +308,6 @@ export class KernelManager {
 
   async activate(versionInput: string): Promise<EngineStatus> {
     const version = safeVersion(versionInput)
-    this.assertKernelEntitlement(version)
     const manifest = await this.readManifest(version)
     if (!manifest) throw new Error('该内核尚未安装')
     const executable = join(this.kernelPath(version), manifest.executableRelative)
@@ -336,10 +321,6 @@ export class KernelManager {
   }
 
   async configure(patch: Pick<AppSettings, 'browserExecutable' | 'fingerprintKernel' | 'enginePreference'>, resolvedExecutable = patch.browserExecutable): Promise<EngineStatus> {
-    if (patch.fingerprintKernel && resolvedExecutable) {
-      const { version } = await this.inspectLocalBuild(resolvedExecutable)
-      this.assertKernelEntitlement(version)
-    }
     await this.rememberPreviousKernel(resolvedExecutable)
     await this.settings.update(patch)
     return locateBrowser(this.settings)

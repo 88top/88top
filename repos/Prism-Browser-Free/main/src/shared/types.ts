@@ -21,23 +21,6 @@ export interface ProfileLaunchOptions {
   allowGeoConflict?: boolean
 }
 export type EnginePreference = 'auto' | 'bundled' | 'system'
-export type ProEntitlement =
-  | 'automation-api'
-  | 'scheduler'
-  | 'mcp'
-
-export interface LicenseStatus {
-  plan: 'community' | 'pro'
-  state: 'community' | 'active' | 'maintenance-expired' | 'invalid' | 'unavailable'
-  activationAvailable: boolean
-  message: string
-  deviceId?: string
-  licenseId?: string
-  issuedAt?: string
-  leaseExpiresAt?: string
-  maintenanceUntil?: string
-  entitlements: ProEntitlement[]
-}
 
 export interface ProductAnnouncement {
   id: string
@@ -423,16 +406,11 @@ export interface BrowserApi {
     sessionHealth: () => Promise<AppRecoveryStatus>
     e2eQuit: () => Promise<void>
   }
-  licensing: {
-    status: () => Promise<LicenseStatus>
-    sync: () => Promise<LicenseStatus>
-    activate: (activationCode: string) => Promise<LicenseStatus>
-    deactivate: () => Promise<LicenseStatus>
-    onChanged: (listener: (status: LicenseStatus) => void) => () => void
-  }
   extensions: {
     list: () => Promise<BrowserExtension[]>
     importDirectory: () => Promise<BrowserExtension | null>
+    // ---- 修改点 12：从 Chrome 应用商店安装。network 为 'direct'（本机直连）、'system'（跟随系统代理）或某个环境的 id（复用该环境代理下载） ----
+    installFromStore: (extensionId: string, network: string) => Promise<BrowserExtension>
     openSourceFolder: (id: string) => Promise<string>
     setGlobalEnabled: (id: string, enabled: boolean) => Promise<BrowserExtension>
     remove: (id: string) => Promise<void>

@@ -181,10 +181,6 @@ CONFIG_PACKAGE_luci-theme-openwrt-2020=y
 
 ---
 
-[![Star History Chart](https://api.star-history.com/chart?repos=smallprogram/OpenWrtAction&type=date&legend=top-left&sealed_token=OG4G_E7WoJlJYB7165Zk3sJP1-l2FmhTW3MXSlm62R9Q6nG1eaWSKhdKSyMwa08Hkd1vD5At8d3WsDdraIHywpQOerXxlSS8m1PZj0aaS2xUp3hjrlbcbqy-embOHku8PJPUvEFxYV3nChp1PwdFYeARO_hG_YEAkmfFgdU8nn8wHHsKUQv1wpuv2xDE)](https://www.star-history.com/?type=date&repos=smallprogram%2FOpenWrtAction)
-
----
-
 ## 🔗 快速跳转
 
 #### [🧭 最新固件列表，点击自取](https://github.com/smallprogram/OpenWrtAction/tags)

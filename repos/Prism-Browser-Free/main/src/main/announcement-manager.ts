@@ -3,8 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { AnnouncementStatus, ProductAnnouncement } from '../shared/types'
 import type { Logger } from './app-logger'
-import { canonicalJson } from './license-crypto'
-import { activationUrl, validateConfig } from './license-manager'
+import { activationUrl, canonicalJson, validateSignedConfig } from './signed-config'
 
 interface AnnouncementPayload extends ProductAnnouncement {
   schemaVersion: 1
@@ -102,7 +101,7 @@ export class AnnouncementManager {
   async check(): Promise<AnnouncementStatus> {
     try {
       const path = this.configOverride ?? join(this.resourcesPath, 'license-config.json')
-      const config = validateConfig(JSON.parse(await readFile(path, 'utf8')))
+      const config = validateSignedConfig(JSON.parse(await readFile(path, 'utf8')))
       const response = await this.fetchImpl(activationUrl(config.activationBaseUrl, '/v1/announcements/current'), {
         method: 'GET',
         redirect: 'error',

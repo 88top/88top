@@ -46,7 +46,7 @@ import {
   type TableColumnsType
 } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
-import type { AnnouncementStatus, AppRecoveryStatus, AppUpdateStatus, BrowserCrashRecord, BrowserExtension, BrowserProfileView, EngineStatus, KernelRelease, LaunchDiagnosticReport, LicenseStatus, ProfileDraft, ProfileStoreHealth, StorageOverview } from '../../shared/types'
+import type { AnnouncementStatus, AppRecoveryStatus, AppUpdateStatus, BrowserCrashRecord, BrowserExtension, BrowserProfileView, EngineStatus, KernelRelease, LaunchDiagnosticReport, ProfileDraft, ProfileStoreHealth, StorageOverview } from '../../shared/types'
 import { ProfileEditor } from './ProfileEditor'
 import { KernelManagerModal } from './KernelManagerModal'
 import { ProfileDataModal } from './ProfileDataModal'
@@ -58,7 +58,6 @@ import { BatchResultModal, type BatchOperationResult } from './BatchResultModal'
 import { UpdateModal } from './UpdateModal'
 import { WorkspaceMigrationModal } from './WorkspaceMigrationModal'
 import { effectiveNetworkIdentity, geoConflictConfirmationMessage } from '../../shared/network-identity'
-import { kernelRequiresPro } from '../../shared/kernel-policy'
 import { orderBatchLaunchProfiles, waitForBatchLaunchGap } from './batch-launch-order'
 import { profileTableSorters } from './profile-table-sort'
 
@@ -130,7 +129,6 @@ export default function App() {
   const [extensionManagerOpen, setExtensionManagerOpen] = useState(false)
   const [profileStorageHealth, setProfileStorageHealth] = useState<ProfileStoreHealth | null>(null)
   const [appRecoveryStatus, setAppRecoveryStatus] = useState<AppRecoveryStatus | null>(null)
-  const [license, setLicense] = useState<LicenseStatus | null>(null)
   const [diagnosticProfile, setDiagnosticProfile] = useState<BrowserProfileView>()
   const [diagnosticReport, setDiagnosticReport] = useState<LaunchDiagnosticReport>()
   const [crashProfile, setCrashProfile] = useState<BrowserProfileView>()
@@ -191,22 +189,6 @@ export default function App() {
     }
   }
 
-  async function applyLicenseStatus(status: LicenseStatus, knownEngine?: EngineStatus): Promise<void> {
-    setLicense(status)
-    if (status.plan === 'pro') return
-    const selected = knownEngine ?? await window.browserApi.engine.status()
-    if (!kernelRequiresPro(selected.version)) return
-    const communityEngine = await window.browserApi.engine.activateBundled()
-    setEngine(communityEngine)
-    const [installedKernels, bundled] = await Promise.all([
-      window.browserApi.engine.installed(),
-      window.browserApi.engine.bundled()
-    ])
-    setKernels(installedKernels)
-    setBundledEngine(bundled)
-    messageApi.info('Pro 授权已失效，已自动切换到免费的 Chromium 144 内核')
-  }
-
   useEffect(() => {
     void Promise.all([
       window.browserApi.profiles.list(),
@@ -216,10 +198,9 @@ export default function App() {
       window.browserApi.engine.installed(),
       window.browserApi.engine.bundled(),
       window.browserApi.diagnostics.sessionHealth(),
-      window.browserApi.updates.status(),
-      window.browserApi.licensing.status()
+      window.browserApi.updates.status()
     ])
-      .then(([items, engineStatus, extensionItems, storageHealth, installedKernels, bundled, recoveryStatus, applicationUpdate, licenseStatus]) => {
+      .then(([items, engineStatus, extensionItems, storageHealth, installedKernels, bundled, recoveryStatus, applicationUpdate]) => {
         setProfiles(items)
         setEngine(engineStatus)
         setExtensions(extensionItems)
@@ -228,26 +209,20 @@ export default function App() {
         setBundledEngine(bundled)
         setAppRecoveryStatus(recoveryStatus)
         setUpdateStatus(applicationUpdate)
-        void applyLicenseStatus(licenseStatus, engineStatus).catch((error) => messageApi.error(humanError(error)))
       })
       .catch((error) => messageApi.error(humanError(error)))
       .finally(() => setLoading(false))
 
     void refreshStorageOverview()
     // 应用更新公告不再在启动时自动检查，只有用户打开"应用更新"面板并手动点击"重新检查"时才会请求
-    void window.browserApi.licensing.sync().then((status) => applyLicenseStatus(status)).catch(() => undefined)
 
     const removeProfileListener = window.browserApi.profiles.onChanged((changed) => {
       setProfiles((current) => current.map((profile) => profile.id === changed.id ? changed : profile))
     })
     const removeUpdateListener = window.browserApi.updates.onChanged(setUpdateStatus)
-    const removeLicenseListener = window.browserApi.licensing.onChanged((status) => {
-      void applyLicenseStatus(status).catch((error) => messageApi.error(humanError(error)))
-    })
     return () => {
       removeProfileListener()
       removeUpdateListener()
-      removeLicenseListener()
     }
   }, [messageApi])
 
@@ -294,7 +269,6 @@ export default function App() {
   }
 
   function canLaunchProfile(profile: BrowserProfileView): boolean {
-    if (kernelRequiresPro(profile.kernelVersion || engine?.version) && license?.plan !== 'pro') return false
     if (!profile.kernelVersion) return Boolean(engine?.executable)
     return selectableKernels.some((kernel) => kernel.version === profile.kernelVersion && kernel.executable)
   }
@@ -734,7 +708,7 @@ export default function App() {
     {
       title: '环境',
       dataIndex: 'name',
-      width: 250,
+      width: 200,
       sorter: profileTableSorters.environment,
       render: (_value, profile) => (
         <div className="profile-name-cell">
@@ -757,7 +731,7 @@ export default function App() {
       title: '备注',
       dataIndex: 'note',
       key: 'note',
-      width: 200,
+      width: 270,
       render: (_value, profile) => (
         <Popover
           trigger="click"
@@ -804,26 +778,6 @@ export default function App() {
       )
     },
     {
-      title: '分组 / 标签',
-      key: 'classification',
-      width: 190,
-      sorter: profileTableSorters.classification,
-      render: (_value, profile) => (
-        <div className="profile-tags">
-          <Tag icon={<FolderOutlined />}>{profile.group || '未分组'}</Tag>
-          {profile.tags.slice(0, 2).map((tag) => <Tag key={tag}>{tag}</Tag>)}
-          {profile.tags.length > 2 && <Tooltip title={profile.tags.slice(2).join('、')}><Tag>+{profile.tags.length - 2}</Tag></Tooltip>}
-        </div>
-      )
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      width: 100,
-      sorter: profileTableSorters.status,
-      render: (_value, profile) => statusTag(profile)
-    },
-    {
       title: '代理',
       dataIndex: 'proxy',
       width: 220,
@@ -838,6 +792,26 @@ export default function App() {
       )
     },
     {
+      title: '状态',
+      dataIndex: 'status',
+      width: 100,
+      sorter: profileTableSorters.status,
+      render: (_value, profile) => statusTag(profile)
+    },
+    {
+      title: '分组 / 标签',
+      key: 'classification',
+      width: 150,
+      sorter: profileTableSorters.classification,
+      render: (_value, profile) => (
+        <div className="profile-tags">
+          <Tag icon={<FolderOutlined />}>{profile.group || '未分组'}</Tag>
+          {profile.tags.slice(0, 2).map((tag) => <Tag key={tag}>{tag}</Tag>)}
+          {profile.tags.length > 2 && <Tooltip title={profile.tags.slice(2).join('、')}><Tag>+{profile.tags.length - 2}</Tag></Tooltip>}
+        </div>
+      )
+    },
+    {
       title: '指纹',
       dataIndex: 'fingerprint',
       width: 230,
@@ -847,9 +821,7 @@ export default function App() {
           <span>{profile.fingerprint.platform === 'windows' ? 'Windows' : 'macOS'}</span>
           <span>{profile.fingerprint.screenWidth}×{profile.fingerprint.screenHeight}</span>
           <span>{effectiveNetworkIdentity(profile.fingerprint, profile.proxyCheck).timezone}</span>
-          <span>{profile.kernelVersion
-            ? <>内核 {profile.kernelVersion}{kernelRequiresPro(profile.kernelVersion) && <Tag color="gold">Pro</Tag>}</>
-            : '内核自动'}</span>
+          <span>{profile.kernelVersion ? <>内核 {profile.kernelVersion}</> : '内核自动'}</span>
           <span className={`webrtc-badge ${profile.fingerprint.webrtcPolicy}`}>
             {profile.fingerprint.webrtcPolicy === 'proxy_only' ? 'WebRTC 防泄漏' : profile.fingerprint.webrtcPolicy === 'public_only' ? 'WebRTC 公网' : 'WebRTC 默认'}
           </span>
@@ -1122,7 +1094,7 @@ export default function App() {
                   onChange: (keys) => setSelectedIds(keys.map(String))
                 }}
                 pagination={profiles.length > 12 ? { pageSize: 12 } : false}
-                scroll={{ x: 1240 }}
+                scroll={{ x: 1295 }}
                 locale={{
                   emptyText: (
                     <Empty description="还没有浏览器环境">
@@ -1159,14 +1131,12 @@ export default function App() {
         engine={engine}
         kernels={selectableKernels}
         groups={editableGroups}
-        proEnabled={license?.plan === 'pro'}
         onCancel={() => { setEditorOpen(false); setEditing(undefined) }}
         onSave={saveProfile}
       />
       <KernelManagerModal
         open={kernelManagerOpen}
         engine={engine}
-        proActive={license?.plan === 'pro'}
         onClose={() => setKernelManagerOpen(false)}
         onEngineChanged={(nextEngine) => {
           setEngine(nextEngine)
@@ -1186,6 +1156,7 @@ export default function App() {
       <ExtensionManagerModal
         open={extensionManagerOpen}
         extensions={extensions}
+        profiles={profiles}
         onClose={() => setExtensionManagerOpen(false)}
         onChanged={setExtensions}
       />

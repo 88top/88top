@@ -1,0 +1,201 @@
+name: Release
+
+# 两种触发方式都支持：
+# 1. 推送形如 v0.3.11 的 tag 时自动构建发布
+# 2. 在 GitHub Actions 页面手动点击 "Run workflow" 触发（可指定版本号）
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "发布版本号（不带 v 前缀，例如 0.3.11）；留空则使用 package.json 中的当前版本"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  # ------------------------------
+  # 解析本次发布使用的版本号
+  # ------------------------------
+  resolve-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set-version.outputs.version }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 解析版本号
+        id: set-version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [ "${{ github.ref_type }}" = "tag" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+  # ------------------------------
+  # macOS 构建（未签名、未公证）
+  # ------------------------------
+  build-macos:
+    needs: resolve-version
+    runs-on: macos-14
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 安装依赖
+        # 用 npm install 而不是 npm ci：
+        # package.json 改过依赖但 lock 文件未在本地同步更新时，
+        # npm ci 会因为二者不一致直接报错退出；npm install 会自动
+        # 重新解析依赖树并就地更新 lock 文件后继续安装。
+        run: npm install
+
+      - name: 同步版本号
+        if: needs.resolve-version.outputs.version != ''
+        run: npm pkg set version=${{ needs.resolve-version.outputs.version }}
+
+      - name: 构建 macOS 安装包
+        # 明确关闭自动代码签名探测和公证，产出未签名构建；
+        # 显式传 --publish never 避免 electron-builder 在 CI 中自动尝试发布到 GitHub
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: |
+          npm run build
+          npx electron-builder --mac dmg zip --publish never
+
+      - name: 统一重命名为发布规范文件名
+        # 不依赖 package.json 里的 artifactName 宏，直接强制改成与
+        # v0.3.10 一致的命名：Prism-Browser-{version}-macos-arm64.{dmg,zip}
+        run: |
+          VERSION="${{ needs.resolve-version.outputs.version }}"
+          if [ -z "$VERSION" ]; then
+            VERSION=$(node -p "require('./package.json').version")
+          fi
+          cd release
+          DMG_FILE=$(ls *.dmg)
+          ZIP_FILE=$(ls *.zip)
+          mv "$DMG_FILE" "Prism-Browser-${VERSION}-macos-arm64.dmg"
+          mv "$ZIP_FILE" "Prism-Browser-${VERSION}-macos-arm64.zip"
+          ls -la
+
+      - name: 上传 macOS 构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-artifacts
+          path: |
+            release/*.dmg
+            release/*.zip
+          if-no-files-found: error
+
+  # ------------------------------
+  # Windows 构建
+  # ------------------------------
+  build-windows:
+    needs: resolve-version
+    runs-on: windows-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 安装依赖
+        # 同上：用 npm install 代替 npm ci，避免 lock 文件与
+        # package.json 不同步时报错退出
+        run: npm install
+
+      - name: 同步版本号
+        if: needs.resolve-version.outputs.version != ''
+        run: npm pkg set version=${{ needs.resolve-version.outputs.version }}
+
+      - name: 构建 Windows 安装包
+        # 只构建 msi 和 zip 两个目标（与实际发布保持一致，不生成独立的
+        # portable .exe 目标）；zip 会在下一步重命名为带 -portable 后缀；
+        # 显式传 --publish never 避免 electron-builder 在 CI 中自动尝试发布到 GitHub
+        run: |
+          npm run build
+          npx electron-builder --win msi zip --x64 --publish never
+
+      - name: 统一重命名为发布规范文件名
+        # 强制改成与 v0.3.10 一致的命名：
+        # Prism-Browser-{version}-windows-x64.msi
+        # Prism-Browser-{version}-windows-x64-portable.zip
+        shell: bash
+        run: |
+          VERSION="${{ needs.resolve-version.outputs.version }}"
+          if [ -z "$VERSION" ]; then
+            VERSION=$(node -p "require('./package.json').version")
+          fi
+          cd release
+          MSI_FILE=$(ls *.msi)
+          ZIP_FILE=$(ls *.zip)
+          mv "$MSI_FILE" "Prism-Browser-${VERSION}-windows-x64.msi"
+          mv "$ZIP_FILE" "Prism-Browser-${VERSION}-windows-x64-portable.zip"
+          ls -la
+
+      - name: 上传 Windows 构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-artifacts
+          path: |
+            release/*.msi
+            release/*.zip
+          if-no-files-found: error
+
+  # ------------------------------
+  # 汇总产物、生成 SHA256SUMS.txt、发布 Release
+  # ------------------------------
+  publish:
+    needs: [resolve-version, build-macos, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: 下载全部构建产物
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: 生成 SHA256SUMS.txt
+        working-directory: dist
+        run: sha256sum * > SHA256SUMS.txt
+
+      - name: 列出即将发布的文件
+        run: ls -la dist
+
+      - name: 发布 GitHub Release（固定 tag，覆盖式发布）
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          VERSION="${{ needs.resolve-version.outputs.version }}"
+          TAG="latest"
+
+          # 如果已存在同名 release，先删除（不报错，允许首次发布时不存在）
+          gh release delete "$TAG" --yes --cleanup-tag || true
+
+          gh release create "$TAG" \
+            --title "Prism Browser ${VERSION}" \
+            --latest \
+            "dist/Prism-Browser-${VERSION}-macos-arm64.dmg#macOS Apple Silicon DMG" \
+            "dist/Prism-Browser-${VERSION}-macos-arm64.zip#macOS Apple Silicon ZIP" \
+            "dist/Prism-Browser-${VERSION}-windows-x64-portable.zip#Windows x64 portable ZIP" \
+            "dist/Prism-Browser-${VERSION}-windows-x64.msi#Windows x64 installer" \
+            "dist/SHA256SUMS.txt#SHA-256 checksums"

@@ -14,9 +14,7 @@ import { ProfileBackupManager } from './profile-backup'
 import { AppSessionTracker } from './app-session'
 import { UpdateManager } from './update-manager'
 import { migrateMacLegacyKernelSelection } from './browser-locator'
-import { LicenseManager } from './license-manager'
 import { WorkspaceMigrationManager } from './workspace-migration'
-import { ElectronDeviceKeyProtector } from './electron-device-key-protector'
 import { AnnouncementManager } from './announcement-manager'
 
 let mainWindow: BrowserWindow | null = null
@@ -109,20 +107,8 @@ app.whenReady().then(async () => {
     mainWindow?.webContents.send('updates:changed', status)
   }, logger)
   const announcements = new AnnouncementManager(process.resourcesPath, app.getVersion(), logger)
-  const licensing = new LicenseManager(
-    vaultPath,
-    process.resourcesPath,
-    app.getVersion(),
-    new ElectronDeviceKeyProtector(),
-    (status) => {
-      mainWindow?.webContents.send('licensing:changed', status)
-    },
-    logger
-  )
-  await Promise.all([updater.initialize(), licensing.initialize()])
-  launcher.setProKernelAccessCheck(() => licensing.status().plan === 'pro')
-  kernels.setProKernelAccessCheck(() => licensing.status().plan === 'pro')
-  registerIpc({ profiles, settings, launcher, kernels, extensions, cookies, logger, backups, workspaceMigration, appSession, updater, licensing, announcements })
+  await updater.initialize()
+  registerIpc({ profiles, settings, launcher, kernels, extensions, cookies, logger, backups, workspaceMigration, appSession, updater, announcements })
   mainWindow = createWindow()
 
   app.on('activate', () => {
