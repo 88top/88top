@@ -1,4 +1,4 @@
-timeflysoon (70, 私有0)                        88alt (70, 私有0)
+timeflysoon (70, 私有1)                        88alt (70, 私有1)
 -------------------------------------------  -------------------------------------
 timeflysoon/2FAGuard                         88alt/2FAGuard
 timeflysoon/3x-ui                            88alt/3x-ui
@@ -44,7 +44,7 @@ timeflysoon/openclash-auto-installer         88alt/openclash-auto-installer
 timeflysoon/openwrt-daede                    88alt/openwrt-daede
 timeflysoon/OpenWrtAction                    88alt/OpenWrtAction
 timeflysoon/Prism-Browser-Community          88alt/Prism-Browser-Community
-timeflysoon/Prism-Browser-Free               88alt/Prism-Browser-Free
+timeflysoon/Prism-Browser-Free (private)     88alt/Prism-Browser-Free (private)
 timeflysoon/PVE-manager-status               88alt/PVE-manager-status
 timeflysoon/quickstart                       88alt/quickstart
 timeflysoon/realtek-r8125-dkms               88alt/realtek-r8125-dkms
