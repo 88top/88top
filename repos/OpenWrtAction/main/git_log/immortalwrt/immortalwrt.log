@@ -1,24 +1,25 @@
 <details> <summary> <b>immortalwrt new commit log :rocket: </b> </summary>
 
-#### [:mega: Full Changelog. ](https://github.com/immortalwrt/immortalwrt/compare/ce4e104df06d8dd397d34d053e7d857f5f2f42cd...6081813a7ec91aba6555a74dc3f4d34f504f8a53)  
+#### [:mega: Full Changelog. ](https://github.com/immortalwrt/immortalwrt/compare/6081813a7ec91aba6555a74dc3f4d34f504f8a53...1d34e7b88708d4eeb3feabe0b2b6f835a909c9c0)  
 :heavy_exclamation_mark: The list displays only the latest 15 commit logs.  
 
 SHA|Author|Date|Message
 -|-|-|-
-6081813a7e|Tianling Shen|Tue Aug 18 09:47:50 2026 +0800|Merge Official Source
-8924f6c895|Shiji Yang|Fri Aug 14 07:21:54 2026 +0800|kernel: fix kmod-switch-rtl8366-smi dependencies for econet target
-a83ab037db|Shiji Yang|Thu Aug 13 22:19:20 2026 +0800|kernel: fix kmod-mdio-gpio dependencies for econet target
-bee48059af|Shiji Yang|Thu Aug 13 19:01:50 2026 +0800|kernel: fix kmod-mdio-devres dependencies for econet target
-52e22c4b16|Shiji Yang|Mon Aug 10 08:19:52 2026 +0800|kernel: bump 6.12 to 6.12.103
-6d515de8c9|Shiji Yang|Mon Aug 3 18:57:22 2026 +0800|kernel: bump 6.12 to 6.12.102
-f3a2b0fea9|Rosen Penev|Thu Jun 4 14:17:26 2026 -0700|generic: ppc: replace revert with proper solution
-7656e6de5a|Shiji Yang|Thu Jul 30 01:59:06 2026 +0800|kernel: bump 6.12 to 6.12.100
-f10ae5e6db|Shiji Yang|Sat Jul 25 15:26:11 2026 +0800|kernel: bump 6.12 to 6.12.98
-e69fb9e2b3|Shiji Yang|Sat Jul 25 06:52:39 2026 +0800|kernel: bump 6.12 to 6.12.97
-21b63fed10|Shiji Yang|Thu Feb 26 00:03:30 2026 +0800|mediatek: drop PCIe reset assert delay patch
-22b571bdb2|Shiji Yang|Sun Jul 19 09:39:10 2026 +0800|kernel: bump 6.12 to 6.12.96
-82311e87fb|Shiji Yang|Sun Jul 5 11:29:02 2026 +0800|kernel: bump 6.12 to 6.12.95
-d69c2a7bea|Myeongjae SONG|Sun Aug 2 07:23:22 2026 +0000|ramips: fix PCIe reset GPIOs for ipTIME A8004T
-95dec97d08|Dmitry Mostovoy|Tue Jul 28 03:26:19 2026 -0400|mediatek: add support for Cudy WR3000U v1
+1d34e7b887|Tianling Shen|Wed Aug 26 09:56:37 2026 +0800|mediatek: fix merge conflict
+7020e88fd2|Tianling Shen|Tue Aug 25 09:31:59 2026 +0800|kernel: refresh fmsh patches
+3a0e732472|Tianling Shen|Mon Aug 24 21:43:14 2026 +0800|Merge Official Source
+7466306111|Tianling Shen|Thu Aug 20 10:50:25 2026 +0800|px5g-openssl: add openssl px5g variant
+ecbf832c08|Murad Rabadanov|Wed Jul 29 08:52:42 2026 +0300|mediatek: filogic: add support for netis N6 V2
+e472455a76|Mieczyslaw Nalewaj|Sat Aug 22 11:00:58 2026 +0200|mediatek: mt7622: remove bogus dsa-migration from Netgear WAX206
+58aa1b7f16|Charles Joynson|Tue Aug 11 19:12:36 2026 -0400|ramips: mt7621: add TL-R605 v1 as alternative name for TP-Link ER605 v1
+c95c39b147|Charles Joynson|Sat Aug 8 00:50:30 2026 -0400|ramips: mt7621: add support for TP-Link ER605 v1
+5787af6688|Charles Joynson|Sat Aug 8 00:40:01 2026 -0400|base-files: add mtd_get_mac_uci_config()
+cf51ed8784|Fil Dunsky|Fri Jun 12 21:15:27 2026 +0300|mediatek: add support Teralink TL3020
+80bc5eabe5|Donghyun Ko|Tue Jun 9 21:12:33 2026 +0900|mediatek: fix WLAN LED indication for ipTIME AX3000SE
+390a867118|Magnus Kroken|Tue Aug 11 22:33:15 2026 +0200|mbedtls: update to 3.6.7
+feaa1e685a|Maxim Anisimov|Mon Jun 29 16:14:20 2026 +0300|mediatek: fix nmbm max-reserved-blocks for Keenetic/Netcraze devices
+4007488e13|Qingfang Deng|Mon Aug 17 09:55:09 2026 +0800|ppp: fix precompiled filter option
+21945f8774|Sander van Deijck|Thu Aug 13 01:26:01 2026 +0200|wolfssl: update to 5.9.2
+
 
 </details>

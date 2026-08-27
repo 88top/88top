@@ -189,7 +189,7 @@
   },
   "timeflysoon/OpenWrtAction": {
     "main": {
-      "remote_sha": "01ae3d1f8be484eca8abeba97775fc345007c3ef"
+      "remote_sha": "44b94ea3dee3f4904132e6d0a7a88acd286e606d"
     }
   },
   "timeflysoon/PVE-manager-status": {
@@ -247,7 +247,7 @@
   },
   "timeflysoon/dae": {
     "main": {
-      "remote_sha": "caa6f5e91776bc86d5b0edc940bb7d264359863c"
+      "remote_sha": "5db27a0028d36e7847bd3796497df952337a20e2"
     }
   },
   "timeflysoon/daed": {
@@ -257,7 +257,7 @@
   },
   "timeflysoon/ecs": {
     "master": {
-      "remote_sha": "cfa0ddeda0e3e21ffa2404a4c78cd22cef0c1c07"
+      "remote_sha": "f161151132161ca02a24bd8ed79a63fe6c80a3fb"
     }
   },
   "timeflysoon/edgetunnel": {
@@ -430,7 +430,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "3793f24700ad695edda8db6af6500957aa4c8e1e"
+      "remote_sha": "bae15e2b5f758a800755f119502585fb419c05a9"
     }
   },
   "timeflysoon/store": {
@@ -496,7 +496,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "65aee230b32e5c3ce0116abdbf6d3a6775d333fa"
+      "remote_sha": "6d09da65d94486ef7efb713ca2769b738e00ffb0"
     }
   },
   "timeflysoon/weasel": {

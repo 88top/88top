@@ -1,25 +1,20 @@
 <details> <summary> <b>openwrt new commit log :rocket: </b> </summary>
 
-#### [:mega: Full Changelog. ](https://github.com/openwrt/openwrt/compare/8924f6c8953aea44ca02e6ef5d85b7f31edd59f4...feaa1e685a8f874a88ab96cd6aeb1858d01d3415)  
+#### [:mega: Full Changelog. ](https://github.com/openwrt/openwrt/compare/feaa1e685a8f874a88ab96cd6aeb1858d01d3415...b6a820ea85d268ecbe55c0f803c8b2dbb811c8aa)  
 :heavy_exclamation_mark: The list displays only the latest 15 commit logs.  
 
 SHA|Author|Date|Message
 -|-|-|-
-feaa1e685a|Maxim Anisimov|Mon Jun 29 16:14:20 2026 +0300|mediatek: fix nmbm max-reserved-blocks for Keenetic/Netcraze devices
-4007488e13|Qingfang Deng|Mon Aug 17 09:55:09 2026 +0800|ppp: fix precompiled filter option
-21945f8774|Sander van Deijck|Thu Aug 13 01:26:01 2026 +0200|wolfssl: update to 5.9.2
-bd36bf56f7|Ryan Leung|Mon Aug 3 22:17:36 2026 +1000|mediatek: filogic: comfast cf-wr632ax: fix nmbm configuration mismatch
-4e545bf51e|Lukas Stockner|Fri Jun 12 17:05:20 2026 +0200|ipq806x: add apboot package for AP-32x
-65f01eb357|Lukas Stockner|Wed Nov 5 23:41:57 2025 +0100|ipq806x: add support for Aruba AP-32x
-c1096e0e8b|Lukas Stockner|Sat May 2 20:11:04 2026 +0200|ipq806x: add CONFIG_GPIO_WATCHDOG
-32841c3ed2|Lukas Stockner|Sat May 2 19:32:23 2026 +0200|base-files: handle name collision between kernel UBI volume and MTD partition
-6ebb080d8c|Lukas Stockner|Sat May 2 19:31:43 2026 +0200|base-files: support rootfs_data on its own partition
-d73bf56039|Maxim Anisimov|Tue Aug 18 13:10:43 2026 +0300|kernel: fix FM25G01B/FM25G02B Quad I/O read dummy
-af591a8097|Maxim Anisimov|Tue Aug 18 13:09:59 2026 +0300|kernel: add support for FudanMicro FM25G01B and FM25G02B spi-nand
-d0d5556fcc|Lech Perczak|Tue Aug 11 00:53:43 2026 +0200|wifi-scripts: fix default cipher selection for 11ad in iface.uc
-689bf360e5|Lech Perczak|Mon Aug 10 01:13:04 2026 +0200|wifi-scripts: set hw_mode = 'ad' for 60GHz radios in hostapd config
-6bc29f3424|Lech Perczak|Thu Aug 6 16:44:22 2026 +0200|wifi-scripts: add 60G band to mac80211.uc to support 802.11ad
-78f1217d07|Felix Fietkau|Fri Jul 10 14:46:37 2026 +0200|wifi-scripts: pass device config to parse_encryption for station mode
-
-
+b6a820ea85|Mikhail Kshevetskiy|Sun Aug 9 21:57:14 2026 +0300|airoha: an7581: dts: update number of available gpios
+69c4af7d2c|Mikhail Kshevetskiy|Sun Aug 9 21:39:30 2026 +0300|uboot-airoha: update an7583 patches
+696e6de55d|Mikhail Kshevetskiy|Sun Aug 9 21:25:48 2026 +0300|uboot-airoha: update pinctrl driver to match linux-7.3
+dc1a8125d0|Mikhail Kshevetskiy|Mon Aug 24 02:39:54 2026 +0300|airoha: update pinctrl driver to match linux-7.3
+ecbf832c08|Murad Rabadanov|Wed Jul 29 08:52:42 2026 +0300|mediatek: filogic: add support for netis N6 V2
+e472455a76|Mieczyslaw Nalewaj|Sat Aug 22 11:00:58 2026 +0200|mediatek: mt7622: remove bogus dsa-migration from Netgear WAX206
+58aa1b7f16|Charles Joynson|Tue Aug 11 19:12:36 2026 -0400|ramips: mt7621: add TL-R605 v1 as alternative name for TP-Link ER605 v1
+c95c39b147|Charles Joynson|Sat Aug 8 00:50:30 2026 -0400|ramips: mt7621: add support for TP-Link ER605 v1
+5787af6688|Charles Joynson|Sat Aug 8 00:40:01 2026 -0400|base-files: add mtd_get_mac_uci_config()
+cf51ed8784|Fil Dunsky|Fri Jun 12 21:15:27 2026 +0300|mediatek: add support Teralink TL3020
+80bc5eabe5|Donghyun Ko|Tue Jun 9 21:12:33 2026 +0900|mediatek: fix WLAN LED indication for ipTIME AX3000SE
+390a867118|Magnus Kroken|Tue Aug 11 22:33:15 2026 +0200|mbedtls: update to 3.6.7
 </details>
