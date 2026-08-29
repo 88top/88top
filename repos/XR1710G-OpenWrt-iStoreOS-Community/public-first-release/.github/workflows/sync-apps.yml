@@ -1,0 +1,123 @@
+name: Sync APP Files
+run-name: Sync XR1710G APP Files
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: '操作 / Action'
+        type: choice
+        required: true
+        default: 'sync'
+        options:
+          - sync
+
+permissions:
+  contents: read
+
+jobs:
+  sync-target:
+    runs-on: ubuntu-latest
+    # 1. 在 job 级别统一设置环境变量
+    env:
+      FOLDERS: "luci-app-airoha-fancontrol luci-app-airoha-flowsense luci-app-airoha-npu"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Clone XR1710G Source
+        if: github.event.inputs.action != 'clear'
+        uses: actions/checkout@v4
+        with:
+          repository: naoki66/ImmortalWrt-for-Gemtek-XR1710G
+          path: ./tmp-xr1710g-source
+          token: ${{ github.token }}
+          fetch-depth: 1
+
+      - name: Show Source Files
+        if: github.event.inputs.action != 'clear'
+        run: |
+          echo "=== 检查源仓库中文件夹路径 ==="
+          # 直接使用环境变量 $FOLDERS
+          for dir in $FOLDERS; do
+            if [ -d "./tmp-xr1710g-source/$dir" ]; then
+              echo "✅ 源仓库根目录找到: $dir"
+            elif [ -d "./tmp-xr1710g-source/apps/$dir" ]; then
+              echo "✅ 源仓库 apps/ 下找到: $dir"
+            elif [ -d "./tmp-xr1710g-source/package/$dir" ]; then
+              echo "✅ 源仓库 package/ 下找到: $dir"
+            else
+              echo "⚠️ 警告: 未能在源仓库中找到 $dir"
+            fi
+          done
+
+      - name: Sync App Files to apps/
+        if: github.event.inputs.action == 'sync'
+        run: |
+          echo "=== 开始同步到本地 apps/ 目录 ==="
+          mkdir -p apps
+
+          for dir in $FOLDERS; do
+            TARGET_PATH="apps/$dir"
+            echo ""
+            echo "--> 处理目标路径: $TARGET_PATH"
+
+            # 1. 寻找源路径（兼容根目录、apps/ 和 package/ 目录）
+            SRC_PATH=""
+            if [ -d "./tmp-xr1710g-source/$dir" ]; then
+              SRC_PATH="./tmp-xr1710g-source/$dir"
+            elif [ -d "./tmp-xr1710g-source/apps/$dir" ]; then
+              SRC_PATH="./tmp-xr1710g-source/apps/$dir"
+            elif [ -d "./tmp-xr1710g-source/package/$dir" ]; then
+              SRC_PATH="./tmp-xr1710g-source/package/$dir"
+            fi
+
+            if [ -z "$SRC_PATH" ]; then
+              echo "❌ 跳过: 源仓库中未找到 $dir"
+              continue
+            fi
+
+            # 2. 对比差异并更新
+            if [ -d "$TARGET_PATH" ]; then
+              if diff -r -x ".git" "$SRC_PATH" "$TARGET_PATH" > /dev/null 2>&1; then
+                echo "ℹ️ 内容与源仓库完全相同，无需更新: $dir"
+              else
+                echo "⚡ 检测到更新，删除旧文件并重新同步: $dir"
+                rm -rf "$TARGET_PATH"
+                mkdir -p "$TARGET_PATH"
+                cp -r "$SRC_PATH"/* "$TARGET_PATH"/
+                rm -rf "$TARGET_PATH"/.git 2>/dev/null || true
+                chmod -R +x "$TARGET_PATH"
+                echo "✅ 已完成 $dir 的更新并赋予 +x 权限"
+              fi
+            else
+              echo "➕ 本地不存在，创建并同步: $dir"
+              mkdir -p "$TARGET_PATH"
+              cp -r "$SRC_PATH"/* "$TARGET_PATH"/
+              rm -rf "$TARGET_PATH"/.git 2>/dev/null || true
+              chmod -R +x "$TARGET_PATH"
+              echo "✅ 已完成 $dir 的首次同步并赋予 +x 权限"
+            fi
+          done
+
+          echo ""
+          echo "=== 验证结果 ==="
+          for dir in $FOLDERS; do
+            if [ -d "apps/$dir" ]; then
+              echo "✅ apps/$dir 验证存在"
+            else
+              echo "❌ apps/$dir 缺失"
+            fi
+          done
+
+      - name: Commit and Push
+        if: github.event.inputs.action == 'sync'
+        run: |
+          echo "=== 安全检查与人工审核边界 ==="
+          chmod +x scripts/test-status-and-istore-safety.sh
+          scripts/test-status-and-istore-safety.sh .
+          echo "上游同步只用于生成本次工作流差异，不再自动覆盖并推送维护分支。"
+          echo "请下载日志、审查 apps/ 差异，并通过常规提交流程合并。"

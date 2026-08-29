@@ -1,0 +1,262 @@
+name: Build Airoha_an7581-Wrt
+
+permissions:
+  contents: write
+  actions: write
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        default: 'false'
+env:
+  ARCHITECTURE: xr1710g
+  UPLOAD_BIN_DIR: false
+  UPLOAD_FIRMWARE: true
+  TZ: Asia/Shanghai
+  DIY_P2_DIR: diy-part2.d
+  TARGET: openwrt
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: XR1710G统一预构建门禁
+      run: |
+        chmod +x scripts/prebuild-xr1710g-release.sh
+        scripts/prebuild-xr1710g-release.sh
+
+    - name: 服务器信息
+      run: |
+        echo "------------------------------- CPU -------------------------------"
+        echo "物理数量: $(cat /proc/cpuinfo| grep 'physical id'| sort| uniq| wc -l)"
+        echo "型号: $(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c | xargs)"
+        echo "------------------------------- 内存 -------------------------------"
+        sudo lshw -short -C memory | grep GiB
+        echo "------------------------------- 磁盘 -------------------------------"
+        df -Th
+
+    - name: 初始化编译环境
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /etc/mysql /etc/php \
+          /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install $(cat $GITHUB_WORKSPACE/depends/ubuntu-22.04)
+        sudo timedatectl set-timezone "$TZ"
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
+
+    - name: 检查首启配置
+      run: |
+        CONFIG_PATH="./files/etc/uci-defaults/99-custom.sh"
+        echo "首启配置路径: $CONFIG_PATH"
+        cat "$CONFIG_PATH"
+
+    - name: 克隆源码 — OpenWrt
+      if: ${{ env.TARGET == 'openwrt' }}
+      env:
+        REPO_URL: https://github.com/YYH2913/openwrt
+        REPO_BRANCH: xr1710g-6.18-integration
+        REPO_COMMIT: 99598e539d47aa9f137baff43f0c2f77becc2e50
+      run: |
+        df -hT $PWD
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        git -C openwrt checkout "$REPO_COMMIT"
+        chmod -R +x openwrt/
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+
+    - name: 缓存构建动作
+      uses: klever1988/cachewrtbuild@main
+      with:
+        ccache: 'true'
+        mixkey: ubuntu-22.04-${{ env.ARCHITECTURE }}-${{ env.TARGET }}-v4
+        prefix: ${{ github.workspace }}/openwrt
+
+    - name: 加载 99-custom.sh 配置
+      run: |
+        cp -a files/. openwrt/files/
+        chmod 0755 openwrt/files/etc/uci-defaults/99-custom.sh
+        chmod 0755 openwrt/files/etc/uci-defaults/41_uhttpd_proxy_linkease
+        chmod 0755 openwrt/files/etc/uci-defaults/50-root-passwd
+        chmod 0755 openwrt/files/etc/uci-defaults/zz-xr1710g-services.sh
+        chmod 0755 openwrt/files/etc/init.d/xr1710g-bootlog
+        chmod 0755 openwrt/files/etc/init.d/xr1710g-cpufreq
+        chmod 0755 openwrt/files/usr/sbin/xr1710g-role
+        chmod 0755 openwrt/files/usr/sbin/xr1710g-wireless-defaults
+        chmod 0755 openwrt/files/usr/sbin/xr1710g-lan-cidr-guard
+        chmod 0755 openwrt/files/etc/init.d/xr1710g-lan-cidr-guard
+        chmod 0755 openwrt/files/etc/hotplug.d/iface/05-xr1710g-lan-cidr-guard
+        chmod 0755 openwrt/files/usr/sbin/xr1710g-mesh-diag
+        chmod 0755 openwrt/files/etc/openclash/core/clash_meta
+        echo "✅ 文件准备完成"
+
+    - name: 加载 feeds 配置 — OpenWrt
+      if: ${{ env.TARGET == 'openwrt' }}
+      run: cp feeds.d/openwrt openwrt/feeds.conf
+
+    - name: DIY part1 — 版本号
+      run: |
+        chmod +x scripts/diy-part1.sh
+        cd openwrt && "$GITHUB_WORKSPACE/scripts/diy-part1.sh"
+
+    - name: 更新 feeds
+      run: |
+        cd openwrt
+        ./scripts/feeds update -a
+        ./scripts/feeds uninstall -a >/dev/null 2>&1 || true
+        chmod +x "$GITHUB_WORKSPACE/scripts/prepare-istore-feed.sh"
+        "$GITHUB_WORKSPACE/scripts/prepare-istore-feed.sh"
+        XR_ISTORE_FIXTURE="$PWD/feeds/istore/luci/luci-app-store/root/bin/is-opkg" \
+        XR_QUICKSTART_FIXTURE="$PWD/feeds/linkease_nas_luci/luci/luci-app-quickstart/htdocs/luci-static/quickstart/index.js" \
+          "$GITHUB_WORKSPACE/scripts/test-status-and-istore-safety.sh" "$GITHUB_WORKSPACE"
+
+    - name: 安装 feeds
+      run: cd openwrt && ./scripts/feeds install -a
+
+    - name: 加载配置 — OpenWrt
+      if: ${{ env.TARGET == 'openwrt' }}
+      run: cp configs/openwrt.config openwrt/.config
+
+    - name: DIY part2 — OpenWrt
+      if: ${{ env.TARGET == 'openwrt' }}
+      run: |
+        # 1. 赋予 apps/ 目录下所有文件可执行权限
+        if [ -d "apps" ]; then
+          chmod -R +x apps/
+          # 2. 只有当 apps/ 目录下有内容时才进行复制
+          if [ -n "$(ls -A apps/ 2>/dev/null)" ]; then
+            cp -a apps/. openwrt/package/
+            echo "=== 已成功复制 apps/ 内容到 openwrt/package/ ==="
+          fi
+        fi
+        ls -la openwrt/package/
+        
+        chmod +x "$DIY_P2_DIR/openwrt.sh"
+        cd openwrt && "$GITHUB_WORKSPACE/$DIY_P2_DIR/openwrt.sh"
+
+    - name: SSH
+      uses: P3TERX/ssh2actions@v1.0.0
+      if: ${{ github.event.inputs.ssh == 'true' }}
+      env:
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+
+    - name: 下载软件包
+      id: package
+      run: |
+        cd openwrt
+        make defconfig
+        BUILD_JOBS="$(sh "$GITHUB_WORKSPACE/scripts/detect-build-jobs.sh")"
+        echo "Using $BUILD_JOBS parallel build jobs (override with XR_BUILD_JOBS)"
+        make download -j"$BUILD_JOBS"
+        find dl -maxdepth 1 -type f -size -1024c -exec ls -l {} \;
+        find dl -maxdepth 1 -type f -size -1024c -exec rm -f {} \;
+
+    - name: 编译固件
+      id: compile
+      run: |
+        cd openwrt
+        BUILD_JOBS="$(sh "$GITHUB_WORKSPACE/scripts/detect-build-jobs.sh")"
+        echo "$(nproc) host threads, $BUILD_JOBS parallel build jobs"
+        make defconfig
+        if ! make olddefconfig; then
+          yes "" | make oldconfig
+        fi
+        grep -qx 'CONFIG_PACKAGE_luci-theme-argon=y' .config
+        if grep -Eq '^CONFIG_(DEFAULT|PACKAGE)_luci-(theme-glass|i18n-glass-zh-cn)=y$' .config; then
+          echo 'GlassTheme unexpectedly remains selected after defconfig' >&2
+          exit 1
+        fi
+        for xr_package in \
+          luci-app-airoha-fancontrol \
+          luci-app-airoha-flowsense \
+          luci-app-airoha-npu \
+          luci-app-xr1710g-recovery \
+          xr1710g-status-core; do
+          make "package/$xr_package/clean"
+        done
+        make -j"$BUILD_JOBS" || make -j1 || make -j1 V=s
+        chmod +x "$GITHUB_WORKSPACE/scripts/rebuild-initramfs-recovery.sh"
+        "$GITHUB_WORKSPACE/scripts/rebuild-initramfs-recovery.sh" "$PWD"
+        chmod +x "$GITHUB_WORKSPACE/scripts/verify-xr1710g-build.sh"
+        "$GITHUB_WORKSPACE/scripts/verify-xr1710g-build.sh" "$PWD"
+        cp "$GITHUB_WORKSPACE/RELEASE-NOTES.md" \
+          bin/targets/airoha/an7581/RELEASE-NOTES.md
+        cp "$GITHUB_WORKSPACE/FLASHING-GUIDE.md" \
+          bin/targets/airoha/an7581/FLASHING-GUIDE.md
+        # 去掉了 %H%M，仅保留年月日
+        echo "FILE_DATE=_$(date +'%Y%m%d')" >> $GITHUB_ENV
+        echo "COMPILED=true" >> $GITHUB_ENV
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 磁盘空间
+      if: (!cancelled())
+      run: df -hT
+
+    - name: 上传 bin 目录
+      uses: actions/upload-artifact@v4
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      with:
+        name: OpenWrt_bin_${{ env.TARGET }}${{ env.FILE_DATE }}
+        path: openwrt/bin
+
+    - name: 整理固件
+      id: organize
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      run: |
+        target_dir="$GITHUB_WORKSPACE/openwrt/bin/targets/airoha/an7581"
+        public_dir="$GITHUB_WORKSPACE/xr1710g-v1.4.0-public-assets"
+        rm -rf "$public_dir"
+        mkdir -p "$public_dir"
+
+        mapfile -t recovery_images < <(
+          find "$target_dir" -maxdepth 1 -type f \
+            -name '*-v1.4.0-*-econet_xr1710g-ubi-initramfs-recovery.itb'
+        )
+        mapfile -t sysupgrade_images < <(
+          find "$target_dir" -maxdepth 1 -type f \
+            -name '*-v1.4.0-*-econet_xr1710g-ubi-squashfs-sysupgrade.itb'
+        )
+        [ "${#recovery_images[@]}" -eq 1 ]
+        [ "${#sysupgrade_images[@]}" -eq 1 ]
+
+        cp "${recovery_images[0]}" \
+          "$public_dir/xr1710g-community-v1.4.0-recovery.itb"
+        cp "${sysupgrade_images[0]}" \
+          "$public_dir/xr1710g-community-v1.4.0-sysupgrade.itb"
+        cp "$GITHUB_WORKSPACE/FLASHING-GUIDE.md" "$public_dir/"
+        (
+          cd "$public_dir"
+          sha256sum \
+            xr1710g-community-v1.4.0-recovery.itb \
+            xr1710g-community-v1.4.0-sysupgrade.itb \
+            > SHA256SUMS.txt
+          sha256sum -c SHA256SUMS.txt
+        )
+
+        # Official Releases are curated manually so only the verified U-Boot
+        # slot image is added beside these four generated public assets.
+        echo "FIRMWARE=$public_dir" >> $GITHUB_ENV
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 上传固件
+      uses: actions/upload-artifact@v4
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      with:
+        name: XR1710G-v1.4.0-public-assets
+        path: ${{ env.FIRMWARE }}/*
+
+    - name: 清理运行记录
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh run list --workflow="Build Airoha_an7581-Wrt" --limit 30 --json databaseId --jq '.[].databaseId' | \
+          tail -n +2 | xargs -I {} gh run delete {} --yes || true

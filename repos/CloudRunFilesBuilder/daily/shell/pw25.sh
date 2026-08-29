@@ -138,7 +138,6 @@ build_one() {
     download_target "tcping"                   "$source_arch" "passwall_packages" '^tcping-[0-9].*\.apk$'                "$apk_dir"
     download_target "geoview"                  "$source_arch" "passwall_packages" '^geoview-[0-9].*\.apk$'               "$apk_dir"
     download_target "xray-core"                "$source_arch" "passwall_packages" '^xray-core-[0-9].*\.apk$'             "$apk_dir"
-    download_target "sing-box"                 "$source_arch" "passwall_packages" '^sing-box-[0-9].*\.apk$'              "$apk_dir"
     download_target "hysteria"                 "$source_arch" "passwall_packages" '^hysteria-[0-9].*\.apk$'              "$apk_dir"
     download_target "v2ray-geoip"              "$source_arch" "passwall_packages" '^v2ray-geoip-[0-9].*\.apk$'           "$apk_dir"
     download_target "v2ray-geosite"            "$source_arch" "passwall_packages" '^v2ray-geosite-[0-9].*\.apk$'         "$apk_dir"

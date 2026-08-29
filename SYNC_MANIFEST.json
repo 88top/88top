@@ -1,7 +1,7 @@
 {
   "timeflysoon/2FAGuard": {
     "main": {
-      "remote_sha": "112da420210e204870b9557d72b73db59d422665"
+      "remote_sha": "38acce233850ff25bb9fece68bf22b6222a181f2"
     }
   },
   "timeflysoon/3x-ui": {
@@ -63,7 +63,7 @@
   },
   "timeflysoon/CloudRunFilesBuilder": {
     "daily": {
-      "remote_sha": "9223148f1bdfb725de824f3cf93a1b41feb43832"
+      "remote_sha": "ec1cb9a788492272641166f6dc68a8f7a824eb5c"
     }
   },
   "timeflysoon/CloudSaver": {
@@ -124,7 +124,7 @@
   },
   "timeflysoon/LAVFilters": {
     "master": {
-      "remote_sha": "63d24baf2316d41ac8b9f8a83f35f6bc0ec42b43"
+      "remote_sha": "5424579d01b5d53c9fcca009e894890ae4bf0f7d"
     }
   },
   "timeflysoon/Microsoft-Activation-Scripts": {
@@ -137,7 +137,7 @@
   },
   "timeflysoon/MikroTikPatch": {
     "main": {
-      "remote_sha": "a988945f52ff226b9166d645750ac8bd7df2149d"
+      "remote_sha": "c126421897163e8b4a52f9647b85851420ff8356"
     }
   },
   "timeflysoon/MusicFree": {
@@ -237,7 +237,7 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "ddf21098690c25ea1ecc8f7c080dc155b3fc8d26"
+      "remote_sha": "bd25093b498842e5088fbd729d7d5c6af538af40"
     }
   },
   "timeflysoon/commonscript": {
@@ -267,7 +267,7 @@
   },
   "timeflysoon/github-chinese": {
     "gh-pages": {
-      "remote_sha": "bef04d90d6ef75858ee124928fde182515edba25"
+      "remote_sha": "f35c2d0c885dabca8ffb9d567c5637b400054b85"
     }
   },
   "timeflysoon/gl-inet-onescript": {
@@ -287,7 +287,7 @@
   },
   "timeflysoon/immortalwrt": {
     "master": {
-      "remote_sha": "d2dc130d7f8341741df04eaaf5fd4c74dcc447d7"
+      "remote_sha": "db5c5de56a4ca86b4f1705d38f343ab0075d185c"
     },
     "openwrt-18.06": {
       "remote_sha": "f7bc84bd30a038b0fd251ce59b6619e5eae94848"
@@ -337,7 +337,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "51cf1cc55a78bb0ea36fee49c3327634578f83c5"
+      "remote_sha": "9f8c85d0b7d91b40ad7bed2ef5e779212c96084f"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -358,13 +358,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "ea397961a5500b6f759f566eed53e2240e260e0f"
+      "remote_sha": "38ec91a5d80f699e1b33a78ee7a6a0d00ab50180"
     },
     "release": {
-      "remote_sha": "04abd4efbdd55362f84ea9d7e720c5fe1b87cd00"
+      "remote_sha": "e3268b1fc9c67943e37aa999b6a4b34c07b970d8"
     },
     "sing": {
-      "remote_sha": "6582a28ed9fd858adf49788c249d5d0c172fedbd"
+      "remote_sha": "d16e48ffb31b831ff65be7dd8b6c10585170192c"
     }
   },
   "timeflysoon/nanopi-openwrt": {
@@ -405,7 +405,7 @@
   },
   "timeflysoon/rule": {
     "main": {
-      "remote_sha": "140696a427aecb637c29fe4dd7dca19c156e77e8"
+      "remote_sha": "1bd5a6dafba19896cc4a88c3e305eb9fc206e8b1"
     },
     "release": {
       "remote_sha": "ac4c134949902a46e9560388b78d144d5d8f88d5"
@@ -430,7 +430,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "9f0c7606c0667048004053d18ceeaa1396951fd1"
+      "remote_sha": "826b57d47caf0a1c1860bd0522b2c832afbaebf4"
     }
   },
   "timeflysoon/store": {
@@ -467,10 +467,10 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "ea397961a5500b6f759f566eed53e2240e260e0f"
+      "remote_sha": "38ec91a5d80f699e1b33a78ee7a6a0d00ab50180"
     },
     "release": {
-      "remote_sha": "04abd4efbdd55362f84ea9d7e720c5fe1b87cd00"
+      "remote_sha": "e3268b1fc9c67943e37aa999b6a4b34c07b970d8"
     }
   },
   "timeflysoon/turboacc": {
@@ -480,7 +480,7 @@
   },
   "timeflysoon/v2rayN": {
     "master": {
-      "remote_sha": "0a2f3e4f2209bf417f810f7a741a69b44427ee02"
+      "remote_sha": "3f14c86a04989d7d0194a4c37e082f258eaf9ed0"
     },
     "v7_16": {
       "remote_sha": "654d7d83d09d1683c60501c9fa853a19c3dd9d6b"
@@ -496,7 +496,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "91c2849a9a8eabbe0fe592f0f1c6bba34ea1af68"
+      "remote_sha": "511b795cf96d88a4b7f60428a7d05ac350cbebe8"
     }
   },
   "timeflysoon/weasel": {
@@ -529,7 +529,12 @@
   },
   "timeflysoon/Prism-Browser-Free": {
     "main": {
-      "remote_sha": "4dba39be360a4e6479b7a148a7eb49e0fb9a876a"
+      "remote_sha": "3d0d8e6cb376d5e438bc18e89d76ce893ff2c859"
+    }
+  },
+  "timeflysoon/XR1710G-OpenWrt-iStoreOS-Community": {
+    "public-first-release": {
+      "remote_sha": "7023ffa058415232a3b431d8903a0df5c4641e0d"
     }
   }
 }
