@@ -18,6 +18,7 @@
 package com.vrem.wifianalyzer.wifi.scanner
 
 import android.os.Handler
+import com.vrem.wifianalyzer.Configuration
 import com.vrem.wifianalyzer.MainActivity
 import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.manager.WiFiManagerWrapper
@@ -32,6 +33,7 @@ class ScannerServiceTest {
     private val mainActivity: MainActivity = mock()
     private val handler: Handler = mock()
     private val settings: Settings = mock()
+    private val configuration: Configuration = mock()
 
     @After
     fun tearDown() {
@@ -39,13 +41,13 @@ class ScannerServiceTest {
         verifyNoMoreInteractions(mainActivity)
         verifyNoMoreInteractions(handler)
         verifyNoMoreInteractions(settings)
+        verifyNoMoreInteractions(configuration)
     }
 
     @Test
     fun makeScannerService() {
-        // setup
-        // execute
-        val actual = makeScannerService(mainActivity, wiFiManagerWrapper, handler, settings) as Scanner
+        // setup && execute
+        val actual = makeScannerService(mainActivity, wiFiManagerWrapper, handler, settings, configuration) as Scanner
         // validate
         assertThat(actual.wiFiManagerWrapper).isEqualTo(wiFiManagerWrapper)
         assertThat(actual.settings).isEqualTo(settings)

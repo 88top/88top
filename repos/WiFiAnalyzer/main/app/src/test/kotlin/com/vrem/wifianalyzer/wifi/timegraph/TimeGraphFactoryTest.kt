@@ -19,7 +19,6 @@ package com.vrem.wifianalyzer.wifi.timegraph
 
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.vrem.wifianalyzer.MainContext
 import com.vrem.wifianalyzer.RobolectricUtil
 import com.vrem.wifianalyzer.settings.ThemeStyle
 import org.assertj.core.api.Assertions.assertThat
@@ -35,7 +34,7 @@ class TimeGraphFactoryTest {
     @Test
     fun makeGraphShouldNotBeNull() {
         // Act
-        val actual = makeGraph(MainContext.INSTANCE, 10, ThemeStyle.DARK)
+        val actual = makeGraph(mainActivity, 10, ThemeStyle.DARK)
         // Assert
         assertThat(actual).isNotNull()
     }

@@ -26,10 +26,10 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.vrem.util.EMPTY
-import com.vrem.wifianalyzer.MainContextHelper
 import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.RobolectricUtil
 import com.vrem.wifianalyzer.databinding.ChannelRatingBestBinding
+import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.band.WiFiBand
 import com.vrem.wifianalyzer.wifi.band.WiFiChannel
 import com.vrem.wifianalyzer.wifi.model.ChannelAPCount
@@ -60,18 +60,17 @@ import java.util.Locale
 @Config(sdk = [Build.VERSION_CODES.BAKLAVA])
 class ChannelRatingAdapterTest {
     private val mainActivity = RobolectricUtil.INSTANCE.activity
-    private val settings = MainContextHelper.INSTANCE.settings
+    private val settings: Settings = mock()
     private val channelRating: ChannelRating = mock()
     private val inflater: LayoutInflater = LayoutInflater.from(mainActivity)
     private val parent: ViewGroup = LinearLayout(mainActivity)
     private val binding: ChannelRatingBestBinding = ChannelRatingBestBinding.inflate(inflater, parent, false)
-    private val fixture = ChannelRatingAdapter(mainActivity, binding, channelRating)
+    private val fixture = ChannelRatingAdapter(mainActivity, binding, channelRating, settings)
 
     @After
     fun tearDown() {
         verifyNoMoreInteractions(settings)
         verifyNoMoreInteractions(channelRating)
-        MainContextHelper.INSTANCE.restore()
     }
 
     @Test
@@ -151,7 +150,7 @@ class ChannelRatingAdapterTest {
     @Test
     fun update() {
         // setup
-        val expected = mainActivity.resources.getText(R.string.channel_rating_best_none).toString()
+        val expected = mainActivity.getText(R.string.channel_rating_best_none).toString()
         val wiFiData = WiFiData(listOf(), WiFiConnection.EMPTY)
         val wiFiBand = WiFiBand.GHZ5
         val wiFiChannels = wiFiBand.wiFiChannels.availableChannels(wiFiBand, Locale.US.country)
@@ -172,12 +171,11 @@ class ChannelRatingAdapterTest {
     @Test
     fun bestChannelsGHZ2WithErrorMessage() {
         // setup
-        val resources = mainActivity.resources
         val expected =
             String.format(
-                resources.getString(R.string.channel_rating_best_alternative),
-                resources.getString(R.string.channel_rating_best_none),
-                resources.getString(WiFiBand.GHZ5.textResource),
+                mainActivity.getString(R.string.channel_rating_best_alternative),
+                mainActivity.getString(R.string.channel_rating_best_none),
+                mainActivity.getString(WiFiBand.GHZ5.textResource),
             )
         val expectedColor = ContextCompat.getColor(mainActivity, R.color.error)
         val wiFiChannels: List<WiFiChannel> = listOf()
@@ -194,7 +192,7 @@ class ChannelRatingAdapterTest {
     @Test
     fun bestChannelsGHZ5WithErrorMessage() {
         // setup
-        val expected = mainActivity.resources.getText(R.string.channel_rating_best_none).toString()
+        val expected = mainActivity.getText(R.string.channel_rating_best_none).toString()
         val expectedColor = ContextCompat.getColor(mainActivity, R.color.error)
         val wiFiChannels: List<WiFiChannel> = listOf()
         val channelAPCounts: List<ChannelAPCount> = listOf()

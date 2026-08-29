@@ -18,7 +18,8 @@
 package com.vrem.wifianalyzer.wifi.accesspoint
 
 import android.widget.ExpandableListView
-import com.vrem.wifianalyzer.MainContextHelper.INSTANCE
+import com.vrem.wifianalyzer.Configuration
+import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.band.WiFiBand
 import com.vrem.wifianalyzer.wifi.model.GroupBy
 import com.vrem.wifianalyzer.wifi.model.Security
@@ -45,9 +46,9 @@ class AccessPointsAdapterDataTest {
     private val wiFiData: WiFiData = mock()
     private val accessPointsAdapterGroup: AccessPointsAdapterGroup = mock()
     private val expandableListView: ExpandableListView = mock()
-    private val settings = INSTANCE.settings
-    private val configuration = INSTANCE.configuration
-    private val fixture = AccessPointsAdapterData(accessPointsAdapterGroup)
+    private val settings: Settings = mock()
+    private val configuration: Configuration = mock()
+    private val fixture = AccessPointsAdapterData(accessPointsAdapterGroup, settings, configuration)
 
     @After
     fun tearDown() {
@@ -55,7 +56,6 @@ class AccessPointsAdapterDataTest {
         verifyNoMoreInteractions(accessPointsAdapterGroup)
         verifyNoMoreInteractions(expandableListView)
         verifyNoMoreInteractions(configuration)
-        INSTANCE.restore()
     }
 
     @Test

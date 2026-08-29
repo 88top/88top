@@ -18,6 +18,7 @@
 package com.vrem.wifianalyzer.wifi.filter.adapter
 
 import com.vrem.annotation.OpenClass
+import com.vrem.wifianalyzer.MainActivity
 import com.vrem.wifianalyzer.MainContext
 import com.vrem.wifianalyzer.navigation.NavigationMenu
 import com.vrem.wifianalyzer.settings.Settings
@@ -26,6 +27,7 @@ import java.io.Serializable
 @OpenClass
 class FiltersAdapter(
     private val settings: Settings,
+    private val mainActivity: MainActivity = MainContext.INSTANCE.mainActivity,
 ) {
     private var ssidAdapter: SSIDAdapter = SSIDAdapter(settings.findSSIDs())
     private var wiFiBandAdapter: WiFiBandAdapter = WiFiBandAdapter(settings.findWiFiBands())
@@ -64,6 +66,5 @@ class FiltersAdapter(
             listOf(ssidAdapter, strengthAdapter, securityAdapter)
         }
 
-    private fun isAccessPoints(): Boolean =
-        NavigationMenu.ACCESS_POINTS == MainContext.INSTANCE.mainActivity.currentNavigationMenu()
+    private fun isAccessPoints(): Boolean = NavigationMenu.ACCESS_POINTS == mainActivity.currentNavigationMenu()
 }

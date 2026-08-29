@@ -18,7 +18,7 @@
 package com.vrem.wifianalyzer.wifi.timegraph
 
 import com.patrykandpatrick.vico.views.common.data.ExtraStore
-import com.vrem.wifianalyzer.MainContextHelper
+import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.graphutils.MAX_SCAN_COUNT
 import com.vrem.wifianalyzer.wifi.graphutils.MIN_Y
 import org.assertj.core.api.Assertions.assertThat
@@ -33,15 +33,13 @@ import org.mockito.kotlin.whenever
 private const val NUM_X_TIME = 21
 
 class TimeLayerRangeProviderTest {
-    private val mainActivity = MainContextHelper.INSTANCE.mainActivity
-    private val settings = MainContextHelper.INSTANCE.settings
+    private val settings: Settings = mock()
     private val extraStore: ExtraStore = mock()
-    private val fixture = TimeLayerRangeProvider()
+    private val fixture = TimeLayerRangeProvider(settings)
 
     @After
     fun tearDown() {
-        MainContextHelper.INSTANCE.restore()
-        verifyNoMoreInteractions(mainActivity, settings, extraStore)
+        verifyNoMoreInteractions(settings, extraStore)
     }
 
     @Test

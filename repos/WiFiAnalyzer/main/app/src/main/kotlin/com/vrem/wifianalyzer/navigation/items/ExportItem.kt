@@ -25,18 +25,17 @@ import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.export.Export
 import com.vrem.wifianalyzer.navigation.NavigationMenu
 import com.vrem.wifianalyzer.wifi.model.WiFiDetail
+import com.vrem.wifianalyzer.wifi.scanner.ScannerService
 
 internal class ExportItem(
     private val export: Export,
+    private val scannerService: () -> ScannerService = MainContext.INSTANCE::scannerService,
 ) : NavigationItem {
     override fun activate(
         mainActivity: MainActivity,
         navigationMenu: NavigationMenu,
     ) {
-        val wiFiDetails: List<WiFiDetail> =
-            MainContext.INSTANCE.scannerService
-                .wiFiData()
-                .wiFiDetails
+        val wiFiDetails: List<WiFiDetail> = scannerService().wiFiData().wiFiDetails
         if (wiFiDetails.isEmpty()) {
             Toast.makeText(mainActivity, R.string.no_data, Toast.LENGTH_LONG).show()
             return

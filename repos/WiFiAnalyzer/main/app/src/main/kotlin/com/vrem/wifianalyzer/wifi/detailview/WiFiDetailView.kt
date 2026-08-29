@@ -17,6 +17,7 @@
  */
 package com.vrem.wifianalyzer.wifi.detailview
 
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -33,7 +34,9 @@ import com.vrem.wifianalyzer.wifi.model.WiFiSecurity
 import com.vrem.wifianalyzer.wifi.model.WiFiSignal
 
 @OpenClass
-class WiFiDetailView {
+class WiFiDetailView(
+    private val layoutInflater: LayoutInflater = MainContext.INSTANCE.layoutInflater,
+) {
     fun makeView(
         convertView: View?,
         parent: ViewGroup?,
@@ -44,7 +47,7 @@ class WiFiDetailView {
                 .accessPointView()
                 .layout,
     ): View {
-        val view = convertView ?: MainContext.INSTANCE.layoutInflater.inflate(layout, parent, false)
+        val view = convertView ?: layoutInflater.inflate(layout, parent, false)
         setViewCompact(view, wiFiDetail, child)
         setViewExtra(view, wiFiDetail)
         setViewVendor(view, R.id.vendorShort, wiFiDetail.wiFiAdditional)
@@ -55,7 +58,7 @@ class WiFiDetailView {
         wiFiDetail: WiFiDetail,
         ssidColor: Int? = null,
     ): View {
-        val view = MainContext.INSTANCE.layoutInflater.inflate(R.layout.wifi_detail_view_popup, null)
+        val view = layoutInflater.inflate(R.layout.wifi_detail_view_popup, null)
         setViewCompact(view, wiFiDetail, false, ssidColor)
         setViewExtra(view, wiFiDetail)
         setViewCapabilitiesLong(view, wiFiDetail.wiFiSecurity)

@@ -18,7 +18,6 @@
 package com.vrem.wifianalyzer
 
 import android.content.Context
-import android.content.res.Resources
 import android.net.wifi.WifiManager
 import android.os.Handler
 import android.os.Looper
@@ -47,8 +46,6 @@ enum class MainContext {
 
     val context: Context get() = mainActivity.applicationContext
 
-    val resources: Resources get() = context.resources
-
     val layoutInflater: LayoutInflater get() = mainActivity.layoutInflater
 
     private val wiFiManager: WifiManager get() = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -63,7 +60,14 @@ enum class MainContext {
         vendorService = VendorService(activity.resources)
         wiFiManagerWrapper = WiFiManagerWrapper(wiFiManager)
         permissionService = PermissionService(activity)
-        scannerService = makeScannerService(mainActivity, wiFiManagerWrapper, Handler(Looper.getMainLooper()), settings)
+        scannerService =
+            makeScannerService(
+                mainActivity,
+                wiFiManagerWrapper,
+                Handler(Looper.getMainLooper()),
+                settings,
+                configuration,
+            )
         filtersAdapter = FiltersAdapter(settings)
     }
 }

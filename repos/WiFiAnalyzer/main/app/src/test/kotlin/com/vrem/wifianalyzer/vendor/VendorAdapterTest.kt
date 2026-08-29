@@ -23,7 +23,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.vrem.wifianalyzer.MainActivity
-import com.vrem.wifianalyzer.MainContextHelper.INSTANCE
 import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.RobolectricUtil
 import com.vrem.wifianalyzer.vendor.model.VendorService
@@ -54,7 +53,10 @@ class VendorAdapterTest {
     private lateinit var fixture: VendorAdapter
 
     private val mainActivity: MainActivity = RobolectricUtil.INSTANCE.activity
-    private val vendorService: VendorService = INSTANCE.vendorService
+    private val vendorService: VendorService = mock()
+    private val rootView: View = mock()
+    private val vendorNameView: TextView = mock()
+    private val vendorMacsView: TextView = mock()
     private val vendors: List<String> = listOf(vendorName1, vendorName2, vendorName3)
     private val macs: List<String> = listOf("MAC1", "MAC2", "MAC3")
 
@@ -67,8 +69,7 @@ class VendorAdapterTest {
     @After
     fun tearDown() {
         verify(vendorService, atLeastOnce()).findVendors()
-        verifyNoMoreInteractions(vendorService)
-        INSTANCE.restore()
+        verifyNoMoreInteractions(vendorService, rootView, vendorNameView, vendorMacsView)
     }
 
     @Test
@@ -116,9 +117,6 @@ class VendorAdapterTest {
     @Test
     fun getViewWhenRootViewNotNull() {
         // setup
-        val rootView: View = mock()
-        val vendorNameView: TextView = mock()
-        val vendorMacsView: TextView = mock()
         val viewGroup = mainActivity.findViewById<ViewGroup>(android.R.id.content)
         val expected = macs.joinToString(separator = ", ")
         whenever(vendorService.findMacAddresses(vendorName2)).thenReturn(macs)

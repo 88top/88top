@@ -18,14 +18,13 @@
 package com.vrem.wifianalyzer
 
 import android.content.Intent
-import android.os.Build
-import android.provider.Settings
+import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
 import android.view.WindowManager
-import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.Toolbar
+import com.vrem.wifianalyzer.settings.Settings
 
-internal fun MainActivity.keepScreenOn() =
-    if (MainContext.INSTANCE.settings.keepScreenOn()) {
+internal fun MainActivity.keepScreenOn(settings: Settings) =
+    if (settings.keepScreenOn()) {
         this.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     } else {
         this.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -41,10 +40,4 @@ internal fun MainActivity.setupToolbar(): Toolbar {
     return toolbar
 }
 
-private fun makeIntent(action: String): Intent = Intent(action)
-
-@RequiresApi(Build.VERSION_CODES.Q)
-internal fun MainActivity.startWiFiSettings() = this.startActivity(makeIntent(Settings.Panel.ACTION_WIFI))
-
-internal fun MainActivity.startLocationSettings() =
-    this.startActivity(makeIntent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+internal fun MainActivity.startLocationSettings() = this.startActivity(Intent(ACTION_LOCATION_SOURCE_SETTINGS))

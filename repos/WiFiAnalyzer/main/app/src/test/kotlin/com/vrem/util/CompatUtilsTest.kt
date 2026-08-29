@@ -22,6 +22,8 @@ import android.content.ContextWrapper
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.PackageInfoFlags
+import android.content.pm.Signature
+import android.content.pm.SigningInfo
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
@@ -36,11 +38,14 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import java.util.Locale
 
@@ -132,6 +137,117 @@ class CompatUtilsTest {
     }
 
     @Test
+    fun contextSignature() {
+        // Arrange
+        val packageName = "Package Name"
+        packageInfo.signingInfo = signingInfo(Signature("0a0b0c"))
+        doReturn(packageManager).whenever(context).packageManager
+        doReturn(packageName).whenever(context).packageName
+        doReturn(packageInfo)
+            .whenever(packageManager)
+            .getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+        // Act
+        val actual = context.signature()
+        // Assert
+        assertThat(actual).isEqualTo("9909ec")
+        verify(packageManager).getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+        verify(context).packageName
+        verify(context).packageManager
+    }
+
+    @Test
+    fun contextSignatureWithMultipleSigners() {
+        // Arrange
+        val packageName = "Package Name"
+        packageInfo.signingInfo = signingInfo(Signature("0a0b0c"), Signature("ffffff"))
+        doReturn(packageManager).whenever(context).packageManager
+        doReturn(packageName).whenever(context).packageName
+        doReturn(packageInfo)
+            .whenever(packageManager)
+            .getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+        // Act
+        val actual = context.signature()
+        // Assert
+        assertThat(actual).isEqualTo("9909ec")
+        verify(packageManager).getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+        verify(context).packageName
+        verify(context).packageManager
+    }
+
+    @Test
+    fun contextSignatureWhenNoSignatures() {
+        // Arrange
+        val packageName = "Package Name"
+        packageInfo.signingInfo = signingInfo()
+        doReturn(packageManager).whenever(context).packageManager
+        doReturn(packageName).whenever(context).packageName
+        doReturn(packageInfo)
+            .whenever(packageManager)
+            .getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+        // Act
+        val actual = context.signature()
+        // Assert
+        assertThat(actual).isEqualTo(String.EMPTY)
+        verify(packageManager).getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+        verify(context).packageName
+        verify(context).packageManager
+    }
+
+    @Test
+    fun contextSignatureWhenPackageNotFound() {
+        // Arrange
+        val packageName = "Package Name"
+        doReturn(packageManager).whenever(context).packageManager
+        doReturn(packageName).whenever(context).packageName
+        doThrow(PackageManager.NameNotFoundException())
+            .whenever(packageManager)
+            .getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+        // Act
+        val actual = context.signature()
+        // Assert
+        assertThat(actual).isEqualTo(String.EMPTY)
+        verify(packageManager).getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+        verify(context).packageName
+        verify(context).packageManager
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.O_MR1])
+    fun contextSignatureLegacy() {
+        // Arrange
+        val packageName = "Package Name"
+        packageInfo.signatures = arrayOf(Signature("0a0b0c"))
+        doReturn(packageManager).whenever(context).packageManager
+        doReturn(packageName).whenever(context).packageName
+        doReturn(packageInfo).whenever(packageManager).getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
+        // Act
+        val actual = context.signature()
+        // Assert
+        assertThat(actual).isEqualTo("9909ec")
+        verify(packageManager).getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
+        verify(context).packageName
+        verify(context).packageManager
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.O_MR1])
+    fun contextSignatureLegacyWhenNoSignatures() {
+        // Arrange
+        val packageName = "Package Name"
+        packageInfo.signatures = arrayOf()
+        doReturn(packageManager).whenever(context).packageManager
+        doReturn(packageName).whenever(context).packageName
+        doReturn(packageInfo).whenever(packageManager).getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
+        // Act
+        val actual = context.signature()
+        // Assert
+        assertThat(actual).isEqualTo(String.EMPTY)
+        verify(packageManager).getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
+        verify(context).packageName
+        verify(context).packageManager
+    }
+
+    @Test
     fun scanResultSSID() {
         // setup
         val expected = "SSID"
@@ -191,4 +307,7 @@ class CompatUtilsTest {
         // validate
         assertThat(actual).isEqualTo(String.EMPTY)
     }
+
+    private fun signingInfo(vararg signatures: Signature): SigningInfo =
+        SigningInfo().also { shadowOf(it).setSignatures(arrayOf(*signatures)) }
 }

@@ -17,13 +17,14 @@
  */
 package com.vrem.wifianalyzer.wifi.model
 
-import com.vrem.wifianalyzer.MainContextHelper.INSTANCE
+import com.vrem.wifianalyzer.vendor.model.VendorService
 import com.vrem.wifianalyzer.wifi.band.WiFiBand
 import com.vrem.wifianalyzer.wifi.predicate.Predicate
 import com.vrem.wifianalyzer.wifi.predicate.predicate
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Test
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
@@ -47,16 +48,15 @@ class WiFiDataTest {
     private val level0 = -5
     private val level1 = -4
     private val level2 = -3
-    private val vendorService = INSTANCE.vendorService
+    private val vendorService: VendorService = mock()
     private val wiFiIdentifier = WiFiIdentifier(ssid1, bssid1)
     private val wiFiConnection = WiFiConnection(wiFiIdentifier, ipAddress, linkSpeed)
     private val wiFiDetails = withWiFiDetails()
-    private val fixture = WiFiData(wiFiDetails, wiFiConnection)
+    private val fixture = WiFiData(wiFiDetails, wiFiConnection) { vendorService }
 
     @After
     fun tearDown() {
         verifyNoMoreInteractions(vendorService)
-        INSTANCE.restore()
     }
 
     @Test

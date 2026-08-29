@@ -37,26 +37,23 @@ class ConnectionView(
     private val wiFiDetailView: WiFiDetailView = WiFiDetailView(),
     private val wiFiDetailPopup: WiFiDetailPopup = WiFiDetailPopup(),
     private val warningView: WarningView = WarningView(mainActivity),
+    private val settings: Settings = MainContext.INSTANCE.settings,
 ) : UpdateNotifier {
     override fun update(wiFiData: WiFiData) {
-        val mainContext = MainContext.INSTANCE
-        displayConnection(wiFiData, mainContext.settings)
-        displayWiFiSupport(mainContext.settings)
+        displayConnection(wiFiData)
+        displayWiFiSupport()
         warningView.update(wiFiData)
     }
 
-    private fun displayWiFiSupport(settings: Settings) {
+    private fun displayWiFiSupport() {
         val wiFiBand = settings.wiFiBand()
         val visibility = if (wiFiBand.available()) View.GONE else View.VISIBLE
         val textView = mainActivity.findViewById<TextView>(R.id.main_wifi_support)
         textView.visibility = visibility
-        textView.text = mainActivity.resources.getString(wiFiBand.textResource)
+        textView.text = mainActivity.getString(wiFiBand.textResource)
     }
 
-    private fun displayConnection(
-        wiFiData: WiFiData,
-        settings: Settings,
-    ) {
+    private fun displayConnection(wiFiData: WiFiData) {
         val connectionViewType = settings.connectionViewType()
         val connection = wiFiData.connection()
         val connectionView = mainActivity.findViewById<View>(R.id.connection)

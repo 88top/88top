@@ -19,9 +19,11 @@ package com.vrem.wifianalyzer.wifi.accesspoint
 
 import android.widget.ExpandableListView
 import com.vrem.annotation.OpenClass
+import com.vrem.wifianalyzer.Configuration
 import com.vrem.wifianalyzer.MainContext
 import com.vrem.wifianalyzer.SIZE_MAX
 import com.vrem.wifianalyzer.SIZE_MIN
+import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.graphutils.TYPE1
 import com.vrem.wifianalyzer.wifi.graphutils.TYPE2
 import com.vrem.wifianalyzer.wifi.graphutils.TYPE3
@@ -33,14 +35,15 @@ import java.security.MessageDigest
 @OpenClass
 class AccessPointsAdapterData(
     private val accessPointsAdapterGroup: AccessPointsAdapterGroup = AccessPointsAdapterGroup(),
+    private val settings: Settings = MainContext.INSTANCE.settings,
+    private val configuration: Configuration = MainContext.INSTANCE.configuration,
     val wiFiDetails: MutableList<WiFiDetail> = mutableListOf(),
 ) {
     fun update(
         wiFiData: WiFiData,
         expandableListView: ExpandableListView?,
     ) {
-        MainContext.INSTANCE.configuration.size = type(calculateChildType())
-        val settings = MainContext.INSTANCE.settings
+        configuration.size = type(calculateChildType())
         val predicate = makeAccessPointsPredicate(settings)
         wiFiDetails.clear()
         wiFiDetails.addAll(wiFiData.wiFiDetails(predicate, settings.sortBy(), settings.groupBy()))

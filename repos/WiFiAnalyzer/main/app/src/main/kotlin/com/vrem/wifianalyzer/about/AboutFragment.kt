@@ -35,6 +35,7 @@ import androidx.fragment.app.FragmentActivity
 import com.vrem.util.EMPTY
 import com.vrem.util.packageInfo
 import com.vrem.util.readFile
+import com.vrem.util.signature
 import com.vrem.wifianalyzer.MainContext
 import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.databinding.AboutContentBinding
@@ -124,7 +125,8 @@ class AboutFragment : Fragment() {
         return applicationVersion(activity) +
             ifElse(configuration.sizeAvailable, "S") +
             ifElse(configuration.largeScreen, "L") +
-            " (" + Build.VERSION.RELEASE + "-" + Build.VERSION.SDK_INT + ")"
+            " (" + Build.VERSION.RELEASE + "-" + Build.VERSION.SDK_INT + ") " +
+            activity.signature()
     }
 
     private fun applicationVersion(activity: FragmentActivity): String =

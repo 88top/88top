@@ -19,6 +19,7 @@ package com.vrem.wifianalyzer.wifi.detailview
 
 import android.graphics.Color
 import android.os.Build
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -26,7 +27,7 @@ import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.vrem.util.EMPTY
-import com.vrem.wifianalyzer.MainContextHelper.INSTANCE
+import com.vrem.wifianalyzer.MainContextHelper
 import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.RobolectricUtil
 import com.vrem.wifianalyzer.wifi.accesspoint.AccessPointViewType
@@ -47,6 +48,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.annotation.Config
 
@@ -55,7 +59,7 @@ import org.robolectric.annotation.Config
 class WiFiDetailViewTest {
     private val vendorName = "1VendorName-2VendorName-3VendorName-4VendorName-5VendorName-6VendorName"
     private val mainActivity = RobolectricUtil.INSTANCE.activity
-    private val settings = INSTANCE.settings
+    private val settings = MainContextHelper.INSTANCE.settings
     private val fixture = WiFiDetailView()
     private val expectedWidth = "40 MHz"
     private val expectedSecurities = "[WPS WEP WPA2 WPA3]"
@@ -69,7 +73,8 @@ class WiFiDetailViewTest {
 
     @After
     fun tearDown() {
-        INSTANCE.restore()
+        verifyNoMoreInteractions(settings)
+        MainContextHelper.INSTANCE.restore()
     }
 
     @Test
@@ -80,6 +85,7 @@ class WiFiDetailViewTest {
         val actual = fixture.makeView(null, null, wiFiDetail)
         // Assert
         assertThat(actual).isNotNull
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -91,6 +97,7 @@ class WiFiDetailViewTest {
         val actual = fixture.makeView(expected, null, wiFiDetail)
         // Assert
         assertThat(actual).isEqualTo(expected)
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -101,6 +108,7 @@ class WiFiDetailViewTest {
         val actual = fixture.makeView(null, null, wiFiDetail)
         // Assert
         assertThat(actual.findViewById<View>(R.id.tab).visibility).isEqualTo(View.GONE)
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -111,6 +119,7 @@ class WiFiDetailViewTest {
         val actual = fixture.makeView(null, null, wiFiDetail)
         // Assert
         assertThat(actual.findViewById<View>(R.id.groupIndicator).visibility).isEqualTo(View.GONE)
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -122,6 +131,7 @@ class WiFiDetailViewTest {
         // Assert
         assertThat(actual.findViewById<View>(R.id.vendorLong)).isNull()
         assertThat(actual.findViewById<View>(R.id.vendorShort).visibility).isEqualTo(View.GONE)
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -134,6 +144,7 @@ class WiFiDetailViewTest {
         assertThat(actual.findViewById<View>(R.id.vendorLong)).isNull()
         assertThat(actual.findViewById<View>(R.id.vendorShort).visibility).isEqualTo(View.VISIBLE)
         validateTextViewValue(actual, vendorName, R.id.vendorShort)
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -144,6 +155,7 @@ class WiFiDetailViewTest {
         val actual = fixture.makeView(null, null, wiFiDetail, true)
         // Assert
         assertThat(actual.findViewById<View>(R.id.tab).visibility).isEqualTo(View.VISIBLE)
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -154,6 +166,7 @@ class WiFiDetailViewTest {
         val actual = fixture.makeView(null, null, wiFiDetail)
         // Assert
         validateTextViewValuesCompleteView(actual, wiFiDetail)
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -164,6 +177,7 @@ class WiFiDetailViewTest {
         val actual = fixture.makeView(null, null, wiFiDetail)
         // Assert
         validateTextViewValuesCompleteView(actual, wiFiDetail)
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -174,6 +188,7 @@ class WiFiDetailViewTest {
         val actual = fixture.makeView(null, null, wiFiDetail)
         // Assert
         assertThat(actual.findViewById<TextView>(R.id.ssid).isTextSelectable).isFalse
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -185,6 +200,7 @@ class WiFiDetailViewTest {
         val actual = fixture.makeView(null, null, wiFiDetail)
         // Assert
         assertThat(actual.findViewById<View>(R.id.tab).visibility).isEqualTo(View.GONE)
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -196,6 +212,7 @@ class WiFiDetailViewTest {
         val actual = fixture.makeView(null, null, wiFiDetail)
         // Assert
         assertThat(actual.findViewById<View>(R.id.groupIndicator).visibility).isEqualTo(View.GONE)
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -207,6 +224,7 @@ class WiFiDetailViewTest {
         val actual = fixture.makeView(null, null, wiFiDetail, true)
         // Assert
         assertThat(actual.findViewById<View>(R.id.tab).visibility).isEqualTo(View.VISIBLE)
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -218,6 +236,7 @@ class WiFiDetailViewTest {
         val actual = fixture.makeView(null, null, wiFiDetail)
         // Assert
         validateTextViewValuesCompactView(actual, wiFiDetail)
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -229,6 +248,7 @@ class WiFiDetailViewTest {
         val actual = fixture.makeView(null, null, wiFiDetail)
         // Assert
         validateTextViewValuesCompactView(actual, wiFiDetail)
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -240,6 +260,7 @@ class WiFiDetailViewTest {
         val actual = fixture.makeView(null, null, wiFiDetail)
         // Assert
         assertThat(actual.findViewById<View>(R.id.attachPopup)).isNotNull()
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -256,6 +277,7 @@ class WiFiDetailViewTest {
         assertThat(actual.findViewById<View>(R.id.width)).isNull()
         assertThat(actual.findViewById<View>(R.id.capabilities)).isNull()
         assertThat(actual.findViewById<View>(R.id.vendorShort)).isNull()
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -267,6 +289,7 @@ class WiFiDetailViewTest {
         val actual = fixture.makeView(null, null, wiFiDetail)
         // Assert
         assertThat(actual.findViewById<TextView>(R.id.ssid).isTextSelectable).isFalse
+        verify(settings).accessPointView()
     }
 
     @Test
@@ -380,6 +403,7 @@ class WiFiDetailViewTest {
         val levelTextView = view.findViewById<TextView>(R.id.level)
         // Assert
         assertThat(levelTextView.currentTextColor).isEqualTo(expectedColor)
+        verify(settings).accessPointView()
     }
 
     private fun withWiFiDetail(
@@ -467,5 +491,20 @@ class WiFiDetailViewTest {
         id: Int,
     ) {
         assertThat(view.findViewById<ImageView>(id).tag).isEqualTo(expected)
+    }
+
+    @Test
+    fun makeViewUsesInjectedLayoutInflater() {
+        // Arrange
+        val layoutInflater: LayoutInflater = mock()
+        val expected = mainActivity.layoutInflater.inflate(AccessPointViewType.COMPLETE.layout, null, false)
+        doReturn(expected).whenever(layoutInflater).inflate(AccessPointViewType.COMPLETE.layout, null, false)
+        val wiFiDetail = withWiFiDetail()
+        // Act
+        val actual = WiFiDetailView(layoutInflater).makeView(null, null, wiFiDetail)
+        // Assert
+        assertThat(actual).isSameAs(expected)
+        verify(layoutInflater).inflate(AccessPointViewType.COMPLETE.layout, null, false)
+        verify(settings).accessPointView()
     }
 }

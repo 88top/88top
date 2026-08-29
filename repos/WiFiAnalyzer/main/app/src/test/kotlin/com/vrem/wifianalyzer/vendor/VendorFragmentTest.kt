@@ -20,7 +20,7 @@ package com.vrem.wifianalyzer.vendor
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.vrem.util.EMPTY
-import com.vrem.wifianalyzer.MainContextHelper.INSTANCE
+import com.vrem.wifianalyzer.MainContextHelper
 import com.vrem.wifianalyzer.RobolectricUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
@@ -36,7 +36,7 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.BAKLAVA])
 class VendorFragmentTest {
     private val mainActivity = RobolectricUtil.INSTANCE.activity
-    private val vendorService = INSTANCE.vendorService
+    private val vendorService = MainContextHelper.INSTANCE.vendorService
     private val fixture = VendorFragment()
 
     @Before
@@ -48,7 +48,7 @@ class VendorFragmentTest {
     @After
     fun tearDown() {
         verify(vendorService).findVendors()
-        INSTANCE.restore()
+        MainContextHelper.INSTANCE.restore()
     }
 
     @Test

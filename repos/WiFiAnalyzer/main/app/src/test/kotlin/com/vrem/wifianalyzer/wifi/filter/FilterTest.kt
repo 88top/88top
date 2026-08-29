@@ -22,12 +22,14 @@ import android.os.Build
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.vrem.wifianalyzer.MainActivity
+import com.vrem.wifianalyzer.MainContext
 import com.vrem.wifianalyzer.MainContextHelper
 import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.RobolectricUtil
 import com.vrem.wifianalyzer.navigation.NavigationMenu
 import com.vrem.wifianalyzer.wifi.band.WiFiBand
 import com.vrem.wifianalyzer.wifi.filter.Filter.Companion.build
+import com.vrem.wifianalyzer.wifi.filter.adapter.FiltersAdapter
 import com.vrem.wifianalyzer.wifi.model.Security
 import com.vrem.wifianalyzer.wifi.model.Strength
 import org.assertj.core.api.Assertions.assertThat
@@ -35,8 +37,11 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.Shadows
@@ -78,7 +83,7 @@ class FilterTest {
     @Test
     fun title() {
         // setup
-        val expected = mainActivity.resources.getString(R.string.filter_title)
+        val expected = mainActivity.getString(R.string.filter_title)
         val shadowAlertDialog = Shadows.shadowOf(fixture.alertDialog!!)
         // execute
         val actual = shadowAlertDialog.title
@@ -89,10 +94,11 @@ class FilterTest {
     @Test
     fun positiveButton() {
         // setup
+        val filtersAdapter = withFiltersAdapter()
+        val mainActivity: MainActivity = mock()
+        val fixture = build(filtersAdapter = filtersAdapter, mainActivity = mainActivity)
         fixture.show()
         val button = fixture.alertDialog!!.getButton(DialogInterface.BUTTON_POSITIVE)
-        val filtersAdapter = MainContextHelper.INSTANCE.filterAdapter
-        val mainActivity = MainContextHelper.INSTANCE.mainActivity
         // execute
         button.performClick()
         // validate
@@ -105,10 +111,11 @@ class FilterTest {
     @Test
     fun negativeButton() {
         // setup
+        val filtersAdapter = withFiltersAdapter()
+        val mainActivity: MainActivity = mock()
+        val fixture = build(filtersAdapter = filtersAdapter, mainActivity = mainActivity)
         fixture.show()
         val button = fixture.alertDialog!!.getButton(DialogInterface.BUTTON_NEGATIVE)
-        val filtersAdapter = MainContextHelper.INSTANCE.filterAdapter
-        val mainActivity = MainContextHelper.INSTANCE.mainActivity
         // execute
         button.performClick()
         // validate
@@ -121,10 +128,11 @@ class FilterTest {
     @Test
     fun neutralButton() {
         // setup
+        val filtersAdapter = withFiltersAdapter()
+        val mainActivity: MainActivity = mock()
+        val fixture = build(filtersAdapter = filtersAdapter, mainActivity = mainActivity)
         fixture.show()
         val button = fixture.alertDialog!!.getButton(DialogInterface.BUTTON_NEUTRAL)
-        val filtersAdapter = MainContextHelper.INSTANCE.filterAdapter
-        val mainActivity = MainContextHelper.INSTANCE.mainActivity
         // execute
         button.performClick()
         // validate
@@ -253,5 +261,25 @@ class FilterTest {
         // validate
         assertThat(actual.alertDialog).isNull()
         verify(mainActivity).isFinishing
+    }
+
+    @Test
+    fun buildUsesInjectedMainActivityRatherThanMainContext() {
+        // Arrange
+        val injected: MainActivity = mock()
+        doReturn(true).whenever(injected).isFinishing
+        // Act
+        val actual = build(mainActivity = injected)
+        // Assert
+        assertThat(actual.alertDialog).isNull()
+        verify(injected).isFinishing
+    }
+
+    private fun withFiltersAdapter(): FiltersAdapter {
+        val filtersAdapter = spy(MainContext.INSTANCE.filtersAdapter)
+        doNothing().whenever(filtersAdapter).save()
+        doNothing().whenever(filtersAdapter).reset()
+        doNothing().whenever(filtersAdapter).reload()
+        return filtersAdapter
     }
 }

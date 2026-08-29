@@ -17,42 +17,40 @@
  */
 package com.vrem.wifianalyzer.navigation.availability
 
-import android.os.Build
 import android.view.Menu
 import android.view.MenuItem
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.vrem.wifianalyzer.MainActivity
 import com.vrem.wifianalyzer.MainContextHelper
 import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.navigation.options.OptionMenu
+import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.band.WiFiBand
 import org.junit.After
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
-import org.robolectric.annotation.Config
 
-@RunWith(AndroidJUnit4::class)
-@Config(sdk = [Build.VERSION_CODES.BAKLAVA])
 class WiFiSwitchOnTest {
-    private val mainActivity = MainContextHelper.INSTANCE.mainActivity
-    private val settings = MainContextHelper.INSTANCE.settings
+    private val mainActivity: MainActivity = mock()
+    private val settings: Settings = MainContextHelper.INSTANCE.settings
     private val optionMenu: OptionMenu = mock()
     private val menu: Menu = mock()
     private val menuItem: MenuItem = mock()
+    private val fixture: NavigationOption = wiFiBandMenuItem(true) { settings }
 
     @After
     fun tearDown() {
+        MainContextHelper.INSTANCE.restore()
         verifyNoMoreInteractions(mainActivity)
         verifyNoMoreInteractions(settings)
         verifyNoMoreInteractions(optionMenu)
         verifyNoMoreInteractions(menu)
         verifyNoMoreInteractions(menuItem)
-        MainContextHelper.INSTANCE.restore()
     }
 
     @Test
@@ -65,7 +63,7 @@ class WiFiSwitchOnTest {
         whenever(settings.wiFiBand()).thenReturn(WiFiBand.GHZ5)
         whenever(mainActivity.getString(WiFiBand.GHZ5.textResource)).thenReturn("XYZ 123")
         // execute
-        navigationOptionWiFiSwitchOn(mainActivity)
+        fixture(mainActivity)
         // validate
         verify(mainActivity).optionMenu
         verify(optionMenu).menu
@@ -82,7 +80,7 @@ class WiFiSwitchOnTest {
         whenever(mainActivity.optionMenu).thenReturn(optionMenu)
         whenever(optionMenu.menu).thenReturn(null)
         // execute
-        navigationOptionWiFiSwitchOn(mainActivity)
+        fixture(mainActivity)
         // validate
         verify(mainActivity).optionMenu
         verify(optionMenu).menu
@@ -91,5 +89,25 @@ class WiFiSwitchOnTest {
         verify(mainActivity, never()).getString(WiFiBand.GHZ5.textResource)
         verify(menuItem, never()).isVisible = any()
         verify(menuItem, never()).title = any()
+    }
+
+    @Test
+    fun navigationOptionWiFiSwitchOnIsVisibleAndUsesMainContextSettings() {
+        // Arrange
+        doReturn(optionMenu).whenever(mainActivity).optionMenu
+        doReturn(menu).whenever(optionMenu).menu
+        doReturn(menuItem).whenever(menu).findItem(R.id.action_wifi_band)
+        doReturn(WiFiBand.GHZ5).whenever(settings).wiFiBand()
+        doReturn("XYZ 123").whenever(mainActivity).getString(WiFiBand.GHZ5.textResource)
+        // Act
+        navigationOptionWiFiSwitchOn(mainActivity)
+        // Assert
+        verify(menuItem).isVisible = true
+        verify(menuItem).title = "XYZ\n123"
+        verify(settings).wiFiBand()
+        verify(mainActivity).optionMenu
+        verify(optionMenu).menu
+        verify(menu).findItem(R.id.action_wifi_band)
+        verify(mainActivity).getString(WiFiBand.GHZ5.textResource)
     }
 }

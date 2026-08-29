@@ -18,10 +18,10 @@
 package com.vrem.wifianalyzer.wifi.scanner
 
 import android.net.wifi.ScanResult
-import com.vrem.wifianalyzer.MainContextHelper
+import com.vrem.wifianalyzer.Configuration
+import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.band.WiFiRange
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -37,20 +37,15 @@ class CacheTest {
     private val scanResult4: ScanResult = mock()
     private val scanResult5: ScanResult = mock()
     private val scanResult6: ScanResult = mock()
-    private val settings = MainContextHelper.INSTANCE.settings
-    private val configuration = MainContextHelper.INSTANCE.configuration
-    private val fixture = Cache()
+    private val settings: Settings = mock()
+    private val configuration: Configuration = mock()
+    private val fixture = Cache(settings, configuration)
 
     @Before
     fun setUp() {
         whenever(settings.scanSpeed()).thenReturn(5)
         whenever(settings.cacheOff()).thenReturn(false)
         whenever(configuration.sizeAvailable).thenReturn(true)
-    }
-
-    @After
-    fun tearDown() {
-        MainContextHelper.INSTANCE.restore()
     }
 
     @Test

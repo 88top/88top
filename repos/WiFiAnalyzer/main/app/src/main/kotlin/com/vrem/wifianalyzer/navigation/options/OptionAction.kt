@@ -19,22 +19,32 @@ package com.vrem.wifianalyzer.navigation.options
 
 import com.vrem.wifianalyzer.MainContext
 import com.vrem.wifianalyzer.R
+import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.band.WiFiBand
 import com.vrem.wifianalyzer.wifi.filter.Filter
+import com.vrem.wifianalyzer.wifi.scanner.ScannerService
 
 typealias Action = () -> Unit
+
+internal fun scannerToggleAction(scannerService: () -> ScannerService = MainContext.INSTANCE::scannerService): Action =
+    { scannerService().toggle() }
+
+internal fun wiFiBandAction(
+    wiFiBand: WiFiBand,
+    settings: () -> Settings = MainContext.INSTANCE::settings,
+): Action = { settings().wiFiBand(wiFiBand) }
 
 internal val noAction: Action = { }
 
 internal val filterAction: Action = { Filter.build().show() }
 
-internal val scannerAction: Action = { MainContext.INSTANCE.scannerService.toggle() }
+internal val scannerAction: Action = scannerToggleAction()
 
-internal val wiFiBandAction2: Action = { MainContext.INSTANCE.settings.wiFiBand(WiFiBand.GHZ2) }
+internal val wiFiBandAction2: Action = wiFiBandAction(WiFiBand.GHZ2)
 
-internal val wiFiBandAction5: Action = { MainContext.INSTANCE.settings.wiFiBand(WiFiBand.GHZ5) }
+internal val wiFiBandAction5: Action = wiFiBandAction(WiFiBand.GHZ5)
 
-internal val wiFiBandAction6: Action = { MainContext.INSTANCE.settings.wiFiBand(WiFiBand.GHZ6) }
+internal val wiFiBandAction6: Action = wiFiBandAction(WiFiBand.GHZ6)
 
 internal enum class OptionAction(
     val key: Int,

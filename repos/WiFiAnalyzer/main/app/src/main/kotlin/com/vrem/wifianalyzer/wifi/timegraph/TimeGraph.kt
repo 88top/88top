@@ -17,6 +17,7 @@
  */
 package com.vrem.wifianalyzer.wifi.timegraph
 
+import android.content.Context
 import android.graphics.Paint
 import android.view.View
 import com.patrykandpatrick.vico.views.cartesian.AutoScrollCondition
@@ -51,7 +52,9 @@ import com.vrem.wifianalyzer.wifi.predicate.makeOtherPredicate
 
 private const val NUM_X_TIME = 21
 
-internal class TimeLayerRangeProvider : CartesianLayerRangeProvider {
+internal class TimeLayerRangeProvider(
+    private val settings: Settings,
+) : CartesianLayerRangeProvider {
     override fun getMinX(
         minX: Double,
         maxX: Double,
@@ -77,9 +80,7 @@ internal class TimeLayerRangeProvider : CartesianLayerRangeProvider {
         minY: Double,
         maxY: Double,
         extraStore: ExtraStore,
-    ) = MainContext.INSTANCE.settings
-        .graphMaximumY()
-        .toDouble()
+    ) = settings.graphMaximumY().toDouble()
 }
 
 internal fun calculateLabelPosition(
@@ -96,15 +97,15 @@ internal fun calculateLabelPosition(
 }
 
 internal fun makeGraph(
-    mainContext: MainContext,
+    context: Context,
     graphMaximumY: Int,
     themeStyle: ThemeStyle,
 ): CartesianChartView =
     GraphBuilder(graphMaximumY, themeStyle)
         .setItemPlacer(HorizontalAxis.ItemPlacer.aligned(spacing = { 2 }, shiftExtremeLines = false))
-        .setVerticalTitle(mainContext.resources.getString(R.string.graph_axis_y))
-        .setHorizontalTitle(mainContext.resources.getString(R.string.graph_time_axis_x))
-        .build(mainContext.context, false)
+        .setVerticalTitle(context.getString(R.string.graph_axis_y))
+        .setHorizontalTitle(context.getString(R.string.graph_time_axis_x))
+        .build(context, false)
 
 internal fun makeGraphWrapper(): GraphWrapper {
     val mainContext = MainContext.INSTANCE
@@ -112,12 +113,12 @@ internal fun makeGraphWrapper(): GraphWrapper {
     val configuration = mainContext.configuration
     val themeStyle = settings.themeStyle()
     val graphMaximumY = settings.graphMaximumY()
-    val chartView = makeGraph(mainContext, graphMaximumY, themeStyle)
+    val chartView = makeGraph(mainContext.context, graphMaximumY, themeStyle)
     val seriesLabel = SeriesLabel(::calculateLabelPosition)
     val scrollHandler = ScrollHandler(true, Scroll.Absolute.End, Scroll.Absolute.End, AutoScrollCondition.OnModelGrowth)
     val graphViewport =
         GraphViewport(
-            rangeProvider = TimeLayerRangeProvider(),
+            rangeProvider = TimeLayerRangeProvider(settings),
             scrollHandler = scrollHandler,
             placeholderDataPoints = (0..NUM_X_TIME).map { DataPoint(it, MIN_Y) },
             initialZoom = Zoom.x(NUM_X_TIME.toDouble()),
@@ -132,6 +133,7 @@ internal class TimeGraph(
     private val wiFiBand: WiFiBand,
     private val dataManager: DataManager = DataManager(),
     private val graphWrapper: GraphWrapper = makeGraphWrapper(),
+    private val settings: Settings = MainContext.INSTANCE.settings,
 ) : GraphNotifier {
     private var wasSelected: Boolean = false
 
@@ -145,20 +147,18 @@ internal class TimeGraph(
             dataManager.reset(graphWrapper)
         }
         wasSelected = true
-        val mainContext = MainContext.INSTANCE
-        val settings = mainContext.settings
         val sortBy = settings.sortBy()
         val levelMax = settings.graphMaximumY()
-        val predicate = predicate(settings)
+        val predicate = predicate()
         val wiFiDetails = wiFiData.wiFiDetails(predicate, sortBy)
         val newSeries = dataManager.addSeriesData(graphWrapper, wiFiDetails, levelMax)
         graphWrapper.removeSeries(newSeries)
         graphWrapper.show()
     }
 
-    fun predicate(settings: Settings): Predicate = makeOtherPredicate(settings)
+    fun predicate(): Predicate = makeOtherPredicate(settings)
 
-    private fun selected(): Boolean = wiFiBand == MainContext.INSTANCE.settings.wiFiBand()
+    private fun selected(): Boolean = wiFiBand == settings.wiFiBand()
 
     override fun graph(): View = graphWrapper.chartView
 

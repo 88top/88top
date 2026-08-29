@@ -18,37 +18,31 @@
 package com.vrem.wifianalyzer.navigation.availability
 
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.view.Menu
 import android.view.MenuItem
 import androidx.core.content.ContextCompat
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.vrem.wifianalyzer.MainActivity
-import com.vrem.wifianalyzer.MainContextHelper.INSTANCE
 import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.navigation.options.OptionMenu
+import com.vrem.wifianalyzer.wifi.filter.adapter.FiltersAdapter
 import org.junit.After
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
-import org.robolectric.annotation.Config
 
-@RunWith(AndroidJUnit4::class)
-@Config(sdk = [Build.VERSION_CODES.BAKLAVA])
 class FilterOnTest {
     private val mainActivity: MainActivity = mock()
     private val optionMenu: OptionMenu = mock()
     private val menu: Menu = mock()
     private val menuItem: MenuItem = mock()
     private val drawable: Drawable = mock()
-    private val filterAdapter = INSTANCE.filterAdapter
+    private val filterAdapter: FiltersAdapter = mock()
+    private val fixture: NavigationOption = filterMenuItem { filterAdapter }
 
     @After
     fun tearDown() {
-        INSTANCE.restore()
         verifyNoMoreInteractions(filterAdapter)
         verifyNoMoreInteractions(drawable)
         verifyNoMoreInteractions(menuItem)
@@ -65,7 +59,7 @@ class FilterOnTest {
         whenever(ContextCompat.getColor(mainActivity, R.color.regular)).thenReturn(colorResult)
         withMenuItem()
         // execute
-        navigationOptionFilterOn(mainActivity)
+        fixture(mainActivity)
         // validate
         verifyMenuItem()
         ContextCompat.getColor(verify(mainActivity), R.color.regular)
@@ -80,7 +74,7 @@ class FilterOnTest {
         whenever(ContextCompat.getColor(mainActivity, R.color.selected)).thenReturn(colorResult)
         withMenuItem()
         // execute
-        navigationOptionFilterOn(mainActivity)
+        fixture(mainActivity)
         // validate
         verifyMenuItem()
         ContextCompat.getColor(verify(mainActivity), R.color.selected)
@@ -93,7 +87,7 @@ class FilterOnTest {
         whenever(mainActivity.optionMenu).thenReturn(optionMenu)
         whenever(optionMenu.menu).thenReturn(null)
         // execute
-        navigationOptionFilterOn(mainActivity)
+        fixture(mainActivity)
         // validate
         verify(mainActivity).optionMenu
         verify(optionMenu).menu
@@ -108,7 +102,7 @@ class FilterOnTest {
         whenever(menu.findItem(R.id.action_filter)).thenReturn(menuItem)
         whenever(menuItem.icon).thenReturn(null)
         // execute
-        navigationOptionFilterOn(mainActivity)
+        fixture(mainActivity)
         // validate
         verify(mainActivity).optionMenu
         verify(optionMenu).menu

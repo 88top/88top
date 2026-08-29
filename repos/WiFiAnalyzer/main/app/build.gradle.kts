@@ -42,6 +42,7 @@ dependencies {
     implementation(libs.google.material)
     implementation(libs.vico.views)
     implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlinx.coroutines.android)
     // Unit Test Dependencies
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.junit.toolbox)
@@ -105,6 +106,7 @@ android {
     tasks.withType<Test>().configureEach {
         jvmArgs("-XX:+EnableDynamicAgentLoading")
         maxHeapSize = "2g"
+        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceIn(1, 4)
         testLogging {
             events =
                 setOf(

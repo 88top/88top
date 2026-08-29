@@ -22,13 +22,13 @@ import android.content.Intent
 import android.os.Build
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.vrem.wifianalyzer.MainContextHelper
 import com.vrem.wifianalyzer.RobolectricUtil
 import com.vrem.wifianalyzer.export.Export
 import com.vrem.wifianalyzer.navigation.NavigationMenu
 import com.vrem.wifianalyzer.wifi.model.WiFiConnection
 import com.vrem.wifianalyzer.wifi.model.WiFiData
 import com.vrem.wifianalyzer.wifi.model.WiFiDetail
+import com.vrem.wifianalyzer.wifi.scanner.ScannerService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Test
@@ -50,16 +50,15 @@ class ExportItemTest {
     private val export: Export = mock()
     private val intent: Intent = mock()
     private val componentName: ComponentName = mock()
-    private val scanner = MainContextHelper.INSTANCE.scannerService
+    private val scanner: ScannerService = mock()
 
-    private val fixture = ExportItem(export)
+    private val fixture = ExportItem(export) { scanner }
 
     @After
     fun tearDown() {
         verifyNoMoreInteractions(export)
         verifyNoMoreInteractions(componentName)
         verifyNoMoreInteractions(scanner)
-        MainContextHelper.INSTANCE.restore()
     }
 
     @Test

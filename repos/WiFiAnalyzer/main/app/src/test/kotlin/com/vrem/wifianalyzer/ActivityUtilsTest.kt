@@ -19,13 +19,14 @@ package com.vrem.wifianalyzer
 
 import android.content.Intent
 import android.os.Build
-import android.provider.Settings
+import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.widget.Toolbar
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.vrem.wifianalyzer.settings.Settings
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Test
@@ -46,12 +47,11 @@ class ActivityUtilsTest {
     private val toolbar: Toolbar = mock()
     private val intent: Intent = mock()
     private val intentArgumentCaptor = argumentCaptor<Intent>()
-    private val mainActivity = MainContextHelper.INSTANCE.mainActivity
-    private val settings = MainContextHelper.INSTANCE.settings
+    private val mainActivity: MainActivity = mock()
+    private val settings: Settings = mock()
 
     @After
     fun tearDown() {
-        MainContextHelper.INSTANCE.restore()
         verifyNoMoreInteractions(mainActivity)
         verifyNoMoreInteractions(toolbar)
         verifyNoMoreInteractions(actionBar)
@@ -82,7 +82,7 @@ class ActivityUtilsTest {
         doReturn(true).whenever(settings).keepScreenOn()
         doReturn(window).whenever(mainActivity).window
         // execute
-        mainActivity.keepScreenOn()
+        mainActivity.keepScreenOn(settings)
         // validate
         verify(settings).keepScreenOn()
         verify(mainActivity).window
@@ -95,20 +95,11 @@ class ActivityUtilsTest {
         doReturn(false).whenever(settings).keepScreenOn()
         doReturn(window).whenever(mainActivity).window
         // execute
-        mainActivity.keepScreenOn()
+        mainActivity.keepScreenOn(settings)
         // validate
         verify(settings).keepScreenOn()
         verify(mainActivity).window
         verify(window).clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-    }
-
-    @Test
-    fun startWiFiSettings() {
-        // execute
-        mainActivity.startWiFiSettings()
-        // validate
-        verify(mainActivity).startActivity(intentArgumentCaptor.capture())
-        assertThat(intentArgumentCaptor.firstValue.action).isEqualTo(Settings.Panel.ACTION_WIFI)
     }
 
     @Test
@@ -117,6 +108,6 @@ class ActivityUtilsTest {
         mainActivity.startLocationSettings()
         // validate
         verify(mainActivity).startActivity(intentArgumentCaptor.capture())
-        assertThat(intentArgumentCaptor.firstValue.action).isEqualTo(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+        assertThat(intentArgumentCaptor.firstValue.action).isEqualTo(ACTION_LOCATION_SOURCE_SETTINGS)
     }
 }

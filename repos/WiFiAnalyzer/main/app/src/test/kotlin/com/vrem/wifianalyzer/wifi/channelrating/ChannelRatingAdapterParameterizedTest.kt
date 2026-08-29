@@ -22,9 +22,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import com.vrem.wifianalyzer.MainContextHelper
 import com.vrem.wifianalyzer.RobolectricUtil
 import com.vrem.wifianalyzer.databinding.ChannelRatingBestBinding
+import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.band.WiFiBand
 import com.vrem.wifianalyzer.wifi.band.WiFiChannel
 import com.vrem.wifianalyzer.wifi.model.ChannelAPCount
@@ -49,12 +49,12 @@ class ChannelRatingAdapterParameterizedTest(
     val wiFiWidth: WiFiWidth,
 ) {
     private val mainActivity = RobolectricUtil.INSTANCE.activity
-    private val settings = MainContextHelper.INSTANCE.settings
+    private val settings: Settings = mock()
     private val channelRating: ChannelRating = mock()
     private val inflater: LayoutInflater = LayoutInflater.from(mainActivity)
     private val parent: ViewGroup = LinearLayout(mainActivity)
     private val binding: ChannelRatingBestBinding = ChannelRatingBestBinding.inflate(inflater, parent, false)
-    private val fixture = ChannelRatingAdapter(mainActivity, binding, channelRating)
+    private val fixture = ChannelRatingAdapter(mainActivity, binding, channelRating, settings)
 
     private val bindingMap =
         mapOf(
@@ -69,7 +69,6 @@ class ChannelRatingAdapterParameterizedTest(
     fun tearDown() {
         verifyNoMoreInteractions(settings)
         verifyNoMoreInteractions(channelRating)
-        MainContextHelper.INSTANCE.restore()
     }
 
     @Test

@@ -17,6 +17,7 @@
  */
 package com.vrem.wifianalyzer.wifi.graphutils
 
+import android.content.Context
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import com.vrem.annotation.OpenClass
@@ -31,9 +32,11 @@ data class GraphColor(
 )
 
 @OpenClass
-class GraphColors {
+class GraphColors(
+    private val context: Context = MainContext.INSTANCE.context,
+) {
     private val availableGraphColors: List<GraphColor> by lazy {
-        MainContext.INSTANCE.resources
+        context.resources
             .getStringArray(R.array.graph_colors)
             .filterNotNull()
             .chunked(2) { GraphColor(it[0].toColor(), it[1].toColor()) }
@@ -41,7 +44,6 @@ class GraphColors {
     }
     private val currentGraphColors: ArrayDeque<GraphColor> = ArrayDeque()
     val connectedColor: GraphColor by lazy {
-        val context = MainContext.INSTANCE.context
         val primary = ContextCompat.getColor(context, R.color.selected)
         val background = ContextCompat.getColor(context, R.color.selected_background)
         GraphColor(primary, background)

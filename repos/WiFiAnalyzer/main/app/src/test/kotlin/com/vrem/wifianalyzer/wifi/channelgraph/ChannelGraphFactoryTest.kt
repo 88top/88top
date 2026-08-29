@@ -19,7 +19,6 @@ package com.vrem.wifianalyzer.wifi.channelgraph
 
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.vrem.wifianalyzer.MainContext
 import com.vrem.wifianalyzer.RobolectricUtil
 import com.vrem.wifianalyzer.settings.ThemeStyle
 import com.vrem.wifianalyzer.wifi.band.WiFiBand
@@ -36,7 +35,7 @@ class ChannelGraphFactoryTest {
     @Test
     fun makeGraph() {
         // Act
-        val actual = makeGraph(MainContext.INSTANCE, 10, ThemeStyle.DARK, WiFiBand.GHZ2, false)
+        val actual = makeGraph(mainActivity, 10, ThemeStyle.DARK, WiFiBand.GHZ2, false)
         // Assert
         assertThat(actual).isNotNull()
     }

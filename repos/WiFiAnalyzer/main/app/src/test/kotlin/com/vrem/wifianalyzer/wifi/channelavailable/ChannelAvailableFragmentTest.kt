@@ -20,7 +20,7 @@ package com.vrem.wifianalyzer.wifi.channelavailable
 import android.os.Build
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.vrem.wifianalyzer.MainContextHelper.INSTANCE
+import com.vrem.wifianalyzer.MainContextHelper
 import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.RobolectricUtil
 import com.vrem.wifianalyzer.wifi.band.WiFiBand
@@ -41,7 +41,7 @@ import java.util.Locale
 class ChannelAvailableFragmentTest {
     private val mainActivity = RobolectricUtil.INSTANCE.activity
     private val locale = Locale.JAPAN
-    private val settings = INSTANCE.settings
+    private val settings = MainContextHelper.INSTANCE.settings
     private val fixture = ChannelAvailableFragment()
 
     private val textViewsIds =
@@ -69,7 +69,7 @@ class ChannelAvailableFragmentTest {
     fun tearDown() {
         verify(settings, atLeastOnce()).countryCode()
         verify(settings, atLeastOnce()).languageLocale()
-        INSTANCE.restore()
+        MainContextHelper.INSTANCE.restore()
     }
 
     @Test

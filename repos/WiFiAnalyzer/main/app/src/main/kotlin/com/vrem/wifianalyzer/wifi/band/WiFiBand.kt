@@ -20,12 +20,21 @@ package com.vrem.wifianalyzer.wifi.band
 import androidx.annotation.StringRes
 import com.vrem.wifianalyzer.MainContext
 import com.vrem.wifianalyzer.R
+import com.vrem.wifianalyzer.wifi.manager.WiFiManagerWrapper
 
 typealias Available = () -> Boolean
 
+internal fun bandSupportGHZ5(
+    wiFiManagerWrapper: () -> WiFiManagerWrapper = MainContext.INSTANCE::wiFiManagerWrapper,
+): Available = { wiFiManagerWrapper().is5GHzBandSupported() }
+
+internal fun bandSupportGHZ6(
+    wiFiManagerWrapper: () -> WiFiManagerWrapper = MainContext.INSTANCE::wiFiManagerWrapper,
+): Available = { wiFiManagerWrapper().is6GHzBandSupported() }
+
 internal val availableGHZ2: Available = { true }
-internal val availableGHZ5: Available = { MainContext.INSTANCE.wiFiManagerWrapper.is5GHzBandSupported() }
-internal val availableGHZ6: Available = { MainContext.INSTANCE.wiFiManagerWrapper.is6GHzBandSupported() }
+internal val availableGHZ5: Available = bandSupportGHZ5()
+internal val availableGHZ6: Available = bandSupportGHZ6()
 
 enum class WiFiBand(
     @get:StringRes @param:StringRes val textResource: Int,

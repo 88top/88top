@@ -20,11 +20,13 @@ package com.vrem.wifianalyzer.wifi.accesspoint
 import android.widget.ExpandableListView
 import com.vrem.annotation.OpenClass
 import com.vrem.wifianalyzer.MainContext
+import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.model.GroupBy
 import com.vrem.wifianalyzer.wifi.model.WiFiDetail
 
 @OpenClass
 class AccessPointsAdapterGroup(
+    private val settings: Settings = MainContext.INSTANCE.settings,
     val expanded: MutableSet<String> = mutableSetOf(),
     var groupBy: GroupBy = GroupBy.NONE,
 ) {
@@ -39,7 +41,7 @@ class AccessPointsAdapterGroup(
     }
 
     fun updateGroupBy() {
-        val currentGroupBy = MainContext.INSTANCE.settings.groupBy()
+        val currentGroupBy = settings.groupBy()
         if (currentGroupBy != groupBy) {
             expanded.clear()
             groupBy = currentGroupBy

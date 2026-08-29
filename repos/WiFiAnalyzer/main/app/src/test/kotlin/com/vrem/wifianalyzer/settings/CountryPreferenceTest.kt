@@ -23,8 +23,14 @@ import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.RobolectricUtil
 import com.vrem.wifianalyzer.wifi.band.WiFiChannelCountry.Companion.findAll
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
+import org.mockito.kotlin.whenever
 import org.robolectric.Robolectric
 import org.robolectric.annotation.Config
 import java.util.Locale
@@ -37,6 +43,12 @@ class CountryPreferenceTest {
     private val attributeSet = Robolectric.getAttributeSetFromXml(R.xml.test_attrs)
     private val fixture = CountryPreference(mainActivity, attributeSet)
     private val currentLocale = Locale.getDefault()
+    private val settings: Settings = mock()
+
+    @After
+    fun tearDown() {
+        verifyNoMoreInteractions(settings)
+    }
 
     @Test
     fun entries() {
@@ -58,5 +70,20 @@ class CountryPreferenceTest {
         countries.forEach {
             assertThat(actual).contains(it.countryCode)
         }
+    }
+
+    @Test
+    fun countryDataNamesCountriesInTheLocaleFromSettings() {
+        // Arrange
+        val locale = Locale.GERMAN
+        doReturn(locale).whenever(settings).languageLocale()
+        // Act
+        val actual = countryData(settings)
+        // Assert
+        assertThat(actual).hasSize(countries.size)
+        countries.forEach {
+            assertThat(actual).contains(Data(it.countryCode, it.countryName(locale)))
+        }
+        verify(settings).languageLocale()
     }
 }

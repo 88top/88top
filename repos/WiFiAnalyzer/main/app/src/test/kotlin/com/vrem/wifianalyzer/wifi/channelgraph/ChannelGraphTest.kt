@@ -18,9 +18,7 @@
 package com.vrem.wifianalyzer.wifi.channelgraph
 
 import com.patrykandpatrick.vico.views.cartesian.CartesianChartView
-import com.vrem.wifianalyzer.MainContextHelper
 import com.vrem.wifianalyzer.settings.Settings
-import com.vrem.wifianalyzer.settings.ThemeStyle
 import com.vrem.wifianalyzer.wifi.band.WiFiBand
 import com.vrem.wifianalyzer.wifi.graphutils.GraphWrapper
 import com.vrem.wifianalyzer.wifi.graphutils.MAX_Y
@@ -43,16 +41,16 @@ import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 
 class ChannelGraphTest {
-    private val settings: Settings = MainContextHelper.INSTANCE.settings
+    private val settings: Settings = mock()
     private val graphWrapper: GraphWrapper = mock()
     private val dataManager: DataManager = mock()
-    private val fixture: ChannelGraph = spy(ChannelGraph(WiFiBand.GHZ2, dataManager, graphWrapper))
+    private val fixture: ChannelGraph = spy(ChannelGraph(WiFiBand.GHZ2, dataManager, graphWrapper, settings))
 
     @After
     fun tearDown() {
+        verifyNoMoreInteractions(settings)
         verifyNoMoreInteractions(graphWrapper)
         verifyNoMoreInteractions(dataManager)
-        MainContextHelper.INSTANCE.restore()
     }
 
     @Test
@@ -62,17 +60,16 @@ class ChannelGraphTest {
         val wiFiDetails: List<WiFiDetail> = listOf()
         val wiFiData = WiFiData(wiFiDetails, WiFiConnection.EMPTY)
         val predicate: Predicate = truePredicate
-        doReturn(predicate).whenever(fixture).predicate(settings)
+        doReturn(predicate).whenever(fixture).predicate()
         doReturn(true).whenever(fixture).selected()
         doReturn(newSeries).whenever(dataManager).newSeries(wiFiDetails)
         doReturn(MAX_Y).whenever(settings).graphMaximumY()
-        doReturn(ThemeStyle.DARK).whenever(settings).themeStyle()
         doReturn(SortBy.CHANNEL).whenever(settings).sortBy()
         // Act
         fixture.update(wiFiData)
         // Assert
         verify(fixture).selected()
-        verify(fixture).predicate(settings)
+        verify(fixture).predicate()
         verify(graphWrapper).reset()
         verify(dataManager).newSeries(wiFiDetails)
         verify(dataManager).addSeriesData(graphWrapper, newSeries, MAX_Y)
@@ -80,7 +77,6 @@ class ChannelGraphTest {
         verify(graphWrapper).show()
         verify(settings).sortBy()
         verify(settings).graphMaximumY()
-        verifyNoMoreInteractions(settings)
     }
 
     @Test
@@ -124,7 +120,6 @@ class ChannelGraphTest {
         // Assert
         assertThat(actual).isTrue()
         verify(settings).wiFiBand()
-        verifyNoMoreInteractions(settings)
     }
 
     @Test
@@ -136,7 +131,6 @@ class ChannelGraphTest {
         // Assert
         assertThat(actual).isFalse()
         verify(settings).wiFiBand()
-        verifyNoMoreInteractions(settings)
     }
 
     @Test
@@ -147,13 +141,12 @@ class ChannelGraphTest {
         doReturn(Strength.entries.toSet()).whenever(settings).findStrengths()
         doReturn(Security.entries.toSet()).whenever(settings).findSecurities()
         // Act
-        val actual = fixture.predicate(settings)
+        val actual = fixture.predicate()
         // Assert
         assertThat(actual).isNotNull()
         verify(settings).wiFiBand()
         verify(settings).findSSIDs()
         verify(settings).findStrengths()
         verify(settings).findSecurities()
-        verifyNoMoreInteractions(settings)
     }
 }

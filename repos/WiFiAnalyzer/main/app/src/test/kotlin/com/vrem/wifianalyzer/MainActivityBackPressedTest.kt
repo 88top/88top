@@ -37,15 +37,14 @@ import org.robolectric.annotation.Config
 class MainActivityBackPressedTest {
     private val mainActivity: MainActivity = mock()
     private val menuItem: MenuItem = mock()
-    private val settings: Settings = MainContextHelper.INSTANCE.settings
-    private val fixture = MainActivityBackPressed(mainActivity)
+    private val settings: Settings = mock()
+    private val fixture = MainActivityBackPressed(mainActivity, settings)
 
     @After
     fun tearDown() {
         verifyNoMoreInteractions(mainActivity)
         verifyNoMoreInteractions(menuItem)
         verifyNoMoreInteractions(settings)
-        MainContextHelper.INSTANCE.restore()
     }
 
     @Test

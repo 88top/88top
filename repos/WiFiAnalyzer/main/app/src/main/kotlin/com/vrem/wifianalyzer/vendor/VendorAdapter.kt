@@ -18,6 +18,7 @@
 package com.vrem.wifianalyzer.vendor
 
 import android.content.Context
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -32,6 +33,7 @@ import com.vrem.wifianalyzer.vendor.model.VendorService
 internal class VendorAdapter(
     context: Context,
     private val vendorService: VendorService,
+    private val layoutInflater: LayoutInflater = MainContext.INSTANCE.layoutInflater,
 ) : ArrayAdapter<String>(context, R.layout.vendor_details, vendorService.findVendors()) {
     override fun getView(
         position: Int,
@@ -52,7 +54,7 @@ internal class VendorAdapter(
     }
 
     private fun create(parent: ViewGroup): VendorDetailsBinding =
-        VendorDetailsBinding.inflate(MainContext.INSTANCE.layoutInflater, parent, false)
+        VendorDetailsBinding.inflate(layoutInflater, parent, false)
 
     private class Binding {
         val root: View

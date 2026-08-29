@@ -17,10 +17,17 @@
  */
 package com.vrem.wifianalyzer.wifi.manager
 
+import android.app.Activity
+import android.content.Intent
 import android.net.wifi.WifiManager
+import android.os.Build
+import android.provider.Settings.Panel
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
@@ -28,36 +35,58 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
+import org.robolectric.annotation.Config
 
+@RunWith(AndroidJUnit4::class)
+@Config(sdk = [Build.VERSION_CODES.BAKLAVA])
 class WiFiSwitchTest {
     private val wifiManager: WifiManager = mock()
-    private val fixture = spy(WiFiSwitch(wifiManager))
+    private val activity: Activity = mock()
+    private val intentArgumentCaptor = argumentCaptor<Intent>()
+    private val fixture = spy(WiFiSwitch(wifiManager, activity))
 
     @After
     fun tearDown() {
         verifyNoMoreInteractions(wifiManager)
+        verifyNoMoreInteractions(activity)
     }
 
     @Test
     fun on() {
         // setup
+        doReturn(false).whenever(fixture).minVersionQ()
         whenever(wifiManager.setWifiEnabled(true)).thenReturn(true)
         // execute
         val actual = fixture.on()
         // validate
         assertThat(actual).isTrue
+        verify(fixture).minVersionQ()
         verify(wifiManager).isWifiEnabled = true
     }
 
     @Test
     fun off() {
         // setup
+        doReturn(false).whenever(fixture).minVersionQ()
         whenever(wifiManager.setWifiEnabled(false)).thenReturn(true)
         // execute
         val actual = fixture.off()
         // validate
         assertThat(actual).isTrue
+        verify(fixture).minVersionQ()
         verify(wifiManager).isWifiEnabled = false
+    }
+
+    @Test
+    fun startWiFiSettingsStartsWiFiPanelOnInjectedActivity() {
+        // Arrange
+        doNothing().whenever(activity).startActivity(intentArgumentCaptor.capture())
+        // Act
+        fixture.startWiFiSettings()
+        // Assert
+        val intent = intentArgumentCaptor.firstValue
+        assertThat(intent.action).isEqualTo(Panel.ACTION_WIFI)
+        verify(activity).startActivity(intent)
     }
 
     @Test

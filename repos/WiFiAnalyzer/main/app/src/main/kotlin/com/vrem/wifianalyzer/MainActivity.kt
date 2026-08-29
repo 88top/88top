@@ -72,7 +72,7 @@ class MainActivity :
         settings.registerOnSharedPreferenceChangeListener(this)
         optionMenu = OptionMenu()
 
-        keepScreenOn()
+        keepScreenOn(settings)
 
         val toolbar = setupToolbar()
         drawerNavigation = DrawerNavigation(this, toolbar)
@@ -125,7 +125,7 @@ class MainActivity :
             MainContext.INSTANCE.scannerService.stop()
             recreate()
         } else {
-            keepScreenOn()
+            keepScreenOn(mainContext.settings)
             update()
         }
     }

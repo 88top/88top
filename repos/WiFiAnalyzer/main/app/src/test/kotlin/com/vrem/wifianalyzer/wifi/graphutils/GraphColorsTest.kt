@@ -19,7 +19,6 @@ package com.vrem.wifianalyzer.wifi.graphutils
 
 import android.content.Context
 import android.content.res.Resources
-import com.vrem.wifianalyzer.MainContextHelper
 import com.vrem.wifianalyzer.R
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
@@ -33,12 +32,10 @@ import org.mockito.kotlin.whenever
 class GraphColorsTest {
     private val resources: Resources = mock()
     private val context: Context = mock()
-    private val fixture = GraphColors()
+    private val fixture = GraphColors(context)
 
     @Before
     fun setUp() {
-        val mainActivity = MainContextHelper.INSTANCE.mainActivity
-        whenever(mainActivity.applicationContext).thenReturn(context)
         whenever(context.resources).thenReturn(resources)
         whenever(resources.getStringArray(R.array.graph_colors)).thenReturn(withColors())
     }
@@ -49,7 +46,6 @@ class GraphColorsTest {
         verify(resources).getStringArray(R.array.graph_colors)
         verifyNoMoreInteractions(context)
         verifyNoMoreInteractions(resources)
-        MainContextHelper.INSTANCE.restore()
     }
 
     @Test

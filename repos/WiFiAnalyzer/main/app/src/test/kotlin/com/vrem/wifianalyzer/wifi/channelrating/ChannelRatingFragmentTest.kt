@@ -21,7 +21,7 @@ import android.os.Build
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.vrem.wifianalyzer.MainActivity
-import com.vrem.wifianalyzer.MainContextHelper.INSTANCE
+import com.vrem.wifianalyzer.MainContextHelper
 import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.RobolectricUtil
 import com.vrem.wifianalyzer.wifi.scanner.ScannerService
@@ -37,12 +37,12 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.BAKLAVA])
 class ChannelRatingFragmentTest {
     private val mainActivity: MainActivity = RobolectricUtil.INSTANCE.activity
-    private val scanner: ScannerService = INSTANCE.scannerService
+    private val scanner: ScannerService = MainContextHelper.INSTANCE.scannerService
     private val fixture: ChannelRatingFragment = ChannelRatingFragment()
 
     @After
     fun tearDown() {
-        INSTANCE.restore()
+        MainContextHelper.INSTANCE.restore()
     }
 
     @Test

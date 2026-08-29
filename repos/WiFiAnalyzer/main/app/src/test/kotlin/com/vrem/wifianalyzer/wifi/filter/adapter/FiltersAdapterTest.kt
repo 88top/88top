@@ -19,8 +19,8 @@ package com.vrem.wifianalyzer.wifi.filter.adapter
 
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.vrem.wifianalyzer.MainContextHelper
 import com.vrem.wifianalyzer.RobolectricUtil
+import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.band.WiFiBand
 import com.vrem.wifianalyzer.wifi.model.Security
 import com.vrem.wifianalyzer.wifi.model.Strength
@@ -29,6 +29,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
@@ -44,7 +45,7 @@ class FiltersAdapterTest {
     private val wiFiBands: Set<WiFiBand> = WiFiBand.entries.toSet()
     private val strengths: Set<Strength> = Strength.entries.toSet()
     private val securities: Set<Security> = Security.entries.toSet()
-    private val settings = MainContextHelper.INSTANCE.settings
+    private val settings: Settings = mock()
 
     private lateinit var fixture: FiltersAdapter
 
@@ -55,7 +56,7 @@ class FiltersAdapterTest {
         whenever(settings.findStrengths()).thenReturn(strengths)
         whenever(settings.findSecurities()).thenReturn(securities)
 
-        fixture = FiltersAdapter(settings)
+        fixture = FiltersAdapter(settings, mainActivity)
 
         verify(settings).findSSIDs()
         verify(settings).findWiFiBands()
@@ -66,7 +67,6 @@ class FiltersAdapterTest {
     @After
     fun tearDown() {
         verifyNoMoreInteractions(settings)
-        MainContextHelper.INSTANCE.restore()
     }
 
     @Test

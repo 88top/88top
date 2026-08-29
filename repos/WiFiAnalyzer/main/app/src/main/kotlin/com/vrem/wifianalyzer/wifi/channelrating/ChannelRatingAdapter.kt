@@ -19,6 +19,7 @@ package com.vrem.wifianalyzer.wifi.channelrating
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -29,6 +30,7 @@ import com.vrem.wifianalyzer.MainContext
 import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.databinding.ChannelRatingBestBinding
 import com.vrem.wifianalyzer.databinding.ChannelRatingDetailsBinding
+import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.band.WiFiBand
 import com.vrem.wifianalyzer.wifi.band.WiFiChannel
 import com.vrem.wifianalyzer.wifi.model.ChannelAPCount
@@ -47,6 +49,8 @@ class ChannelRatingAdapter(
     context: Context,
     val channelRatingBest: ChannelRatingBestBinding,
     val channelRating: ChannelRating = ChannelRating(),
+    private val settings: Settings = MainContext.INSTANCE.settings,
+    private val layoutInflater: LayoutInflater = MainContext.INSTANCE.layoutInflater,
 ) : ArrayAdapter<WiFiChannel>(context, R.layout.channel_rating_details, mutableListOf()),
     UpdateNotifier {
     private val bindingMap =
@@ -61,7 +65,6 @@ class ChannelRatingAdapter(
         )
 
     override fun update(wiFiData: WiFiData) {
-        val settings = MainContext.INSTANCE.settings
         val wiFiBand = settings.wiFiBand()
         val countryCode = settings.countryCode()
         val wiFiChannels: List<WiFiChannel> = wiFiChannels(wiFiBand, countryCode)
@@ -87,7 +90,7 @@ class ChannelRatingAdapter(
         view: View?,
         parent: ViewGroup,
     ): View {
-        val wiFiBand = MainContext.INSTANCE.settings.wiFiBand()
+        val wiFiBand = settings.wiFiBand()
         val binding = view?.let { ChannelRatingAdapterBinding(it) } ?: ChannelRatingAdapterBinding(create(parent))
         getItem(position)?.let {
             val wiFiWidth = wiFiBand.wiFiChannels.wiFiWidthByChannel(it.channel)
@@ -144,7 +147,7 @@ class ChannelRatingAdapter(
     }
 
     private fun errorMessage(wiFiBand: WiFiBand): String =
-        with(context.resources) {
+        with(context) {
             if (WiFiBand.GHZ2 == wiFiBand) {
                 String.format(
                     getString(R.string.channel_rating_best_alternative),
@@ -157,5 +160,5 @@ class ChannelRatingAdapter(
         }
 
     private fun create(parent: ViewGroup): ChannelRatingDetailsBinding =
-        ChannelRatingDetailsBinding.inflate(MainContext.INSTANCE.layoutInflater, parent, false)
+        ChannelRatingDetailsBinding.inflate(layoutInflater, parent, false)
 }

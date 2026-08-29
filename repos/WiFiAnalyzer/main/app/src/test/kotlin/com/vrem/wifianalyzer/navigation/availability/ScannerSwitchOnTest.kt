@@ -20,9 +20,9 @@ package com.vrem.wifianalyzer.navigation.availability
 import android.view.Menu
 import android.view.MenuItem
 import com.vrem.wifianalyzer.MainActivity
-import com.vrem.wifianalyzer.MainContextHelper.INSTANCE
 import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.navigation.options.OptionMenu
+import com.vrem.wifianalyzer.wifi.scanner.ScannerService
 import org.junit.After
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -36,7 +36,8 @@ class ScannerSwitchOnTest {
     private val optionMenu: OptionMenu = mock()
     private val menu: Menu = mock()
     private val menuItem: MenuItem = mock()
-    private val scanner = INSTANCE.scannerService
+    private val scanner: ScannerService = mock()
+    private val fixture: NavigationOption = scannerMenuItem { scanner }
 
     @After
     fun tearDown() {
@@ -45,7 +46,6 @@ class ScannerSwitchOnTest {
         verifyNoMoreInteractions(menu)
         verifyNoMoreInteractions(menuItem)
         verifyNoMoreInteractions(scanner)
-        INSTANCE.restore()
     }
 
     @Test
@@ -55,7 +55,7 @@ class ScannerSwitchOnTest {
         whenever(optionMenu.menu).thenReturn(menu)
         whenever(menu.findItem(R.id.action_scanner)).thenReturn(menuItem)
         // execute
-        navigationOptionScannerSwitchOn(mainActivity)
+        fixture(mainActivity)
         // validate
         verify(mainActivity).optionMenu
         verify(optionMenu).menu
@@ -74,7 +74,7 @@ class ScannerSwitchOnTest {
         whenever(optionMenu.menu).thenReturn(menu)
         whenever(menu.findItem(R.id.action_scanner)).thenReturn(menuItem)
         // execute
-        navigationOptionScannerSwitchOn(mainActivity)
+        fixture(mainActivity)
         // validate
         verify(mainActivity).optionMenu
         verify(optionMenu).menu
@@ -93,7 +93,7 @@ class ScannerSwitchOnTest {
         whenever(optionMenu.menu).thenReturn(menu)
         whenever(menu.findItem(R.id.action_scanner)).thenReturn(menuItem)
         // execute
-        navigationOptionScannerSwitchOn(mainActivity)
+        fixture(mainActivity)
         // validate
         verify(mainActivity).optionMenu
         verify(optionMenu).menu
@@ -110,7 +110,7 @@ class ScannerSwitchOnTest {
         whenever(mainActivity.optionMenu).thenReturn(optionMenu)
         whenever(optionMenu.menu).thenReturn(null)
         // execute
-        navigationOptionScannerSwitchOn(mainActivity)
+        fixture(mainActivity)
         // validate
         verify(mainActivity).optionMenu
         verify(optionMenu).menu

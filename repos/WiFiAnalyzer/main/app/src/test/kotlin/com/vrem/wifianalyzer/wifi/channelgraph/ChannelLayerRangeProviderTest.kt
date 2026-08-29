@@ -18,7 +18,7 @@
 package com.vrem.wifianalyzer.wifi.channelgraph
 
 import com.patrykandpatrick.vico.views.common.data.ExtraStore
-import com.vrem.wifianalyzer.MainContextHelper
+import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.graphutils.MIN_Y
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
@@ -30,17 +30,15 @@ import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 
 class ChannelLayerRangeProviderTest {
-    private val mainActivity = MainContextHelper.INSTANCE.mainActivity
-    private val settings = MainContextHelper.INSTANCE.settings
+    private val settings: Settings = mock()
     private val extraStore: ExtraStore = mock()
     private val minX = 100.0
     private val maxX = 200.0
-    private val fixture = ChannelLayerRangeProvider(minX, maxX)
+    private val fixture = ChannelLayerRangeProvider(minX, maxX, settings)
 
     @After
     fun tearDown() {
-        MainContextHelper.INSTANCE.restore()
-        verifyNoMoreInteractions(mainActivity, settings, extraStore)
+        verifyNoMoreInteractions(settings, extraStore)
     }
 
     @Test
@@ -68,7 +66,7 @@ class ChannelLayerRangeProviderTest {
     }
 
     @Test
-    fun getMaxYReturnsDefaultWhenSettingsNotAvailable() {
+    fun getMaxY() {
         // Arrange
         val expected = 50
         doReturn(expected).whenever(settings).graphMaximumY()

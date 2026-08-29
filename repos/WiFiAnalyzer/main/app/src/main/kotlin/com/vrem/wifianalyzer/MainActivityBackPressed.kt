@@ -19,13 +19,15 @@
 package com.vrem.wifianalyzer
 
 import androidx.activity.OnBackPressedCallback
+import com.vrem.wifianalyzer.settings.Settings
 
 class MainActivityBackPressed(
     val mainActivity: MainActivity,
+    private val settings: Settings = MainContext.INSTANCE.settings,
 ) : OnBackPressedCallback(true) {
     override fun handleOnBackPressed() {
         if (!mainActivity.closeDrawer()) {
-            val selectedMenu = MainContext.INSTANCE.settings.selectedMenu()
+            val selectedMenu = settings.selectedMenu()
             if (selectedMenu == mainActivity.currentNavigationMenu()) {
                 mainActivity.finish()
             } else {

@@ -20,7 +20,7 @@ package com.vrem.wifianalyzer.navigation.options
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.vrem.wifianalyzer.MainActivity
-import com.vrem.wifianalyzer.MainContextHelper.INSTANCE
+import com.vrem.wifianalyzer.MainContextHelper
 import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.RobolectricUtil
 import com.vrem.wifianalyzer.navigation.options.OptionAction.Companion.findOptionAction
@@ -39,45 +39,61 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.BAKLAVA])
 class OptionActionTest {
     private val mainActivity: MainActivity = RobolectricUtil.INSTANCE.activity
-    private val scannerService: ScannerService = INSTANCE.scannerService
-    private val settings: Settings = INSTANCE.settings
+    private val scannerService: ScannerService = MainContextHelper.INSTANCE.scannerService
+    private val settings: Settings = MainContextHelper.INSTANCE.settings
 
     @After
     fun tearDown() {
         verifyNoMoreInteractions(scannerService)
         verifyNoMoreInteractions(settings)
-        INSTANCE.restore()
+        MainContextHelper.INSTANCE.restore()
     }
 
     @Test
-    fun scannerActionShouldToggleScannerService() {
+    fun scannerToggleActionShouldToggleScannerService() {
         // execute
-        scannerAction()
+        scannerToggleAction { scannerService }()
         // validate
         verify(scannerService).toggle()
     }
 
     @Test
-    fun wiFiBandAction2ShouldSwitchToGHZ2() {
+    fun wiFiBandActionShouldSwitchToGivenBand() {
         // execute
-        wiFiBandAction2()
-        // validate
-        verify(settings).wiFiBand(WiFiBand.GHZ2)
-    }
-
-    @Test
-    fun wiFiBandAction5ShouldSwitchToGHZ5() {
-        // execute
-        wiFiBandAction5()
+        wiFiBandAction(WiFiBand.GHZ5) { settings }()
         // validate
         verify(settings).wiFiBand(WiFiBand.GHZ5)
     }
 
     @Test
-    fun wiFiBandAction6ShouldSwitchToGHZ6() {
-        // execute
+    fun scannerActionUsesMainContextScannerService() {
+        // Act
+        scannerAction()
+        // Assert
+        verify(scannerService).toggle()
+    }
+
+    @Test
+    fun wiFiBandAction2UsesMainContextSettings() {
+        // Act
+        wiFiBandAction2()
+        // Assert
+        verify(settings).wiFiBand(WiFiBand.GHZ2)
+    }
+
+    @Test
+    fun wiFiBandAction5UsesMainContextSettings() {
+        // Act
+        wiFiBandAction5()
+        // Assert
+        verify(settings).wiFiBand(WiFiBand.GHZ5)
+    }
+
+    @Test
+    fun wiFiBandAction6UsesMainContextSettings() {
+        // Act
         wiFiBandAction6()
-        // validate
+        // Assert
         verify(settings).wiFiBand(WiFiBand.GHZ6)
     }
 

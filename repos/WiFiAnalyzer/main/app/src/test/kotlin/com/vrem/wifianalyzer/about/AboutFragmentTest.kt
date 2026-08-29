@@ -79,7 +79,7 @@ class AboutFragmentTest {
     @Test
     fun versionNumber() {
         // setup
-        val expected: String = version() + "SL" + " (" + Build.VERSION.RELEASE + "-" + Build.VERSION.SDK_INT + ")"
+        val expected: String = version() + "SL" + " (" + Build.VERSION.RELEASE + "-" + Build.VERSION.SDK_INT + ") "
         // execute
         val actual = fixture.requireView().findViewById<TextView>(R.id.about_version_info)
         // validate

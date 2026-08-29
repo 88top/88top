@@ -17,6 +17,7 @@
  */
 package com.vrem.wifianalyzer.wifi.channelgraph
 
+import android.content.Context
 import android.view.View
 import com.patrykandpatrick.vico.views.cartesian.CartesianChartView
 import com.patrykandpatrick.vico.views.cartesian.CartesianDrawingContext
@@ -49,6 +50,7 @@ import com.vrem.wifianalyzer.wifi.predicate.makeOtherPredicate
 internal class ChannelLayerRangeProvider(
     private val minXValue: Double,
     private val maxXValue: Double,
+    private val settings: Settings,
 ) : CartesianLayerRangeProvider {
     override fun getMinX(
         minX: Double,
@@ -72,9 +74,7 @@ internal class ChannelLayerRangeProvider(
         minY: Double,
         maxY: Double,
         extraStore: ExtraStore,
-    ) = MainContext.INSTANCE.settings
-        .graphMaximumY()
-        .toDouble()
+    ) = settings.graphMaximumY().toDouble()
 }
 
 internal fun calculateLabelPosition(
@@ -96,20 +96,18 @@ internal fun calculateLabelPosition(
 }
 
 internal fun makeGraph(
-    mainContext: MainContext,
+    context: Context,
     graphMaximumY: Int,
     themeStyle: ThemeStyle,
     wiFiBand: WiFiBand,
     scalable: Boolean,
-): CartesianChartView {
-    val resources = mainContext.resources
-    return GraphBuilder(graphMaximumY, themeStyle, FREQUENCY_SPREAD.toDouble())
+): CartesianChartView =
+    GraphBuilder(graphMaximumY, themeStyle, FREQUENCY_SPREAD.toDouble())
         .setXAxisFormatter(channelXAxisFormatter(wiFiBand))
         .setItemPlacer(channelItemPlacer(wiFiBand))
-        .setVerticalTitle(resources.getString(R.string.graph_axis_y))
-        .setHorizontalTitle(resources.getString(R.string.graph_channel_axis_x))
-        .build(mainContext.context, scalable)
-}
+        .setVerticalTitle(context.getString(R.string.graph_axis_y))
+        .setHorizontalTitle(context.getString(R.string.graph_channel_axis_x))
+        .build(context, scalable)
 
 internal fun makeGraphWrapper(wiFiBand: WiFiBand): GraphWrapper {
     val mainContext = MainContext.INSTANCE
@@ -118,12 +116,12 @@ internal fun makeGraphWrapper(wiFiBand: WiFiBand): GraphWrapper {
     val graphMaximumY = settings.graphMaximumY()
     val themeStyle = settings.themeStyle()
     val scalable = !wiFiBand.ghz2
-    val chartView = makeGraph(mainContext, graphMaximumY, themeStyle, wiFiBand, scalable)
+    val chartView = makeGraph(mainContext.context, graphMaximumY, themeStyle, wiFiBand, scalable)
     val seriesLabel = SeriesLabel(::calculateLabelPosition)
     val wiFiChannels = wiFiBand.wiFiChannels.wiFiChannels()
     val minX = wiFiChannels.first().frequency
     val maxX = wiFiChannels.last().frequency
-    val rangeProvider = ChannelLayerRangeProvider(minX.toDouble(), maxX.toDouble())
+    val rangeProvider = ChannelLayerRangeProvider(minX.toDouble(), maxX.toDouble(), settings)
     val graphViewport =
         GraphViewport(
             rangeProvider = rangeProvider,
@@ -143,6 +141,7 @@ internal class ChannelGraph(
     private val wiFiBand: WiFiBand,
     private var dataManager: DataManager = DataManager(),
     private var graphWrapper: GraphWrapper = makeGraphWrapper(wiFiBand),
+    private val settings: Settings = MainContext.INSTANCE.settings,
 ) : GraphNotifier {
     private var wasSelected: Boolean = false
 
@@ -157,19 +156,17 @@ internal class ChannelGraph(
             graphWrapper.reset()
         }
         wasSelected = true
-        val mainContext = MainContext.INSTANCE
-        val settings = mainContext.settings
         val levelMax = settings.graphMaximumY()
-        val predicate = predicate(settings)
+        val predicate = predicate()
         val wiFiDetails = wiFiData.wiFiDetails(predicate, settings.sortBy())
         val newSeries = dataManager.newSeries(wiFiDetails)
         dataManager.addSeriesData(graphWrapper, newSeries, levelMax)
         graphWrapper.removeSeries(newSeries)
     }
 
-    fun selected(): Boolean = wiFiBand == MainContext.INSTANCE.settings.wiFiBand()
+    fun selected(): Boolean = wiFiBand == settings.wiFiBand()
 
-    fun predicate(settings: Settings): Predicate = makeOtherPredicate(settings)
+    fun predicate(): Predicate = makeOtherPredicate(settings)
 
     override fun graph(): View = graphWrapper.chartView
 

@@ -19,13 +19,18 @@ package com.vrem.wifianalyzer.wifi.filter
 
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.view.LayoutInflater
 import android.view.View
+import com.vrem.wifianalyzer.MainActivity
 import com.vrem.wifianalyzer.MainContext
 import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.navigation.NavigationMenu
+import com.vrem.wifianalyzer.wifi.filter.adapter.FiltersAdapter
 
 class Filter(
     val alertDialog: AlertDialog?,
+    private val filtersAdapter: FiltersAdapter = MainContext.INSTANCE.filtersAdapter,
+    private val mainActivity: MainActivity = MainContext.INSTANCE.mainActivity,
 ) {
     private var ssidFilter: SSIDFilter? = null
     internal var wiFiBandFilter: WiFiBandFilter? = null
@@ -46,70 +51,86 @@ class Filter(
     }
 
     private fun addSSIDFilter(alertDialog: AlertDialog): SSIDFilter =
-        SSIDFilter(MainContext.INSTANCE.filtersAdapter.ssidAdapter(), alertDialog)
+        SSIDFilter(filtersAdapter.ssidAdapter(), alertDialog)
 
     private fun addWiFiBandFilter(alertDialog: AlertDialog): WiFiBandFilter? =
-        if (NavigationMenu.ACCESS_POINTS == MainContext.INSTANCE.mainActivity.currentNavigationMenu()) {
-            WiFiBandFilter(MainContext.INSTANCE.filtersAdapter.wiFiBandAdapter(), alertDialog)
+        if (NavigationMenu.ACCESS_POINTS == mainActivity.currentNavigationMenu()) {
+            WiFiBandFilter(filtersAdapter.wiFiBandAdapter(), alertDialog)
         } else {
             alertDialog.findViewById<View>(R.id.filterWiFiBand)?.visibility = View.GONE
             null
         }
 
     private fun addStrengthFilter(alertDialog: AlertDialog): StrengthFilter =
-        StrengthFilter(MainContext.INSTANCE.filtersAdapter.strengthAdapter(), alertDialog)
+        StrengthFilter(filtersAdapter.strengthAdapter(), alertDialog)
 
     private fun addSecurityFilter(alertDialog: AlertDialog): SecurityFilter =
-        SecurityFilter(MainContext.INSTANCE.filtersAdapter.securityAdapter(), alertDialog)
+        SecurityFilter(filtersAdapter.securityAdapter(), alertDialog)
 
-    private class Close : DialogInterface.OnClickListener {
+    private class Close(
+        private val filtersAdapter: FiltersAdapter,
+    ) : DialogInterface.OnClickListener {
         override fun onClick(
             dialog: DialogInterface,
             which: Int,
         ) {
             dialog.dismiss()
-            MainContext.INSTANCE.filtersAdapter.reload()
+            filtersAdapter.reload()
         }
     }
 
-    private class Apply : DialogInterface.OnClickListener {
+    private class Apply(
+        private val filtersAdapter: FiltersAdapter,
+        private val mainActivity: MainActivity,
+    ) : DialogInterface.OnClickListener {
         override fun onClick(
             dialog: DialogInterface,
             which: Int,
         ) {
             dialog.dismiss()
-            MainContext.INSTANCE.filtersAdapter.save()
-            MainContext.INSTANCE.mainActivity.update()
+            filtersAdapter.save()
+            mainActivity.update()
         }
     }
 
-    private class Reset : DialogInterface.OnClickListener {
+    private class Reset(
+        private val filtersAdapter: FiltersAdapter,
+        private val mainActivity: MainActivity,
+    ) : DialogInterface.OnClickListener {
         override fun onClick(
             dialog: DialogInterface,
             which: Int,
         ) {
             dialog.dismiss()
-            MainContext.INSTANCE.filtersAdapter.reset()
-            MainContext.INSTANCE.mainActivity.update()
+            filtersAdapter.reset()
+            mainActivity.update()
         }
     }
 
     companion object {
-        fun build(): Filter = Filter(buildAlertDialog())
+        fun build(
+            filtersAdapter: FiltersAdapter = MainContext.INSTANCE.filtersAdapter,
+            mainActivity: MainActivity = MainContext.INSTANCE.mainActivity,
+            layoutInflater: () -> LayoutInflater = MainContext.INSTANCE::layoutInflater,
+        ): Filter = Filter(buildAlertDialog(filtersAdapter, mainActivity, layoutInflater), filtersAdapter, mainActivity)
 
-        private fun buildAlertDialog(): AlertDialog? {
-            if (MainContext.INSTANCE.mainActivity.isFinishing) {
+        private fun buildAlertDialog(
+            filtersAdapter: FiltersAdapter,
+            mainActivity: MainActivity,
+            layoutInflater: () -> LayoutInflater,
+        ): AlertDialog? {
+            if (mainActivity.isFinishing) {
                 return null
             }
-            val view = MainContext.INSTANCE.layoutInflater.inflate(R.layout.filter_popup, null)
+            val view = layoutInflater().inflate(R.layout.filter_popup, null)
             return AlertDialog
                 .Builder(view.context)
                 .setView(view)
                 .setTitle(R.string.filter_title)
                 .setIcon(R.drawable.ic_filter_list)
-                .setNegativeButton(R.string.filter_reset, Reset())
-                .setNeutralButton(R.string.filter_close, Close())
-                .setPositiveButton(R.string.filter_apply, Apply())
+                .setNegativeButton(R.string.filter_reset, Reset(filtersAdapter, mainActivity))
+                .setNeutralButton(R.string.filter_close, Close(filtersAdapter))
+                .setPositiveButton(R.string.filter_apply, Apply(filtersAdapter, mainActivity))
                 .create()
         }
     }

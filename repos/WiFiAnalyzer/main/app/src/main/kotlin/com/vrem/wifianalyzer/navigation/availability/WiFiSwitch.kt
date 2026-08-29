@@ -17,29 +17,26 @@
  */
 package com.vrem.wifianalyzer.navigation.availability
 
-import com.vrem.wifianalyzer.MainActivity
 import com.vrem.wifianalyzer.MainContext
 import com.vrem.wifianalyzer.R
+import com.vrem.wifianalyzer.settings.Settings
 
-internal val navigationOptionWiFiSwitchOff: NavigationOption = {
-    updateMenuItem(it, false)
-}
+internal val navigationOptionWiFiSwitchOff: NavigationOption = wiFiBandMenuItem(false)
 
-internal val navigationOptionWiFiSwitchOn: NavigationOption = {
-    updateMenuItem(it, true)
-}
+internal val navigationOptionWiFiSwitchOn: NavigationOption = wiFiBandMenuItem(true)
 
-private fun updateMenuItem(
-    mainActivity: MainActivity,
+internal fun wiFiBandMenuItem(
     visible: Boolean,
-) {
-    mainActivity.optionMenu.menu?.let {
-        val menuItem = it.findItem(R.id.action_wifi_band)
-        menuItem.isVisible = visible
-        if (visible) {
-            val wiFiBand = MainContext.INSTANCE.settings.wiFiBand()
-            val title = mainActivity.getString(wiFiBand.textResource)
-            menuItem.title = title.replace(' ', '\n')
+    settings: () -> Settings = MainContext.INSTANCE::settings,
+): NavigationOption =
+    { mainActivity ->
+        mainActivity.optionMenu.menu?.let {
+            val menuItem = it.findItem(R.id.action_wifi_band)
+            menuItem.isVisible = visible
+            if (visible) {
+                val wiFiBand = settings().wiFiBand()
+                val title = mainActivity.getString(wiFiBand.textResource)
+                menuItem.title = title.replace(' ', '\n')
+            }
         }
     }
-}
