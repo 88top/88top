@@ -1,11 +1,12 @@
 <details> <summary> <b>openwrt-passwall-packages new commit log :rocket: </b> </summary>
 
-#### [:mega: Full Changelog. ](https://github.com/Openwrt-Passwall/openwrt-passwall-packages/compare/50de2d79993447258b1bc15a667a6fb1cd6e7222...a8302d598ca54cda22f7fe76fa553b3df034f8ae)  
+#### [:mega: Full Changelog. ](https://github.com/Openwrt-Passwall/openwrt-passwall-packages/compare/a8302d598ca54cda22f7fe76fa553b3df034f8ae...b2d6f2384de1b50c6e7626a4e976cda42be15966)  
 :heavy_exclamation_mark: The list displays only the latest 15 commit logs.  
 
 SHA|Author|Date|Message
 -|-|-|-
-a8302d5|David Mandy|Wed Aug 26 19:11:32 2026 +0800|v2ray-geoip: update to 202608200014 (#712)
-368afcc|David Mandy|Wed Aug 26 19:11:19 2026 +0800|v2ray-geosite: update to 202608252219 (#713)
-f7f253d|David Mandy|Sun Aug 23 10:15:36 2026 +0800|hysteria: update to 2.12.2 (#711)
+b2d6f23|David Mandy|Sat Aug 29 22:15:31 2026 +0800|sing-box: update to 1.13.20 (#717)
+c9a416c|David Mandy|Sat Aug 29 21:07:45 2026 +0800|v2ray-geosite: update to 202608290326 (#715)
+c6cdff1|David Mandy|Sat Aug 29 21:07:23 2026 +0800|v2ray-geoip: update to 202608270741 (#716)
+e13e463|David Mandy|Thu Aug 27 03:48:01 2026 +0800|shadowsocks-rust: update to 1.25.0 (#714)
 </details>

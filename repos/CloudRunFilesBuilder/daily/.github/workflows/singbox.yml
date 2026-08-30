@@ -7,7 +7,7 @@
 #=================================================
 
 # 用户可利用此run单独升级最新版sing-box内核
-name: Build 24-25 sing-box core
+name: Build 24.10 sing-box core
 
 on:
   schedule:

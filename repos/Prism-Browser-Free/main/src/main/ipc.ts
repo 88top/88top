@@ -22,7 +22,6 @@ import type { ProfileBackupManager } from './profile-backup'
 import type { AppSessionTracker } from './app-session'
 import type { UpdateManager } from './update-manager'
 import type { WorkspaceMigrationManager } from './workspace-migration'
-import type { AnnouncementManager } from './announcement-manager'
 
 interface IpcDependencies {
   profiles: ProfileStore
@@ -36,10 +35,9 @@ interface IpcDependencies {
   workspaceMigration: WorkspaceMigrationManager
   appSession: AppSessionTracker
   updater: UpdateManager
-  announcements: AnnouncementManager
 }
 
-export function registerIpc({ profiles, settings, launcher, kernels, extensions, cookies, logger, backups, workspaceMigration, appSession, updater, announcements }: IpcDependencies): void {
+export function registerIpc({ profiles, settings, launcher, kernels, extensions, cookies, logger, backups, workspaceMigration, appSession, updater }: IpcDependencies): void {
   ipcMain.handle('profiles:list', () => profiles.list().map(publicProfile))
   ipcMain.handle('profiles:storage-health', () => profiles.storageHealth())
   ipcMain.handle('profiles:create', async (_event, draft: ProfileDraft) => publicProfile(await profiles.create(draft)))
@@ -339,13 +337,6 @@ export function registerIpc({ profiles, settings, launcher, kernels, extensions,
   ipcMain.handle('updates:open-installer', async () => {
     const error = await shell.openPath(await updater.downloadedPath())
     if (error) throw new Error(`无法打开更新安装程序：${error}`)
-  })
-  ipcMain.handle('announcements:status', () => announcements.status())
-  ipcMain.handle('announcements:check', () => announcements.check())
-  ipcMain.handle('announcements:open-action', async () => {
-    const status = announcements.status()
-    if (status.state !== 'available' || !status.announcement?.action) throw new Error('当前公告没有可打开的链接')
-    await shell.openExternal(status.announcement.action.url)
   })
   ipcMain.handle('proxy:test', (_event, config, profileId?: string) => {
     const validated = validateProxyConfig(config)

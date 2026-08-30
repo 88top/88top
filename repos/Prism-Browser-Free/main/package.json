@@ -3,8 +3,8 @@
   "version": "0.2.0-beta.1",
   "private": true,
   "author": {
-    "name": "DFarm",
-    "url": "https://x.com/DFarm_club"
+    "name": "timeflysoon",
+    "url": "https://github.com/timeflysoon"
   },
   "description": "Open-source local-first multi-profile fingerprint browser",
   "main": "out/main/index.js",
@@ -40,7 +40,6 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
-    "@modelcontextprotocol/server": "^2.0.0",
     "antd": "^6.1.3",
     "https-proxy-agent": "^7.0.6",
     "proxy-chain": "^2.6.0",
@@ -52,7 +51,6 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@modelcontextprotocol/client": "^2.0.0",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
@@ -93,7 +91,7 @@
       "hardenedRuntime": true,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.inherit.plist",
-      "signIgnore": "[/\\\\]Contents[/\\\\]Resources[/\\\\](?:kernels[/\\\\](?:current|available[/\\\\]\\d+(?:\\.\\d+){3})[/\\\\]Chromium\\.app|pro-agent[/\\\\]prism-pro-agent(?:-[A-Za-z0-9._-]+)?)(?:[/\\\\]|$)"
+      "signIgnore": "[/\\\\]Contents[/\\\\]Resources[/\\\\]kernels[/\\\\](?:current|available[/\\\\]\\d+(?:\\.\\d+){3})[/\\\\]Chromium\\.app(?:[/\\\\]|$)"
     },
     "win": {
       "icon": "build/icon.ico",
@@ -123,10 +121,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DFarm6/Prism-Browser-Community.git"
+    "url": "https://github.com/timeflysoon/Prism-Browser-Free.git"
   },
-  "homepage": "https://github.com/DFarm6/Prism-Browser-Community#readme",
+  "homepage": "https://github.com/timeflysoon/Prism-Browser-Free#readme",
   "bugs": {
-    "url": "https://github.com/DFarm6/Prism-Browser-Community/issues"
+    "url": "https://github.com/timeflysoon/Prism-Browser-Free/issues"
   }
 }
