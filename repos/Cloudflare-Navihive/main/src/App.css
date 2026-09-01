@@ -103,8 +103,32 @@
   background-color: #1e1e1e;
 }
 
+/* 关闭毛玻璃、或没有背景图时的暗色卡片兜底色 —— 由 SiteCard.tsx 条件启用毛玻璃时使用 */
 .dark .MuiCard-root {
   background-color: #262626;
+}
+
+/* 细滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c3d0e3;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #416d9d;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }
 
 /* 增强可访问性 */

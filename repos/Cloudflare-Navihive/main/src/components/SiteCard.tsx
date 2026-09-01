@@ -14,6 +14,7 @@ import {
   IconButton,
   Box,
   Fade,
+  useTheme,
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
@@ -26,6 +27,8 @@ interface SiteCardProps {
   viewMode?: 'readonly' | 'edit'; // 访问模式
   index?: number;
   iconApi?: string; // 添加iconApi属性
+  frostedGlassEnabled?: boolean; // 是否启用毛玻璃（用户开关）
+  hasBackgroundImage?: boolean; // 当前是否设置了背景图
 }
 
 // 使用memo包装组件以减少不必要的重渲染
@@ -37,10 +40,15 @@ const SiteCard = memo(function SiteCard({
   viewMode = 'edit', // 默认为编辑模式
   index = 0,
   iconApi, // 添加iconApi参数
+  frostedGlassEnabled = false,
+  hasBackgroundImage = false,
 }: SiteCardProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [iconError, setIconError] = useState(!site.icon);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const frosted = frostedGlassEnabled && hasBackgroundImage;
 
   // 使用dnd-kit的useSortable hook
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -107,19 +115,43 @@ const SiteCard = memo(function SiteCard({
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          borderRadius: 3,
+          borderRadius: 'var(--card-radius)',
           transition: 'box-shadow 0.3s ease-in-out',
           boxShadow: isDragging ? 8 : 2,
+          overflow: 'hidden',
+          contain: 'content',
+          backfaceVisibility: 'hidden',
+          transform: isDragging ? undefined : 'translateZ(0)', // 拖拽中不加，避免和 dnd-kit 的 transform 冲突
+          ...(frosted && {
+            backgroundColor: isDark ? 'rgba(30, 41, 59, 0.4)' : 'rgba(255, 255, 255, 0.45)',
+            backdropFilter: 'blur(var(--frosted-glass-blur))',
+            WebkitBackdropFilter: 'blur(var(--frosted-glass-blur))',
+            border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(255,255,255,0.6)',
+          }),
           '&:hover': !isEditMode
             ? {
                 boxShadow: 5,
               }
             : {},
-          overflow: 'hidden',
-          backgroundColor: 'rgba(255, 255, 255, 0.45)',
-          backdropFilter: 'blur(14px)',
-          WebkitBackdropFilter: 'blur(14px)',
-          border: '1px solid rgba(255, 255, 255, 0.6)',
+          '& .site-icon': {
+            transition: 'width 0.3s ease, opacity 0.3s ease, margin 0.3s ease',
+          },
+          '&:hover .site-icon': !isEditMode
+            ? { width: 0, opacity: 0, marginRight: 0, transitionDelay: '0.1s' }
+            : {},
+          '& .site-title': {
+            transformOrigin: 'left center',
+            transition: 'transform 0.3s ease',
+          },
+          '&:hover .site-title': !isEditMode
+            ? { transform: 'scale(1.15)', transitionDelay: '0.1s' }
+            : {},
+          '& .site-title-row': {
+            transition: 'padding-right 0.3s ease',
+          },
+          '&:hover .site-title-row': !isEditMode && viewMode === 'edit'
+            ? { paddingRight: 'calc(1em + 28px)', transitionDelay: '0.05s' } // 28px ≈ 齿轮按钮本身宽度，1em ≈ 多空一个汉字
+            : {},
         }}
       >
         {isEditMode ? (
@@ -225,9 +257,9 @@ const SiteCard = memo(function SiteCard({
               }}
             >
               {/* 图标和名称 */}
-              <Box display='flex' alignItems='center' mb={1}>
+              <Box className='site-title-row' display='flex' alignItems='center' mb={1}>
                 {!iconError && site.icon ? (
-                  <Box position='relative' mr={1.5} width={32} height={32} flexShrink={0}>
+                  <Box className='site-icon' position='relative' mr={1.5} width={32} height={32} flexShrink={0}>
                     <Skeleton
                       variant='rounded'
                       width={32}
@@ -255,6 +287,7 @@ const SiteCard = memo(function SiteCard({
                   </Box>
                 ) : (
                   <Box
+                    className='site-icon'
                     sx={{
                       width: 32,
                       height: 32,
@@ -274,11 +307,13 @@ const SiteCard = memo(function SiteCard({
                   </Box>
                 )}
                 <Typography
+                  className='site-title'
                   variant='subtitle1'
                   fontWeight='medium'
                   noWrap
                   sx={{
                     fontSize: { xs: '0.875rem', sm: '1rem' },
+                    minWidth: 0, // 修复 flex 布局下 noWrap 不生效、文字冲破卡片边界的问题
                   }}
                 >
                   {site.name}

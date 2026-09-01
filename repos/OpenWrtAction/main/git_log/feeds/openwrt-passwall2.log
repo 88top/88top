@@ -1,16 +1,10 @@
 <details> <summary> <b>openwrt-passwall2 new commit log :rocket: </b> </summary>
 
-#### [:mega: Full Changelog. ](https://github.com/Openwrt-Passwall/openwrt-passwall2/compare/9badadf63462631261f49f32f7a3dd18100b5eb1...45631b46b96291bdba259dd3a52244e143ef84d6)  
+#### [:mega: Full Changelog. ](https://github.com/Openwrt-Passwall/openwrt-passwall2/compare/45631b46b96291bdba259dd3a52244e143ef84d6...12b33906ae89f62db5ee3a4d52c1b3294071b2c7)  
 :heavy_exclamation_mark: The list displays only the latest 15 commit logs.  
 
 SHA|Author|Date|Message
 -|-|-|-
-45631b4|A-BO|Fri Aug 28 09:53:47 2026 +0800|luci: support hysteria2 realm `portMapping`
-fb2a20b|A-BO|Thu Aug 27 23:56:18 2026 +0800|luci: optimize the geoview cache cleanup logic
-93a3fa5|handsomeji|Thu Aug 27 23:37:46 2026 +0800|luci: re-add direct DNS option
-0179546|handsomeji|Sun Aug 30 00:35:18 2026 +0800|luci: adjust and optimize
-98fc727|itoywh|Fri Aug 28 18:11:22 2026 +0800|luci: clarify psw2_vps log - gate LB log on balancing_enable, restore anti-loop log (#1247)
-cc074ed|handsomeji|Thu Aug 27 17:54:42 2026 +0800|luci: re-add ACL process log
-cadf37f|handsomeji|Thu Aug 27 15:30:08 2026 +0800|luci: fix missing dnsmasq dns redirect logic
-1999056|handsomeji|Thu Aug 27 17:03:33 2026 +0800|luci: fix IPv6 remote DNS
+12b3390|A-BO|Mon Aug 31 23:05:40 2026 +0800|luci: optimize shunt route
+3f9339a|SwordKing|Mon Aug 31 17:45:45 2026 +0800|luci: optimize haproxy config (#1252)
 </details>

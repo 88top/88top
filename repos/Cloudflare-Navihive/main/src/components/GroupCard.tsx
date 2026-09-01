@@ -39,6 +39,9 @@ interface GroupCardProps {
   // 新增：接收跨组拖拽悬停状态
   dragOverGroupId?: number | null;
   isOverGroupHeader?: boolean;
+  // 新增：毛玻璃效果开关与是否有背景图
+  frostedGlassEnabled?: boolean;
+  hasBackgroundImage?: boolean;
 }
 
 const GroupCard: React.FC<GroupCardProps> = ({
@@ -56,6 +59,8 @@ const GroupCard: React.FC<GroupCardProps> = ({
   configs,
   dragOverGroupId = null,
   isOverGroupHeader = false,
+  frostedGlassEnabled = false,
+  hasBackgroundImage = false,
 }) => {
   // 添加编辑弹窗的状态
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -159,6 +164,8 @@ const GroupCard: React.FC<GroupCardProps> = ({
                     viewMode={viewMode}
                     index={idx}
                     iconApi={configs?.['site.iconApi']} // 传入iconApi配置
+                    frostedGlassEnabled={configs?.['site.frostedGlass'] === 'true'}
+                    hasBackgroundImage={!!configs?.['site.backgroundImage']}
                   />
                 </Box>
               ))}
@@ -199,6 +206,8 @@ const GroupCard: React.FC<GroupCardProps> = ({
               isEditMode={false}
               viewMode={viewMode}
               iconApi={configs?.['site.iconApi']} // 传入iconApi配置
+              frostedGlassEnabled={configs?.['site.frostedGlass'] === 'true'}
+              hasBackgroundImage={!!configs?.['site.backgroundImage']}
             />
           </Box>
         ))}
@@ -244,10 +253,20 @@ const GroupCard: React.FC<GroupCardProps> = ({
           borderColor: 'divider',
           transform: sortMode === 'None' ? 'scale(1.01)' : 'none',
         },
-        backgroundColor: 'rgba(255, 255, 255, 0.45)',
-        backdropFilter: 'blur(14px)',
-        WebkitBackdropFilter: 'blur(14px)',
-        border: '1px solid rgba(255, 255, 255, 0.6)',
+        ...(frostedGlassEnabled && hasBackgroundImage
+          ? {
+              backgroundColor: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? 'rgba(30, 30, 30, 0.45)'
+                  : 'rgba(255, 255, 255, 0.45)',
+              backdropFilter: 'blur(14px)',
+              WebkitBackdropFilter: 'blur(14px)',
+              border: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? '1px solid rgba(255, 255, 255, 0.12)'
+                  : '1px solid rgba(255, 255, 255, 0.6)',
+            }
+          : {}),
       }}
     >
       <Box

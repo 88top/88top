@@ -108,8 +108,11 @@ return {
                                 (readfile("/sys/module/nft_fullcone/refcnt") || "0") != "0") {
                                         fctype = "nft_FULLCONENAT";
                                 }
+                                else if (system("nft list ruleset 2>/dev/null | grep -q 'masquerade fullcone'") == 0) {
+                                        fctype = "Boardcom Fullcone NAT1";
+                                }
                                 else if (system("iptables -t nat -L zone_wan_postrouting | grep -q fullcone") == 0) {
-                                        fctype = "Boardcom Fullcone";
+                                        fctype = "Boardcom Fullcone NAT1";
                                 }
 
                                 return {

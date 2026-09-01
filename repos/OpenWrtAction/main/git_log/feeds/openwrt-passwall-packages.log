@@ -1,12 +1,10 @@
 <details> <summary> <b>openwrt-passwall-packages new commit log :rocket: </b> </summary>
 
-#### [:mega: Full Changelog. ](https://github.com/Openwrt-Passwall/openwrt-passwall-packages/compare/a8302d598ca54cda22f7fe76fa553b3df034f8ae...b2d6f2384de1b50c6e7626a4e976cda42be15966)  
+#### [:mega: Full Changelog. ](https://github.com/Openwrt-Passwall/openwrt-passwall-packages/compare/b2d6f2384de1b50c6e7626a4e976cda42be15966...b31fecf0ab40606e35864c21c3988b9daf3c441b)  
 :heavy_exclamation_mark: The list displays only the latest 15 commit logs.  
 
 SHA|Author|Date|Message
 -|-|-|-
-b2d6f23|David Mandy|Sat Aug 29 22:15:31 2026 +0800|sing-box: update to 1.13.20 (#717)
-c9a416c|David Mandy|Sat Aug 29 21:07:45 2026 +0800|v2ray-geosite: update to 202608290326 (#715)
-c6cdff1|David Mandy|Sat Aug 29 21:07:23 2026 +0800|v2ray-geoip: update to 202608270741 (#716)
-e13e463|David Mandy|Thu Aug 27 03:48:01 2026 +0800|shadowsocks-rust: update to 1.25.0 (#714)
+b31fecf|David Mandy|Mon Aug 31 13:25:24 2026 +0800|sing-box: update to 1.14.0 (#719)
+ca9248d|David Mandy|Sun Aug 30 21:24:00 2026 +0800|sing-box: update to 1.13.21 (#718)
 </details>

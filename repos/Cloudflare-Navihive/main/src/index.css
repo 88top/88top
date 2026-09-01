@@ -1,3 +1,10 @@
 @import 'tailwindcss';
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --card-radius: 0.75rem;
+  --frosted-glass-blur: 15px;
+  --transition-curve: cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-duration: 0.3s;
+}

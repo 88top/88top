@@ -60,6 +60,8 @@ import {
   Slider,
   FormControlLabel,
   Switch,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
 import SortIcon from '@mui/icons-material/Sort';
 import SaveIcon from '@mui/icons-material/Save';
@@ -92,10 +94,11 @@ enum SortMode {
 // 默认配置
 const DEFAULT_CONFIGS = {
   'site.title': '导航站',
-  'site.name': '导航站',
+  'site.name': '',
   'site.customCss': '',
-  'site.backgroundImage': '', // 背景图片URL
-  'site.backgroundOpacity': '0.15', // 背景蒙版透明度
+  'site.backgroundImage': 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1920&auto=format&fit=crop', // 背景图片URL
+  'site.backgroundOpacity': '0.2', // 背景蒙版透明度
+  'site.frostedGlass': 'false', // 是否启用毛玻璃卡片（仅在有背景图时生效，默认关闭避免存量用户升级后视觉突变）
   'site.iconApi': 'https://www.faviconextractor.com/favicon/{domain}?larger=true', // 默认使用的API接口，带上 ?larger=true 参数可以获取最大尺寸的图标
   'site.searchBoxEnabled': 'true', // 是否启用搜索框
   'site.searchBoxGuestEnabled': 'true', // 访客是否可以使用搜索框
@@ -1244,7 +1247,9 @@ function App() {
         }}
       >
         {/* 背景图片 */}
-        {configs['site.backgroundImage'] && isSecureUrl(configs['site.backgroundImage']) && (
+        {configs['site.backgroundImage'] &&
+          (configs['site.backgroundImage'].startsWith('linear-gradient(') ||
+            isSecureUrl(configs['site.backgroundImage'])) && (
           <>
             <Box
               sx={{
@@ -1253,7 +1258,9 @@ function App() {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundImage: `url(${configs['site.backgroundImage']})`,
+                backgroundImage: configs['site.backgroundImage'].startsWith('linear-gradient(')
+                  ? configs['site.backgroundImage']
+                  : `url(${configs['site.backgroundImage']})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
@@ -1604,6 +1611,8 @@ function App() {
                           configs={configs}
                           dragOverGroupId={dragOverGroupId}
                           isOverGroupHeader={isOverGroupHeader}
+                          frostedGlassEnabled={configs['site.frostedGlass'] === 'true'}
+                          hasBackgroundImage={!!configs['site.backgroundImage']}
                         />
                       </Box>
                     ))}
@@ -1937,18 +1946,40 @@ function App() {
                 <Typography variant='subtitle1' gutterBottom>
                   背景图片设置
                 </Typography>
+
+                <Typography variant='caption' color='text.secondary' sx={{ display: 'block', mb: 1 }}>
+                  快速预设（点击后会填入下方输入框，你也可以直接手动改）
+                </Typography>
+                <ToggleButtonGroup size='small' exclusive sx={{ mb: 2, flexWrap: 'wrap' }}
+                  onChange={(_, value) => {
+                    if (!value) return;
+                    const presets: Record<string, string> = {
+                      gradient: 'linear-gradient(135deg, #b8d0ea 0%, #6b93bf 100%)',
+                      bing: 'https://bing.biturl.top/?resolution=1920&format=image&index=0&mkt=zh-CN',
+                      random: `https://picsum.photos/1920/1080?random=${Date.now()}`,
+                    };
+                    const preset = presets[value];
+                    if (!preset) return; // value 不在预设表里时直接忽略，避免类型报错
+                    setTempConfigs({ ...tempConfigs, 'site.backgroundImage': preset });
+                  }}
+                >
+                  <ToggleButton value='gradient'>渐变色</ToggleButton>
+                  <ToggleButton value='bing'>Bing 每日</ToggleButton>
+                  <ToggleButton value='random'>随机图片</ToggleButton>
+                </ToggleButtonGroup>
+
                 <TextField
                   margin='dense'
                   id='site-background-image'
                   name='site.backgroundImage'
-                  label='背景图片URL'
-                  type='url'
+                  label='背景图片URL 或 渐变值'
+                  type='text'
                   fullWidth
                   variant='outlined'
                   value={tempConfigs['site.backgroundImage']}
                   onChange={handleConfigInputChange}
                   placeholder='https://example.com/background.jpg'
-                  helperText='输入图片URL，留空则不使用背景图片'
+                  helperText='输入图片URL，或点上方预设按钮；留空则不使用背景'
                 />
 
                 <Box sx={{ mt: 2, mb: 1 }}>
@@ -1979,6 +2010,30 @@ function App() {
                     值越大，背景图片越清晰，内容可能越难看清
                   </Typography>
                 </Box>
+
+                <FormControlLabel
+                  sx={{ mt: 1 }}
+                  control={
+                    <Switch
+                      checked={tempConfigs['site.frostedGlass'] === 'true'}
+                      onChange={(e) =>
+                        setTempConfigs({
+                          ...tempConfigs,
+                          'site.frostedGlass': e.target.checked ? 'true' : 'false',
+                        })
+                      }
+                      color='primary'
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant='body1'>毛玻璃卡片</Typography>
+                      <Typography variant='caption' color='text.secondary'>
+                        仅在设置了背景图片时生效，未设置背景图时该开关不起作用
+                      </Typography>
+                    </Box>
+                  }
+                />
               </Box>
               {/* 搜索框功能设置 */}
               <Box sx={{ mb: 1 }}>
