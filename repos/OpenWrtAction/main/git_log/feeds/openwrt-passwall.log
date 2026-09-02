@@ -1,11 +1,11 @@
 <details> <summary> <b>openwrt-passwall new commit log :rocket: </b> </summary>
 
-#### [:mega: Full Changelog. ](https://github.com/Openwrt-Passwall/openwrt-passwall/compare/bbd098938427249f06f644341bfb916bad5cab5c...2155bdc22b9ace9225207de263de27ef849d57e8)  
+#### [:mega: Full Changelog. ](https://github.com/Openwrt-Passwall/openwrt-passwall/compare/2155bdc22b9ace9225207de263de27ef849d57e8...56adb0e2cbcf17e419524d46841d77a79474f327)  
 :heavy_exclamation_mark: The list displays only the latest 15 commit logs.  
 
 SHA|Author|Date|Message
 -|-|-|-
-2155bdc2|A-BO|Mon Aug 31 23:04:15 2026 +0800|luci: optimize shunt route
-7d1d1cef|A-BO|Mon Aug 31 16:15:42 2026 +0800|luci: repair and optimize
-2e5e6b9a|A-BO|Sun Aug 30 15:47:12 2026 +0800|luci: adjust and optimize
+56adb0e2|A-BO|Tue Sep 1 10:40:58 2026 +0800|luci: 26.9.1
+5acbe52d|A-BO|Tue Sep 1 10:38:38 2026 +0800|luci: update WeChat C2C Xray domain exclusion to regex
+41a38af7|A-BO|Tue Sep 1 10:14:33 2026 +0800|luci: update default rules
 </details>

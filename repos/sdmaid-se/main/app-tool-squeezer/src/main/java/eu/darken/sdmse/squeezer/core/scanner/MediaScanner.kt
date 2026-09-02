@@ -29,6 +29,7 @@ import eu.darken.sdmse.squeezer.core.CompressibleImage
 import eu.darken.sdmse.squeezer.core.CompressibleMedia
 import eu.darken.sdmse.squeezer.core.CompressibleVideo
 import eu.darken.sdmse.squeezer.core.CompressionEstimator
+import eu.darken.sdmse.squeezer.core.PriorCompression
 import eu.darken.sdmse.squeezer.core.SqueezerEligibility
 import eu.darken.sdmse.squeezer.core.SqueezerSettings
 import eu.darken.sdmse.squeezer.core.history.CompressionHistoryDatabase
@@ -36,6 +37,7 @@ import eu.darken.sdmse.squeezer.core.history.CompressionHistoryEntity
 import eu.darken.sdmse.squeezer.core.history.ImageContentHasher
 import eu.darken.sdmse.squeezer.core.history.VideoContentHasher
 import eu.darken.sdmse.squeezer.core.processor.ExifPreserver
+import eu.darken.sdmse.squeezer.core.processor.ImageCompressor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
@@ -63,6 +65,7 @@ class MediaScanner @Inject constructor(
     private val compressionEstimator: CompressionEstimator,
     private val exifPreserver: ExifPreserver,
     private val lossyAuxDetector: LossyAuxDetector,
+    private val dimensionProbe: ImageDimensionProbe,
     private val settings: SqueezerSettings,
 ) : Progress.Host, Progress.Client {
 
@@ -82,6 +85,10 @@ class MediaScanner @Inject constructor(
         val compressionQuality: Int,
         /** When false (default), skip photos with an HDR gain map or depth map. */
         val includeLossyAuxImages: Boolean = false,
+        /** When false (default), skip Motion Photos so the re-encode can't drop their clip. */
+        val includeMotionPhotos: Boolean = false,
+        /** When false (default), skip images the re-encode would decode at reduced resolution. */
+        val includeOversizedImages: Boolean = false,
     )
 
     data class ScanResult(
@@ -89,7 +96,17 @@ class MediaScanner @Inject constructor(
         val skippedInaccessibleCount: Int,
         /** Photos excluded to preserve their HDR gain map / depth map. */
         val skippedLossyAuxCount: Int = 0,
+        /** Motion Photos excluded to preserve their embedded clip. */
+        val skippedMotionPhotoCount: Int = 0,
+        /** Images excluded because compression would halve their resolution. */
+        val skippedOversizedCount: Int = 0,
     )
+
+    private class SkipCounters {
+        val lossyAux = AtomicInteger(0)
+        val motionPhoto = AtomicInteger(0)
+        val oversized = AtomicInteger(0)
+    }
 
     private suspend fun createSearchFlow(paths: Set<APath>): Flow<APathLookup<*>> {
         val exclusions = exclusionManager.pathExclusions(SDMTool.Type.SQUEEZER)
@@ -132,7 +149,7 @@ class MediaScanner @Inject constructor(
         updateProgressCount(Progress.Count.Indeterminate())
 
         val skippedInaccessible = AtomicInteger(0)
-        val skippedLossyAux = AtomicInteger(0)
+        val skips = SkipCounters()
 
         val searchPaths = options.paths
         val searchFlow = createSearchFlow(searchPaths)
@@ -194,7 +211,7 @@ class MediaScanner @Inject constructor(
             }
 
             if (isImage) {
-                val media = processImageCandidate(lookup, mimeType, options, skippedLossyAux)
+                val media = processImageCandidate(lookup, mimeType, options, skips)
                 if (media != null) results.add(media)
             } else if (isVideo) {
                 val media = processVideoCandidate(lookup, mimeType, options)
@@ -205,12 +222,16 @@ class MediaScanner @Inject constructor(
         log(TAG) {
             "Scan complete: $scannedCount files scanned, ${results.size} compressible media found, " +
                 "${skippedInaccessible.get()} skipped (inaccessible), " +
-                "${skippedLossyAux.get()} skipped (HDR/depth aux)"
+                "${skips.lossyAux.get()} skipped (HDR/depth aux), " +
+                "${skips.motionPhoto.get()} skipped (Motion Photo), " +
+                "${skips.oversized.get()} skipped (oversized)"
         }
         return ScanResult(
             items = results,
             skippedInaccessibleCount = skippedInaccessible.get(),
-            skippedLossyAuxCount = skippedLossyAux.get(),
+            skippedLossyAuxCount = skips.lossyAux.get(),
+            skippedMotionPhotoCount = skips.motionPhoto.get(),
+            skippedOversizedCount = skips.oversized.get(),
         )
     }
 
@@ -218,57 +239,26 @@ class MediaScanner @Inject constructor(
         lookup: APathLookup<*>,
         mimeType: String,
         options: Options,
-        skippedLossyAux: AtomicInteger,
+        skips: SkipCounters,
     ): CompressibleImage? {
-        val skipReason = if (options.skipPreviouslyCompressed) {
-            val hasExifMarker = if (settings.writeExifMarker.value()) {
-                try {
-                    val localPath = lookup.lookedUp as? LocalPath
-                    localPath?.let { exifPreserver.hasCompressionMarker(File(it.path)) } ?: false
-                } catch (e: Exception) {
-                    log(TAG, WARN) { "Failed to check EXIF marker for $lookup: ${e.message}" }
-                    false
-                }
-            } else {
-                false
-            }
+        val priorCompression = detectImagePriorCompression(lookup)
 
-            if (hasExifMarker) {
-                "compressed (exif marker)"
-            } else {
-                try {
-                    val identifier = imageContentHasher.computeHash(lookup.lookedUp)
-                    when (historyDatabase.getOutcome(identifier.contentId)) {
-                        CompressionHistoryEntity.Outcome.COMPRESSED -> "compressed (history)"
-                        CompressionHistoryEntity.Outcome.TRIED_NO_SAVINGS -> "no savings (history)"
-                        null -> null
-                    }
-                } catch (e: Exception) {
-                    log(TAG, WARN) { "Failed to compute content hash for $lookup: ${e.message}" }
-                    null
-                }
-            }
-        } else {
-            null
-        }
-
-        if (skipReason != null) {
-            log(TAG, VERBOSE) { "Skipping image ($skipReason): $lookup" }
+        if (options.skipPreviouslyCompressed && priorCompression != null) {
+            log(TAG, VERBOSE) { "Skipping image ($priorCompression): $lookup" }
             return null
         }
 
-        // Skip photos whose HDR gain map / depth map compression would silently destroy, unless the
-        // user opted in. Runs BEFORE the (HEIC-only) multi-image guard so a HEIF gain-map/depth file
-        // is attributed to "HDR/depth preserved" rather than the multi-image reason. Format-wide
-        // (also catches Ultra HDR JPEG). Plain Live-Photo HEICs carry no gain-map signature, so they
-        // still fall through to the hard multi-image skip below.
-        if (!options.includeLossyAuxImages) {
-            val localFile = (lookup.lookedUp as? LocalPath)?.let { File(it.path) }
-            if (localFile != null && lossyAuxDetector.hasLossyAux(localFile, mimeType)) {
-                skippedLossyAux.incrementAndGet()
-                log(TAG, VERBOSE) { "Skipping image with HDR/depth aux data: $lookup" }
-                return null
-            }
+        // Detects photos whose HDR gain map / depth map compression would silently destroy. Runs
+        // BEFORE the (HEIC-only) multi-image guard so a HEIF gain-map/depth file is attributed to
+        // "HDR/depth preserved" rather than the multi-image reason. Format-wide (also catches Ultra
+        // HDR JPEG). Plain Live-Photo HEICs carry no gain-map signature, so they still fall through
+        // to the hard multi-image skip below.
+        val localFile = (lookup.lookedUp as? LocalPath)?.let { File(it.path) }
+        val hasLossyAux = localFile != null && lossyAuxDetector.hasLossyAux(localFile, mimeType)
+        if (hasLossyAux && !options.includeLossyAuxImages) {
+            skips.lossyAux.incrementAndGet()
+            log(TAG, VERBOSE) { "Skipping image with HDR/depth aux data: $lookup" }
+            return null
         }
 
         // Intentionally NOT bypassed by includeLossyAuxImages: a multi-image HEIC may hold sibling
@@ -280,6 +270,24 @@ class MediaScanner @Inject constructor(
             return null
         }
 
+        // Same shape as the HDR/depth guard: opt-in off means the file is excluded and counted,
+        // opt-in on means it stays in the results carrying the marker.
+        val hasMotionVideo = localFile != null && lossyAuxDetector.hasMotionVideo(localFile, mimeType)
+        if (hasMotionVideo && !options.includeMotionPhotos) {
+            skips.motionPhoto.incrementAndGet()
+            log(TAG, VERBOSE) { "Skipping Motion Photo: $lookup" }
+            return null
+        }
+
+        val willDownscale = localFile
+            ?.let { dimensionProbe.read(it) }
+            ?.let { ImageCompressor.willDownscale(it.width, it.height) } == true
+        if (willDownscale && !options.includeOversizedImages) {
+            skips.oversized.incrementAndGet()
+            log(TAG, VERBOSE) { "Skipping oversized image: $lookup" }
+            return null
+        }
+
         val estimatedCompressedSize = compressionEstimator.estimateCompressedSize(
             lookup.size, mimeType, options.compressionQuality,
         )
@@ -288,9 +296,42 @@ class MediaScanner @Inject constructor(
             lookup = lookup,
             mimeType = mimeType,
             estimatedCompressedSize = estimatedCompressedSize,
-            wasCompressedBefore = false,
+            priorCompression = priorCompression,
+            hasLossyAux = hasLossyAux,
+            hasMotionVideo = hasMotionVideo,
+            willDownscale = willDownscale,
         ).also {
             log(TAG, VERBOSE) { "Found compressible image: $it" }
+        }
+    }
+
+    /**
+     * Read whether a previous run already compressed this image. Evaluated regardless of
+     * [Options.skipPreviouslyCompressed]: with the setting off the file stays in the results and
+     * the outcome is shown on its row instead.
+     */
+    private suspend fun detectImagePriorCompression(lookup: APathLookup<*>): PriorCompression? {
+        // The EXIF marker survives a cleared history and is only written after a compression that
+        // actually replaced the file, so a positive marker means COMPRESSED and saves the hash.
+        val hasExifMarker = if (settings.writeExifMarker.value()) {
+            try {
+                val localPath = lookup.lookedUp as? LocalPath
+                localPath?.let { exifPreserver.hasCompressionMarker(File(it.path)) } ?: false
+            } catch (e: Exception) {
+                log(TAG, WARN) { "Failed to check EXIF marker for $lookup: ${e.message}" }
+                false
+            }
+        } else {
+            false
+        }
+        if (hasExifMarker) return PriorCompression.COMPRESSED
+
+        return try {
+            val identifier = imageContentHasher.computeHash(lookup.lookedUp)
+            historyDatabase.getOutcome(identifier.contentId).toPriorCompression()
+        } catch (e: Exception) {
+            log(TAG, WARN) { "Failed to compute content hash for $lookup: ${e.message}" }
+            null
         }
     }
 
@@ -353,24 +394,16 @@ class MediaScanner @Inject constructor(
             return null
         }
 
-        val skipReason = if (options.skipPreviouslyCompressed) {
-            try {
-                val identifier = videoContentHasher.computeHash(lookup.lookedUp)
-                when (historyDatabase.getOutcome(identifier.contentId)) {
-                    CompressionHistoryEntity.Outcome.COMPRESSED -> "compressed (history)"
-                    CompressionHistoryEntity.Outcome.TRIED_NO_SAVINGS -> "no savings (history)"
-                    null -> null
-                }
-            } catch (e: Exception) {
-                log(TAG, WARN) { "Failed to compute video content hash for $lookup: ${e.message}" }
-                null
-            }
-        } else {
+        val priorCompression = try {
+            val identifier = videoContentHasher.computeHash(lookup.lookedUp)
+            historyDatabase.getOutcome(identifier.contentId).toPriorCompression()
+        } catch (e: Exception) {
+            log(TAG, WARN) { "Failed to compute video content hash for $lookup: ${e.message}" }
             null
         }
 
-        if (skipReason != null) {
-            log(TAG, VERBOSE) { "Skipping video ($skipReason): $lookup" }
+        if (options.skipPreviouslyCompressed && priorCompression != null) {
+            log(TAG, VERBOSE) { "Skipping video ($priorCompression): $lookup" }
             return null
         }
 
@@ -385,7 +418,7 @@ class MediaScanner @Inject constructor(
             lookup = lookup,
             mimeType = mimeType,
             estimatedCompressedSize = estimatedCompressedSize,
-            wasCompressedBefore = false,
+            priorCompression = priorCompression,
             durationMs = metadata.durationMs,
             bitrateBps = metadata.bitrateBps,
         ).also {
@@ -440,5 +473,11 @@ class MediaScanner @Inject constructor(
     companion object {
         private const val MAX_BITRATE_BPS = 200_000_000L // 200 Mbps
         private val TAG = logTag("Squeezer", "Scanner")
+
+        private fun CompressionHistoryEntity.Outcome?.toPriorCompression(): PriorCompression? = when (this) {
+            CompressionHistoryEntity.Outcome.COMPRESSED -> PriorCompression.COMPRESSED
+            CompressionHistoryEntity.Outcome.TRIED_NO_SAVINGS -> PriorCompression.NO_SAVINGS
+            null -> null
+        }
     }
 }

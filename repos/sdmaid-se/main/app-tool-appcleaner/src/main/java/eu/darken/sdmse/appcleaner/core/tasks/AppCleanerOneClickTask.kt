@@ -22,6 +22,7 @@ data class AppCleanerOneClickTask(
         override val affectedPaths: Set<APath>,
         override val affectedCount: Int = affectedPaths.size,
         val stoppedEarly: AppCleanerTask.StopReason? = null,
+        val skippedCount: Int = 0,
     ) : Result, ReportDetails.AffectedSpace, ReportDetails.AffectedPaths {
 
         override val primaryInfo
@@ -35,6 +36,13 @@ data class AppCleanerOneClickTask(
                     AppCleanerTask.StopReason.ERROR -> getQuantityString2(
                         R.plurals.appcleaner_result_x_items_deleted_stopped_error,
                         affectedCount,
+                    )
+
+                    AppCleanerTask.StopReason.AUTOMATION_NO_CONSENT -> getQuantityString2(
+                        R.plurals.appcleaner_result_x_items_deleted_stopped_automation,
+                        skippedCount,
+                        getQuantityString2(R.plurals.appcleaner_result_x_items_deleted, affectedCount),
+                        skippedCount,
                     )
 
                     null -> getQuantityString2(R.plurals.appcleaner_result_x_items_deleted, affectedCount)

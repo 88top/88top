@@ -11,6 +11,8 @@ import eu.darken.sdmse.exclusion.core.ExclusionManager
 import eu.darken.sdmse.exclusion.core.types.ExclusionHolder
 import eu.darken.sdmse.squeezer.core.CompressibleImage
 import eu.darken.sdmse.squeezer.core.CompressionEstimator
+import eu.darken.sdmse.squeezer.core.ContentId
+import eu.darken.sdmse.squeezer.core.ContentIdentifier
 import eu.darken.sdmse.squeezer.core.SqueezerSettings
 import eu.darken.sdmse.squeezer.core.history.CompressionHistoryDatabase
 import eu.darken.sdmse.squeezer.core.history.ImageContentHasher
@@ -28,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import testhelpers.BaseTest
 import testhelpers.coroutine.TestDispatcherProvider
+import testhelpers.mockDataStoreValue
 import java.io.File
 import java.time.Instant
 
@@ -50,6 +53,7 @@ class MediaScannerAccessibilityTest : BaseTest() {
     private val compressionEstimator: CompressionEstimator = mockk(relaxed = true)
     private val exifPreserver: ExifPreserver = mockk(relaxed = true)
     private val lossyAuxDetector: LossyAuxDetector = mockk(relaxed = true)
+    private val dimensionProbe: ImageDimensionProbe = mockk(relaxed = true)
     private val settings: SqueezerSettings = mockk(relaxed = true)
 
     private val dispatcherProvider: DispatcherProvider = TestDispatcherProvider()
@@ -65,6 +69,11 @@ class MediaScannerAccessibilityTest : BaseTest() {
         // Return a bogus mime type so nothing ever makes it into the results set — we only
         // care about the accessibility filter + skip counter for this test.
         coEvery { mimeTypeTool.determineMimeType(any<APathLookup<*>>()) } returns "application/octet-stream"
+        // Image candidates always consult the marker + history now, so these can't stay relaxed.
+        every { settings.writeExifMarker } returns mockDataStoreValue(false)
+        every { exifPreserver.hasCompressionMarker(any()) } returns false
+        coEvery { imageContentHasher.computeHash(any()) } returns ContentIdentifier.ImageHash(ContentId("hash"))
+        coEvery { historyDatabase.getOutcome(any()) } returns null
     }
 
     @AfterEach
@@ -106,6 +115,7 @@ class MediaScannerAccessibilityTest : BaseTest() {
         compressionEstimator = compressionEstimator,
         exifPreserver = exifPreserver,
         lossyAuxDetector = lossyAuxDetector,
+        dimensionProbe = dimensionProbe,
         settings = settings,
     )
 

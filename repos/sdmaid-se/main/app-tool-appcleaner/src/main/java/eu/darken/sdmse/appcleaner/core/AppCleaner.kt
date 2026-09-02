@@ -14,8 +14,10 @@ import eu.darken.sdmse.appcleaner.core.tasks.AppCleanerScanTask
 import eu.darken.sdmse.appcleaner.core.tasks.AppCleanerSchedulerTask
 import eu.darken.sdmse.appcleaner.core.tasks.AppCleanerTask
 import eu.darken.sdmse.appcleaner.core.tasks.AppCleanerTask.StopReason
+import eu.darken.sdmse.automation.core.errors.AutomationNoConsentException
 import eu.darken.sdmse.automation.core.errors.isScreenUnavailable
 import eu.darken.sdmse.common.adb.AdbManager
+import eu.darken.sdmse.common.adb.canUseAdbNow
 import eu.darken.sdmse.common.ca.CaString
 import eu.darken.sdmse.common.coroutine.AppScope
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.INFO
@@ -82,6 +84,7 @@ private fun AppCleanerProcessingTask.Success.toSchedulerSuccess() = AppCleanerSc
     affectedPaths = affectedPaths,
     affectedCount = affectedCount,
     stoppedEarly = stoppedEarly,
+    skippedCount = skippedCount,
 )
 
 private fun AppCleanerProcessingTask.Success.toOneClickSuccess() = AppCleanerOneClickTask.Success(
@@ -89,6 +92,7 @@ private fun AppCleanerProcessingTask.Success.toOneClickSuccess() = AppCleanerOne
     affectedPaths = affectedPaths,
     affectedCount = affectedCount,
     stoppedEarly = stoppedEarly,
+    skippedCount = skippedCount,
 )
 
 @Singleton
@@ -102,7 +106,7 @@ class AppCleaner @Inject constructor(
     private val pkgOps: PkgOps,
     @SetupBinding(SetupModule.Type.USAGE_STATS) usageStatsSetupModule: SetupModule,
     rootManager: RootManager,
-    adbManager: AdbManager,
+    private val adbManager: AdbManager,
     private val shellOps: ShellOps,
     private val filterFactories: Set<@JvmSuppressWildcards ExpendablesFilter.Factory>,
     @SetupBinding(SetupModule.Type.INVENTORY) private val appInventorySetupModule: SetupModule,
@@ -264,6 +268,9 @@ class AppCleaner @Inject constructor(
             val targetJunk = task.targetPkgs
                 ?.map { tp -> snapshot.junks.single { it.identifier == tp } }
                 ?: snapshot.junks
+                    // Exclusion-limited junks are in the snapshot because the ADB cache trim would
+                    // reach them anyway. Deleting their files directly is never ours to do.
+                    .filter { !it.isExclusionLimited }
 
             updateProgressCount(Progress.Count.Percent(targetJunk.size))
 
@@ -366,63 +373,62 @@ class AppCleaner @Inject constructor(
 
         val deleted = mutableSetOf<APath>()
 
-        internalData.value = snapshot.copy(
-            junks = snapshot.junks.map { appJunk ->
-                updateProgressSecondary(appJunk.label, extra = appJunk.pkg)
-                // Remove all files we deleted or children of deleted files
+        val reconciledJunks = snapshot.junks.map { appJunk ->
+            updateProgressSecondary(appJunk.label, extra = appJunk.pkg)
+            // Remove all files we deleted or children of deleted files
 
-                val deletedInaccessible = mutableSetOf<ExpendablesFilter.Match>()
+            val deletedInaccessible = mutableSetOf<ExpendablesFilter.Match>()
 
-                val updatedExpendables = appJunk.expendables?.mapValues { (type, matches) ->
-                    if (type == DefaultCachesPublicFilter::class && acsResult?.succesful?.contains(appJunk.identifier) == true) {
-                        // It's inaccessible caches were deleted, this included the default public caches
-                        return@mapValues emptySet<ExpendablesFilter.Match>()
-                    }
-
-                    matches.filter { match ->
-                        val isDeleted = accessibleDeletionMap.getOrDefault(appJunk.identifier, emptySet()).any {
-                            it.path.isAncestorOf(match.path) || it.path.matches(match.path)
-                        }
-                        if (isDeleted) {
-                            deleted.add(match.path)
-                            if (match.identifier == DefaultCachesPublicFilter::class) {
-                                // We need path and size to update the size of `InaccessibleCache` later
-                                deletedInaccessible.add(match)
-                            }
-                        }
-                        !isDeleted
-                    }
-                }?.filterValues { it.isNotEmpty() }
-
-                val updatedInaccessible = appJunk.inaccessibleCache?.let { inacc ->
-                    if (acsResult?.succesful?.contains(appJunk.identifier) == true) {
-                        // Inaccessible were deleted, `expendables` should have been updated correctly by above code
-                        deleted.addAll(inacc.theoreticalPaths)
-                        return@let null
-                    }
-
-                    val deletedSize = deletedInaccessible.sumOf { it.expectedGain }
-                    inacc.copy(
-                        totalSize = inacc.totalSize - deletedSize,
-                        publicSize = inacc.publicSize?.let { it - deletedSize }?.coerceAtLeast(0L),
-                    )
+            val updatedExpendables = appJunk.expendables?.mapValues { (type, matches) ->
+                if (type == DefaultCachesPublicFilter::class && acsResult?.succesful?.contains(appJunk.identifier) == true) {
+                    // It's inaccessible caches were deleted, this included the default public caches
+                    return@mapValues emptySet<ExpendablesFilter.Match>()
                 }
 
+                matches.filter { match ->
+                    val isDeleted = accessibleDeletionMap.getOrDefault(appJunk.identifier, emptySet()).any {
+                        it.path.isAncestorOf(match.path) || it.path.matches(match.path)
+                    }
+                    if (isDeleted) {
+                        deleted.add(match.path)
+                        if (match.identifier == DefaultCachesPublicFilter::class) {
+                            // We need path and size to update the size of `InaccessibleCache` later
+                            deletedInaccessible.add(match)
+                        }
+                    }
+                    !isDeleted
+                }
+            }?.filterValues { it.isNotEmpty() }
 
-                appJunk.copy(
-                    expendables = updatedExpendables,
-                    inaccessibleCache = updatedInaccessible,
-                    acsError = when {
-                        acsResult == null -> appJunk.acsError
-                        acsResult.failed.containsKey(appJunk.identifier) -> acsResult.failed[appJunk.identifier]
-                        acsResult.succesful.contains(appJunk.identifier) -> null
-                        // Not attempted this run (e.g. a targeted delete of other apps): a fresh
-                        // null must not erase what the last actual attempt learned.
-                        else -> appJunk.acsError
-                    },
+            val updatedInaccessible = appJunk.inaccessibleCache?.let { inacc ->
+                if (acsResult?.succesful?.contains(appJunk.identifier) == true) {
+                    // Inaccessible were deleted, `expendables` should have been updated correctly by above code
+                    deleted.addAll(inacc.theoreticalPaths)
+                    return@let null
+                }
+
+                val deletedSize = deletedInaccessible.sumOf { it.expectedGain }
+                inacc.copy(
+                    totalSize = inacc.totalSize - deletedSize,
+                    publicSize = inacc.publicSize?.let { it - deletedSize }?.coerceAtLeast(0L),
                 )
-            }.filter { !it.isEmpty() }
-        )
+            }
+
+
+            appJunk.copy(
+                expendables = updatedExpendables,
+                inaccessibleCache = updatedInaccessible,
+                acsError = when {
+                    acsResult == null -> appJunk.acsError
+                    acsResult.failed.containsKey(appJunk.identifier) -> acsResult.failed[appJunk.identifier]
+                    acsResult.succesful.contains(appJunk.identifier) -> null
+                    // Not attempted this run (e.g. a targeted delete of other apps): a fresh
+                    // null must not erase what the last actual attempt learned.
+                    else -> appJunk.acsError
+                },
+            )
+        }.filter { !it.isEmpty() }
+        internalData.value = snapshot.copy(junks = reconciledJunks.pruneOrphanedExclusionLimited())
 
         // `acsResult` is a var (the partial-result callback writes to it), so it won't smart-cast.
         val acsOutcome = acsResult
@@ -441,7 +447,7 @@ class AppCleaner @Inject constructor(
         // the pre- and post-deletion scan totals. Deriving it from the snapshot avoids re-deriving the
         // accessible/inaccessible/public-cache counting rules in a second hand-rolled counter, and it counts ACS
         // cache clears at scan scale rather than as the <=2 synthetic paths that land in `affectedPaths`.
-        val affectedCount = (snapshot.totalCount - (internalData.value?.totalCount ?: 0)).coerceAtLeast(0)
+        val affectedCount = (snapshot.totalCount - reconciledJunks.sumOf { it.itemCount }).coerceAtLeast(0)
         val salvaged = AppCleanerProcessingTask.Success(
             affectedSpace = accessibleDeletionMap.values.sumOf { contents -> contents.sumOf { it.expectedGain } } + automationSize,
             affectedPaths = deleted,
@@ -459,6 +465,19 @@ class AppCleaner @Inject constructor(
             throw PartialResultException(failure, salvaged.copy(stoppedEarly = reason))
         }
 
+        if (acsOutcome != null && acsOutcome.skippedNoConsent.isNotEmpty()) {
+            log(TAG, WARN) { "Skipped for lack of ACS consent: ${acsOutcome.skippedNoConsent}" }
+            // Nothing was salvaged, so there is no outcome to report and no other place that offers
+            // the user a way to grant consent. Fail with the dialog that routes to setup.
+            if (salvaged.affectedCount == 0 && salvaged.affectedSpace == 0L) {
+                throw InaccessibleDeletionException(AutomationNoConsentException())
+            }
+            return salvaged.copy(
+                stoppedEarly = StopReason.AUTOMATION_NO_CONSENT,
+                skippedCount = acsOutcome.skippedNoConsent.size,
+            )
+        }
+
         return salvaged
     }
 
@@ -472,13 +491,19 @@ class AppCleaner @Inject constructor(
                 tags = setOf(Exclusion.Tag.APPCLEANER),
             )
         }.toSet()
+
+        // Everything that can suspend or fail is resolved before save(), otherwise a cancel between
+        // a durable exclusion and the state rewrite would leave stale data and no undo handle.
+        val snapshot = internalData.value!!
+        val canUseAdb = adbManager.canUseAdbNow()
+
         val saved = exclusionManager.save(exclusions)
 
-        val snapshot = internalData.value!!
         val updated = snapshot.copy(
-            junks = snapshot.junks.filter { junk ->
-                exclusions.none { it.match(junk.identifier.pkgId) }
-            }
+            junks = snapshot.junks.mapNotNull { junk ->
+                if (exclusions.none { it.match(junk.identifier.pkgId) }) return@mapNotNull junk
+                if (canUseAdb) junk.limitToTrimBlastRadius() else null
+            }.pruneOrphanedExclusionLimited()
         )
         internalData.value = updated
 
@@ -543,7 +568,7 @@ class AppCleaner @Inject constructor(
                 } else {
                     junk
                 }
-            }
+            }.pruneOrphanedExclusionLimited()
         )
 
         log(TAG) { "exclude(): Excluded $excludedCount of $totalCount matches for $identifier" }

@@ -976,9 +976,8 @@ function App() {
             throw new Error('导入文件格式错误：缺少站点数据');
           }
 
-          if (!importData.configs || typeof importData.configs !== 'object') {
-            throw new Error('导入文件格式错误：缺少配置数据');
-          }
+          // 导入功能不再处理网站配置：configs 字段是否存在、格式是否正确都不校验，
+          // 因为无论如何都不会被使用（见下方 5.5）
 
           // 关键修复：重新组织导入数据，确保正确的顺序和去重
           // 1. 按分组ID分组站点
@@ -1063,6 +1062,14 @@ function App() {
 
           // 5. 更新导入数据中的站点
           importData.sites = finalSites;
+
+          // 5.5 关键修复：导入功能只负责分组和站点数据。
+          // 网站配置（网站名称、背景图、自定义CSS等）只能通过"网站设置"面板手动修改，
+          // 首次部署时用代码里的 DEFAULT_CONFIGS，手动改过之后就应该一直保持手动设置的值。
+          // 这里无条件用当前内存中的 configs 覆盖掉 importData.configs，
+          // 确保不管导入文件里带的是什么值（空值/默认值/看似合理的非空值），
+          // 导入书签这个动作都不会改变已保存的网站设置。
+          importData.configs = configs;
 
           // 6. 调用API导入数据
           const result = await api.importData(importData);
