@@ -2,7 +2,7 @@
 name: Patch Mikrotik RouterOS
 on:
   schedule:
-    - cron: "00 09 * * *"   # At UTC 09:00 (Beijing 17:00) on every day
+    - cron: "25 * * * *"   # Every hour at minute 25 (UTC)
   workflow_dispatch:  
     inputs:
       version:
@@ -14,43 +14,113 @@ on:
           - all
           - v6
           - v7
+      release:
+        description: 'Release'
+        required: false
+        default: true
+        type: boolean
 jobs:
-  Patch_Stable_V7:
-    if: |
-      (github.event_name == 'schedule') || 
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.version == 'all' || github.event.inputs.version == 'v7'))
-    uses: ./.github/workflows/patch_v7.yml
+
+  Check_Versions:
+    runs-on: ubuntu-latest
+    outputs:
+      upgrades_v6: ${{ steps.set-matrix.outputs.upgrades_v6 }}
+      upgrades_v7: ${{ steps.set-matrix.outputs.upgrades_v7 }}
+      patch_v6: ${{ steps.set-matrix.outputs.patch_v6 }}
+      patch_v7: ${{ steps.set-matrix.outputs.patch_v7 }}
+    steps:
+      - name: Fetch and compare versions
+        id: set-matrix
+        run: |
+          OFFICIAL_UPGRADE=$(curl -s https://upgrade.mikrotik.com/routeros/upgrade.json)
+          echo "$OFFICIAL_UPGRADE" | jq -e . >/dev/null 2>&1 || { echo "ERROR: OFFICIAL_UPGRADE is not valid JSON" >&2; exit 1; }
+
+          if [[ "${{ github.event_name }}" != "workflow_dispatch" ]]; then
+            PATCH_UPGRADE=$(curl -s https://upgrade.mikrotik.ltd/routeros/upgrade.json)
+            echo "$PATCH_UPGRADE" | jq -e . >/dev/null 2>&1 || { echo "ERROR: PATCH_UPGRADE is not valid JSON" >&2; exit 1; }
+
+            CANDIDATES=$(echo "$OFFICIAL_UPGRADE" | jq -c --argjson patch "$PATCH_UPGRADE" '
+              ($patch.upgradePaths // {}) as $paths |
+              .upgradePaths // {} | to_entries |
+              map(
+                .value.version as $official_version |
+                ($paths[.key] // null) as $patch_value |
+                select(
+                  $patch_value != null and
+                  $official_version != $patch_value.version and
+                  (any($paths[]; .version == $official_version) | not) and
+                  ((.key | test("^NEWEST6")) or (.key | test("^NEWESTa7"))) and 
+                  (.key | test("\\.(stable|development|long-term)$"))
+                ) |
+                {
+                  majorVersion: (.value.version | split(".")[0]),
+                  channel: (.key | split(".")[1]),
+                  version: .value.version
+                }
+              )
+            ')
+          else
+            CANDIDATES=$(echo "$OFFICIAL_UPGRADE" | jq -c '
+              .upgradePaths // {} | to_entries | 
+              map(
+                select(
+                  ((.key | test("^NEWEST6")) or (.key | test("^NEWESTa7")))
+                  and
+                  (.key | test("\\.(stable|development|long-term)$"))
+                )
+                |
+                {
+                  majorVersion: (.value.version | split(".")[0]),
+                  channel: (.key | split(".")[1]),
+                  version: .value.version
+                }
+              )
+            ')
+          fi
+
+          VERSION_FILTER="${{ inputs.version || 'all' }}"
+          V6_MATRIX=$(echo "$CANDIDATES" | jq -c 'map(select(.majorVersion == "6" ))')
+          V7_MATRIX=$(echo "$CANDIDATES" | jq -c 'map(select(.majorVersion == "7" ))')
+          if [[ "$VERSION_FILTER" == "v6" ]]; then
+            V7_MATRIX='[]'
+          elif [[ "$VERSION_FILTER" == "v7" ]]; then
+            V6_MATRIX='[]'
+          fi
+          echo "upgrades_v6=$V6_MATRIX" >> "$GITHUB_OUTPUT"
+          echo "upgrades_v7=$V7_MATRIX" >> "$GITHUB_OUTPUT"
+          echo "patch_v6=$(jq 'length > 0' <<< "$V6_MATRIX")" >> "$GITHUB_OUTPUT"
+          echo "patch_v7=$(jq 'length > 0' <<< "$V7_MATRIX")" >> "$GITHUB_OUTPUT"
+
+          echo "=== Upgrades V6 ==="
+          echo "$V6_MATRIX" | jq .
+
+          echo "=== Upgrades V7 ==="
+          echo "$V7_MATRIX" | jq .
+
+  Patch_V6:
+    needs: Check_Versions
+    if: ${{ needs.Check_Versions.outputs.patch_v6 == 'true' }}
+    uses: ./.github/workflows/patch_v6.yml
+    strategy:
+      matrix:
+        target: ${{ fromJson(needs.Check_Versions.outputs.upgrades_v6) }}
+      fail-fast: false
     with:
-      channel: stable
-      release: true
+      channel: ${{ matrix.target.channel }}
+      version: ${{ matrix.target.version }}
+      release: ${{ github.event_name != 'workflow_dispatch' || inputs.release }}
     secrets: inherit
 
-  Patch_LongTerm_V7:
-    if: |
-      (github.event_name == 'schedule') || 
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.version == 'all' || github.event.inputs.version == 'v7'))
+  Patch_V7:
+    needs: Check_Versions
+    if: ${{ needs.Check_Versions.outputs.patch_v7 == 'true' }}
     uses: ./.github/workflows/patch_v7.yml
+    strategy:
+      matrix:
+        target: ${{ fromJson(needs.Check_Versions.outputs.upgrades_v7) }}
+      fail-fast: false
     with:
-      channel: long-term
-      release: true
-    secrets: inherit
-    
-  Patch_Stable_V6:
-    if: |
-      (github.event_name == 'schedule') || 
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.version == 'all' || github.event.inputs.version == 'v6'))
-    uses: ./.github/workflows/patch_v6.yml
-    with:
-      channel: stable
-      release: true
-    secrets: inherit
-
-  Patch_LongTerm_V6:
-    if: |
-      (github.event_name == 'schedule') || 
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.version == 'all' || github.event.inputs.version == 'v6'))
-    uses: ./.github/workflows/patch_v6.yml
-    with:
-      channel: long-term
-      release: true
+      channel: ${{ matrix.target.channel }}
+      version: ${{ matrix.target.version }}
+      release: ${{ github.event_name != 'workflow_dispatch' || inputs.release }}
     secrets: inherit

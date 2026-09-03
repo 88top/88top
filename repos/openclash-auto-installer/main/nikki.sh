@@ -73,6 +73,19 @@ add_nikki_apk_feed() {
     printf '%s\n' "$FEED_URL/packages.adb" >> "$feed_list"
 }
 
+get_installed_nikki_version() {
+    case "$PKG_MGR" in
+        opkg)
+            opkg status luci-app-nikki 2>/dev/null | sed -n 's/^Version: //p' | head -n1 || true
+            ;;
+        apk)
+            VER="$(apk list --installed --manifest luci-app-nikki 2>/dev/null | awk '$1 == "luci-app-nikki" {print $2; exit}' || true)"
+            [ -n "$VER" ] || VER="$(apk info -a luci-app-nikki 2>/dev/null | sed -n 's/^[Vv]ersion:[[:space:]]*//p' | head -n1 || true)"
+            printf '%s' "$VER"
+            ;;
+    esac
+}
+
 if ! mkdir "$LOCKDIR" 2>/dev/null; then
     die "已有另一个 Nikki 任务正在运行"
 fi
@@ -85,6 +98,7 @@ REL_RAW="${DISTRIB_RELEASE:-}"
 log "System release: ${REL_RAW:-unknown}"
 
 need_cmd wget
+need_cmd awk
 
 if command -v opkg >/dev/null 2>&1; then
     PKG_MGR="opkg"
@@ -109,22 +123,22 @@ EOF
     exit 1
 fi
 if [ "$PKG_MGR" = "apk" ]; then
-    warn "当前包管理器为 apk（OpenWrt 25.12+），Nikki 可能尚未完全适配。"
+    log "当前包管理器为 apk，将使用 Nikki 官方 OpenWrt 25.12 feed"
 fi
 
 case "$PKG_MGR" in
     opkg)
-        OLD_VER="$(opkg status luci-app-nikki 2>/dev/null | sed -n 's/^Version: //p' | head -n1 || true)"
+        OLD_VER="$(get_installed_nikki_version)"
         log "当前已安装版本: ${OLD_VER:-not installed}"
         log "按官方方式导入 Nikki feed"
         wget -qO- "$FEED_SCRIPT_URL" | sh || die "执行 Nikki feed.sh 失败"
         log "按官方方式安装 / 更新 Nikki"
         wget -qO- "$INSTALL_SCRIPT_URL" | sh || die "执行 Nikki 官方 install.sh 失败"
         opkg install luci-i18n-nikki-zh-cn || warn "安装 Nikki 中文语言包失败"
-        NEW_VER="$(opkg status luci-app-nikki 2>/dev/null | sed -n 's/^Version: //p' | head -n1 || true)"
+        NEW_VER="$(get_installed_nikki_version)"
         ;;
     apk)
-        OLD_VER="$(apk info -a luci-app-nikki 2>/dev/null | sed -n 's/^version: //p' | head -n1 || true)"
+        OLD_VER="$(get_installed_nikki_version)"
         log "当前已安装版本: ${OLD_VER:-not installed}"
         add_nikki_apk_feed
         log "刷新软件源"
@@ -132,7 +146,7 @@ case "$PKG_MGR" in
         log "按 Nikki 官方 apk feed 安装 / 更新 Nikki"
         apk add --allow-untrusted -X "$FEED_URL/packages.adb" mihomo-meta nikki luci-app-nikki || die "安装 Nikki apk 包失败，请检查当前架构是否存在 Nikki 官方构建"
         apk add --allow-untrusted -X "$FEED_URL/packages.adb" luci-i18n-nikki-zh-cn || warn "安装 Nikki 中文语言包失败"
-        NEW_VER="$(apk info -a luci-app-nikki 2>/dev/null | sed -n 's/^version: //p' | head -n1 || true)"
+        NEW_VER="$(get_installed_nikki_version)"
         ;;
 esac
 

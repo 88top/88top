@@ -168,7 +168,11 @@ fetch_release_json() {
 
 find_asset_url() {
     PATTERN="$1"
-    sed -n 's/.*"browser_download_url":[[:space:]]*"\([^"]*\)".*/\1/p' "$TMP_ROOT/release.json" | grep "$PATTERN" | head -n1 || true
+    sed 's/"browser_download_url"/\
+"browser_download_url"/g' "$TMP_ROOT/release.json" |
+        sed -n 's/.*"browser_download_url":[[:space:]]*"\([^"]*\)".*/\1/p' |
+        grep "$PATTERN" |
+        head -n1 || true
 }
 
 get_installed_version() {
@@ -178,7 +182,9 @@ get_installed_version() {
             opkg status smartdns 2>/dev/null | sed -n 's/^Version: //p' | head -n1 || true
             ;;
         apk)
-            apk info -a smartdns 2>/dev/null | sed -n 's/^version: //p' | head -n1 || true
+            VER="$(apk list --installed --manifest smartdns 2>/dev/null | awk '$1 == "smartdns" {print $2; exit}' || true)"
+            [ -n "$VER" ] || VER="$(apk info -a smartdns 2>/dev/null | sed -n 's/^[Vv]ersion:[[:space:]]*//p' | head -n1 || true)"
+            printf '%s' "$VER"
             ;;
     esac
 }
@@ -279,6 +285,7 @@ main() {
     need_cmd grep
     need_cmd head
     need_cmd basename
+    need_cmd awk
 
     PKG_MGR="$(detect_pkg_mgr)"
     SMARTDNS_ARCH="$(detect_smartdns_arch)"

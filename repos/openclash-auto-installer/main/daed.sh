@@ -133,6 +133,10 @@ download_url() {
             -H "Accept: application/vnd.github+json" \
             -A "openclash-auto-installer" \
             "$URL" -o "$OUT" && return 0
+        curl -4fsSL --retry 2 --connect-timeout 15 \
+            -H "Accept: application/vnd.github+json" \
+            -A "openclash-auto-installer" \
+            "$URL" -o "$OUT" && return 0
     fi
 
     if command -v wget >/dev/null 2>&1; then
@@ -140,6 +144,17 @@ download_url() {
     fi
 
     return 1
+}
+
+diagnose_github_network() {
+    warn "无法连接 GitHub；请先检查路由器 DNS、默认路由和代理插件状态"
+    if command -v nslookup >/dev/null 2>&1 && ! nslookup api.github.com >/dev/null 2>&1; then
+        warn "DNS 无法解析 api.github.com；可执行: nslookup api.github.com 1.1.1.1"
+    fi
+    if command -v ip >/dev/null 2>&1 && ! ip route show default 2>/dev/null | grep -q '^default'; then
+        warn "未检测到 IPv4 默认路由"
+    fi
+    warn "网络恢复后可执行: curl -4 -I https://api.github.com"
 }
 
 fetch_luci_release_meta() {
@@ -297,6 +312,11 @@ install_luci_daed() {
                 fi
                 [ ! -e "$DAED_BIN" ] ||
                     die "移除旧版 daed APK 后核心文件仍存在，无法确认新核心会覆盖"
+            fi
+            if ! apk info -e vmlinux-btf >/dev/null 2>&1 && has_btf; then
+                warn "固件已提供可用 BTF 文件，但包管理器没有 vmlinux-btf 记录；将登记兼容元包以满足 daed 依赖"
+                apk add --virtual vmlinux-btf ||
+                    die "无法登记固件内置的 vmlinux-btf 能力"
             fi
             apk add --allow-untrusted "$CORE_PKG" "$LUCI_PKG" "$I18N_PKG" ||
                 die "安装 OpenWrt daed 与 LuCI Release 包失败"
@@ -557,7 +577,10 @@ find_latest_tag() {
             head -n1 || true)"
     fi
 
-    [ -n "$TAG" ] || die "无法获取 daed 最新正式版本"
+    if [ -z "$TAG" ]; then
+        diagnose_github_network
+        die "无法获取 daed 最新正式版本"
+    fi
     printf '%s' "$TAG"
 }
 

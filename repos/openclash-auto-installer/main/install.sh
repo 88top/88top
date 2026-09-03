@@ -244,9 +244,31 @@ get_installed_openclash_version() {
             opkg status luci-app-openclash 2>/dev/null | sed -n 's/^Version: //p' | head -n1
             ;;
         apk)
-            apk info -a luci-app-openclash 2>/dev/null | sed -n 's/^version: //p' | head -n1
+            VER="$(apk list --installed --manifest luci-app-openclash 2>/dev/null | awk '$1 == "luci-app-openclash" {print $2; exit}' || true)"
+            [ -n "$VER" ] || VER="$(apk list --installed luci-app-openclash 2>/dev/null | sed -n 's/^luci-app-openclash-\([^[:space:]]*\).*/\1/p' | head -n1 || true)"
+            [ -n "$VER" ] || VER="$(apk info -v luci-app-openclash 2>/dev/null | sed -n 's/^luci-app-openclash-\([^[:space:]]*\).*/\1/p' | head -n1 || true)"
+            [ -n "$VER" ] || VER="$(apk info -a luci-app-openclash 2>/dev/null | sed -n 's/^[Vv]ersion:[[:space:]]*//p' | head -n1 || true)"
+            printf '%s' "$VER"
             ;;
     esac
+}
+
+is_opkg_package_installed() {
+    opkg list-installed "$1" 2>/dev/null | grep -q "^$1 -"
+}
+
+ensure_dnsmasq_full_opkg() {
+    is_opkg_package_installed dnsmasq-full && return 0
+
+    log "安装 OpenClash 必需的 dnsmasq-full"
+    if is_opkg_package_installed dnsmasq; then
+        opkg install --force-overwrite dnsmasq-full ||
+            die "安装 dnsmasq-full 失败；原 dnsmasq 尚未移除"
+        opkg remove dnsmasq ||
+            die "dnsmasq-full 已安装，但无法移除冲突的 dnsmasq 包"
+    else
+        opkg install dnsmasq-full || die "安装 dnsmasq-full 失败"
+    fi
 }
 
 maybe_update_index_opkg() {
@@ -286,11 +308,12 @@ maybe_update_index_apk() {
 install_dependencies_opkg() {
     FIREWALL_STACK="$1"
     maybe_update_index_opkg
+    ensure_dnsmasq_full_opkg
 
     if [ "$FIREWALL_STACK" = "nft" ]; then
-        PKGS="bash dnsmasq-full curl ca-bundle ip-full kmod-tun kmod-inet-diag unzip kmod-nft-tproxy jsonfilter"
+        PKGS="bash curl ca-bundle ip-full kmod-tun kmod-inet-diag unzip kmod-nft-tproxy jsonfilter"
     else
-        PKGS="bash iptables dnsmasq-full curl ca-bundle ipset ip-full iptables-mod-tproxy iptables-mod-extra kmod-tun kmod-inet-diag unzip jsonfilter"
+        PKGS="bash iptables curl ca-bundle ipset ip-full iptables-mod-tproxy iptables-mod-extra kmod-tun kmod-inet-diag unzip jsonfilter"
     fi
 
     log "安装最小依赖包"
@@ -597,6 +620,7 @@ main() {
     need_cmd head
     need_cmd find
     need_cmd sed
+    need_cmd awk
 
     PKG_MGR="$(detect_pkg_mgr)"
     FIREWALL_STACK="$(detect_firewall_stack)"

@@ -3,13 +3,14 @@ on:
   workflow_dispatch:
     inputs:
       channel:
-        description: 'Channel (stable, long-term)'
+        description: 'Channel (stable, long-term, development)'
         required: true
         default: 'stable'
         type: choice
         options:
         - stable
         - long-term
+        - development
       arch:
         description: 'Architecture (x86, arm64)'
         required: true
@@ -946,7 +947,7 @@ jobs:
         **Architecture**: $ARCH
         **Channel**: $CHANNEL
 
-        <details><summary><strong>RouterOS</strong></summary>
+        <details open><summary><strong>RouterOS</strong></summary>
 
         | Type | File |
         |------|------|
@@ -965,7 +966,7 @@ jobs:
         echo "" >> "$RELEASE_BODY"
 
         if [ "$ARCH" == "x86" ] || [ "$ARCH" == "arm64" ]; then
-          echo "<details><summary><strong>Cloud Hosted Router (CHR)</strong></summary>" >> "$RELEASE_BODY"
+          echo "<details open><summary><strong>Cloud Hosted Router (CHR)</strong></summary>" >> "$RELEASE_BODY"
           echo "" >> "$RELEASE_BODY"
           if [ "$ARCH" == "x86" ]; then
             echo "| Platform | UEFI | Legacy BIOS |" >> "$RELEASE_BODY"
@@ -1018,6 +1019,7 @@ jobs:
         body_path: ${{env.BUILD_DIR}}/RELEASE_BODY.md
         tag_name: ${{ env.VERSION }}${{ env.ARCH_EXT }}
         make_latest:  ${{ env.CHANNEL == 'stable' && matrix.arch == 'x86'}} 
+        prerelease: ${{ env.CHANNEL == 'development' || env.CHANNEL == 'testing'}}
         files: |
           ${{env.PUBLISH_DIR}}/*.zip
           ${{env.PUBLISH_DIR}}/*.zip.sha256

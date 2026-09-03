@@ -183,7 +183,9 @@ get_installed_version() {
             opkg status mosdns 2>/dev/null | sed -n 's/^Version: //p' | head -n1 || true
             ;;
         apk)
-            apk info -a mosdns 2>/dev/null | sed -n 's/^version: //p' | head -n1 || true
+            VER="$(apk list --installed --manifest mosdns 2>/dev/null | awk '$1 == "mosdns" {print $2; exit}' || true)"
+            [ -n "$VER" ] || VER="$(apk info -a mosdns 2>/dev/null | sed -n 's/^[Vv]ersion:[[:space:]]*//p' | head -n1 || true)"
+            printf '%s' "$VER"
             ;;
     esac
 }
@@ -259,6 +261,7 @@ install_release_archive() {
         "$EXTRACT_DIR"/packages_ci/v2dat*.* \
         "$EXTRACT_DIR"/packages_ci/v2ray-geoip*.* \
         "$EXTRACT_DIR"/packages_ci/v2ray-geosite*.* \
+        "$EXTRACT_DIR"/packages_ci/geo2txt*.* \
         "$EXTRACT_DIR"/packages_ci/mosdns*.* \
         "$EXTRACT_DIR"/packages_ci/luci-app-mosdns*.* \
         "$EXTRACT_DIR"/packages_ci/luci-i18n-mosdns-zh-cn*.*; do

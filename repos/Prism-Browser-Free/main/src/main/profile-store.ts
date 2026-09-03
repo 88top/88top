@@ -34,7 +34,7 @@ interface ProfileOwnerMarker {
 const PROFILE_OWNER_FILE = 'profile-owner.json'
 const MAX_PROFILE_SERIAL = 999_999_999
 
-function validProfileSerial(value: unknown): value is number {
+export function validProfileSerial(value: unknown): value is number {
   return Number.isInteger(value) && Number(value) >= 1 && Number(value) <= MAX_PROFILE_SERIAL
 }
 
@@ -248,7 +248,10 @@ export class ProfileStore {
   }
 
   list(): BrowserProfile[] {
-    return [...this.profiles.values()].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    // Ordered by the permanent, user-facing serial number (newest-numbered first) so that
+    // editing a profile ("保存修改") never changes its position — position must stay tied to
+    // the serial number, not to updatedAt.
+    return [...this.profiles.values()].sort((a, b) => b.serialNumber - a.serialNumber)
   }
 
   get(id: string): BrowserProfile {
@@ -261,20 +264,58 @@ export class ProfileStore {
     return (await this.createMany([input]))[0]
   }
 
-  async createMany(inputs: ProfileDraft[]): Promise<BrowserProfile[]> {
+  /**
+   * @param serialNumbers Optional, parallel to `inputs`. When an entry is a valid serial number
+   * that isn't currently in use, it is reused as-is (e.g. re-importing a workspace migration
+   * archive so environment numbers stay bound to their original fingerprint/seed). Entries that
+   * are omitted, invalid, or already taken fall back to the next free auto-assigned number.
+   */
+  async createMany(inputs: ProfileDraft[], serialNumbers?: Array<number | undefined>): Promise<BrowserProfile[]> {
     if (!Array.isArray(inputs) || inputs.length === 0) throw new Error('没有可创建的浏览器环境')
     if (inputs.length > 500) throw new Error('单次最多创建 500 个浏览器环境')
+    if (serialNumbers && serialNumbers.length !== inputs.length) throw new Error('环境编号参数无效')
     const drafts = inputs.map(validateProfileDraft)
-    if (this.nextSerialNumber + drafts.length - 1 > MAX_PROFILE_SERIAL) throw new Error('环境编号空间已用尽')
-    const firstSerialNumber = this.nextSerialNumber
-    this.nextSerialNumber += drafts.length
+    const usedSerials = new Set(this.list().map((profile) => profile.serialNumber))
+    // Pass 1: honor each item's originally-requested number where it's still free.
+    const serials: number[] = new Array(drafts.length)
+    const pendingIndexes: number[] = []
+    drafts.forEach((_, index) => {
+      const requested = serialNumbers?.[index]
+      if (validProfileSerial(requested) && !usedSerials.has(requested)) {
+        serials[index] = requested
+        usedSerials.add(requested)
+      } else {
+        pendingIndexes.push(index)
+      }
+    })
+    // Pass 2: items that couldn't keep their requested number (no request, or it collided with a
+    // number already in use) get a freshly allocated one. Allocate in ascending order of each
+    // item's *originally requested* number (items with no request keep their relative input
+    // order, since Array#sort is stable) — not in raw array-index order. Otherwise, when the
+    // batch being created is itself ordered newest-numbered-first (as an exported workspace
+    // archive is), the first item processed would always be the one with the *highest* original
+    // number, and it would grab the *lowest* available fallback number — silently reversing the
+    // whole batch's relative order once the list re-sorts by the new numbers.
+    pendingIndexes.sort((a, b) => (serialNumbers?.[a] ?? -1) - (serialNumbers?.[b] ?? -1))
+    // Always start from the current highest serial number among existing (non-deleted) profiles,
+    // never from a persisted high-water mark — so a freed number (from a deleted profile) is
+    // reused by the next auto-created one instead of being skipped forever.
+    let nextSerial = usedSerials.size ? Math.max(...usedSerials) + 1 : 1
+    for (const index of pendingIndexes) {
+      while (usedSerials.has(nextSerial)) nextSerial += 1
+      if (nextSerial > MAX_PROFILE_SERIAL) throw new Error('环境编号空间已用尽')
+      serials[index] = nextSerial
+      usedSerials.add(nextSerial)
+      nextSerial += 1
+    }
+    this.nextSerialNumber = nextSerial
     const now = new Date().toISOString()
     const created = drafts.map((draft, index) => {
       const id = randomUUID()
       return {
         ...draft,
         id,
-        serialNumber: firstSerialNumber + index,
+        serialNumber: serials[index],
         proxy: privateProxyConfig(draft.proxy),
         fingerprint: {
           ...draft.fingerprint,

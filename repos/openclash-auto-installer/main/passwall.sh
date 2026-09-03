@@ -153,12 +153,14 @@ find_github_pkg_url() {
     {
         if [ -n "${GH_RELEASE_JSON:-}" ]; then
             printf '%s\n' "$GH_RELEASE_JSON" \
+                | sed 's/"browser_download_url"/\
+"browser_download_url"/g' \
                 | sed -n 's/.*"browser_download_url":[[:space:]]*"\([^"]*\)".*/\1/p'
         fi
         [ -z "${GH_RELEASE_ASSET_URLS:-}" ] || printf '%s\n' "$GH_RELEASE_ASSET_URLS"
     } \
         | sed 's/%2B/+/g' \
-        | grep "/${prefix}[^/]*${pkg}[^/]*\.${ext}$" \
+        | grep "/${prefix}[^/]*${pkg}[-_][0-9][^/]*\.${ext}$" \
         | head -n1
 }
 
@@ -200,6 +202,80 @@ download_passwall_pkg() {
     download_pkg_from_dir "$pkg" "$dir" "$ext"
 }
 
+is_package_installed() {
+    pkg="$1"
+    case "$PKG_MGR" in
+        opkg) opkg list-installed "$pkg" 2>/dev/null | grep -q "^${pkg} -" ;;
+        apk) apk info -e "$pkg" >/dev/null 2>&1 ;;
+    esac
+}
+
+get_installed_version() {
+    pkg="$1"
+    case "$PKG_MGR" in
+        opkg)
+            opkg status "$pkg" 2>/dev/null | sed -n 's/^Version: //p' | head -n1 || true
+            ;;
+        apk)
+            VER="$(apk list --installed --manifest "$pkg" 2>/dev/null | awk -v name="$pkg" '$1 == name {print $2; exit}' || true)"
+            [ -n "$VER" ] || VER="$(apk info -a "$pkg" 2>/dev/null | sed -n 's/^[Vv]ersion:[[:space:]]*//p' | head -n1 || true)"
+            printf '%s' "$VER"
+            ;;
+    esac
+}
+
+maybe_update_pkg_index() {
+    case "$PKG_MGR" in
+        opkg) opkg update || warn "opkg update 未完全成功，将继续使用已缓存的软件源索引" ;;
+        apk) apk update || warn "apk update 未完全成功，将继续使用已缓存的软件源索引" ;;
+    esac
+}
+
+install_passwall_dependency() {
+    pkg="$1"
+    is_package_installed "$pkg" && return 0
+
+    log "安装 PassWall 依赖: $pkg"
+    case "$PKG_MGR" in
+        opkg) opkg install "$pkg" >/dev/null 2>&1 && return 0 ;;
+        apk) apk add "$pkg" >/dev/null 2>&1 && return 0 ;;
+    esac
+
+    dep_pkg="$(download_pkg_from_dir "$pkg" passwall_packages "$PKG_EXT")" ||
+        die "无法从软件源或 PassWall 构建目录获取依赖: $pkg"
+    case "$PKG_MGR" in
+        opkg) opkg install "$dep_pkg" || die "安装 PassWall 依赖失败: $pkg" ;;
+        apk) apk add --allow-untrusted "$dep_pkg" || die "安装 PassWall 依赖失败: $pkg" ;;
+    esac
+}
+
+install_passwall_dependencies() {
+    for pkg in chinadns-ng dns2socks microsocks tcping; do
+        install_passwall_dependency "$pkg"
+    done
+}
+
+ensure_dnsmasq_full() {
+    is_package_installed dnsmasq-full && return 0
+
+    log "安装 PassWall 必需的 dnsmasq-full"
+    case "$PKG_MGR" in
+        opkg)
+            if is_package_installed dnsmasq; then
+                opkg install --force-overwrite dnsmasq-full ||
+                    die "安装 dnsmasq-full 失败；原 dnsmasq 尚未移除"
+                opkg remove dnsmasq ||
+                    die "dnsmasq-full 已安装，但无法移除冲突的 dnsmasq 包"
+            else
+                opkg install dnsmasq-full || die "安装 dnsmasq-full 失败"
+            fi
+            ;;
+        apk)
+            apk add dnsmasq-full || die "安装 dnsmasq-full 失败"
+            ;;
+    esac
+}
+
 if ! mkdir "$LOCKDIR" 2>/dev/null; then
     die "已有另一个 PassWall 任务正在运行"
 fi
@@ -217,6 +293,7 @@ need_cmd sed
 need_cmd grep
 need_cmd basename
 need_cmd mktemp
+need_cmd awk
 
 [ -f /etc/openwrt_release ] || die "未检测到 /etc/openwrt_release"
 # shellcheck disable=SC1091
@@ -280,18 +357,18 @@ fi
 case "$PKG_MGR" in
     opkg)
         PKG_EXT="ipk"
-        OLD_VER="$(opkg status luci-app-passwall 2>/dev/null | sed -n 's/^Version: //p' | head -n1 || true)"
         ;;
     apk)
         PKG_EXT="apk"
-        OLD_VER="$(apk info -a luci-app-passwall 2>/dev/null | sed -n 's/^version: //p' | head -n1 || true)"
         ;;
     *)
         die "未知包管理器: $PKG_MGR"
         ;;
 esac
+OLD_VER="$(get_installed_version luci-app-passwall)"
 log "当前已安装版本: ${OLD_VER:-not installed}"
 log "按接近手动 ${PKG_EXT} 的方式安装 / 更新 PassWall"
+maybe_update_pkg_index
 
 install_lyaml_fallback() {
     case "$SUPPORTED_RELEASE" in
@@ -346,9 +423,11 @@ install_lyaml_fallback() {
 
 if [ "$PKG_MGR" = "opkg" ] && ! opkg list-installed lyaml 2>/dev/null | grep -q '^lyaml -'; then
     log "安装依赖: lyaml"
-    opkg update || warn "opkg update 失败，将继续尝试安装已缓存的软件源依赖"
     opkg install lyaml || install_lyaml_fallback || die "安装依赖 lyaml 失败。请检查系统软件源是否启用 packages 源，或手动执行: opkg update && opkg install lyaml"
 fi
+
+install_passwall_dependencies
+ensure_dnsmasq_full
 
 MAIN_PKG="$(download_passwall_pkg luci-app-passwall passwall_luci "$PKG_EXT")" || die "下载 luci-app-passwall ${PKG_EXT} 失败，请检查当前系统版本/架构是否存在对应构建，或稍后重试。"
 LANG_PKG="$(download_passwall_pkg luci-i18n-passwall-zh-cn passwall_luci "$PKG_EXT")" || die "下载 luci-i18n-passwall-zh-cn ${PKG_EXT} 失败，请稍后重试。"
@@ -362,7 +441,6 @@ case "$PKG_MGR" in
         ;;
     apk)
         INSTALL_OK=1
-        apk update || warn "apk update 失败，将继续尝试安装本地安装包"
         if apk add --allow-untrusted "$MAIN_PKG" "$LANG_PKG"; then
             INSTALL_OK=0
         fi
@@ -387,10 +465,7 @@ EOF
     exit 1
 fi
 
-case "$PKG_MGR" in
-    opkg) NEW_VER="$(opkg status luci-app-passwall 2>/dev/null | sed -n 's/^Version: //p' | head -n1 || true)" ;;
-    apk) NEW_VER="$(apk info -a luci-app-passwall 2>/dev/null | sed -n 's/^version: //p' | head -n1 || true)" ;;
-esac
+NEW_VER="$(get_installed_version luci-app-passwall)"
 log "安装后版本: ${NEW_VER:-unknown}"
 
 refresh_luci

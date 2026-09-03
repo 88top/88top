@@ -9,6 +9,7 @@ NIKKI_REPO_API="https://api.github.com/repos/nikkinikki-org/OpenWrt-nikki/releas
 SMARTDNS_API="https://api.github.com/repos/pymumu/smartdns/releases/latest"
 MOSDNS_API="https://api.github.com/repos/sbwml/luci-app-mosdns/releases/latest"
 DAED_RELEASES_API="https://api.github.com/repos/daeuniverse/daed/releases?per_page=20"
+DAED_RELEASES_PAGE="https://github.com/daeuniverse/daed/releases"
 LUCI_DAED_API="https://api.github.com/repos/QiuSimons/luci-app-daed/releases/latest"
 TARGET="all"
 
@@ -139,11 +140,12 @@ fetch_url() {
     OUT="$2"
 
     if command -v curl >/dev/null 2>&1; then
-        curl -fsSL --retry 3 --connect-timeout 15 "$URL" -o "$OUT" 2>/dev/null && return 0
+        curl -fsSL --retry 3 --connect-timeout 15 -A "openclash-auto-installer" "$URL" -o "$OUT" 2>/dev/null && return 0
+        curl -4fsSL --retry 2 --connect-timeout 15 -A "openclash-auto-installer" "$URL" -o "$OUT" 2>/dev/null && return 0
     fi
 
     if command -v wget >/dev/null 2>&1; then
-        wget -qO "$OUT" "$URL" 2>/dev/null && return 0
+        wget -qO "$OUT" --user-agent="openclash-auto-installer" "$URL" 2>/dev/null && return 0
     fi
 
     return 1
@@ -311,6 +313,10 @@ check_daed() {
         LATEST="$(sed 's/"tag_name"/\
 "tag_name"/g' "$OUT" |
             sed -n 's/^"tag_name"[[:space:]]*:[[:space:]]*"\(v[0-9][^"]*\)".*/\1/p' |
+            head -n1 || true)"
+    fi
+    if [ -z "$LATEST" ] && fetch_url "$DAED_RELEASES_PAGE" "$TMP_ROOT/daed-releases.html"; then
+        LATEST="$(sed -n 's|.*href="/daeuniverse/daed/releases/tag/\(v[0-9][^"/?#]*\)".*|\1|p' "$TMP_ROOT/daed-releases.html" |
             head -n1 || true)"
     fi
     print_result "daed" "$INSTALLED" "$LATEST"

@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- 修复 PassWall / PassWall2 只安装 LuCI 包、未补齐上游构建目录中的必需运行依赖，导致 iStoreOS 出现 `tcping`、`geoview`、`chinadns-ng`、`dns2socks` 等缺失的问题；现在优先使用系统软件源，缺失时按当前版本和架构从官方构建目录补齐。
+- PassWall 安装前会把基础 `dnsmasq` 安全切换为其硬依赖的 `dnsmasq-full`；`opkg` 环境先完成覆盖安装再移除旧包，避免下载过程中提前失去本机 DNS。
+- OpenClash 的 `opkg` 首装路径同步修复 `dnsmasq` / `dnsmasq-full` 文件冲突；PassWall、PassWall2 与 OpenClash 在 `apk` 环境改用 manifest 读取已安装版本，避免安装成功后显示 `unknown`。
+- PassWall2 主包与中文包改为优先使用 GitHub 最新 Release assets，并保留 SourceForge 兜底，避免滚动目录与 Release 版本错配。
+- 修复 OpenWrt 25.12 固件已内置 BTF 文件、但 `apk` 没有 `vmlinux-btf` 包记录时 daed APK 仍被依赖解析拒绝的问题；仅在确认 BTF 文件实际存在时登记同名兼容元包，不覆盖固件 BTF 文件。
+- daed 下载增加 IPv4 回退；版本查询失败时明确检查 GitHub DNS、IPv4 默认路由和代理状态，避免把网络故障误报为“没有正式版本”。
+- 更新检查器同步增加 IPv4 与 daed Release 页面兜底；GitHub API 限流时仍可识别最新正式版本。
+- 修复 SmartDNS 在单行 GitHub API JSON 下只解析到最后一个资产、误报当前架构无安装包的问题。
+- 适配 MosDNS `v5.3.4-r12` 新增的 `geo2txt` 硬依赖，按 Release 内置顺序在 LuCI 主包之前安装。
+- SmartDNS、MosDNS 与 Nikki 在 OpenWrt 25.12 `apk` 环境统一从 manifest 读取安装后版本；Nikki 25.12 官方 feed 已验证可用，不再显示过时的“可能尚未完全适配”警告。
 - 修复 ImmortalWrt / 精简 OpenWrt 首装环境缺少 `curl` 时无法打开菜单的问题；README 主入口改为 `wget` 下载菜单到 `/usr/bin/openclash-menu` 后执行，`menu.sh` 和 OpenClash 安装流程支持 `curl/wget` 双下载器，并新增 Gitee 原始文件入口。
 - 新增 `daed.sh`，从 `daeuniverse/daed` 官方 Release 安装 / 更新 daed 静态二进制、GeoIP/GeoSite 数据与 OpenWrt procd 服务。
 - 菜单、更新检测和安全卸载新增 daed 入口；安装前检查架构、Linux 5.17+、eBPF/BTF 内核能力及磁盘空间。
