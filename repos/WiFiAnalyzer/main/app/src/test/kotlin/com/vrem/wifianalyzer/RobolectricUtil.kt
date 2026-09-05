@@ -41,6 +41,12 @@ enum class RobolectricUtil {
         clearLooper()
     }
 
+    fun removeFragment(fragment: Fragment) {
+        val fragmentManager = activity.supportFragmentManager
+        fragmentManager.beginTransaction().remove(fragment).commit()
+        clearLooper()
+    }
+
     fun clearLooper() {
         Shadows.shadowOf(Looper.getMainLooper()).idle()
     }

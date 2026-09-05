@@ -29,6 +29,7 @@ import com.vrem.wifianalyzer.MainContext
 import com.vrem.wifianalyzer.databinding.GraphContentBinding
 import com.vrem.wifianalyzer.wifi.band.WiFiBand
 import com.vrem.wifianalyzer.wifi.graphutils.GraphAdapter
+import com.vrem.wifianalyzer.wifi.scanner.collectWiFiData
 
 class ChannelGraphFragment :
     Fragment(),
@@ -61,15 +62,17 @@ class ChannelGraphFragment :
         swipeRefreshLayout.isRefreshing = false
     }
 
-    override fun onResume() {
-        super.onResume()
-        MainContext.INSTANCE.scannerService.register(graphAdapter)
-        onRefresh()
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
+        super.onViewCreated(view, savedInstanceState)
+        viewLifecycleOwner.collectWiFiData(graphAdapter::update)
     }
 
-    override fun onPause() {
-        MainContext.INSTANCE.scannerService.unregister(graphAdapter)
-        super.onPause()
+    override fun onResume() {
+        super.onResume()
+        onRefresh()
     }
 
     override fun onDestroyView() {

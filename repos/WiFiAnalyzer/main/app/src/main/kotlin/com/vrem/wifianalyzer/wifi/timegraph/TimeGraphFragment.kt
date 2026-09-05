@@ -29,6 +29,7 @@ import com.vrem.wifianalyzer.MainContext
 import com.vrem.wifianalyzer.databinding.GraphContentBinding
 import com.vrem.wifianalyzer.wifi.band.WiFiBand
 import com.vrem.wifianalyzer.wifi.graphutils.GraphAdapter
+import com.vrem.wifianalyzer.wifi.scanner.collectWiFiData
 
 private fun timeGraphs(): List<TimeGraph> = WiFiBand.entries.map { TimeGraph(it) }
 
@@ -64,15 +65,17 @@ class TimeGraphFragment :
         swipeRefreshLayout.isRefreshing = false
     }
 
-    override fun onResume() {
-        super.onResume()
-        MainContext.INSTANCE.scannerService.register(timeGraphAdapter)
-        onRefresh()
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
+        super.onViewCreated(view, savedInstanceState)
+        viewLifecycleOwner.collectWiFiData(timeGraphAdapter::update)
     }
 
-    override fun onPause() {
-        MainContext.INSTANCE.scannerService.unregister(timeGraphAdapter)
-        super.onPause()
+    override fun onResume() {
+        super.onResume()
+        onRefresh()
     }
 
     override fun onDestroyView() {

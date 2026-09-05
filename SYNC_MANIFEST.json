@@ -82,7 +82,7 @@
       "remote_sha": "ee64c0e38de94f32cdd3ee5a58742c281c0cc6a0"
     },
     "main": {
-      "remote_sha": "c018182bed92ef8663c29ae5eae4b50249be852c"
+      "remote_sha": "9234ac9bfa9119c15ab4d7b7ae5b6c7175eeaaf3"
     },
     "v1.0.0": {
       "remote_sha": "3fa79998cee646730b1ba2d416b94c5e0e03c928"
@@ -137,7 +137,7 @@
   },
   "timeflysoon/MikroTikPatch": {
     "main": {
-      "remote_sha": "677889f5696f267c986f26a2edae3026532b06a9"
+      "remote_sha": "8f6f95221e96cdf6beddefbf64b5ab8ee083168b"
     }
   },
   "timeflysoon/MusicFree": {
@@ -209,7 +209,7 @@
   },
   "timeflysoon/WiFiAnalyzer": {
     "main": {
-      "remote_sha": "7111d3740f9a360fcd5d301a3d47a8aef147f967"
+      "remote_sha": "4d59f4fce0527ef895cc652417fe2d425acfb9cb"
     }
   },
   "timeflysoon/WinFi": {
@@ -267,7 +267,7 @@
   },
   "timeflysoon/github-chinese": {
     "gh-pages": {
-      "remote_sha": "ae97952ef8b62e22538f4b665b46316835c17506"
+      "remote_sha": "26c4c1a30db5aed6cccf72e6e91893bf99cb1c38"
     }
   },
   "timeflysoon/gl-inet-onescript": {
@@ -277,7 +277,7 @@
   },
   "timeflysoon/gopeed": {
     "main": {
-      "remote_sha": "3be8db664c1f8e64e088afe69abcb12c795f63af"
+      "remote_sha": "8f3cf351623beaf02211c8995ff90ad08820e062"
     }
   },
   "timeflysoon/img-installer": {
@@ -422,7 +422,7 @@
       "remote_sha": "d1ffe2b87a9c57b53088ab9aee1f4f679096b640"
     },
     "main": {
-      "remote_sha": "b9b01ee0af648fa6af25d388bb39bacde8d5b7a9"
+      "remote_sha": "276acece06fffb7ebf8f08d128c147e6ecc6874d"
     },
     "translations-deadend": {
       "remote_sha": "e483486dff5deef147fed8605b5dfaa1010649f6"
@@ -430,7 +430,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "02d5bb66e65fb0a8d05dede4d09dc9b58547c11b"
+      "remote_sha": "80c57c92be7b75994c96a78da1bec103f884042a"
     }
   },
   "timeflysoon/store": {
@@ -488,7 +488,7 @@
   },
   "timeflysoon/v2rayNG": {
     "master": {
-      "remote_sha": "9e673d21d0d82609c8e53cd3d191e0ebbdd7e862"
+      "remote_sha": "f2a9e59616f82402c26c127577041d5b8feb7cf0"
     },
     "v1_10_32": {
       "remote_sha": "bd6b67cbfc71caa7ed94d2c64e8ac7756af61276"
@@ -496,7 +496,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "7fed9be2fae8d42bda41ed06d33fc834e5967dcb"
+      "remote_sha": "1ff3d474da49324ac60aee20f59f5d160f922eca"
     }
   },
   "timeflysoon/weasel": {

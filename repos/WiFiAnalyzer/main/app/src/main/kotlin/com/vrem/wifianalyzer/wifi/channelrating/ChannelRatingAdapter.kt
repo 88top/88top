@@ -43,7 +43,6 @@ import com.vrem.wifianalyzer.wifi.model.WiFiDetail
 import com.vrem.wifianalyzer.wifi.model.WiFiWidth
 import com.vrem.wifianalyzer.wifi.predicate.Predicate
 import com.vrem.wifianalyzer.wifi.predicate.predicate
-import com.vrem.wifianalyzer.wifi.scanner.UpdateNotifier
 
 class ChannelRatingAdapter(
     context: Context,
@@ -51,8 +50,7 @@ class ChannelRatingAdapter(
     val channelRating: ChannelRating = ChannelRating(),
     private val settings: Settings = MainContext.INSTANCE.settings,
     private val layoutInflater: LayoutInflater = MainContext.INSTANCE.layoutInflater,
-) : ArrayAdapter<WiFiChannel>(context, R.layout.channel_rating_details, mutableListOf()),
-    UpdateNotifier {
+) : ArrayAdapter<WiFiChannel>(context, R.layout.channel_rating_details, mutableListOf()) {
     private val bindingMap =
         mapOf(
             WiFiWidth.MHZ_20 to Pair(channelRatingBest.channelRating20, channelRatingBest.channelRatingRatingChannel20),
@@ -64,7 +62,7 @@ class ChannelRatingAdapter(
                 Pair(channelRatingBest.channelRating320, channelRatingBest.channelRatingRatingChannel320),
         )
 
-    override fun update(wiFiData: WiFiData) {
+    fun update(wiFiData: WiFiData) {
         val wiFiBand = settings.wiFiBand()
         val countryCode = settings.countryCode()
         val wiFiChannels: List<WiFiChannel> = wiFiChannels(wiFiBand, countryCode)

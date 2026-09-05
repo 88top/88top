@@ -24,13 +24,18 @@ import com.vrem.wifianalyzer.MainActivity
 import com.vrem.wifianalyzer.MainContextHelper
 import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.RobolectricUtil
+import com.vrem.wifianalyzer.wifi.model.WiFiData
 import com.vrem.wifianalyzer.wifi.scanner.ScannerService
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
@@ -39,6 +44,12 @@ class ChannelRatingFragmentTest {
     private val mainActivity: MainActivity = RobolectricUtil.INSTANCE.activity
     private val scanner: ScannerService = MainContextHelper.INSTANCE.scannerService
     private val fixture: ChannelRatingFragment = ChannelRatingFragment()
+    private val wiFiData = MutableStateFlow(WiFiData.EMPTY)
+
+    @Before
+    fun setUp() {
+        doReturn(wiFiData).whenever(scanner).wiFiData()
+    }
 
     @After
     fun tearDown() {
@@ -47,11 +58,11 @@ class ChannelRatingFragmentTest {
 
     @Test
     fun onCreateView() {
-        // execute
+        // Act
         RobolectricUtil.INSTANCE.startFragment(fixture)
-        // validate
+        // Assert
+        assertThat(wiFiData.subscriptionCount.value).isEqualTo(1)
         verify(scanner).update()
-        verify(scanner).register(fixture.channelRatingAdapter)
     }
 
     @Test
@@ -66,23 +77,23 @@ class ChannelRatingFragmentTest {
 
     @Test
     fun onResume() {
-        // setup
+        // Arrange
         RobolectricUtil.INSTANCE.startFragment(fixture)
-        // execute
+        // Act
         fixture.onResume()
-        // validate
+        // Assert
+        assertThat(wiFiData.subscriptionCount.value).isEqualTo(1)
         verify(scanner, times(2)).update()
-        verify(scanner, times(2)).register(fixture.channelRatingAdapter)
     }
 
     @Test
-    fun onPause() {
-        // setup
+    fun onDestroyView() {
+        // Arrange
         RobolectricUtil.INSTANCE.startFragment(fixture)
-        // execute
-        fixture.onPause()
-        // validate
-        verify(scanner).unregister(fixture.channelRatingAdapter)
+        // Act
+        RobolectricUtil.INSTANCE.removeFragment(fixture)
+        // Assert
+        assertThat(wiFiData.subscriptionCount.value).isEqualTo(0)
     }
 
     @Config(sdk = [Build.VERSION_CODES.P])

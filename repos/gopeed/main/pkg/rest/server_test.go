@@ -144,6 +144,23 @@ func TestCreateDirectTask(t *testing.T) {
 	})
 }
 
+func TestGetTaskStatus(t *testing.T) {
+	doTest(func() {
+		resolved := httpRequestCheckOk[*download.ResolveResult](http.MethodPost, "/api/v1/resolve", resolveReq)
+		taskId := httpRequestCheckOk[string](http.MethodPost, "/api/v1/tasks", &model.CreateTask{Rid: resolved.ID})
+		status := httpRequestCheckOk[*download.TaskRuntimeStatus](http.MethodGet, "/api/v1/tasks/"+taskId+"/status", nil)
+		if status.Total != test.BuildSize {
+			t.Fatalf("task status total = %d, want %d", status.Total, test.BuildSize)
+		}
+		if status.Files == nil {
+			t.Fatal("task status files must be an empty array or contain file progress, not null")
+		}
+
+		code, _ := httpRequest[*download.TaskRuntimeStatus](http.MethodGet, "/api/v1/tasks/missing/status", nil)
+		checkCode(code, model.CodeTaskNotFound)
+	})
+}
+
 func TestCreateDirectTaskBatch(t *testing.T) {
 	doTest(func() {
 		reqs := make([]*base.CreateTaskBatchItem, 0)
@@ -438,6 +455,7 @@ func TestGetAndPutConfig(t *testing.T) {
 	doTest(func() {
 		cfg := httpRequestCheckOk[*base.DownloaderStoreConfig](http.MethodGet, "/api/v1/config", nil)
 		cfg.DownloadDir = "./download"
+		cfg.AutoStartTasks = true
 		cfg.Extra = map[string]any{
 			"serverConfig": &Config{
 				Host: "127.0.0.1",
@@ -625,7 +643,7 @@ func TestWebFsEnhance(t *testing.T) {
 
 func TestDoProxy(t *testing.T) {
 	doTest(func() {
-		code, respBody := doHttpRequest0(http.MethodGet, "/api/v1/proxy", map[string]string{
+		code, respBody := doHttpRequest0(http.MethodGet, "/api/web/proxy", map[string]string{
 			"X-Target-Uri": "https://github.com/GopeedLab/gopeed/raw/695da7ea87d2b455552b709d3cb4d7879484d4d1/README.md",
 		}, nil)
 		if code != http.StatusOK {
@@ -639,7 +657,7 @@ func TestDoProxy(t *testing.T) {
 	})
 
 	doTest(func() {
-		code, _ := doHttpRequest0(http.MethodGet, "/api/v1/proxy", map[string]string{
+		code, _ := doHttpRequest0(http.MethodGet, "/api/web/proxy", map[string]string{
 			"X-Target-Uri": "https://github.com/GopeedLab/gopeed/raw/695da7ea87d2b455552b709d3cb4d7879484d4d1/NOT_FOUND",
 		}, nil)
 		if code != http.StatusNotFound {
@@ -762,6 +780,7 @@ func TestApiToken(t *testing.T) {
 	var cfg = &model.StartConfig{}
 	cfg.Init()
 	cfg.ApiToken = "123456"
+	cfg.MCPEnable = true
 	fileListener := doStart(cfg)
 	defer func() {
 		if err := fileListener.Close(); err != nil {
@@ -782,6 +801,134 @@ func TestApiToken(t *testing.T) {
 		t.Errorf("TestApiToken() got = %v, want %v", status, http.StatusOK)
 	}
 
+	status, _ = doHttpRequest0(http.MethodGet, "/api/v1/config", map[string]string{
+		"Authorization": "Bearer " + cfg.ApiToken,
+	}, nil)
+	if status != http.StatusOK {
+		t.Errorf("Bearer API token status = %v, want %v", status, http.StatusOK)
+	}
+
+	status, _ = doHttpRequest0(http.MethodGet, "/api/v1/config", map[string]string{
+		"Authorization": "bearer " + cfg.ApiToken,
+	}, nil)
+	if status != http.StatusOK {
+		t.Errorf("case-insensitive Bearer API token status = %v, want %v", status, http.StatusOK)
+	}
+
+	status, _ = doHttpRequest0(http.MethodGet, "/api/v1/config", map[string]string{
+		"Authorization": "Bearer invalid",
+	}, nil)
+	if status != http.StatusUnauthorized {
+		t.Errorf("invalid Bearer API token status = %v, want %v", status, http.StatusUnauthorized)
+	}
+
+	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/api/v1/config", restPort), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("X-Api-Token", "invalid")
+	request.Header.Set("Authorization", "Bearer "+cfg.ApiToken)
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Errorf("one valid token header status = %v, want %v", response.StatusCode, http.StatusOK)
+	}
+
+	mcpInitialize := map[string]any{
+		"jsonrpc": "2.0",
+		"id":      1,
+		"method":  "initialize",
+		"params": map[string]any{
+			"protocolVersion": "2025-11-25",
+			"capabilities":    map[string]any{},
+			"clientInfo":      map[string]any{"name": "gopeed-test", "version": "1.0.0"},
+		},
+	}
+	status, _ = doHttpRequest0(http.MethodPost, "/mcp", map[string]string{
+		"Accept":       "application/json, text/event-stream",
+		"Content-Type": "application/json",
+	}, mcpInitialize)
+	if status != http.StatusUnauthorized {
+		t.Errorf("unauthenticated MCP status = %v, want %v", status, http.StatusUnauthorized)
+	}
+	status, _ = doHttpRequest0(http.MethodPost, "/mcp", map[string]string{
+		"Accept":        "application/json, text/event-stream",
+		"Content-Type":  "application/json",
+		"Authorization": "Bearer " + cfg.ApiToken,
+	}, mcpInitialize)
+	if status != http.StatusOK {
+		t.Errorf("Bearer-authenticated MCP status = %v, want %v", status, http.StatusOK)
+	}
+
+}
+
+func TestMCPRouteToggle(t *testing.T) {
+	initialize := map[string]any{
+		"jsonrpc": "2.0",
+		"id":      1,
+		"method":  "initialize",
+		"params": map[string]any{
+			"protocolVersion": "2025-11-25",
+			"capabilities":    map[string]any{},
+			"clientInfo": map[string]any{
+				"name":    "gopeed-test",
+				"version": "1.0.0",
+			},
+		},
+	}
+	headers := map[string]string{
+		"Accept":       "application/json, text/event-stream",
+		"Content-Type": "application/json",
+	}
+
+	t.Run("disabled", func(t *testing.T) {
+		cfg := (&model.StartConfig{Storage: model.StorageMem, ApiToken: "secret"}).Init()
+		fileListener := doStart(cfg)
+		defer fileListener.Close()
+		defer Stop()
+
+		status, _ := doHttpRequest0(http.MethodPost, "/mcp", headers, initialize)
+		if status != http.StatusNotFound {
+			t.Fatalf("disabled MCP status = %d, want %d", status, http.StatusNotFound)
+		}
+	})
+
+	t.Run("enabled", func(t *testing.T) {
+		cfg := (&model.StartConfig{Storage: model.StorageMem, MCPEnable: true}).Init()
+		fileListener := doStart(cfg)
+		defer fileListener.Close()
+		defer Stop()
+
+		status, _ := doHttpRequest0(http.MethodPost, "/mcp", headers, initialize)
+		if status != http.StatusOK {
+			t.Fatalf("enabled MCP status = %d, want %d", status, http.StatusOK)
+		}
+	})
+}
+
+func TestBuildServerRejectsWebAPITokenWithoutWebAuth(t *testing.T) {
+	cfg := (&model.StartConfig{
+		Storage:   model.StorageMem,
+		WebEnable: true,
+		ApiToken:  "123456",
+	}).Init()
+
+	server, listener, err := BuildServer(cfg)
+	if err == nil {
+		if listener != nil {
+			listener.Close()
+		}
+		if server != nil {
+			server.Close()
+		}
+		t.Fatal("BuildServer() should reject an API token without web authentication")
+	}
+	if server != nil || listener != nil {
+		t.Fatal("invalid web authentication config must fail before opening a listener")
+	}
 }
 
 func TestAuthorization(t *testing.T) {
@@ -809,55 +956,74 @@ func TestAuthorization(t *testing.T) {
 		t.Errorf("TestAuthorization() got = %v, want %v", status, http.StatusUnauthorized)
 	}
 
-	token := httpRequestCheckOk[string](http.MethodPost, "/api/web/login", cfg.WebAuth)
-	authToken := fmt.Sprintf("Bearer %s", token)
-	authHeaders := map[string]string{
-		"Authorization": authToken,
-	}
-
 	status, _ = doHttpRequest0(http.MethodGet, "/api/v1/config", nil, nil)
 	if status != http.StatusUnauthorized {
 		t.Errorf("TestAuthorization() got = %v, want %v", status, http.StatusUnauthorized)
 	}
+	status, _ = doHttpRequest0(http.MethodGet, "/api/v1/config", map[string]string{
+		"Authorization": "Bearer invalid-session",
+	}, nil)
+	if status != http.StatusUnauthorized {
+		t.Errorf("Bearer-authenticated API status = %v, want %v", status, http.StatusUnauthorized)
+	}
 
 	status, _ = doHttpRequest0(http.MethodGet, "/api/v1/config", map[string]string{
-		"Authorization": "xxx",
+		"Cookie": webAuthCookieName + "=invalid-session",
 	}, nil)
 	if status != http.StatusUnauthorized {
 		t.Errorf("TestAuthorization() got = %v, want %v", status, http.StatusUnauthorized)
 	}
 
-	status, _ = doHttpRequest0(http.MethodGet, "/api/v1/config", map[string]string{
-		"Authorization": "xxx",
-	}, nil)
-	if status != http.StatusUnauthorized {
-		t.Errorf("TestAuthorization() got = %v, want %v", status, http.StatusUnauthorized)
-	}
-
-	buildToken := func(username, password string, ts int64) string {
-		token, _ := aesEncrypt(aesKey, []byte(fmt.Sprintf("%s:%s:%d", username, password, ts)))
-		return token
-	}
-
-	fakeToken := buildToken("fake", "fake", time.Now().Unix())
-	status, _ = doHttpRequest0(http.MethodGet, "/api/v1/config", map[string]string{
-		"Authorization": fmt.Sprintf("Bearer %s", fakeToken),
-	}, nil)
-	if status != http.StatusUnauthorized {
-		t.Errorf("TestAuthorization() got = %v, want %v", status, http.StatusUnauthorized)
-	}
-
-	expireToken := buildToken(cfg.WebAuth.Username, cfg.WebAuth.Password, time.Now().Add(-time.Hour*8*24).Unix())
-	status, _ = doHttpRequest0(http.MethodGet, "/api/v1/config", map[string]string{
-		"Authorization": fmt.Sprintf("Bearer %s", expireToken),
-	}, nil)
-	if status != http.StatusUnauthorized {
-		t.Errorf("TestAuthorization() got = %v, want %v", status, http.StatusUnauthorized)
-	}
-
-	status, _ = doHttpRequest0(http.MethodGet, "/api/v1/config", authHeaders, nil)
+	status, loginHeaders, loginBody := doHttpRequest1(http.MethodPost, "/api/web/login", nil, cfg.WebAuth)
 	if status != http.StatusOK {
-		t.Errorf("TestAuthorization() got = %v, want %v", status, http.StatusOK)
+		t.Fatalf("cookie login got = %v, want %v", status, http.StatusOK)
+	}
+	setCookie := loginHeaders["Set-Cookie"]
+	if !strings.Contains(setCookie, webAuthCookieName+"=") ||
+		!strings.Contains(setCookie, "HttpOnly") ||
+		!strings.Contains(setCookie, "SameSite=Lax") {
+		t.Fatalf("unexpected auth cookie: %q", setCookie)
+	}
+	cookieHeader := strings.SplitN(setCookie, ";", 2)[0]
+	sessionID := strings.TrimPrefix(cookieHeader, webAuthCookieName+"=")
+	if sessionID == "" || strings.Contains(string(loginBody), sessionID) {
+		t.Fatalf("session id must only be returned in the HttpOnly cookie")
+	}
+	status, _ = doHttpRequest0(http.MethodGet, "/api/v1/config", map[string]string{
+		"Cookie": cookieHeader,
+	}, nil)
+	if status != http.StatusOK {
+		t.Errorf("cookie authorization got = %v, want %v", status, http.StatusOK)
+	}
+	status, _ = doHttpRequest0(http.MethodGet, "/fs/extensions/not_exist/icon.png", nil, nil)
+	if status != http.StatusUnauthorized {
+		t.Errorf("unauthenticated fs request got = %v, want %v", status, http.StatusUnauthorized)
+	}
+	status, _ = doHttpRequest0(http.MethodGet, "/fs/extensions/not_exist/icon.png", map[string]string{
+		"Cookie": cookieHeader,
+	}, nil)
+	if status != http.StatusNotFound {
+		t.Errorf("authenticated fs request got = %v, want %v", status, http.StatusNotFound)
+	}
+	status, _ = doHttpRequest0(http.MethodGet, "/fs/tasks/not_exist/file.png", nil, nil)
+	if status != http.StatusUnauthorized {
+		t.Errorf("unauthenticated task fs request got = %v, want %v", status, http.StatusUnauthorized)
+	}
+	status, _ = doHttpRequest0(http.MethodGet, "/fs/tasks/not_exist/file.png", map[string]string{
+		"Cookie": cookieHeader,
+	}, nil)
+	if status != http.StatusNotFound {
+		t.Errorf("authenticated task fs request got = %v, want %v", status, http.StatusNotFound)
+	}
+	status, _ = doHttpRequest0(http.MethodGet, "/fs/future-resource", nil, nil)
+	if status != http.StatusUnauthorized {
+		t.Errorf("unauthenticated future /fs route got = %v, want %v", status, http.StatusUnauthorized)
+	}
+	status, _ = doHttpRequest0(http.MethodGet, "/fs/future-resource", map[string]string{
+		"Authorization": "Bearer " + sessionID,
+	}, nil)
+	if status != http.StatusUnauthorized {
+		t.Errorf("Bearer-only future /fs route got = %v, want %v", status, http.StatusUnauthorized)
 	}
 
 	status, _ = doHttpRequest0(http.MethodGet, "/api/v1/config", map[string]string{
@@ -866,21 +1032,42 @@ func TestAuthorization(t *testing.T) {
 	if status != http.StatusOK {
 		t.Errorf("TestAuthorization() got = %v, want %v", status, http.StatusOK)
 	}
-
 	status, _ = doHttpRequest0(http.MethodGet, "/api/v1/config", map[string]string{
-		"Authorization": authToken,
-		"X-Api-Token":   cfg.ApiToken,
+		"Cookie":      cookieHeader,
+		"X-Api-Token": cfg.ApiToken,
 	}, nil)
 	if status != http.StatusOK {
-		t.Errorf("TestAuthorization() got = %v, want %v", status, http.StatusOK)
+		t.Errorf("cookie and API token authorization got = %v, want %v", status, http.StatusOK)
 	}
 
 	status, _ = doHttpRequest0(http.MethodGet, "/api/v1/config", map[string]string{
-		"Authorization": authToken,
-		"X-Api-Token":   "",
+		"Cookie":      cookieHeader,
+		"X-Api-Token": "",
 	}, nil)
 	if status != http.StatusUnauthorized {
 		t.Errorf("TestAuthorization() got = %v, want %v", status, http.StatusUnauthorized)
+	}
+}
+
+func TestWebSessionStoreExpiry(t *testing.T) {
+	now := time.Date(2026, time.August, 30, 12, 0, 0, 0, time.UTC)
+	store := newWebSessionStore()
+	store.now = func() time.Time { return now }
+
+	sessionID, expiresAt, err := store.create()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sessionID == "" || expiresAt != now.Add(webAuthSessionTTL) {
+		t.Fatalf("unexpected session: id=%q expiresAt=%v", sessionID, expiresAt)
+	}
+	if !store.valid(sessionID) {
+		t.Fatal("new session should be valid")
+	}
+
+	now = expiresAt
+	if store.valid(sessionID) {
+		t.Fatal("expired session should be invalid")
 	}
 }
 

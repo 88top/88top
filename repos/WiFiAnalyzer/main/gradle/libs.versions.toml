@@ -1,11 +1,11 @@
 [versions]
-agp = "9.3.2"
+agp = "9.4.0"
 androidx-annotation = "1.10.0"
 androidx-appcompat = "1.8.0"
 androidx-collection = "1.6.0"
 androidx-core-ktx = "1.19.0"
 androidx-core-splashscreen = "1.2.0"
-androidx-lifecycle-viewmodel-ktx = "2.11.0"
+androidx-lifecycle = "2.11.0"
 androidx-media = "1.8.0"
 androidx-preference-ktx = "1.2.1"
 androidx-swiperefreshlayout = "1.2.0"
@@ -25,7 +25,7 @@ ktlint = "14.2.0"
 mockito-core = "5.23.0"
 mockito-kotlin = "6.3.0"
 robolectric = "4.16.1"
-slf4j-simple = "2.0.18"
+slf4j-simple = "2.0.19"
 vico-views = "3.2.3"
 
 [libraries]
@@ -35,7 +35,8 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 androidx-collection-ktx = { group = "androidx.collection", name = "collection-ktx", version.ref = "androidx-collection" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "androidx-core-splashscreen" }
-androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle-viewmodel-ktx" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
 androidx-media = { group = "androidx.media", name = "media", version.ref = "androidx-media" }
 androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "androidx-preference-ktx" }
 androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "androidx-swiperefreshlayout" }
@@ -55,6 +56,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 junit-toolbox = { group = "com.googlecode.junit-toolbox", name = "junit-toolbox", version.ref = "junit-toolbox" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito-core" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito-kotlin" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }

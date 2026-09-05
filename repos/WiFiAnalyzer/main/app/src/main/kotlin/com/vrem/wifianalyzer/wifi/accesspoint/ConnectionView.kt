@@ -30,7 +30,6 @@ import com.vrem.wifianalyzer.wifi.detailview.WiFiDetailPopup
 import com.vrem.wifianalyzer.wifi.detailview.WiFiDetailView
 import com.vrem.wifianalyzer.wifi.model.WiFiConnection
 import com.vrem.wifianalyzer.wifi.model.WiFiData
-import com.vrem.wifianalyzer.wifi.scanner.UpdateNotifier
 
 class ConnectionView(
     private val mainActivity: MainActivity,
@@ -38,8 +37,8 @@ class ConnectionView(
     private val wiFiDetailPopup: WiFiDetailPopup = WiFiDetailPopup(),
     private val warningView: WarningView = WarningView(mainActivity),
     private val settings: Settings = MainContext.INSTANCE.settings,
-) : UpdateNotifier {
-    override fun update(wiFiData: WiFiData) {
+) {
+    fun update(wiFiData: WiFiData) {
         displayConnection(wiFiData)
         displayWiFiSupport()
         warningView.update(wiFiData)

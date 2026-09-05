@@ -10,8 +10,7 @@ class WebViewRpcConfig {
 
   WebViewRpcConfig();
 
-  factory WebViewRpcConfig.fromJson(Map<String, dynamic> json) =>
-      _$WebViewRpcConfigFromJson(json);
+  factory WebViewRpcConfig.fromJson(Map<String, dynamic> json) => _$WebViewRpcConfigFromJson(json);
 
   Map<String, dynamic> toJson() => _$WebViewRpcConfigToJson(this);
 }
@@ -20,6 +19,8 @@ class WebViewRpcConfig {
 class StartConfig {
   late String network;
   late String address;
+  bool apiEnable = false;
+  bool mcpEnable = false;
   late String storage;
   late String storageDir;
   late int refreshInterval;
@@ -28,8 +29,7 @@ class StartConfig {
 
   StartConfig();
 
-  factory StartConfig.fromJson(Map<String, dynamic> json) =>
-      _$StartConfigFromJson(json);
+  factory StartConfig.fromJson(Map<String, dynamic> json) => _$StartConfigFromJson(json);
 
   Map<String, dynamic> toJson() => _$StartConfigToJson(this);
 }

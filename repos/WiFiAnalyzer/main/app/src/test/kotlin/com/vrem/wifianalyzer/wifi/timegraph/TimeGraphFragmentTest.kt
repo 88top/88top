@@ -23,12 +23,17 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.vrem.wifianalyzer.MainContextHelper
 import com.vrem.wifianalyzer.R
 import com.vrem.wifianalyzer.RobolectricUtil
+import com.vrem.wifianalyzer.wifi.model.WiFiData
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
@@ -37,6 +42,12 @@ class TimeGraphFragmentTest {
     private val mainActivity = RobolectricUtil.INSTANCE.activity
     private val fixture = TimeGraphFragment()
     private val scannerService = MainContextHelper.INSTANCE.scannerService
+    private val wiFiData = MutableStateFlow(WiFiData.EMPTY)
+
+    @Before
+    fun setUp() {
+        doReturn(wiFiData).whenever(scannerService).wiFiData()
+    }
 
     @After
     fun tearDown() {
@@ -45,12 +56,12 @@ class TimeGraphFragmentTest {
 
     @Test
     fun onCreateView() {
-        // setup
+        // Act
         RobolectricUtil.INSTANCE.startFragment(fixture)
-        // validate
+        // Assert
         assertThat(fixture).isNotNull()
+        assertThat(wiFiData.subscriptionCount.value).isEqualTo(1)
         verify(scannerService).update()
-        verify(scannerService).register(fixture.timeGraphAdapter)
     }
 
     @Test
@@ -64,23 +75,23 @@ class TimeGraphFragmentTest {
 
     @Test
     fun onResume() {
-        // setup
+        // Arrange
         RobolectricUtil.INSTANCE.startFragment(fixture)
-        // execute
+        // Act
         fixture.onResume()
-        // validate
+        // Assert
+        assertThat(wiFiData.subscriptionCount.value).isEqualTo(1)
         verify(scannerService, times(2)).update()
-        verify(scannerService, times(2)).register(fixture.timeGraphAdapter)
     }
 
     @Test
-    fun onPause() {
-        // setup
+    fun onDestroyView() {
+        // Arrange
         RobolectricUtil.INSTANCE.startFragment(fixture)
-        // execute
-        fixture.onPause()
-        // validate
-        verify(scannerService).unregister(fixture.timeGraphAdapter)
+        // Act
+        RobolectricUtil.INSTANCE.removeFragment(fixture)
+        // Assert
+        assertThat(wiFiData.subscriptionCount.value).isEqualTo(0)
     }
 
     @Config(sdk = [Build.VERSION_CODES.P])

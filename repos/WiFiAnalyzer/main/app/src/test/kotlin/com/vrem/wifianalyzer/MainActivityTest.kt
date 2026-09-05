@@ -19,6 +19,7 @@ package com.vrem.wifianalyzer
 
 import android.content.SharedPreferences
 import android.os.Build
+import android.os.Looper
 import android.view.Menu
 import android.view.MenuItem
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -27,6 +28,7 @@ import com.vrem.util.EMPTY
 import com.vrem.wifianalyzer.navigation.NavigationMenu
 import com.vrem.wifianalyzer.navigation.NavigationMenuController
 import com.vrem.wifianalyzer.navigation.options.OptionMenu
+import com.vrem.wifianalyzer.wifi.accesspoint.ConnectionView
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Test
@@ -36,17 +38,18 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.Robolectric
+import org.robolectric.Shadows
 import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.BAKLAVA])
 class MainActivityTest {
-    private val fixture =
+    private val controller =
         Robolectric
             .buildActivity(MainActivity::class.java)
             .create()
             .resume()
-            .get()
+    private val fixture = controller.get()
 
     @After
     fun tearDown() {
@@ -59,59 +62,68 @@ class MainActivityTest {
     }
 
     @Test
+    fun collectionWillUpdateConnectionView() {
+        // Arrange
+        val scannerService = MainContext.INSTANCE.scannerService
+        val connectionView: ConnectionView = mock()
+        fixture.connectionView = connectionView
+        // Act
+        controller.stop().start()
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
+        // Assert
+        verify(connectionView).update(scannerService.wiFiData().value)
+    }
+
+    @Test
     fun onPauseWillPauseScanner() {
-        // setup
+        // Arrange
         val scannerService = MainContextHelper.INSTANCE.scannerService
-        // execute
+        // Act
         fixture.onPause()
-        // validate
+        // Assert
         verify(scannerService).pause()
-        verify(scannerService).unregister(fixture.connectionView)
     }
 
     @Test
     fun onResumeWithPermissionGrantedAndLocationDisabledWillResumeScanner() {
-        // setup
+        // Arrange
         val permissionService = MainContextHelper.INSTANCE.permissionService
         val scannerService = MainContextHelper.INSTANCE.scannerService
         whenever(permissionService.permissionGranted()).thenReturn(true)
         whenever(permissionService.locationEnabled()).thenReturn(false)
-        // execute
+        // Act
         fixture.onResume()
-        // validate
+        // Assert
         verify(permissionService).permissionGranted()
         verify(permissionService).locationEnabled()
         verify(scannerService).resume()
-        verify(scannerService).register(fixture.connectionView)
     }
 
     @Test
     fun onResumeWithPermissionGrantedAndLocationEnabledWillResumeScanner() {
-        // setup
+        // Arrange
         val permissionService = MainContextHelper.INSTANCE.permissionService
         val scannerService = MainContextHelper.INSTANCE.scannerService
         whenever(permissionService.permissionGranted()).thenReturn(true)
         whenever(permissionService.locationEnabled()).thenReturn(true)
-        // execute
+        // Act
         fixture.onResume()
-        // validate
+        // Assert
         verify(permissionService).permissionGranted()
         verify(permissionService).locationEnabled()
         verify(scannerService).resume()
-        verify(scannerService).register(fixture.connectionView)
     }
 
     @Test
     fun onResumeWithPermissionNotGrantedWillPauseScanner() {
-        // setup
+        // Arrange
         val permissionService = MainContextHelper.INSTANCE.permissionService
         val scannerService = MainContextHelper.INSTANCE.scannerService
         whenever(permissionService.permissionGranted()).thenReturn(false)
-        // execute
+        // Act
         fixture.onResume()
-        // validate
+        // Assert
         verify(scannerService).pause()
-        verify(scannerService).register(fixture.connectionView)
         verify(permissionService).permissionGranted()
         verify(permissionService, never()).locationEnabled()
     }

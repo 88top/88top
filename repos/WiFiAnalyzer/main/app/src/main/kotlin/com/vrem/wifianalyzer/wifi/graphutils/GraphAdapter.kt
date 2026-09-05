@@ -19,14 +19,13 @@ package com.vrem.wifianalyzer.wifi.graphutils
 
 import android.view.View
 import com.vrem.wifianalyzer.wifi.model.WiFiData
-import com.vrem.wifianalyzer.wifi.scanner.UpdateNotifier
 
 open class GraphAdapter(
     internal val graphNotifiers: List<GraphNotifier>,
-) : UpdateNotifier {
+) {
     fun graphs(): List<View> = graphNotifiers.map { it.graph() }
 
-    override fun update(wiFiData: WiFiData) = graphNotifiers.forEach { it.update(wiFiData) }
+    fun update(wiFiData: WiFiData) = graphNotifiers.forEach { it.update(wiFiData) }
 
     fun destroy() = graphNotifiers.forEach { it.destroy() }
 }

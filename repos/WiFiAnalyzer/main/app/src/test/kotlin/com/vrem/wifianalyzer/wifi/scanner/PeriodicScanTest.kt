@@ -17,62 +17,179 @@
  */
 package com.vrem.wifianalyzer.wifi.scanner
 
-import android.os.Handler
 import com.vrem.wifianalyzer.settings.Settings
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.test.runTest
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.After
 import org.junit.Test
+import org.mockito.Mockito.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+
+private const val SCAN_SPEED = 15
+private const val SCAN_SPEED_FASTER = 5
+private val DELAY_INITIAL = 1.milliseconds
 
 class PeriodicScanTest {
-    private val handler: Handler = mock()
-    private val settings: Settings = mock()
     private val scanner: ScannerService = mock()
-    private val fixture: PeriodicScan = PeriodicScan(scanner, handler, settings)
+    private val settings: Settings = mock()
 
-    @Test
-    fun run() {
-        // setup
-        val delayInterval = 1000L
-        val scanSpeed = 15
-        whenever(settings.scanSpeed()).thenReturn(scanSpeed)
-        // execute
-        fixture.run()
-        // validate
-        verify(scanner).update()
-        verify(handler).removeCallbacks(fixture)
-        verify(handler).postDelayed(fixture, scanSpeed * delayInterval)
+    @After
+    fun tearDown() {
+        verifyNoMoreInteractions(scanner)
+        verifyNoMoreInteractions(settings)
     }
 
     @Test
-    fun stop() {
-        // execute
-        fixture.stop()
-        // validate
-        verify(handler).removeCallbacks(fixture)
+    fun runningIsFalseBeforeStart() {
+        runTest {
+            // Arrange
+            val fixture = PeriodicScan(scanner, backgroundScope, settings)
+            // Assert
+            assertThat(fixture.running).isFalse
+        }
     }
 
     @Test
-    fun start() {
-        // setup
-        val delayInitial = 1L
-        // execute
-        fixture.start()
-        // validate
-        verify(handler).removeCallbacks(fixture)
-        verify(handler).postDelayed(fixture, delayInitial)
+    fun startDoesNotScanBeforeInitialDelay() {
+        runTest {
+            // Arrange
+            val fixture = PeriodicScan(scanner, backgroundScope, settings)
+            // Act
+            fixture.start()
+            testScheduler.runCurrent()
+            // Assert
+            assertThat(fixture.running).isTrue
+            verify(scanner, never()).update()
+        }
     }
 
     @Test
-    fun startWithDelay() {
-        // setup
-        val scanSpeed = 15
-        whenever(settings.scanSpeed()).thenReturn(scanSpeed)
-        // execute
-        fixture.startWithDelay()
-        // validate
-        verify(handler).removeCallbacks(fixture)
-        verify(handler).postDelayed(fixture, scanSpeed * PeriodicScan.DELAY_INTERVAL)
-        verify(settings).scanSpeed()
+    fun startScansAfterInitialDelay() {
+        runTest {
+            // Arrange
+            doReturn(SCAN_SPEED).whenever(settings).scanSpeed()
+            val fixture = PeriodicScan(scanner, backgroundScope, settings)
+            // Act
+            fixture.start()
+            testScheduler.advanceTimeBy(DELAY_INITIAL)
+            testScheduler.runCurrent()
+            // Assert
+            verify(scanner).update()
+            verify(settings).scanSpeed()
+        }
+    }
+
+    @Test
+    fun scansRepeatEveryScanInterval() {
+        runTest {
+            // Arrange
+            doReturn(SCAN_SPEED).whenever(settings).scanSpeed()
+            val fixture = PeriodicScan(scanner, backgroundScope, settings)
+            // Act
+            fixture.start()
+            testScheduler.advanceTimeBy(DELAY_INITIAL + SCAN_SPEED.seconds * 3)
+            testScheduler.runCurrent()
+            // Assert
+            verify(scanner, times(4)).update()
+            verify(settings, times(4)).scanSpeed()
+        }
+    }
+
+    @Test
+    fun scanIntervalFollowsChangedScanSpeed() {
+        runTest {
+            // Arrange
+            doReturn(SCAN_SPEED, SCAN_SPEED_FASTER).whenever(settings).scanSpeed()
+            val fixture = PeriodicScan(scanner, backgroundScope, settings)
+            // Act
+            fixture.start()
+            testScheduler.advanceTimeBy(DELAY_INITIAL)
+            testScheduler.runCurrent()
+            testScheduler.advanceTimeBy(SCAN_SPEED.seconds)
+            testScheduler.runCurrent()
+            testScheduler.advanceTimeBy(SCAN_SPEED_FASTER.seconds)
+            testScheduler.runCurrent()
+            // Assert
+            verify(scanner, times(3)).update()
+            verify(settings, times(3)).scanSpeed()
+        }
+    }
+
+    @Test
+    fun stopEndsTheScanLoop() {
+        runTest {
+            // Arrange
+            doReturn(SCAN_SPEED).whenever(settings).scanSpeed()
+            val fixture = PeriodicScan(scanner, backgroundScope, settings)
+            fixture.start()
+            testScheduler.advanceTimeBy(DELAY_INITIAL)
+            testScheduler.runCurrent()
+            // Act
+            fixture.stop()
+            testScheduler.advanceTimeBy(SCAN_SPEED.seconds * 3)
+            testScheduler.runCurrent()
+            // Assert
+            assertThat(fixture.running).isFalse
+            verify(scanner).update()
+            verify(settings).scanSpeed()
+        }
+    }
+
+    @Test
+    fun stopBeforeStartLeavesScannerIdle() {
+        runTest {
+            // Arrange
+            val fixture = PeriodicScan(scanner, backgroundScope, settings)
+            // Act
+            fixture.stop()
+            testScheduler.advanceTimeBy(SCAN_SPEED.seconds * 3)
+            testScheduler.runCurrent()
+            // Assert
+            assertThat(fixture.running).isFalse
+            verify(scanner, never()).update()
+        }
+    }
+
+    @Test
+    fun runningIsFalseAfterScopeIsCancelled() {
+        runTest {
+            // Arrange
+            val coroutineScope = CoroutineScope(backgroundScope.coroutineContext + SupervisorJob())
+            val fixture = PeriodicScan(scanner, coroutineScope, settings)
+            fixture.start()
+            testScheduler.runCurrent()
+            // Act
+            coroutineScope.cancel()
+            // Assert
+            assertThat(fixture.running).isFalse
+            verify(scanner, never()).update()
+        }
+    }
+
+    @Test
+    fun startReplacesTheRunningScanLoop() {
+        runTest {
+            // Arrange
+            doReturn(SCAN_SPEED).whenever(settings).scanSpeed()
+            val fixture = PeriodicScan(scanner, backgroundScope, settings)
+            fixture.start()
+            // Act
+            fixture.start()
+            testScheduler.advanceTimeBy(DELAY_INITIAL)
+            testScheduler.runCurrent()
+            // Assert
+            verify(scanner).update()
+            verify(settings).scanSpeed()
+        }
     }
 }

@@ -28,15 +28,13 @@ import com.vrem.wifianalyzer.wifi.detailview.WiFiDetailPopup
 import com.vrem.wifianalyzer.wifi.detailview.WiFiDetailView
 import com.vrem.wifianalyzer.wifi.model.WiFiData
 import com.vrem.wifianalyzer.wifi.model.WiFiDetail
-import com.vrem.wifianalyzer.wifi.scanner.UpdateNotifier
 
 @OpenClass
 class AccessPointsAdapter(
     private val accessPointsAdapterData: AccessPointsAdapterData = AccessPointsAdapterData(),
     private val wiFiDetailView: WiFiDetailView = WiFiDetailView(),
     private val wiFiDetailPopup: WiFiDetailPopup = WiFiDetailPopup(),
-) : BaseExpandableListAdapter(),
-    UpdateNotifier {
+) : BaseExpandableListAdapter() {
     lateinit var expandableListView: ExpandableListView
 
     override fun getGroupView(
@@ -73,7 +71,7 @@ class AccessPointsAdapter(
         return view
     }
 
-    override fun update(wiFiData: WiFiData) {
+    fun update(wiFiData: WiFiData) {
         accessPointsAdapterData.update(wiFiData, expandableListView)
         notifyDataSetChanged()
     }

@@ -27,6 +27,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
 import com.vrem.util.buildVersionP
 import com.vrem.wifianalyzer.MainContext
 import com.vrem.wifianalyzer.databinding.AccessPointsContentBinding
+import com.vrem.wifianalyzer.wifi.scanner.collectWiFiData
 
 class AccessPointsFragment :
     Fragment(),
@@ -59,14 +60,16 @@ class AccessPointsFragment :
         swipeRefreshLayout.isRefreshing = false
     }
 
-    override fun onResume() {
-        super.onResume()
-        MainContext.INSTANCE.scannerService.register(accessPointsAdapter)
-        onRefresh()
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
+        super.onViewCreated(view, savedInstanceState)
+        viewLifecycleOwner.collectWiFiData(accessPointsAdapter::update)
     }
 
-    override fun onPause() {
-        MainContext.INSTANCE.scannerService.unregister(accessPointsAdapter)
-        super.onPause()
+    override fun onResume() {
+        super.onResume()
+        onRefresh()
     }
 }

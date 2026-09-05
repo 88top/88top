@@ -133,6 +133,8 @@ type Options struct {
 	Name string `json:"name"`
 	// Download file path
 	Path string `json:"path"`
+	// Use this path as the default download directory after creation succeeds
+	AsDefaultPath bool `json:"asDefaultPath,omitempty"`
 	// Select file indexes to download
 	SelectFiles []int `json:"selectFiles"`
 	// Extra info for specific fetcher
@@ -206,6 +208,8 @@ type DownloaderStoreConfig struct {
 	Script                     *ScriptConfig          `json:"script"`                     // Script is the script execution configuration
 	AutoTorrent                *AutoTorrentConfig     `json:"autoTorrent"`                // AutoTorrent is the auto torrent task creation configuration
 	Archive                    *ArchiveConfig         `json:"archive"`                    // Archive is the archive extraction configuration
+	API                        *APIServerConfig       `json:"api"`                        // API is the optional REST server configuration
+	AutoStartTasks             bool                   `json:"autoStartTasks"`             // AutoStartTasks continues all unfinished tasks when the backend starts
 	AutoDeleteMissingFileTasks bool                   `json:"autoDeleteMissingFileTasks"` // AutoDeleteMissingFileTasks enables automatic deletion of tasks with missing files
 }
 
@@ -270,6 +274,27 @@ func (cfg *DownloaderStoreConfig) Merge(beforeCfg *DownloaderStoreConfig) *Downl
 	}
 	if cfg.Archive == nil {
 		cfg.Archive = beforeCfg.Archive
+	}
+	if cfg.API == nil {
+		cfg.API = beforeCfg.API
+	}
+	return cfg
+}
+
+type APIServerConfig struct {
+	Enable    bool   `json:"enable"`
+	MCPEnable bool   `json:"mcpEnable"`
+	Network   string `json:"network"`
+	Address   string `json:"address"`
+	Token     string `json:"token"`
+}
+
+func (cfg *APIServerConfig) Init() *APIServerConfig {
+	if cfg.Network == "" {
+		cfg.Network = "tcp"
+	}
+	if cfg.Address == "" {
+		cfg.Address = "127.0.0.1:9999"
 	}
 	return cfg
 }

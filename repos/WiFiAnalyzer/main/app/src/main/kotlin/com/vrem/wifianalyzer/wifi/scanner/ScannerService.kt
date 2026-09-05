@@ -17,34 +17,31 @@
  */
 package com.vrem.wifianalyzer.wifi.scanner
 
-import android.os.Handler
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.vrem.wifianalyzer.Configuration
 import com.vrem.wifianalyzer.MainActivity
+import com.vrem.wifianalyzer.MainContext
 import com.vrem.wifianalyzer.permission.PermissionService
 import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.manager.WiFiManagerWrapper
 import com.vrem.wifianalyzer.wifi.model.WiFiData
-
-fun interface UpdateNotifier { // Compliant, function interface used
-    fun update(wiFiData: WiFiData)
-}
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 interface ScannerService {
     fun update()
 
-    fun wiFiData(): WiFiData
-
-    fun register(updateNotifier: UpdateNotifier): Boolean
-
-    fun unregister(updateNotifier: UpdateNotifier): Boolean
+    fun wiFiData(): StateFlow<WiFiData>
 
     fun pause()
 
     fun running(): Boolean
 
     fun resume()
-
-    fun resumeWithDelay()
 
     fun stop()
 
@@ -54,7 +51,7 @@ interface ScannerService {
 fun makeScannerService(
     mainActivity: MainActivity,
     wiFiManagerWrapper: WiFiManagerWrapper,
-    handler: Handler,
+    coroutineScope: CoroutineScope,
     settings: Settings,
     configuration: Configuration,
 ): ScannerService {
@@ -62,8 +59,17 @@ fun makeScannerService(
     val transformer = Transformer(cache)
     val permissionService = PermissionService(mainActivity)
     val scanner = Scanner(wiFiManagerWrapper, settings, permissionService, transformer)
-    scanner.periodicScan = PeriodicScan(scanner, handler, settings)
+    scanner.periodicScan = PeriodicScan(scanner, coroutineScope, settings)
     scanner.scannerCallback = ScannerCallback(wiFiManagerWrapper, cache)
     scanner.scanResultsReceiver = ScanResultsReceiver(mainActivity, scanner.scannerCallback)
     return scanner
+}
+
+fun LifecycleOwner.collectWiFiData(update: (WiFiData) -> Unit) {
+    val wiFiData = MainContext.INSTANCE.scannerService.wiFiData()
+    lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            wiFiData.collect(update)
+        }
+    }
 }

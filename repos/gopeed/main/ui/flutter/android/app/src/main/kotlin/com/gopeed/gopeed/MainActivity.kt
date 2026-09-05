@@ -1,49 +1,79 @@
 package com.gopeed.gopeed
 
-import androidx.annotation.NonNull
 import com.gopeed.libgopeed.Libgopeed
+import com.gopeed.libgopeed.TaskEventListener
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.StandardMethodCodec
 
-open class MainActivity : FlutterActivity() {
-    private val CHANNEL = "gopeed.com/libgopeed"
-
-    protected open fun isDialogMode(): Boolean = false
-
-    override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+class MainActivity : FlutterActivity() {
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
         val taskQueue =
             flutterEngine.dartExecutor.binaryMessenger.makeBackgroundTaskQueue()
-        MethodChannel(
+        val libgopeedChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
-            CHANNEL,
+            LIBGOPEED_CHANNEL,
             StandardMethodCodec.INSTANCE,
-            taskQueue
-        ).setMethodCallHandler { call, result ->
+            taskQueue,
+        )
+        libgopeedChannel.setMethodCallHandler { call, result ->
             when (call.method) {
                 "start" -> {
-                    val cfg = call.argument<String>("cfg")
                     try {
-                        val port = Libgopeed.start(cfg)
-                        result.success(port)
-                    } catch (e: Exception) {
-                        result.error("ERROR", e.message, null)
+                        result.success(Libgopeed.start(call.argument<String>("cfg")))
+                    } catch (error: Exception) {
+                        result.error("ERROR", error.message, null)
                     }
                 }
                 "stop" -> {
                     Libgopeed.stop()
                     result.success(null)
                 }
-                "isDialogMode" -> {
-                    result.success(isDialogMode())
+                "getApiServerState" -> result.success(Libgopeed.getAPIServerState())
+                "startApiServer" -> result.success(Libgopeed.startAPIServer())
+                "stopApiServer" -> result.success(Libgopeed.stopAPIServer())
+                "restartApiServer" -> result.success(Libgopeed.restartAPIServer())
+                "invoke" -> {
+                    try {
+                        result.success(
+                            Libgopeed.invoke(
+                                call.argument<String>("method") ?: "",
+                                call.argument<String>("path") ?: "",
+                                call.argument<String>("query") ?: "",
+                                call.argument<String>("body") ?: "",
+                            ),
+                        )
+                    } catch (error: Exception) {
+                        result.error("ERROR", error.message, null)
+                    }
                 }
-                else -> {
-                    result.notImplemented()
+                "subscribeTaskEvents" -> {
+                    val mask = call.argument<Number>("mask")?.toLong() ?: 0L
+                    if (mask == 0L) {
+                        Libgopeed.subscribeTaskEvents(0L, null)
+                    } else {
+                        Libgopeed.subscribeTaskEvents(
+                            mask,
+                            object : TaskEventListener {
+                                override fun onTaskEvent(payload: String?) {
+                                    runOnUiThread {
+                                        libgopeedChannel.invokeMethod("taskEvent", payload ?: "")
+                                    }
+                                }
+                            },
+                        )
+                    }
+                    result.success(null)
                 }
+                else -> result.notImplemented()
             }
         }
     }
 
+    private companion object {
+        const val LIBGOPEED_CHANNEL = "gopeed.com/libgopeed"
+    }
 }

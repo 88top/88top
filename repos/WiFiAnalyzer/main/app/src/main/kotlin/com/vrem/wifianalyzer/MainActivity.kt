@@ -40,6 +40,7 @@ import com.vrem.wifianalyzer.settings.Repository
 import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.accesspoint.ConnectionView
 import com.vrem.wifianalyzer.wifi.scanner.ScannerService
+import com.vrem.wifianalyzer.wifi.scanner.collectWiFiData
 
 @OpenClass
 class MainActivity :
@@ -83,6 +84,7 @@ class MainActivity :
         onNavigationItemSelected(currentMenuItem())
 
         connectionView = ConnectionView(this)
+        collectWiFiData { connectionView.update(it) }
 
         onBackPressedDispatcher.addCallback(this, MainActivityBackPressed(this))
     }
@@ -154,7 +156,6 @@ class MainActivity :
     public override fun onPause() {
         val scannerService: ScannerService = MainContext.INSTANCE.scannerService
         scannerService.pause()
-        scannerService.unregister(connectionView)
         updateActionBar()
         super.onPause()
     }
@@ -171,7 +172,6 @@ class MainActivity :
             scannerService.pause()
         }
         updateActionBar()
-        scannerService.register(connectionView)
     }
 
     public override fun onStop() {

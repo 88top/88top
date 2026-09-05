@@ -30,6 +30,9 @@ import com.vrem.wifianalyzer.wifi.filter.adapter.FiltersAdapter
 import com.vrem.wifianalyzer.wifi.manager.WiFiManagerWrapper
 import com.vrem.wifianalyzer.wifi.scanner.ScannerService
 import com.vrem.wifianalyzer.wifi.scanner.makeScannerService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.android.asCoroutineDispatcher
 
 enum class MainContext {
     INSTANCE,
@@ -43,6 +46,7 @@ enum class MainContext {
     lateinit var vendorService: VendorService
     lateinit var configuration: Configuration
     lateinit var filtersAdapter: FiltersAdapter
+    lateinit var coroutineScope: CoroutineScope
 
     val context: Context get() = mainActivity.applicationContext
 
@@ -60,11 +64,12 @@ enum class MainContext {
         vendorService = VendorService(activity.resources)
         wiFiManagerWrapper = WiFiManagerWrapper(wiFiManager)
         permissionService = PermissionService(activity)
+        coroutineScope = CoroutineScope(SupervisorJob() + Handler(Looper.getMainLooper()).asCoroutineDispatcher())
         scannerService =
             makeScannerService(
                 mainActivity,
                 wiFiManagerWrapper,
-                Handler(Looper.getMainLooper()),
+                coroutineScope,
                 settings,
                 configuration,
             )

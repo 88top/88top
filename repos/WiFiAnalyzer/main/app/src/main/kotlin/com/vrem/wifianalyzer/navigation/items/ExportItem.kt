@@ -35,7 +35,7 @@ internal class ExportItem(
         mainActivity: MainActivity,
         navigationMenu: NavigationMenu,
     ) {
-        val wiFiDetails: List<WiFiDetail> = scannerService().wiFiData().wiFiDetails
+        val wiFiDetails: List<WiFiDetail> = scannerService().wiFiData().value.wiFiDetails
         if (wiFiDetails.isEmpty()) {
             Toast.makeText(mainActivity, R.string.no_data, Toast.LENGTH_LONG).show()
             return

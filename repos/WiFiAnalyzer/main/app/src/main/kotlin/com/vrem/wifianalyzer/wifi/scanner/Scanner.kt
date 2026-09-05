@@ -22,6 +22,9 @@ import com.vrem.wifianalyzer.permission.PermissionService
 import com.vrem.wifianalyzer.settings.Settings
 import com.vrem.wifianalyzer.wifi.manager.WiFiManagerWrapper
 import com.vrem.wifianalyzer.wifi.model.WiFiData
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @OpenClass
 internal class Scanner(
@@ -30,9 +33,8 @@ internal class Scanner(
     val permissionService: PermissionService,
     val transformer: Transformer,
 ) : ScannerService {
-    private val updateNotifiers: MutableList<UpdateNotifier> = mutableListOf()
+    private val wiFiDataState: MutableStateFlow<WiFiData> = MutableStateFlow(WiFiData.EMPTY)
 
-    private var wiFiData: WiFiData = WiFiData.EMPTY
     private var initialScan: Boolean = false
 
     lateinit var periodicScan: PeriodicScan
@@ -49,15 +51,10 @@ internal class Scanner(
                 initialScan = true
             }
         }
-        wiFiData = transformer.transformToWiFiData()
-        updateNotifiers.forEach { it.update(wiFiData) }
+        wiFiDataState.value = transformer.transformToWiFiData()
     }
 
-    override fun wiFiData(): WiFiData = wiFiData
-
-    override fun register(updateNotifier: UpdateNotifier): Boolean = updateNotifiers.add(updateNotifier)
-
-    override fun unregister(updateNotifier: UpdateNotifier): Boolean = updateNotifiers.remove(updateNotifier)
+    override fun wiFiData(): StateFlow<WiFiData> = wiFiDataState.asStateFlow()
 
     override fun pause() {
         periodicScan.stop()
@@ -68,11 +65,8 @@ internal class Scanner(
 
     override fun resume(): Unit = periodicScan.start()
 
-    override fun resumeWithDelay(): Unit = periodicScan.startWithDelay()
-
     override fun stop() {
         periodicScan.stop()
-        updateNotifiers.clear()
         if (settings.wiFiOffOnExit()) {
             wiFiManagerWrapper.disableWiFi()
         }
@@ -85,6 +79,4 @@ internal class Scanner(
         } else {
             periodicScan.start()
         }
-
-    fun registered(): Int = updateNotifiers.size
 }
