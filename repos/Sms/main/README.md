@@ -23,21 +23,21 @@
 
 ## Development Environment
 
-- Flutter 3.44.9 (stable)
-- Dart 3.12.2
-- Gradle 9.1.0
-- Android Gradle Plugin 9.0.1
-- Kotlin 2.3.20
-- compileSdk 36 / minSdk 26
+- Flutter 3.47.2 (stable)
+- Dart 3.13.2
+- Gradle 9.3.1
+- Android Gradle Plugin 9.1.0
+- Kotlin 2.4.10
+- compileSdk 37 / minSdk 26
 - JDK 17
 
 ## Build & Publish
 
-Build the release APK with flutter_distributor:
+Build the release APK with fastforge:
 
 ```bash
-dart pub global activate flutter_distributor
-flutter_distributor release --name apk
+dart pub global activate fastforge
+fastforge release --name apk
 ```
 
 Artifacts are output to `dist/`. The APK is signed with the release keystore and packages **arm64-v8a only** (single ABI).
@@ -46,18 +46,19 @@ Artifacts are output to `dist/`. The APK is signed with the release keystore and
 
 | Workflow | Trigger | Flutter Channel | Contents |
 | --- | --- | --- | --- |
-| `build.yml` | push main (version tags excluded) / opened PR | stable | `dart analyze` + build APK + upload artifact |
-| `manual.yml` | manual trigger | beta / master / stable selectable | `dart analyze` + build APK + upload artifact |
-| `publish.yml` | version tag (e.g. `1.6.1+250725`) | beta | build APK + create draft Release |
+| `build.yml` | push main (version tags excluded) / opened PR | stable | `dart analyze` + `flutter test` + build APK + upload artifact |
+| `manual.yml` | manual trigger | beta / master / stable selectable (default stable) | `dart analyze` + `flutter test` + build APK + upload artifact |
+| `publish.yml` | version tag (e.g. `1.6.1+250725`) | stable | build APK + create draft Release |
 
 ### Build Notes
 
-- `permission_handler` is pinned to `12.0.3`: v13 requires compileSdk 37, which exceeds the Flutter stable template (compileSdk 36) and AGP 9.0.1's supported range.
-- Old plugins (e.g. `sms_advanced 1.1.0`, from the AGP 4.1 era) lack a `namespace` and hardcode `compileSdk 31`. The root `android/build.gradle.kts` auto-fills the namespace from `project.group` and raises the compileSdk of legacy library modules to 36.
-- Lint tasks are disabled in `android/build.gradle.kts` (see the Call project note): legacy plugin buildscripts pin old AGP versions and crash the lint worker (`AndroidLintWorkAction`) when mixed with root AGP 9.0.1; `extract*Annotations` tasks are replaced with placeholder outputs.
+- `permission_handler` upgraded to `13.0.2`: v13 requires compileSdk 37, so `android/app/build.gradle.kts` pins `compileSdk = 37` (above Flutter 3.47 template 36) with AGP 9.1.0 + Android SDK Platform 37. Permission code follows the v13 request-driven pattern (never derive `permanentlyDenied` from `status`).
+- Old plugins (e.g. `sms_advanced 1.1.0`, from the AGP 4.1 era) lack a `namespace` and hardcode `compileSdk 31`. The root `android/build.gradle.kts` auto-fills the namespace from `project.group` and raises the compileSdk of legacy library modules to 37.
+- Lint tasks are disabled in `android/build.gradle.kts` (see the Call project note): legacy plugin buildscripts pin old AGP versions and crash the lint worker (`AndroidLintWorkAction`) when mixed with root AGP 9.1.0; `extract*Annotations` tasks are replaced with placeholder outputs.
 - `kotlin.incremental=false` is set in `android/gradle.properties`: on Windows, Kotlin incremental compilation cannot handle sources (pub cache on the C: drive) and build output (project on the D: drive) on different drives.
 - `sms_advanced` applies the Kotlin Gradle Plugin itself; future Flutter versions will reject this, so keep an eye out for an alternative.
-- Code quality is guaranteed by `dart analyze` in CI.
+- Code quality is guaranteed by `dart analyze` + `flutter test` in CI.
+- Run tests locally with `flutter test` (platform channels are mocked, no device needed).
 
 ## Project Structure
 

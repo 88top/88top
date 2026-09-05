@@ -1,30 +1,58 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:sms/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    // permission_handler：短信权限已授权（granted == 1）。
+    const permissionChannel = MethodChannel(
+      'flutter.baseflow.com/permissions/methods',
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(permissionChannel, (MethodCall call) async {
+          if (call.method == 'checkPermissionStatus') return 1;
+          return 0;
+        });
+
+    // sms_advanced：短信库为空。
+    const queryChannel = MethodChannel(
+      'plugins.elyudde.com/querySMS',
+      JSONMethodCodec(),
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(queryChannel, (MethodCall call) async {
+          return <dynamic>[];
+        });
+  });
+
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('flutter.baseflow.com/permissions/methods'),
+          null,
+        );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel(
+            'plugins.elyudde.com/querySMS',
+            JSONMethodCodec(),
+          ),
+          null,
+        );
+  });
+
+  testWidgets('App boots and shows empty SMS state', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const SmsApp());
+    await tester.pumpAndSettle();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // 空列表时 AppBar 显示应用名（测试默认英文 locale）。
+    expect(find.text('SMS'), findsOneWidget);
+    // 空状态页提供“请求权限”入口。
+    expect(find.text('Request SMS Permission'), findsOneWidget);
   });
 }

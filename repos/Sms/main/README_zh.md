@@ -23,21 +23,21 @@
 
 ## 开发环境
 
-- Flutter 3.44.9 (stable)
-- Dart 3.12.2
-- Gradle 9.1.0
-- Android Gradle Plugin 9.0.1
-- Kotlin 2.3.20
-- compileSdk 36 / minSdk 26
+- Flutter 3.47.2 (stable)
+- Dart 3.13.2
+- Gradle 9.3.1
+- Android Gradle Plugin 9.1.0
+- Kotlin 2.4.10
+- compileSdk 37 / minSdk 26
 - JDK 17
 
 ## 构建与发布
 
-使用 flutter_distributor 打包 release：
+使用 fastforge 打包 release：
 
 ```bash
-dart pub global activate flutter_distributor
-flutter_distributor release --name apk
+dart pub global activate fastforge
+fastforge release --name apk
 ```
 
 产物输出到 `dist/` 目录。APK 使用 release 签名，且仅打包 **arm64-v8a** 单 ABI。
@@ -46,18 +46,19 @@ flutter_distributor release --name apk
 
 | 工作流 | 触发时机 | Flutter 渠道 | 内容 |
 | --- | --- | --- | --- |
-| `build.yml` | push main（版本 tag 除外）/ 新建 PR | stable | `dart analyze` + 构建 APK + 上传 artifact |
-| `manual.yml` | 手动触发 | beta / master / stable 可选 | `dart analyze` + 构建 APK + 上传 artifact |
-| `publish.yml` | 版本 tag（如 `1.6.1+250725`） | beta | 构建 APK + 创建草稿 Release |
+| `build.yml` | push main（版本 tag 除外）/ 新建 PR | stable | `dart analyze` + `flutter test` + 构建 APK + 上传 artifact |
+| `manual.yml` | 手动触发 | beta / master / stable 可选（默认 stable） | `dart analyze` + `flutter test` + 构建 APK + 上传 artifact |
+| `publish.yml` | 版本 tag（如 `1.6.1+250725`） | stable | 构建 APK + 创建草稿 Release |
 
 ### 构建注意事项
 
-- `permission_handler` 固定在 `12.0.3`：v13 要求 compileSdk 37，超出 Flutter stable 模板（compileSdk 36）与 AGP 9.0.1 的支持范围。
-- 老插件（如 `sms_advanced 1.1.0`，AGP 4.1 时代产物）缺少 `namespace` 且写死 `compileSdk 31`，根 `android/build.gradle.kts` 中自动用 `project.group` 补全 namespace，并把旧库模块的 compileSdk 抬升到 36。
-- lint 相关任务在 `android/build.gradle.kts` 中被跳过：旧插件的 buildscript 钉老版本 AGP，与根工程 AGP 9.0.1 混载会导致 lint worker（`AndroidLintWorkAction`）崩溃，因此统一禁用 lint 系列任务，并为 `extract*Annotations` 任务生成占位产物。
+- `permission_handler` 已升级到 `13.0.2`：v13 要求 compileSdk 37，因此 `android/app/build.gradle.kts` 硬编码 `compileSdk = 37`（高于 Flutter 3.47 模板的 36），配合 AGP 9.1.0 + Android SDK Platform 37。权限代码遵循 v13 request-driven 模式（不从 `status` 推导 `permanentlyDenied`）。
+- 老插件（如 `sms_advanced 1.1.0`，AGP 4.1 时代产物）缺少 `namespace` 且写死 `compileSdk 31`，根 `android/build.gradle.kts` 中自动用 `project.group` 补全 namespace，并把旧库模块的 compileSdk 抬升到 37。
+- lint 相关任务在 `android/build.gradle.kts` 中被跳过：旧插件的 buildscript 钉老版本 AGP，与根工程 AGP 9.1.0 混载会导致 lint worker（`AndroidLintWorkAction`）崩溃，因此统一禁用 lint 系列任务，并为 `extract*Annotations` 任务生成占位产物。
 - `android/gradle.properties` 中设置了 `kotlin.incremental=false`：Windows 上 Kotlin 增量编译无法处理源码（C: 盘 pub 缓存）与构建产物（D: 盘工程）跨盘符的情况。
 - `sms_advanced` 插件自身应用了 Kotlin Gradle Plugin，未来版本 Flutter 将拒绝构建，需留意替代方案。
-- 代码质量由 CI 中的 `dart analyze` 保证。
+- 代码质量由 CI 中的 `dart analyze` + `flutter test` 保证。
+- 本地运行测试：`flutter test`（平台通道已 mock，无需真机）。
 
 ## 项目结构
 

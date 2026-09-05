@@ -19,7 +19,7 @@ issue_tracker: https://github.com/davidche1116/Sms/issues
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.6.2+250810
+version: 1.7.0+260905
 
 environment:
   sdk: ^3.12.2
@@ -38,17 +38,17 @@ dependencies:
     sdk: flutter
 
   # 跨平台文件
-  cross_file: ^0.3.5+4
+  cross_file: ^0.3.5+5
   # 导出csv
   csv: ^8.0.0
   # 对话框loading
-  flutter_smart_dialog: ^5.1.1
+  flutter_smart_dialog: ^5.3.0
   # 国际化
-  intl: any
+  intl: ^0.20.3
   # 获取临时目录
   path_provider: ^2.1.6
   # 权限申请
-  permission_handler: ^12.0.3
+  permission_handler: ^13.0.2
   # 分享
   share_plus: ^13.3.0
   # 短信读取、删除

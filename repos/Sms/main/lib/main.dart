@@ -63,7 +63,11 @@ class SmsHomePage extends StatefulWidget {
 class _SmsHomePageState extends State<SmsHomePage> {
   static const _platform = MethodChannel('com.dc16.sms/smsApp');
   static const String _packageId = 'com.dc16.sms';
-  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+  // AnimatedList 的条目计数由内部状态维护（只认 insertItem/removeItem，
+  // 会忽略重建时传的新 initialItemCount）。整表刷新（查询/过滤/切回全部）
+  // 必须换一个新 Key 让旧状态丢弃，否则内部计数与新列表长度错位，
+  // 标题显示 n 条但列表灰屏无内容，且多轮操作后越差越多。
+  GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   final ValueNotifier<List<SmsMessage>> _showList =
       ValueNotifier<List<SmsMessage>>([]);
   final TextEditingController _textController = TextEditingController();
@@ -72,6 +76,12 @@ class _SmsHomePageState extends State<SmsHomePage> {
   late AppLocalizations appLocalizations;
   DateTime? _startDate;
   DateTime? _endDate;
+
+  /// 整表替换：丢弃旧 AnimatedList 状态，用正确长度重建。
+  void _setFullList(List<SmsMessage> newList) {
+    _listKey = GlobalKey<AnimatedListState>();
+    _showList.value = newList;
+  }
 
   Future<void> _showToast(String msg) async {
     SmartDialog.showToast(
@@ -148,28 +158,37 @@ class _SmsHomePageState extends State<SmsHomePage> {
       _showToast(appLocalizations.toast_permission);
       _showLoading.value = false;
     }
-    _showList.value = showMessageList;
+    _setFullList(showMessageList);
   }
 
   void _removeIndex(int index) {
+    if (index < 0 || index >= _showList.value.length) return;
+    final AnimatedListState? listState = _listKey.currentState;
+    if (listState == null) return;
     final removedItem = _showList.value.removeAt(index);
     _showList.value = [..._showList.value];
-    _listKey.currentState!.removeItem(index, (
+    listState.removeItem(index, (
       BuildContext context,
       Animation<double> animation,
     ) {
-      return _buildItem(index, removedItem, context, animation);
+      // 离场动画用的静态快照：不可交互，不再按 index 回查实时列表
+      //（旧代码把 stale index 传给 _buildItem，动画期间点选会读写错位）。
+      return _buildItem(index, removedItem, context, animation, false);
     });
     // return removedItem;
   }
 
   Future<void> _deleteIndex(int index) async {
+    if (index < 0 || index >= _showList.value.length) return;
+    final int? id = _showList.value[index].id;
+    final int? threadId = _showList.value[index].threadId;
+    if (id == null || threadId == null) return;
     bool check = await _checkDefaultSmsApp();
     if (check) {
       SmsRemover smsRemover = SmsRemover();
       bool? ok = await smsRemover.removeSmsById(
-        _showList.value[index].id!,
-        _showList.value[index].threadId!,
+        id,
+        threadId,
       );
       if (ok != null) {
         if (ok) {
@@ -182,6 +201,9 @@ class _SmsHomePageState extends State<SmsHomePage> {
   }
 
   Future<void> _sameAddress(int index) async {
+    // 同步快照查询条件：await 间隙列表可能已被刷新，不能再用 index 回查。
+    if (index < 0 || index >= _showList.value.length) return;
+    final String? address = _showList.value[index].address;
     _textController.text = '';
     List<SmsMessage> showMessageList = [];
     bool ok = await Permission.sms.isGranted;
@@ -190,7 +212,7 @@ class _SmsHomePageState extends State<SmsHomePage> {
 
       SmsQuery query = SmsQuery();
       showMessageList = await query.querySms(
-        address: _showList.value[index].address,
+        address: address,
       );
       showMessageList.sort((a, b) => b.date!.compareTo(a.date!));
 
@@ -199,10 +221,13 @@ class _SmsHomePageState extends State<SmsHomePage> {
       showMessageList = [];
     }
 
-    _showList.value = showMessageList;
+    _setFullList(showMessageList);
   }
 
   Future<void> _sameSim(int index) async {
+    // 同上：先同步快照 sim，避免异步间隙 index 失效。
+    if (index < 0 || index >= _showList.value.length) return;
+    final int? sim = _showList.value[index].sim;
     _textController.text = '';
     List<SmsMessage> showMessageList = [];
     bool ok = await Permission.sms.isGranted;
@@ -212,8 +237,6 @@ class _SmsHomePageState extends State<SmsHomePage> {
       List<SmsMessage> allMessageList = [];
       SmsQuery query = SmsQuery();
       allMessageList = await query.getAllSms;
-
-      int? sim = _showList.value[index].sim;
 
       if (sim != null) {
         for (int i = 0; i < allMessageList.length; ++i) {
@@ -232,7 +255,7 @@ class _SmsHomePageState extends State<SmsHomePage> {
       showMessageList = [];
     }
 
-    _showList.value = showMessageList;
+    _setFullList(showMessageList);
   }
 
   void _filterDate() async {
@@ -364,16 +387,32 @@ class _SmsHomePageState extends State<SmsHomePage> {
   }
 
   Future<void> _requestPermission() async {
-    PermissionStatus status = await Permission.sms.request();
-    bool ok = (status == PermissionStatus.granted);
-    if (ok && _showList.value.isEmpty) {
-      _querySms();
+    // v13 迁移指南：Android 上 status 永不返回 permanentlyDenied，
+    // 只能以 request() 结果为准。已授权时直接跳过请求。
+    if (await Permission.sms.isGranted) {
+      if (_showList.value.isEmpty) {
+        _querySms();
+      }
+      _showToast(appLocalizations.operation_completed);
+      return;
     }
-    _showToast(
-      ok
-          ? appLocalizations.operation_completed
-          : appLocalizations.operation_failed,
-    );
+    final PermissionStatus status = await Permission.sms.request();
+    if (status.isGranted || status.isLimited) {
+      if (_showList.value.isEmpty) {
+        _querySms();
+      }
+      _showToast(appLocalizations.operation_completed);
+      return;
+    }
+    if (status.isPermanentlyDenied) {
+      // 第二次拒绝后系统不再弹窗，引导用户去设置页手动开启。
+      // 不持久化该结论：从设置返回后下次用户操作会再次 request()。
+      _showToast(appLocalizations.toast_permission);
+      await _setAppPermission();
+      return;
+    }
+    // 本次刚拒绝：不立即重弹，等下次用户操作再试。
+    _showToast(appLocalizations.operation_failed);
   }
 
   Future<void> _setAppPermission() async {
@@ -481,8 +520,9 @@ class _SmsHomePageState extends State<SmsHomePage> {
     int index,
     SmsMessage item,
     BuildContext context,
-    Animation<double> animation,
-  ) {
+    Animation<double> animation, [
+    bool interactive = true,
+  ]) {
     return SlideTransition(
       position: Tween<Offset>(
         begin: const Offset(1, 0),
@@ -537,7 +577,8 @@ class _SmsHomePageState extends State<SmsHomePage> {
                 ),
               ],
             ),
-            onTap: () {
+            onTap: interactive
+                ? () {
               showCupertinoModalPopup(
                 context: context,
                 builder: (context) {
@@ -580,8 +621,10 @@ class _SmsHomePageState extends State<SmsHomePage> {
                           Navigator.of(context).pop('copy');
                           Clipboard.setData(
                             ClipboardData(
+                              // 用创建弹窗时捕获的 item，不按 index 回查实时列表
+                              //（列表刷新/移除后 index 可能指向别条甚至越界）。
                               text:
-                                  '${_showList.value[index].address}\r\n${_showList.value[index].date}\r\n${_showList.value[index].body}',
+                                  '${item.address}\r\n${item.date}\r\n${item.body}',
                             ),
                           );
                           _showToast(appLocalizations.toast_clipboard);
@@ -598,8 +641,10 @@ class _SmsHomePageState extends State<SmsHomePage> {
                   );
                 },
               );
-            },
-            onLongPress: () {
+            }
+                : null,
+            onLongPress: interactive
+                ? () {
               showCupertinoModalPopup(
                 context: context,
                 builder: (context) {
@@ -617,7 +662,7 @@ class _SmsHomePageState extends State<SmsHomePage> {
                           Navigator.of(context).pop('copy');
                           Clipboard.setData(
                             ClipboardData(
-                              text: '${_showList.value[index].address}',
+                              text: '${item.address}',
                             ),
                           );
                           _showToast(appLocalizations.toast_clipboard);
@@ -634,7 +679,8 @@ class _SmsHomePageState extends State<SmsHomePage> {
                   );
                 },
               );
-            },
+            }
+                : null,
           ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 10),

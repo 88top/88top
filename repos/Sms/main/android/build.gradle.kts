@@ -20,8 +20,8 @@ subprojects {
     afterEvaluate {
         extensions.findByType<com.android.build.api.dsl.LibraryExtension>()?.apply {
             val currentCompileSdk = compileSdk
-            if (currentCompileSdk != null && currentCompileSdk < 36) {
-                compileSdk = 36
+            if (currentCompileSdk != null && currentCompileSdk < 37) {
+                compileSdk = 37
             }
         }
     }

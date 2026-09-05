@@ -15,7 +15,8 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.dc16.sms"
-    compileSdk = flutter.compileSdkVersion
+    // permission_handler v13 起要求 compileSdk 37（Flutter 3.47 模板仍为 36，需硬编码）
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

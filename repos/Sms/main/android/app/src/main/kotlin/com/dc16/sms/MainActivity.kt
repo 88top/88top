@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Telephony
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -16,6 +17,11 @@ import io.flutter.plugin.common.MethodChannel
  */
 class MainActivity : FlutterFragmentActivity() {
     private val CHANNEL = "com.dc16.sms/smsApp"
+
+    // startActivityForResult 已废弃，改用 Activity Result API。
+    // 选择结果通过 onResume 后的 getDefaultSmsApp 重新读取，无需在此处理。
+    private val roleRequestLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -36,7 +42,7 @@ class MainActivity : FlutterFragmentActivity() {
     private fun getDefaultSmsApp(): String {
         val defaultSmsApp = Telephony.Sms.getDefaultSmsPackage(this)
         if (defaultSmsApp == null) {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val roleManager = getSystemService(RoleManager::class.java)
                 val isRoleHeld = roleManager?.isRoleHeld(RoleManager.ROLE_SMS) ?: false
                 if (isRoleHeld) {
@@ -57,7 +63,7 @@ class MainActivity : FlutterFragmentActivity() {
         val defaultName = getDefaultSmsApp()
         
         if (defaultName.isEmpty() || packageName != defaultName) {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val roleManager = getSystemService(RoleManager::class.java)
                 val isRoleHeld = roleManager?.isRoleHeld(RoleManager.ROLE_SMS) ?: false
                 if (isRoleHeld) {
@@ -65,7 +71,7 @@ class MainActivity : FlutterFragmentActivity() {
                 }
                 val roleRequestIntent = roleManager?.createRequestRoleIntent(RoleManager.ROLE_SMS)
                 roleRequestIntent?.let {
-                    startActivityForResult(it, 12)
+                    roleRequestLauncher.launch(it)
                 }
             } else {
                 val intent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
