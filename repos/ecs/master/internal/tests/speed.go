@@ -3,6 +3,7 @@
 package tests
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"runtime"
@@ -24,15 +25,22 @@ func ShowHead(language string) {
 }
 
 func NearbySP() {
+	NearbySPWithNetwork("")
+}
+
+// NearbySPWithNetwork keeps a nearby Ookla measurement on the requested
+// address family. An empty network retains the historical automatic behavior.
+func NearbySPWithNetwork(network string) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Fprintln(os.Stderr, "[WARN] nearby speedtest unavailable")
 		}
 	}()
+	network = normalizeSpeedNetwork(network)
 	if runtime.GOOS == "windows" || sp.OfficialAvailableTest() != nil {
-		sp.NearbySpeedTest()
+		sp.NearbySpeedTestWithNetwork(network)
 	} else {
-		sp.OfficialNearbySpeedTest()
+		sp.OfficialNearbySpeedTestWithNetwork(network)
 	}
 }
 
@@ -79,7 +87,114 @@ func printTableRow(result pst.SpeedTestResult) {
 	fmt.Println()
 }
 
+type PrivateSpeedPreloads struct {
+	network    pst.Network
+	preloads   map[string]*pst.ServerPreload
+	preloadErr map[string]error
+}
+
+func configurePrivateSpeedOutput() {
+	*pst.NoProgress = true
+	*pst.Quiet = true
+	*pst.NoHeader = true
+	*pst.NoProjectURL = true
+}
+
+func privateSpeedNetwork(network string) pst.Network {
+	switch normalizeSpeedNetwork(network) {
+	case "tcp4":
+		return pst.NetworkIPv4
+	case "tcp6":
+		return pst.NetworkIPv6
+	default:
+		return pst.NetworkAuto
+	}
+}
+
+func privateSpeedCarrier(operator string) (string, bool) {
+	switch strings.ToLower(strings.TrimSpace(operator)) {
+	case "cmcc":
+		return "Mobile", true
+	case "cu":
+		return "Unicom", true
+	case "ct":
+		return "Telecom", true
+	case "other":
+		return "Other", true
+	default:
+		return "", false
+	}
+}
+
+// StartPrivateSpeedPreloads starts silent candidate probes for every requested
+// carrier. Call Wait before throughput so probing traffic never shares a
+// bandwidth sample with the selected server.
+func StartPrivateSpeedPreloads(ctx context.Context, operators []string, network string) *PrivateSpeedPreloads {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	preloads := &PrivateSpeedPreloads{
+		network:    privateSpeedNetwork(network),
+		preloads:   make(map[string]*pst.ServerPreload, len(operators)),
+		preloadErr: make(map[string]error, len(operators)),
+	}
+	configurePrivateSpeedOutput()
+	serverList, err := privateSpeedServerList()
+	if err != nil {
+		for _, operator := range operators {
+			preloads.preloadErr[strings.ToLower(strings.TrimSpace(operator))] = fmt.Errorf("加载自定义服务器列表失败")
+		}
+		return preloads
+	}
+	seen := make(map[string]struct{}, len(operators))
+	for _, operator := range operators {
+		operator = strings.ToLower(strings.TrimSpace(operator))
+		if _, exists := seen[operator]; exists {
+			continue
+		}
+		seen[operator] = struct{}{}
+		carrier, ok := privateSpeedCarrier(operator)
+		if !ok {
+			preloads.preloadErr[operator] = fmt.Errorf("不支持的运营商类型: %s", operator)
+			continue
+		}
+		servers := pst.FilterServersByISP(serverList.Servers, carrier)
+		if len(servers) == 0 {
+			preloads.preloadErr[operator] = fmt.Errorf("没有可用的%s测速服务器", carrier)
+			continue
+		}
+		preload, preloadErr := pst.PreloadBestServersWithNetwork(ctx, servers, len(servers), 5*time.Second, false, true, preloads.network)
+		if preloadErr != nil {
+			preloads.preloadErr[operator] = preloadErr
+			continue
+		}
+		preloads.preloads[operator] = preload
+	}
+	return preloads
+}
+
+// Wait returns preloaded candidates for one carrier. It intentionally blocks
+// before the caller starts any download or upload measurement.
+func (p *PrivateSpeedPreloads) Wait(ctx context.Context, operator string) ([]pst.ServerWithLatencyInfo, error) {
+	if p == nil {
+		return nil, fmt.Errorf("测速候选预加载不可用")
+	}
+	operator = strings.ToLower(strings.TrimSpace(operator))
+	if err := p.preloadErr[operator]; err != nil {
+		return nil, err
+	}
+	preload := p.preloads[operator]
+	if preload == nil {
+		return nil, fmt.Errorf("测速候选预加载不可用")
+	}
+	return preload.Wait(ctx)
+}
+
 func privateSpeedTest(num int, operator string) (testedCount int, err error) {
+	return privateSpeedTestWithNetwork(context.Background(), num, operator, "", nil)
+}
+
+func privateSpeedTestWithNetwork(ctx context.Context, num int, operator, network string, preloads *PrivateSpeedPreloads) (testedCount int, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Fprintln(os.Stderr, "[WARN] speedtest registry unavailable")
@@ -87,39 +202,37 @@ func privateSpeedTest(num int, operator string) (testedCount int, err error) {
 			err = fmt.Errorf("私有测速运行失败")
 		}
 	}()
-	*pst.NoProgress = true
-	*pst.Quiet = true
-	*pst.NoHeader = true
-	*pst.NoProjectURL = true
-	serverList, err := privateSpeedServerList()
-	if err != nil {
-		return 0, fmt.Errorf("加载自定义服务器列表失败")
+	if ctx == nil {
+		ctx = context.Background()
 	}
+	configurePrivateSpeedOutput()
 	serversPerISP := num
 	if serversPerISP <= 0 || serversPerISP > 5 {
 		serversPerISP = 2
 	}
-	var carrierType string
-	switch strings.ToLower(operator) {
-	case "cmcc":
-		carrierType = "Mobile"
-	case "cu":
-		carrierType = "Unicom"
-	case "ct":
-		carrierType = "Telecom"
-	case "other":
-		carrierType = "Other"
-	default:
+	operator = strings.ToLower(strings.TrimSpace(operator))
+	carrierType, ok := privateSpeedCarrier(operator)
+	if !ok {
 		return 0, fmt.Errorf("不支持的运营商类型: %s", operator)
 	}
-	filteredServers := pst.FilterServersByISP(serverList.Servers, carrierType)
-	candidateServers, err := pst.FindBestServers(
-		filteredServers,
-		len(filteredServers),
-		5*time.Second, // ping 超时
-		true,          // 显示进度条
-		true,          // 静默
-	)
+	var candidateServers []pst.ServerWithLatencyInfo
+	if preloads != nil {
+		candidateServers, err = preloads.Wait(ctx, operator)
+	} else {
+		serverList, loadErr := privateSpeedServerList()
+		if loadErr != nil {
+			return 0, fmt.Errorf("加载自定义服务器列表失败")
+		}
+		filteredServers := pst.FilterServersByISP(serverList.Servers, carrierType)
+		candidateServers, err = pst.FindBestServersWithNetwork(
+			filteredServers,
+			len(filteredServers),
+			5*time.Second,
+			false,
+			true,
+			privateSpeedNetwork(network),
+		)
+	}
 	if err != nil {
 		return 0, fmt.Errorf("分组查找失败")
 	}
@@ -131,7 +244,8 @@ func privateSpeedTest(num int, operator string) (testedCount int, err error) {
 		if testedCount >= serversPerISP {
 			break
 		}
-		result := pst.RunSpeedTest(
+		result := pst.RunSpeedTestContextWithNetwork(
+			ctx,
 			serverInfo.Server,
 			false,          // 不禁用下载测试
 			false,          // 不禁用上传测试
@@ -139,6 +253,7 @@ func privateSpeedTest(num int, operator string) (testedCount int, err error) {
 			12*time.Second, // 超时时间
 			&serverInfo,
 			false, // 不显示进度条
+			privateSpeedNetwork(network),
 		)
 		if result.UploadMbps > 0 || result.DownloadMbps > 0 {
 			printTableRow(result)
@@ -160,33 +275,55 @@ func selectPrivateSpeedCandidates(candidates []pst.ServerWithLatencyInfo, server
 }
 
 func privateSpeedTestWithFallback(num int, operator, language string) {
+	privateSpeedTestWithFallbackWithNetwork(num, operator, language, "")
+}
+
+func privateSpeedTestWithFallbackWithNetwork(num int, operator, language, network string) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Fprintln(os.Stderr, "[WARN] preferred speedtest unavailable; using fallback")
 		}
 	}()
-	testedCount, err := privateSpeedTest(num, operator)
+	testedCount, err := privateSpeedTestWithNetwork(context.Background(), num, operator, network, nil)
 	if err != nil || testedCount == 0 {
 		var url, parseType string
 		url = model.NetGlobal
 		parseType = "id"
 		if runtime.GOOS == "windows" || sp.OfficialAvailableTest() != nil {
-			sp.CustomSpeedTest(url, parseType, num, language)
+			sp.CustomSpeedTestWithNetwork(url, parseType, num, language, normalizeSpeedNetwork(network))
 		} else {
-			sp.OfficialCustomSpeedTest(url, parseType, num, language)
+			sp.OfficialCustomSpeedTestWithNetwork(url, parseType, num, language, normalizeSpeedNetwork(network))
 		}
 	}
 }
 
 func CustomSP(platform, operator string, num int, language string) {
+	CustomSPWithNetwork(platform, operator, num, language, "")
+}
+
+// CustomSPWithNetwork keeps public and managed carrier tests on one explicit
+// address family when requested.
+func CustomSPWithNetwork(platform, operator string, num int, language, network string) {
+	customSPWithNetwork(context.Background(), platform, operator, num, language, network, nil)
+}
+
+// CustomSPWithNetworkAndPreloads consumes a batch started earlier by
+// StartPrivateSpeedPreloads. It waits for the relevant carrier before running
+// transfer traffic.
+func CustomSPWithNetworkAndPreloads(ctx context.Context, platform, operator string, num int, language, network string, preloads *PrivateSpeedPreloads) {
+	customSPWithNetwork(ctx, platform, operator, num, language, network, preloads)
+}
+
+func customSPWithNetwork(ctx context.Context, platform, operator string, num int, language, network string, preloads *PrivateSpeedPreloads) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Fprintln(os.Stderr, "[WARN] custom speedtest unavailable")
 		}
 	}()
+	network = normalizeSpeedNetwork(network)
 	opLower := strings.ToLower(operator)
 	if opLower == "cmcc" || opLower == "cu" || opLower == "ct" || opLower == "other" {
-		testedCount, err := privateSpeedTest(num, opLower)
+		testedCount, err := privateSpeedTestWithNetwork(ctx, num, opLower, network, preloads)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "[WARN] preferred speedtest unavailable; using fallback")
 		} else if testedCount >= num {
@@ -238,8 +375,8 @@ func CustomSP(platform, operator string, num int, language string) {
 		parseType = "id"
 	}
 	if runtime.GOOS == "windows" || sp.OfficialAvailableTest() != nil {
-		sp.CustomSpeedTest(url, parseType, num, language)
+		sp.CustomSpeedTestWithNetwork(url, parseType, num, language, network)
 	} else {
-		sp.OfficialCustomSpeedTest(url, parseType, num, language)
+		sp.OfficialCustomSpeedTestWithNetwork(url, parseType, num, language, network)
 	}
 }

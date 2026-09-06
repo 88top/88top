@@ -58,3 +58,18 @@ func TestWithFullTestPresetUsesMenuContract(t *testing.T) {
 		t.Fatalf("API full preset did not enable network enhancements: %+v", cfg)
 	}
 }
+
+func TestWithFullConcurrentTestPresetUsesOptionTwoContract(t *testing.T) {
+	cfg := NewDefaultConfig()
+	ApplyOptions(cfg, WithFullConcurrentTestPreset(true))
+
+	if cfg.Choice != "2" {
+		t.Fatalf("full concurrent preset choice = %q, want 2", cfg.Choice)
+	}
+	if !cfg.BasicStatus || !cfg.CpuTestStatus || !cfg.MemoryTestStatus || !cfg.DiskTestStatus || !cfg.SpeedTestStatus {
+		t.Fatalf("full concurrent preset did not retain full-suite coverage: %+v", cfg)
+	}
+	if !cfg.UtTestStatus || !cfg.SecurityTestStatus || !cfg.EmailTestStatus || !cfg.BacktraceStatus || !cfg.Nt3Status {
+		t.Fatalf("full concurrent preset did not enable complete network coverage: %+v", cfg)
+	}
+}

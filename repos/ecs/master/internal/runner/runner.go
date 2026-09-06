@@ -160,7 +160,28 @@ func shouldPrintBriefIPLinesInBasicStage(config *params.Config) bool {
 	if config.OnlyIpInfoCheck {
 		return false
 	}
-	return config.Choice == "6" || config.Choice == "9"
+	return config.Choice == "7" || config.Choice == "10"
+}
+
+func speedNetworkForStack(stack string) string {
+	switch strings.ToLower(strings.TrimSpace(stack)) {
+	case "dualstack", "ipv4":
+		return "tcp4"
+	case "ipv6":
+		return "tcp6"
+	default:
+		return ""
+	}
+}
+
+func speedNetworkFromLegacyIdentity() string {
+	if strings.TrimSpace(tests.IPV4) != "" {
+		return "tcp4"
+	}
+	if strings.TrimSpace(tests.IPV6) != "" {
+		return "tcp6"
+	}
+	return ""
 }
 
 func shouldPrintPingInfoSection(config *params.Config, info string) bool {
@@ -417,46 +438,62 @@ func RunNetworkTests(ctx context.Context, config *params.Config, wg3 *sync.WaitG
 
 // RunSpeedTests runs speed tests (Chinese mode)
 func RunSpeedTests(ctx context.Context, config *params.Config, output, tempOutput string, outputMutex *sync.Mutex) string {
+	return RunSpeedTestsWithNetwork(ctx, config, output, tempOutput, outputMutex, speedNetworkFromLegacyIdentity(), nil)
+}
+
+// RunSpeedTestsWithNetwork runs the Chinese speed profile with one explicit
+// family policy. A nil preload batch remains safe for direct API callers.
+func RunSpeedTestsWithNetwork(ctx context.Context, config *params.Config, output, tempOutput string, outputMutex *sync.Mutex, network string, preloads *tests.PrivateSpeedPreloads) string {
 	if ctx.Err() != nil {
 		return output
 	}
 	outputMutex.Lock()
 	defer outputMutex.Unlock()
-	return utils.PrintAndCapture(func() {
-		if config.SpeedTestStatus {
-			utils.PrintCenteredTitle("就近节点测速", config.Width)
-			tests.ShowHead(config.Language)
-			if config.Choice == "1" || !config.MenuMode {
-				tests.NearbySP()
-				tests.CustomSP("net", "global", 2, config.Language)
-				tests.CustomSP("net", "cu", config.SpNum, config.Language)
-				tests.CustomSP("net", "ct", config.SpNum, config.Language)
-				tests.CustomSP("net", "cmcc", config.SpNum, config.Language)
-			} else if config.Choice == "2" || config.Choice == "3" || config.Choice == "4" || config.Choice == "5" {
-				// 中文模式：就近测速 + 三网各1个 + Other 1个（带回退）
-				if config.Language == "zh" {
-					tests.NearbySP()
-					tests.CustomSP("net", "other", 1, config.Language)
-					tests.CustomSP("net", "cu", 1, config.Language)
-					tests.CustomSP("net", "ct", 1, config.Language)
-					tests.CustomSP("net", "cmcc", 1, config.Language)
-				} else {
-					// 英文模式：保持原有逻辑，测4个global节点
-					tests.CustomSP("net", "global", 4, config.Language)
-				}
-			} else if config.Choice == "6" {
-				tests.CustomSP("net", "global", 11, config.Language)
-			} else {
-				// Custom menu mode and any other fallback choices.
-				tests.NearbySP()
-				tests.CustomSP("net", "cu", config.SpNum, config.Language)
-				tests.CustomSP("net", "ct", config.SpNum, config.Language)
-				tests.CustomSP("net", "cmcc", config.SpNum, config.Language)
-			}
-			// 等待第三方库的输出完全刷新到标准输出
-			time.Sleep(500 * time.Millisecond)
+	_ = tempOutput
+	return output + captureChineseSpeedTests(ctx, config, network, preloads, true)
+}
+
+func captureChineseSpeedTests(ctx context.Context, config *params.Config, network string, preloads *tests.PrivateSpeedPreloads, display bool) string {
+	capture := utils.CaptureOutputSilent
+	if display {
+		capture = utils.CaptureOutput
+	}
+	return capture(func() {
+		if config == nil || !config.SpeedTestStatus || ctx.Err() != nil {
+			return
 		}
-	}, tempOutput, output)
+		utils.PrintCenteredTitle("就近节点测速", config.Width)
+		tests.ShowHead(config.Language)
+		if usesChinesePresetSpeedProfile(config) {
+			// Built-in Chinese profiles intentionally avoid global/other node
+			// groups: one nearby Ookla measurement and one representative from
+			// each mainland carrier are both easier to interpret and predictable.
+			tests.NearbySPWithNetwork(network)
+			for _, operator := range []string{"ct", "cu", "cmcc"} {
+				tests.CustomSPWithNetworkAndPreloads(ctx, "net", operator, 1, config.Language, network, preloads)
+			}
+		} else {
+			// Explicit/custom parameters retain their caller-selected node count.
+			tests.NearbySPWithNetwork(network)
+			for _, operator := range []string{"cu", "ct", "cmcc"} {
+				tests.CustomSPWithNetworkAndPreloads(ctx, "net", operator, config.SpNum, config.Language, network, preloads)
+			}
+		}
+		// Wait for third-party writers before restoring the temporary stream.
+		time.Sleep(500 * time.Millisecond)
+	})
+}
+
+func usesChinesePresetSpeedProfile(config *params.Config) bool {
+	if config == nil {
+		return false
+	}
+	switch strings.TrimSpace(config.Choice) {
+	case "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11":
+		return true
+	default:
+		return false
+	}
 }
 
 // RunEnglishNetworkTests runs network tests (English mode)
@@ -497,22 +534,37 @@ func RunEnglishNetworkTests(ctx context.Context, config *params.Config, wg3 *syn
 
 // RunEnglishSpeedTests runs speed tests (English mode)
 func RunEnglishSpeedTests(ctx context.Context, config *params.Config, output, tempOutput string, outputMutex *sync.Mutex) string {
+	return RunEnglishSpeedTestsWithNetwork(ctx, config, output, tempOutput, outputMutex, speedNetworkFromLegacyIdentity())
+}
+
+// RunEnglishSpeedTestsWithNetwork preserves the international selection logic
+// while pinning every lookup and transfer when the caller knows the family.
+func RunEnglishSpeedTestsWithNetwork(ctx context.Context, config *params.Config, output, tempOutput string, outputMutex *sync.Mutex, network string) string {
 	if ctx.Err() != nil {
 		return output
 	}
 	outputMutex.Lock()
 	defer outputMutex.Unlock()
-	return utils.PrintAndCapture(func() {
-		if config.SpeedTestStatus {
-			utils.PrintCenteredTitle("Speed-Test", config.Width)
-			tests.ShowHead(config.Language)
-			// English mode deliberately excludes nearby/CN operator discovery;
-			// the global registry supplies representative international nodes.
-			tests.CustomSP("net", "global", max(4, config.SpNum), config.Language)
-			// 等待第三方库的输出完全刷新到标准输出
-			time.Sleep(500 * time.Millisecond)
+	_ = tempOutput
+	return output + captureEnglishSpeedTests(ctx, config, network, true)
+}
+
+func captureEnglishSpeedTests(ctx context.Context, config *params.Config, network string, display bool) string {
+	capture := utils.CaptureOutputSilent
+	if display {
+		capture = utils.CaptureOutput
+	}
+	return capture(func() {
+		if config == nil || !config.SpeedTestStatus || ctx.Err() != nil {
+			return
 		}
-	}, tempOutput, output)
+		utils.PrintCenteredTitle("Speed-Test", config.Width)
+		tests.ShowHead(config.Language)
+		// English mode deliberately keeps the international registry profile.
+		tests.CustomSPWithNetwork("net", "global", max(4, config.SpNum), config.Language, network)
+		// Wait for third-party writers before restoring the temporary stream.
+		time.Sleep(500 * time.Millisecond)
+	})
 }
 
 // AppendTimeInfo appends timing information

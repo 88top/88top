@@ -52,6 +52,7 @@ type componentInputs struct {
 	BGPASNMap        []bgptools.ASNMetadata
 	PublicIPv4       string
 	PublicIPv6       string
+	SpeedNetwork     speedmodel.Network
 	Network          bool
 }
 

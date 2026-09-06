@@ -855,9 +855,9 @@ jobs:
         ARCH_TEXT="\`$ARCH\`"
 
         cat > "$RELEASE_BODY" << EOF
-        **Build Time**: $BUILD_TIME_UTC ($BUILD_TIME)
         **Architecture**: $ARCH_TEXT
         **Channel**: $CHANNELS_TEXT
+        **Build Time**: $BUILD_TIME_UTC ($BUILD_TIME)
 
         <details open><summary><strong>RouterOS</strong></summary>
 
@@ -912,7 +912,7 @@ jobs:
           echo "</details>" >> "$RELEASE_BODY"
           echo "" >> "$RELEASE_BODY"
         fi
-        echo "<details><summary><strong>Changelog</strong></summary>" >> "$RELEASE_BODY"
+        echo "<details><summary><strong>Changelog</strong> (click to expand)</summary>" >> "$RELEASE_BODY"
         echo "" >> "$RELEASE_BODY"
         echo "<pre>" >> "$RELEASE_BODY"
         cat "$PUBLISH_DIR/CHANGELOG" >> "$RELEASE_BODY"

@@ -61,6 +61,12 @@ func SpeedTestNearby() {
 	tests.NearbySP()
 }
 
+// SpeedTestNearbyWithNetwork runs the nearby speed test on the requested
+// family ("tcp4" or "tcp6"). Empty keeps automatic selection.
+func SpeedTestNearbyWithNetwork(network string) {
+	tests.NearbySPWithNetwork(network)
+}
+
 // SpeedTestCustom 自定义测速
 // platform: 平台 ("cn" 或 "net")
 // operator: 运营商 ("cmcc", "cu", "ct", "global", "other" 等)
@@ -68,6 +74,12 @@ func SpeedTestNearby() {
 // language: 语言 ("zh" 或 "en")
 func SpeedTestCustom(platform, operator string, num int, language string) {
 	tests.CustomSP(platform, operator, num, language)
+}
+
+// SpeedTestCustomWithNetwork keeps public and carrier speed requests on one
+// explicit address family when callers know the intended stack.
+func SpeedTestCustomWithNetwork(platform, operator string, num int, language, network string) {
+	tests.CustomSPWithNetwork(platform, operator, num, language, network)
 }
 
 // NextTrace3Check 三网路由追踪测试

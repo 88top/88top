@@ -404,6 +404,16 @@ func RunSpeedTests(config *Config) string {
 	return finalizePublicText(config, runner.RunSpeedTests(context.Background(), config, output, tempOutput, &outputMutex))
 }
 
+// RunSpeedTestsWithNetwork runs the Chinese profile with a family pinned
+// throughout server discovery and transfer. Empty retains automatic selection.
+func RunSpeedTestsWithNetwork(config *Config, network string) string {
+	var (
+		output, tempOutput string
+		outputMutex        sync.Mutex
+	)
+	return finalizePublicText(config, runner.RunSpeedTestsWithNetwork(context.Background(), config, output, tempOutput, &outputMutex, network, nil))
+}
+
 // RunEnglishNetworkTests 运行网络测试（英文模式）
 func RunEnglishNetworkTests(config *Config, ptInfo string) string {
 	var (
@@ -422,6 +432,16 @@ func RunEnglishSpeedTests(config *Config) string {
 		outputMutex        sync.Mutex
 	)
 	return finalizePublicText(config, runner.RunEnglishSpeedTests(context.Background(), config, output, tempOutput, &outputMutex))
+}
+
+// RunEnglishSpeedTestsWithNetwork preserves the global English profile while
+// pinning its requests to the selected address family.
+func RunEnglishSpeedTestsWithNetwork(config *Config, network string) string {
+	var (
+		output, tempOutput string
+		outputMutex        sync.Mutex
+	)
+	return finalizePublicText(config, runner.RunEnglishSpeedTestsWithNetwork(context.Background(), config, output, tempOutput, &outputMutex, network))
 }
 
 // AppendTimeInfo 添加时间信息

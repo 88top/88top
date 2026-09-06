@@ -347,8 +347,21 @@ func SecurityInfoCheck(language string) string {
 	return securityInfo
 }
 
-// CaptureOutput 捕获函数输出和错误输出，实时输出，并返回字符串
+// CaptureOutput captures stdout and stderr, mirrors stdout to the active
+// terminal, and returns the captured stdout text.
 func CaptureOutput(f func()) string {
+	return captureOutput(f, true)
+}
+
+// CaptureOutputSilent captures stdout and stderr without publishing either
+// stream until its caller decides where the completed section belongs. It is
+// used by the fully-concurrent suite so the renderer can retain the classic
+// section order even when throughput begins immediately.
+func CaptureOutputSilent(f func()) string {
+	return captureOutput(f, false)
+}
+
+func captureOutput(f func(), display bool) string {
 	// 保存旧的 stdout 和 stderr
 	oldStdout := os.Stdout
 	oldStderr := os.Stderr
@@ -371,16 +384,23 @@ func CaptureOutput(f func()) string {
 	// 并发读取 stdout 和 stderr
 	done := make(chan struct{}, 2)
 	stdoutBufferWriter := &leadingCellWriter{writer: &stdoutBuf, lineStart: true}
-	stdoutDisplayWriter := &leadingCellWriter{writer: oldStdout, lineStart: true}
 	sanitizer := currentOutputSanitizer()
 	go func() {
-		writer := &lineSanitizingWriter{writer: io.MultiWriter(stdoutBufferWriter, stdoutDisplayWriter), sanitizer: sanitizer}
+		writers := []io.Writer{stdoutBufferWriter}
+		if display {
+			writers = append(writers, &leadingCellWriter{writer: oldStdout, lineStart: true})
+		}
+		writer := &lineSanitizingWriter{writer: io.MultiWriter(writers...), sanitizer: sanitizer}
 		_, _ = io.Copy(writer, stdoutPipeR)
 		_ = writer.Flush()
 		done <- struct{}{}
 	}()
 	go func() {
-		writer := &lineSanitizingWriter{writer: io.MultiWriter(&stderrBuf, oldStderr), sanitizer: sanitizer}
+		writers := []io.Writer{&stderrBuf}
+		if display {
+			writers = append(writers, oldStderr)
+		}
+		writer := &lineSanitizingWriter{writer: io.MultiWriter(writers...), sanitizer: sanitizer}
 		_, _ = io.Copy(writer, stderrPipeR)
 		_ = writer.Flush()
 		done <- struct{}{}

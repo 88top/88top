@@ -28,7 +28,7 @@ func TestShouldPrintBriefIPLinesInBasicStage(t *testing.T) {
 		{
 			name: "network only choice without ip-only mode",
 			cfg: &params.Config{
-				Choice:             "6",
+				Choice:             "7",
 				SecurityTestStatus: true,
 				BasicStatus:        false,
 				OnlyIpInfoCheck:    false,
@@ -38,7 +38,7 @@ func TestShouldPrintBriefIPLinesInBasicStage(t *testing.T) {
 		{
 			name: "ip quality choice without ip-only mode",
 			cfg: &params.Config{
-				Choice:             "9",
+				Choice:             "10",
 				SecurityTestStatus: true,
 				BasicStatus:        false,
 				OnlyIpInfoCheck:    false,
@@ -48,7 +48,7 @@ func TestShouldPrintBriefIPLinesInBasicStage(t *testing.T) {
 		{
 			name: "network only with ip-only mode should suppress duplicate",
 			cfg: &params.Config{
-				Choice:             "6",
+				Choice:             "7",
 				SecurityTestStatus: true,
 				BasicStatus:        false,
 				OnlyIpInfoCheck:    true,
@@ -58,7 +58,7 @@ func TestShouldPrintBriefIPLinesInBasicStage(t *testing.T) {
 		{
 			name: "basic enabled should not print brief lines",
 			cfg: &params.Config{
-				Choice:             "6",
+				Choice:             "7",
 				SecurityTestStatus: true,
 				BasicStatus:        true,
 				OnlyIpInfoCheck:    false,
@@ -68,7 +68,7 @@ func TestShouldPrintBriefIPLinesInBasicStage(t *testing.T) {
 		{
 			name: "security disabled should not print brief lines",
 			cfg: &params.Config{
-				Choice:             "6",
+				Choice:             "7",
 				SecurityTestStatus: false,
 				BasicStatus:        false,
 				OnlyIpInfoCheck:    false,
@@ -94,6 +94,33 @@ func TestShouldPrintBriefIPLinesInBasicStage(t *testing.T) {
 				t.Fatalf("shouldPrintBriefIPLinesInBasicStage() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestSpeedNetworkForStackPinsDualStackToIPv4(t *testing.T) {
+	tests := map[string]string{
+		"DualStack": "tcp4",
+		"IPv4":      "tcp4",
+		"IPv6":      "tcp6",
+		"None":      "",
+	}
+	for stack, want := range tests {
+		if got := speedNetworkForStack(stack); got != want {
+			t.Fatalf("speedNetworkForStack(%q) = %q, want %q", stack, got, want)
+		}
+	}
+}
+
+func TestChinesePresetSpeedProfileExcludesGlobalNodes(t *testing.T) {
+	for _, choice := range []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"} {
+		if !usesChinesePresetSpeedProfile(&params.Config{Choice: choice}) {
+			t.Fatalf("preset choice %q should use the nearby plus three-carrier profile", choice)
+		}
+	}
+	for _, choice := range []string{"", "custom", "manual"} {
+		if usesChinesePresetSpeedProfile(&params.Config{Choice: choice}) {
+			t.Fatalf("non-preset choice %q should retain its custom speed profile", choice)
+		}
 	}
 }
 

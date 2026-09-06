@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/oneclickvirt/ecs/utils"
+	speedmodel "github.com/oneclickvirt/speedtest/model"
 )
 
 const StructuredReportSchema = "goecs.report/v1"
@@ -260,7 +261,8 @@ func validatedStructuredConfig(config *Config) *Config {
 }
 
 func collectStructuredExtras(ctx context.Context, preCheck utils.NetCheckResult, config *Config) structuredExtras {
-	inputs, dataFiles, primary, loadErr := loadComponentData(ctx, config.DataOffline)
+	speedNetwork := speedNetworkForPreCheck(preCheck)
+	inputs, dataFiles, primary, loadErr := loadComponentDataWithSpeedNetwork(ctx, config.DataOffline, speedNetwork)
 	extras := structuredExtras{data: primary, dataFiles: dataFiles, err: loadErr}
 	publicIPv4, publicIPv6 := GetIPv4Address(), GetIPv6Address()
 	if preCheck.Connected && publicIPv4 == "" && publicIPv6 == "" {
@@ -269,6 +271,9 @@ func collectStructuredExtras(ctx context.Context, preCheck utils.NetCheckResult,
 	inputs.Network = preCheck.Connected && ctx.Err() == nil
 	inputs.PublicIPv4 = publicIPv4
 	inputs.PublicIPv6 = publicIPv6
+	if inputs.SpeedNetwork == speedmodel.NetworkAuto {
+		inputs.SpeedNetwork = speedNetworkForComponentInputs(inputs)
+	}
 	extras.components, extras.tcp = collectComponentReportsWithTCP(ctx, config, inputs)
 	return extras
 }

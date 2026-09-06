@@ -417,9 +417,9 @@ jobs:
         ARCH_TEXT="\`$ARCH\`"
 
         cat > "$RELEASE_BODY" << EOF
-        **Build Time**: $BUILD_TIME_UTC ($BUILD_TIME)
         **Architecture**: $ARCH_TEXT
         **Channel**: $CHANNELS_TEXT
+        **Build Time**: $BUILD_TIME_UTC ($BUILD_TIME)
 
         <details open><summary><strong>RouterOS</strong></summary>
 
@@ -453,13 +453,12 @@ jobs:
         for fmt in "${formats[@]}"; do
           platform="${FORMAT_PLATFORM[$fmt]}"
           link=$(link_file "$PUBLISH_DIR/chr-$VERSION$ARCH_EXT.$fmt.zip")
-            echo "| $platform | $link |" >> "$RELEASE_BODY"
-          fi
+          echo "| $platform | $link |" >> "$RELEASE_BODY"
         done
         echo "</details>" >> "$RELEASE_BODY"
         echo "" >> "$RELEASE_BODY"
         
-        echo "<details><summary><strong>Changelog</strong></summary>" >> "$RELEASE_BODY"
+        echo "<details><summary><strong>Changelog</strong> (click to expand)</summary>" >> "$RELEASE_BODY"
         echo "" >> "$RELEASE_BODY"
         echo "<pre>" >> "$RELEASE_BODY"
         cat "$PUBLISH_DIR/CHANGELOG" >> "$RELEASE_BODY"
@@ -565,12 +564,12 @@ jobs:
         PASS=${{ secrets.SSH_PASSWORD }}
         PORT=${{ secrets.SSH_PORT }}
 
-        REMOTE_CMD="
+        REMOTE_CMD=""
 
         while read -r CHANNEL
         do
           REMOTE_CMD="$REMOTE_CMD
-        ln -sfn /root/$REMOTE_PATH/$VERSION/info /rw/disk/$REMOTE_PATH/NEWEST6.$CHANNEL"
+        ln -sfn /root/$REMOTE_PATH/$VERSION/info /rw/disk/$REMOTE_PATH/NEWEST6.$CHANNEL
         ln -sfn /root/$REMOTE_PATH/$VERSION/info /rw/disk/$REMOTE_PATH/NEWESTa6.$CHANNEL"
         done < <(echo "$CHANNELS" | jq -r '.[]')
 

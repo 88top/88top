@@ -24,12 +24,16 @@ type bufferedTask struct {
 }
 
 type legacyWorkflowPlan struct {
-	basics        func(context.Context)
-	hardware      []bufferedTask
-	afterHardware func(context.Context)
-	independent   []bufferedTask
-	speed         func(context.Context)
-	emit          func(string)
+	basics          func(context.Context)
+	hardware        []bufferedTask
+	afterHardware   func(context.Context)
+	identityReady   func(context.Context)
+	preload         func(context.Context)
+	independent     []bufferedTask
+	speed           func(context.Context)
+	concurrentSpeed *bufferedTask
+	fullConcurrent  bool
+	emit            func(string)
 }
 
 var (
@@ -58,6 +62,8 @@ func runLegacyTests(ctx context.Context, preCheck utils.NetCheckResult, config *
 		return
 	}
 	network := preCheck.Connected && preCheck.StackType != "" && preCheck.StackType != "None"
+	speedNetwork := speedNetworkForStack(preCheck.StackType)
+	var speedPreloads *tests.PrivateSpeedPreloads
 	emit := func(value string) {
 		if value == "" {
 			return
@@ -68,6 +74,7 @@ func runLegacyTests(ctx context.Context, preCheck utils.NetCheckResult, config *
 		outputMutex.Unlock()
 	}
 	plan := legacyWorkflowPlan{
+		fullConcurrent: config.Choice == "2",
 		basics: func(context.Context) {
 			*output = RunBasicTests(ctx, preCheck, config, basicInfo, securityInfo, *output, tempOutput, outputMutex)
 		},
@@ -75,9 +82,17 @@ func runLegacyTests(ctx context.Context, preCheck utils.NetCheckResult, config *
 			if config.OnlyIpInfoCheck && !config.BasicStatus && network {
 				*output = RunIpInfoCheck(ctx, config, *output, tempOutput, outputMutex)
 			}
-			signalIdentityReady(ctx)
 		},
-		emit: emit,
+		identityReady: signalIdentityReady,
+		emit:          emit,
+	}
+	if network && config.SpeedTestStatus && config.Language == "zh" {
+		// Candidate probes are lightweight but still use the network. Start them
+		// only after the serialized hardware stage, then let them overlap with
+		// non-throughput diagnostics. The speed stage waits before any transfer.
+		plan.preload = func(taskCtx context.Context) {
+			speedPreloads = tests.StartPrivateSpeedPreloads(taskCtx, []string{"ct", "cu", "cmcc"}, speedNetwork)
+		}
 	}
 	if config.CpuTestStatus || (config.DeepMode && config.DeepBurnDuration > 0) {
 		plan.hardware = append(plan.hardware, bufferedTask{name: "cpu", run: func(taskCtx context.Context) string {
@@ -150,11 +165,21 @@ func runLegacyTests(ctx context.Context, preCheck utils.NetCheckResult, config *
 			}})
 		}
 		if config.SpeedTestStatus {
-			plan.speed = func(context.Context) {
-				if config.Language == "zh" {
-					*output = RunSpeedTests(ctx, config, *output, tempOutput, outputMutex)
-				} else {
-					*output = RunEnglishSpeedTests(ctx, config, *output, tempOutput, outputMutex)
+			if config.Choice == "2" {
+				plan.fullConcurrent = true
+				plan.concurrentSpeed = &bufferedTask{name: "speed", run: func(taskCtx context.Context) string {
+					if config.Language == "zh" {
+						return captureChineseSpeedTests(taskCtx, config, speedNetwork, speedPreloads, false)
+					}
+					return captureEnglishSpeedTests(taskCtx, config, speedNetwork, false)
+				}}
+			} else {
+				plan.speed = func(context.Context) {
+					if config.Language == "zh" {
+						*output = RunSpeedTestsWithNetwork(ctx, config, *output, tempOutput, outputMutex, speedNetwork, speedPreloads)
+					} else {
+						*output = RunEnglishSpeedTestsWithNetwork(ctx, config, *output, tempOutput, outputMutex, speedNetwork)
+					}
 				}
 			}
 		}
@@ -167,6 +192,10 @@ func runLegacyTests(ctx context.Context, preCheck utils.NetCheckResult, config *
 // returns a complete chapter string; only the coordinator is allowed to emit
 // terminal output.
 func runLegacyWorkflowPlan(ctx context.Context, plan legacyWorkflowPlan) {
+	if plan.fullConcurrent {
+		runFullyConcurrentLegacyWorkflow(ctx, plan)
+		return
+	}
 	if plan.basics != nil {
 		plan.basics(ctx)
 	}
@@ -174,9 +203,69 @@ func runLegacyWorkflowPlan(ctx context.Context, plan legacyWorkflowPlan) {
 	if plan.afterHardware != nil {
 		plan.afterHardware(ctx)
 	}
+	if plan.identityReady != nil {
+		plan.identityReady(ctx)
+	}
+	if plan.preload != nil && ctx.Err() == nil {
+		plan.preload(ctx)
+	}
 	runOrderedBufferedTasks(ctx, plan.independent, plan.emit)
 	if plan.speed != nil && ctx.Err() == nil {
 		plan.speed(ctx)
+	}
+}
+
+// runFullyConcurrentLegacyWorkflow starts all non-basic stages before waiting
+// for any result. The basic stage remains first because it establishes the IP
+// identity used by the rest of the workflow; its output is still rendered
+// first. Completed sections are emitted in the same order as option 1.
+func runFullyConcurrentLegacyWorkflow(ctx context.Context, plan legacyWorkflowPlan) {
+	if plan.basics != nil {
+		plan.basics(ctx)
+	}
+	if plan.identityReady != nil {
+		plan.identityReady(ctx)
+	}
+	if plan.preload != nil && ctx.Err() == nil {
+		plan.preload(ctx)
+	}
+	if ctx.Err() != nil {
+		return
+	}
+
+	allTasks := make([]bufferedTask, 0, len(plan.hardware)+len(plan.independent)+1)
+	allTasks = append(allTasks, plan.hardware...)
+	allTasks = append(allTasks, plan.independent...)
+	if plan.concurrentSpeed != nil {
+		allTasks = append(allTasks, *plan.concurrentSpeed)
+	}
+	values, completed := collectBufferedTaskResults(ctx, startBufferedTasks(ctx, allTasks))
+	if !completed {
+		return
+	}
+
+	hardwareEnd := len(plan.hardware)
+	independentEnd := hardwareEnd + len(plan.independent)
+	for _, value := range values[:hardwareEnd] {
+		if value != "" && plan.emit != nil {
+			plan.emit(value)
+		}
+	}
+	// This path can capture its own output. It deliberately runs after every
+	// concurrently-started task has completed so no process-wide stdout capture
+	// can consume another section's result.
+	if plan.afterHardware != nil && ctx.Err() == nil {
+		plan.afterHardware(ctx)
+	}
+	for _, value := range values[hardwareEnd:independentEnd] {
+		if value != "" && plan.emit != nil {
+			plan.emit(value)
+		}
+	}
+	for _, value := range values[independentEnd:] {
+		if value != "" && plan.emit != nil {
+			plan.emit(value)
+		}
 	}
 }
 
@@ -198,8 +287,20 @@ func runSequentialBufferedTasks(ctx context.Context, tasks []bufferedTask, emit 
 // private result channel in display order. A later chapter may finish early,
 // but it cannot overtake the next chapter expected by the renderer.
 func runOrderedBufferedTasks(ctx context.Context, tasks []bufferedTask, emit func(string)) {
-	if len(tasks) == 0 {
+	values, completed := collectBufferedTaskResults(ctx, startBufferedTasks(ctx, tasks))
+	if !completed {
 		return
+	}
+	for _, value := range values {
+		if value != "" && emit != nil && ctx.Err() == nil {
+			emit(value)
+		}
+	}
+}
+
+func startBufferedTasks(ctx context.Context, tasks []bufferedTask) []<-chan string {
+	if len(tasks) == 0 {
+		return nil
 	}
 	results := make([]<-chan string, len(tasks))
 	for index := range tasks {
@@ -216,16 +317,19 @@ func runOrderedBufferedTasks(ctx context.Context, tasks []bufferedTask, emit fun
 			value = runBufferedTask(ctx, task)
 		}()
 	}
-	for _, result := range results {
+	return results
+}
+
+func collectBufferedTaskResults(ctx context.Context, results []<-chan string) ([]string, bool) {
+	values := make([]string, len(results))
+	for index, result := range results {
 		select {
-		case value := <-result:
-			if value != "" && emit != nil && ctx.Err() == nil {
-				emit(value)
-			}
+		case values[index] = <-result:
 		case <-ctx.Done():
-			return
+			return values, false
 		}
 	}
+	return values, true
 }
 
 func runBufferedTask(ctx context.Context, task bufferedTask) (value string) {

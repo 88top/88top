@@ -10,17 +10,22 @@ import (
 
 	privatepst "github.com/oneclickvirt/privatespeedtest/pst"
 	privatetransfer "github.com/oneclickvirt/privatespeedtest/transfer"
+	speedmodel "github.com/oneclickvirt/speedtest/model"
 )
 
 func hasPrivateComponentData() bool { return true }
 
 func loadPrivateSpeedComponentData(ctx context.Context, offline bool) componentDataResult {
+	return loadPrivateSpeedComponentDataWithNetwork(ctx, offline, speedmodel.NetworkAuto)
+}
+
+func loadPrivateSpeedComponentDataWithNetwork(ctx context.Context, offline bool, network speedmodel.Network) componentDataResult {
 	var loaded privatepst.RegistryLoadResult
 	var err error
 	if offline {
 		loaded, err = privatepst.LoadEmbeddedServerList()
 	} else {
-		loaded, err = privatepst.LoadServerListWithMetadataContext(ctx)
+		loaded, err = privatepst.LoadServerListWithMetadataContextWithNetwork(ctx, privateSpeedNetwork(network))
 	}
 	if err != nil {
 		return failedComponentData(ctx, privateDataFile, err)
@@ -52,27 +57,45 @@ func loadTransferComponentData(ctx context.Context, offline bool) componentDataR
 }
 
 func runPrivateSpeedBenchmarks(ctx context.Context, limit int) (any, int, []privateSpeedBenchmark) {
-	return runPrivateSpeedBenchmarksWithLoader(ctx, limit, privatepst.LoadServerListWithMetadataContext)
+	return runPrivateSpeedBenchmarksWithNetwork(ctx, limit, speedmodel.NetworkAuto)
 }
 
 func runEmbeddedPrivateSpeedBenchmarks(ctx context.Context, limit int) (any, int, []privateSpeedBenchmark) {
-	return runPrivateSpeedBenchmarksWithLoader(ctx, limit, func(context.Context) (privatepst.RegistryLoadResult, error) {
-		return privatepst.LoadEmbeddedServerList()
-	})
+	return runEmbeddedPrivateSpeedBenchmarksWithNetwork(ctx, limit, speedmodel.NetworkAuto)
 }
 
 func runInternationalPrivateSpeedBenchmarks(ctx context.Context, limit int) (any, int, []privateSpeedBenchmark) {
-	return runPrivateSpeedBenchmarksWithLoader(ctx, limit, func(ctx context.Context) (privatepst.RegistryLoadResult, error) {
-		loaded, err := privatepst.LoadServerListWithMetadataContext(ctx)
-		return filterInternationalPrivateRegistry(loaded), err
-	})
+	return runInternationalPrivateSpeedBenchmarksWithNetwork(ctx, limit, speedmodel.NetworkAuto)
 }
 
 func runEmbeddedInternationalPrivateSpeedBenchmarks(ctx context.Context, limit int) (any, int, []privateSpeedBenchmark) {
-	return runPrivateSpeedBenchmarksWithLoader(ctx, limit, func(context.Context) (privatepst.RegistryLoadResult, error) {
+	return runEmbeddedInternationalPrivateSpeedBenchmarksWithNetwork(ctx, limit, speedmodel.NetworkAuto)
+}
+
+func runPrivateSpeedBenchmarksWithNetwork(ctx context.Context, limit int, network speedmodel.Network) (any, int, []privateSpeedBenchmark) {
+	return runPrivateSpeedBenchmarksWithLoaderAndNetwork(ctx, limit, func(ctx context.Context, network speedmodel.Network) (privatepst.RegistryLoadResult, error) {
+		return privatepst.LoadServerListWithMetadataContextWithNetwork(ctx, privateSpeedNetwork(network))
+	}, network)
+}
+
+func runEmbeddedPrivateSpeedBenchmarksWithNetwork(ctx context.Context, limit int, network speedmodel.Network) (any, int, []privateSpeedBenchmark) {
+	return runPrivateSpeedBenchmarksWithLoaderAndNetwork(ctx, limit, func(context.Context, speedmodel.Network) (privatepst.RegistryLoadResult, error) {
+		return privatepst.LoadEmbeddedServerList()
+	}, network)
+}
+
+func runInternationalPrivateSpeedBenchmarksWithNetwork(ctx context.Context, limit int, network speedmodel.Network) (any, int, []privateSpeedBenchmark) {
+	return runPrivateSpeedBenchmarksWithLoaderAndNetwork(ctx, limit, func(ctx context.Context, network speedmodel.Network) (privatepst.RegistryLoadResult, error) {
+		loaded, err := privatepst.LoadServerListWithMetadataContextWithNetwork(ctx, privateSpeedNetwork(network))
+		return filterInternationalPrivateRegistry(loaded), err
+	}, network)
+}
+
+func runEmbeddedInternationalPrivateSpeedBenchmarksWithNetwork(ctx context.Context, limit int, network speedmodel.Network) (any, int, []privateSpeedBenchmark) {
+	return runPrivateSpeedBenchmarksWithLoaderAndNetwork(ctx, limit, func(context.Context, speedmodel.Network) (privatepst.RegistryLoadResult, error) {
 		loaded, err := privatepst.LoadEmbeddedServerList()
 		return filterInternationalPrivateRegistry(loaded), err
-	})
+	}, network)
 }
 
 func filterInternationalPrivateRegistry(loaded privatepst.RegistryLoadResult) privatepst.RegistryLoadResult {
@@ -92,24 +115,42 @@ func filterInternationalPrivateRegistry(loaded privatepst.RegistryLoadResult) pr
 }
 
 func runPrivateSpeedBenchmarksWithLoader(ctx context.Context, limit int, loader func(context.Context) (privatepst.RegistryLoadResult, error)) (any, int, []privateSpeedBenchmark) {
+	return runPrivateSpeedBenchmarksWithLoaderAndNetwork(ctx, limit, func(ctx context.Context, _ speedmodel.Network) (privatepst.RegistryLoadResult, error) {
+		return loader(ctx)
+	}, speedmodel.NetworkAuto)
+}
+
+func runPrivateSpeedBenchmarksWithLoaderAndNetwork(ctx context.Context, limit int, loader func(context.Context, speedmodel.Network) (privatepst.RegistryLoadResult, error), network speedmodel.Network) (any, int, []privateSpeedBenchmark) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 	if limit <= 0 {
 		limit = 2
 	}
-	loaded, err := loader(ctx)
+	loaded, err := loader(ctx, network)
 	if err != nil {
 		return privatepst.RegistryReport{
 			SchemaVersion: "privatespeedtest.registry/v1", Fallback: true,
 			Availability: privatepst.ServerUnavailable, Servers: []privatepst.RegistryNode{}, Error: err.Error(),
 		}, 0, nil
 	}
-	registry := privatepst.ResolveLoadedServerRegistry(ctx, loaded, limit, 2*time.Second, nil)
+	privateNetwork := privateSpeedNetwork(network)
+	registry := privatepst.ResolveLoadedServerRegistryWithNetwork(ctx, loaded, limit, 2*time.Second, nil, privateNetwork)
 	selected, benchmarks := runPrivateSpeedBenchmarksFromRegistry(ctx, limit, registry, func(ctx context.Context, node privatepst.RegistryNode, latencyInfo *privatepst.ServerWithLatencyInfo) privatepst.SpeedTestResult {
-		return privatepst.RunSpeedTestContext(ctx, node.Server, false, false, 4, 5*time.Second, latencyInfo, false)
+		return privatepst.RunSpeedTestContextWithNetwork(ctx, node.Server, false, false, 4, 5*time.Second, latencyInfo, false, privateNetwork)
 	})
 	return registry, selected, benchmarks
+}
+
+func privateSpeedNetwork(network speedmodel.Network) privatepst.Network {
+	switch network {
+	case speedmodel.NetworkIPv4:
+		return privatepst.NetworkIPv4
+	case speedmodel.NetworkIPv6:
+		return privatepst.NetworkIPv6
+	default:
+		return privatepst.NetworkAuto
+	}
 }
 
 type privateSpeedTestFunc func(context.Context, privatepst.RegistryNode, *privatepst.ServerWithLatencyInfo) privatepst.SpeedTestResult

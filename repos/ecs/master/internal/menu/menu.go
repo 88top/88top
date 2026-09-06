@@ -51,7 +51,7 @@ func GetMenuChoice(language string) string {
 		if re.MatchString(input) {
 			inChoice := input
 			switch inChoice {
-			case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10":
+			case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11":
 				return inChoice
 			default:
 				if language == "zh" {
@@ -125,16 +125,17 @@ func PrintMenuOptions(preCheck utils.NetCheckResult, config *params.Config) {
 			}
 			fmt.Printf("使用统计: %s\n", statsInfo)
 		}
-		fmt.Println("1. 融合怪完全体(能测全测)")
-		fmt.Println("2. 极简版(系统信息+CPU+内存+磁盘+测速节点5个)")
-		fmt.Println("3. 精简版(系统信息+CPU+内存+磁盘+跨国平台解锁+路由+TCP握手+测速节点5个)")
-		fmt.Println("4. 精简网络版(系统信息+CPU+内存+磁盘+回程+路由+TCP握手+测速节点5个)")
-		fmt.Println("5. 精简解锁版(系统信息+CPU+内存+磁盘IO+跨国平台解锁+测速节点5个)")
-		fmt.Println("6. 网络单项(IP质量检测+上游及三网回程+广州三网回程详细路由+全国延迟+TCP握手+TGDC+网站延迟+测速节点11个)")
-		fmt.Println("7. 解锁单项(跨国平台解锁)")
-		fmt.Println("8. 硬件单项(系统信息+CPU+dd磁盘测试+fio磁盘测试)")
-		fmt.Println("9. IP质量检测(15个数据库的IP质量检测+邮件端口检测)")
-		fmt.Println("10. 三网回程线路检测+三网回程详细路由(北京上海广州成都)+全国延迟+TCP握手+TGDC+网站延迟")
+		fmt.Println("1. 融合怪完全体(能测全测，性能检测顺序检测，其余项目并发，适合精确测试需求)")
+		fmt.Println("2. 融合怪并发完全态(能测全测，但仅限性能强劲时使用，最短耗时但性能测试不精确)")
+		fmt.Println("3. 极简版(系统信息+CPU+内存+磁盘+测速节点4个)")
+		fmt.Println("4. 精简版(系统信息+CPU+内存+磁盘+跨国平台解锁+路由+TCP握手+测速节点4个)")
+		fmt.Println("5. 精简网络版(系统信息+CPU+内存+磁盘+回程+路由+TCP握手+测速节点4个)")
+		fmt.Println("6. 精简解锁版(系统信息+CPU+内存+磁盘IO+跨国平台解锁+测速节点4个)")
+		fmt.Println("7. 网络单项(IP质量检测+上游及三网回程+广州三网回程详细路由+全国延迟+TCP握手+TGDC+网站延迟+测速节点4个)")
+		fmt.Println("8. 解锁单项(跨国平台解锁)")
+		fmt.Println("9. 硬件单项(系统信息+CPU+dd磁盘测试+fio磁盘测试)")
+		fmt.Println("10. IP质量检测(15个数据库的IP质量检测+邮件端口检测)")
+		fmt.Println("11. 三网回程线路检测+三网回程详细路由(北京上海广州成都)+全国延迟+TCP握手+TGDC+网站延迟")
 		fmt.Println("0. 退出程序")
 	case "en":
 		fmt.Printf("VPS Fusion Monster Test Version: %s\n", config.EcsVersion)
@@ -145,16 +146,17 @@ func PrintMenuOptions(preCheck utils.NetCheckResult, config *params.Config) {
 			}
 			fmt.Printf("%s\n", statsInfo)
 		}
-		fmt.Println("1. VPS Fusion Monster Test (Full Test)")
-		fmt.Println("2. Minimal Test Suite (System Info + CPU + Memory + Disk + 5 Speed Test Nodes)")
-		fmt.Println("3. Standard Test Suite (System Info + CPU + Memory + Disk + International Platform Unlock + Routing + TCP Handshake + 5 Speed Test Nodes)")
-		fmt.Println("4. Network-Focused Test Suite (System Info + CPU + Memory + Disk + Backtrace + Routing + TCP Handshake + 5 Speed Test Nodes)")
-		fmt.Println("5. Unlock-Focused Test Suite (System Info + CPU + Memory + Disk IO + International Platform Unlock + 5 Speed Test Nodes)")
-		fmt.Println("6. Network-Only Test (IP Quality Test + Upstream & 3-Network Backtrace + Guangzhou 3-Network Detailed Routing + National Latency + TCP Handshake + TGDC + Websites + 11 Speed Test Nodes)")
-		fmt.Println("7. Unlock-Only Test (International Platform Unlock)")
-		fmt.Println("8. Hardware-Only Test (System Info + CPU + Memory + dd Disk Test + fio Disk Test)")
-		fmt.Println("9. IP Quality Test (IP Test with 15 Databases + Email Port Test)")
-		fmt.Println("10. 3-Network Backtrace + Detailed Routes (Beijing/Shanghai/Guangzhou/Chengdu) + National Latency + TCP Handshake + TGDC + Websites")
+		fmt.Println("1. Full Suite (Sequential Performance Tests, Concurrent Remaining Tests)")
+		fmt.Println("2. Full Concurrent Suite (Fastest, Performance Measurements Are Not Precise)")
+		fmt.Println("3. Minimal Test Suite (System Info + CPU + Memory + Disk + 5 Speed Test Nodes)")
+		fmt.Println("4. Standard Test Suite (System Info + CPU + Memory + Disk + International Platform Unlock + Routing + TCP Handshake + 5 Speed Test Nodes)")
+		fmt.Println("5. Network-Focused Test Suite (System Info + CPU + Memory + Disk + Backtrace + Routing + TCP Handshake + 5 Speed Test Nodes)")
+		fmt.Println("6. Unlock-Focused Test Suite (System Info + CPU + Memory + Disk IO + International Platform Unlock + 5 Speed Test Nodes)")
+		fmt.Println("7. Network-Only Test (IP Quality Test + Upstream & 3-Network Backtrace + Guangzhou 3-Network Detailed Routing + National Latency + TCP Handshake + TGDC + Websites + 11 Speed Test Nodes)")
+		fmt.Println("8. Unlock-Only Test (International Platform Unlock)")
+		fmt.Println("9. Hardware-Only Test (System Info + CPU + Memory + dd Disk Test + fio Disk Test)")
+		fmt.Println("10. IP Quality Test (IP Test with 15 Databases + Email Port Test)")
+		fmt.Println("11. 3-Network Backtrace + Detailed Routes (Beijing/Shanghai/Guangzhou/Chengdu) + National Latency + TCP Handshake + TGDC + Websites")
 		fmt.Println("0. Exit Program")
 	}
 }
@@ -201,29 +203,31 @@ func applyMenuResult(preCheck utils.NetCheckResult, config *params.Config, resul
 	case "1":
 		SetFullTestStatus(preCheck, config)
 	case "2":
-		SetMinimalTestStatus(preCheck, config)
+		SetFullConcurrentTestStatus(preCheck, config)
 	case "3":
-		SetStandardTestStatus(preCheck, config)
+		SetMinimalTestStatus(preCheck, config)
 	case "4":
-		SetNetworkFocusedTestStatus(preCheck, config)
+		SetStandardTestStatus(preCheck, config)
 	case "5":
-		SetUnlockFocusedTestStatus(preCheck, config)
+		SetNetworkFocusedTestStatus(preCheck, config)
 	case "6":
-		SetNetworkOnlyTestStatus(config)
+		SetUnlockFocusedTestStatus(preCheck, config)
 	case "7":
-		SetUnlockOnlyTestStatus(config)
+		SetNetworkOnlyTestStatus(config)
 	case "8":
-		SetHardwareOnlyTestStatus(preCheck, config)
+		SetUnlockOnlyTestStatus(config)
 	case "9":
-		SetIPQualityTestStatus(config)
+		SetHardwareOnlyTestStatus(preCheck, config)
 	case "10":
+		SetIPQualityTestStatus(config)
+	case "11":
 		config.Nt3Location = "ALL"
 		SetRouteTestStatus(config)
 	}
 	config.RestoreUserSetParams(savedParams)
 	config.AnalyzeResult = result.mainAnalyze
 	config.EnableUpload = result.mainUpload
-	if result.choice == "1" && config.SpeedTestStatus {
+	if (result.choice == "1" || result.choice == "2") && config.SpeedTestStatus {
 		config.OnlyChinaTest = utils.CheckChina(config.EnableLogger, config.Language)
 	}
 	config.ValidateParams()
@@ -243,6 +247,12 @@ func HandleMenuMode(preCheck utils.NetCheckResult, config *params.Config) {
 // SetFullTestStatus enables all tests
 func SetFullTestStatus(preCheck utils.NetCheckResult, config *params.Config) {
 	config.ApplyFullTestPreset(preCheck.Connected)
+}
+
+// SetFullConcurrentTestStatus enables the complete coverage without option
+// one's measurement-protection barriers.
+func SetFullConcurrentTestStatus(preCheck utils.NetCheckResult, config *params.Config) {
+	config.ApplyFullConcurrentTestPreset(preCheck.Connected)
 }
 
 // SetMinimalTestStatus sets minimal test configuration

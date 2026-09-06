@@ -172,6 +172,16 @@ func (c *Config) ApplyFullTestPreset(connected bool) {
 	c.WebTestStatus = connected
 }
 
+// ApplyFullConcurrentTestPreset configures menu option 2. It enables the same
+// complete coverage as option 1, while the runner deliberately removes the
+// hardware and network scheduling barriers for shortest elapsed time.
+func (c *Config) ApplyFullConcurrentTestPreset(connected bool) {
+	c.ApplyFullTestPreset(connected)
+	if c != nil {
+		c.Choice = "2"
+	}
+}
+
 // normalizeBoolArgs preprocesses args so that bool flags written as
 // "-flag true" or "-flag false" (space-separated) are converted to
 // "-flag=true" / "-flag=false" that the standard flag package understands.
@@ -577,7 +587,7 @@ func (c *Config) RestoreUserSetParams(saved map[string]interface{}) {
 		}
 	}
 	if val, ok := saved["nt3loc"]; ok {
-		if c.Choice != "10" {
+		if c.Choice != "11" {
 			if strVal, ok := val.(string); ok {
 				c.Nt3Location = strVal
 			}

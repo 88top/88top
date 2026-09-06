@@ -30,6 +30,14 @@ func WithFullTestPreset(connected bool) ConfigOption {
 	}
 }
 
+// WithFullConcurrentTestPreset applies menu option 2, which runs the complete
+// suite without performance-protection scheduling barriers.
+func WithFullConcurrentTestPreset(connected bool) ConfigOption {
+	return func(c *Config) {
+		c.ApplyFullConcurrentTestPreset(connected)
+	}
+}
+
 // WithLanguage 设置语言
 func WithLanguage(lang string) ConfigOption {
 	return func(c *Config) {

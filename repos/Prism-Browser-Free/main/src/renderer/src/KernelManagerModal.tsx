@@ -1,5 +1,6 @@
-import { CheckCircleFilled, DeleteOutlined, FolderOpenOutlined, ReloadOutlined, SafetyCertificateOutlined } from '@ant-design/icons'
-import { Alert, Button, List, Modal, Popconfirm, Space, Spin, Tag, Typography, message } from 'antd'
+import { CheckCircleFilled, DeleteOutlined, DownOutlined, FolderOpenOutlined, ReloadOutlined, RollbackOutlined, SafetyCertificateOutlined } from '@ant-design/icons'
+import { Alert, Button, Dropdown, List, Modal, Popconfirm, Space, Spin, Tag, Typography, message } from 'antd'
+import type { MenuProps } from 'antd'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { EngineStatus, KernelHealth, KernelRelease } from '../../shared/types'
 
@@ -103,6 +104,17 @@ export function KernelManagerModal({ open, engine, onClose, onEngineChanged }: K
       messageApi.error(errorText(error))
     }
   }
+  
+  function confirmRollback(): void {
+    Modal.confirm({
+      title: '回滚到上一个健康内核？',
+      content: '请先关闭全部浏览器环境。',
+      okText: '回滚',
+      cancelText: '取消',
+      okButtonProps: { danger: true },
+      onOk: () => rollback()
+    })
+  }
 
   async function importLocal(): Promise<void> {
     try {
@@ -143,6 +155,16 @@ export function KernelManagerModal({ open, engine, onClose, onEngineChanged }: K
     }
   }
 
+  const kernelMenuItems: MenuProps['items'] = [
+    { key: 'refresh', icon: <ReloadOutlined />, label: '刷新列表', onClick: () => void refresh() },
+    ...(rollbackAvailable
+      ? [
+          { type: 'divider' as const },
+          { key: 'rollback', icon: <RollbackOutlined />, label: '回滚内核', danger: true, onClick: () => confirmRollback() }
+        ]
+      : [])
+  ]
+  
   return (
     <Modal open={open} title="浏览器内核" width={760} footer={null} onCancel={onClose} destroyOnHidden>
       {contextHolder}
@@ -163,16 +185,11 @@ export function KernelManagerModal({ open, engine, onClose, onEngineChanged }: K
           <Button type="primary" icon={<FolderOpenOutlined />} onClick={() => void importLocal()}>导入本地构建</Button>
           <Button onClick={() => void selectManual()}>外部路径</Button>
           <Button onClick={() => void useSystem()}>系统兼容模式</Button>
-          {rollbackAvailable && (
-            <Popconfirm
-              title="回滚到上一个健康内核？"
-              description="请先关闭全部浏览器环境。"
-              onConfirm={() => rollback()}
-            >
-              <Button danger>回滚上一个</Button>
-            </Popconfirm>
-          )}
-          <Button icon={<ReloadOutlined />} loading={loading} onClick={() => void refresh()}>刷新</Button>
+          <Dropdown menu={{ items: kernelMenuItems }} trigger={['click', 'hover']} disabled={loading} placement="bottomRight">
+            <Button icon={<ReloadOutlined />}>
+              刷新 <DownOutlined />
+            </Button>
+          </Dropdown>
         </Space>
       </div>
 

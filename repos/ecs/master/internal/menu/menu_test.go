@@ -37,7 +37,7 @@ func TestApplyMenuResultQuickOptionsSurviveSavedParamsRestore(t *testing.T) {
 	saved := cfg.SaveUserSetParams()
 
 	applyMenuResult(utils.NetCheckResult{}, cfg, tuiResult{
-		choice:      "2",
+		choice:      "3",
 		language:    "zh",
 		mainAnalyze: false,
 		mainUpload:  false,
@@ -107,14 +107,15 @@ func TestTCPProbePresetDefaults(t *testing.T) {
 	}{
 		{choice: "1", want: false},
 		{choice: "2", want: false},
-		{choice: "3", want: true},
+		{choice: "3", want: false},
 		{choice: "4", want: true},
-		{choice: "5", want: false},
-		{choice: "6", want: true},
-		{choice: "7", want: false},
+		{choice: "5", want: true},
+		{choice: "6", want: false},
+		{choice: "7", want: true},
 		{choice: "8", want: false},
 		{choice: "9", want: false},
-		{choice: "10", want: true},
+		{choice: "10", want: false},
+		{choice: "11", want: true},
 	}
 	for _, test := range tests {
 		t.Run(test.choice, func(t *testing.T) {
@@ -134,7 +135,7 @@ func TestNetworkPresetRespectsExplicitTCPDisable(t *testing.T) {
 	cfg.ParseFlags([]string{"-tcp=false"})
 	saved := cfg.SaveUserSetParams()
 	applyMenuResult(utils.NetCheckResult{Connected: true}, cfg, tuiResult{
-		choice: "6", language: "zh", mainUpload: cfg.EnableUpload,
+		choice: "7", language: "zh", mainUpload: cfg.EnableUpload,
 	}, saved)
 	if cfg.TCPProbeStatus {
 		t.Fatal("explicit -tcp=false should override the network preset")

@@ -3,6 +3,7 @@
 package tests
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"runtime"
@@ -22,25 +23,35 @@ func ShowHead(language string) {
 }
 
 func NearbySP() {
+	NearbySPWithNetwork("")
+}
+
+func NearbySPWithNetwork(network string) {
 	defer func() {
 		if recover() != nil {
 			fmt.Fprintln(os.Stderr, "[WARN] nearby speedtest unavailable")
 		}
 	}()
+	network = normalizeSpeedNetwork(network)
 	if runtime.GOOS == "windows" || sp.OfficialAvailableTest() != nil {
-		sp.NearbySpeedTest()
+		sp.NearbySpeedTestWithNetwork(network)
 		return
 	}
-	sp.OfficialNearbySpeedTest()
+	sp.OfficialNearbySpeedTestWithNetwork(network)
 }
 
 // CustomSP keeps public builds on the established public speedtest sources.
 func CustomSP(platform, operator string, num int, language string) {
+	CustomSPWithNetwork(platform, operator, num, language, "")
+}
+
+func CustomSPWithNetwork(platform, operator string, num int, language, network string) {
 	defer func() {
 		if recover() != nil {
 			fmt.Fprintln(os.Stderr, "[WARN] custom speedtest unavailable")
 		}
 	}()
+	network = normalizeSpeedNetwork(network)
 
 	var url, parseType string
 	switch strings.ToLower(platform) {
@@ -84,8 +95,20 @@ func CustomSP(platform, operator string, num int, language string) {
 		parseType = "id"
 	}
 	if runtime.GOOS == "windows" || sp.OfficialAvailableTest() != nil {
-		sp.CustomSpeedTest(url, parseType, num, language)
+		sp.CustomSpeedTestWithNetwork(url, parseType, num, language, network)
 		return
 	}
-	sp.OfficialCustomSpeedTest(url, parseType, num, language)
+	sp.OfficialCustomSpeedTestWithNetwork(url, parseType, num, language, network)
+}
+
+// PrivateSpeedPreloads is a no-op compatibility type for ecs_public builds,
+// which intentionally do not link the managed private speed registry.
+type PrivateSpeedPreloads struct{}
+
+func StartPrivateSpeedPreloads(context.Context, []string, string) *PrivateSpeedPreloads {
+	return &PrivateSpeedPreloads{}
+}
+
+func CustomSPWithNetworkAndPreloads(_ context.Context, platform, operator string, num int, language, network string, _ *PrivateSpeedPreloads) {
+	CustomSPWithNetwork(platform, operator, num, language, network)
 }

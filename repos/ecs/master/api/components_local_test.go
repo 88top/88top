@@ -772,6 +772,82 @@ func TestStructuredPlanHonorsBarriersConcurrencyOrderAndSpeedIsolation(t *testin
 	}
 }
 
+func TestStructuredFullConcurrentPlanStartsAllStagesAndPreservesOrder(t *testing.T) {
+	started := make(chan string, 4)
+	releases := map[string]chan struct{}{
+		"basics":   make(chan struct{}),
+		"hardware": make(chan struct{}),
+		"network":  make(chan struct{}),
+		"speed":    make(chan struct{}),
+	}
+	stage := func(name string, reports []ComponentReport) func(context.Context) []ComponentReport {
+		return func(context.Context) []ComponentReport {
+			started <- name
+			<-releases[name]
+			return reports
+		}
+	}
+	task := func(name string, reports []ComponentReport) structuredComponentTask {
+		return structuredComponentTask{section: name, run: func(context.Context) structuredTaskResult {
+			started <- name
+			<-releases[name]
+			return structuredTaskResult{components: reports}
+		}}
+	}
+	plan := structuredCollectionPlan{
+		fullConcurrent: true,
+		basics:         stage("basics", []ComponentReport{{Name: "basics", Status: ReportStatusOK}}),
+		hardware:       stage("hardware", []ComponentReport{{Name: "cputest", Status: ReportStatusOK}}),
+		concurrent: []structuredComponentTask{
+			task("network", []ComponentReport{{Name: "ping.icmp", Status: ReportStatusOK}}),
+		},
+		speed: func() *structuredComponentTask {
+			task := task("speed", []ComponentReport{{Name: "speed.registry", Status: ReportStatusOK}})
+			return &task
+		}(),
+	}
+	type collectionResult struct {
+		components []ComponentReport
+		tcp        []TCPReport
+	}
+	done := make(chan collectionResult, 1)
+	go func() {
+		components, tcp := runStructuredCollectionPlan(context.Background(), plan)
+		done <- collectionResult{components: components, tcp: tcp}
+	}()
+
+	seen := make(map[string]bool, 4)
+	for range 4 {
+		select {
+		case name := <-started:
+			seen[name] = true
+		case <-time.After(time.Second):
+			t.Fatalf("full-concurrent plan did not start every stage: %v", seen)
+		}
+	}
+	for _, name := range []string{"basics", "hardware", "network", "speed"} {
+		if !seen[name] {
+			t.Fatalf("full-concurrent stage %q did not start: %v", name, seen)
+		}
+	}
+	for _, name := range []string{"speed", "network", "hardware", "basics"} {
+		close(releases[name])
+	}
+	var result collectionResult
+	select {
+	case result = <-done:
+	case <-time.After(time.Second):
+		t.Fatal("full-concurrent plan did not complete")
+	}
+	gotNames := make([]string, 0, len(result.components))
+	for _, component := range result.components {
+		gotNames = append(gotNames, component.Name)
+	}
+	if got, want := strings.Join(gotNames, ","), "basics,cputest,ping.icmp,speed.registry"; got != want {
+		t.Fatalf("full-concurrent component order = %q, want %q", got, want)
+	}
+}
+
 func TestStructuredNetworkTaskOrderMatchesDisplayedSections(t *testing.T) {
 	tasks := []structuredComponentTask{
 		{section: "routes"}, {section: "ping"}, {section: "media"}, {section: "tcp"},

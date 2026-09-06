@@ -102,18 +102,31 @@ jobs:
         
     - name: Remove security package references
       if: steps.release.outputs.publish == 'true'
-      env:
-        GOFLAGS: "-mod=mod -tags=ecs_public"
       run: |
         set -euo pipefail
         python3 .back/create_public_branch.py
+        go mod tidy
         go clean -cache -testcache -fuzzcache
-        if grep -n -E 'github\.com/oneclickvirt/(security|privatespeedtest)' go.mod; then
-          echo "Public go.mod still requires private modules" >&2
+        for artifact in .back/create_public_branch.py .github/workflows/build_binary.yaml .github/workflows/build_public.yml; do
+          if [ -e "$artifact" ]; then
+            echo "Public branch retained private delivery artifact: $artifact" >&2
+            exit 1
+          fi
+        done
+        if grep -n -E 'github\.com/oneclickvirt/(security|privatespeedtest)' go.mod go.sum; then
+          echo "Public module metadata still references private modules" >&2
+          exit 1
+        fi
+        if git grep -n -E 'github\.com/oneclickvirt/(security|privatespeedtest)(/|["`]|$)' -- .; then
+          echo "Public delivery tree still references private modules" >&2
           exit 1
         fi
         if go list -deps ./... | grep -E '^github\.com/oneclickvirt/(security|privatespeedtest)(/|$)'; then
-          echo "Public build dependency graph still loads private modules" >&2
+          echo "Default public build dependency graph still loads private modules" >&2
+          exit 1
+        fi
+        if go list -tags=ecs_public -deps ./... | grep -E '^github\.com/oneclickvirt/(security|privatespeedtest)(/|$)'; then
+          echo "Tagged public build dependency graph still loads private modules" >&2
           exit 1
         fi
         python3 - <<'PY'
@@ -125,6 +138,10 @@ jobs:
             r"私有(?:国内|三网)?测速(?:节点)?|私有节点|プライベート回線キャリア",
             re.IGNORECASE,
         )
+        stale_security = re.compile(
+            r"securitycheck|Enable/Disable security test \(default true\)",
+            re.IGNORECASE,
+        )
         matches = []
         for path in Path(".").rglob("*"):
             if path.suffix.lower() not in {".md", ".mdx"}:
@@ -132,15 +149,13 @@ jobs:
             if any(part in {".git", "vendor", ".cache", ".tmp"} for part in path.parts):
                 continue
             text = path.read_text(encoding="utf-8")
-            if restricted.search(text):
+            if restricted.search(text) or stale_security.search(text):
                 matches.append(str(path))
         if matches:
-            raise SystemExit("Public Markdown contains restricted speed-test details: " + ", ".join(matches))
+            raise SystemExit("Public Markdown contains private or stale feature details: " + ", ".join(matches))
         PY
     - name: Build and Test
       if: steps.release.outputs.publish == 'true'
-      env:
-        GOFLAGS: "-mod=mod -tags=ecs_public"
       run: |
         set -euo pipefail
         go test ./...
@@ -173,6 +188,9 @@ jobs:
         if any(marker in encoded for marker in ("privatespeedtest", "dnsbl-zones", "openspeedtest-servers")):
             raise SystemExit("public canary exposed private registry details")
         PY
+        go test -tags=ecs_public ./...
+        go build -tags=ecs_public -ldflags="-checklinkname=0" -o maintest-ecs-public
+        ./maintest-ecs-public -h >/dev/null
         rm -f maintest public-canary.json
         
     - name: Commit and push changes

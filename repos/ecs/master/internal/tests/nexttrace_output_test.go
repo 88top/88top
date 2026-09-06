@@ -16,10 +16,10 @@ func TestFormatNextTraceOutputSeparatesStopReasonAndNextHeader(t *testing.T) {
 	}
 
 	got := formatNextTraceOutput(lines)
-	if !strings.Contains(got, "ICMP Echo Reply)\n") {
-		t.Fatalf("stop reason was not terminated: %q", got)
+	if strings.Contains(got, "Trace Stopped: Destination Reached") {
+		t.Fatalf("destination-reached stop line should be filtered: %q", got)
 	}
-	if strings.Contains(got, "ICMP Echo Reply)广州移动") {
+	if strings.Contains(got, "hop广州移动") {
 		t.Fatalf("next carrier header was concatenated: %q", got)
 	}
 	if !strings.Contains(got, "广州移动 - ICMP v4 -\x1b[0mtraceroute to 120.196.165.24") {

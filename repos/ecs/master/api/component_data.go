@@ -36,14 +36,22 @@ type componentDataResult struct {
 // loadComponentData asks each component for its own validated registry. A
 // failed registry is isolated to its owner so unrelated probes still run.
 func loadComponentData(ctx context.Context, offline bool) (componentInputs, []DataFileVersion, *DataVersion, error) {
+	return loadComponentDataWithSpeedNetwork(ctx, offline, speedmodel.NetworkAuto)
+}
+
+func loadComponentDataWithSpeedNetwork(ctx context.Context, offline bool, network speedmodel.Network) (componentInputs, []DataFileVersion, *DataVersion, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 	loaders := []func(context.Context, bool) componentDataResult{
 		loadTCPComponentData,
 		loadProvinceComponentData,
-		loadSpeedComponentData,
-		loadPrivateSpeedComponentData,
+		func(loadCtx context.Context, loadOffline bool) componentDataResult {
+			return loadSpeedComponentDataWithNetwork(loadCtx, loadOffline, network)
+		},
+		func(loadCtx context.Context, loadOffline bool) componentDataResult {
+			return loadPrivateSpeedComponentDataWithNetwork(loadCtx, loadOffline, network)
+		},
 		loadTransferComponentData,
 		loadSecurityComponentData,
 		loadASNComponentData,
@@ -58,7 +66,7 @@ func loadComponentData(ctx context.Context, offline bool) (componentInputs, []Da
 		}(loader)
 	}
 
-	var inputs componentInputs
+	inputs := componentInputs{SpeedNetwork: network}
 	files := make([]DataFileVersion, 0, len(loaders))
 	var primary *DataVersion
 	var loadErr error
@@ -119,11 +127,15 @@ func loadProvinceComponentData(ctx context.Context, offline bool) componentDataR
 }
 
 func loadSpeedComponentData(ctx context.Context, offline bool) componentDataResult {
+	return loadSpeedComponentDataWithNetwork(ctx, offline, speedmodel.NetworkAuto)
+}
+
+func loadSpeedComponentDataWithNetwork(ctx context.Context, offline bool, network speedmodel.Network) componentDataResult {
 	sources := speedmodel.DefaultRegistrySources()
 	if offline {
 		sources = nil
 	}
-	loaded, err := speedmodel.LoadServerRegistry(ctx, nil, sources, 10)
+	loaded, err := speedmodel.LoadServerRegistryWithNetwork(ctx, nil, sources, 10, network)
 	if err != nil {
 		return failedComponentData(ctx, speedDataFile, err)
 	}

@@ -62,6 +62,9 @@ type structuredCollectionPlan struct {
 	hardware   func(context.Context) []ComponentReport
 	concurrent []structuredComponentTask
 	speed      *structuredComponentTask
+	// fullConcurrent is menu option 2. It starts every enabled stage before
+	// waiting for a result, while retaining option one's component order.
+	fullConcurrent bool
 }
 
 func sortStructuredNetworkTasks(tasks []structuredComponentTask) {
@@ -83,6 +86,9 @@ func sortStructuredNetworkTasks(tasks []structuredComponentTask) {
 }
 
 func runStructuredCollectionPlan(ctx context.Context, plan structuredCollectionPlan) ([]ComponentReport, []TCPReport) {
+	if plan.fullConcurrent {
+		return runFullyConcurrentStructuredCollectionPlan(ctx, plan)
+	}
 	components := make([]ComponentReport, 0, 12)
 	if plan.basics != nil {
 		components = append(components, plan.basics(ctx)...)
@@ -108,6 +114,131 @@ func runStructuredCollectionPlan(ctx context.Context, plan structuredCollectionP
 		components = append(components, result.components...)
 	}
 	return components, tcp
+}
+
+// runFullyConcurrentStructuredCollectionPlan starts all enabled stages before
+// collecting anything. This is intentionally limited to option 2: concurrent
+// hardware and network throughput can distort benchmark values. Results are
+// still joined in the same component order as the accurate full-suite path.
+func runFullyConcurrentStructuredCollectionPlan(ctx context.Context, plan structuredCollectionPlan) ([]ComponentReport, []TCPReport) {
+	basicsDone := startStructuredComponentStage(ctx, "basics", plan.basics)
+	hardwareDone := startStructuredComponentStage(ctx, "hardware", plan.hardware)
+	networkDone := startStructuredConcurrentTaskBatch(ctx, plan.concurrent)
+	speedDone := startStructuredTaskStage(ctx, plan.speed)
+
+	components := make([]ComponentReport, 0, 12)
+	if reports, complete := waitStructuredComponentStage(ctx, basicsDone); complete {
+		components = append(components, reports...)
+	} else {
+		return components, nil
+	}
+	if reports, complete := waitStructuredComponentStage(ctx, hardwareDone); complete {
+		components = append(components, reports...)
+	} else {
+		return components, nil
+	}
+
+	var tcp []TCPReport
+	if results, complete := waitStructuredTaskBatch(ctx, networkDone); complete {
+		for _, result := range results {
+			components = append(components, result.components...)
+			if result.tcp != nil {
+				tcp = result.tcp
+			}
+		}
+	} else {
+		return components, tcp
+	}
+	if result, complete := waitStructuredTaskStage(ctx, speedDone); complete {
+		components = append(components, result.components...)
+	}
+	return components, tcp
+}
+
+func startStructuredComponentStage(ctx context.Context, section string, run func(context.Context) []ComponentReport) <-chan []ComponentReport {
+	if run == nil {
+		return nil
+	}
+	result := make(chan []ComponentReport, 1)
+	go func() {
+		reports := []ComponentReport(nil)
+		defer func() {
+			if recover() != nil {
+				reports = []ComponentReport{{Name: section, Status: ReportStatusError, Reason: section + " component panic"}}
+			}
+			result <- reports
+			close(result)
+		}()
+		reports = run(ctx)
+	}()
+	return result
+}
+
+func startStructuredConcurrentTaskBatch(ctx context.Context, tasks []structuredComponentTask) <-chan []structuredTaskResult {
+	if len(tasks) == 0 {
+		return nil
+	}
+	result := make(chan []structuredTaskResult, 1)
+	go func() {
+		result <- runStructuredConcurrentTasks(ctx, tasks)
+		close(result)
+	}()
+	return result
+}
+
+func startStructuredTaskStage(ctx context.Context, task *structuredComponentTask) <-chan structuredTaskResult {
+	if task == nil {
+		return nil
+	}
+	result := make(chan structuredTaskResult, 1)
+	progressStarted(ctx, task.section)
+	go func() {
+		value := runStructuredTask(ctx, *task)
+		status, reason := structuredTaskResultStatus(value)
+		if contextStatus, done := contextProgressStatus(ctx); done {
+			status, reason = contextStatus, ctx.Err().Error()
+		}
+		progressCompleted(ctx, task.section, status, reason)
+		result <- value
+		close(result)
+	}()
+	return result
+}
+
+func waitStructuredComponentStage(ctx context.Context, result <-chan []ComponentReport) ([]ComponentReport, bool) {
+	if result == nil {
+		return nil, true
+	}
+	select {
+	case reports := <-result:
+		return reports, true
+	case <-ctx.Done():
+		return nil, false
+	}
+}
+
+func waitStructuredTaskBatch(ctx context.Context, result <-chan []structuredTaskResult) ([]structuredTaskResult, bool) {
+	if result == nil {
+		return nil, true
+	}
+	select {
+	case reports := <-result:
+		return reports, true
+	case <-ctx.Done():
+		return nil, false
+	}
+}
+
+func waitStructuredTaskStage(ctx context.Context, result <-chan structuredTaskResult) (structuredTaskResult, bool) {
+	if result == nil {
+		return structuredTaskResult{}, true
+	}
+	select {
+	case report := <-result:
+		return report, true
+	case <-ctx.Done():
+		return structuredTaskResult{}, false
+	}
 }
 
 func runStructuredConcurrentTasks(ctx context.Context, tasks []structuredComponentTask) []structuredTaskResult {
@@ -192,6 +323,7 @@ func collectPublishedComponentReportsWithTCP(ctx context.Context, config *Config
 		config = NewDefaultConfig()
 	}
 	plan := structuredCollectionPlan{
+		fullConcurrent: config.Choice == "2",
 		basics: func(stageCtx context.Context) []ComponentReport {
 			if !config.BasicStatus {
 				return nil
@@ -324,8 +456,8 @@ func collectPublishedComponentReportsWithTCP(ctx context.Context, config *Config
 	if config.SpeedTestStatus && inputs.Network {
 		plan.speed = &structuredComponentTask{section: "speed", run: func(taskCtx context.Context) structuredTaskResult {
 			started := time.Now()
-			privateRunner := privateSpeedRunnerForConfig(config.Language, config.DataOffline)
-			report := withComponentDuration(collectSpeedComponentFromRegistryForLanguageWithDependencies(taskCtx, inputs.SpeedtestServers, inputs.TransferTargets, config.Language, config.SpNum, nil, nil, privateRunner), started)
+			privateRunner := privateSpeedRunnerForConfigWithNetwork(config.Language, config.DataOffline)
+			report := withComponentDuration(collectSpeedComponentFromRegistryForLanguageWithNetwork(taskCtx, inputs.SpeedtestServers, inputs.TransferTargets, config.Language, config.SpNum, inputs.SpeedNetwork, privateRunner), started)
 			return structuredTaskResult{components: []ComponentReport{report}}
 		}}
 	}
@@ -1543,6 +1675,8 @@ type privateSpeedBenchmark struct {
 
 type privateSpeedRunner func(context.Context, int) (any, int, []privateSpeedBenchmark)
 
+type privateSpeedRunnerWithNetwork func(context.Context, int, speedmodel.Network) (any, int, []privateSpeedBenchmark)
+
 func privateSpeedRunnerForConfig(language string, offline bool) privateSpeedRunner {
 	if language == "en" {
 		if offline {
@@ -1554,6 +1688,19 @@ func privateSpeedRunnerForConfig(language string, offline bool) privateSpeedRunn
 		return runEmbeddedPrivateSpeedBenchmarks
 	}
 	return runPrivateSpeedBenchmarks
+}
+
+func privateSpeedRunnerForConfigWithNetwork(language string, offline bool) privateSpeedRunnerWithNetwork {
+	if language == "en" {
+		if offline {
+			return runEmbeddedInternationalPrivateSpeedBenchmarksWithNetwork
+		}
+		return runInternationalPrivateSpeedBenchmarksWithNetwork
+	}
+	if offline {
+		return runEmbeddedPrivateSpeedBenchmarksWithNetwork
+	}
+	return runPrivateSpeedBenchmarksWithNetwork
 }
 
 func isMainlandChinaCountry(country string) bool {
@@ -1602,10 +1749,27 @@ func collectSpeedComponentFromRegistryForLanguageWithDependencies(ctx context.Co
 	return collectSpeedComponentFromRegistryWithSelection(ctx, servers, transfers, limit, dial, throughput, privateRunner, international)
 }
 
+// collectSpeedComponentFromRegistryForLanguageWithNetwork is the production
+// structured-speed path. It pins registry candidates, probes, and throughput
+// to the same family selected from the host stack.
+func collectSpeedComponentFromRegistryForLanguageWithNetwork(ctx context.Context, servers []speedmodel.ServerMetadata, transfers []transferTargetInput, language string, limit int, network speedmodel.Network, privateRunner privateSpeedRunnerWithNetwork) ComponentReport {
+	international := strings.EqualFold(strings.TrimSpace(language), "en")
+	if international {
+		servers = internationalSpeedServers(servers)
+		transfers = internationalTransferTargets(transfers)
+	}
+	return collectSpeedComponentFromRegistryWithSelectionAndNetwork(ctx, servers, transfers, limit, nil, nil, nil, privateRunner, international, network)
+}
+
 func collectSpeedComponentFromRegistryWithSelection(ctx context.Context, servers []speedmodel.ServerMetadata, transfers []transferTargetInput, limit int, dial speedDialFunc, throughput speedmodel.ThroughputProbe, privateRunner privateSpeedRunner, representative bool) ComponentReport {
+	return collectSpeedComponentFromRegistryWithSelectionAndNetwork(ctx, servers, transfers, limit, dial, throughput, privateRunner, nil, representative, speedmodel.NetworkAuto)
+}
+
+func collectSpeedComponentFromRegistryWithSelectionAndNetwork(ctx context.Context, servers []speedmodel.ServerMetadata, transfers []transferTargetInput, limit int, dial speedDialFunc, throughput speedmodel.ThroughputProbe, privateRunner privateSpeedRunner, privateRunnerWithNetwork privateSpeedRunnerWithNetwork, representative bool, network speedmodel.Network) ComponentReport {
 	started := time.Now()
 	payload := speedComponentPayload{SchemaVersion: "goecs.speed/v1", Nodes: make([]speedNodeResult, 0, len(servers))}
-	for _, server := range servers {
+	probedServers := speedmodel.ProbeServersWithNetwork(ctx, servers, 2*time.Second, 8, speedmodel.ServerDialFunc(dial), network)
+	for _, server := range probedServers {
 		host := strings.TrimSpace(server.Host)
 		port := 0
 		if _, parsedPort, err := net.SplitHostPort(host); err == nil {
@@ -1634,7 +1798,7 @@ func collectSpeedComponentFromRegistryWithSelection(ctx context.Context, servers
 			Availability: availability,
 		})
 	}
-	return collectSpeedComponentFromNodes(ctx, payload, limit, dial, throughput, privateRunner, representative, started)
+	return collectSpeedComponentFromNodesWithNetwork(ctx, payload, limit, dial, throughput, privateRunner, privateRunnerWithNetwork, representative, started, network)
 }
 
 func collectSpeedComponentWithAllDependencies(ctx context.Context, speedtestData, openData []byte, limit int, dial speedDialFunc, throughput speedmodel.ThroughputProbe, privateRunner privateSpeedRunner) ComponentReport {
@@ -1679,7 +1843,11 @@ func collectSpeedComponentWithAllDependencies(ctx context.Context, speedtestData
 }
 
 func collectSpeedComponentFromNodes(ctx context.Context, payload speedComponentPayload, limit int, dial speedDialFunc, throughput speedmodel.ThroughputProbe, privateRunner privateSpeedRunner, representative bool, started time.Time) ComponentReport {
-	probeSpeedNodes(ctx, payload.Nodes, dial)
+	return collectSpeedComponentFromNodesWithNetwork(ctx, payload, limit, dial, throughput, privateRunner, nil, representative, started, speedmodel.NetworkAuto)
+}
+
+func collectSpeedComponentFromNodesWithNetwork(ctx context.Context, payload speedComponentPayload, limit int, dial speedDialFunc, throughput speedmodel.ThroughputProbe, privateRunner privateSpeedRunner, privateRunnerWithNetwork privateSpeedRunnerWithNetwork, representative bool, started time.Time, network speedmodel.Network) ComponentReport {
+	probeSpeedNodesWithNetwork(ctx, payload.Nodes, dial, network)
 	available := make([]speedNodeResult, 0, len(payload.Nodes))
 	for _, node := range payload.Nodes {
 		if node.Availability == "available" && node.Source == "speedtest" && strings.TrimSpace(node.URL) != "" {
@@ -1708,7 +1876,7 @@ func collectSpeedComponentFromNodes(ctx context.Context, payload speedComponentP
 			Provider: selected.Provider, Country: selected.Country, City: selected.City,
 		})
 	}
-	payload.Benchmarks = speedmodel.BenchmarkServers(ctx, benchmarkServers, len(benchmarkServers), throughput)
+	payload.Benchmarks = speedmodel.BenchmarkServersWithNetwork(ctx, benchmarkServers, len(benchmarkServers), throughput, network)
 	completed := 0
 	for _, benchmark := range payload.Benchmarks {
 		if benchmark.Status == speedmodel.ThroughputAvailable {
@@ -1716,8 +1884,15 @@ func collectSpeedComponentFromNodes(ctx context.Context, payload speedComponentP
 		}
 	}
 	privateSelected := 0
-	if privateRunner != nil && (ctx == nil || ctx.Err() == nil) {
-		registry, selected, benchmarks := privateRunner(ctx, limit)
+	if (privateRunner != nil || privateRunnerWithNetwork != nil) && (ctx == nil || ctx.Err() == nil) {
+		var registry any
+		var selected int
+		var benchmarks []privateSpeedBenchmark
+		if privateRunnerWithNetwork != nil {
+			registry, selected, benchmarks = privateRunnerWithNetwork(ctx, limit, network)
+		} else {
+			registry, selected, benchmarks = privateRunner(ctx, limit)
+		}
 		payload.PrivateRegistry = registry
 		payload.PrivateBenchmarks = benchmarks
 		privateSelected = selected
@@ -1783,11 +1958,15 @@ func speedContextStatus(err error) string {
 }
 
 func probeSpeedNodes(ctx context.Context, nodes []speedNodeResult, dial speedDialFunc) {
+	probeSpeedNodesWithNetwork(ctx, nodes, dial, speedmodel.NetworkAuto)
+}
+
+func probeSpeedNodesWithNetwork(ctx context.Context, nodes []speedNodeResult, dial speedDialFunc, network speedmodel.Network) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 	if dial == nil {
-		dial = (&net.Dialer{}).DialContext
+		dial = speedDialFunc(speedmodel.DialContext(network))
 	}
 	if len(nodes) == 0 {
 		return
