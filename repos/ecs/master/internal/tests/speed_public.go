@@ -5,6 +5,7 @@ package tests
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"runtime"
 	"strings"
@@ -14,12 +15,16 @@ import (
 )
 
 func ShowHead(language string) {
+	ShowHeadTo(os.Stdout, language)
+}
+
+func ShowHeadTo(writer io.Writer, language string) {
 	defer func() {
 		if recover() != nil {
-			fmt.Fprintln(os.Stderr, "[WARN] speedtest header unavailable")
+			fmt.Fprintln(writerOrDiscard(writer), "[WARN] speedtest header unavailable")
 		}
 	}()
-	sp.ShowHead(language)
+	sp.ShowHeadTo(writerOrDiscard(writer), language)
 }
 
 func NearbySP() {
@@ -27,17 +32,32 @@ func NearbySP() {
 }
 
 func NearbySPWithNetwork(network string) {
+	NearbySPWithNetworkContextTo(context.Background(), os.Stdout, network)
+}
+
+func NearbySPWithNetworkTo(writer io.Writer, network string) {
+	NearbySPWithNetworkContextTo(context.Background(), writer, network)
+}
+
+func NearbySPWithNetworkContextTo(ctx context.Context, writer io.Writer, network string) {
 	defer func() {
 		if recover() != nil {
-			fmt.Fprintln(os.Stderr, "[WARN] nearby speedtest unavailable")
+			fmt.Fprintln(writerOrDiscard(writer), "[WARN] nearby speedtest unavailable")
 		}
 	}()
 	network = normalizeSpeedNetwork(network)
 	if runtime.GOOS == "windows" || sp.OfficialAvailableTest() != nil {
-		sp.NearbySpeedTestWithNetwork(network)
+		sp.NearbySpeedTestWithNetworkContextTo(ctx, writerOrDiscard(writer), network)
 		return
 	}
-	sp.OfficialNearbySpeedTestWithNetwork(network)
+	sp.OfficialNearbySpeedTestWithNetworkContextTo(ctx, writerOrDiscard(writer), network)
+}
+
+func writerOrDiscard(writer io.Writer) io.Writer {
+	if writer == nil {
+		return io.Discard
+	}
+	return writer
 }
 
 // CustomSP keeps public builds on the established public speedtest sources.
@@ -46,9 +66,17 @@ func CustomSP(platform, operator string, num int, language string) {
 }
 
 func CustomSPWithNetwork(platform, operator string, num int, language, network string) {
+	CustomSPWithNetworkContextTo(context.Background(), os.Stdout, platform, operator, num, language, network)
+}
+
+func CustomSPWithNetworkTo(writer io.Writer, platform, operator string, num int, language, network string) {
+	CustomSPWithNetworkContextTo(context.Background(), writer, platform, operator, num, language, network)
+}
+
+func CustomSPWithNetworkContextTo(ctx context.Context, writer io.Writer, platform, operator string, num int, language, network string) {
 	defer func() {
 		if recover() != nil {
-			fmt.Fprintln(os.Stderr, "[WARN] custom speedtest unavailable")
+			fmt.Fprintln(writerOrDiscard(writer), "[WARN] custom speedtest unavailable")
 		}
 	}()
 	network = normalizeSpeedNetwork(network)
@@ -95,10 +123,10 @@ func CustomSPWithNetwork(platform, operator string, num int, language, network s
 		parseType = "id"
 	}
 	if runtime.GOOS == "windows" || sp.OfficialAvailableTest() != nil {
-		sp.CustomSpeedTestWithNetwork(url, parseType, num, language, network)
+		sp.CustomSpeedTestWithNetworkContextTo(ctx, writerOrDiscard(writer), url, parseType, num, language, network)
 		return
 	}
-	sp.OfficialCustomSpeedTestWithNetwork(url, parseType, num, language, network)
+	sp.OfficialCustomSpeedTestWithNetworkContextTo(ctx, writerOrDiscard(writer), url, parseType, num, language, network)
 }
 
 // PrivateSpeedPreloads is a no-op compatibility type for ecs_public builds,
@@ -109,6 +137,12 @@ func StartPrivateSpeedPreloads(context.Context, []string, string) *PrivateSpeedP
 	return &PrivateSpeedPreloads{}
 }
 
-func CustomSPWithNetworkAndPreloads(_ context.Context, platform, operator string, num int, language, network string, _ *PrivateSpeedPreloads) {
-	CustomSPWithNetwork(platform, operator, num, language, network)
+func (*PrivateSpeedPreloads) WaitAll(context.Context) error { return nil }
+
+func CustomSPWithNetworkAndPreloads(ctx context.Context, platform, operator string, num int, language, network string, preloads *PrivateSpeedPreloads) {
+	CustomSPWithNetworkAndPreloadsTo(os.Stdout, ctx, platform, operator, num, language, network, preloads)
+}
+
+func CustomSPWithNetworkAndPreloadsTo(writer io.Writer, ctx context.Context, platform, operator string, num int, language, network string, _ *PrivateSpeedPreloads) {
+	CustomSPWithNetworkContextTo(ctx, writer, platform, operator, num, language, network)
 }

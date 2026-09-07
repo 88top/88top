@@ -13,7 +13,7 @@
             </div>
         </template>
         <template #settings-menu v-if="docker?.status === 'running'">
-            <div><a href="/cgi-bin/luci/admin/docker/overview">{{ $gettext("Docker高级配置") }}</a></div>
+            <div><a href="/cgi-bin/luci/admin/services/dockerman/overview">{{ $gettext("Docker高级配置") }}</a></div>
         </template>
         <div class="content" v-if="load">
             <statusVue :docker="docker" />

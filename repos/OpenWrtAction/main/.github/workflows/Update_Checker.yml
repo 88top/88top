@@ -19,8 +19,8 @@ on:
         required: false
         default: 'false'
   schedule:
-    - cron: '0 16 */5 * *'
-    # 每五天的UTC 16:00触发 北京时间为每五天的凌晨0点
+    - cron: '0 14 */5 * *'
+    # 每五天的UTC 16:00触发 北京时间为每五天的凌晨0点 Action存在调度延迟，我把时间提前两个小时看看情况
 
 permissions:
   contents: write
