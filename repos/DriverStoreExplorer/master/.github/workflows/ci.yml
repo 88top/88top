@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Compute version and tag
+        id: version
+        shell: pwsh
+        run: |
+          # Check if HEAD already has a version tag
+          $existingTag = git tag --points-at HEAD | Where-Object { $_ -match '^v\d+\.\d+\.\d+$' } | Select-Object -First 1
+          if ($existingTag) {
+            $version = $existingTag -replace '^v', ''
+          } else {
+            $latest = git describe --tags --match "v*" --abbrev=0
+            if ($latest -match '^v(\d+\.\d+)\.(\d+)$') {
+              $version = "$($Matches[1]).$([int]$Matches[2] + 1)"
+            } else { throw "No valid version tag found" }
+            if ("${{ github.event_name }}" -eq "push" -and "${{ github.ref }}" -eq "refs/heads/master") {
+              Write-Host "Tag commit: v$version"
+              git tag "v$version"
+              git push origin "v$version"
+            }
+          }
+          if ("${{ github.event_name }}" -eq "pull_request") {
+            $sha = "${{ github.event.pull_request.head.sha }}".Substring(0, 8)
+            $fullVersion = "$version+$sha"
+          } else {
+            $fullVersion = $version
+          }
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "fullVersion=$fullVersion" >> $env:GITHUB_OUTPUT
+          Write-Host "Build version: $version, full: $fullVersion"
+
+      - name: Patch assembly version
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $fullVersion = "${{ steps.version.outputs.fullVersion }}"
+          $file = "Rapr/Properties/AssemblyInfo.cs"
+          $content = Get-Content $file -Raw
+          $content = $content -replace 'AssemblyVersion\(".*?"\)', "AssemblyVersion(`"$version`")"
+          $content = $content -replace 'AssemblyFileVersion\(".*?"\)', "AssemblyFileVersion(`"$version`")"
+          $content = $content -replace 'AssemblyInformationalVersion\(".*?"\)', "AssemblyInformationalVersion(`"$fullVersion`")"
+          Set-Content $file $content
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore Rapr.sln
+
+      - name: Build
+        run: msbuild Rapr.sln /p:Configuration=Release /p:Platform="Any CPU" /v:minimal
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: DriverStoreExplorer-v${{ steps.version.outputs.fullVersion }}-unsigned
+          path: Rapr/bin/Release/

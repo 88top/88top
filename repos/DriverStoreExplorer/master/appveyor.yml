@@ -1,0 +1,32 @@
+version: 1.0.{build}
+pull_requests:
+  do_not_increment_build_number: true
+skip_tags: true
+image: Visual Studio 2022
+configuration: Release
+platform: Any CPU
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}'
+before_build:
+- ps: >-
+    $existingTag = git tag --points-at HEAD | Where-Object { $_ -match '^v\d+\.\d+\.\d+$' } | Select-Object -First 1;
+    if ($existingTag) {
+      $version = $existingTag -replace '^v', ''
+    } else {
+      $latest = git describe --tags --match "v*" --abbrev=0;
+      if ($latest -match '^v(\d+\.\d+)\.(\d+)$') {
+        $version = "$($Matches[1]).$([int]$Matches[2] + 1)"
+      } else { throw "No valid version tag found" }
+    };
+    Update-AppveyorBuild -Version $version
+- cmd: nuget restore
+build:
+  parallel: true
+  verbosity: normal
+artifacts:
+- path: Rapr\bin\$(configuration)
+  name: DriverStoreExplorer.v$(appveyor_build_version)

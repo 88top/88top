@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"strings"
@@ -13,6 +14,36 @@ import (
 	pingmodel "github.com/oneclickvirt/pingtest/model"
 	"github.com/oneclickvirt/pingtest/pt"
 )
+
+func TestSpeedCaptureWriterStreamsAndBuffers(t *testing.T) {
+	var report, terminal bytes.Buffer
+	writer := speedCaptureWriterTo(&report, true, &terminal)
+	if _, err := writer.Write([]byte("speed row\n")); err != nil {
+		t.Fatal(err)
+	}
+	if report.String() != "speed row\n" {
+		t.Fatalf("report buffer = %q", report.String())
+	}
+	if terminal.String() != report.String() {
+		t.Fatalf("terminal output = %q, report = %q", terminal.String(), report.String())
+	}
+}
+
+func TestBoundedSpeedTestContextRespectsEarlierParentDeadline(t *testing.T) {
+	parentDeadline := time.Now().Add(2 * time.Second)
+	parent, parentCancel := context.WithDeadline(context.Background(), parentDeadline)
+	defer parentCancel()
+
+	child, childCancel := boundedSpeedTestContext(parent)
+	defer childCancel()
+	childDeadline, ok := child.Deadline()
+	if !ok {
+		t.Fatal("bounded speed context has no deadline")
+	}
+	if childDeadline.After(parentDeadline) {
+		t.Fatalf("speed deadline %s exceeded parent deadline %s", childDeadline, parentDeadline)
+	}
+}
 
 func TestShouldPrintBriefIPLinesInBasicStage(t *testing.T) {
 	tests := []struct {
@@ -136,6 +167,30 @@ func TestChinesePresetSpeedProfilesKeepCompleteAndNearbyScopes(t *testing.T) {
 		if usesChinesePresetSpeedProfile(cfg) {
 			t.Fatalf("custom/menu choice %q should retain its custom speed profile", choice)
 		}
+	}
+}
+
+func TestGlobalSpeedCandidatePreloadMatchesRenderedProfiles(t *testing.T) {
+	tests := []struct {
+		name string
+		cfg  *params.Config
+		want bool
+	}{
+		{name: "nil", cfg: nil, want: false},
+		{name: "Chinese complete", cfg: &params.Config{Language: "zh", Choice: "1"}, want: true},
+		{name: "Chinese concurrent complete", cfg: &params.Config{Language: "zh", Choice: "2"}, want: true},
+		{name: "Chinese compact", cfg: &params.Config{Language: "zh", Choice: "3"}, want: false},
+		{name: "Chinese custom", cfg: &params.Config{Language: "zh", Choice: "custom", MenuMode: true}, want: false},
+		{name: "Chinese non-menu legacy", cfg: &params.Config{Language: "zh", MenuMode: false}, want: true},
+		{name: "English compact", cfg: &params.Config{Language: "en", Choice: "3"}, want: true},
+		{name: "unsupported language", cfg: &params.Config{Language: "ja", Choice: "1"}, want: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := shouldPreloadGlobalSpeedCandidates(tt.cfg); got != tt.want {
+				t.Fatalf("shouldPreloadGlobalSpeedCandidates(%+v) = %t, want %t", tt.cfg, got, tt.want)
+			}
+		})
 	}
 }
 

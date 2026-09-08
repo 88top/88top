@@ -6,7 +6,7 @@
   },
   "timeflysoon/3x-ui": {
     "main": {
-      "remote_sha": "a5e68f410fa949b98dd8bd19e18c2591f0757336"
+      "remote_sha": "3cd3836d771c978c805ad66edb4e412909938cc6"
     }
   },
   "timeflysoon/Actions-FriendlyWrt": {
@@ -183,7 +183,7 @@
   },
   "timeflysoon/OpenWrtAction": {
     "main": {
-      "remote_sha": "9de4c17e999cca9b03c2605fd5f590937681848f"
+      "remote_sha": "bfcbd0f3d03091a27ba6dd227ce463045fdf957d"
     }
   },
   "timeflysoon/PVE-manager-status": {
@@ -231,7 +231,7 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "e0325def90d2fa5314f25f25f084cbd1fdfced6e"
+      "remote_sha": "584a2a743a6e936c94b38382a8f22977c961ffcf"
     }
   },
   "timeflysoon/commonscript": {
@@ -251,7 +251,7 @@
   },
   "timeflysoon/ecs": {
     "master": {
-      "remote_sha": "6657803c281c8aae0311a8260c6f33b759d45e6e"
+      "remote_sha": "f2cc943b316130052107496a32124e8cc8a9026a"
     }
   },
   "timeflysoon/edgetunnel": {
@@ -271,7 +271,7 @@
   },
   "timeflysoon/gopeed": {
     "main": {
-      "remote_sha": "65684988503413b706a23e95cd36a97f3fa1e12c"
+      "remote_sha": "481675107f96141d370b058851b83ec65adc75b5"
     }
   },
   "timeflysoon/img-installer": {
@@ -331,7 +331,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "188a16c61e1e84fa90e607129d5da8dcc9441571"
+      "remote_sha": "bd370c42bb81cf32dde4ba37274cfd093b330dda"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -352,13 +352,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "c9f1fd664797ccdc85783c5746827a3f22ce6068"
+      "remote_sha": "4ea3103622a2cebb5dfd189fc78d84cd584f8d73"
     },
     "release": {
-      "remote_sha": "7b3bc982ac28f83ac004fba9ade33b93a22d0565"
+      "remote_sha": "464ce81256c01af2ea0d464e0481fe4726519dcf"
     },
     "sing": {
-      "remote_sha": "2ff436c65b7dd8934ef68a87f03aa2448bfbf4f1"
+      "remote_sha": "15fe92146ee067a903f04f125a00120dbc3e2f06"
     }
   },
   "timeflysoon/nanopi-openwrt": {
@@ -373,7 +373,7 @@
   },
   "timeflysoon/openwrt-daede": {
     "main": {
-      "remote_sha": "2fa4ebddb958a7abd17e6f1a4dbd8c1d47b46e6b"
+      "remote_sha": "7b1daf3e6d0787df204576aa0c696aa9452d5361"
     }
   },
   "timeflysoon/quickstart": {
@@ -399,7 +399,7 @@
   },
   "timeflysoon/rule": {
     "main": {
-      "remote_sha": "62357cf96de6d18eeb080c40d22a9c1ac18e9123"
+      "remote_sha": "581b2626eeff83ee1911bc6591eb89d9eeedf63e"
     },
     "release": {
       "remote_sha": "511bb62f422cc07c60f947565206f45b05b0a62c"
@@ -424,7 +424,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "ce90da57cad5611137735024f0a7bc34c0735532"
+      "remote_sha": "d1154d027a7fdeba5c117d779f5f135d870e5fe7"
     }
   },
   "timeflysoon/store": {
@@ -461,10 +461,10 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "c9f1fd664797ccdc85783c5746827a3f22ce6068"
+      "remote_sha": "4ea3103622a2cebb5dfd189fc78d84cd584f8d73"
     },
     "release": {
-      "remote_sha": "7b3bc982ac28f83ac004fba9ade33b93a22d0565"
+      "remote_sha": "464ce81256c01af2ea0d464e0481fe4726519dcf"
     }
   },
   "timeflysoon/turboacc": {
@@ -474,7 +474,7 @@
   },
   "timeflysoon/v2rayN": {
     "master": {
-      "remote_sha": "3d50d9f82c993d58dd3eedfcdeaf2af5b98a7146"
+      "remote_sha": "8b8e579bc8ee74513ba17a9347f908a7fee6394c"
     },
     "v7_16": {
       "remote_sha": "654d7d83d09d1683c60501c9fa853a19c3dd9d6b"
@@ -490,7 +490,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "6aed68ee8b6bf85162d1964244e97451e03110e7"
+      "remote_sha": "d26fcde3cfba59fd2df0e4f4497e590b6e3e98b3"
     }
   },
   "timeflysoon/weasel": {
@@ -532,6 +532,11 @@
   "timeflysoon/ungoogled-chromium-windows": {
     "master": {
       "remote_sha": "333bc7dfff72ff4abc4d9cc76bc41de300a46e06"
+    }
+  },
+  "timeflysoon/DriverStoreExplorer": {
+    "master": {
+      "remote_sha": "84a626c3018743a240f617f20cbd3881182cae59"
     }
   }
 }

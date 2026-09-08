@@ -124,6 +124,34 @@ type PrivateSpeedPreloads struct {
 	done       chan struct{}
 }
 
+// GlobalSpeedPreload caches the legacy international candidate phase. It is
+// intentionally separate from PrivateSpeedPreloads so English mode never
+// loads or exposes the managed private registry.
+type GlobalSpeedPreload struct {
+	preload *sp.CustomSpeedTestPreload
+}
+
+func StartGlobalSpeedPreload(ctx context.Context, network string) *GlobalSpeedPreload {
+	return &GlobalSpeedPreload{preload: sp.StartCustomSpeedTestPreload(ctx, model.NetGlobal, "id", normalizeSpeedNetwork(network))}
+}
+
+func (p *GlobalSpeedPreload) Wait(ctx context.Context) error {
+	if p == nil || p.preload == nil {
+		return fmt.Errorf("国际测速候选预加载不可用")
+	}
+	return p.preload.Wait(ctx)
+}
+
+func RunGlobalSpeedTestWithPreloadTo(ctx context.Context, writer io.Writer, num int, language, network string, preload *GlobalSpeedPreload) error {
+	if preload == nil || preload.preload == nil {
+		return fmt.Errorf("国际测速候选预加载不可用")
+	}
+	if runtime.GOOS == "windows" || sp.OfficialAvailableTest() != nil {
+		return preload.preload.RunCustomSpeedTestContextTo(ctx, writer, num, language)
+	}
+	return preload.preload.RunOfficialCustomSpeedTestContextTo(ctx, writer, num, language)
+}
+
 const privateSpeedPreloadDeadline = 20 * time.Second
 
 func privateSpeedNetwork(network string) pst.Network {
@@ -179,7 +207,7 @@ func StartPrivateSpeedPreloads(ctx context.Context, operators []string, network 
 
 func (p *PrivateSpeedPreloads) load(ctx context.Context, operators []string) {
 	defer close(p.done)
-	serverList, err := privateSpeedServerList()
+	serverList, err := privateSpeedServerListWithNetwork(p.network)
 	if err != nil {
 		for _, operator := range operators {
 			operator = strings.ToLower(strings.TrimSpace(operator))
@@ -329,7 +357,7 @@ func privateSpeedTestWithNetworkTo(ctx context.Context, num int, operator, netwo
 	if preloads != nil {
 		candidateServers, err = preloads.Wait(ctx, operator)
 	} else {
-		serverList, loadErr := privateSpeedServerList()
+		serverList, loadErr := privateSpeedServerListWithNetwork(privateSpeedNetwork(network))
 		if loadErr != nil {
 			return 0, fmt.Errorf("加载自定义服务器列表失败")
 		}

@@ -1,4 +1,4 @@
-timeflysoon (71, 私有1)                        88alt (71, 私有1)
+timeflysoon (72, 私有1)                        88alt (72, 私有1)
 -------------------------------------------  -------------------------------------
 timeflysoon/2FAGuard                         88alt/2FAGuard
 timeflysoon/3x-ui                            88alt/3x-ui
@@ -18,6 +18,7 @@ timeflysoon/CLX-S20P                         88alt/CLX-S20P
 timeflysoon/commonscript                     88alt/commonscript
 timeflysoon/dae                              88alt/dae
 timeflysoon/daed                             88alt/daed
+timeflysoon/DriverStoreExplorer              88alt/DriverStoreExplorer
 timeflysoon/ecs                              88alt/ecs
 timeflysoon/edgetunnel                       88alt/edgetunnel
 timeflysoon/GenP                             88alt/GenP

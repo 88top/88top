@@ -65,6 +65,7 @@ func runLegacyTests(ctx context.Context, preCheck utils.NetCheckResult, config *
 	network := preCheck.Connected && preCheck.StackType != "" && preCheck.StackType != "None"
 	speedNetwork := speedNetworkForStack(preCheck.StackType)
 	var speedPreloads *tests.PrivateSpeedPreloads
+	var globalSpeedPreload *tests.GlobalSpeedPreload
 	emit := func(value string) {
 		if value == "" {
 			return
@@ -93,13 +94,18 @@ func runLegacyTests(ctx context.Context, preCheck utils.NetCheckResult, config *
 		identityReady: signalIdentityReady,
 		emit:          emit,
 	}
-	if network && config.SpeedTestStatus && config.Language == "zh" {
+	if network && config.SpeedTestStatus {
 		// Candidate probes are lightweight but still use the network. Start them
-		// only after the hardware stage, then hide selection latency behind the
-		// independent network diagnostics. The speed stage waits before opening
-		// any transfer stream.
+		// only after the hardware stage for option 1, then hide selection latency
+		// behind the independent network diagnostics. Option 2 starts this same
+		// phase before all stages, as its contract allows full interference.
 		plan.preload = func(taskCtx context.Context) {
-			speedPreloads = tests.StartPrivateSpeedPreloads(taskCtx, []string{"ct", "cu", "cmcc"}, speedNetwork)
+			if config.Language == "zh" {
+				speedPreloads = tests.StartPrivateSpeedPreloads(taskCtx, []string{"ct", "cu", "cmcc"}, speedNetwork)
+			}
+			if shouldPreloadGlobalSpeedCandidates(config) {
+				globalSpeedPreload = tests.StartGlobalSpeedPreload(taskCtx, speedNetwork)
+			}
 		}
 	}
 	if config.CpuTestStatus || (config.DeepMode && config.DeepBurnDuration > 0) {
@@ -177,16 +183,16 @@ func runLegacyTests(ctx context.Context, preCheck utils.NetCheckResult, config *
 				plan.fullConcurrent = true
 				plan.concurrentSpeed = &bufferedTask{name: "speed", run: func(taskCtx context.Context) string {
 					if config.Language == "zh" {
-						return captureChineseSpeedTests(taskCtx, config, speedNetwork, speedPreloads, false)
+						return captureChineseSpeedTests(taskCtx, config, speedNetwork, speedPreloads, globalSpeedPreload, false)
 					}
-					return captureEnglishSpeedTests(taskCtx, config, speedNetwork, false)
+					return captureEnglishSpeedTests(taskCtx, config, speedNetwork, globalSpeedPreload, false)
 				}}
 			} else {
 				plan.speed = func(context.Context) {
 					if config.Language == "zh" {
-						*output = RunSpeedTestsWithNetwork(ctx, config, *output, tempOutput, outputMutex, speedNetwork, speedPreloads)
+						*output = runSpeedTestsWithNetworkAndPreload(ctx, config, *output, tempOutput, outputMutex, speedNetwork, speedPreloads, globalSpeedPreload)
 					} else {
-						*output = RunEnglishSpeedTestsWithNetwork(ctx, config, *output, tempOutput, outputMutex, speedNetwork)
+						*output = RunEnglishSpeedTestsWithNetworkAndPreload(ctx, config, *output, tempOutput, outputMutex, speedNetwork, globalSpeedPreload)
 					}
 				}
 			}
