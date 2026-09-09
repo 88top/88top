@@ -34,6 +34,9 @@ import (
 type InboundService struct {
 	clientService   ClientService
 	fallbackService FallbackService
+	// FromNodeSync marks a master push: the row was validated where the operator
+	// acted, and a node that refuses it only falls out of sync.
+	FromNodeSync bool
 }
 
 func normalizeTrafficResetDay(day int) int {
@@ -610,6 +613,64 @@ func canonicalizeStreamNetworkKey(streamSettings string) string {
 	return string(out)
 }
 
+// validateInboundTLSCertificates rejects incomplete TLS credentials before a save
+// can restart Xray. File paths belong to the node, so only presence is checked.
+func validateInboundTLSCertificates(streamSettings string) error {
+	if strings.TrimSpace(streamSettings) == "" {
+		return nil
+	}
+	var stream struct {
+		Security    string          `json:"security"`
+		TLSSettings json.RawMessage `json:"tlsSettings"`
+	}
+	if err := json.Unmarshal([]byte(streamSettings), &stream); err != nil {
+		return common.NewError("Invalid inbound stream settings: ", err)
+	}
+	if !strings.EqualFold(stream.Security, "tls") {
+		return nil
+	}
+	var settings struct {
+		Certificates []struct {
+			CertificateFile string   `json:"certificateFile"`
+			KeyFile         string   `json:"keyFile"`
+			Certificate     []string `json:"certificate"`
+			Key             []string `json:"key"`
+			Usage           string   `json:"usage"`
+		} `json:"certificates"`
+	}
+	if len(stream.TLSSettings) > 0 {
+		if err := json.Unmarshal(stream.TLSSettings, &settings); err != nil {
+			return common.NewError("Invalid inbound TLS settings: ", err)
+		}
+	}
+	hasServerCertificate := false
+	for i, cert := range settings.Certificates {
+		// Match Xray's file-over-inline precedence for each credential.
+		certificate := cert.CertificateFile
+		if certificate == "" {
+			certificate = strings.Join(cert.Certificate, "\n")
+		}
+		if strings.TrimSpace(certificate) == "" {
+			return common.NewErrorf("TLS certificate %d is missing. Configure a certificate file path or certificate content before saving the inbound.", i+1)
+		}
+		if strings.EqualFold(cert.Usage, "verify") {
+			continue
+		}
+		key := cert.KeyFile
+		if key == "" {
+			key = strings.Join(cert.Key, "\n")
+		}
+		if strings.TrimSpace(key) == "" {
+			return common.NewErrorf("TLS certificate %d is missing its private key. Configure a private key file path or private key content before saving the inbound.", i+1)
+		}
+		hasServerCertificate = true
+	}
+	if !hasServerCertificate {
+		return common.NewError("TLS requires a server certificate and private key. Configure an encipherment or issue certificate before saving the inbound.")
+	}
+	return nil
+}
+
 // finalMaskRealityTcpMasks returns the stream's finalmask.tcp masks when the
 // stream uses REALITY security, or nil otherwise. A non-empty result means
 // this stream carries the finalmask+REALITY combination that panics
@@ -968,6 +1029,11 @@ func (s *InboundService) AddInbound(inbound *model.Inbound) (*model.Inbound, boo
 	inbound.TrafficResetDay = normalizeTrafficResetDay(inbound.TrafficResetDay)
 	// Normalize streamSettings based on protocol
 	s.normalizeStreamSettings(inbound)
+	if !s.FromNodeSync {
+		if err := validateInboundTLSCertificates(inbound.StreamSettings); err != nil {
+			return inbound, false, err
+		}
+	}
 	if err := validateFinalMaskRealityCombo(inbound.StreamSettings); err != nil {
 		return inbound, false, err
 	}
@@ -978,7 +1044,7 @@ func (s *InboundService) AddInbound(inbound *model.Inbound) (*model.Inbound, boo
 	if err := s.normalizeMtprotoXrayPort(inbound, ""); err != nil {
 		return inbound, false, err
 	}
-	if err := s.normalizeAmneziaWGSettings(inbound); err != nil {
+	if err := s.normalizeAmneziaWGSettings(inbound, ""); err != nil {
 		return inbound, false, err
 	}
 	if inbound.NodeID != nil && !isNodeEligibleProtocol(inbound.Protocol) {
@@ -1499,7 +1565,12 @@ func (s *InboundService) UpdateInbound(inbound *model.Inbound) (*model.Inbound, 
 		return inbound, false, err
 	}
 	s.normalizeMtprotoSecret(inbound)
-	if err := s.normalizeAmneziaWGSettings(inbound); err != nil {
+
+	oldInbound, err := s.GetInbound(inbound.Id)
+	if err != nil {
+		return inbound, false, err
+	}
+	if err := s.normalizeAmneziaWGSettings(inbound, oldInbound.Settings); err != nil {
 		return inbound, false, err
 	}
 	inbound.SubSortIndex = normalizeSubSortIndex(inbound.SubSortIndex)
@@ -1515,15 +1586,21 @@ func (s *InboundService) UpdateInbound(inbound *model.Inbound) (*model.Inbound, 
 			}
 		}
 	}
-
-	oldInbound, err := s.GetInbound(inbound.Id)
-	if err != nil {
-		return inbound, false, err
+	// Grandfather a row that was already stored incomplete so it stays editable;
+	// only a save that breaks a previously valid TLS block is refused.
+	if !s.FromNodeSync {
+		if err := validateInboundTLSCertificates(inbound.StreamSettings); err != nil {
+			if validateInboundTLSCertificates(oldInbound.StreamSettings) == nil {
+				return inbound, false, err
+			}
+		}
 	}
 	// Restore the stored NodeID before the port-conflict check so a node inbound
 	// stays scoped to its own node (the payload's nodeId is unreliable, often absent).
 	inbound.NodeID = oldInbound.NodeID
-	if inbound.NodeID != nil && !isNodeEligibleProtocol(inbound.Protocol) {
+	// The node assignment is the stored one, so only a protocol change can
+	// introduce one; a row adopted from a node keeps the protocol it arrived with.
+	if inbound.NodeID != nil && inbound.Protocol != oldInbound.Protocol && !isNodeEligibleProtocol(inbound.Protocol) {
 		return inbound, false, common.NewErrorf("%s inbounds cannot be assigned to a node", inbound.Protocol)
 	}
 
