@@ -6,12 +6,14 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"runtime"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/oneclickvirt/privatespeedtest/pst"
 	"github.com/oneclickvirt/speedtest/model"
 	"github.com/oneclickvirt/speedtest/sp"
@@ -56,9 +58,9 @@ func NearbySPWithNetworkContextTo(ctx context.Context, writer io.Writer, network
 	}()
 	network = normalizeSpeedNetwork(network)
 	if runtime.GOOS == "windows" || sp.OfficialAvailableTest() != nil {
-		sp.NearbySpeedTestWithNetworkContextTo(ctx, writerOrDiscard(writer), network)
+		renderNearbySpeedtest(ctx, writer, network, sp.NearbySpeedTestWithNetworkContextTo)
 	} else {
-		sp.OfficialNearbySpeedTestWithNetworkContextTo(ctx, writerOrDiscard(writer), network)
+		renderNearbySpeedtest(ctx, writer, network, sp.OfficialNearbySpeedTestWithNetworkContextTo)
 	}
 }
 
@@ -71,7 +73,11 @@ func writerOrDiscard(writer io.Writer) io.Writer {
 
 // formatString 格式化字符串到指定宽度
 func formatString(s string, width int) string {
-	return fmt.Sprintf("%-*s", width, s)
+	padding := width - runewidth.StringWidth(s)
+	if padding <= 0 {
+		return s
+	}
+	return s + strings.Repeat(" ", padding)
 }
 
 // printTableRow 打印表格行
@@ -109,7 +115,7 @@ func printTableRowTo(writer io.Writer, result pst.SpeedTestResult) {
 	}
 	latency := fmt.Sprintf("%.2f ms", result.PingLatency.Seconds()*1000)
 	packetLoss := "N/A"
-	fmt.Fprint(writer, formatString(location, 15))
+	fmt.Fprint(writer, " "+formatString(location, 16))
 	fmt.Fprint(writer, formatString(upload, 16))
 	fmt.Fprint(writer, formatString(download, 16))
 	fmt.Fprint(writer, formatString(latency, 16))
@@ -120,6 +126,7 @@ func printTableRowTo(writer io.Writer, result pst.SpeedTestResult) {
 type PrivateSpeedPreloads struct {
 	network    pst.Network
 	preloads   map[string]*pst.ServerPreload
+	candidates map[string][]pst.ServerConfig
 	preloadErr map[string]error
 	done       chan struct{}
 }
@@ -147,9 +154,13 @@ func RunGlobalSpeedTestWithPreloadTo(ctx context.Context, writer io.Writer, num 
 		return fmt.Errorf("国际测速候选预加载不可用")
 	}
 	if runtime.GOOS == "windows" || sp.OfficialAvailableTest() != nil {
-		return preload.preload.RunCustomSpeedTestContextTo(ctx, writer, num, language)
+		return renderFilteredSpeedtestWithError(writer, func(output io.Writer) error {
+			return preload.preload.RunCustomSpeedTestContextTo(ctx, output, num, language)
+		})
 	}
-	return preload.preload.RunOfficialCustomSpeedTestContextTo(ctx, writer, num, language)
+	return renderFilteredSpeedtestWithError(writer, func(output io.Writer) error {
+		return preload.preload.RunOfficialCustomSpeedTestContextTo(ctx, output, num, language)
+	})
 }
 
 const privateSpeedPreloadDeadline = 20 * time.Second
@@ -190,6 +201,7 @@ func StartPrivateSpeedPreloads(ctx context.Context, operators []string, network 
 	preloads := &PrivateSpeedPreloads{
 		network:    privateSpeedNetwork(network),
 		preloads:   make(map[string]*pst.ServerPreload, len(operators)),
+		candidates: make(map[string][]pst.ServerConfig, len(operators)),
 		preloadErr: make(map[string]error, len(operators)),
 		done:       make(chan struct{}),
 	}
@@ -253,6 +265,9 @@ func (p *PrivateSpeedPreloads) load(ctx context.Context, operators []string) {
 				mu.Unlock()
 				return
 			}
+			mu.Lock()
+			p.candidates[operator] = append([]pst.ServerConfig(nil), servers...)
+			mu.Unlock()
 			preload, preloadErr := pst.PreloadBestServersWithNetwork(ctx, servers, len(servers), 5*time.Second, false, true, p.network)
 			mu.Lock()
 			defer mu.Unlock()
@@ -321,7 +336,51 @@ func (p *PrivateSpeedPreloads) Wait(ctx context.Context, operator string) ([]pst
 	if preload == nil {
 		return nil, fmt.Errorf("测速候选预加载不可用")
 	}
-	return preload.Wait(ctx)
+	ranked, err := preload.Wait(ctx)
+	if err != nil {
+		return nil, err
+	}
+	// The preload deliberately probes only a bounded front-loaded sample. Keep
+	// that ranking, then append every other syntactically eligible carrier node
+	// so the real transfer remains the final availability decision.
+	return mergePrivateSpeedCandidates(ranked, p.candidates[operator], p.network), nil
+}
+
+func mergePrivateSpeedCandidates(ranked []pst.ServerWithLatencyInfo, candidates []pst.ServerConfig, network pst.Network) []pst.ServerWithLatencyInfo {
+	merged := append([]pst.ServerWithLatencyInfo(nil), ranked...)
+	seen := make(map[string]struct{}, len(ranked))
+	for _, candidate := range ranked {
+		seen[privateSpeedCandidateKey(candidate)] = struct{}{}
+	}
+	for _, server := range candidates {
+		if !privateSpeedServerSupportsNetwork(server, network) {
+			continue
+		}
+		candidate := pst.ServerWithLatencyInfo{Server: server, Availability: pst.ServerCandidate}
+		key := privateSpeedCandidateKey(candidate)
+		if _, exists := seen[key]; exists {
+			continue
+		}
+		seen[key] = struct{}{}
+		merged = append(merged, candidate)
+	}
+	return merged
+}
+
+func privateSpeedServerSupportsNetwork(server pst.ServerConfig, network pst.Network) bool {
+	host := strings.Trim(strings.TrimSpace(server.Host), "[]")
+	ip := net.ParseIP(host)
+	if ip == nil {
+		return true
+	}
+	switch network {
+	case pst.NetworkIPv4:
+		return ip.To4() != nil
+	case pst.NetworkIPv6:
+		return ip.To4() == nil && ip.To16() != nil
+	default:
+		return true
+	}
 }
 
 func privateSpeedTest(num int, operator string) (testedCount int, err error) {
@@ -356,21 +415,12 @@ func privateSpeedTestWithNetworkTo(ctx context.Context, num int, operator, netwo
 	var candidateServers []pst.ServerWithLatencyInfo
 	if preloads != nil {
 		candidateServers, err = preloads.Wait(ctx, operator)
-	} else {
-		serverList, loadErr := privateSpeedServerListWithNetwork(privateSpeedNetwork(network))
-		if loadErr != nil {
-			return 0, fmt.Errorf("加载自定义服务器列表失败")
-		}
-		filteredServers := pst.FilterServersByISP(serverList.Servers, carrierType)
-		candidateServers, err = pst.FindBestServersContextWithNetwork(
-			ctx,
-			filteredServers,
-			len(filteredServers),
-			5*time.Second,
-			false,
-			true,
-			privateSpeedNetwork(network),
-		)
+	}
+	if preloads == nil || err != nil || len(candidateServers) == 0 {
+		// Preloading is only a sorting optimization. If its short deadline or
+		// reachability checks fail, rebuild the ordered candidate list here and
+		// let actual download/upload attempts make the final decision.
+		candidateServers, err = findPrivateSpeedCandidates(ctx, carrierType, network)
 	}
 	if err != nil {
 		return 0, fmt.Errorf("分组查找失败")
@@ -399,18 +449,71 @@ func privateSpeedTestWithNetworkTo(ctx context.Context, num int, operator, netwo
 			testedCount++
 		}
 		if testedCount < serversPerISP && i < len(bestServers)-1 {
-			time.Sleep(1 * time.Second)
+			select {
+			case <-time.After(time.Second):
+			case <-ctx.Done():
+				return testedCount, ctx.Err()
+			}
 		}
 	}
 	// 返回实际成功输出的节点数量
 	return testedCount, nil
 }
 
+func findPrivateSpeedCandidates(ctx context.Context, carrierType, network string) ([]pst.ServerWithLatencyInfo, error) {
+	serverList, err := privateSpeedServerListWithNetwork(privateSpeedNetwork(network))
+	if err != nil {
+		return nil, fmt.Errorf("加载自定义服务器列表失败")
+	}
+	filteredServers := pst.FilterServersByISP(serverList.Servers, carrierType)
+	return pst.FindBestServersContextWithNetwork(
+		ctx,
+		filteredServers,
+		len(filteredServers),
+		5*time.Second,
+		false,
+		true,
+		privateSpeedNetwork(network),
+	)
+}
+
 func selectPrivateSpeedCandidates(candidates []pst.ServerWithLatencyInfo, serversPerISP int) []pst.ServerWithLatencyInfo {
 	if serversPerISP <= 0 {
 		return nil
 	}
-	return pst.SelectDistinctCityServers(candidates, serversPerISP*2)
+	attemptLimit := serversPerISP * 2
+	if attemptLimit > len(candidates) {
+		attemptLimit = len(candidates)
+	}
+	// City diversity remains a ranking preference only. Precheck failures stay
+	// eligible inside the bounded 2*limit real-transfer window.
+	selected := pst.SelectDistinctCityServers(candidates, attemptLimit)
+	if len(selected) >= attemptLimit {
+		return selected
+	}
+	used := make(map[string]struct{}, len(selected))
+	for _, candidate := range selected {
+		used[privateSpeedCandidateKey(candidate)] = struct{}{}
+	}
+	// Prefer city diversity, then retain same-city endpoints as real-transfer
+	// fallbacks instead of discarding them after a failed reachability check.
+	for _, candidate := range candidates {
+		key := privateSpeedCandidateKey(candidate)
+		if _, exists := used[key]; exists {
+			continue
+		}
+		used[key] = struct{}{}
+		selected = append(selected, candidate)
+		if len(selected) >= attemptLimit {
+			break
+		}
+	}
+	return selected
+}
+
+func privateSpeedCandidateKey(candidate pst.ServerWithLatencyInfo) string {
+	server := candidate.Server
+	return server.ID + "\x00" + server.URL + "\x00" + server.Host + "\x00" + fmt.Sprint(server.Port)
 }
 
 func privateSpeedTestWithFallback(num int, operator, language string) {
@@ -438,9 +541,13 @@ func privateSpeedTestWithFallbackWithNetworkContextTo(ctx context.Context, write
 		url = model.NetGlobal
 		parseType = "id"
 		if runtime.GOOS == "windows" || sp.OfficialAvailableTest() != nil {
-			sp.CustomSpeedTestWithNetworkContextTo(ctx, writer, url, parseType, num, language, normalizeSpeedNetwork(network))
+			renderFilteredSpeedtest(writer, func(output io.Writer) {
+				sp.CustomSpeedTestWithNetworkContextTo(ctx, output, url, parseType, num, language, normalizeSpeedNetwork(network))
+			})
 		} else {
-			sp.OfficialCustomSpeedTestWithNetworkContextTo(ctx, writer, url, parseType, num, language, normalizeSpeedNetwork(network))
+			renderFilteredSpeedtest(writer, func(output io.Writer) {
+				sp.OfficialCustomSpeedTestWithNetworkContextTo(ctx, output, url, parseType, num, language, normalizeSpeedNetwork(network))
+			})
 		}
 	}
 }
@@ -543,8 +650,12 @@ func customSPWithNetworkTo(ctx context.Context, writer io.Writer, platform, oper
 		parseType = "id"
 	}
 	if runtime.GOOS == "windows" || sp.OfficialAvailableTest() != nil {
-		sp.CustomSpeedTestWithNetworkContextTo(ctx, writer, url, parseType, num, language, network)
+		renderFilteredSpeedtest(writer, func(output io.Writer) {
+			sp.CustomSpeedTestWithNetworkContextTo(ctx, output, url, parseType, num, language, network)
+		})
 	} else {
-		sp.OfficialCustomSpeedTestWithNetworkContextTo(ctx, writer, url, parseType, num, language, network)
+		renderFilteredSpeedtest(writer, func(output io.Writer) {
+			sp.OfficialCustomSpeedTestWithNetworkContextTo(ctx, output, url, parseType, num, language, network)
+		})
 	}
 }
