@@ -879,6 +879,8 @@
       "amneziaWgAllowedIPsHint": "برای تخصیص خودکار خالی بگذارید؛ ورودی‌ها را با کاما جدا کنید",
       "amneziaWgForwardedPorts": "پورت‌های هدایت‌شده",
       "amneziaWgForwardedPortsHint": "پورت‌ها/محدوده‌های DNAT شده به این کلاینت، مثلاً 80, 443, 8000-8100. برای غیرفعال بودن خالی بگذارید.",
+      "tunnelKeepAlive": "Keepalive (seconds)",
+      "tunnelKeepAliveHint": "How often the client sends a keepalive packet. 25 is the usual value: it holds the NAT mapping open and brings an idle peer back on its own after any drop, including a panel restart. 0 disables it — an idle client then stays disconnected until it sends traffic.",
       "amneziaWgConfig": "پیکربندی AmneziaWG",
       "mtprotoSecret": "سکرت MTProto",
       "mtprotoSecretHint": "سکرت FakeTLS این کلاینت. برای تعویض، دوباره تولید کنید.",
@@ -1171,6 +1173,8 @@
       "subJsonAlwaysArrayDesc": "مسیر صریح اشتراک JSON را حتی برای یک پروفایل، مطابق استاندارد XTLS به‌صورت آرایه برمی‌گرداند. پاسخ‌های JSON تشخیص‌داده‌شده همیشه آرایه هستند. برای حفظ پاسخ قدیمی تک‌شیء غیرفعال بگذارید.",
       "subJsonUserAgentRegex": "عبارت User-Agent برای Xray JSON",
       "subJsonUserAgentRegexDesc": "عبارت منظم Go RE2 که با عامل کاربر (User-Agent) کلاینت مطابقت داده می‌شود تا صیغه Xray JSON روی آدرس استاندارد اشتراک به‌طور خودکار انتخاب شود. به‌طور پیش‌فرض خالی است، بنابراین تشخیص خودکار غیرفعال می‌ماند تا زمانی که الگویی برای کلاینت‌های موردنظر خود تعیین کنید. سایر کلاینت‌ها پاسخ خام/Base64 را دریافت می‌کنند. پس از تغییر، پنل را راه‌اندازی مجدد کنید.",
+      "subJsonRoutingRules": "پروفایل مسیریابی اشتراک JSON",
+      "subJsonRoutingRulesDesc": "JSON قواعد مسیریابی، دیپ‌لینک happ:// یا incy://، یا آدرس https://. وقتی تنظیم شود، DNS و قواعد مسیریابی اشتراک JSON را جایگزین می‌کند (در پیکربندی برای کلاینت‌هایی که هدرها را نادیده می‌گیرند تعبیه می‌شود، مانند Happ و INCY با بالانسر سمت کلاینت). اگر تنظیم هدر Happ خالی باشد، همین پروفایل به‌صورت خودکار در هدر Routing ارسال می‌شود (JSON و آدرس‌ها به‌صورت دیپ‌لینک happ://) تا کلاینت‌ها فایل‌های geo منطبق را دانلود کنند.",
       "subClashAutoDetect": "تشخیص خودکار کلاینت‌های Clash/Mihomo",
       "subClashAutoDetectDesc": "با فعال‌سازی، کلاینت‌های شناخته‌شده Clash/Mihomo که آدرس استاندارد اشتراک را درخواست می‌کنند، به‌طور خودکار پیکربندی Clash با فرمت YAML دریافت می‌کنند. مرورگرها همچنان صفحه اشتراک را نمایش می‌دهند، سایر کلاینت‌ها پاسخ خام/Base64 را دریافت می‌کنند و آدرس‌های صریح JSON و Clash در دسترس می‌مانند. برای اعمال تغییر، اشتراک Clash/Mihomo باید فعال باشد و پنل راه‌اندازی مجدد شود.",
       "subClashUserAgentRegex": "عبارت User-Agent برای Clash/Mihomo",
@@ -1784,6 +1788,7 @@
         "urlPlaceholder": "https://... (فهرست base64 از لینک‌ها)",
         "tagPrefix": "پیشوند تگ",
         "tagPrefixPlaceholder": "hk-",
+        "userAgent": "User-Agent",
         "interval": "بازه به‌روزرسانی",
         "hours": "ساعت",
         "minutes": "دقیقه",
@@ -2363,5 +2368,18 @@
     "statusFailed": "ناموفق",
     "statusDown": "قطع",
     "statusUp": "وصل"
+  },
+  "commandPalette": {
+    "title": "پالت دستورات",
+    "placeholder": "جستجوی کلاینت‌ها، اینباندها، صفحات یا تایپ دستور...",
+    "search": "جستجو...",
+    "navigation": "ناوبری و صفحات",
+    "actions": "دستورات سیستمی",
+    "navigate": "پیمایش",
+    "select": "انتخاب",
+    "copySubscription": "کپی لینک اشتراک",
+    "restartXray": "راه‌اندازی مجدد سرویس Xray",
+    "restartXraySuccess": "سرویس Xray با موفقیت مجدداً راه‌اندازی شد",
+    "settings": "تنظیمات"
   }
 }

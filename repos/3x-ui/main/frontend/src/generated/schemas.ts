@@ -297,6 +297,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "subJsonPath": {
         "type": "string"
       },
+      "subJsonRoutingRules": {
+        "type": "string"
+      },
       "subJsonRules": {
         "type": "string"
       },
@@ -521,6 +524,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subJsonMux",
       "subJsonObservatory",
       "subJsonPath",
+      "subJsonRoutingRules",
       "subJsonRules",
       "subJsonURI",
       "subJsonUserAgentRegex",
@@ -881,6 +885,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "subJsonPath": {
         "type": "string"
       },
+      "subJsonRoutingRules": {
+        "type": "string"
+      },
       "subJsonRules": {
         "type": "string"
       },
@@ -1112,6 +1119,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subJsonMux",
       "subJsonObservatory",
       "subJsonPath",
+      "subJsonRoutingRules",
       "subJsonRules",
       "subJsonURI",
       "subJsonUserAgentRegex",
@@ -1331,6 +1339,8 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "string"
       },
       "keepAlive": {
+        "description": "Seconds between PersistentKeepalive packets; 0 sends none, omit to keep the stored value",
+        "nullable": true,
         "type": "integer"
       },
       "limitIp": {
@@ -2456,6 +2466,39 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "HwidSlotStatus": {
+    "description": "HwidSlotStatus is the aggregate device-slot view exposed to subscribers:\ncounters only, no hwid value or hash, no email, no device metadata.",
+    "properties": {
+      "active": {
+        "example": true,
+        "type": "boolean"
+      },
+      "full": {
+        "example": false,
+        "type": "boolean"
+      },
+      "limit": {
+        "example": 2,
+        "type": "integer"
+      },
+      "registered": {
+        "example": 1,
+        "type": "integer"
+      },
+      "remaining": {
+        "example": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "active",
+      "full",
+      "limit",
+      "registered",
+      "remaining"
+    ],
+    "type": "object"
+  },
   "Inbound": {
     "description": "Inbound represents an Xray inbound configuration with traffic statistics and settings.",
     "properties": {
@@ -2710,6 +2753,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "mtprotoDomain": {
         "type": "string"
       },
+      "network": {
+        "type": "string"
+      },
       "nodeAddress": {
         "description": "Share-host resolution inputs, mirroring the subscription's\nresolveInboundAddress so the clients page renders a node-managed WireGuard\nEndpoint that points at the node, not the master panel. NodeAddress is the\nhosting node's externally reachable address (empty for this panel's own\ninbounds); Listen and ShareAddrStrategy/ShareAddr feed the same\nnode→listen→custom fallback the share/QR links already use.",
         "type": "string"
@@ -2729,6 +2775,9 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "remark": {
         "example": "VLESS-443",
+        "type": "string"
+      },
+      "security": {
         "type": "string"
       },
       "shareAddr": {

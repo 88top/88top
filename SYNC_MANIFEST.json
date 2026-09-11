@@ -6,7 +6,7 @@
   },
   "timeflysoon/3x-ui": {
     "main": {
-      "remote_sha": "ed5465d0f2f8f83820151fa3c0eb4d4ccf851840"
+      "remote_sha": "0a2cd789ba11a617a910f7c4d1bdbf30883aef39"
     }
   },
   "timeflysoon/Actions-FriendlyWrt": {
@@ -231,7 +231,7 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "05467093c951006be81d003c99f5c2a886ab4229"
+      "remote_sha": "c57db24107e8d58d828a1e8ddff5274f5b7509c6"
     }
   },
   "timeflysoon/commonscript": {
@@ -261,7 +261,7 @@
   },
   "timeflysoon/github-chinese": {
     "gh-pages": {
-      "remote_sha": "26c4c1a30db5aed6cccf72e6e91893bf99cb1c38"
+      "remote_sha": "8890eda601e1075875d0c9116c1cbd230778c177"
     }
   },
   "timeflysoon/gl-inet-onescript": {
@@ -271,7 +271,7 @@
   },
   "timeflysoon/gopeed": {
     "main": {
-      "remote_sha": "b9914826178f773822ac0afdce7020a03d43f9d7"
+      "remote_sha": "e5ac13cfdcbed2f7409e06ff64c6fd81e6739d7b"
     }
   },
   "timeflysoon/img-installer": {
@@ -281,7 +281,7 @@
   },
   "timeflysoon/immortalwrt": {
     "master": {
-      "remote_sha": "057e4ad4a8bdad21831052a79ee3d66a63e004d2"
+      "remote_sha": "3e246256ce4ca966818c4152bd20f84d0d9ea570"
     },
     "openwrt-18.06": {
       "remote_sha": "f7bc84bd30a038b0fd251ce59b6619e5eae94848"
@@ -331,7 +331,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "75ad906badded4951e9d62623794b0047a92f687"
+      "remote_sha": "1caa8ac9b4ff151e4188de9c7b74a55d29cf3471"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -352,13 +352,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "a1985d26a15f217dfd539e789c19a6d49f78b624"
+      "remote_sha": "a7e7f1e81a240ec95c8800078036ebf626f82e12"
     },
     "release": {
-      "remote_sha": "00d18d8f9eec132181f3968d10d1f608ff382ff5"
+      "remote_sha": "b8872060b58955d8f61b6bf85178923b8be12e71"
     },
     "sing": {
-      "remote_sha": "2e9298ec56dd36f885edf245475fb2f0f2f965fb"
+      "remote_sha": "ff12703ce5252a6b54298a835729f3abdd61ba6e"
     }
   },
   "timeflysoon/nanopi-openwrt": {
@@ -386,7 +386,7 @@
   },
   "timeflysoon/realtek-r8125-dkms": {
     "main": {
-      "remote_sha": "4a020a6036ead1cefa0fa5427f4bca2c15e80f95"
+      "remote_sha": "5f3ba4fa5a5e677d882121599975f14a667a19a2"
     }
   },
   "timeflysoon/realtek-r8125-dkms_ch": {
@@ -416,7 +416,7 @@
       "remote_sha": "d1ffe2b87a9c57b53088ab9aee1f4f679096b640"
     },
     "main": {
-      "remote_sha": "2ddd33cfe0d8d33f9b23bce63d530987ef989312"
+      "remote_sha": "2e8a531ef592b72d5a35736ea39be47302e3767b"
     },
     "translations-deadend": {
       "remote_sha": "e483486dff5deef147fed8605b5dfaa1010649f6"
@@ -424,7 +424,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "ddccb707325316a3f951a58bad44d2edf7b7ad13"
+      "remote_sha": "2bd23037383dfb74bbc2e2075ad1ff7961fea6d0"
     }
   },
   "timeflysoon/store": {
@@ -461,10 +461,10 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "a1985d26a15f217dfd539e789c19a6d49f78b624"
+      "remote_sha": "a7e7f1e81a240ec95c8800078036ebf626f82e12"
     },
     "release": {
-      "remote_sha": "00d18d8f9eec132181f3968d10d1f608ff382ff5"
+      "remote_sha": "b8872060b58955d8f61b6bf85178923b8be12e71"
     }
   },
   "timeflysoon/turboacc": {
@@ -474,7 +474,7 @@
   },
   "timeflysoon/v2rayN": {
     "master": {
-      "remote_sha": "7674d7e4728b3591aff3fcdb726686a793f816ed"
+      "remote_sha": "4f5a6be12da72ebce3babe2dacf7549aff5daddf"
     },
     "v7_16": {
       "remote_sha": "654d7d83d09d1683c60501c9fa853a19c3dd9d6b"
@@ -482,7 +482,7 @@
   },
   "timeflysoon/v2rayNG": {
     "master": {
-      "remote_sha": "e0432578c0d812781abb11164b41c49167e87878"
+      "remote_sha": "29bc72f9b836d9b4eae165f78b5baaf3f1a7fcb9"
     },
     "v1_10_32": {
       "remote_sha": "bd6b67cbfc71caa7ed94d2c64e8ac7756af61276"
@@ -490,7 +490,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "5bb7cd46c39175e27c0a58f3c5c2827bdd9ac2a2"
+      "remote_sha": "cf58a5db6375fb3fe9b60a1a51602e9c74105a7b"
     }
   },
   "timeflysoon/weasel": {

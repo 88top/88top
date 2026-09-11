@@ -117,6 +117,7 @@ export const AllSettingSchema = z.object({
   subJsonMux: z.string(),
   subJsonObservatory: z.string(),
   subJsonPath: z.string(),
+  subJsonRoutingRules: z.string(),
   subJsonRules: z.string(),
   subJsonURI: z.string(),
   subJsonUserAgentRegex: z.string(),
@@ -259,6 +260,7 @@ export const AllSettingViewSchema = z.object({
   subJsonMux: z.string(),
   subJsonObservatory: z.string(),
   subJsonPath: z.string(),
+  subJsonRoutingRules: z.string(),
   subJsonRules: z.string(),
   subJsonURI: z.string(),
   subJsonUserAgentRegex: z.string(),
@@ -344,7 +346,7 @@ export const ClientSchema = z.object({
   forwardedPorts: z.string().optional(),
   group: z.string().optional(),
   id: z.string().optional(),
-  keepAlive: z.number().int().optional(),
+  keepAlive: z.number().int().nullable().optional(),
   limitIp: z.number().int(),
   password: z.string().optional(),
   preSharedKey: z.string().optional(),
@@ -607,6 +609,15 @@ export const HostGroupSchema = z.object({
 });
 export type HostGroup = z.infer<typeof HostGroupSchema>;
 
+export const HwidSlotStatusSchema = z.object({
+  active: z.boolean(),
+  full: z.boolean(),
+  limit: z.number().int(),
+  registered: z.number().int(),
+  remaining: z.number().int(),
+});
+export type HwidSlotStatus = z.infer<typeof HwidSlotStatusSchema>;
+
 export const InboundSchema = z.object({
   clientStats: z.array(z.lazy(() => ClientTrafficSchema)),
   disableFlow: z.boolean(),
@@ -662,11 +673,13 @@ export const InboundOptionSchema = z.object({
   id: z.number().int(),
   listen: z.string().optional(),
   mtprotoDomain: z.string().optional(),
+  network: z.string().optional(),
   nodeAddress: z.string().optional(),
   nodeId: z.number().int().nullable().optional(),
   port: z.number().int(),
   protocol: z.string(),
   remark: z.string(),
+  security: z.string().optional(),
   shareAddr: z.string().optional(),
   shareAddrStrategy: z.string().optional(),
   ssMethod: z.string(),

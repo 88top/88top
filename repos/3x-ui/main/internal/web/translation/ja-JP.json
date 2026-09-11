@@ -879,6 +879,8 @@
       "amneziaWgAllowedIPsHint": "空欄で自動割り当て。複数指定はカンマ区切り",
       "amneziaWgForwardedPorts": "転送ポート",
       "amneziaWgForwardedPortsHint": "このクライアントに転送するポート/範囲。例: 80, 443, 8000-8100。空欄で転送なし。",
+      "tunnelKeepAlive": "Keepalive (seconds)",
+      "tunnelKeepAliveHint": "How often the client sends a keepalive packet. 25 is the usual value: it holds the NAT mapping open and brings an idle peer back on its own after any drop, including a panel restart. 0 disables it — an idle client then stays disconnected until it sends traffic.",
       "amneziaWgConfig": "AmneziaWG 設定",
       "mtprotoSecret": "MTProto シークレット",
       "mtprotoSecretHint": "このクライアントの FakeTLS シークレット。変更するには再生成します。",
@@ -1167,6 +1169,8 @@
       "subJsonAlwaysArrayDesc": "プロファイルが 1 件でも、明示的な JSON サブスクリプションを XTLS 標準に従う配列として返します。自動検出された JSON 応答は常に配列です。無効時は従来の単一オブジェクト応答を維持します。",
       "subJsonUserAgentRegex": "Xray JSON User-Agent 正規表現",
       "subJsonUserAgentRegexDesc": "標準サブスクリプション URL で Xray JSON 形式を自動選択するため、クライアントの User-Agent と照合する Go RE2 正規表現です。既定では空欄のため、対象とするクライアント向けのパターンを設定するまで自動判別は無効のままです。その他のクライアントには従来の raw/Base64 応答を返します。変更後にパネルを再起動してください。",
+      "subJsonRoutingRules": "JSON サブスクリプションのルーティングプロファイル",
+      "subJsonRoutingRulesDesc": "ルーティング JSON、happ:// または incy:// のディープリンク、もしくは https:// URL。設定すると JSON サブスクリプションの DNS とルーティングルールを置き換えます（ヘッダーを無視するクライアント、例えばクライアントサイドバランサーを使う Happ や INCY 向けに設定へ組み込まれます）。Happ のルーティングヘッダー設定が空の場合、同じプロファイルが自動的に Routing ヘッダーとして送信され（JSON と URL は happ:// ディープリンクに変換）、クライアントは対応する geo ファイルを取得します。",
       "subClashAutoDetect": "Clash/Mihomo クライアントを自動検出",
       "subClashAutoDetectDesc": "有効にすると、標準サブスクリプション URL を要求する既知の Clash/Mihomo クライアントへ Clash YAML を自動的に返します。ブラウザには引き続きサブスクリプションページを表示し、その他のクライアントには従来の raw/Base64 応答を返します。明示的な JSON および Clash URL も引き続き利用できます。Clash/Mihomo サブスクリプションを有効にし、適用のためにパネルを再起動する必要があります。",
       "subClashUserAgentRegex": "Clash/Mihomo User-Agent 正規表現",
@@ -1784,6 +1788,7 @@
         "urlPlaceholder": "https://...（リンクのbase64リスト）",
         "tagPrefix": "タグのプレフィックス",
         "tagPrefixPlaceholder": "hk-",
+        "userAgent": "User-Agent",
         "interval": "更新間隔",
         "hours": "時間",
         "minutes": "分",
@@ -2363,5 +2368,18 @@
     "statusFailed": "失敗",
     "statusDown": "ダウン",
     "statusUp": "アップ"
+  },
+  "commandPalette": {
+    "title": "コマンドパレット",
+    "placeholder": "コマンドを入力するか、クライアント、インバウンド、ページを検索...",
+    "search": "検索...",
+    "navigation": "ナビゲーション",
+    "actions": "操作",
+    "navigate": "移動",
+    "select": "選択",
+    "copySubscription": "サブスクリプションをコピー",
+    "restartXray": "Xrayサービスを再起動",
+    "restartXraySuccess": "Xrayサービスが正常に再起動されました",
+    "settings": "設定"
   }
 }

@@ -313,6 +313,49 @@ class AppControlListScreenTest : BaseComposeRobolectricTest() {
     }
 
     @Test
+    fun `a running task offers Cancel in place of Search and Refresh`() {
+        val cancels = mutableListOf<Unit>()
+        composeRule.setContent {
+            CompositionLocalProvider(LocalGuidedTourController provides mockTourController) {
+                PreviewWrapper {
+                    AppControlListScreen(
+                        stateSource = MutableStateFlow(
+                            AppControlListViewModel.State(
+                                rows = listOf(row("com.alpha.app", label = "Alpha")),
+                                progress = Progress.Data(),
+                            ),
+                        ),
+                        onCancel = { cancels += Unit },
+                    )
+                }
+            }
+        }
+
+        composeRule.onAllNodesWithContentDescription("Search").assertCountEquals(0)
+        composeRule.onAllNodesWithContentDescription("Refresh").assertCountEquals(0)
+        composeRule.onNodeWithContentDescription("Cancel").performClick()
+        cancels.size shouldBeEqual 1
+    }
+
+    @Test
+    fun `Cancel stays available while search is open`() {
+        // A scan can start while search is open (a sort change that needs data the current snapshot
+        // lacks triggers a refresh), so gating Cancel on !searchActive would strand that scan.
+        // A restored non-empty query auto-opens the search field.
+        composeRule.setListScreen(
+            AppControlListViewModel.State(
+                rows = listOf(row("com.alpha.app", label = "Alpha")),
+                progress = Progress.Data(),
+                options = AppControlListViewModel.DisplayOptions(searchQuery = "alpha"),
+            ),
+        )
+
+        // Title replaced by the search field proves search really is open here.
+        composeRule.onAllNodesWithText("AppControl").assertCountEquals(0)
+        composeRule.onNodeWithContentDescription("Cancel").assertExists()
+    }
+
+    @Test
     fun `filter row and top bar actions are visible when no task is executing`() {
         composeRule.setListScreen(
             AppControlListViewModel.State(
@@ -371,6 +414,36 @@ class AppControlListScreenTest : BaseComposeRobolectricTest() {
 
         composeRule.onNodeWithText("Alpha").assertExists()
         composeRule.onNodeWithText("Beta").assertExists()
+    }
+
+    @Test
+    fun `the cancelled message appears only after a cancel, not on cold start`() {
+        // Cancelling the initial scan restores AppControl's pre-scan data, which is null, so the
+        // screen is left with rows == null and progress == null. That is the same combination as
+        // cold start, so the content area can only tell them apart via the explicit cancel flag.
+        // Without a flag-driven branch the area renders a bare Box: no rows, no "Empty", no filter
+        // row, no count, nothing explaining why the screen is blank.
+        val cancelledMessage = "Scan cancelled, no apps were loaded."
+        val stateSource = MutableStateFlow(
+            AppControlListViewModel.State(rows = null, progress = null),
+        )
+        composeRule.setContent {
+            CompositionLocalProvider(LocalGuidedTourController provides mockTourController) {
+                PreviewWrapper {
+                    AppControlListScreen(stateSource = stateSource)
+                }
+            }
+        }
+
+        // Cold start: no cancel yet, so the message must stay away (it would otherwise flash on
+        // every first open, which is why the flag exists instead of a bare rows/progress check).
+        composeRule.onAllNodesWithText(cancelledMessage).assertCountEquals(0)
+
+        // Only the flag changes — rows and progress stay exactly as they were.
+        stateSource.value = stateSource.value.copy(cancelRequested = true)
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithText(cancelledMessage).assertExists()
     }
 
     private infix fun <T> T.shouldBeEqual(other: T) {
