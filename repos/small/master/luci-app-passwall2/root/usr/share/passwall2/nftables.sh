@@ -671,16 +671,22 @@ add_script_mwan3() {
 	}
 }
 
+MWAN3_RULE_ARGS="-m connmark --mark ${FWMARK}/0xffffffff -j RETURN"
+
 mwan3_stop() {
+	nft list chain ip mangle mwan3_hook >/dev/null 2>&1 || return 0
 	local handles=$(nft -a list chain ip mangle mwan3_hook 2>/dev/null | grep "${FWMARK}" | awk -F '# handle ' '{print$2}')
 	for handle in $handles; do
 		nft delete rule ip mangle mwan3_hook handle ${handle} 2>/dev/null
 	done
+	while iptables -w 5 -t mangle -D mwan3_hook ${MWAN3_RULE_ARGS} >/dev/null 2>&1; do :; done
 }
 
 mwan3_start() {
+	nft list chain ip mangle mwan3_hook >/dev/null 2>&1 || return 0
 	mwan3_stop
-	nft list chain ip mangle mwan3_hook >/dev/null 2>&1 && nft insert rule ip mangle mwan3_hook ct mark ${FWMARK} counter return >/dev/null 2>&1
+	iptables -w 5 -t mangle -I mwan3_hook 1 ${MWAN3_RULE_ARGS} >/dev/null 2>&1 || \
+		logger -t passwall2 "mwan3: failed to add ${FWMARK} exemption rule to mangle/mwan3_hook"
 }
 
 update_wan_sets() {
@@ -812,7 +818,7 @@ add_firewall_rule() {
 
 	# jump chains
 	# Only TCP, UDP Invalid.
-	nft "add rule $NFTABLE_NAME mangle_prerouting meta nfproto ipv4 meta l4proto tcp socket transparent 1 mark set ${FWMARK} counter accept"
+	nft "add rule $NFTABLE_NAME mangle_prerouting meta nfproto ipv4 meta l4proto tcp socket transparent 1 mark set ${FWMARK} counter accept comment PSW2_SOCKET"
 	nft "add rule $NFTABLE_NAME mangle_prerouting ip daddr != @$NFTSET_DIRECT ip protocol udp counter jump PSW2_MANGLE"
 	[ -n "${is_tproxy}" ] && nft "add rule $NFTABLE_NAME mangle_prerouting ip daddr != @$NFTSET_DIRECT ip protocol tcp counter jump PSW2_MANGLE"
 
@@ -883,7 +889,7 @@ add_firewall_rule() {
 	# jump chains
 	[ "$PROXY_IPV6" == "1" ] && {
 		# Only TCP, UDP Invalid.
-		nft "add rule $NFTABLE_NAME mangle_prerouting meta nfproto ipv6 meta l4proto tcp socket transparent 1 mark set ${FWMARK} counter accept"
+		nft "add rule $NFTABLE_NAME mangle_prerouting meta nfproto ipv6 meta l4proto tcp socket transparent 1 mark set ${FWMARK} counter accept comment PSW2_SOCKET"
 		nft "add rule $NFTABLE_NAME mangle_prerouting ip6 daddr != @$NFTSET_DIRECT6 meta nfproto {ipv6} counter jump PSW2_MANGLE_V6"
 		nft "add rule $NFTABLE_NAME mangle_output ip6 daddr != @$NFTSET_DIRECT6 meta nfproto {ipv6} counter jump PSW2_OUTPUT_MANGLE_V6 comment \"PSW2_OUTPUT_MANGLE\""
 

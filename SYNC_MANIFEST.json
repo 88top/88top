@@ -6,7 +6,7 @@
   },
   "timeflysoon/3x-ui": {
     "main": {
-      "remote_sha": "0a2cd789ba11a617a910f7c4d1bdbf30883aef39"
+      "remote_sha": "72df05a403e2c2c0126e939a1fb8dc3a9fb0c5b9"
     }
   },
   "timeflysoon/Actions-FriendlyWrt": {
@@ -183,7 +183,7 @@
   },
   "timeflysoon/OpenWrtAction": {
     "main": {
-      "remote_sha": "70da5e0cd85b4133591fa17e45bdf6e6b7a8cd9c"
+      "remote_sha": "1f805880366a0b888577e6cf32bf38b06539aefe"
     }
   },
   "timeflysoon/PVE-manager-status": {
@@ -231,7 +231,7 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "c57db24107e8d58d828a1e8ddff5274f5b7509c6"
+      "remote_sha": "151fbd34679a829bde4a0c86bda72bcd391b27de"
     }
   },
   "timeflysoon/commonscript": {
@@ -271,7 +271,7 @@
   },
   "timeflysoon/gopeed": {
     "main": {
-      "remote_sha": "e5ac13cfdcbed2f7409e06ff64c6fd81e6739d7b"
+      "remote_sha": "8fa9a1e9021503ae57048c8018d8fbae2d5479a8"
     }
   },
   "timeflysoon/img-installer": {
@@ -331,7 +331,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "1caa8ac9b4ff151e4188de9c7b74a55d29cf3471"
+      "remote_sha": "b34ef9d084f9a1b2bccfd33c656ff86e486a0145"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -352,13 +352,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "a7e7f1e81a240ec95c8800078036ebf626f82e12"
+      "remote_sha": "54722d41648fe80bcabdc712e83bc747a21aee10"
     },
     "release": {
-      "remote_sha": "b8872060b58955d8f61b6bf85178923b8be12e71"
+      "remote_sha": "22c58e1310d9371a702cdf349daeb29419f1b6c2"
     },
     "sing": {
-      "remote_sha": "ff12703ce5252a6b54298a835729f3abdd61ba6e"
+      "remote_sha": "c4fdfde0033b306b45404e2c8007ec9433a6cddd"
     }
   },
   "timeflysoon/nanopi-openwrt": {
@@ -424,7 +424,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "2bd23037383dfb74bbc2e2075ad1ff7961fea6d0"
+      "remote_sha": "efaaca85f2cf1e5f3814229889c5d82dceaae881"
     }
   },
   "timeflysoon/store": {
@@ -461,10 +461,10 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "a7e7f1e81a240ec95c8800078036ebf626f82e12"
+      "remote_sha": "54722d41648fe80bcabdc712e83bc747a21aee10"
     },
     "release": {
-      "remote_sha": "b8872060b58955d8f61b6bf85178923b8be12e71"
+      "remote_sha": "22c58e1310d9371a702cdf349daeb29419f1b6c2"
     }
   },
   "timeflysoon/turboacc": {
@@ -474,7 +474,7 @@
   },
   "timeflysoon/v2rayN": {
     "master": {
-      "remote_sha": "4f5a6be12da72ebce3babe2dacf7549aff5daddf"
+      "remote_sha": "cef40d38eec545dbe5a736602549d2b72c4f64bc"
     },
     "v7_16": {
       "remote_sha": "654d7d83d09d1683c60501c9fa853a19c3dd9d6b"
@@ -490,7 +490,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "cf58a5db6375fb3fe9b60a1a51602e9c74105a7b"
+      "remote_sha": "469ae9aef13acebfcad3f5d4a980ba604837f024"
     }
   },
   "timeflysoon/weasel": {
