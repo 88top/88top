@@ -31,6 +31,40 @@
           "datepicker": {
             "type": "string"
           },
+          "discordAdminIds": {
+            "type": "string"
+          },
+          "discordBotBackup": {
+            "type": "boolean"
+          },
+          "discordBotEnable": {
+            "type": "boolean"
+          },
+          "discordBotToken": {
+            "type": "string"
+          },
+          "discordChannelId": {
+            "type": "string"
+          },
+          "discordCpu": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "discordEnabledEvents": {
+            "type": "string"
+          },
+          "discordLang": {
+            "type": "string"
+          },
+          "discordMemory": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "discordRunTime": {
+            "type": "string"
+          },
           "expireDiff": {
             "minimum": 0,
             "type": "integer"
@@ -40,6 +74,9 @@
           },
           "externalTrafficInformURI": {
             "type": "string"
+          },
+          "happLinkEnable": {
+            "type": "boolean"
           },
           "ipLimitAllowlist": {
             "type": "string"
@@ -123,6 +160,9 @@
             "type": "integer"
           },
           "panelOutbound": {
+            "type": "string"
+          },
+          "realityScanCandidates": {
             "type": "string"
           },
           "remarkTemplate": {
@@ -308,6 +348,9 @@
           "subJsonAutoDetect": {
             "type": "boolean"
           },
+          "subJsonDns": {
+            "type": "string"
+          },
           "subJsonEnable": {
             "type": "boolean"
           },
@@ -459,9 +502,20 @@
         },
         "required": [
           "datepicker",
+          "discordAdminIds",
+          "discordBotBackup",
+          "discordBotEnable",
+          "discordBotToken",
+          "discordChannelId",
+          "discordCpu",
+          "discordEnabledEvents",
+          "discordLang",
+          "discordMemory",
+          "discordRunTime",
           "expireDiff",
           "externalTrafficInformEnable",
           "externalTrafficInformURI",
+          "happLinkEnable",
           "ipLimitAllowlist",
           "ldapAutoCreate",
           "ldapAutoDelete",
@@ -487,6 +541,7 @@
           "outboundDownThreshold",
           "pageSize",
           "panelOutbound",
+          "realityScanCandidates",
           "remarkTemplate",
           "restartXrayOnClientDisable",
           "sessionMaxAge",
@@ -545,6 +600,7 @@
           "subInfoNodeEnable",
           "subJsonAlwaysArray",
           "subJsonAutoDetect",
+          "subJsonDns",
           "subJsonEnable",
           "subJsonFinalMask",
           "subJsonMux",
@@ -598,6 +654,40 @@
           "datepicker": {
             "type": "string"
           },
+          "discordAdminIds": {
+            "type": "string"
+          },
+          "discordBotBackup": {
+            "type": "boolean"
+          },
+          "discordBotEnable": {
+            "type": "boolean"
+          },
+          "discordBotToken": {
+            "type": "string"
+          },
+          "discordChannelId": {
+            "type": "string"
+          },
+          "discordCpu": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "discordEnabledEvents": {
+            "type": "string"
+          },
+          "discordLang": {
+            "type": "string"
+          },
+          "discordMemory": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "discordRunTime": {
+            "type": "string"
+          },
           "expireDiff": {
             "minimum": 0,
             "type": "integer"
@@ -608,7 +698,13 @@
           "externalTrafficInformURI": {
             "type": "string"
           },
+          "happLinkEnable": {
+            "type": "boolean"
+          },
           "hasApiToken": {
+            "type": "boolean"
+          },
+          "hasDiscordBotToken": {
             "type": "boolean"
           },
           "hasLdapPassword": {
@@ -713,6 +809,9 @@
           "panelOutbound": {
             "type": "string"
           },
+          "realityScanCandidates": {
+            "type": "string"
+          },
           "remarkTemplate": {
             "type": "string"
           },
@@ -896,6 +995,9 @@
           "subJsonAutoDetect": {
             "type": "boolean"
           },
+          "subJsonDns": {
+            "type": "string"
+          },
           "subJsonEnable": {
             "type": "boolean"
           },
@@ -1047,10 +1149,22 @@
         },
         "required": [
           "datepicker",
+          "discordAdminIds",
+          "discordBotBackup",
+          "discordBotEnable",
+          "discordBotToken",
+          "discordChannelId",
+          "discordCpu",
+          "discordEnabledEvents",
+          "discordLang",
+          "discordMemory",
+          "discordRunTime",
           "expireDiff",
           "externalTrafficInformEnable",
           "externalTrafficInformURI",
+          "happLinkEnable",
           "hasApiToken",
+          "hasDiscordBotToken",
           "hasLdapPassword",
           "hasNordSecret",
           "hasSmtpPassword",
@@ -1082,6 +1196,7 @@
           "outboundDownThreshold",
           "pageSize",
           "panelOutbound",
+          "realityScanCandidates",
           "remarkTemplate",
           "restartXrayOnClientDisable",
           "sessionMaxAge",
@@ -1140,6 +1255,7 @@
           "subInfoNodeEnable",
           "subJsonAlwaysArray",
           "subJsonAutoDetect",
+          "subJsonDns",
           "subJsonEnable",
           "subJsonFinalMask",
           "subJsonMux",
@@ -2123,6 +2239,18 @@
         "required": [
           "reason",
           "token"
+        ],
+        "type": "object"
+      },
+      "HappLinkResult": {
+        "properties": {
+          "encryptedLink": {
+            "example": "happ://crypt5/example",
+            "type": "string"
+          }
+        },
+        "required": [
+          "encryptedLink"
         ],
         "type": "object"
       },
@@ -7280,7 +7408,7 @@
         "tags": [
           "Server"
         ],
-        "summary": "Probe/discover REALITY targets and return each verdict ranked by feasibility then latency. Each comma-separated token may be a domain (validated with SNI), a bare IP, or a CIDR range (discovered without SNI by reading the certificate domain). When empty, a built-in seed list is probed.",
+        "summary": "Probe/discover REALITY targets and return each verdict ranked by feasibility then latency. Each comma-separated token may be a domain (validated with SNI), a bare IP, or a CIDR range (discovered without SNI by reading the certificate domain). When empty, the realityScanCandidates setting is probed (the built-in seed list if that setting is empty).",
         "operationId": "post_panel_api_server_scanRealityTargets",
         "requestBody": {
           "required": false,
@@ -7291,7 +7419,7 @@
                 "properties": {
                   "targets": {
                     "type": "string",
-                    "description": "Optional comma-separated tokens: domain[:port], IP[:port], or CIDR (e.g. 104.16.0.0/24). When omitted, a built-in seed list is probed."
+                    "description": "Optional comma-separated tokens: domain[:port], IP[:port], or CIDR (e.g. 104.16.0.0/24). When omitted, the realityScanCandidates setting is probed (the built-in seed list if that setting is empty)."
                   }
                 }
               }
@@ -10061,6 +10189,55 @@
         }
       }
     },
+    "/panel/api/clients/happLink/{id}": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Generate a fresh Happ crypt5 link locally from the current client subscription URL when Happ link generation is enabled. The panel applies a resource limit of 8192 UTF-8 bytes to the source URL; this is not a Happ client maximum. Longer sources return success: false with msg: happ_source_too_long and obj: null. The source URL is not sent to a generation provider, and the result is not stored or reused.",
+        "operationId": "post_panel_api_clients_happLink_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Stable client record ID.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/HappLinkResult"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "encryptedLink": "happ://crypt5/example"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/api/clients/links/{email}": {
       "get": {
         "tags": [
@@ -12298,6 +12475,40 @@
                 "example": {
                   "success": true,
                   "msg": "Test message sent to Telegram"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/setting/testDiscord": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Test Discord bot connection by sending a test embed to the configured channel.",
+        "operationId": "post_panel_api_setting_testDiscord",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "msg": "Test notification sent successfully"
                 }
               }
             }

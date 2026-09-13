@@ -9,6 +9,8 @@ export class AllSetting {
   webBasePath = '/';
   sessionMaxAge = 360;
   trustedProxyCIDRs = '127.0.0.1/32,::1/128';
+  realityScanCandidates =
+    'www.cloudflare.com:443,www.microsoft.com:443,www.amazon.com:443,aws.amazon.com:443,www.samsung.com:443,www.nvidia.com:443,www.amd.com:443,www.intel.com:443,www.sony.com:443,dl.google.com:443';
   ipLimitAllowlist = '';
   panelOutbound = '';
   pageSize = 25;
@@ -33,6 +35,7 @@ export class AllSetting {
   twoFactorEnable = false;
   twoFactorToken = '';
   xrayTemplateConfig = '';
+  happLinkEnable = false;
   subEnable = true;
   subJsonEnable = false;
   subJsonAutoDetect = false;
@@ -70,6 +73,7 @@ export class AllSetting {
   subJsonMux = '';
   subJsonRules = '';
   subJsonRoutingRules = '';
+  subJsonDns = '';
   subJsonFinalMask = '';
   subJsonObservatory = '';
   subThemeDir = '';
@@ -145,6 +149,18 @@ export class AllSetting {
   clearTgBotToken = false;
   clearLdapPassword = false;
   clearSmtpPassword = false;
+  discordBotEnable = false;
+  discordBotToken = '';
+  discordChannelId = '';
+  discordAdminIds = '';
+  discordRunTime = '@daily';
+  discordBotBackup = false;
+  discordCpu = 80;
+  discordMemory = 80;
+  discordLang = 'en-US';
+  discordEnabledEvents = 'login.attempt,cpu.high';
+  hasDiscordBotToken = false;
+  clearDiscordBotToken = false;
 
   constructor(data?: unknown) {
     if (data != null) {
