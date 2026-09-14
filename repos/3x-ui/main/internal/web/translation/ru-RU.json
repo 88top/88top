@@ -221,6 +221,7 @@
       "geodataOutbound": "Скачивать через outbound (необязательно)",
       "geodataFile": "Имя файла",
       "geodataAddFile": "Добавить файл",
+      "geodataUseStandardSources": "Использовать штатные источники",
       "geodataSaveRestart": "Сохранить и перезапустить Xray",
       "geodataConfirmTitle": "Сохранить настройки geodata?",
       "geodataConfirmContent": "Шаблон конфигурации Xray будет обновлён, а Xray перезапущен.",
@@ -1492,6 +1493,8 @@
           "note": "Балансировщики leastPing/leastLoad всегда содержат burst-обсерваторию. Этот переключатель настраивает её параметры проб — выключите, чтобы использовать встроенные значения по умолчанию. Изменения применяются после перезапуска панели."
         }
       },
+      "subCalendarExpireInclusive": "Month-end subscription expiry display",
+      "subCalendarExpireInclusiveDesc": "Default off. For clients renewing on day 1 with a midnight cutoff in the panel timezone, report the previous month's last second in subscription expiry headers. Actual cutoff and renewals are unchanged. Clients use their own timezone and may consider the subscription expired one second early.",
       "subInfoNodeEnable": "Отдельный инфо-конфиг / фиктивный узел",
       "subInfoNodeEnableDesc": "Если включено, примечание и остаток трафика/дней отображаются отдельным SOCKS-конфигом вверху, а при истечении срока/трафика возвращается только статус.",
       "subExpiredTemplate": "Шаблон истекшей подписки",
