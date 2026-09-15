@@ -6,7 +6,7 @@
   },
   "timeflysoon/3x-ui": {
     "main": {
-      "remote_sha": "c0271e231dfb649539d31517256f9246fec7c23f"
+      "remote_sha": "cfa8350d10adf343f4611ac685246860f9aebb42"
     }
   },
   "timeflysoon/Actions-FriendlyWrt": {
@@ -95,7 +95,7 @@
   },
   "timeflysoon/CloudflareSpeedTest": {
     "master": {
-      "remote_sha": "d9f0ced235bbb7d529d5a8e60cb73cffd2239a2c"
+      "remote_sha": "50b42c7f95cfb06413740ce6e1967578ebe63380"
     }
   },
   "timeflysoon/GenP": {
@@ -208,7 +208,7 @@
   },
   "timeflysoon/WinFi": {
     "main": {
-      "remote_sha": "90356243a47b26f41dfdb6c876f2b2439a3401ff"
+      "remote_sha": "288ed59d2820f68277e1e524bf1f35556140f9b1"
     }
   },
   "timeflysoon/ZyPlayer": {
@@ -231,7 +231,7 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "ea5bb83cc03e024481a36fffbe8ebc3ba04b5bd5"
+      "remote_sha": "d2a2be2842345c0a19e099a84ebd04ffdb13ff6f"
     }
   },
   "timeflysoon/commonscript": {
@@ -271,7 +271,7 @@
   },
   "timeflysoon/gopeed": {
     "main": {
-      "remote_sha": "cee5f3336ef0910c4198ad59a1f2f0cf4b910d24"
+      "remote_sha": "e47a20a1bd927b9714c8611aad0720df5d0ebc56"
     }
   },
   "timeflysoon/img-installer": {
@@ -331,7 +331,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "bc2413df9cc9975c83eb2a1e508b1f03f96c6d6b"
+      "remote_sha": "48cc00e50b4aa06ec6124c1e2b11982d0869eb1f"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -352,13 +352,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "a1bf9c5ed492b6c4603636a0383b9698757d25a5"
+      "remote_sha": "a839abd63a215184eae6cf53ed736db39157e2ad"
     },
     "release": {
-      "remote_sha": "e3a930d43ca380fe4148533edfa915591b62d6c7"
+      "remote_sha": "dd5a87d51534dd7cece12b9a2367e2ed48841ca7"
     },
     "sing": {
-      "remote_sha": "3e7ea429ffe745576724f4e6646ffa709b92413b"
+      "remote_sha": "c0d8c7a9e198b53d30e4c0e29344d930a57cb573"
     }
   },
   "timeflysoon/nanopi-openwrt": {
@@ -399,7 +399,7 @@
   },
   "timeflysoon/rule": {
     "main": {
-      "remote_sha": "581b2626eeff83ee1911bc6591eb89d9eeedf63e"
+      "remote_sha": "5186affa138c0830a820e8d314164cea118e786c"
     },
     "release": {
       "remote_sha": "511bb62f422cc07c60f947565206f45b05b0a62c"
@@ -416,7 +416,7 @@
       "remote_sha": "d1ffe2b87a9c57b53088ab9aee1f4f679096b640"
     },
     "main": {
-      "remote_sha": "47ef0dfc005086a21cbfbf736b6d8174b2ad279e"
+      "remote_sha": "783a6b18f6f465067d8d9df4bc941ec26cd52715"
     },
     "translations-deadend": {
       "remote_sha": "e483486dff5deef147fed8605b5dfaa1010649f6"
@@ -424,7 +424,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "59181b2c652a89a362dee9a7e540b22b7ea630e1"
+      "remote_sha": "4ccaf3ee2960367589eab3680ec18b6a7bc5f643"
     }
   },
   "timeflysoon/store": {
@@ -461,10 +461,10 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "a1bf9c5ed492b6c4603636a0383b9698757d25a5"
+      "remote_sha": "a839abd63a215184eae6cf53ed736db39157e2ad"
     },
     "release": {
-      "remote_sha": "e3a930d43ca380fe4148533edfa915591b62d6c7"
+      "remote_sha": "dd5a87d51534dd7cece12b9a2367e2ed48841ca7"
     }
   },
   "timeflysoon/turboacc": {
@@ -490,7 +490,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "5dc9de0e973b82f15b862952fbe212faa32c99c2"
+      "remote_sha": "e8fd0f19c1cc9484e9bd72d6d85457d541460b1c"
     }
   },
   "timeflysoon/weasel": {
@@ -531,12 +531,17 @@
   },
   "timeflysoon/ungoogled-chromium-windows": {
     "master": {
-      "remote_sha": "35349ee01d8a54d6ebfb164f572b947d475f184e"
+      "remote_sha": "d99843ca7c336a61f482844d31385a53e9970979"
     }
   },
   "timeflysoon/DriverStoreExplorer": {
     "master": {
       "remote_sha": "84a626c3018743a240f617f20cbd3881182cae59"
+    }
+  },
+  "timeflysoon/dlssg_for_sm86": {
+    "main": {
+      "remote_sha": "117faf5c70333b34160f5d21d01c222261cc5af1"
     }
   }
 }
