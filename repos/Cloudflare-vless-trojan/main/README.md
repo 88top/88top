@@ -1,6 +1,4 @@
 
-<img width="766" height="181" alt="9edae247c703bef887a2d680c77c3c17" src="https://github.com/user-attachments/assets/a641b36d-59ba-41e4-ac6f-6622f786187e" />
-
 # 搭建方式1：Cloudflare-Socks5/Http本地代理脚本
 ### 支持基于Workers域名、Pages域名、自定义域名
 ### 可选 ECH-TLS、普通TLS、无TLS 三种代理模式，应对各种阻断封杀
