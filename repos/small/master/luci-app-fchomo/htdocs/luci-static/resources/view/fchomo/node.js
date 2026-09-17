@@ -207,11 +207,14 @@ class VlessEncryptionClient {
 return view.extend({
 	load() {
 		return Promise.all([
-			uci.load('fchomo')
+			uci.load('fchomo'),
+			hm.getFeatures()
 		]);
 	},
 
 	render(data) {
+		const features = data[1];
+
 		let m, s, o, ss, so;
 
 		m = new form.Map('fchomo', _('Edit outbound'));
@@ -2698,7 +2701,32 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.DummyValue, '_update');
-		so.cfgvalue = hm.renderResDownload;
+		so.cfgvalue = function(section_id, set_value) {
+			const section_type = this.section.sectiontype;
+
+			// For providers that use private DNS to resolve node domains.
+			const command = '.dns | [keys[] | select(. == "proxy-server-nameserver" or . == "proxy-server-nameserver-policy" or . == "nameserver-policy")]';
+
+			this.callback = L.bind(function(command, section_type, section_id) {
+				return hm.yamlfile2json(section_type, section_id, command).then((res) => {
+					if (res.length > 0) {
+						const label = this.map.data.get(this.section.config, section_id, 'label');
+						ui.addNotification(null, E('p',
+							_('Note: The subscription of provider %s is includes %s.').format(label || section_id, res.map(v => `<code>dns.${v}</code>`).join(', ')) + '</br>' +
+							_('Recommended to adjust Client DNS configuration based on actual conditions.')),
+						'warning');
+					}
+				});
+			}, this, command);
+
+			return hm.renderResDownload.apply(this, arguments);
+		}
+		so.editable = true;
+		so.modalonly = false;
+
+		so = ss.option(form.DummyValue, '_link');
+		so.cfgvalue = hm.renderResLink;
+		so.readonly = features.has_luci_app_tinyfilemanager ? false : _('luci-app-tinyfilemanager is not installed, please install it first.');
 		so.editable = true;
 		so.modalonly = false;
 		/* Provider END */

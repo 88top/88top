@@ -1402,6 +1402,16 @@ function yaml2json(content, command) {
 
 	return callYaml2Json(content, command).then(res => res.result);
 }
+function yamlfile2json(type, filename, command) {
+	const callYamlfile2Json = rpc.declare({
+		object: 'luci.fchomo',
+		method: 'yamlfile2json',
+		params: ['type', 'filename', 'command'],
+		expect: { '': {} }
+	});
+
+	return callYamlfile2Json(type, filename, command).then(res => res.result);
+}
 
 function isEmpty(res) {
 	if (res == null) return true;                                                // null, undefined
@@ -1623,6 +1633,8 @@ function renderResDownload(section_id) {
 				if (type === 'http') {
 					return downloadFile(section_type, section_id, url, header).then((res) => {
 						ui.addNotification(null, E('p', _('Download successful.')), 'info');
+						if (this.callback)
+							this.callback(section_type, section_id);
 					}).catch((e) => {
 						ui.addNotification(null, E('p', _('Download failed: %s').format(e)), 'error');
 					});
@@ -1630,6 +1642,28 @@ function renderResDownload(section_id) {
 					return ui.addNotification(null, E('p', _('Unable to download unsupported type: %s').format(type)), 'error');
 			}, section_type, section_id, type, url, header)
 		}, [ _('🡇') ]) //🗘
+	]);
+
+	return El;
+}
+
+function renderResLink(section_id) {
+	const section_type = this.section.sectiontype;
+	const type = uci.get(this.config, section_id, 'type');
+
+	let El = E([
+		E('span', {
+			title: this.readonly ? this.readonly : null
+		}, [
+			E('button', {
+				class: 'cbi-button cbi-button-apply',
+				disabled: (this.readonly !== false || type === 'inline') || null,
+				click: ui.createHandlerFn(this, (section_type, section_id) => {
+					let path = encodeURIComponent(`${HM_DIR.replace(/^\//, '')}/${section_type}`);
+					return window.open(`${window.location.origin}/tinyfilemanager/index.php?p=${path}&view=${section_id}`, '_blank', 'noopener');
+				}, section_type, section_id)
+			}, [ _('🔗') ])
+		])
 	]);
 
 	return El;
@@ -2166,6 +2200,7 @@ return baseclass.extend({
 	shuffle,
 	json2yaml,
 	yaml2json,
+	yamlfile2json,
 	isEmpty,
 	removeBlankAttrs,
 	toUciname,
@@ -2182,6 +2217,7 @@ return baseclass.extend({
 	updateStatus,
 	getDashURL,
 	renderResDownload,
+	renderResLink,
 	handleGenKey,
 	handleReload,
 	handleRemoveIdles,
