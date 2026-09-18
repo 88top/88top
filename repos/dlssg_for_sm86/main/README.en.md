@@ -1,10 +1,15 @@
-# DLSSG for SM86 (proxy) - 0.3.2 Version
+# DLSSG for SM86 (proxy) - 0.3.3 Version
 
 [中文](README.md) · **English**
 
 Enables NVIDIA DLSS Frame Generation (DLSS-G) on RTX 30-series (SM86) and RTX 20-series (SM75). Windows x64 / D3D12; the runtime files are `version.dll` and `dlssg_sm86.ini`.
 
 ## Changes in this release
+
+### 0.3.3
+
+- RTX 20 / 30: the GPU-architecture rewrite shown to the game is now armed at game start and reports RTX 50. Games on Streamline 2.8 (e.g. Final Fantasy VII Rebirth) used to decide "this GPU does not support DLSS-G" during startup and drop the frame-generation plugin (issues #509 / #528); the rewrite is now in place before that check, and the game's 3X / 4X / 6X options unlock as on an RTX 50.
+- `Optimized=1` no longer skips the repeated real-frame copy within a group (`SkipRepeatedRealCopy`; off at every level, set it to `1` yourself if wanted). It had never been validated in a live game, and a flicker report followed on 0.3.2 (issue #532). Level `1` remains bit-identical to the official image.
 
 ### 0.3.2
 
@@ -21,11 +26,11 @@ Enables NVIDIA DLSS Frame Generation (DLSS-G) on RTX 30-series (SM86) and RTX 20
 - The 310.9 runtime adds 6X (`MaxGeneratedFrames` ceiling raised from 3 to 5). On games that themselves support Dynamic MFG, selecting "Dynamic / Auto" frame generation reaches 6X.
 - Optimized kernel set (~19–32% in the offline benchmark), a two-switch factory INI, capture/replay, and diagnostic logging — see below and `docs/`.
 
-## Roadmap
+## Statement & roadmap
 
-- Re-evaluate Vulkan support.
-- Re-evaluate forcing 6X on games that only support 4X. This release confirmed the approach is per-game, depends on the game's closed-source plugin, and is fragile (see "6X"); a more robust path remains to be found.
-- Optimization of the DLSS L / M presets: preliminary testing shows about a 1.2× latency improvement; to be merged after validation.
+- Kernel-level work on frame generation (DLSS-G) has essentially reached the best this project can do at this stage; kernel optimization is paused, and later releases will carry compatibility and bug fixes only.
+- The next release focuses on INT8 optimization of several Transformer super-resolution models, to raise the base frame rate on RTX 30 / RTX 20.
+- Vulkan support is hard to continue in the project's current state: the wrapper layer itself still has weak game compatibility and little coverage testing, and adding Vulkan on top would only bring more compatibility problems. If you need it, use one of the community patch builds.
 
 ## Requirements
 
