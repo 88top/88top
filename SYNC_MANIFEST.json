@@ -241,7 +241,7 @@
   },
   "timeflysoon/dae": {
     "main": {
-      "remote_sha": "eea4596333b3209f1300f3b02126172009a93228"
+      "remote_sha": "fb5eae6c2578e3ec99ae5b2844cb4f4ed93557a5"
     }
   },
   "timeflysoon/daed": {
@@ -424,7 +424,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "db2619bca9c793cfb9360169ac1b178259a2dd5e"
+      "remote_sha": "c1700ce0e39c4f51fb65969c09ff01bf3a63fc80"
     }
   },
   "timeflysoon/store": {
@@ -474,7 +474,7 @@
   },
   "timeflysoon/v2rayN": {
     "master": {
-      "remote_sha": "cef40d38eec545dbe5a736602549d2b72c4f64bc"
+      "remote_sha": "be3566df2f714ecfbb61169088def97ba92c57c4"
     },
     "v7_16": {
       "remote_sha": "654d7d83d09d1683c60501c9fa853a19c3dd9d6b"
@@ -482,7 +482,7 @@
   },
   "timeflysoon/v2rayNG": {
     "master": {
-      "remote_sha": "3ba2bc6a80eae58a19a1481bd5b2ccc6e5c18cbc"
+      "remote_sha": "a69787ef9526f48c4ee3ed134233d2f5a3682750"
     },
     "v1_10_32": {
       "remote_sha": "bd6b67cbfc71caa7ed94d2c64e8ac7756af61276"
@@ -490,7 +490,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "7cd4ac0b18bc0dd134549863b7277e1f2d1ec013"
+      "remote_sha": "08a233d8f846c2ce220341daf91cbbce810d4659"
     }
   },
   "timeflysoon/weasel": {
