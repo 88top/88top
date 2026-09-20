@@ -23,8 +23,7 @@ import java.util.Locale
 internal const val MAX_SIZE = 6
 private const val SEPARATOR = ":"
 
-internal fun String.clean(): String =
-    orEmpty().replace(SEPARATOR, String.EMPTY).take(MAX_SIZE).uppercase(Locale.getDefault())
+internal fun String.clean(): String = orEmpty().replace(SEPARATOR, String.EMPTY).take(MAX_SIZE).uppercase(Locale.ROOT)
 
 internal fun String.toMacAddress(): String =
     when {
