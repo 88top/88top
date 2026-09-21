@@ -620,6 +620,17 @@ function createConfigEditor(mode) {
   };
 }
 
+// 全局锁：内核操作互斥（切换配置 / 更新订阅 / 删除）
+function clKernelBusy() { return !!document.body.getAttribute('data-cl-kernel-busy'); }
+function clKernelLock() {
+  document.body.setAttribute('data-cl-kernel-busy', '1');
+  document.querySelectorAll('.cl-btn-switch, .cl-btn-update-sub, .cl-btn-delete').forEach(function (b) { b.disabled = true; });
+}
+function clKernelUnlock() {
+  document.body.removeAttribute('data-cl-kernel-busy');
+  document.querySelectorAll('.cl-btn-switch, .cl-btn-update-sub, .cl-btn-delete').forEach(function (b) { b.disabled = false; });
+}
+
 return view.extend({
   _tab: null,
   _sbTab: null,
@@ -841,17 +852,37 @@ return view.extend({
         E('div', { 'class': 'cl-file-actions' }, [
           E('button', {
             'class': 'btn cbi-button cl-btn-sm cl-btn-update-sub',
-            click: function () {
+            click: function (ev) {
+              var btn = ev.target;
+              if (btn.disabled || clKernelBusy()) return;
+              clKernelLock();
+              btn.disabled = true;
+              btn.textContent = _("Updating…");
               L.resolveDefault(callUpdateSub(sub.name), {}).then(function (r) {
                 ui.addNotification(null, E('p', r.success ? sub.name + _(" update succeeded") : _("Update failed")));
                 location.reload();
+              }).catch(function () {
+                btn.disabled = false;
+                btn.textContent = _("Update");
+                clKernelUnlock();
               });
             }
           }, _("Update")),
           E('button', {
             'class': 'btn cbi-button cl-btn-sm cl-btn-switch',
-            click: function () {
-              L.resolveDefault(callSetConfig(sub.name), {}).then(function () { location.reload(); });
+            click: function (ev) {
+              var btn = ev.target;
+              if (btn.disabled || clKernelBusy()) return;
+              clKernelLock();
+              btn.disabled = true;
+              btn.textContent = _("Loading…");
+              L.resolveDefault(callSetConfig(sub.name), {}).then(function () {
+                location.reload();
+              }).catch(function () {
+                btn.disabled = false;
+                btn.textContent = _("Switch Profile");
+                clKernelUnlock();
+              });
             }
           }, _("Switch Profile")),
           E('button', {
@@ -1022,19 +1053,54 @@ return view.extend({
           E('div', { 'class': 'cl-file-actions' }, [
             E('button', {
               'class': 'btn cbi-button cl-btn-sm cl-btn-edit',
-              click: function () { loadOtherEditor(f.name, type); }
+              click: function (ev) {
+                var btn = ev.target;
+                if (btn.disabled) return;
+                btn.disabled = true;
+                var orig = btn.textContent;
+                btn.textContent = _("Loading…");
+                Promise.resolve(loadOtherEditor(f.name, type)).then(function () {
+                  btn.disabled = false;
+                  btn.textContent = orig;
+                }).catch(function () {
+                  btn.disabled = false;
+                  btn.textContent = orig;
+                });
+              }
             }, _("Edit")),
             E('button', {
               'class': 'btn cbi-button cl-btn-sm cl-btn-switch',
-              click: function () {
-                L.resolveDefault(callSetConfig(f.name), {}).then(function () { location.reload(); });
+              click: function (ev) {
+                var btn = ev.target;
+                if (btn.disabled || clKernelBusy()) return;
+                clKernelLock();
+                btn.disabled = true;
+                btn.textContent = _("Loading…");
+                L.resolveDefault(callSetConfig(f.name), {}).then(function () {
+                  location.reload();
+                }).catch(function () {
+                  btn.disabled = false;
+                  btn.textContent = _("Switch Profile");
+                  clKernelUnlock();
+                });
               }
             }, _("Switch Profile")),
             E('button', {
               'class': 'btn cbi-button cl-btn-sm cl-btn-delete',
-              click: function () {
+              click: function (ev) {
+                var btn = ev.target;
+                if (btn.disabled || clKernelBusy()) return;
                 if (!confirm(_("Delete ") + f.name + '?')) return;
-                L.resolveDefault(callDeleteCfg(f.name, type), {}).then(function () { location.reload(); });
+                clKernelLock();
+                btn.disabled = true;
+                btn.textContent = _("Loading…");
+                L.resolveDefault(callDeleteCfg(f.name, type), {}).then(function () {
+                  location.reload();
+                }).catch(function () {
+                  btn.disabled = false;
+                  btn.textContent = _("Delete");
+                  clKernelUnlock();
+                });
               }
             }, _("Delete"))
           ])
@@ -1359,12 +1425,8 @@ return view.extend({
     o.description = _("DNS queries follow the routing rules, so overseas domains resolve through the proxy instead of a polluted result. Requires proxy-server-nameserver.");
     o = s.option(form.Flag, 'dns_loopback_compat', _("OpenClash/Nikki Loopback DNS Compatibility"));
     o.default = '0';
-    o.description = _("Optional compatibility for normal managed mode. At runtime, replace only proxy node resolvers that point back to the imported configuration's own DNS listener. Core Only mode stays verbatim; the source configuration and unrelated local DNS services remain unchanged.");
+    o.description = _("Optional compatibility for normal managed mode. At runtime, replace only proxy node resolvers that point back to the imported configuration's own DNS listener with the proxy-server-nameserver setting. Core Only mode stays verbatim; the source configuration and unrelated local DNS services remain unchanged.");
     o.depends('enable_dns', '1');
-    o = s.option(form.DynamicList, 'dns_loopback_compat_resolver', _("Loopback DNS Replacement"));
-    o.placeholder = 'udp://223.5.5.5:53';
-    o.description = _("Used only when the compatibility switch detects a stale self-reference. When empty, udp://223.5.5.5:53 and udp://119.29.29.29:53 are used. Plain IP DNS is recommended to avoid bootstrap loops.");
-    o.depends('dns_loopback_compat', '1');
     o = s.option(form.Value, 'dns_ecs', _("ECS Client Subnet"));
     o.placeholder = _("Recommended blank");
     o.description = _("mihomo writes the ecs parameter to DNS URLs; sing-box writes dns.client_subnet. Leave empty to skip.");

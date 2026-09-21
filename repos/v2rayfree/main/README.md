@@ -1,4 +1,4 @@
-# 最新公益免费节点订阅地址每日更新  更新时间 2026-09-20 20:56:52  
+# 最新公益免费节点订阅地址每日更新  更新时间 2026-09-21 22:57:21  
 ## 免费节点及订阅地址：
 
 > 优质节点每天实时测速更新，6小时更新一次
@@ -12,20 +12,20 @@ ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6K1JWcnJZcGthOHZ6REcxSVpJSEVjdXlGU3V
 ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6K1dyUmxUQ3RuVFpISFE2WXBNSEVoUldhTHBzOXdVYkk1WkpBODVyT2FJbz0@134.98.150.53:45819#%E6%9C%AA%E7%9F%A5%20SS-04%20%7C%20free-nodes
 ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6K28yOHFEcnBOWm0xa0FBWWZ4Ynk4azJoc21XNXpIQmk3ckxsbXpPeFJHbz0@138.2.152.206:59924#%E6%9C%AA%E7%9F%A5%20SS-05%20%7C%20free-nodes
 ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6K2JoRW5XWnFqVytRYkQxYVJIenc5ejZGaWRidDNQNGVTUlpYekRxKzV1WT0@134.65.57.137:61312#%E6%9C%AA%E7%9F%A5%20SS-06%20%7C%20free-nodes
-ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6K2Z6SnZwd1cyVlRLVUg0cThES0x1WlhuaWJ2ckkyZVJ1U3RpWE44dHhYND0@129.146.202.221:50356#%E6%9C%AA%E7%9F%A5%20SS-07%20%7C%20free-nodes
-ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6K2lnZEpJa0pnRjM5UTV3WGRkQVA5UmxqNjY3akc2cHVjWjNwSWhxM0N5WT0@140.245.99.244:56927#%E6%9C%AA%E7%9F%A5%20SS-08%20%7C%20free-nodes
+ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6K2lnZEpJa0pnRjM5UTV3WGRkQVA5UmxqNjY3akc2cHVjWjNwSWhxM0N5WT0@140.245.99.244:56927#%E6%9C%AA%E7%9F%A5%20SS-07%20%7C%20free-nodes
+ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6K2xsamxna3NmYW9RajlXeWtYSUt6M0tpWXZSZ3dZczBxL1lHSEo0ZGZOQT0@144.24.231.91:61312#%E6%9C%AA%E7%9F%A5%20SS-08%20%7C%20free-nodes
 ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6K3pnSFFSYnprdEZVc0RJQVowNmNRdmQwQ2R3QkhxdDlKQThneHYxUG1Baz0@134.98.152.108:45819#%E6%9C%AA%E7%9F%A5%20SS-09%20%7C%20free-nodes
-ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6M0NMekVTazB5NVRUNHJxOW5OMEo5LzJ1aFdBVlV5TTFHdmd0ZmVhNCtLdz0@134.98.138.80:45819#%E6%9C%AA%E7%9F%A5%20SS-10%20%7C%20free-nodes
-ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6M3ZUNjcrRWlSSWF1cFdqTS9MWjhQdFo5cjExdlJzOGVxRjU5RktSZHZ4az0@129.151.67.2:61312#%E6%9C%AA%E7%9F%A5%20SS-11%20%7C%20free-nodes
-ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6ME4xZFl0UUZtSG53QmVLdjUzbzVNSkRrUnpiR1lZMUtrTFhuYU5rV28zbz0@129.151.68.65:61312#%E6%9C%AA%E7%9F%A5%20SS-12%20%7C%20free-nodes
+ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6M0FJWE9UOTg4NTZaMzcvRUM0STMwSG04RWtacDVjUHY3cjlnL1poY2VpND0@130.61.32.89:59924#%E6%9C%AA%E7%9F%A5%20SS-10%20%7C%20free-nodes
+ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6M0NMekVTazB5NVRUNHJxOW5OMEo5LzJ1aFdBVlV5TTFHdmd0ZmVhNCtLdz0@134.98.138.80:45819#%E6%9C%AA%E7%9F%A5%20SS-11%20%7C%20free-nodes
+ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6M3ZUNjcrRWlSSWF1cFdqTS9MWjhQdFo5cjExdlJzOGVxRjU5RktSZHZ4az0@129.151.67.2:61312#%E6%9C%AA%E7%9F%A5%20SS-12%20%7C%20free-nodes
 ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6MFpRbUs0aDZGWWZKMWc4SlUzSm1oMHZLSDZXbENGdEVrY21iU1JDeUFvTT0@144.24.226.232:61312#%E6%9C%AA%E7%9F%A5%20SS-13%20%7C%20free-nodes
 ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6MGcvVHNudVk4ZnBYakdodjFRTXpiLzNzM0NEMDBoa3JVZmZQZ2lzaE92bz0@130.61.41.25:59924#%E6%9C%AA%E7%9F%A5%20SS-14%20%7C%20free-nodes
 ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6MHg2UFRySkNHTUQ3UHowRVFucFJzSUtFSjNDeTU1aFBLQUFnSmlBNThpYz0@158.180.50.45:59924#%E6%9C%AA%E7%9F%A5%20SS-15%20%7C%20free-nodes
 ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6MHl6YVlYRUJidlFTSnVyTHdrQnlvM1lqcSsvd1ZadG8xT285VjR6M2krRT0@89.168.83.14:59924#%E6%9C%AA%E7%9F%A5%20SS-16%20%7C%20free-nodes
 ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6MTR6ZHVWT3BxWk9LNmlheWsreGQzNGg5OHltcDZxcjJOdUpqMnh0V1hpWT0@158.178.155.37:45819#%E6%9C%AA%E7%9F%A5%20SS-17%20%7C%20free-nodes
 ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6MU1YLzExZWFSbTJPYmZhT0RSS2k0Wk5BV1d4cnNhUEZDS3RpeXNzQ0pNcz0@129.151.84.137:61312#%E6%9C%AA%E7%9F%A5%20SS-18%20%7C%20free-nodes
-ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6MVc0RjBmSTgxZC92d0dDeERMQ2xlK0tiRSsvQmI2dUU3QlA4WGpxMXdIND0@129.151.72.10:61312#%E6%9C%AA%E7%9F%A5%20SS-19%20%7C%20free-nodes
-ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6MVc0UnZFRmp5YWQ3OHdFeHdwQ2NXS1EwQXFYREdQcUNGUnh1eHNtRkxtaz0@130.61.146.82:59924#%E6%9C%AA%E7%9F%A5%20SS-20%20%7C%20free-nodes
+ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6MVc0UnZFRmp5YWQ3OHdFeHdwQ2NXS1EwQXFYREdQcUNGUnh1eHNtRkxtaz0@130.61.146.82:59924#%E6%9C%AA%E7%9F%A5%20SS-19%20%7C%20free-nodes
+ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6MVhleWRaQi9seDY0TUhjZVE5cE90cy9ONDI0MHpia1JIRVJwUkJvYVZWUT0@152.70.56.250:45819#%E6%9C%AA%E7%9F%A5%20SS-20%20%7C%20free-nodes
 ```
 
 ### 永久订阅地址 
@@ -149,4 +149,6 @@ ss://MjAyMi1ibGFrZTMtY2hhY2hhMjAtcG9seTEzMDU6MVc0UnZFRmp5YWQ3OHdFeHdwQ2NXS1EwQXF
 | **Clash**                     | OpenWrt  | [![img](https://github.com/free-nodes/fanqiang/raw/main/assets/luci-app-clash.svg)](https://github.com/free-nodes/fanqiang/blob/main/assets/luci-app-clash.svg) | [GitHub](https://github.com/frainzy1477/luci-app-clash)      | 配置教程                                                     | [![img](https://github.com/free-nodes/fanqiang/raw/main/assets/luci-app-clash-1779243844528-203.svg)](https://github.com/free-nodes/fanqiang/blob/main/assets/luci-app-clash-1779243844528-203.svg) |
 | **FancySS_arm**               | Merlin   | [![img](https://github.com/free-nodes/fanqiang/raw/main/assets/fancyss.svg)](https://github.com/free-nodes/fanqiang/blob/main/assets/fancyss.svg) | [GitHub](https://github.com/hq450/fancyss)                   | 配置教程                                                     | [![img](https://github.com/free-nodes/fanqiang/raw/main/assets/fancyss-1779243844528-204.svg)](https://github.com/free-nodes/fanqiang/blob/main/assets/fancyss-1779243844528-204.svg) |
 | **Merlin Clash**              | Merlin   | [![img](https://github.com/free-nodes/fanqiang/raw/main/assets/official-404-C0C0C0.svg)](https://github.com/free-nodes/fanqiang/blob/main/assets/official-404-C0C0C0.svg) | [官方文档](https://mcreadme.gitbook.io/mc)                   | 配置教程                                                     | [![img](https://github.com/free-nodes/fanqiang/raw/main/assets/official-404-C0C0C0.svg)](https://github.com/free-nodes/fanqiang/blob/main/assets/official-404-C0C0C0.svg) |
+
+**👉[Shadowrocket 共享账号](https://shareid.tools12345.com)**
 
