@@ -8,6 +8,7 @@ export repos=(
   "src-git helloworld https://github.com/fw876/helloworld;master"
   "src-git OpenClash https://github.com/vernesong/OpenClash;master"
   "src-git ghfu https://github.com/smallprogram/openwrt-ghfu.git;main"
+  "src-git accesspolicycontroller https://github.com/smallprogram/openwrt-access-policy-controller.git;main"
 )
 
 # 自定义软件包列表
