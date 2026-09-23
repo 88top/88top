@@ -4,9 +4,17 @@
 
 Author: [DFarm](https://x.com/DFarm_club)
 
+Official website: [https://prismbrowser.app/](https://prismbrowser.app/)
+
 Prism Browser is a local fingerprint-browser profile manager built on a customized Chromium. Each profile has independent cookies, cache, extension data, proxy settings, and fingerprint configuration, making it suitable for managing multiple isolated browser identities.
 
 Browser profiles, cookies, proxy credentials, and browsing history remain on the user's device by default. The Community edition is free to use and does not limit the number of local profiles.
+
+## Source Code Maintenance Notice
+
+This repository will remain publicly available for learning, review, and community builds. Starting with Prism Browser `v0.3.17`, product features, fixes, and later source-code changes will no longer be synchronized to this repository. As the desktop app, fingerprint kernels, cross-platform packaging, Pro features, and multiple release branches have grown, maintaining separate public and product code lines has created a substantial development and testing burden.
+
+The existing source code, commit history, and historical releases will remain available. For future features, fixes, and installers, please refer to the [official website](https://prismbrowser.app/) and this repository's [Releases](../../releases) page.
 
 ## Quick Download and Setup
 
@@ -109,12 +117,12 @@ You need Xcode, Git, Python 3, Ninja, and an APFS build volume. Accept the Xcode
 
 ```bash
 cd tools/macos-kernel
-./Check-Prerequisites.sh /Volumes/disk/prism-kernel
-./Prepare-Source.sh /Volumes/disk/prism-kernel
-./Build-Kernel.sh /Volumes/disk/prism-kernel 4
+./Check-Prerequisites.sh /Volumes/ds/prism-kernel
+./Prepare-Source.sh /Volumes/ds/prism-kernel
+./Build-Kernel.sh /Volumes/ds/prism-kernel 4
 ```
 
-Replace `/Volumes/disk/prism-kernel` with your build directory. The final number controls Ninja parallelism.
+Replace `/Volumes/ds/prism-kernel` with your build directory. The final number controls Ninja parallelism.
 
 #### Windows x64
 
@@ -189,3 +197,7 @@ Code owned by Prism Browser Community is released under the MIT License. Chromiu
 Chromium builds and distributions must retain the `LICENSE`, `LICENSES`, and component notices required by Chromium's source tree and packaged artifacts. The Prism Browser name, logo, and icons are not automatically licensed as trademarks by the source-code license.
 
 Use this project only for lawful and authorized browser isolation, automation testing, privacy research, and account management. Users are responsible for complying with target-site terms and applicable local laws.
+
+## Star History
+
+[![Prism Browser Community Star History](https://api.star-history.com/svg?repos=DFarm6/Prism-Browser-Community&type=Date)](https://www.star-history.com/#DFarm6/Prism-Browser-Community&Date)

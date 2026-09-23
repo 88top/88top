@@ -4,9 +4,17 @@
 
 作者：[DFarm](https://x.com/DFarm_club)
 
+官网：[https://prismbrowser.app/](https://prismbrowser.app/)
+
 Prism Browser 是一个基于定制 Chromium 的本地指纹浏览器环境管理器。每个环境拥有独立的 Cookie、缓存、扩展数据、代理设置和指纹配置，适合管理多个相互隔离的浏览器身份。
 
 浏览器环境、Cookie、代理凭据和浏览历史默认只保存在用户自己的设备上。Community 版本可以免费使用，不限制本地环境数量。
+
+## 项目维护说明
+
+本仓库将继续公开保留，供学习、审阅和社区自行构建使用。自 Prism Browser `v0.3.17` 起，产品版的新功能、修复及后续源码更新将不再同步到本仓库。随着桌面应用、指纹内核、跨平台打包、Pro 功能和多条发布分支持续增长，同时维护公开版与产品版已经带来较高的开发和测试成本。
+
+现有源码、提交历史和历史 Release 不会删除。后续功能、修复和安装包请以[官网](https://prismbrowser.app/)与本仓库 [Releases](../../releases) 页面发布的信息为准。
 
 ## 快速下载和使用
 
@@ -109,12 +117,12 @@ Chromium 首次编译需要下载完整源码和工具链。建议准备 32 GB �
 
 ```bash
 cd tools/macos-kernel
-./Check-Prerequisites.sh /Volumes/disk/prism-kernel
-./Prepare-Source.sh /Volumes/disk/prism-kernel
-./Build-Kernel.sh /Volumes/disk/prism-kernel 4
+./Check-Prerequisites.sh /Volumes/ds/prism-kernel
+./Prepare-Source.sh /Volumes/ds/prism-kernel
+./Build-Kernel.sh /Volumes/ds/prism-kernel 4
 ```
 
-将 `/Volumes/disk/prism-kernel` 换成自己的构建目录，最后一个数字是 Ninja 并发任务数。
+将 `/Volumes/ds/prism-kernel` 换成自己的构建目录，最后一个数字是 Ninja 并发任务数。
 
 #### Windows x64
 
@@ -189,3 +197,7 @@ Prism Browser Community 自有代码以 MIT License 发布。Chromium、ungoogle
 编译或分发 Chromium 时，必须同时保留 Chromium 源码和发行产物要求的 `LICENSE`、`LICENSES` 及组件通知。Prism Browser 的名称、标志和图标不因源码许可而自动授予商标使用权。
 
 请仅将本项目用于合法、获得授权的浏览器隔离、自动化测试、隐私研究和账号管理。使用者应遵守目标网站条款及所在地区法律。
+
+## Star 历史
+
+[![Prism Browser Community Star History](https://api.star-history.com/svg?repos=DFarm6/Prism-Browser-Community&type=Date)](https://www.star-history.com/#DFarm6/Prism-Browser-Community&Date)

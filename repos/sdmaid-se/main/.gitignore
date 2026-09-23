@@ -34,6 +34,11 @@ fastlane/metadata/android/*/images/phoneScreenshots/*.png
 _site/
 .jekyll-cache/
 vendor/bundle/
+
+# Python bytecode caches, written whenever the tools/ci unit tests run.
+__pycache__/
+*.pyc
+
 # JVM crash logs (e.g. from a layoutlib render OOM)
 hs_err_pid*.log
 replay_pid*.log
