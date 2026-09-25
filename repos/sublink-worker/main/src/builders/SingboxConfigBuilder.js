@@ -547,13 +547,13 @@ export class SingboxConfigBuilder extends BaseConfigBuilder {
      */
     configureRuleSetDownload() {
         if (this.singboxVersion === '1.14') {
-            if (this.config.route.default_http_client) {
-                return;
+            if (!this.config.route.default_http_client) {
+                if (!Array.isArray(this.config.http_clients) || this.config.http_clients.length === 0) {
+                    this.config.http_clients = [{ tag: RULE_SET_HTTP_CLIENT_TAG, detour: 'DIRECT' }];
+                }
+                this.config.route.default_http_client = this.config.http_clients[0].tag;
             }
-            if (!Array.isArray(this.config.http_clients) || this.config.http_clients.length === 0) {
-                this.config.http_clients = [{ tag: RULE_SET_HTTP_CLIENT_TAG, detour: 'DIRECT' }];
-            }
-            this.config.route.default_http_client = this.config.http_clients[0].tag;
+            this.ensureDownloadTargetNotEmptyDirect();
             return;
         }
         this.config.route.rule_set.forEach(ruleSet => {
@@ -561,6 +561,30 @@ export class SingboxConfigBuilder extends BaseConfigBuilder {
                 ruleSet.download_detour = 'DIRECT';
             }
         });
+    }
+
+    /**
+     * sing-box >=1.12 rejects a detour targeting an empty direct outbound
+     * ("detour to an empty direct outbound makes no sense"), which kills every
+     * remote rule-set download on the 1.14 tier. Give the detour target a
+     * domain_resolver so it is no longer empty; mirroring
+     * route.default_domain_resolver keeps this a no-op.
+     */
+    ensureDownloadTargetNotEmptyDirect() {
+        const clientTag = this.config.route.default_http_client;
+        const client = (this.config.http_clients || []).find(c => c?.tag === clientTag);
+        if (!client?.detour) return;
+        const target = (this.config.outbounds || []).find(o => o?.tag === client.detour);
+        if (target?.type !== 'direct') return;
+        const hasDialFields = Object.keys(target).some(key => key !== 'type' && key !== 'tag');
+        if (hasDialFields) return;
+        const candidates = (this.config.dns?.servers || []).filter(server => server?.tag && server.type !== 'fakeip' && !server.detour);
+        const resolver = typeof this.config.route.default_domain_resolver === 'string'
+            ? this.config.route.default_domain_resolver
+            : (candidates.find(server => server.type === 'udp') || candidates[0])?.tag;
+        if (resolver) {
+            target.domain_resolver = resolver;
+        }
     }
 
     formatConfig() {

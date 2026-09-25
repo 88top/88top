@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -125,4 +126,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get t_list_too_long => 'Large list, may take longer to process';
+
+  @override
+  String delete_failed(String num) {
+    return 'Deletion finished, $num message(s) failed to delete';
+  }
 }

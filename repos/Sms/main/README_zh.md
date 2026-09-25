@@ -13,7 +13,8 @@
 - 复制短信到剪切板
 - 设置/恢复默认短信应用
 - 关键字过滤短信信息
-- 同号码短信搜索
+- 按日期范围筛选短信
+- 同号码/同卡短信搜索
 - 从搜索结果移除/直接删除短信
 - 一键批量删除查询结果短信
 - 一键导出所有短信到csv文件
@@ -21,10 +22,22 @@
 ## 界面截图
 ![UI](assets/screenshot/ui.jpg)
 
+## 隐私说明
+
+- 所有短信数据仅保存在**本机**。应用不发起任何网络请求，不会上传、同步或自动分享任何数据。
+- 导出的 CSV 文件仅写入应用临时目录，只在主动触发导出时通过系统分享面板分享。
+- 删除短信不可恢复，批量删除前请确认过滤条件。
+- AndroidManifest 中声明的权限及用途：
+  - `READ_SMS` / `RECEIVE_SMS` / `RECEIVE_MMS` / `RECEIVE_WAP_PUSH`：读取与管理短信/彩信。
+  - `SEND_SMS`：默认短信应用角色所需（应用本身不发送短信）。
+  - `READ_PHONE_STATE`：部分 Android 版本上默认短信应用角色所需。
+  - `READ_CONTACTS` / `READ_PROFILE` / `QUERY_ALL_PACKAGES`：随短信插件一并声明，应用本身未使用。
+  - 默认短信应用：Android 仅允许默认短信应用删除短信，应用会引导临时切换，并可恢复原默认应用。
+
 ## 开发环境
 
-- Flutter 3.47.2 (stable)
-- Dart 3.13.2
+- Flutter 3.47.5 (stable)
+- Dart 3.13.4
 - Gradle 9.3.1
 - Android Gradle Plugin 9.1.0
 - Kotlin 2.4.10
@@ -40,13 +53,13 @@ dart pub global activate fastforge
 fastforge release --name apk
 ```
 
-产物输出到 `dist/` 目录。APK 使用 release 签名，且仅打包 **arm64-v8a** 单 ABI。
+产物输出到 `dist/` 目录。APK 使用 release 签名，且仅打包 **arm64-v8a** 单 ABI。debug 构建使用标准调试签名；缺少 `android/key.properties` 时 release 构建回退为调试签名。
 
 ### CI 工作流
 
 | 工作流 | 触发时机 | Flutter 渠道 | 内容 |
 | --- | --- | --- | --- |
-| `build.yml` | push main（版本 tag 除外）/ 新建 PR | stable | `dart analyze` + `flutter test` + 构建 APK + 上传 artifact |
+| `build.yml` | push main（版本 tag 除外）/ PR 新建或更新 | stable | `dart analyze` + `flutter test` + 构建 APK + 上传 artifact |
 | `manual.yml` | 手动触发 | beta / master / stable 可选（默认 stable） | `dart analyze` + `flutter test` + 构建 APK + 上传 artifact |
 | `publish.yml` | 版本 tag（如 `1.6.1+250725`） | stable | 构建 APK + 创建草稿 Release |
 
@@ -67,7 +80,10 @@ Sms
 ├─android              # Android工程配置
 ├─assets               # 资源文件目录
 ├─lib                  # Flutter源代码目录
-│  └─main.dart         # APP入口
+│  ├─main.dart         # APP入口与界面
+│  ├─l10n              # 国际化（ARB源文件与生成代码）
+│  └─services          # 数据访问与纯逻辑（短信仓库 / 过滤 / CSV导出）
+├─test                 # 单元测试与widget测试
 ├─.github/workflows    # CI 工作流
 └─dist                 # 构建产物目录
 ```

@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -122,6 +123,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get t_list_too_long => '列表太多了，可能需要久一点';
+
+  @override
+  String delete_failed(String num) {
+    return '删除完成，$num条短信删除失败';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -242,4 +248,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get t_list_too_long => '清單較長，可能需要較多時間';
+
+  @override
+  String delete_failed(String num) {
+    return '刪除完成，$num則簡訊刪除失敗';
+  }
 }
