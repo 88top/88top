@@ -17,6 +17,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'To delete SMS messages, please set this app as the default SMS app in System Settings';
 
   @override
+  String get toast_default_settings =>
+      'Please switch the default SMS app in System Settings';
+
+  @override
+  String get toast_default_confirm => 'Please confirm in the system dialog';
+
+  @override
   String get toast_permission =>
       'SMS permission required or set as default SMS app';
 
@@ -41,6 +48,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get operation_failed => 'Operation Failed';
 
   @override
+  String get toast_save_failed =>
+      'Save failed. Please check storage space or permissions';
+
+  @override
   String get operation_completed => 'Operation Completed';
 
   @override
@@ -50,8 +61,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sms_list => 'Message List';
 
   @override
-  String get toast_share =>
-      'Shared successfully. Please open with UTF-8 encoding';
+  String get toast_share => 'Shared successfully';
 
   @override
   String get tips => 'Tips';
@@ -120,6 +130,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get t_delete_all => 'Delete All Messages in Current List';
+
+  @override
+  String get set_select => 'Select';
+
+  @override
+  String get select_all => 'Select All';
+
+  @override
+  String get exit_select => 'Exit Selection';
+
+  @override
+  String selected_num(String num) {
+    return '$num selected';
+  }
+
+  @override
+  String get toast_no_selection => 'No messages selected';
+
+  @override
+  String get t_deleting => 'Deleting...';
+
+  @override
+  String delete_progress(String done, String total) {
+    return 'Deleted $done / $total';
+  }
 
   @override
   String get sim => 'SIM';

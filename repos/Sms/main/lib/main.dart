@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -11,10 +9,12 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:sms_advanced/sms_advanced.dart';
 
+import 'controllers/sms_list_controller.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'services/csv_exporter.dart';
 import 'services/sms_filter.dart';
 import 'services/sms_repository.dart';
+import 'widgets/message_item.dart';
 
 void main() {
   runApp(const SmsApp());
@@ -62,30 +62,24 @@ class SmsHomePage extends StatefulWidget {
   State<SmsHomePage> createState() => _SmsHomePageState();
 }
 
-class _SmsHomePageState extends State<SmsHomePage> {
-  // 数据访问与过滤逻辑已下沉到 services 层，UI 只负责调用与展示。
-  final SmsRepository _repository = SmsRepository();
-  // AnimatedList 的条目计数由内部状态维护（只认 insertItem/removeItem，
-  // 会忽略重建时传的新 initialItemCount）。整表刷新（查询/过滤/切回全部）
-  // 必须换一个新 Key 让旧状态丢弃，否则内部计数与新列表长度错位，
-  // 标题显示 n 条但列表灰屏无内容，且多轮操作后越差越多。
-  GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
-  final ValueNotifier<List<SmsMessage>> _showList =
-      ValueNotifier<List<SmsMessage>>([]);
-  final TextEditingController _textController = TextEditingController();
+/// 列表页只负责渲染与交互呈现：业务状态与规则都在 SmsListController 里，
+/// 这里不保存短信数据、不重复实现过滤与删除逻辑。
+class _SmsHomePageState extends State<SmsHomePage> with WidgetsBindingObserver {
+  late SmsListController _controller;
   final FocusNode _focusNode = FocusNode();
-  final ValueNotifier<bool> _showLoading = ValueNotifier<bool>(true);
   late AppLocalizations appLocalizations;
-  DateTime? _startDate;
-  DateTime? _endDate;
 
-  /// 整表替换：丢弃旧 AnimatedList 状态，用正确长度重建。
-  void _setFullList(List<SmsMessage> newList) {
-    _listKey = GlobalKey<AnimatedListState>();
-    _showList.value = newList;
-  }
+  /// 是否已完成首次查询。didChangeDependencies 会被多次触发（locale 变化、
+  /// MediaQuery 变化等），首次查询只能发起一次。
+  bool _didInitQuery = false;
 
-  Future<void> _showToast(String msg) async {
+  /// 批量删除是否被用户取消。
+  bool _deleteCancelled = false;
+
+  void _showToast(String msg) {
+    // 所有提示都可能在 await 之后触发：页面已销毁时 context 失效，
+    // 统一在这里拦截，调用方不必逐个加 mounted 判断。
+    if (!mounted) return;
     SmartDialog.showToast(
       msg,
       animationType: SmartAnimationType.centerScale_otherSlide,
@@ -111,148 +105,55 @@ class _SmsHomePageState extends State<SmsHomePage> {
     );
   }
 
-  Future<bool> _checkDefaultSmsApp() async {
-    try {
-      bool same = await _repository.isDefaultSmsApp();
-      if (!same) {
-        _showToast(appLocalizations.toast_default);
-      }
-      return same;
-    } on PlatformException catch (e) {
-      debugPrint(e.message);
-    }
-    // 查询失败时按"非默认短信应用"处理：删除操作依赖默认应用身份，
-    // 失败时继续删除只会静默失败甚至误删状态，宁可拦截。
-    _showToast(appLocalizations.operation_failed);
-    return false;
+  Widget _buildItem(
+    SmsMessage item,
+    Animation<double> animation, {
+    bool interactive = true,
+  }) {
+    // 列表项需随选择态变化重建（复选框勾选、选中背景）。控制器是
+    // ChangeNotifier，仅监听 messages 无法感知 selectionMode/_selected 的
+    // 变化，必须显式监听 _controller 才能在勾选/全选/退出时刷新。
+    // 离场动画用的静态快照不监听，避免动画过程中被选择态刷新打断。
+    MessageItem buildItem() => MessageItem(
+      item: item,
+      animation: animation,
+      interactive: interactive,
+      selectionMode: _controller.selectionMode,
+      selected: _controller.isSelected(item),
+      appLocalizations: appLocalizations,
+      onDelete: _deleteMessage,
+      onRemove: _removeMessage,
+      onSameAddress: _controller.querySameAddress,
+      onSameSim: _controller.querySameSim,
+      onShowToast: _showToast,
+      onToggleSelection: _controller.toggleSelection,
+    );
+    if (!interactive) return buildItem();
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (BuildContext context, Widget? _) => buildItem(),
+    );
   }
 
-  Future<void> _querySms() async {
-    bool ok = await Permission.sms.isGranted;
-    List<SmsMessage> showMessageList = [];
-    if (ok) {
-      _showLoading.value = true;
-      try {
-        List<SmsMessage> allMessageList = [];
-        allMessageList = await _repository.getAllSms();
-        // body 可能为 null（部分彩信/草稿无正文），过滤逻辑见
-        // services/sms_filter.dart，null 一律视为不匹配。
-        showMessageList = filterByKeyword(allMessageList, _textController.text);
-        showMessageList = filterByDateRange(
-          showMessageList,
-          _startDate,
-          _endDate,
-        );
-        sortByDateDesc(showMessageList);
-      } catch (e) {
-        // 平台查询失败（如底层插件异常）时兜底：提示失败、清空列表，
-        // 保证 loading 一定复位、界面不挂死。
-        debugPrint('querySms failed: $e');
-        showMessageList = [];
-        _showToast(appLocalizations.operation_failed);
-      } finally {
-        _showLoading.value = false;
-      }
-    } else {
-      showMessageList = [];
-      _showToast(appLocalizations.toast_permission);
-      _showLoading.value = false;
-    }
-    _setFullList(showMessageList);
-  }
-
-  void _removeIndex(int index) {
-    if (index < 0 || index >= _showList.value.length) return;
-    final AnimatedListState? listState = _listKey.currentState;
-    if (listState == null) return;
-    final removedItem = _showList.value.removeAt(index);
-    _showList.value = [..._showList.value];
-    listState.removeItem(index, (
+  /// 只从列表移除（不删系统短信），用于"从列表移除"。
+  void _removeMessage(SmsMessage message) {
+    final int index = _controller.removeFromList(message);
+    if (index < 0) return;
+    _controller.listKey.currentState?.removeItem(index, (
       BuildContext context,
       Animation<double> animation,
     ) {
-      // 离场动画用的静态快照：不可交互，不再按 index 回查实时列表
-      //（旧代码把 stale index 传给 _buildItem，动画期间点选会读写错位）。
-      return _buildItem(index, removedItem, context, animation, false);
+      // 离场动画用的静态快照：不可交互。
+      return _buildItem(message, animation, interactive: false);
     });
-    // return removedItem;
   }
 
-  Future<void> _deleteIndex(int index) async {
-    if (index < 0 || index >= _showList.value.length) return;
-    final int? id = _showList.value[index].id;
-    final int? threadId = _showList.value[index].threadId;
-    if (id == null || threadId == null) return;
-    bool check = await _checkDefaultSmsApp();
-    if (!check) return;
-    try {
-      bool? ok = await _repository.removeSmsById(id, threadId);
-      if (ok == true) {
-        _removeIndex(index);
-      } else {
-        _showToast(appLocalizations.operation_failed);
-      }
-    } catch (e) {
-      // 平台删除调用异常（如系统拒绝）时提示失败，而不是静默崩溃。
-      debugPrint('removeSmsById failed: $e');
-      _showToast(appLocalizations.operation_failed);
+  Future<void> _deleteMessage(SmsMessage message) async {
+    if (!await _controller.ensureDefaultSmsApp()) return;
+    if (!mounted) return;
+    if (await _controller.deleteMessage(message)) {
+      _removeMessage(message);
     }
-  }
-
-  Future<void> _sameAddress(int index) async {
-    // 同步快照查询条件：await 间隙列表可能已被刷新，不能再用 index 回查。
-    if (index < 0 || index >= _showList.value.length) return;
-    final String? address = _showList.value[index].address;
-    _textController.text = '';
-    List<SmsMessage> showMessageList = [];
-    bool ok = await Permission.sms.isGranted;
-    if (ok) {
-      _showLoading.value = true;
-
-      try {
-        showMessageList = await _repository.queryByAddress(address);
-        sortByDateDesc(showMessageList);
-      } catch (e) {
-        debugPrint('querySms(address) failed: $e');
-        showMessageList = [];
-        _showToast(appLocalizations.operation_failed);
-      } finally {
-        _showLoading.value = false;
-      }
-    } else {
-      showMessageList = [];
-    }
-
-    _setFullList(showMessageList);
-  }
-
-  Future<void> _sameSim(int index) async {
-    // 同上：先同步快照 sim，避免异步间隙 index 失效。
-    if (index < 0 || index >= _showList.value.length) return;
-    final int? sim = _showList.value[index].sim;
-    _textController.text = '';
-    List<SmsMessage> showMessageList = [];
-    bool ok = await Permission.sms.isGranted;
-    if (ok) {
-      _showLoading.value = true;
-
-      try {
-        List<SmsMessage> allMessageList = [];
-        allMessageList = await _repository.getAllSms();
-        showMessageList = filterBySim(allMessageList, sim);
-        sortByDateDesc(showMessageList);
-      } catch (e) {
-        debugPrint('querySms(sim) failed: $e');
-        showMessageList = [];
-        _showToast(appLocalizations.operation_failed);
-      } finally {
-        _showLoading.value = false;
-      }
-    } else {
-      showMessageList = [];
-    }
-
-    _setFullList(showMessageList);
   }
 
   void _filterDate() async {
@@ -261,21 +162,27 @@ class _SmsHomePageState extends State<SmsHomePage> {
       firstDate: DateTime(1900),
       lastDate: DateTime(2999),
       initialDateRange: DateTimeRange(
-        start: _startDate ?? DateTime.now().subtract(Duration(days: 7)),
-        end: _endDate ?? DateTime.now(),
+        start:
+            _controller.startDate ??
+            DateTime.now().subtract(const Duration(days: 7)),
+        end: _controller.endDate ?? DateTime.now(),
       ),
     );
 
+    if (!mounted) return;
     if (picked != null) {
-      _startDate = picked.start;
-      _endDate = picked.end.add(Duration(hours: 23, minutes: 59, seconds: 59));
-      _querySms();
+      // 区间语义 [起始日零点, 结束日次日零点)：左闭右开。旧实现给 end 加
+      // 23:59:59 后又按开区间比较，结束日 23:59:59.001 之后的短信会被漏掉。
+      await _controller.applyDateRange(
+        startOfDay(picked.start),
+        startOfNextDay(picked.end),
+      );
     }
   }
 
   void _filterMsg() {
-    double top = MediaQuery.of(context).padding.top;
-    double width = MediaQuery.of(context).size.width / 2;
+    final double top = MediaQuery.of(context).padding.top;
+    final double width = MediaQuery.of(context).size.width / 2;
     _focusNode.requestFocus();
     SmartDialog.show(
       alignment: Alignment.topCenter,
@@ -294,15 +201,15 @@ class _SmsHomePageState extends State<SmsHomePage> {
               SizedBox(height: top),
               TextField(
                 autofocus: true,
-                controller: _textController,
+                controller: _controller.keywordController,
                 focusNode: _focusNode,
                 decoration: InputDecoration(
                   labelText: appLocalizations.keyword,
                   prefixIcon: const Icon(Icons.search_outlined),
                   suffixIcon: GestureDetector(
                     onTap: () {
-                      if (_textController.text.isNotEmpty) {
-                        _textController.text = '';
+                      if (_controller.keywordController.text.isNotEmpty) {
+                        _controller.keywordController.clear();
                       } else {
                         SmartDialog.dismiss(status: SmartStatus.custom);
                       }
@@ -331,18 +238,23 @@ class _SmsHomePageState extends State<SmsHomePage> {
 
   void _filterSubmit() {
     SmartDialog.dismiss(status: SmartStatus.custom);
-    _querySms();
+    _controller.queryAll();
   }
 
   void _deleteMsg() {
+    // 多选模式下删除"已选"而非"当前列表全部"，确认弹窗文案与数量随之切换。
+    final bool selecting = _controller.selectionMode;
+    final int total = selecting ? _controller.selectedCount : _controller.count;
+    if (selecting && total == 0) {
+      _showToast(appLocalizations.toast_no_selection);
+      return;
+    }
     showCupertinoModalPopup(
       context: context,
-      builder: (context) {
+      builder: (BuildContext context) {
         return CupertinoActionSheet(
           title: Text(appLocalizations.t_confirm_delete),
-          message: Text(
-            appLocalizations.delete_num(_showList.value.length.toString()),
-          ),
+          message: Text(appLocalizations.delete_num(total.toString())),
           actions: <Widget>[
             CupertinoActionSheetAction(
               onPressed: () {
@@ -366,56 +278,110 @@ class _SmsHomePageState extends State<SmsHomePage> {
   }
 
   Future<void> _deleteSubmit() async {
-    bool check = await _checkDefaultSmsApp();
-    if (!check) return;
-    if (_showList.value.length > 3000) {
+    // 多选模式：删除已选；否则删除当前列表全部。数量口径与弹窗一致。
+    final bool selecting = _controller.selectionMode;
+    final int total = selecting ? _controller.selectedCount : _controller.count;
+    if (selecting && total == 0) {
+      _showToast(appLocalizations.toast_no_selection);
+      return;
+    }
+    if (!selecting && _controller.isEmpty) {
+      _showToast(appLocalizations.toast_no);
+      return;
+    }
+    if (!await _controller.ensureDefaultSmsApp()) return;
+    if (!mounted) return;
+    if (total > 3000) {
       _showToast(appLocalizations.t_list_too_long);
     }
-    // 快照：批量删除耗时较长，期间列表可能被其他操作刷新，
-    // 按开始时的快照逐条删除，避免 index 漂移或读写错位。
-    final List<SmsMessage> items = List.of(_showList.value);
-    _showLoading.value = true;
-    int failed = 0;
-    for (final SmsMessage message in items) {
-      final int? id = message.id;
-      final int? threadId = message.threadId;
-      // id/threadId 缺失的条目无法删除，计入失败而不是 ! 强解包崩溃。
-      if (id == null || threadId == null) {
-        failed++;
-        continue;
-      }
-      try {
-        final bool? ok = await _repository.removeSmsById(id, threadId);
-        if (ok != true) {
-          failed++;
-        }
-      } catch (e) {
-        debugPrint('removeSmsById failed: $e');
-        failed++;
-      }
-    }
+
+    final ValueNotifier<int?> progress = ValueNotifier<int?>(null);
+    _deleteCancelled = false;
+    SmartDialog.show(
+      clickMaskDismiss: false,
+      builder: (_) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              ValueListenableBuilder<int?>(
+                valueListenable: progress,
+                builder: (BuildContext context, int? value, Widget? _) {
+                  // value 为 null 表示原生批量删除中，没有逐条进度。
+                  return Text(
+                    value == null
+                        ? appLocalizations.t_deleting
+                        : appLocalizations.delete_progress(
+                            value.toString(),
+                            total.toString(),
+                          ),
+                  );
+                },
+              ),
+              TextButton(
+                onPressed: () => _deleteCancelled = true,
+                child: Text(appLocalizations.b_cancel),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    final int failed = selecting
+        ? await _controller.deleteSelected(
+            onProgress: (int? done, int total) {
+              progress.value = done;
+            },
+            shouldCancel: () => _deleteCancelled || !mounted,
+          )
+        : await _controller.deleteAll(
+            onProgress: (int? done, int total) {
+              progress.value = done;
+            },
+            shouldCancel: () => _deleteCancelled || !mounted,
+          );
+    SmartDialog.dismiss();
+    progress.dispose();
+    if (!mounted) return;
     if (failed > 0) {
       _showToast(appLocalizations.delete_failed(failed.toString()));
     }
-    _querySms();
+    if (selecting) {
+      // 删除完成后退出多选模式，避免残留的选中态指向已删除条目。
+      _controller.exitSelectionMode();
+    }
+    _controller.queryAll();
   }
 
   Future<void> _requestPermission() async {
-    // v13 迁移指南：Android 上 status 永不返回 permanentlyDenied，
-    // 只能以 request() 结果为准。已授权时直接跳过请求。
-    if (await Permission.sms.isGranted) {
-      if (_showList.value.isEmpty) {
-        _querySms();
-      }
+    // 勿用 Permission.sms.isGranted 短路：掉默认短信角色并被系统强停后，
+    // 该状态可能仍缓存为 true，导致「申请成功」假象，实际 READ_SMS 已被收回。
+    // 一律走 request() 让系统重新裁定；再以原生 checkSelfPermission 复核。
+    final PermissionStatus status = await Permission.sms.request();
+    final bool reallyGranted = await _controller.repository
+        .hasReadSmsPermission();
+    final bool? isDefault = await _controller.repository.isDefaultSmsApp();
+
+    if (reallyGranted || isDefault == true) {
+      // 系统侧确实可读（有 READ_SMS，或本应用仍是默认短信）。
+      // 强制重查，去掉空列表残留。
+      await _controller.queryAll();
       _showToast(appLocalizations.operation_completed);
       return;
     }
-    final PermissionStatus status = await Permission.sms.request();
+
+    // permission_handler 报成功但原生 check 为否：状态不一致，去设置页手动开。
     if (status.isGranted || status.isLimited) {
-      if (_showList.value.isEmpty) {
-        _querySms();
-      }
-      _showToast(appLocalizations.operation_completed);
+      _showToast(appLocalizations.toast_permission);
+      await _setAppPermission();
       return;
     }
     if (status.isPermanentlyDenied) {
@@ -430,7 +396,7 @@ class _SmsHomePageState extends State<SmsHomePage> {
   }
 
   Future<void> _setAppPermission() async {
-    bool ok = await openAppSettings();
+    final bool ok = await openAppSettings();
     if (!ok) {
       _showToast(appLocalizations.operation_failed);
     }
@@ -438,10 +404,13 @@ class _SmsHomePageState extends State<SmsHomePage> {
 
   Future<void> _setDefaultApp() async {
     try {
-      final set = await _repository.setDefaultSmsApp();
-      final get = await _repository.getDefaultSmsApp();
+      final String? set = await _controller.repository.setDefaultSmsApp();
+      final String? get = await _controller.repository.getDefaultSmsApp();
       if (set == 'had' || get == SmsRepository.defaultPackageId) {
         _showToast(appLocalizations.operation_completed);
+      } else {
+        // 'no'：已发起系统角色申请流程，尚未生效，需用户在系统弹窗确认。
+        _showToast(appLocalizations.toast_default_confirm);
       }
     } on PlatformException catch (e) {
       _showToast(e.message ?? appLocalizations.operation_failed);
@@ -450,8 +419,15 @@ class _SmsHomePageState extends State<SmsHomePage> {
 
   Future<void> _resetDefaultSmsApp() async {
     try {
-      final result = await _repository.resetDefaultSmsApp();
-      if (result == 'no') {
+      final String? result = await _controller.repository.resetDefaultSmsApp();
+      if (result == 'settings') {
+        // Android 10+ 无法由应用代用户释放默认短信角色，只能引导到系统
+        // 设置页；如实告知，不谎报"已完成"。
+        _showToast(appLocalizations.toast_default_settings);
+      } else if (result == 'ok') {
+        // Android 10 以下：已发起系统切换弹窗，需用户确认。
+        _showToast(appLocalizations.toast_default_confirm);
+      } else if (result == 'no') {
         _showToast(appLocalizations.operation_failed);
       }
     } on PlatformException catch (e) {
@@ -460,39 +436,55 @@ class _SmsHomePageState extends State<SmsHomePage> {
   }
 
   Future<void> _export() async {
-    if (_showList.value.isEmpty) {
+    if (_controller.isEmpty) {
       _showToast(appLocalizations.toast_no);
       return;
     }
 
-    File? outFile;
+    // 阶段 1：生成 CSV 并落盘。这里失败多为 IO/权限/平台（存储满、临时目录不可用、
+    // 缺少存储权限），单独提示"保存失败"，与后面调起系统分享的失败区分开。
+    // 阶段 1 成功后 outFile 必已赋值；阶段 1 失败即 return，不会触碰它。
+    late File outFile;
     try {
       // CSV 编码逻辑见 services/csv_exporter.dart（纯函数，已单测覆盖）。
-      String csvData = buildSmsCsv(_showList.value);
-      final bytes = utf8.encode(csvData);
-      Uint8List data = Uint8List.fromList(bytes);
-      XFile xFile = XFile.fromData(data, mimeType: 'text/csv');
-      Directory tempDir = await getTemporaryDirectory();
-      String path = '${tempDir.path}/${appLocalizations.sms_list}.csv';
-      xFile.saveTo(path);
+      final Directory tempDir = await getTemporaryDirectory();
+      final String path = '${tempDir.path}/${appLocalizations.sms_list}.csv';
       outFile = File(path);
+      // 直接 writeAsBytes 落盘，省掉 String→Uint8List.fromList 这层冗余全量
+      // 拷贝，以及 XFile.fromData 额外驻留的一份 data。内存峰值从多份全量降到
+      // csvString + bytes 两份。flush 确保 CSV 完整落盘后再分享，否则可能分享
+      // 到空或半截文件。这里刻意不改 CSV 的逐行编码路径（仍用 buildSmsCsv
+      // 整体编码）：流式/分批编码需逐字节一致性验证，改动风险大于收益。
+      await outFile.writeAsBytes(
+        encodeSmsCsvBytes(_controller.messages.value),
+        flush: true,
+      );
+    } catch (e) {
+      // IO/平台类失败：提示保存失败，而不是笼统的"操作失败"。
+      debugPrint('export save failed: $e');
+      _showToast(appLocalizations.toast_save_failed);
+      return;
+    }
+
+    // 阶段 2：调起系统分享。文件已落盘，这里失败只关乎分享面板/目标应用。
+    try {
       final ShareParams params = ShareParams(
         text: appLocalizations.sms_list,
-        files: [XFile(path)],
+        files: <XFile>[XFile(outFile.path)],
       );
-      ShareResult res = await SharePlus.instance.share(params);
+      final ShareResult res = await SharePlus.instance.share(params);
       if (res.status == ShareResultStatus.success) {
         _showToast(appLocalizations.toast_share);
       }
     } catch (e) {
-      // 写文件或调起分享失败时提示，而不是未捕获异常直接崩溃。
-      debugPrint('export failed: $e');
+      // 调起分享失败时提示，而不是未捕获异常直接崩溃。
+      debugPrint('export share failed: $e');
       _showToast(appLocalizations.operation_failed);
     } finally {
       // 只清理本次导出的 CSV 文件；递归删整个临时目录会连缓存目录里
       // 其他数据一起清掉，风险过大。
       try {
-        await outFile?.delete();
+        await outFile.delete();
       } catch (_) {
         // 清理失败可以忽略，临时目录系统会回收。
       }
@@ -502,6 +494,7 @@ class _SmsHomePageState extends State<SmsHomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // 系统 UI 一次性配置：原先放在 build 里，每次重建都会触发
     // platform channel 调用。透明导航栏 + edge-to-edge 由系统自动
     // 处理图标对比度，无需按主题逐帧更新。
@@ -509,186 +502,43 @@ class _SmsHomePageState extends State<SmsHomePage> {
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent),
     );
-    // 首次查询推迟到首帧之后：appLocalizations 在 build 中才赋值，
-    // _querySms 的 await 间隙若早于首帧触发提示，会触发
-    // LateInitializationError。
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _querySms();
-    });
   }
 
-  Widget _buildItem(
-    int index,
-    SmsMessage item,
-    BuildContext context,
-    Animation<double> animation, [
-    bool interactive = true,
-  ]) {
-    return SlideTransition(
-      position:
-          Tween<Offset>(
-            begin: const Offset(1, 0),
-            end: const Offset(0, 0),
-          ).animate(
-            CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeInBack,
-              reverseCurve: Curves.easeInOutBack,
-            ),
-          ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            minVerticalPadding: 8,
-            minLeadingWidth: 4,
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [Text(item.body ?? ''), const SizedBox(height: 5)],
-            ),
-            subtitle: Row(
-              spacing: 10,
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '${appLocalizations.sim}${item.sim}',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    item.sender ?? '',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Text(
-                  item.date.toString().substring(0, 19),
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                  ),
-                ),
-              ],
-            ),
-            onTap: interactive
-                ? () {
-                    showCupertinoModalPopup(
-                      context: context,
-                      builder: (context) {
-                        return CupertinoActionSheet(
-                          title: Text(appLocalizations.tips),
-                          message: Text(appLocalizations.delete_or_move),
-                          actions: <Widget>[
-                            CupertinoActionSheetAction(
-                              onPressed: () {
-                                Navigator.of(context).pop('remove');
-                                _removeIndex(index);
-                              },
-                              child: Text(appLocalizations.b_remove),
-                            ),
-                            CupertinoActionSheetAction(
-                              onPressed: () {
-                                Navigator.of(context).pop('delete');
-                                _deleteIndex(index);
-                              },
-                              isDestructiveAction: true,
-                              isDefaultAction: true,
-                              child: Text(appLocalizations.b_delete),
-                            ),
-                            CupertinoActionSheetAction(
-                              onPressed: () {
-                                Navigator.of(context).pop('same');
-                                _sameAddress(index);
-                              },
-                              child: Text(appLocalizations.b_same_number),
-                            ),
-                            CupertinoActionSheetAction(
-                              onPressed: () {
-                                Navigator.of(context).pop('sim');
-                                _sameSim(index);
-                              },
-                              child: Text(appLocalizations.b_same_sim),
-                            ),
-                            CupertinoActionSheetAction(
-                              onPressed: () {
-                                Navigator.of(context).pop('copy');
-                                Clipboard.setData(
-                                  ClipboardData(
-                                    // 用创建弹窗时捕获的 item，不按 index 回查实时列表
-                                    //（列表刷新/移除后 index 可能指向别条甚至越界）。
-                                    text:
-                                        '${item.address}\r\n${item.date}\r\n${item.body}',
-                                  ),
-                                );
-                                _showToast(appLocalizations.toast_clipboard);
-                              },
-                              child: Text(appLocalizations.b_copy),
-                            ),
-                          ],
-                          cancelButton: CupertinoActionSheetAction(
-                            child: Text(appLocalizations.b_cancel),
-                            onPressed: () {
-                              Navigator.of(context).pop('cancel');
-                            },
-                          ),
-                        );
-                      },
-                    );
-                  }
-                : null,
-            onLongPress: interactive
-                ? () {
-                    showCupertinoModalPopup(
-                      context: context,
-                      builder: (context) {
-                        return CupertinoActionSheet(
-                          title: Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: SelectableText(
-                              item.body ?? '',
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
-                          ),
-                          actions: [
-                            CupertinoActionSheetAction(
-                              onPressed: () {
-                                Navigator.of(context).pop('copy');
-                                Clipboard.setData(
-                                  ClipboardData(text: '${item.address}'),
-                                );
-                                _showToast(appLocalizations.toast_clipboard);
-                              },
-                              child: Text(item.address ?? ''),
-                            ),
-                          ],
-                          cancelButton: CupertinoActionSheetAction(
-                            child: Text(appLocalizations.b_cancel),
-                            onPressed: () {
-                              Navigator.of(context).pop('cancel');
-                            },
-                          ),
-                        );
-                      },
-                    );
-                  }
-                : null,
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            child: Divider(),
-          ),
-        ],
-      ),
-    );
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // 从系统设置（改默认短信/权限）返回后自动重查。掉默认短信角色时系统可能
+    // 杀进程，冷启动会走 didChangeDependencies；进程仍在时靠这里刷新。
+    if (state == AppLifecycleState.resumed && _didInitQuery) {
+      _controller.queryAll();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 在 didChangeDependencies 里取国际化对象：它早于首帧执行，且 locale
+    // 变化时会重新触发。旧实现在 build() 里给 late 字段赋值，导致任何早于
+    // 首帧触发的异步回调都是 LateInitializationError，只能靠把首次查询推迟
+    // 到 postFrameCallback 来绕开——治标不治本。
+    appLocalizations = AppLocalizations.of(context)!;
+    if (!_didInitQuery) {
+      _didInitQuery = true;
+      _controller = SmsListController(
+        l10n: appLocalizations,
+        onMessage: _showToast,
+      );
+      _controller.queryAll();
+    } else {
+      _controller.l10n = appLocalizations;
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _focusNode.dispose();
+    _controller.dispose();
+    super.dispose();
   }
 
   PopupMenuItem<String> _selectView(IconData icon, String text, String id) {
@@ -706,186 +556,211 @@ class _SmsHomePageState extends State<SmsHomePage> {
     );
   }
 
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(
+            Icons.message_outlined,
+            size: 80,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            appLocalizations.t_no_sms,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 80),
+          FilledButton(
+            onPressed: () {
+              _controller.clearFilters();
+              _controller.queryAll();
+            },
+            child: Text(appLocalizations.b_remove_filter),
+          ),
+          const SizedBox(height: 10),
+          FilledButton(
+            onPressed: _setDefaultApp,
+            child: Text(appLocalizations.set_default),
+          ),
+          const SizedBox(height: 10),
+          FilledButton(
+            onPressed: _requestPermission,
+            child: Text(appLocalizations.set_permission),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    appLocalizations = AppLocalizations.of(context)!;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: ValueListenableBuilder(
-          valueListenable: _showList,
-          builder:
-              (BuildContext context, List<SmsMessage> value, Widget? child) {
-                return value.isEmpty
-                    ? Text(appLocalizations.sms)
-                    : Text(appLocalizations.num_sms(value.length.toString()));
-              },
+        title: ListenableBuilder(
+          // 标题既要随列表条数变化，也要随多选状态/选中数变化：合并两个
+          // 监听源，任一变化都重建标题。
+          listenable: Listenable.merge([_controller, _controller.messages]),
+          builder: (BuildContext context, Widget? child) {
+            if (_controller.selectionMode) {
+              return Text(
+                appLocalizations.selected_num(
+                  _controller.selectedCount.toString(),
+                ),
+              );
+            }
+            return _controller.isEmpty
+                ? Text(appLocalizations.sms)
+                : Text(appLocalizations.num_sms(_controller.count.toString()));
+          },
         ),
-        actions: [
-          IconButton(
-            tooltip: appLocalizations.t_all_sms,
-            onPressed: () {
-              _textController.text = '';
-              _startDate = null;
-              _endDate = null;
-              _querySms();
-            },
-            icon: const Icon(Icons.format_list_bulleted_outlined),
-          ),
-          IconButton(
-            tooltip: appLocalizations.t_date_filter,
-            onPressed: _filterDate,
-            icon: const Icon(Icons.date_range_outlined),
-          ),
-          IconButton(
-            tooltip: appLocalizations.t_keyword_filter,
-            onPressed: _filterMsg,
-            icon: const Icon(Icons.search_outlined),
-          ),
-          PopupMenuButton(
-            itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-              _selectView(
-                Icons.message_outlined,
-                appLocalizations.set_permission,
-                'A',
-              ),
-              _selectView(
-                Icons.settings_outlined,
-                appLocalizations.set_settings,
-                'B',
-              ),
-              _selectView(
-                Icons.admin_panel_settings_outlined,
-                appLocalizations.set_default,
-                'C',
-              ),
-              _selectView(
-                Icons.refresh_rounded,
-                appLocalizations.set_restore,
-                'D',
-              ),
-              _selectView(
-                Icons.share_outlined,
-                appLocalizations.set_export,
-                'E',
-              ),
-            ],
-            onSelected: (String action) {
-              switch (action) {
-                case 'A':
-                  _requestPermission();
-                  break;
-                case 'B':
-                  _setAppPermission();
-                  break;
-                case 'C':
-                  _setDefaultApp();
-                  break;
-                case 'D':
-                  _resetDefaultSmsApp();
-                  break;
-                case 'E':
-                  _export();
-                  break;
+        actions: <Widget>[
+          // 选择态相关的按钮必须监听 _controller：控制器是 ChangeNotifier，
+          // 仅在外层 build 不会在 selectionMode 变化时重建，导致"多选"点了
+          // 没反应。这里用 ListenableBuilder 显式监听，进入/退出多选时切换
+          // 按钮组（全选/退出 ↔ 全部/日期/搜索/多选/菜单）。
+          ListenableBuilder(
+            listenable: _controller,
+            builder: (BuildContext context, Widget? _) {
+              if (_controller.selectionMode) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    TextButton(
+                      onPressed: _controller.selectAll,
+                      child: Text(appLocalizations.select_all),
+                    ),
+                    TextButton(
+                      onPressed: _controller.exitSelectionMode,
+                      child: Text(appLocalizations.exit_select),
+                    ),
+                  ],
+                );
               }
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  IconButton(
+                    tooltip: appLocalizations.t_all_sms,
+                    onPressed: () {
+                      _controller.clearFilters();
+                      _controller.queryAll();
+                    },
+                    icon: const Icon(Icons.format_list_bulleted_outlined),
+                  ),
+                  IconButton(
+                    tooltip: appLocalizations.t_date_filter,
+                    onPressed: _filterDate,
+                    icon: const Icon(Icons.date_range_outlined),
+                  ),
+                  IconButton(
+                    tooltip: appLocalizations.t_keyword_filter,
+                    onPressed: _filterMsg,
+                    icon: const Icon(Icons.search_outlined),
+                  ),
+                  IconButton(
+                    tooltip: appLocalizations.set_select,
+                    onPressed: () => _controller.enterSelectionMode(),
+                    icon: const Icon(Icons.checklist_outlined),
+                  ),
+                  PopupMenuButton<String>(
+                    itemBuilder: (BuildContext context) =>
+                        <PopupMenuItem<String>>[
+                          _selectView(
+                            Icons.message_outlined,
+                            appLocalizations.set_permission,
+                            'A',
+                          ),
+                          _selectView(
+                            Icons.settings_outlined,
+                            appLocalizations.set_settings,
+                            'B',
+                          ),
+                          _selectView(
+                            Icons.admin_panel_settings_outlined,
+                            appLocalizations.set_default,
+                            'C',
+                          ),
+                          _selectView(
+                            Icons.refresh_rounded,
+                            appLocalizations.set_restore,
+                            'D',
+                          ),
+                          _selectView(
+                            Icons.share_outlined,
+                            appLocalizations.set_export,
+                            'E',
+                          ),
+                        ],
+                    onSelected: (String action) {
+                      switch (action) {
+                        case 'A':
+                          _requestPermission();
+                          break;
+                        case 'B':
+                          _setAppPermission();
+                          break;
+                        case 'C':
+                          _setDefaultApp();
+                          break;
+                        case 'D':
+                          _resetDefaultSmsApp();
+                          break;
+                        case 'E':
+                          _export();
+                          break;
+                      }
+                    },
+                  ),
+                ],
+              );
             },
           ),
         ],
       ),
-      body: ValueListenableBuilder(
-        valueListenable: _showLoading,
-        builder: (BuildContext context, bool value, Widget? child) {
-          return value
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const CircularProgressIndicator(),
-                      Container(
-                        margin: const EdgeInsets.only(top: 20),
-                        child: Text(
-                          appLocalizations.t_wait,
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                      ),
-                    ],
+      body: ValueListenableBuilder<bool>(
+        valueListenable: _controller.loading,
+        builder: (BuildContext context, bool loading, Widget? child) {
+          if (loading) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const CircularProgressIndicator(),
+                  Container(
+                    margin: const EdgeInsets.only(top: 20),
+                    child: Text(
+                      appLocalizations.t_wait,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ),
-                )
-              : ValueListenableBuilder(
-                  valueListenable: _showList,
-                  builder:
-                      (
-                        BuildContext context,
-                        List<SmsMessage> value,
-                        Widget? child,
-                      ) {
-                        return value.isEmpty
-                            ? Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.message_outlined,
-                                      size: 80,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary,
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                      appLocalizations.t_no_sms,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge,
-                                    ),
-                                    const SizedBox(height: 80),
-                                    FilledButton(
-                                      onPressed: () {
-                                        _textController.text = '';
-                                        _startDate = null;
-                                        _endDate = null;
-                                        _querySms();
-                                      },
-                                      child: Text(
-                                        appLocalizations.b_remove_filter,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    FilledButton(
-                                      onPressed: _setDefaultApp,
-                                      child: Text(appLocalizations.set_default),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    FilledButton(
-                                      onPressed: _requestPermission,
-                                      child: Text(
-                                        appLocalizations.set_permission,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : AnimatedList(
-                                key: _listKey,
-                                initialItemCount: value.length,
-                                itemBuilder:
-                                    (
-                                      BuildContext context,
-                                      int index,
-                                      Animation<double> animation,
-                                    ) {
-                                      SmsMessage item = value[index];
-                                      return _buildItem(
-                                        index,
-                                        item,
-                                        context,
-                                        animation,
-                                      );
-                                    },
-                              );
-                      },
-                );
+                ],
+              ),
+            );
+          }
+          return ValueListenableBuilder<List<SmsMessage>>(
+            valueListenable: _controller.messages,
+            builder:
+                (BuildContext context, List<SmsMessage> value, Widget? child) {
+                  if (value.isEmpty) {
+                    return _buildEmptyState();
+                  }
+                  return AnimatedList(
+                    key: _controller.listKey,
+                    initialItemCount: value.length,
+                    itemBuilder:
+                        (
+                          BuildContext context,
+                          int index,
+                          Animation<double> animation,
+                        ) {
+                          return _buildItem(value[index], animation);
+                        },
+                  );
+                },
+          );
         },
       ),
       floatingActionButton: FloatingActionButton(

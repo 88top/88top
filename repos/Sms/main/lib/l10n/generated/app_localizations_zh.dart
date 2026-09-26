@@ -16,6 +16,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get toast_default => '需要在系统设置中将本应用设置为默认短信应用才能删除短信';
 
   @override
+  String get toast_default_settings => '请在系统设置中切换默认短信应用';
+
+  @override
+  String get toast_default_confirm => '请在系统弹窗中确认';
+
+  @override
   String get toast_permission => '需要申请短信权限或设置为短信默认应用';
 
   @override
@@ -39,6 +45,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get operation_failed => '操作失败';
 
   @override
+  String get toast_save_failed => '保存失败，请检查存储空间或权限';
+
+  @override
   String get operation_completed => '操作成功';
 
   @override
@@ -48,7 +57,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sms_list => '短信列表';
 
   @override
-  String get toast_share => '分享成功，需用utf-8格式打开';
+  String get toast_share => '分享成功';
 
   @override
   String get tips => '提示';
@@ -119,6 +128,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get t_delete_all => '删除当前列表所有短信';
 
   @override
+  String get set_select => '多选';
+
+  @override
+  String get select_all => '全选';
+
+  @override
+  String get exit_select => '退出多选';
+
+  @override
+  String selected_num(String num) {
+    return '已选 $num 条';
+  }
+
+  @override
+  String get toast_no_selection => '未选择短信';
+
+  @override
+  String get t_deleting => '正在删除...';
+
+  @override
+  String delete_progress(String done, String total) {
+    return '已删除 $done / $total';
+  }
+
+  @override
   String get sim => '卡';
 
   @override
@@ -139,6 +173,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get toast_default => '需要在系統設定中將本應用程式設定為預設簡訊應用程式才能刪除簡訊';
+
+  @override
+  String get toast_default_settings => '請在系統設定中切換預設簡訊應用程式';
+
+  @override
+  String get toast_default_confirm => '請在系統彈出視窗中確認';
 
   @override
   String get toast_permission => '需要申請簡訊權限或設定為預設簡訊應用程式';
@@ -164,6 +204,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get operation_failed => '操作失敗';
 
   @override
+  String get toast_save_failed => '保存失敗，請檢查儲存空間或權限';
+
+  @override
   String get operation_completed => '操作成功';
 
   @override
@@ -173,7 +216,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get sms_list => '簡訊清單';
 
   @override
-  String get toast_share => '分享成功，請使用utf-8格式開啟';
+  String get toast_share => '分享成功';
 
   @override
   String get tips => '提示';
@@ -242,6 +285,31 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get t_delete_all => '刪除目前清單中的所有簡訊';
+
+  @override
+  String get set_select => '多選';
+
+  @override
+  String get select_all => '全選';
+
+  @override
+  String get exit_select => '退出多選';
+
+  @override
+  String selected_num(String num) {
+    return '已選 $num 則';
+  }
+
+  @override
+  String get toast_no_selection => '未選取簡訊';
+
+  @override
+  String get t_deleting => '正在刪除...';
+
+  @override
+  String delete_progress(String done, String total) {
+    return '已刪除 $done / $total';
+  }
 
   @override
   String get sim => '卡';

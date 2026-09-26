@@ -31,7 +31,7 @@
   - `READ_SMS` / `RECEIVE_SMS` / `RECEIVE_MMS` / `RECEIVE_WAP_PUSH`：讀取與管理簡訊/多媒體訊息。
   - `SEND_SMS`：預設簡訊應用程式角色所需（應用程式本身不傳送簡訊）。
   - `READ_PHONE_STATE`：部分 Android 版本上預設簡訊應用程式角色所需。
-  - `READ_CONTACTS` / `READ_PROFILE` / `QUERY_ALL_PACKAGES`：隨簡訊外掛一併宣告，應用程式本身未使用。
+  - `READ_CONTACTS` / `READ_PROFILE` / `QUERY_ALL_PACKAGES`：隨簡訊外掛一併帶入但從未使用，已在 manifest 合併階段用 `tools:node="remove"` 剔除。
   - 預設簡訊應用程式：Android 僅允許預設簡訊應用程式刪除簡訊，應用程式會引導暫時切換，並可還原原預設應用程式。
 
 ## 開發環境
@@ -43,6 +43,8 @@
 - Kotlin 2.4.10
 - compileSdk 37 / minSdk 26
 - JDK 17
+
+以下指令假設 `flutter` / `dart` 已在 `PATH` 中。本專案開發時使用 [fvm](https://fvm.app) 管理的 stable 通道 SDK；若你的 SDK 安裝於其他位置，可參考 `AGENTS.md` 中的 PATH 前綴。
 
 ## 構建與發佈
 
@@ -80,9 +82,12 @@ Sms
 ├─android              # Android工程配置
 ├─assets               # 資源檔案目錄
 ├─lib                  # Flutter原始碼目錄
-│  ├─main.dart         # APP入口與介面
+│  ├─main.dart         # APP入口與簡訊列表頁介面
+│  ├─controllers       # SmsListController：列表狀態與商業邏輯
 │  ├─l10n              # 國際化（ARB原始檔與生成程式碼）
-│  └─services          # 資料存取與純邏輯（簡訊儲存庫 / 篩選 / CSV匯出）
+│  ├─services          # 資料存取與純邏輯（簡訊儲存庫 / 篩選 / CSV匯出）
+│  ├─utils             # 小型純函式（日期格式化）
+│  └─widgets           # 可重用介面元件（簡訊列表項）
 ├─test                 # 單元測試與widget測試
 ├─.github/workflows    # CI 工作流
 └─dist                 # 構建產物目錄

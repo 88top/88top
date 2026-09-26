@@ -5,8 +5,24 @@
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-09-26
+
+### Added
+
+- feat(ui): 新增多选删除（AppBar 进入多选模式，列表项显示复选框，支持全选 / 逐条选择 / 退出多选，确认后批量删除选中项而非整列）
+- feat(controller): SmsListController 新增选择态管理（`selectionMode` / `enterSelectionMode` / `exitSelectionMode` / `toggleSelection` / `selectAll` / `deleteSelected`）
+- feat(l10n): 新增多选相关文案（`set_select` / `select_all` / `exit_select` / `selected_num` / `toast_no_selection`）三语同步
+
 ### Fixed
 
+- fix(permission): READ_SMS 以 AppOps（MODE_ALLOWED）而非仅 checkSelfPermission 判定，修复掉默认短信后 Flyme 将 AppOps 置 ignore、申请不弹框且查询恒空
+- fix(permission): 申请短信权限不再用 `Permission.sms.isGranted` 短路；一律 `request()` 并以原生 `checkSelfPermission` 复核。修复掉默认短信被系统强停后权限缓存假 true、toast「申请成功」却永远读不到短信
+- fix(query): 无 READ_SMS 且非默认短信时显式返回 permission，不再把 OEM 的空游标当成「没有短信」
+- fix(query): 新增原生 `querySms` 通道，按整表 + 收件箱/已发送/草稿多 URI 合并去重；只投影已知列、按列名安全取值。修复掉默认短信后 OEM 对 `content://sms` 返回空、有 READ_SMS 却看不到短信
+- fix(query): 日常查询不再调用 sms_advanced（其 `readSms` 对 `creator` 等文本列 `getInt` 未捕获会打崩进程）；仅原生通道缺失时才回退插件，修复掉默认后的闪退
+- fix(query): 原生行解析不用 `SmsMessage.fromJson`，`date` 为 null 时不再抛错清空整次查询
+- fix(query): 查询不再以 `Permission.sms.isGranted` 作为前置门闩，修复交还默认短信角色后权限误报为拒绝、有 READ_SMS 却读不到任何短信
+- fix(lifecycle): 从系统设置返回后自动重查短信列表
 - fix(app): 首次短信查询推迟到首帧之后，避免国际化对象未初始化导致的潜在崩溃
 - fix(default-sms): 查询默认短信应用发生平台异常时按失败处理（fail-safe），不再继续删除
 - fix(query): 关键词过滤对 null 正文做空安全处理，不再强解包崩溃
@@ -16,6 +32,9 @@
 - fix(export): CSV 中可空字段（id/threadId/sim/address/body/date/dateSent/kind/isRead）写空串而非 "null"
 - fix(ui): 系统栏配置从 build 移到 initState，避免每帧触发平台通道调用
 - fix(ui): 弹出菜单项文案改用 Expanded 约束，修复长文案横向溢出
+- fix(export): await CSV 落盘后再分享，避免 saveTo 竞态导致分享到空/半截文件
+- fix(default-sms): 还原默认短信应用真正调用 RoleManager 移交角色，而非仅启动设置页
+- fix(default-sms): isDefaultSmsApp 区分「无法判定」与「非默认」，平台异常/MissingPlugin 不再误判为非默认
 - build(android): debug 构建改回默认调试签名；release 签名在缺少 key.properties 时回退调试签名，贡献者无密钥也可本地出包
 
 ### Changed
@@ -26,6 +45,9 @@
 - ci: PR 触发补齐 `synchronize`/`reopened`，三个 workflow 增加 concurrency 并发控制
 - test: 新增过滤逻辑与 CSV 导出单元测试，扩展 widget 测试（列表渲染、菜单项）
 - docs(readme): 三语 README 新增隐私说明章节（数据不出设备、逐权限用途、删除不可恢复提示），并同步 CI 触发说明与项目结构
+- refactor(export): 导出拆为保存/分享两阶段分别捕获，保存失败提示「保存失败」、分享失败提示「操作失败」（新增 l10n `toast_save_failed` 三语）
+- perf(export): 导出改用 File.writeAsBytes 直接落盘，去掉 utf8→Uint8List.fromList→XFile.fromData 冗余全量拷贝，降低内存峰值
+- refactor(ui): 短信列表项卡片从 main.dart 抽出为 `lib/widgets/message_item.dart` 的 `MessageItem` 组件，删除/移回收站/同卡/同号/复制等动作经回调注入，行为不变
 
 ## [1.7.0] - 2026-09-05
 

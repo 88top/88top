@@ -111,6 +111,18 @@ abstract class AppLocalizations {
   /// **'To delete SMS messages, please set this app as the default SMS app in System Settings'**
   String get toast_default;
 
+  /// No description provided for @toast_default_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Please switch the default SMS app in System Settings'**
+  String get toast_default_settings;
+
+  /// No description provided for @toast_default_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm in the system dialog'**
+  String get toast_default_confirm;
+
   /// No description provided for @toast_permission.
   ///
   /// In en, this message translates to:
@@ -153,6 +165,12 @@ abstract class AppLocalizations {
   /// **'Operation Failed'**
   String get operation_failed;
 
+  /// No description provided for @toast_save_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed. Please check storage space or permissions'**
+  String get toast_save_failed;
+
   /// No description provided for @operation_completed.
   ///
   /// In en, this message translates to:
@@ -174,7 +192,7 @@ abstract class AppLocalizations {
   /// No description provided for @toast_share.
   ///
   /// In en, this message translates to:
-  /// **'Shared successfully. Please open with UTF-8 encoding'**
+  /// **'Shared successfully'**
   String get toast_share;
 
   /// No description provided for @tips.
@@ -308,6 +326,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete All Messages in Current List'**
   String get t_delete_all;
+
+  /// No description provided for @set_select.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get set_select;
+
+  /// No description provided for @select_all.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get select_all;
+
+  /// No description provided for @exit_select.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit Selection'**
+  String get exit_select;
+
+  /// Number of selected messages
+  ///
+  /// In en, this message translates to:
+  /// **'{num} selected'**
+  String selected_num(String num);
+
+  /// No description provided for @toast_no_selection.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages selected'**
+  String get toast_no_selection;
+
+  /// No description provided for @t_deleting.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting...'**
+  String get t_deleting;
+
+  /// Batch delete progress
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted {done} / {total}'**
+  String delete_progress(String done, String total);
 
   /// No description provided for @sim.
   ///

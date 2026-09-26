@@ -53,6 +53,18 @@ jobs:
         run: flutter pub get
         shell: bash
 
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib test
+        shell: bash
+
+      - name: Analyze project source
+        run: dart analyze
+        shell: bash
+
+      - name: Run widget tests
+        run: flutter test
+        shell: bash
+
       - name: Install fastforge
         run: dart pub global activate fastforge
         shell: bash
@@ -67,6 +79,9 @@ jobs:
         with:
           files: |
             dist/**
+            build/symbols/apk/**
+          # release 开启了混淆（distribute_options.yaml 的 obfuscate +
+          # split-debug-info），符号表不随发布归档的话，线上崩溃栈无法还原。
           draft: true
           token: ${{ secrets.SMS_RELEASE }}
 

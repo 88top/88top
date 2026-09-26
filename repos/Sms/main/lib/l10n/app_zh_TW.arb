@@ -2,6 +2,8 @@
   "@@locale": "zh_TW",
   "title": "簡訊清理",
   "toast_default": "需要在系統設定中將本應用程式設定為預設簡訊應用程式才能刪除簡訊",
+  "toast_default_settings": "請在系統設定中切換預設簡訊應用程式",
+  "toast_default_confirm": "請在系統彈出視窗中確認",
   "toast_permission": "需要申請簡訊權限或設定為預設簡訊應用程式",
   "keyword": "關鍵字",
   "b_confirm": "確定",
@@ -18,10 +20,11 @@
   },
   "b_cancel": "取消",
   "operation_failed": "操作失敗",
+  "toast_save_failed": "保存失敗，請檢查儲存空間或權限",
   "operation_completed": "操作成功",
   "toast_no": "沒有簡訊可分享",
   "sms_list": "簡訊清單",
-  "toast_share": "分享成功，請使用utf-8格式開啟",
+  "toast_share": "分享成功",
   "tips": "提示",
   "delete_or_move": "是否要刪除或移出目前項目？",
   "b_remove": "移出清單",
@@ -53,6 +56,35 @@
   "t_no_sms": "沒有簡訊",
   "b_remove_filter": "移除篩選條件",
   "t_delete_all": "刪除目前清單中的所有簡訊",
+  "set_select": "多選",
+  "select_all": "全選",
+  "exit_select": "退出多選",
+  "selected_num": "已選 {num} 則",
+  "@selected_num": {
+    "description": "已選取的簡訊則數",
+    "placeholders": {
+      "num": {
+        "type": "String",
+        "example": "5"
+      }
+    }
+  },
+  "toast_no_selection": "未選取簡訊",
+  "t_deleting": "正在刪除...",
+  "delete_progress": "已刪除 {done} / {total}",
+  "@delete_progress": {
+    "description": "批次刪除進度",
+    "placeholders": {
+      "done": {
+        "type": "String",
+        "example": "120"
+      },
+      "total": {
+        "type": "String",
+        "example": "3000"
+      }
+    }
+  },
   "sim": "卡",
   "t_list_too_long": "清單較長，可能需要較多時間",
   "delete_failed": "刪除完成，{num}則簡訊刪除失敗",

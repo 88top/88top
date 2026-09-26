@@ -31,7 +31,7 @@
   - `READ_SMS` / `RECEIVE_SMS` / `RECEIVE_MMS` / `RECEIVE_WAP_PUSH` — read and manage SMS/MMS messages.
   - `SEND_SMS` — required by the default-SMS-app role (the app itself does not send messages).
   - `READ_PHONE_STATE` — required by the default-SMS-app role on some Android versions.
-  - `READ_CONTACTS` / `READ_PROFILE` / `QUERY_ALL_PACKAGES` — declared alongside the legacy SMS plugin; not used by the app itself.
+  - `READ_CONTACTS` / `READ_PROFILE` / `QUERY_ALL_PACKAGES` — brought in by the legacy SMS plugin but never used; stripped at manifest-merge time with `tools:node="remove"`.
   - Default SMS app role — Android only allows SMS deletion from the default SMS app; the app asks you to switch temporarily and can restore your previous default.
 
 ## Development Environment
@@ -43,6 +43,8 @@
 - Kotlin 2.4.10
 - compileSdk 37 / minSdk 26
 - JDK 17
+
+Commands below assume `flutter` / `dart` are on your `PATH`. The setup used to develop this project resolves the stable channel through [fvm](https://fvm.app); see `AGENTS.md` for the exact `PATH` prefix if your SDK lives elsewhere.
 
 ## Build & Publish
 
@@ -80,9 +82,12 @@ Sms
 ├─android              # Android project configuration
 ├─assets               # Assets
 ├─lib                  # Flutter source code
-│  ├─main.dart         # App entry & UI
+│  ├─main.dart         # App entry & SMS list page UI
+│  ├─controllers       # SmsListController: list state & business rules
 │  ├─l10n              # Localizations (ARB sources + generated code)
-│  └─services          # Data access & pure logic (SMS repository / filtering / CSV export)
+│  ├─services          # Data access & pure logic (SMS repository / filtering / CSV export)
+│  ├─utils             # Small pure helpers (date formatting)
+│  └─widgets           # Reusable UI pieces (message item)
 ├─test                 # Unit & widget tests
 ├─.github/workflows    # CI workflows
 └─dist                 # Build output
