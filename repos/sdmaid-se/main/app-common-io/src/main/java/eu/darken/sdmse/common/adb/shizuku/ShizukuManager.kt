@@ -22,13 +22,12 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,42 +41,62 @@ class ShizukuManager @Inject constructor(
     val serviceClient: AdbServiceClient,
 ) {
 
-    // The reference package plus every installed app that defines a Shizuku manager permission
-    // (a renamed fork, Shizuku+ next to its Compat Hub).
-    // Consumers (e.g. AppCleaner) use this to recognize the Shizuku manager app.
-    suspend fun managerIds(): Set<Pkg.Id> = setOf(PKG_ID) + shizukuWrapper.getManagerPackages().map { it.toPkgId() }
+    // Both reference packages plus every installed app that defines a manager permission of either
+    // family (a renamed fork, Shizuku+ next to its Compat Hub, Porter).
+    // Consumers (e.g. AppCleaner) use this as a set-membership test to recognize a manager app, so
+    // the reference packages are included whether or not they are installed - same as before.
+    suspend fun managerIds(): Set<Pkg.Id> =
+        setOf(PKG_ID, PORTER_PKG_ID) + shizukuWrapper.getManagerPackages().map { it.toPkgId() }
 
-    val permissionGrantEvents: Flow<ShizukuWrapper.ShizukuPermissionRequest> = shizukuWrapper.permissionGrantEvents
-        .setupCommonEventHandlers(TAG) { "grantEvents" }
+    /**
+     * Managers belonging to [backend]'s family (the active one if null), see
+     * [ShizukuWrapper.getActiveManagerPackages].
+     */
+    suspend fun activeManagerIds(backend: AdbBackend? = null): Set<Pkg.Id> =
+        shizukuWrapper.getActiveManagerPackages(backend).map { it.toPkgId() }.toSet()
+
+    /**
+     * An installed Shizuku-family manager that cannot serve us: an installed Porter always takes
+     * priority, so while [backend] (the active one if null) is Porter and no link is held, a running
+     * Shizuku is ignored.
+     */
+    suspend fun priorityBlockedManagerId(backend: AdbBackend? = null): Pkg.Id? {
+        if ((backend ?: activeBackend()) != AdbBackend.PORTER) return null
+        if (shizukuWrapper.link.first() != null) return null
+        return shizukuWrapper.getActiveManagerPackage(AdbBackend.SHIZUKU)?.toPkgId()
+    }
+
+    val permissionChanges: Flow<Unit> = shizukuWrapper.permissionChanges
+        .setupCommonEventHandlers(TAG) { "permissionChanges" }
         .replayingShare(appScope)
 
-    val shizukuBinder: Flow<ShizukuBaseServiceBinder?> = settings.useShizuku.flow
-        // Only touch the Shizuku binder if the user opted in AND Shizuku is actually installed.
-        // Otherwise (e.g. useShizuku left enabled after uninstalling Shizuku) every subscription would
-        // probe the absent service and spam "binder haven't been received" on each resume.
-        .flatMapLatest { if (it == true && isInstalled()) shizukuWrapper.baseServiceBinder else flowOf(null) }
+    /** The link to the manager's server, null while the user has not opted in. */
+    val adbLink: Flow<AdbLink?> = settings.useShizuku.flow
+        .flatMapLatest { if (it == true) shizukuWrapper.link else flowOf(null) }
         .catch { e ->
-            log(TAG, WARN) { "Shizuku binder access failed: ${e.asLog()}" }
+            log(TAG, WARN) { "ADB link access failed: ${e.asLog()}" }
             emit(null)
         }
-        .setupCommonEventHandlers(TAG) { "binder" }
+        .setupCommonEventHandlers(TAG) { "link" }
         .replayingShare(appScope)
 
     /**
      * Is the device shizukud and we have access?
      */
     suspend fun isShizukud(): Boolean {
-        if (!isInstalled()) {
+        val availability = availability()
+        if (getManagerId(backendOf(availability)) == null) {
             log(TAG) { "isShizukud(): Shizuku is not installed" }
             return false
         }
         log(TAG, VERBOSE) { "isShizukud(): Shizuku is installed" }
 
-        if (!isCompatible()) {
-            log(TAG) { "isShizukud(): Shizuku version is too old" }
+        // Unknown availability does not block: the steps below find out on their own.
+        if (availability is AdbAvailability.Incompatible) {
+            log(TAG) { "isShizukud(): Incompatible: $availability" }
             return false
         }
-        log(TAG, VERBOSE) { "isShizukud(): Shizuku is recent enough" }
+        log(TAG, VERBOSE) { "isShizukud(): Not known to be incompatible" }
 
         val granted = isGranted()
         if (granted == false) {
@@ -99,18 +118,32 @@ class ShizukuManager @Inject constructor(
         }
     }
 
-    // Reference package, also used as a fallback for previews and when nothing is installed.
-    val shizukuPkgId: Pkg.Id
-        get() = PKG_ID
+    // Reference package of [backend] (the active one if null), only used as a placeholder when nothing
+    // is installed.
+    suspend fun referenceManagerId(backend: AdbBackend? = null): Pkg.Id = when (backend ?: activeBackend()) {
+        AdbBackend.PORTER -> PORTER_PKG_ID
+        AdbBackend.SHIZUKU -> PKG_ID
+    }
 
     /**
-     * The installed Shizuku manager's package, resolved via its permission so forks and hidden-mode
-     * installs are handled, or null if Shizuku isn't installed.
+     * The installed manager's package for the ACTIVE backend, resolved via its permission so forks
+     * and hidden-mode installs are handled, or null if no such manager is installed.
      */
-    suspend fun getManagerId(): Pkg.Id? = shizukuWrapper.getManagerPackage()?.toPkgId()
+    suspend fun getManagerId(backend: AdbBackend? = null): Pkg.Id? =
+        shizukuWrapper.getActiveManagerPackage(backend)?.toPkgId()
 
-    // Not cached: a stale "not installed" result would keep the binder gate (see shizukuBinder) closed
-    // even after Shizuku gets installed, until the next process restart. The lookup is cheap.
+    suspend fun activeBackend(): AdbBackend = shizukuWrapper.activeBackend()
+
+    /** Null means unknown, see [ShizukuWrapper.availability]. */
+    suspend fun availability(): AdbAvailability? = shizukuWrapper.availability()
+
+    suspend fun backendOf(availability: AdbAvailability?): AdbBackend = shizukuWrapper.backendOf(availability)
+
+    /** Diagnostics only: the UID the privileged helper runs as, 2000 when it really is shell. */
+    suspend fun serverUid(): Int? = shizukuWrapper.serverUid()
+
+    // Not cached: a stale "not installed" result would outlive installing the manager until the next
+    // process restart. The lookup is cheap.
     suspend fun isInstalled(): Boolean {
         val installed = getManagerId() != null
         log(TAG) { "isInstalled(): $installed" }
@@ -119,20 +152,11 @@ class ShizukuManager @Inject constructor(
 
     suspend fun isGranted(): Boolean? = shizukuWrapper.isGranted()
 
-    private var isCompatibleCache: Boolean? = null
-    private val isCompatibleLock = Mutex()
+    /** Null means "cannot know", see [ShizukuWrapper.permission]. */
+    suspend fun permission(): AdbPermission? = shizukuWrapper.permission()
 
-    suspend fun isCompatible(): Boolean = isCompatibleLock.withLock {
-        isCompatibleCache?.let { return@withLock it }
-
-        shizukuWrapper.isCompatible().also {
-            log(TAG) { "isCompatible(): $it" }
-            isCompatibleCache = it
-        }
-    }
-
-    suspend fun requestPermission() = shizukuWrapper.requestPermission()
-
+    /** Null when there is no link or the request failed. Unbounded, the caller bounds the user's wait. */
+    suspend fun requestPermission(): AdbPermission? = shizukuWrapper.requestPermission()
 
     suspend fun isOurServiceAvailable(): Boolean = getServiceState() is ShizukuServiceState.Available
 
@@ -144,18 +168,20 @@ class ShizukuManager @Inject constructor(
      * should offer a retry.
      */
     suspend fun getServiceState(): ShizukuServiceState = withContext(dispatcherProvider.IO) {
-        when (isGranted()) {
-            false -> {
-                log(TAG, VERBOSE) { "getServiceState(): Shizuku permission not granted" }
-                return@withContext ShizukuServiceState.PermissionDenied
+        when (val permission = permission()) {
+            AdbPermission.DENIED, AdbPermission.DENIED_PERMANENTLY -> {
+                log(TAG, VERBOSE) { "getServiceState(): Shizuku permission not granted ($permission)" }
+                return@withContext ShizukuServiceState.PermissionDenied(
+                    permanently = permission == AdbPermission.DENIED_PERMANENTLY,
+                )
             }
-            // Not a denial: no live binder means the grant state cannot be read at all.
+            // Not a denial: no live link means the grant state cannot be read at all.
             null -> {
-                log(TAG, VERBOSE) { "getServiceState(): No live binder, grant state unknown" }
+                log(TAG, VERBOSE) { "getServiceState(): No live link, grant state unknown" }
                 return@withContext ShizukuServiceState.Unknown
             }
 
-            true -> {}
+            AdbPermission.GRANTED -> {}
         }
         try {
             log(TAG, VERBOSE) { "getServiceState(): Requesting service client" }
@@ -185,8 +211,8 @@ class ShizukuManager @Inject constructor(
             if (isEnabled != true) return@flatMapLatest flowOf(false)
 
             combine(
-                shizukuBinder.map { }.onStart { emit(Unit) },
-                permissionGrantEvents.map { }.onStart { emit(Unit) },
+                adbLink.map { }.onStart { emit(Unit) },
+                permissionChanges.onStart { emit(Unit) },
             ) { _, _ -> isShizukud() }
         }
         .stateIn(
@@ -202,7 +228,7 @@ class ShizukuManager @Inject constructor(
     /**
      * Probe-aware status for UI gating. Mirrors [useShizuku] but exposes the distinct
      * decided/checking/active/unavailable/declined states the gate UI needs.
-     * [AccessState.Unavailable] also covers "Shizuku not installed / not granted / too old".
+     * [AccessState.Unavailable] also covers "Shizuku not installed / not granted / incompatible".
      */
     val accessState: Flow<AccessState> = settings.useShizuku.flow
         .flatMapLatest { setting ->
@@ -210,8 +236,8 @@ class ShizukuManager @Inject constructor(
                 null -> flowOf(AccessState.Undecided)
                 false -> flowOf(AccessState.Declined)
                 true -> combine(
-                    shizukuBinder.map { }.onStart { emit(Unit) },
-                    permissionGrantEvents.map { }.onStart { emit(Unit) },
+                    adbLink.map { }.onStart { emit(Unit) },
+                    permissionChanges.onStart { emit(Unit) },
                 ) { _, _ -> if (isShizukud()) AccessState.Active else AccessState.Unavailable }
                     .onStart { emit(AccessState.Checking) }
             }
@@ -222,5 +248,6 @@ class ShizukuManager @Inject constructor(
     companion object {
         private val TAG = logTag("ADB", "Shizuku", "Manager")
         internal val PKG_ID = "moe.shizuku.privileged.api".toPkgId()
+        internal val PORTER_PKG_ID = "eu.darken.porter".toPkgId()
     }
 }
