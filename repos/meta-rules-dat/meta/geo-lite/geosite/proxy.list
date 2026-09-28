@@ -151,7 +151,6 @@
 +.blink.org
 +.blizzard.com
 +.blog.com
-+.blog.google
 +.blogblog.com
 +.blogcdn.com
 +.blogger.com
@@ -500,7 +499,9 @@
 +.gitbook.com
 +.githack.com
 +.github-avatars.oss-cn-hongkong.aliyuncs.com
++.github.ai
 +.github.blog
++.github.career
 +.github.com
 +.github.community
 +.github.dev
@@ -512,6 +513,7 @@
 +.githubnext.com
 +.githubpreview.dev
 +.githubstatus.com
++.githubsupport.com
 +.githubuniverse.com
 +.githubusercontent.com
 +.gitlab.com
@@ -544,6 +546,7 @@
 +.googel.com
 +.googil.com
 +.googl.com
++.google
 +.google-analytics-cn.com
 +.google-analytics.com
 +.google-syndication.com
@@ -794,6 +797,7 @@
 +.googleusercontent.com
 +.googlevads-cn.com
 +.googleventures.com
++.googlezip.net
 +.googlr.com
 +.goolge.com
 +.gooogle.com
@@ -1176,7 +1180,6 @@
 +.redirector.offline-maps.gvt1.com
 +.redirector.snap.gvt1.com
 +.redtube.com
-+.registry.google
 +.repo.new
 +.resilio.com
 +.reuters.com
@@ -1600,6 +1603,7 @@ cdp.cloud.unity3d.com
 clubhouse.pubnubapi.com
 copilot.microsoft.com
 e13252.dscg.akamaiedge.net
+github-api.arkoselabs.com
 h-netflix.online-metrix.net
 lab.skk.moe
 location.microsoft.com

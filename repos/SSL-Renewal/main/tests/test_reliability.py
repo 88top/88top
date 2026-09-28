@@ -230,6 +230,14 @@ class ServerReliabilityTests(unittest.TestCase):
         self.issue('RELOAD_CMD=""')
         self.assertIn('--reloadcmd :', (self.f.base/'acme.log').read_text())
 
+    def test_reload_menu_uses_simple_labels(self):
+        result = self.f.shell('select_server_deployment', '0\n', expected=None)
+        self.assertIn('1）只保存证书【默认】', result.stdout)
+        self.assertIn('2）保存证书并自动重载服务', result.stdout)
+        self.assertIn('不自动重载网站/服务', result.stdout)
+        self.assertIn('适合 Nginx/Apache', result.stdout)
+        self.assertNotIn('清除此证书原有的自动重载设置', result.stdout)
+
     def test_reload_prompt_requires_confirmation(self):
         result = self.f.shell('select_server_deployment; printf "HOOK=%s\\n" "$RELOAD_CMD"',
                               '2\nsystemctl reload nginx\nno\n1\n')
@@ -247,6 +255,54 @@ class ServerReliabilityTests(unittest.TestCase):
         self.assertIn('停止 TLS/SSL', result.stdout)
         self.assertIn('CA=zerossl', result.stdout)
         self.assertFalse((self.f.base/'acme.log').exists())
+
+    def test_existing_certificate_default_choice_reuses_without_validation(self):
+        cert = self.f.base / 'existing.crt'
+        key = self.f.base / 'existing.key'
+        cert.write_text('fixture-cert')
+        key.write_text('fixture-key')
+        body = (
+            'CERT_KIND=ip; IDENTIFIER=45.77.170.45; CHALLENGE_MODE=webroot; '
+            'CERT_PATH="$TEST_DIR/existing.crt"; KEY_PATH="$TEST_DIR/existing.key"; '
+            'existing_certificate_valid() { return 0; }; '
+            'select_existing_certificate_action; '
+            'printf "REUSE=%s FORCE=%s MODE=%s\\n" "$REUSE_EXISTING_CERT" "$FORCE_FRESH_ISSUE" "$CERT_RESULT_MODE"'
+        )
+        result = self.f.shell(body, '\n')
+        self.assertIn('直接使用本地现有证书', result.stdout)
+        self.assertIn('REUSE=1 FORCE=0 MODE=reused', result.stdout)
+        self.assertFalse((self.f.base/'acme.log').exists())
+
+    def test_existing_certificate_force_choice_uses_selected_webroot(self):
+        (self.f.base/'existing.crt').write_text('fixture-cert')
+        (self.f.base/'existing.key').write_text('fixture-key')
+        body = (
+            'ACME_BIN="$TEST_DIR/bin/fake-acme"; CERT_KIND=ip; IDENTIFIER=45.77.170.45; IP_VERSION=4; '
+            'CA_SERVER=letsencrypt; CHALLENGE_MODE=webroot; WEBROOT_PATH="$TEST_WEBROOT"; '
+            'CERT_PATH="$TEST_DIR/existing.crt"; KEY_PATH="$TEST_DIR/existing.key"; RELOAD_CMD=""; '
+            'existing_certificate_valid() { return 0; }; '
+            'select_existing_certificate_action; issue_static_certificate'
+        )
+        result = self.f.shell(body, '2\n')
+        self.assertIn('强制重新签发', result.stdout)
+        issue = (self.f.base/'acme.log').read_text().splitlines()[0]
+        self.assertIn('--force', issue)
+        self.assertIn('-w ' + str(self.f.webroot), issue)
+
+    def test_reuse_existing_save_only_skips_issue_but_syncs_install_settings(self):
+        body = (
+            'ACME_BIN="$TEST_DIR/bin/fake-acme"; CERT_KIND=ip; IDENTIFIER=45.77.170.45; IP_VERSION=4; '
+            'CA_SERVER=letsencrypt; CHALLENGE_MODE=webroot; WEBROOT_PATH="$TEST_WEBROOT"; '
+            'CERT_PATH="$TEST_DIR/cert"; KEY_PATH="$TEST_DIR/key"; RELOAD_CMD=""; '
+            'REUSE_EXISTING_CERT=1; CERT_RESULT_MODE=reused; issue_static_certificate'
+        )
+        result = self.f.shell(body)
+        self.assertIn('不向 CA 发起签发请求', result.stdout)
+        log = (self.f.base/'acme.log').read_text()
+        self.assertNotIn('--issue', log)
+        self.assertIn('--install-cert', log)
+        self.assertIn('--reloadcmd :', log)
+
 
 
 if __name__ == '__main__':
