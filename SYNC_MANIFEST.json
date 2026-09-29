@@ -231,7 +231,7 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "7a0de3b301ec6e15d41e99c3185fb68a455206fe"
+      "remote_sha": "7e2152bfe7f0d59522462b6dcd574c885ddfb0fe"
     }
   },
   "timeflysoon/commonscript": {
@@ -352,13 +352,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "61fd90847a78311ac89422e5f128f5d903e5fdb8"
+      "remote_sha": "a7d10203472fbc84f6a10906f53c9f39b7c951da"
     },
     "release": {
-      "remote_sha": "e0dcf0d7c187819d84b501b4f8db28ecc5f5d0af"
+      "remote_sha": "0074950491652eaa81f8e15a46d77c1e48b0a64f"
     },
     "sing": {
-      "remote_sha": "739838017cc4632f9961e6010c74f45a4e4ad37f"
+      "remote_sha": "2d517000da91de92e61d26922bc95cd6345c274c"
     }
   },
   "timeflysoon/nanopi-openwrt": {
@@ -461,10 +461,10 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "61fd90847a78311ac89422e5f128f5d903e5fdb8"
+      "remote_sha": "a7d10203472fbc84f6a10906f53c9f39b7c951da"
     },
     "release": {
-      "remote_sha": "e0dcf0d7c187819d84b501b4f8db28ecc5f5d0af"
+      "remote_sha": "0074950491652eaa81f8e15a46d77c1e48b0a64f"
     }
   },
   "timeflysoon/turboacc": {
