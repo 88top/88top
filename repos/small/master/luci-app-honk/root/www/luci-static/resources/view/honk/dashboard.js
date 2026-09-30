@@ -17,12 +17,12 @@ return view.extend({
 	},
 
 	render: function() {
-		if (honk && honk.applyAdvancedTabVisibility) {
-			honk.applyAdvancedTabVisibility();
+		if (honk && honk.applyTabVisibility) {
+			honk.applyTabVisibility();
 		}
 		var sec = (uci.sections('honk', 'honk')[0] || {});
 		var sid = sec['.name'] || 'config';
-		var dashType = uci.get('honk', sid, 'dashboard') || 'doona';
+		var dashType = uci.get('honk', sid, 'dashboard') || 'none';
 
 		var DASHBOARD_PROFILES = {
 			zashboard: {
@@ -85,16 +85,18 @@ return view.extend({
 				'style': 'margin-right: 10px;',
 				'change': function(ev) {
 					var newType = ev.target.value;
-					uci.set('honk', sid, 'dashboard', newType);
-					uci.save().then(function() {
-						return uci.apply();
-					}).then(function() {
-						return honk.callHonkSwitchDashboardApi(newType);
-					}).then(function() {
+					sel.disabled = true;
+					honk.callHonkSwitchDashboardApi(newType).then(function() {
 						window.location.reload();
+					}).catch(function(err) {
+						sel.disabled = false;
+						honk.showNotification(null, E('p', _('Failed to switch dashboard:') + ' ' + (err.message || err)), 'error');
 					});
 				}
 			});
+			var optNone = E('option', { 'value': 'none' }, _('None'));
+			if (dashType === 'none') optNone.selected = true;
+			sel.appendChild(optNone);
 			Object.keys(DASHBOARD_PROFILES).forEach(function(k) {
 				var opt = E('option', { 'value': k }, DASHBOARD_PROFILES[k].label || DASHBOARD_PROFILES[k].name);
 				if (k === dashType) opt.selected = true;
@@ -134,7 +136,7 @@ return view.extend({
 			'	width: 100%;',
 			'	height: calc(100vh - 210px);',
 			'	min-height: 650px;',
-			'	border: 1px solid var(--hairline, var(--border-color-medium, #ccc));',
+			'	border: 1px solid var(--border, var(--hairline, var(--border-color-medium, #ccc)));',
 			'	border-radius: var(--radius-base, 4px);',
 			'	display: block;',
 			'}',
@@ -151,7 +153,7 @@ return view.extend({
 			'.dash-toolbar-actions > * { white-space: nowrap !important; flex-shrink: 0; }',
 			'@media (max-width: 768px) {',
 			'	#dash_iframe { border-right: none; border-radius: var(--radius-base,4px) 0 0 var(--radius-base,4px); }',
-			'	#dash_scroll_handle { display: flex; align-items: center; justify-content: center; width: 14px; flex-shrink: 0; touch-action: none; user-select: none; border: 1px solid var(--hairline,var(--border-color-medium,#ccc)); border-radius: 0 var(--radius-base,4px) var(--radius-base,4px) 0; }',
+			'	#dash_scroll_handle { display: flex; align-items: center; justify-content: center; width: 14px; flex-shrink: 0; touch-action: none; user-select: none; border: 1px solid var(--border, var(--hairline, var(--border-color-medium, #ccc))); border-radius: 0 var(--radius-base,4px) var(--radius-base,4px) 0; }',
 			'	.dash-toolbar-actions { width: 100%; display: flex; flex-wrap: wrap; gap: 6px; }',
 			'	.dash-toolbar-actions select { flex: 1 1 auto; min-width: 90px; margin-right: 0 !important; }',
 			'	.dash-toolbar-actions .btn, .dash-toolbar-actions .cbi-button { padding: 4px 8px !important; font-size: 12px !important; white-space: nowrap !important; flex: 0 0 auto; }',
@@ -159,18 +161,18 @@ return view.extend({
 			'.dash-log-box {',
 			'	max-height: 150px; overflow-y: auto; font-family: var(--font-mono, monospace);',
 			'	font-size: 12px; line-height: 1.4; padding: 8px; margin: 8px 0;',
-			'	background: var(--surface-sunken, var(--background-color-low, transparent));',
-			'	border: 1px solid var(--hairline, var(--border-color-medium, #ccc));',
+			'	background: var(--surface-raised, var(--surface-sunken, var(--background-color-low, transparent)));',
+			'	border: 1px solid var(--border, var(--hairline, var(--border-color-medium, #ccc)));',
 			'	border-radius: var(--radius-base, 3px); white-space: pre-wrap; word-break: break-all;',
 			'}'
 		].join('\n'));
 
-		// State 0: Loading
+		// Loading view
 		var stateLoading = E('div', { 'class': 'cbi-section', 'style': 'text-align: center; padding: 30px;' }, [
 			E('p', {}, E('em', {}, _('Checking Dashboard and API configuration...')))
 		]);
 
-		// State 1: Unconfigured
+		// Unconfigured view
 		var quickEnableMsg = E('span', { 'style': 'margin-left: 8px;' });
 		var enableBtnText = _('One-click Enable Default Native API');
 		var btnQuickEnable = E('button', {
@@ -210,14 +212,30 @@ return view.extend({
 					profile.exampleConfig || ''
 				)
 			]),
-			E('div', { 'style': 'margin-top: 16px; display: flex; gap: 10px; align-items: center;' }, [
+			E('div', { 'style': 'margin-top: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;' }, [
+				createDashboardSelect(),
 				E('a', { 'href': L.url('admin/services/honk/api'), 'class': 'cbi-button' }, _('Configure in API Settings')),
 				btnQuickEnable,
 				quickEnableMsg
 			])
 		]);
 
-		// State 2: Missing UI
+		// Disabled view
+		var selectDashboardNone = createDashboardSelect();
+		var stateNone = E('div', { 'class': 'cbi-section', 'style': 'display: none;' }, [
+			E('h3', {}, _('Dashboard Disabled')),
+			E('div', { 'class': 'cbi-section-descr' },
+				_('Dashboard type is currently set to "None". Web dashboard and API listener are disabled.')
+			),
+			E('table', { 'class': 'table', 'style': 'margin: 14px 0;' }, [
+				E('tr', {}, [
+					E('th', { 'style': 'width: 25%; vertical-align: middle;' }, _('Dashboard Type')),
+					E('td', {}, selectDashboardNone)
+				])
+			])
+		]);
+
+		// Missing UI view
 		var metaUiDir = E('td', {}, profile.defaultDir);
 		var metaController = E('td', {}, '0.0.0.0:9527');
 		var metaSecret = E('td', {}, _('(Not set)'));
@@ -307,7 +325,7 @@ return view.extend({
 			E('div', { 'style': 'margin-top: 16px;' }, [ btnStartDownload ])
 		]);
 
-		// State 3: Ready
+		// Ready view
 		var httpsAlert = E('div', { 'class': 'alert-message warning', 'style': 'display: none; margin-bottom: 10px; justify-content: space-between; align-items: center;' }, [
 			E('div', {}, [
 				E('strong', {}, _('HTTPS access detected:') + ' '),
@@ -515,6 +533,7 @@ return view.extend({
 
 		function showState(name) {
 			stateLoading.style.display = (name === 'loading') ? 'block' : 'none';
+			stateNone.style.display = (name === 'none') ? 'block' : 'none';
 			stateUnconfigured.style.display = (name === 'unconfigured') ? 'block' : 'none';
 			stateMissingUi.style.display = (name === 'missing_ui') ? 'block' : 'none';
 			stateReady.style.display = (name === 'ready') ? 'block' : 'none';
@@ -579,6 +598,10 @@ return view.extend({
 		}
 
 		function loadInfo(forceReload) {
+			if (dashType === 'none') {
+				showState('none');
+				return;
+			}
 			honk.callHonkDashboardInfo(dashType).then(function(data) {
 				if (!data || !data.configured) {
 					showState('unconfigured');
@@ -620,9 +643,11 @@ return view.extend({
 					httpsAlert.style.display = 'none';
 				}
 
+				var normalizedSrc = (iframe.src || '').replace(/\/$/, '');
+				var normalizedFullUrl = (fullUrl || '').replace(/\/$/, '');
 				if (forceReload) {
 					reloadIframe(true);
-				} else if (!iframeLoaded || iframe.src !== fullUrl) {
+				} else if (!iframeLoaded || normalizedSrc !== normalizedFullUrl) {
 					iframe.src = fullUrl;
 					iframeLoaded = true;
 				}
@@ -635,8 +660,10 @@ return view.extend({
 
 		loadInfo();
 
-		// Background status check every 5 seconds for service running pill
 		poll.add(function() {
+			if (document.hidden) {
+				return Promise.resolve();
+			}
 			if (currentInfo && currentInfo.configured && currentInfo.has_ui) {
 				return honk.callHonkStatus().then(function(res) {
 					var isRunning = (res && res.running);
@@ -648,6 +675,7 @@ return view.extend({
 		return E('div', { 'class': 'dash-wrap' }, [
 			style,
 			stateLoading,
+			stateNone,
 			stateUnconfigured,
 			stateMissingUi,
 			stateReady

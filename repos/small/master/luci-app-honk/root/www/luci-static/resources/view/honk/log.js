@@ -1,17 +1,22 @@
 'use strict';
 'require view';
 'require ui';
+'require uci';
 'require poll';
 'require honk.common as honk';
 
 return view.extend({
+	load: function() {
+		return uci.load('honk');
+	},
+
 	handleSaveApply: null,
 	handleSave: null,
 	handleReset: null,
 
 	render: function() {
-		if (honk && honk.applyAdvancedTabVisibility) {
-			honk.applyAdvancedTabVisibility();
+		if (honk && honk.applyTabVisibility) {
+			honk.applyTabVisibility();
 		}
 
 		var scrolled = false;
@@ -35,12 +40,10 @@ return view.extend({
 					logTextarea.value = '';
 					logTextarea.scrollTop = 0;
 					scrolled = false;
-					var notify = (honk && honk.showNotification) ? honk.showNotification : ui.addNotification;
-					notify(null, E('p', _('Logs cleared successfully.')), 'info');
+					honk.showNotification(null, E('p', _('Logs cleared successfully.')), 'info');
 				}).catch(function(err) {
 					btnClear.disabled = false;
-					var notify = (honk && honk.showNotification) ? honk.showNotification : ui.addNotification;
-					notify(null, E('p', _('Failed to clear logs:') + ' ' + (err.message || err)), 'error');
+					honk.showNotification(null, E('p', _('Failed to clear logs:') + ' ' + (err.message || err)), 'error');
 				});
 			}
 		}, _('Clear logs'));
@@ -48,8 +51,9 @@ return view.extend({
 		function updateLog() {
 			return honk.callHonkGetLog().then(function(data) {
 				var content = (data && data.log) ? data.log : '';
+				var atBottom = !scrolled || (logTextarea.scrollHeight - logTextarea.scrollTop - logTextarea.clientHeight < 50);
 				logTextarea.value = content;
-				if (!scrolled && content) {
+				if (atBottom && content) {
 					logTextarea.scrollTop = logTextarea.scrollHeight;
 					scrolled = true;
 				}
@@ -59,8 +63,17 @@ return view.extend({
 		updateLog();
 
 		poll.add(function() {
+			if (document.hidden) {
+				return Promise.resolve();
+			}
 			return updateLog();
 		}, 3);
+
+		document.addEventListener('visibilitychange', function() {
+			if (!document.hidden) {
+				updateLog();
+			}
+		});
 
 		return E('fieldset', { 'class': 'cbi-section', 'id': '_log_fieldset' }, [
 			E('legend', {}, _('Logs')),

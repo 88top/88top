@@ -1,6 +1,7 @@
 'use strict';
 'require baseclass';
 'require rpc';
+'require uci';
 'require fs';
 'require ui';
 'require poll';
@@ -8,7 +9,6 @@
 'require view';
 'require form';
 
-// Scoped helper: auto-dismiss notification after specified timeout (default 3s)
 function showNotification(title, children, type, timeout) {
 	timeout = (timeout != null) ? timeout : 3000;
 	if (ui && ui.addTimeLimitedNotification) {
@@ -76,9 +76,6 @@ var callHonkDownloadDashboard = rpc.declare({
 	expect: { }
 });
 
-var callHonkZashboardInfo = callHonkDashboardInfo;
-var callHonkDownloadZashboard = callHonkDownloadDashboard;
-
 var callHonkDownloadStatus = rpc.declare({
 	object: 'luci.honk',
 	method: 'download_status',
@@ -137,6 +134,7 @@ function ensureEditorStyles() {
 	var style = document.createElement('style');
 	style.id = 'honk-editor-custom-style';
 	style.textContent = [
+		'.cbi-value.hidden { display: none !important; }',
 		'.honk-status-field { display: inline-flex !important; align-items: center !important; justify-content: flex-start !important; gap: 16px !important; flex-wrap: wrap !important; min-height: 32px !important; }',
 		'.honk-editor-toolbar { margin-bottom: 6px !important; margin-top: 0 !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; }',
 		'.cm-format-btn { margin: 0 !important; cursor: pointer !important; }',
@@ -144,45 +142,43 @@ function ensureEditorStyles() {
 		'.cbi-value:has(.CodeMirror) > .cbi-value-title { padding-top: 5px !important; }',
 		'.cbi-value:has(.CodeMirror) .cbi-value-field { flex: 1 1 0% !important; min-width: 0 !important; width: auto !important; }',
 		'.CodeMirror {',
-		'	border: 1px solid var(--hairline, var(--border-color-medium, #ccc)) !important;',
+		'	border: 1px solid var(--border, var(--hairline, var(--border-color-medium, #ccc))) !important;',
 		'	border-radius: var(--radius-base, 4px);',
 		'	height: auto;',
 		'	min-height: 480px;',
 		'	font-family: var(--font-mono, monospace);',
 		'	font-size: 13px;',
-		'	background: var(--control-bg, var(--surface, #ffffff)) !important;',
-		'	color: var(--text, inherit) !important;',
+		'	background: var(--background, var(--control-bg, var(--background-color-high, #ffffff))) !important;',
+		'	color: var(--foreground, var(--text, var(--text-color-highest, inherit))) !important;',
 		'	box-shadow: none;',
 		'}',
 		'.CodeMirror-gutters {',
-		'	border-right: 1px solid var(--hairline, var(--border-color-medium, #ccc)) !important;',
-		'	background: var(--surface-sunken, var(--background-color-low, #f7f7f7)) !important;',
+		'	border-right: 1px solid var(--border, var(--hairline, var(--border-color-medium, #ccc))) !important;',
+		'	background: var(--surface-raised, var(--surface-sunken, var(--background-color-low, #f7f7f7))) !important;',
 		'}',
-		'.CodeMirror-linenumber { color: var(--text-muted, var(--text-color-low, #888888)) !important; }',
-		'.CodeMirror-cursor { border-left: 1px solid var(--text, currentColor) !important; }',
-		'[data-darkmode="true"] .CodeMirror, [data-theme="dark"] .CodeMirror, .dark .CodeMirror {',
-		'	background: var(--control-bg, var(--surface, #141822)) !important;',
-		'	color: var(--text, #f9fafb) !important;',
-		'	border-color: var(--hairline, var(--border-color-medium, #334155)) !important;',
-		'}',
-		'[data-darkmode="true"] .CodeMirror-gutters, [data-theme="dark"] .CodeMirror-gutters, .dark .CodeMirror-gutters {',
-		'	background: var(--surface-sunken, var(--background-color-low, #0a0e17)) !important;',
-		'	border-right-color: var(--hairline, var(--border-color-medium, #334155)) !important;',
-		'}'
+		'.CodeMirror-linenumber { color: var(--muted-foreground, var(--text-muted, var(--text-color-low, #888888))) !important; }',
+		'.CodeMirror-cursor { border-left: 1px solid var(--foreground, var(--text, currentColor)) !important; }'
 	].join('\n');
 	document.head.appendChild(style);
 }
 
+var _cmPromise = null;
+
 function ensureCodeMirror() {
+	if (_cmPromise) {
+		return _cmPromise;
+	}
+
 	loadStyle(L.resource('honk/lib/codemirror.css'));
 	loadStyle(L.resource('honk/addon/fold/foldgutter.css'));
 	ensureEditorStyles();
 
 	if (window.CodeMirror && window.CodeMirror.modes && window.CodeMirror.modes.dae) {
-		return Promise.resolve(window.CodeMirror);
+		_cmPromise = Promise.resolve(window.CodeMirror);
+		return _cmPromise;
 	}
 
-	return loadScript(L.resource('honk/lib/codemirror.js'))
+	_cmPromise = loadScript(L.resource('honk/lib/codemirror.js'))
 		.then(function() {
 			return Promise.all([
 				loadScript(L.resource('honk/addon/edit/matchbrackets.js')),
@@ -195,7 +191,24 @@ function ensureCodeMirror() {
 		})
 		.then(function() {
 			return window.CodeMirror;
+		}).catch(function(err) {
+			_cmPromise = null;
+			throw err;
 		});
+
+	return _cmPromise;
+}
+
+function preloadCodeMirror() {
+	if (window.requestIdleCallback) {
+		requestIdleCallback(function() {
+			ensureCodeMirror().catch(function() {});
+		}, { timeout: 2000 });
+	} else {
+		setTimeout(function() {
+			ensureCodeMirror().catch(function() {});
+		}, 300);
+	}
 }
 
 function formatEditor(ed) {
@@ -300,17 +313,35 @@ function formatEditor(ed) {
 function bindCodeMirrorToMap(m, onSaveCallback) {
 	if (!m || m._cmHooked) return;
 	m._cmHooked = true;
+	ensureEditorStyles();
 
 	var origRenderContents = m.renderContents;
 	m.renderContents = function() {
 		return origRenderContents.apply(this, arguments).then(function(mapNode) {
 			var target = mapNode || m.root || document.getElementById('cbi-' + m.config) || document;
 			target.querySelectorAll('textarea').forEach(function(ta) {
-				initCodeMirror(ta, onSaveCallback).then(function(editor) {
-					requestAnimationFrame(function() {
-						editor.refresh();
+				if (ta.dataset.cmInitialized === 'true' || ta._editor) return;
+
+				if (ta.offsetParent !== null) {
+					initCodeMirror(ta, onSaveCallback);
+				} else if (window.IntersectionObserver) {
+					var row = ta.closest('.cbi-value') || ta;
+					var io = new IntersectionObserver(function(entries) {
+						if (entries[0] && entries[0].isIntersecting) {
+							io.disconnect();
+							initCodeMirror(ta, onSaveCallback).then(function(editor) {
+								if (editor) {
+									requestAnimationFrame(function() {
+										editor.refresh();
+									});
+								}
+							});
+						}
 					});
-				});
+					io.observe(row);
+				} else {
+					initCodeMirror(ta, onSaveCallback);
+				}
 			});
 			return mapNode;
 		});
@@ -403,6 +434,10 @@ function initCodeMirror(textarea, onSaveCallback) {
 
 function createConfigFileView(filePath, mapTitle, mapDesc, fieldTitle, successMsg, needRestart) {
 	return view.extend({
+		load: function() {
+			return uci.load('honk');
+		},
+
 		render: function() {
 			var m = new form.Map('honk', mapTitle, mapDesc);
 
@@ -420,25 +455,7 @@ function createConfigFileView(filePath, mapTitle, mapDesc, fieldTitle, successMs
 			o.wrap = 'off';
 			o.load = function(section_id) {
 				return readFile(filePath).then(function(content) {
-					if ((!content || !content.trim()) && filePath.endsWith('/api.dae')) {
-						return [
-							'# api.dae',
-							'# Configure API access for HONK dashboards and controllers.',
-							'',
-							'experimental {',
-							'    native_api {',
-							'        enabled: true',
-							"        listen: '0.0.0.0:9527'",
-							"        secret: 'honk114514'",
-							"        ui: '/etc/honk/doona'",
-							"        config_write: true",
-							"        geosite_download_url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/release/geosite.dat'",
-							"        geoip_download_url: 'https://raw.githubusercontent.com/QiuSimons/geoip-moedove/refs/heads/main/geoip.dat'",
-							'    }',
-							'}'
-						].join('\n') + '\n';
-					}
-					return content;
+					return content || '';
 				});
 			};
 			o.write = function(section_id, formvalue) {
@@ -460,62 +477,73 @@ function createConfigFileView(filePath, mapTitle, mapDesc, fieldTitle, successMs
 }
 
 
-// Advanced-only tabs: these paths are hidden when advanced=0.
-// This runs on every honk page render and reads live UCI values,
-// bypassing LuCI's sessionStorage menu cache entirely.
-var ADVANCED_TAB_PATHS = ['/honk/dns', '/honk/node', '/honk/route'];
+function updateTabVisibilityFromSections(sections) {
+	var s = (sections && sections[0]) ? sections[0] : (uci.get_first('honk', 'honk') || {});
+	var isAdvanced = (s.advanced === '1');
+	var dashType = s.dashboard || '';
 
-function applyAdvancedTabVisibility() {
-	// Use ubus directly to read the committed UCI value (not the in-memory
-	// JS UCI module, which may have pending unsaved changes).
-	return L.resolveDefault(
-		rpc.declare({
-			object: 'uci',
-			method: 'get',
-			params: ['config', 'section', 'option'],
-			expect: { value: '' }
-		})('honk', 'config', 'advanced'),
-		''
-	).then(function(val) {
-		var isAdvanced = (val === '1');
-		applyTabCss(isAdvanced);
-		if (!isAdvanced) {
-			var isAdvPage = (window.L && L.env && Array.isArray(L.env.dispatchpath) && ['dns', 'node', 'route'].indexOf(L.env.dispatchpath[3]) !== -1) ||
-				ADVANCED_TAB_PATHS.some(function(p) { return window.location.pathname.replace(/\/+$/, '').endsWith(p); });
-			if (isAdvPage) {
-				window.location.href = L.url('admin/services/honk/global');
-			}
-		}
+	var hiddenTabs = [];
+	if (!isAdvanced) {
+		hiddenTabs.push('dns', 'node', 'route');
+	}
+	if (dashType === 'none') {
+		hiddenTabs.push('api');
+	}
+
+	applyTabCss(hiddenTabs);
+
+	var currentTab = (window.L && L.env && Array.isArray(L.env.dispatchpath)) ? L.env.dispatchpath[3] : '';
+	if (!currentTab) {
+		var m = window.location.pathname.match(/\/honk\/([a-z0-9_-]+)/);
+		if (m) currentTab = m[1];
+	}
+	if (currentTab && hiddenTabs.indexOf(currentTab) !== -1) {
+		window.location.href = L.url('admin/services/honk/global');
+	}
+}
+
+// Tab visibility control:
+// - dns, node, route are hidden when advanced=0
+// - api is hidden when dashboard=none
+function applyTabVisibility() {
+	var sections = uci.sections('honk', 'honk');
+	if (sections && sections.length) {
+		updateTabVisibilityFromSections(sections);
+		return Promise.resolve();
+	}
+
+	return uci.load('honk').then(function() {
+		updateTabVisibilityFromSections(uci.sections('honk', 'honk'));
 	}).catch(function() {
 	});
 }
 
-function applyTabCss(isAdvanced) {
-	// Inject a style element that hides advanced-only tab items and links.
-	// This is idempotent and works seamlessly across themes (Bootstrap, Aurora, etc.).
-	var styleId = 'honk-adv-tab-style';
+function applyTabCss(hiddenTabs) {
+	var styleId = 'honk-tab-visibility-style';
 	var existing = document.getElementById(styleId);
 	if (!existing) {
 		existing = document.createElement('style');
 		existing.id = styleId;
 		document.head.appendChild(existing);
 	}
-	if (isAdvanced) {
+	if (!hiddenTabs || hiddenTabs.length === 0) {
 		existing.textContent = '';
 	} else {
-		existing.textContent = [
-			'#tabmenu .tabmenu-item-dns,',
-			'#tabmenu .tabmenu-item-node,',
-			'#tabmenu .tabmenu-item-route,',
-			'.tabmenu-item-dns,',
-			'.tabmenu-item-node,',
-			'.tabmenu-item-route,',
-			'#tabmenu a[href$="/honk/dns"],',
-			'#tabmenu a[href$="/honk/node"],',
-			'#tabmenu a[href$="/honk/route"] { display: none !important; }'
-		].join('\n');
+		existing.textContent = hiddenTabs.map(function(tab) {
+			return '#tabmenu .tabmenu-item-' + tab + ',\n' +
+			       '.tabmenu-item-' + tab + ',\n' +
+			       '#tabmenu a[href$="/honk/' + tab + '"]';
+		}).join(',\n') + ' { display: none !important; }';
 	}
 }
+
+// Early synchronous check if UCI data is already loaded in memory
+try {
+	var _earlySections = uci.sections('honk', 'honk');
+	if (_earlySections && _earlySections.length) {
+		updateTabVisibilityFromSections(_earlySections);
+	}
+} catch (e) {}
 
 function renderStatusHeader() {
 	var statusEl = E('span', { 'id': 'honk_status', 'style': 'font-weight: 500;' }, [
@@ -573,33 +601,30 @@ function renderStatusHeader() {
 
 	poll.add(function() {
 		return callHonkStatus().then(updateStatus);
-	}, 3);
+	}, 5);
 
-	// Apply tab visibility based on live UCI advanced value.
-	// This runs asynchronously after render; the CSS injection is fast enough
-	// that tabs flicker is imperceptible (tabs hide before user can click them).
-	applyAdvancedTabVisibility();
+	applyTabVisibility();
 
 	return section;
 }
 
+preloadCodeMirror();
 
 return baseclass.extend({
-	applyAdvancedTabVisibility: applyAdvancedTabVisibility,
+	applyTabVisibility: applyTabVisibility,
 	callHonkStatus: callHonkStatus,
 	callHonkReload: callHonkReload,
 	callHonkRestart: callHonkRestart,
 	callHonkGetLog: callHonkGetLog,
 	callHonkClearLog: callHonkClearLog,
 	callHonkDashboardInfo: callHonkDashboardInfo,
-	callHonkZashboardInfo: callHonkDashboardInfo,
 	callHonkDownloadDashboard: callHonkDownloadDashboard,
-	callHonkDownloadZashboard: callHonkDownloadDashboard,
 	callHonkDownloadStatus: callHonkDownloadStatus,
 	callHonkSwitchDashboardApi: callHonkSwitchDashboardApi,
 	readFile: readFile,
 	writeFile: writeFile,
 	ensureCodeMirror: ensureCodeMirror,
+	preloadCodeMirror: preloadCodeMirror,
 	formatEditor: formatEditor,
 	initCodeMirror: initCodeMirror,
 	bindCodeMirrorToMap: bindCodeMirrorToMap,
