@@ -52,7 +52,7 @@
   },
   "timeflysoon/ClashMetaForAndroid": {
     "main": {
-      "remote_sha": "a55827bfdd79f69ded8cf75c90293d2b7cb7e5a1"
+      "remote_sha": "94ebfd648abae76d32ae2191cfc413482d654c66"
     }
   },
   "timeflysoon/CloudRunFilesBuilder": {
@@ -118,7 +118,7 @@
   },
   "timeflysoon/LAVFilters": {
     "master": {
-      "remote_sha": "d65a9fdf836db58d5f8884c9da87cb3480fdb98a"
+      "remote_sha": "e43b0109f6fab6dcebe52a595223eebf590eb475"
     }
   },
   "timeflysoon/Microsoft-Activation-Scripts": {
@@ -183,7 +183,7 @@
   },
   "timeflysoon/OpenWrtAction": {
     "main": {
-      "remote_sha": "c0d7abba49c64baaf38c242040cf74b700323627"
+      "remote_sha": "62140b280e0802c4f43989cfe9a99bcb52af38f9"
     }
   },
   "timeflysoon/PVE-manager-status": {
@@ -231,7 +231,7 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "2da8a9d7d6637b5051816c6fd9c26cbb9d72f41e"
+      "remote_sha": "e8e9b5d37826fb3e79333d85db86cb9334d41cb5"
     }
   },
   "timeflysoon/commonscript": {
@@ -261,7 +261,7 @@
   },
   "timeflysoon/github-chinese": {
     "gh-pages": {
-      "remote_sha": "ffbdc7a9207e9ef694cba7013e71478cb5a1371b"
+      "remote_sha": "1c04bccba0512494e7866c0d50f29069798b8302"
     }
   },
   "timeflysoon/gl-inet-onescript": {
@@ -331,7 +331,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "723ae2340c6c0e0672c3bc8b3807598e0610aee6"
+      "remote_sha": "c7ea70278dd9374a6782ee0df6aad2a615f903cb"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -352,13 +352,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "dff97e403383374dbfe39792d3dfdcf6717e385e"
+      "remote_sha": "c3e7b224bf892ab5ad308744419d5dea788c1b31"
     },
     "release": {
-      "remote_sha": "0b64f5010cfab769420d314668e1d481fad9ad7f"
+      "remote_sha": "5d959c14da07167d7f3d4146cb5a35a086184d98"
     },
     "sing": {
-      "remote_sha": "0a9e013b5bb8971992bc09ebfe1b889cd74d65d0"
+      "remote_sha": "bc3313601fb80ee96a91c35417ec6900cad6c4c2"
     }
   },
   "timeflysoon/nanopi-openwrt": {
@@ -373,7 +373,7 @@
   },
   "timeflysoon/openwrt-daede": {
     "main": {
-      "remote_sha": "838153fde84c295840be86d59388fde454eaa080"
+      "remote_sha": "82b2165e5ee119f309b3bfd649c73e9b791064ed"
     }
   },
   "timeflysoon/quickstart": {
@@ -402,7 +402,7 @@
       "remote_sha": "5186affa138c0830a820e8d314164cea118e786c"
     },
     "release": {
-      "remote_sha": "511bb62f422cc07c60f947565206f45b05b0a62c"
+      "remote_sha": "57183485f5a6faaaef5f88d42ce5bd4029c1e707"
     }
   },
   "timeflysoon/sdmaid-se": {
@@ -424,7 +424,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "c1583ddbfa95530e5ec795605b3172b5c597f902"
+      "remote_sha": "3a03f66d706885bf4a35d9ac04c08b2d51593f55"
     }
   },
   "timeflysoon/store": {
@@ -461,10 +461,10 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "dff97e403383374dbfe39792d3dfdcf6717e385e"
+      "remote_sha": "c3e7b224bf892ab5ad308744419d5dea788c1b31"
     },
     "release": {
-      "remote_sha": "0b64f5010cfab769420d314668e1d481fad9ad7f"
+      "remote_sha": "5d959c14da07167d7f3d4146cb5a35a086184d98"
     }
   },
   "timeflysoon/turboacc": {
@@ -474,7 +474,7 @@
   },
   "timeflysoon/v2rayN": {
     "master": {
-      "remote_sha": "7d6a967c18c697f28dc6917122ed3a4993fcf336"
+      "remote_sha": "a28f68c3a736d5d9e77a08b5e37c4a6a22a9791b"
     },
     "v7_16": {
       "remote_sha": "654d7d83d09d1683c60501c9fa853a19c3dd9d6b"
@@ -482,7 +482,7 @@
   },
   "timeflysoon/v2rayNG": {
     "master": {
-      "remote_sha": "058c6e5631397ac9ca7438ff629c122b489c647f"
+      "remote_sha": "448d0f2cb59a56033351a77a8ebab867d1fcb71b"
     },
     "v1_10_32": {
       "remote_sha": "bd6b67cbfc71caa7ed94d2c64e8ac7756af61276"
@@ -490,7 +490,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "c919f225fcec4ebeea9fce8f73ca5a93bebed93b"
+      "remote_sha": "9a16532a124f5bfccf23edddd8ee9395e285cd75"
     }
   },
   "timeflysoon/weasel": {
@@ -531,7 +531,7 @@
   },
   "timeflysoon/ungoogled-chromium-windows": {
     "master": {
-      "remote_sha": "fc387c7527f875ca73c82ed4907fccaa86808c9a"
+      "remote_sha": "f93c8b8fcee7d55bb4b9c7528551b93685091279"
     }
   },
   "timeflysoon/DriverStoreExplorer": {
