@@ -6,7 +6,7 @@
   },
   "timeflysoon/3x-ui": {
     "main": {
-      "remote_sha": "99047c0a6394af4f74a3105220f2910ef615dce8"
+      "remote_sha": "721de5adde36ed16952fcec81db970959ef9b32a"
     }
   },
   "timeflysoon/Actions-FriendlyWrt": {
@@ -281,7 +281,7 @@
   },
   "timeflysoon/immortalwrt": {
     "master": {
-      "remote_sha": "0359f868e8f52897ff7b32eaa0b8ccdc4ec91cc7"
+      "remote_sha": "5233c153ef7f119c567b54a92feea6919b167e84"
     },
     "openwrt-18.06": {
       "remote_sha": "f7bc84bd30a038b0fd251ce59b6619e5eae94848"
@@ -416,7 +416,7 @@
       "remote_sha": "d1ffe2b87a9c57b53088ab9aee1f4f679096b640"
     },
     "main": {
-      "remote_sha": "261b1ce6e7781e417985f5314c41d99c10394d7e"
+      "remote_sha": "6eb83e729bbe0d8d59fc8d67c97e4037b177eab5"
     },
     "translations-deadend": {
       "remote_sha": "e483486dff5deef147fed8605b5dfaa1010649f6"
@@ -424,7 +424,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "8431dc974fdde36fbc3e17ec82bea537e33fd5c9"
+      "remote_sha": "0946751705ad9442405940459f29427b5f659810"
     }
   },
   "timeflysoon/store": {
@@ -490,7 +490,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "45e4b722eb41f07e5942823eed5d4126631f0e53"
+      "remote_sha": "4495c10755c6569e7447a2dc9085ec93b8302da5"
     }
   },
   "timeflysoon/weasel": {
