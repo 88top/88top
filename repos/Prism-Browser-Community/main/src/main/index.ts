@@ -1,3 +1,4 @@
+import { initializeUiLanguage } from './ui-language'
 import { app, BrowserWindow, dialog, shell } from 'electron'
 import { isAbsolute, join } from 'node:path'
 import { BrowserLauncher } from './browser-launcher'
@@ -51,7 +52,7 @@ function createWindow(): BrowserWindow {
     title: 'Prism Browser',
     backgroundColor: '#f3f5f9',
     webPreferences: {
-      preload: join(__dirname, '../preload/index.cjs'),
+      preload: join(import.meta.dirname, '../preload/index.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true
@@ -73,7 +74,7 @@ function createWindow(): BrowserWindow {
   if (!app.isPackaged && process.env.ELECTRON_RENDERER_URL) {
     void window.loadURL(process.env.ELECTRON_RENDERER_URL)
   } else {
-    void window.loadFile(join(__dirname, '../renderer/index.html'))
+    void window.loadFile(join(import.meta.dirname, '../renderer/index.html'))
   }
   return window
 }
@@ -82,6 +83,7 @@ const hasSingleInstanceLock = app.requestSingleInstanceLock()
 if (!hasSingleInstanceLock) app.quit()
 
 app.whenReady().then(async () => {
+  await initializeUiLanguage()
   const vaultPath = join(app.getPath('userData'), 'vault')
   logger = new AppLogger(vaultPath)
   appSession = new AppSessionTracker(vaultPath)

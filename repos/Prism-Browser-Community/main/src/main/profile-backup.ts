@@ -1,3 +1,4 @@
+import { suffixedProfileName } from '../shared/profile-name'
 import { createHash, randomUUID, type Hash } from 'node:crypto'
 import { createReadStream } from 'node:fs'
 import { copyFile, lstat, mkdir, mkdtemp, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises'
@@ -151,7 +152,7 @@ export class ProfileBackupManager {
     const draft = validateProfileDraft({
       ...manifest.profile,
       kernelVersion: typeof manifest.profile.kernelVersion === 'string' ? manifest.profile.kernelVersion : '',
-      name: `${manifest.profile.name.slice(0, 53)}（迁移）`,
+      name: suffixedProfileName('{0}（迁移）', manifest.profile.name),
       extensionIds: [],
       proxy: { ...manifest.profile.proxy, password: '', passwordStored: false }
     })

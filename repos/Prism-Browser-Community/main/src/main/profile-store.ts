@@ -1,3 +1,4 @@
+import { suffixedProfileName } from '../shared/profile-name'
 import { randomUUID } from 'node:crypto'
 import { copyFile, lstat, mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
@@ -333,7 +334,7 @@ export class ProfileStore {
     const source = this.get(id)
     const seed = seedFromId(randomUUID())
     return this.create({
-      name: `${source.name} 副本`,
+      name: suffixedProfileName('{0} 副本', source.name),
       note: source.note,
       group: source.group,
       tags: [...source.tags],

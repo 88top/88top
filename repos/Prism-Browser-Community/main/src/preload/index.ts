@@ -2,6 +2,10 @@ import { contextBridge, ipcRenderer } from 'electron'
 import type { BrowserApi, BrowserProfileView, ProfileBatchClassification, ProfileDraft, ProfileLaunchOptions } from '../shared/types'
 
 const api: BrowserApi = {
+  uiLanguage: {
+    get: () => ipcRenderer.invoke('ui-language:get'),
+    set: (locale) => ipcRenderer.invoke('ui-language:set', locale)
+  },
   profiles: {
     list: () => ipcRenderer.invoke('profiles:list'),
     create: (draft: ProfileDraft) => ipcRenderer.invoke('profiles:create', draft),

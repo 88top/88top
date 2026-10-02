@@ -400,4 +400,4 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   })
 }
 
-export { cleanupRetryDelay, removeTemporaryTree }
+export { cleanupRetryDelay, removeTemporaryTree, launchApp, quitApp, evaluate, draft }

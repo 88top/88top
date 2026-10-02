@@ -1,3 +1,4 @@
+import { t } from '../shared/i18n'
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { lstat, readFile, stat, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -60,7 +61,7 @@ export function registerIpc({ profiles, settings, launcher, kernels, extensions,
     if (profile.status !== 'closed' && profile.status !== 'error') throw new Error('请先关闭环境再导出配置')
     const owner = BrowserWindow.getFocusedWindow()
     const options: Electron.SaveDialogOptions = {
-      title: '导出环境配置',
+      title: t('导出环境配置'),
       defaultPath: safeProfileFileName(profile.name),
       filters: [{ name: 'Prism Browser 环境配置', extensions: ['json'] }]
     }
@@ -73,7 +74,7 @@ export function registerIpc({ profiles, settings, launcher, kernels, extensions,
   ipcMain.handle('profiles:import-config', async () => {
     const owner = BrowserWindow.getFocusedWindow()
     const options: Electron.OpenDialogOptions = {
-      title: '导入环境配置',
+      title: t('导入环境配置'),
       properties: ['openFile'],
       filters: [{ name: 'Prism Browser 环境配置', extensions: ['json'] }]
     }
@@ -88,7 +89,7 @@ export function registerIpc({ profiles, settings, launcher, kernels, extensions,
   ipcMain.handle('profiles:import-batch-csv', async () => {
     const owner = BrowserWindow.getFocusedWindow()
     const options: Electron.OpenDialogOptions = {
-      title: '批量导入浏览器环境',
+      title: t('批量导入浏览器环境'),
       properties: ['openFile'],
       filters: [{ name: 'CSV 表格', extensions: ['csv'] }]
     }
@@ -104,7 +105,7 @@ export function registerIpc({ profiles, settings, launcher, kernels, extensions,
   ipcMain.handle('profiles:export-batch-template', async () => {
     const owner = BrowserWindow.getFocusedWindow()
     const options: Electron.SaveDialogOptions = {
-      title: '保存批量导入 CSV 模板',
+      title: t('保存批量导入 CSV 模板'),
       defaultPath: 'prism-browser-batch-template.csv',
       filters: [{ name: 'CSV 表格', extensions: ['csv'] }]
     }
@@ -143,14 +144,14 @@ export function registerIpc({ profiles, settings, launcher, kernels, extensions,
     const processCheck = (await launcher.diagnose(id)).checks.find((check) => check.key === 'process')
     if (processCheck?.status === 'error') throw new Error(`无法安全备份：${processCheck.message}`)
     const owner = BrowserWindow.getFocusedWindow()
-    const options: Electron.OpenDialogOptions = { title: '选择环境数据备份保存位置', properties: ['openDirectory', 'createDirectory'] }
+    const options: Electron.OpenDialogOptions = { title: t('选择环境数据备份保存位置'), properties: ['openDirectory', 'createDirectory'] }
     const result = owner ? await dialog.showOpenDialog(owner, options) : await dialog.showOpenDialog(options)
     if (result.canceled || !result.filePaths[0]) return null
     return backups.export(id, result.filePaths[0])
   })
   ipcMain.handle('profiles:import-backup', async () => {
     const owner = BrowserWindow.getFocusedWindow()
-    const options: Electron.OpenDialogOptions = { title: '选择 Prism 环境数据备份目录', properties: ['openDirectory'] }
+    const options: Electron.OpenDialogOptions = { title: t('选择 Prism 环境数据备份目录'), properties: ['openDirectory'] }
     const result = owner ? await dialog.showOpenDialog(owner, options) : await dialog.showOpenDialog(options)
     if (result.canceled || !result.filePaths[0]) return null
     const imported = await backups.import(result.filePaths[0])
@@ -162,7 +163,7 @@ export function registerIpc({ profiles, settings, launcher, kernels, extensions,
     const owner = BrowserWindow.getFocusedWindow()
     const stamp = new Date().toISOString().slice(0, 10)
     const options: Electron.SaveDialogOptions = {
-      title: '导出全部环境加密迁移包',
+      title: t('导出全部环境加密迁移包'),
       defaultPath: `Prism 全部环境 ${stamp}.prism-migration`,
       filters: [{ name: 'Prism 加密迁移包', extensions: ['prism-migration'] }]
     }
@@ -175,7 +176,7 @@ export function registerIpc({ profiles, settings, launcher, kernels, extensions,
     if (profiles.list().some((profile) => cookies.isBusy(profile.id))) throw new Error('Cookie 操作尚未结束，请稍后再试')
     const owner = BrowserWindow.getFocusedWindow()
     const options: Electron.OpenDialogOptions = {
-      title: '导入全部环境加密迁移包',
+      title: t('导入全部环境加密迁移包'),
       properties: ['openFile'],
       filters: [{ name: 'Prism 加密迁移包', extensions: ['prism-migration'] }]
     }
@@ -211,7 +212,7 @@ export function registerIpc({ profiles, settings, launcher, kernels, extensions,
     const owner = BrowserWindow.getFocusedWindow()
     const defaultPath = safeProfileFileName(profile.name).replace(/\.prism-profile\.json$/, '.cookies.json')
     const options: Electron.SaveDialogOptions = {
-      title: '导出环境 Cookie',
+      title: t('导出环境 Cookie'),
       defaultPath,
       filters: [{ name: 'Cookie JSON', extensions: ['json'] }]
     }
@@ -226,7 +227,7 @@ export function registerIpc({ profiles, settings, launcher, kernels, extensions,
     if (launcher.isRunning(id)) throw new Error('请先关闭浏览器环境再导入 Cookie')
     const owner = BrowserWindow.getFocusedWindow()
     const options: Electron.OpenDialogOptions = {
-      title: '导入环境 Cookie',
+      title: t('导入环境 Cookie'),
       properties: ['openFile'],
       filters: [{ name: 'Cookie JSON', extensions: ['json'] }]
     }
@@ -290,7 +291,7 @@ export function registerIpc({ profiles, settings, launcher, kernels, extensions,
   ipcMain.handle('engine:select', async () => {
     const owner = BrowserWindow.getFocusedWindow()
     const options: Electron.OpenDialogOptions = {
-      title: '选择 Fingerprint Chromium 内核',
+      title: t('选择 Fingerprint Chromium 内核'),
       properties: process.platform === 'darwin' ? ['openFile', 'openDirectory'] : ['openFile'],
       filters: process.platform === 'win32' ? [{ name: '浏览器', extensions: ['exe'] }] : undefined
     }
@@ -303,7 +304,7 @@ export function registerIpc({ profiles, settings, launcher, kernels, extensions,
     if (launcher.hasRunning()) throw new Error('请先关闭全部浏览器环境再导入并切换内核')
     const owner = BrowserWindow.getFocusedWindow()
     const options: Electron.OpenDialogOptions = {
-      title: '导入本地 Fingerprint Chromium 构建',
+      title: t('导入本地 Fingerprint Chromium 构建'),
       properties: process.platform === 'darwin' ? ['openFile', 'openDirectory'] : ['openFile'],
       filters: process.platform === 'win32' ? [{ name: 'Chromium', extensions: ['exe'] }] : undefined
     }
@@ -404,7 +405,7 @@ export function registerIpc({ profiles, settings, launcher, kernels, extensions,
   ipcMain.handle('extensions:list', () => extensions.list())
   ipcMain.handle('extensions:import-directory', async () => {
     const owner = BrowserWindow.getFocusedWindow()
-    const options: Electron.OpenDialogOptions = { title: '选择未打包的浏览器扩展目录', properties: ['openDirectory'] }
+    const options: Electron.OpenDialogOptions = { title: t('选择未打包的浏览器扩展目录'), properties: ['openDirectory'] }
     const result = owner ? await dialog.showOpenDialog(owner, options) : await dialog.showOpenDialog(options)
     if (result.canceled || !result.filePaths[0]) return null
     return extensions.importDirectory(result.filePaths[0])

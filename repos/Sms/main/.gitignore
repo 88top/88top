@@ -27,7 +27,6 @@ migrate_working_dir/
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
-.flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
@@ -44,4 +43,24 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-/dist/
+
+# Widget Preview related
+.widget_preview/
+
+# 发布签名密钥不再随仓库分发（安全）：使用 CI Secrets + 本地手动配置
+# 本地开发者需在 android/ 下手动创建 key.properties 和 key/sms.keystore
+android/key.properties
+android/app/key/*.keystore
+keystore.properties
+*.p12
+*.pem
+
+# 真机测试截图与 UI dump（含隐私，勿提交）
+test/device/shots/
+test/device/*.xml
+test/device/ui_*.xml
+
+# FVM Version Cache
+.fvm/
+# l10n generated files (regenerate with: flutter gen-l10n)
+lib/generated/

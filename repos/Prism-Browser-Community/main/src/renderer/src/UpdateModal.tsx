@@ -1,3 +1,4 @@
+import { t, getLocale, translateMessage as mt } from '../../shared/i18n'
 import { Alert, Button, Modal, Space, Tag, Typography, message } from 'antd'
 import { useEffect, useState } from 'react'
 import type { AnnouncementStatus, AppUpdateStatus } from '../../shared/types'
@@ -11,8 +12,7 @@ interface UpdateModalProps {
 }
 
 function errorText(error: unknown): string {
-  return (error instanceof Error ? error.message : String(error))
-    .replace(/^Error invoking remote method '[^']+': Error: /, '')
+  return mt(error instanceof Error ? error.message : String(error))
 }
 
 export function UpdateModal({
@@ -60,13 +60,13 @@ export function UpdateModal({
     ? 'error'
     : isAvailable ? 'info' : isCurrent ? 'success' : 'warning'
   const statusDescription = announcementStatus?.state === 'none'
-    ? '暂无适用于当前系统的更新。'
+    ? t("暂无适用于当前系统的更新。")
     : announcementStatus?.state === 'disabled'
-      ? '暂时无法检查更新。'
+      ? t("暂时无法检查更新。")
       : announcement?.body
 
   return (
-    <Modal open={open} title="应用更新" footer={null} onCancel={onClose} destroyOnHidden>
+    <Modal open={open} title={t("应用更新")} footer={null} onCancel={onClose} destroyOnHidden>
       {contextHolder}
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
         <div>
@@ -74,26 +74,24 @@ export function UpdateModal({
             Prism Browser {appStatus?.currentVersion ?? ''}
           </Typography.Title>
           <Space wrap>
-            <Tag>当前版本 {appStatus?.currentVersion ?? '未知'}</Tag>
-            {announcement?.latestVersion && <Tag color={isAvailable ? 'blue' : 'green'}>最新版本 {announcement.latestVersion}</Tag>}
+            <Tag>{t("当前版本 {0}", appStatus?.currentVersion ?? t("未知"))}</Tag>
+            {announcement?.latestVersion && <Tag color={isAvailable ? 'blue' : 'green'}>{t("最新版本 {0}", announcement.latestVersion)}</Tag>}
           </Space>
         </div>
         <Alert
           showIcon
           type={alertType}
-          title={busy && !announcementStatus ? '正在获取最新版本公告…' : announcementStatus?.message ?? '正在读取更新状态…'}
+          title={busy && !announcementStatus ? t("正在获取最新版本公告…") : mt(announcementStatus?.message ?? t("正在读取更新状态…"))}
           description={statusDescription}
         />
         {announcement && (
           <div>
             <Typography.Title level={5} style={{ marginBottom: 4 }}>{announcement.title}</Typography.Title>
-            <Typography.Text type="secondary">
-              发布时间：{new Date(announcement.publishedAt).toLocaleString('zh-CN', { hour12: false })}
-            </Typography.Text>
+            <Typography.Text type="secondary">{t("发布时间：{0}", new Date(announcement.publishedAt).toLocaleString(getLocale(), { hour12: false }))}</Typography.Text>
           </div>
         )}
         <Space wrap>
-          <Button loading={busy} onClick={() => void check()}>重新检查</Button>
+          <Button loading={busy} onClick={() => void check()}>{t("重新检查")}</Button>
           {isAvailable && announcement?.action && (
             <Button type="primary" loading={busy} onClick={() => void openDownload()}>
               {announcement.action.label}

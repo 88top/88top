@@ -1,3 +1,4 @@
+import { suffixedProfileName } from '../shared/profile-name'
 import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes, randomUUID, scrypt, timingSafeEqual } from 'node:crypto'
 import { createReadStream, createWriteStream } from 'node:fs'
 import { appendFile, lstat, mkdir, mkdtemp, open, readdir, realpath, rename, rm, stat, writeFile } from 'node:fs/promises'
@@ -208,7 +209,7 @@ function validateManifest(value: unknown): ArchiveManifest {
 
 function uniqueName(name: string, used: Set<string>): string {
   if (!used.has(name)) { used.add(name); return name }
-  const base = `${name.slice(0, 52)}（迁移）`
+  const base = suffixedProfileName('{0}（迁移）', name)
   let candidate = base
   let index = 2
   while (used.has(candidate)) candidate = `${base.slice(0, 58 - String(index).length)} ${index++}`

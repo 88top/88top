@@ -1,80 +1,94 @@
 # Prism Browser Community
 
-[简体中文](README.md) | [English](README.en.md)
+**[English](README.md)** | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [Русский](README.ru.md) | [Tiếng Việt](README.vi.md) | [ไทย](README.th.md) | [Português (Brasil)](README.pt-BR.md)
 
-作者：[DFarm](https://x.com/DFarm_club)
+[Français](README.fr.md) | [Українська](README.uk.md) | [Español](README.es.md) | [Türkçe](README.tr.md) | [日本語](README.ja.md) | [हिन्दी](README.hi.md)
 
-官网：[https://prismbrowser.app/](https://prismbrowser.app/)
+Author: [DFarm](https://x.com/DFarm_club)
 
-Prism Browser 是一个基于定制 Chromium 的本地指纹浏览器环境管理器。每个环境拥有独立的 Cookie、缓存、扩展数据、代理设置和指纹配置，适合管理多个相互隔离的浏览器身份。
+Official website: [https://prismbrowser.app/](https://prismbrowser.app/)
 
-浏览器环境、Cookie、代理凭据和浏览历史默认只保存在用户自己的设备上。Community 版本可以免费使用，不限制本地环境数量。
+Prism Browser is a local fingerprint-browser profile manager built on a customized Chromium. Each profile has independent cookies, cache, extension data, proxy settings, and fingerprint configuration, making it suitable for managing multiple isolated browser identities.
 
-## 项目维护说明
+Browser profiles, cookies, proxy credentials, and browsing history remain on the user's device by default. The Community edition is free to use and does not limit the number of local profiles.
 
-本仓库将继续公开保留，供学习、审阅和社区自行构建使用。自 Prism Browser `v0.3.17` 起，产品版的新功能、修复及后续源码更新将不再同步到本仓库。随着桌面应用、指纹内核、跨平台打包、Pro 功能和多条发布分支持续增长，同时维护公开版与产品版已经带来较高的开发和测试成本。
+## Source Code Maintenance Notice
 
-现有源码、提交历史和历史 Release 不会删除。后续功能、修复和安装包请以[官网](https://prismbrowser.app/)与本仓库 [Releases](../../releases) 页面发布的信息为准。
+This repository will remain publicly available for learning, review, and community builds. Starting with Prism Browser `v0.3.17`, product features, fixes, and later source-code changes will no longer be routinely synchronized to this repository. As the desktop app, fingerprint kernels, cross-platform packaging, Pro features, and multiple release branches have grown, maintaining separate public and product code lines has created a substantial development and testing burden.
 
-## 快速下载和使用
+As a specific exception, this update ports the general localization support from 0.3.19 and translates the existing public interface. It does not include private Pro runtimes, licensing services, new Pro features, or private release configuration. This does not resume ongoing synchronization of product source code.
 
-### 1. 下载应用
+The existing source code, commit history, and historical releases will remain available. For future features, fixes, and installers, please refer to the [official website](https://prismbrowser.app/) and this repository's [Releases](../../releases) page.
 
-前往项目的 [Releases](../../releases) 页面，下载适合自己系统的最新版本：
+## Interface Languages
 
-- macOS：下载 DMG 安装包或 ZIP 版本；
-- Windows：下载安装版，或者无需安装的 Portable 版本。
+The desktop interface supports **13 languages**: Simplified Chinese, Traditional Chinese, English, Russian, Vietnamese, Thai, Brazilian Portuguese, French, Ukrainian, Spanish, Turkish, Japanese, and Hindi.
 
-发布包已经包含可直接使用的 Chromium 144 指纹内核，普通用户不需要自行编译 Chromium。
+- Startup matches the preferred system display language, with English as the fallback for unsupported or unavailable languages.
+- Switch instantly using the language selector in the upper-right corner. A manual choice is saved locally and takes precedence on subsequent launches.
+- Menus, common dialogs, forms, dates, and sorting follow the interface language. Translation catalogs are bundled; no online translation service is required.
+- Interface language is independent of profile fingerprint language and time zone. Switching preserves profile names, notes, tags, and unsaved edits.
+- The README is also available in all 13 languages above; use the links at the top of the page to switch. See the [localization guide](docs/localization.md) to contribute translations.
 
-如果未签名版本被系统拦截：
+## Quick Download and Setup
 
-- macOS：在“系统设置 → 隐私与安全性”中确认打开；
-- Windows：在 SmartScreen 提示中选择“更多信息 → 仍要运行”。
+### 1. Download the app
 
-请只从本项目 Releases 页面下载文件，并在下载页面核对发布者提供的 SHA-256。
+Open the project's [Releases](../../releases) page and download the latest package for your operating system:
 
-### 2. 创建第一个环境
+- macOS: download the DMG installer or ZIP package;
+- Windows: download the installer or the installation-free Portable package.
 
-1. 打开 Prism Browser，点击“新建环境”；
-2. 填写环境名称，根据需要选择系统、语言、时区、屏幕和硬件身份；
-3. 不使用代理时保持直连；使用代理时填写协议、主机、端口以及认证信息并先检测连接；
-4. 保存环境，点击“打开”；
-5. 关闭窗口后，Cookie、缓存、书签和扩展数据会继续保存在这个环境中。
+Release packages include a ready-to-use Chromium 144 fingerprint kernel. Regular users do not need to compile Chromium themselves.
 
-不同环境使用独立的用户数据目录。复制环境时会保留配置，并自动生成新的环境身份和种子。
+If your system blocks an unsigned build:
 
-## 主要功能
+- macOS: confirm that you want to open it in **System Settings → Privacy & Security**;
+- Windows: select **More info → Run anyway** in the SmartScreen prompt.
 
-- 创建和同时运行多个独立浏览器环境
-- 每个环境独立保存 Cookie、缓存、书签和扩展数据
-- HTTP、HTTPS、SOCKS5 代理及 WebRTC 防泄漏
-- User-Agent、语言、时区、屏幕、CPU、内存和 GPU 身份配置
-- Canvas、WebGL、Audio、DOMRect、字体、Speech 与 WebGPU 一致性处理
-- 环境复制、分组、标签、收藏、批量操作和回收站
-- Cookie、完整环境以及全部工作区的本地迁移
-- macOS 环境 Dock 编号及 Windows 任务栏环境编号
+Only download files from this project's Releases page and compare the file's SHA-256 with the checksum published with the release.
 
-## 已进行的检测
+### 2. Create your first profile
 
-当前内核持续使用以下页面和本地审计工具进行交叉验证：
+1. Open Prism Browser and select **New Profile**;
+2. Enter a profile name, then choose the system, language, time zone, screen, and hardware identity as needed;
+3. Leave the connection direct when no proxy is needed. Otherwise, enter the protocol, host, port, and credentials, then test the connection;
+4. Save the profile and select **Open**;
+5. After the window closes, its cookies, cache, bookmarks, and extension data remain in that profile.
 
-| 检测 | 重点检查内容 |
+Every profile uses an independent user-data directory. Duplicating a profile preserves its settings while generating a new profile identity and seed.
+
+## Main Features
+
+- Create and run multiple independent browser profiles
+- Independent cookies, cache, bookmarks, and extension data for every profile
+- HTTP, HTTPS, and SOCKS5 proxies with WebRTC leak prevention
+- User-Agent, language, time zone, screen, CPU, memory, and GPU identity configuration
+- Consistent Canvas, WebGL, Audio, DOMRect, font, Speech, and WebGPU surfaces
+- Profile duplication, groups, tags, favorites, bulk operations, and trash
+- Local migration of cookies, individual profiles, or the complete workspace
+- Numbered profile Dock icons on macOS and taskbar icons on Windows
+
+## Verification Coverage
+
+The current kernel is continuously cross-checked with the following pages and local audit tools:
+
+| Test | Coverage |
 | --- | --- |
-| Pixelscan | 浏览器、系统、位置、自动化和指纹一致性 |
-| CreepJS | Window、Worker、Intl、Canvas、WebGL、Audio、DOMRect、字体和 Speech |
-| BrowserLeaks | Canvas、WebGL、字体、Audio、WebRTC、客户端提示和屏幕信息 |
-| IPhey | 浏览器、位置、IP、硬件、软件和机器人信号；RDP 会话可能被单独提示 |
-| Prism fingerprint matrix | 同种子重启稳定、不同种子分离、跨 iframe/Worker 身份一致 |
-| Prism profile-data audit | Cookie、存储数据持久化及环境间隔离 |
+| Pixelscan | Browser, operating system, location, automation, and fingerprint consistency |
+| CreepJS | Window, Worker, Intl, Canvas, WebGL, Audio, DOMRect, fonts, and Speech |
+| BrowserLeaks | Canvas, WebGL, fonts, Audio, WebRTC, client hints, and screen information |
+| IPhey | Browser, location, IP, hardware, software, and bot signals; RDP sessions may be flagged separately |
+| Prism fingerprint matrix | Same-seed restart stability, different-seed separation, and cross-iframe/Worker identity consistency |
+| Prism profile-data audit | Cookie and storage persistence plus isolation between profiles |
 
-检测网站会持续更新，任何版本都不承诺永久通过所有第三方检测。代理质量、IP 信誉、远程桌面、系统字体和真实硬件环境也会影响结果。
+Fingerprint-testing sites change over time, so no release promises to pass every third-party test forever. Proxy quality, IP reputation, remote desktop sessions, system fonts, and real hardware also affect results.
 
-## 面向开发者
+## For Developers
 
-### 编译桌面应用
+### Build the desktop app
 
-需要 Node.js 22 或更新版本、npm，以及对应平台的基础构建工具。
+You need Node.js 22 or later, npm, and the basic build tools for your platform.
 
 ```bash
 npm ci
@@ -82,13 +96,13 @@ npm run typecheck
 npm run build
 ```
 
-开发运行：
+Run in development mode:
 
 ```bash
 npm run dev
 ```
 
-生成不内置指纹内核的应用包：
+Create an application package without a bundled fingerprint kernel:
 
 ```bash
 # macOS
@@ -98,22 +112,22 @@ npm run dist:mac
 npm run dist:win
 ```
 
-打包完成后，可以在应用的“浏览器内核”页面导入本地编译的 Chromium。
+After packaging, you can import a locally compiled Chromium build from the **Browser Kernels** page in the application.
 
-### 编译 Chromium 144 指纹内核
+### Build the Chromium 144 fingerprint kernel
 
-Chromium 首次编译需要下载完整源码和工具链。建议准备 32 GB 内存和约 300 GB 可用 SSD 空间；构建目录应使用系统原生文件系统、短路径并避免空格。
+The first Chromium build downloads the complete source tree and toolchain. We recommend 32 GB of RAM and approximately 300 GB of free SSD space. Use a short build path without spaces on the platform's native file system.
 
-版本、上游提交、补丁顺序和 SHA-256 统一记录在 `tools/kernel-lock.json`。公共补丁位于 `tools/kernel-patches`，平台脚本位于：
+Pinned versions, upstream commits, patch order, and SHA-256 values are recorded in `tools/kernel-lock.json`. Shared patches are in `tools/kernel-patches`, while platform scripts are located in:
 
-- macOS arm64：`tools/macos-kernel`
-- Windows x64：`tools/windows-kernel`
+- macOS arm64: `tools/macos-kernel`
+- Windows x64: `tools/windows-kernel`
 
-脚本会准备锁定版本源码、校验并应用补丁、生成 GN 构建配置、调用 Ninja 编译，最后输出 Chromium、Chromedriver、安装产物、构建清单和 SHA-256。
+The scripts prepare the pinned sources, verify and apply patches, generate the GN configuration, invoke Ninja, and produce Chromium, Chromedriver, installer artifacts, a build manifest, and SHA-256 checksums.
 
 #### macOS arm64
 
-需要 Xcode、Git、Python 3、Ninja 和 APFS 构建磁盘。接受 Xcode 许可证后，在仓库根目录执行：
+You need Xcode, Git, Python 3, Ninja, and an APFS build volume. Accept the Xcode license, then run these commands from the repository root:
 
 ```bash
 cd tools/macos-kernel
@@ -122,13 +136,13 @@ cd tools/macos-kernel
 ./Build-Kernel.sh /Volumes/ds/prism-kernel 4
 ```
 
-将 `/Volumes/ds/prism-kernel` 换成自己的构建目录，最后一个数字是 Ninja 并发任务数。
+Replace `/Volumes/ds/prism-kernel` with your build directory. The final number controls Ninja parallelism.
 
 #### Windows x64
 
-需要 Windows 10/11 x64、Visual Studio 的 C++ 桌面开发组件、Windows SDK、Git、Python 3 和 NTFS 构建磁盘。建议使用干净的 Python venv，避免 Anaconda 中的同名包干扰 Chromium 构建。
+You need Windows 10/11 x64, Visual Studio Desktop development with C++, the Windows SDK, Git, Python 3, and an NTFS build volume. A clean Python virtual environment is recommended to avoid package-name conflicts from Anaconda environments.
 
-在普通权限 PowerShell 中进入仓库后执行：
+Open a non-administrator PowerShell session in the repository and run:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
@@ -138,66 +152,66 @@ cd tools\windows-kernel
 .\Build-Kernel.ps1 -BuildRoot D:\prism-chromium -Jobs 4
 ```
 
-将 `D:\prism-chromium` 换成自己的短路径 NTFS 构建目录。首次检查如果提示必须启用 Windows 长路径，请按提示设置并重启系统后继续。
+Replace `D:\prism-chromium` with your own short-path NTFS build directory. If the prerequisite check asks you to enable Windows long-path support, follow its instructions, restart Windows, and then continue.
 
-#### 中断续编与输出
+#### Resume an interrupted build and find artifacts
 
-如果已经生成 Ninja 构建图，停电或编译中断后重新执行对应平台的 `Build-Kernel` 命令即可增量续编，不需要重新下载完整源码。
+After a Ninja graph has been generated, rerun the platform's `Build-Kernel` command to resume incrementally after a shutdown or interrupted build. The complete source tree does not need to be downloaded again.
 
-构建结果位于所选构建目录的 `artifacts/<version>-<platform>`，日志位于 `logs`。详细依赖说明、增量补丁流程和故障处理分别见：
+Build artifacts are written to `artifacts/<version>-<platform>` inside the selected build root, and logs are written to `logs`. See the platform guides for detailed dependencies, incremental patching, and troubleshooting:
 
 - `tools/macos-kernel/README.md`
 - `tools/windows-kernel/README.md`
 
-### 使用自己编译的内核
+### Use a locally compiled kernel
 
-打开 Prism Browser 的“浏览器内核”页面，选择“导入本地构建”：
+Open the **Browser Kernels** page in Prism Browser and select **Import Local Build**:
 
-- macOS：选择编译生成的 `Chromium.app`；
-- Windows：选择包含 `chrome.exe` 的 Chromium 构建目录或解压目录。
+- macOS: select the generated `Chromium.app`;
+- Windows: select the Chromium build or extracted directory containing `chrome.exe`.
 
-导入后先执行内核校验，再将它设为当前内核。已有环境仍会保留各自的数据和配置。
+Verify the kernel after importing it, then make it the active kernel. Existing profiles retain their data and settings.
 
-## Community 与 Pro
+## Community and Pro
 
-Community 已经包含完整的本地浏览器环境管理能力，可以永久免费使用。Prism Pro 在此基础上增加适合自动化、长期运行和本地 AI 协作的专业功能。
+Community includes the complete local browser-profile management experience and remains free to use. Prism Pro adds professional features for automation, recurring workflows, and local AI collaboration.
 
-| 功能 | Community | Prism Pro |
+| Feature | Community | Prism Pro |
 | --- | :---: | :---: |
-| 不限数量的本地浏览器环境 | ✓ | ✓ |
-| 指纹配置、代理与 WebRTC 防泄漏 | ✓ | ✓ |
-| 独立 Cookie、缓存、扩展和浏览器数据 | ✓ | ✓ |
-| 环境复制、分组、批量操作和本地迁移 | ✓ | ✓ |
-| 随应用提供的 Community 指纹内核 | ✓ | ✓ |
-| 官方提供的新内核 | — | ✓ |
-| 本地自动化 API | — | ✓ |
-| 本地计划任务 | — | ✓ |
-| 本地 AI · MCP 控制 | — | ✓ |
+| Unlimited local browser profiles | ✓ | ✓ |
+| Fingerprint configuration, proxies, and WebRTC leak prevention | ✓ | ✓ |
+| Independent cookies, cache, extensions, and browser data | ✓ | ✓ |
+| Profile duplication, groups, bulk operations, and local migration | ✓ | ✓ |
+| Community fingerprint kernel distributed with the app | ✓ | ✓ |
+| Officially distributed newer kernels | — | ✓ |
+| Local automation API | — | ✓ |
+| Local scheduled tasks | — | ✓ |
+| Local AI control through MCP | — | ✓ |
 
-### Pro 功能
+### Pro Features
 
-- **官方新内核**：无需在本机编译，即可使用随新版 Prism Browser 提供的新内核。
-- **本地自动化 API**：在本机查询、启动和关闭指定浏览器环境，使用临时访问令牌，不对公网开放。
-- **本地计划任务**：按照一次、每天或每周规则自动启动和关闭环境，适合固定时间运行的本地工作流程。
-- **本地 AI · MCP**：只授权 AI 控制你选中的环境；AI 可以访问网页、读取页面内容、点击页面并填写表单，可随时停止或撤销环境权限。
-- **本地优先**：Community 和 Pro 的环境数据都保存在用户自己的设备上，不会因为升级 Pro 而上传浏览器环境、Cookie、扩展数据或代理凭据。
+- **Official newer kernels**: use newer kernels distributed with Prism Browser releases without compiling them locally.
+- **Local automation API**: query, launch, and close selected browser profiles on the local machine using a temporary access token. The API is not exposed to the public internet.
+- **Local scheduled tasks**: automatically launch and close profiles once, daily, or weekly for recurring local workflows.
+- **Local AI through MCP**: grant an AI access only to selected profiles. It can visit pages, read page content, click elements, and fill forms; access can be stopped or revoked at any time.
+- **Local-first data**: both Community and Pro store profile data on the user's device. Upgrading does not upload browser profiles, cookies, extension data, or proxy credentials.
 
-Pro 为单设备一年授权。一枚激活码同一时间绑定一台设备；主动解绑后，可以在另一台设备继续使用剩余有效期。授权到期或解除绑定不会删除本地环境，Community 基础功能仍然可以继续使用。
+Pro is licensed for one device for one year. One activation code can be bound to one device at a time. After deactivation, the remaining license term can be used on another device. Expiration or deactivation does not delete local profiles, and Community features remain available.
 
-## 安全报告
+## Security Reports
 
-请不要在公开 Issue 中提交激活码、代理密码、Cookie、钱包信息、完整浏览器环境、私钥或包含个人数据的诊断文件。报告安全问题时，请提供最小复现步骤、受影响版本、平台和影响范围，并先删除敏感数据。
+Do not post activation codes, proxy passwords, cookies, wallet information, complete browser profiles, private keys, or diagnostic files containing personal data in public issues. When reporting a security problem, provide minimal reproduction steps, affected versions, platform, and impact after removing sensitive data.
 
-第三方检测网站的评分变化不一定代表安全漏洞。提交检测问题时，请同时提供检测网站、测试时间、内核版本、操作系统和具体失败字段。
+A score change on a third-party fingerprint-testing site is not necessarily a security vulnerability. Include the site, test time, kernel version, operating system, and exact failed fields when reporting detection issues.
 
-## 许可证与第三方组件
+## License and Third-party Components
 
-Prism Browser Community 自有代码以 MIT License 发布。Chromium、ungoogled-chromium、fingerprint-chromium、Electron、React、Ant Design、Vite、TypeScript、Vitest、proxy-chain、undici、zod 及其他第三方组件继续遵循各自的开源许可证。
+Code owned by Prism Browser Community is released under the MIT License. Chromium, ungoogled-chromium, fingerprint-chromium, Electron, React, Ant Design, Vite, TypeScript, Vitest, proxy-chain, undici, zod, and other third-party components remain subject to their respective open-source licenses.
 
-编译或分发 Chromium 时，必须同时保留 Chromium 源码和发行产物要求的 `LICENSE`、`LICENSES` 及组件通知。Prism Browser 的名称、标志和图标不因源码许可而自动授予商标使用权。
+Chromium builds and distributions must retain the `LICENSE`, `LICENSES`, and component notices required by Chromium's source tree and packaged artifacts. The Prism Browser name, logo, and icons are not automatically licensed as trademarks by the source-code license.
 
-请仅将本项目用于合法、获得授权的浏览器隔离、自动化测试、隐私研究和账号管理。使用者应遵守目标网站条款及所在地区法律。
+Use this project only for lawful and authorized browser isolation, automation testing, privacy research, and account management. Users are responsible for complying with target-site terms and applicable local laws.
 
-## Star 历史
+## Star History
 
 [![Prism Browser Community Star History](https://api.star-history.com/svg?repos=DFarm6/Prism-Browser-Community&type=Date)](https://www.star-history.com/#DFarm6/Prism-Browser-Community&Date)

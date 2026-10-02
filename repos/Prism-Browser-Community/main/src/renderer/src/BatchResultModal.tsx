@@ -1,3 +1,4 @@
+import { t, translateMessage as mt } from '../../shared/i18n'
 import { Alert, List, Modal, Typography } from 'antd'
 
 export interface BatchOperationResult {
@@ -14,20 +15,20 @@ interface BatchResultModalProps {
 
 export function BatchResultModal({ result, onClose }: BatchResultModalProps) {
   return (
-    <Modal open={Boolean(result)} title="批量操作结果" footer={null} onCancel={onClose} destroyOnHidden>
+    <Modal open={Boolean(result)} title={t("批量操作结果")} footer={null} onCancel={onClose} destroyOnHidden>
       {result && (
         <>
           <Alert
             type={result.errors.length ? 'warning' : 'success'}
             showIcon
-            title={`批量${result.operation}完成：成功 ${result.succeeded}，失败 ${result.errors.length}`}
+            title={t("批量{0}完成：成功 {1}，失败 {2}", t(result.operation), result.succeeded, result.errors.length)}
           />
           {result.errors.length > 0 && (
             <List
               dataSource={result.errors}
               renderItem={(error) => (
                 <List.Item>
-                  <Typography.Text type="danger" copyable>{error}</Typography.Text>
+                  <Typography.Text type="danger" copyable>{mt(error)}</Typography.Text>
                 </List.Item>
               )}
             />

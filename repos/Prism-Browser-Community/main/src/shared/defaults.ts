@@ -1,3 +1,4 @@
+import { t } from './i18n'
 import type { BrowserPlatform, FingerprintConfig, ProfileDraft, ProfileWindowConfig } from './types'
 import { applyHardwareProfile, defaultHardwareProfileId } from './hardware-profiles'
 
@@ -52,7 +53,7 @@ export function defaultProfileWindow(): ProfileWindowConfig {
 
 export function defaultProfileDraft(index = 1): ProfileDraft {
   return {
-    name: `环境 ${index}`,
+    name: t('环境 {0}', index),
     note: '',
     group: '',
     tags: [],

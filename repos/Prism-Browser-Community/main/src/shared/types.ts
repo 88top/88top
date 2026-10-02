@@ -1,3 +1,4 @@
+import type { UiLocale } from './i18n'
 export type BrowserPlatform = 'windows' | 'macos'
 export type BrowserBrand = 'Chrome' | 'Edge'
 export type HardwareProfileId =
@@ -413,6 +414,10 @@ export interface BrowserCrashRecord {
 }
 
 export interface BrowserApi {
+  uiLanguage: {
+    get(): Promise<UiLocale>
+    set(locale: UiLocale): Promise<UiLocale>
+  }
   profiles: {
     list: () => Promise<BrowserProfileView[]>
     create: (draft: ProfileDraft) => Promise<BrowserProfileView>

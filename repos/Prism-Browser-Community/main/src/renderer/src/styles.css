@@ -230,3 +230,13 @@ button, input, textarea { font: inherit; }
   .content { padding-inline: 24px; }
   .summary-row { grid-template-columns: 130px 130px minmax(220px, 1fr) 170px; }
 }
+
+/* Accommodate the different lengths of translated interface labels. */
+.language-selector { min-width: 156px; max-width: 220px; }
+.page-header { flex-wrap: wrap; gap: 16px; }
+.page-header .header-actions { justify-content: flex-end; }
+.sidebar .nav-item, .nav-item { min-height: 42px; height: auto; white-space: normal; }
+.nav-item > span { min-width: 0; overflow-wrap: anywhere; }
+.community-card small, .community-action { white-space: normal; }
+.ant-list-item-action { display: flex; flex-wrap: wrap; gap: 8px; }
+.extension-toolbar, .recycle-toolbar, .kernel-toolbar { flex-wrap: wrap; gap: 12px; }
