@@ -8,6 +8,7 @@ import dagger.multibindings.IntoSet
 import eu.darken.sdmse.appcontrol.core.archive.ArchiveException
 import eu.darken.sdmse.appcontrol.core.archive.ArchiveSupport
 import eu.darken.sdmse.appcontrol.core.archive.ArchiveTask
+import eu.darken.sdmse.appcontrol.core.archive.ArchiveUnavailableException
 import eu.darken.sdmse.appcontrol.core.archive.Archiver
 import eu.darken.sdmse.appcontrol.core.export.AppExportTask
 import eu.darken.sdmse.appcontrol.core.export.AppExporter
@@ -15,6 +16,7 @@ import eu.darken.sdmse.appcontrol.core.forcestop.ForceStopTask
 import eu.darken.sdmse.appcontrol.core.forcestop.ForceStopper
 import eu.darken.sdmse.appcontrol.core.restore.RestoreException
 import eu.darken.sdmse.appcontrol.core.restore.RestoreTask
+import eu.darken.sdmse.appcontrol.core.restore.RestoreUnavailableException
 import eu.darken.sdmse.appcontrol.core.restore.Restorer
 import eu.darken.sdmse.appcontrol.core.toggle.AppControlToggleTask
 import eu.darken.sdmse.appcontrol.core.toggle.ComponentToggler
@@ -444,6 +446,7 @@ class AppControl @Inject constructor(
         val snapshot = internalData.value ?: throw IllegalStateException("App data wasn't loaded")
         val successful = mutableSetOf<InstallId>()
         val failed = mutableSetOf<InstallId>()
+        val unavailable = mutableSetOf<InstallId>()
         val budget = UnusableFailureBudget()
         var gaveUp: AutomationCompatibilityException? = null
 
@@ -460,8 +463,10 @@ class AppControl @Inject constructor(
                 } catch (e: Exception) {
                     log(TAG, ERROR) { "Failed to archive $targetId: ${e.asLog()}" }
                     failed.add(targetId)
-                    // The archiver wraps whatever went wrong, the budget classifies the wrapped cause.
-                    budget.onFailure(if (e is ArchiveException) e.cause ?: e else e)
+                    // The archiver wraps whatever went wrong, classify the wrapped cause.
+                    val cause = if (e is ArchiveException) e.cause ?: e else e
+                    if (cause is ArchiveUnavailableException) unavailable.add(targetId)
+                    budget.onFailure(cause)
                     if (budget.isExhausted) {
                         log(TAG, ERROR) { "Automation failure budget spent at $targetId, giving up" }
                         gaveUp = AutomationCompatibilityException()
@@ -508,7 +513,7 @@ class AppControl @Inject constructor(
 
         if (giveUpError != null) throw giveUpError
 
-        return ArchiveTask.Result(successful, failed)
+        return ArchiveTask.Result(successful, failed, unavailable)
     }
 
     private suspend fun performRestore(task: RestoreTask): RestoreTask.Result {
@@ -518,6 +523,7 @@ class AppControl @Inject constructor(
         val snapshot = internalData.value ?: throw IllegalStateException("App data wasn't loaded")
         val successful = mutableSetOf<InstallId>()
         val failed = mutableSetOf<InstallId>()
+        val unavailable = mutableSetOf<InstallId>()
         val budget = UnusableFailureBudget()
         var gaveUp: AutomationCompatibilityException? = null
 
@@ -534,8 +540,10 @@ class AppControl @Inject constructor(
                 } catch (e: Exception) {
                     log(TAG, ERROR) { "Failed to restore $targetId: ${e.asLog()}" }
                     failed.add(targetId)
-                    // The restorer wraps whatever went wrong, the budget classifies the wrapped cause.
-                    budget.onFailure(if (e is RestoreException) e.cause ?: e else e)
+                    // The restorer wraps whatever went wrong, classify the wrapped cause.
+                    val cause = if (e is RestoreException) e.cause ?: e else e
+                    if (cause is RestoreUnavailableException) unavailable.add(targetId)
+                    budget.onFailure(cause)
                     if (budget.isExhausted) {
                         log(TAG, ERROR) { "Automation failure budget spent at $targetId, giving up" }
                         gaveUp = AutomationCompatibilityException()
@@ -582,7 +590,7 @@ class AppControl @Inject constructor(
 
         if (giveUpError != null) throw giveUpError
 
-        return RestoreTask.Result(successful, failed)
+        return RestoreTask.Result(successful, failed, unavailable)
     }
 
     data class State(
