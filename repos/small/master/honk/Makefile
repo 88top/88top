@@ -3,16 +3,17 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=honk
-PKG_VERSION:=0.0.1_beta83
+PKG_VERSION:=2026.10.4_pre1
 PKG_RELEASE:=1
 
 # Raw upstream release tag. It keeps the dots in qualifiers (e.g. v0.0.1.beta.49)
 # because that is what the GitHub release asset name uses.
-HONK_RELEASE_TAG:=v0.0.1.beta.83
+HONK_RELEASE_TAG:=debug.2026.10.4.native-api.1
+HONK_ASSET_TAG:=debug
 
 # SHA256 of each release tarball, kept in sync by scripts/update_honk_version.sh.
-HONK_HASH_X86_64:=0d440bc094a4ceead94a897647b3c598f6ca7630c65a1675ed137e3d9c1c0c56
-HONK_HASH_AARCH64:=bb8c893c676f8f245332598ae701f50b803b922aef308dded4d0805c67692ab3
+HONK_HASH_X86_64:=dfeab5ca18744563c0cb672069fc548744360e3f4b2f35d7be3cfbfef96dbf6c
+HONK_HASH_AARCH64:=a17fd9ee544b7671f57defc4c030a7a3620c1ebfdf329e6e2a22050223ddad9e
 
 PKG_LICENSE:=AGPL-3.0-only
 PKG_LICENSE_FILE:=LICENSE
@@ -29,10 +30,10 @@ endif
 # Default to the stock-malloc build: lower RSS high-water on small gateways.
 # Use an empty suffix to switch back to the mimalloc build (faster QUIC).
 HONK_SUFFIX:=-stock
-HONK_ASSET:=honk-core-$(HONK_RELEASE_TAG)-$(HONK_TARGET)$(HONK_SUFFIX).tar.gz
+HONK_ASSET:=honk-core-$(HONK_ASSET_TAG)-$(HONK_TARGET)$(HONK_SUFFIX).tar.gz
 
 PKG_SOURCE:=$(HONK_ASSET)
-PKG_SOURCE_URL:=https://github.com/daeuniverse/honk/releases/download/$(HONK_RELEASE_TAG)/
+PKG_SOURCE_URL:=https://github.com/Glassyiris/honk/releases/download/$(HONK_RELEASE_TAG)/
 PKG_HASH:=$(HONK_HASH)
 
 include $(INCLUDE_DIR)/package.mk
@@ -42,7 +43,7 @@ define Package/honk
   CATEGORY:=Network
   SUBMENU:=Web Servers/Proxies
   TITLE:=honk - eBPF transparent proxy engine (dae-compatible)
-  URL:=https://github.com/daeuniverse/honk
+  URL:=https://github.com/Glassyiris/honk
   DEPENDS:=@(x86_64||aarch64) \
     +ca-bundle +ip-full \
     +kmod-sched-core +kmod-sched-bpf +kmod-veth +kmod-nft-queue \
