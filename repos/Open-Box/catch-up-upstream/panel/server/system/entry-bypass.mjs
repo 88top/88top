@@ -82,12 +82,17 @@ export const directAnsweredSets = () => [
 // fakeIpCidrs:FakeIP 占位段 { v4, v6 }。「不进内核」的终端发往占位段的包不打标记(见下)
 // admitDnsPort:「只让这些终端进内核」名单外终端发给路由器自己的查询转到内核的直连 DNS 入站(engine/config.mjs 的
 // DNS_DIRECT_INBOUND_PORT);0 = 配置里没有这个入站,不转
-export const entryBypassNft = ({ ports = '', portsMode = 'blacklist', clientRoutes = [], autoRedirect = false, lanIfaces = [], directAnswered = false, tcpMss = 0, terminalDns = { ips: [], macs: [] }, dnsPort = 0, dnsV6 = false, fakeIpCidrs = { v4: [], v6: [] }, admitDnsPort = 0 } = {}) => {
+export const entryBypassNft = ({ ports = '', portsMode = 'blacklist', clientRoutes = [], autoRedirect = false, pureTun = false, lanIfaces = [], directAnswered = false, tcpMss = 0, terminalDns = { ips: [], macs: [] }, dnsPort = 0, dnsV6 = false, fakeIpCidrs = { v4: [], v6: [] }, admitDnsPort = 0 } = {}) => {
   const inRules = []
   const outRules = []
   if (directAnswered) {
-    inRules.push(`ip daddr @${DIRECT_ANSWERED_SET[4]} ${MARK}`)
-    inRules.push(`ip6 daddr @${DIRECT_ANSWERED_SET[6]} ${MARK}`)
+    // 发往这些地址的 DNS 查询(53 端口)不放:集合里偶尔有公共 DNS 的地址(主机名按直连解析、IP 又落在要进内核的网段里,
+    // 比如挂在 Cloudflare / 谷歌云上的),终端直接往它的 53 端口发查询时打了放行位,就跳过了内核的 DNS 劫持,
+    // 域名过滤和按规则分流解析都管不到。不打放行位,照常被劫持进内核(内核的 nat 链里 DNS 劫持排在按目标地址放行之前)
+    for (const [family, name] of [['ip', DIRECT_ANSWERED_SET[4]], ['ip6', DIRECT_ANSWERED_SET[6]]]) {
+      inRules.push(`${family} daddr @${name} meta l4proto != { tcp, udp } ${MARK}`)
+      inRules.push(`${family} daddr @${name} meta l4proto { tcp, udp } th dport != 53 ${MARK}`)
+    }
   }
   const portEls = bypassPortsElements(ports)
   const lanIfnames = [...new Set(lanIfaces)].filter((n) => IFNAME_RE.test(n))
@@ -106,6 +111,14 @@ export const entryBypassNft = ({ ports = '', portsMode = 'blacklist', clientRout
     }
   }
   const natRules = []
+  if (pureTun && !autoRedirect) {
+    // 纯 tun 兼容模式(pureTun:配置里有 tun、没有 auto_redirect):auto_route 的策略路由(9003 not iif lo lookup <tun 表>)把进来的包全拉进 tun 表,回包也不例外——
+    // 端口映射(WAN → 局域网 / docker 里的服务 DNAT)的回包被内核当成新连接重新拨出去,WireGuard、公网 socks 这类映射
+    // 全断(#383)。auto_redirect 的 nft 链见到回包方向就 return(sing-tun redirect_nftables.go),这里照做:回包只给包
+    // 或上放行位(不动连接),init 的 8998 让它跳过 tun 的规则按路由器自己的路由走。经内核的连接回包本来就从 tun 出来
+    // (9002 iif tun 那条),结果不变
+    inRules.push(`ct direction reply meta mark set meta mark or ${PASS_MARK}`)
+  }
   if (autoRedirect) {
     const blackSrc = bypassSources(clientRoutes)
     const black = byFamily(blackSrc.ips)
