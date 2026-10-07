@@ -1,4 +1,4 @@
-timeflysoon (73, 私有1)                        88alt (73, 私有1)
+timeflysoon (74, 私有2)                        88alt (74, 私有2)
 -------------------------------------------  -------------------------------------
 timeflysoon/2FAGuard                         88alt/2FAGuard
 timeflysoon/3x-ui                            88alt/3x-ui
@@ -40,6 +40,7 @@ timeflysoon/MikroTikPatch                    88alt/MikroTikPatch
 timeflysoon/MusicFree                        88alt/MusicFree
 timeflysoon/nanopi-openwrt                   88alt/nanopi-openwrt
 timeflysoon/Nrfr                             88alt/Nrfr
+timeflysoon/Open-Box (private)               88alt/Open-Box (private)
 timeflysoon/OpenBackRestore                  88alt/OpenBackRestore
 timeflysoon/OpenClash                        88alt/OpenClash
 timeflysoon/openclash-auto-installer         88alt/openclash-auto-installer

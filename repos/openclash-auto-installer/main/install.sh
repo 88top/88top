@@ -154,7 +154,10 @@ detect_x86_level() {
 }
 
 detect_pkg_mgr() {
-    if command -v opkg >/dev/null 2>&1; then
+    # An active APK database takes precedence over a leftover opkg binary.
+    if command -v apk >/dev/null 2>&1 && [ -s /lib/apk/db/installed ]; then
+        printf 'apk'
+    elif command -v opkg >/dev/null 2>&1; then
         printf 'opkg'
     elif command -v apk >/dev/null 2>&1; then
         printf 'apk'
@@ -174,7 +177,8 @@ detect_firewall_stack() {
 detect_core_candidates() {
     RAW_ARCH="$(uname -m 2>/dev/null || true)"
     DIST_ARCH="$(get_distr_arch)"
-    MATCH_STR="$RAW_ARCH $DIST_ARCH"
+    # Package/userland ABI takes precedence over the kernel architecture.
+    MATCH_STR="${DIST_ARCH:-$RAW_ARCH}"
 
     case "$MATCH_STR" in
         *x86_64*|*amd64*)
@@ -189,14 +193,38 @@ detect_core_candidates() {
         *aarch64*|*arm64*|*armv8*)
             printf '%s' 'clash-linux-arm64.tar.gz'
             ;;
-        *armv7*|*arm_cortex-a7*|*arm_cortex-a9*|*arm_cortex-a15*)
+        armeb*|arm_fa526|armv4*)
+            printf ''
+            ;;
+        *armv7*|arm_cortex-a*)
             printf '%s' 'clash-linux-armv7.tar.gz'
             ;;
         *armv6*|*arm1176*)
             printf '%s' 'clash-linux-armv6.tar.gz'
             ;;
-        *armv5*|*arm926*)
+        *armv5*|*arm926*|arm_xscale)
             printf '%s' 'clash-linux-armv5.tar.gz'
+            ;;
+        i386*|i486*|i586*|i686*)
+            printf '%s' 'clash-linux-386.tar.gz'
+            ;;
+        mips64el*|mips64le*)
+            printf '%s' 'clash-linux-mips64le.tar.gz'
+            ;;
+        mips64*)
+            printf '%s' 'clash-linux-mips64.tar.gz'
+            ;;
+        mipsel*|mipsle*)
+            printf '%s' 'clash-linux-mipsle-softfloat.tar.gz'
+            ;;
+        mips*)
+            printf '%s' 'clash-linux-mips-softfloat.tar.gz'
+            ;;
+        riscv64*)
+            printf '%s' 'clash-linux-riscv64.tar.gz'
+            ;;
+        loongarch64*)
+            printf '%s' 'clash-linux-loong64-abi2.tar.gz'
             ;;
         *)
             printf ''
@@ -343,6 +371,7 @@ fetch_openclash_release_meta() {
         return 0
     fi
 
+    rm -f "$VERSION_JSON"
     warn "GitHub API 获取失败，尝试回退到 releases 页面解析"
     return 1
 }
@@ -357,7 +386,8 @@ get_latest_tag() {
     fi
 
     if download_file "https://github.com/vernesong/OpenClash/releases/latest" "$LATEST_HTML"; then
-        sed -n 's#.*releases/tag/\([^"'"'"'<]*\).*#\1#p' "$LATEST_HTML" | head -n1
+        grep -oE '/vernesong/OpenClash/releases/tag/v[0-9][A-Za-z0-9._-]*' "$LATEST_HTML" |
+            sed 's#.*/tag/##' | head -n1 || true
     fi
 }
 
@@ -542,6 +572,10 @@ extract_and_install_core() {
     [ -n "$BIN_FILE" ] || BIN_FILE="$(find "$TMP_DIR" -type f 2>/dev/null | head -n1 || true)"
     [ -n "$BIN_FILE" ] || die "内核压缩包中未找到可用文件"
 
+    chmod 0755 "$BIN_FILE"
+    CORE_CHECK="$("$BIN_FILE" -v 2>&1)" || die "下载的 Meta 内核不能在当前 CPU/ABI 运行，保留原核心: $CORE_CHECK"
+    [ -n "$CORE_CHECK" ] || die "下载的 Meta 内核未返回版本信息，保留原核心"
+
     if [ -f /etc/openclash/core/clash_meta ]; then
         cp -f /etc/openclash/core/clash_meta /etc/openclash/core/clash_meta.bak 2>/dev/null || true
     fi
@@ -682,7 +716,7 @@ main() {
                 warn "未识别的 CPU 架构，无法自动匹配 Meta 内核"
                 warn "请在 OpenClash 页面中手动下载匹配内核"
                 show_summary
-                exit 0
+                exit 1
             fi
 
             RESOLVED_CORE_CHANNEL="$(resolve_core_channel)"
@@ -695,7 +729,7 @@ main() {
             else
                 warn "自动下载 ${RESOLVED_CORE_CHANNEL} 内核失败，请在 OpenClash 页面手动下载"
                 show_summary
-                exit 0
+                exit 1
             fi
             ;;
     esac

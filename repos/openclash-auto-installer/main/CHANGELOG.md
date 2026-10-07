@@ -1,6 +1,24 @@
 # Changelog
 
-## Unreleased
+## v1.3.1 — 2026-10-07
+
+- 将验证扩展至 OpenWrt 25.12.5 全部 35 个 CPU/ABI、24.10.8 全部 36 个 CPU/ABI，以及 6 个 iStoreOS 原始镜像，发布逐项结果和明确的未通过/未验证边界。
+- OpenClash 按固件用户态 ABI 优先匹配核心，补齐 x86 32 位、MIPS 大小端、RISC-V、LoongArch 及 ARM 子架构；不再把内核位数当用户态位数。
+- OpenClash 核心运行检查通过后才替换旧核心；无匹配核心或下载失败返回非零。修复 API 失败后的残缺 JSON 和 HTML 路由占位符误识别。
+- 所有安装、更新检查、修复及卸载入口优先识别有效 APK 数据库，修复 iStoreOS seed-ac1 残留 opkg 导致包管理器误选。
+- SmartDNS 修正 MIPS64 小端映射，拒绝 ARMv4/ARM 大端错误匹配；新增核心运行检查，避免包安装成功却不能运行仍报完成。
+- daed 通用回退补齐版本标签；替换核心和停止旧服务前检查二进制是否可执行，拒绝依赖缺失的通用 MIPS/glibc 核心。
+- 补充 ARM64 iStoreOS 官方内核下 daed 的进程、2023 面板及保留配置/启用状态升级验证；离线回归扩展至 15 项。
+
+## v1.3.0 — 2026-10-07
+
+- 重新验证 OpenWrt 25.12.5、24.10.8 和 iStoreOS 25.12.5-2026092410 的 x86_64 安装路径，发布固件与插件验证报告。
+- PassWall / PassWall2 在 APK 环境使用官方签名源，固定公钥摘要、预下载事务软件包并检查最终包记录；签名源版本与 GitHub 不同时明确提示。
+- Nikki 官方脚本改为下载成功且非空后再执行，修复网络失败被管道掩盖而误报安装成功；提前拒绝上游不支持的固件分支，APK 保持签名校验。
+- daed APK 更新检测与安装统一跟随 OpenWrt 专用构建，不再与通用 daed Release 混比。
+- 更新检测保留包修订号，修复 PassWall2 等 `r1` 到 `r2` 的更新漏报。
+- 新增离线回归测试和 CI 检查，并将以下此前 main 上的兼容性修复纳入正式 Release。
+
 
 - 修复 PassWall / PassWall2 只安装 LuCI 包、未补齐上游构建目录中的必需运行依赖，导致 iStoreOS 出现 `tcping`、`geoview`、`chinadns-ng`、`dns2socks` 等缺失的问题；现在优先使用系统软件源，缺失时按当前版本和架构从官方构建目录补齐。
 - PassWall 安装前会把基础 `dnsmasq` 安全切换为其硬依赖的 `dnsmasq-full`；`opkg` 环境先完成覆盖安装再移除旧包，避免下载过程中提前失去本机 DNS。

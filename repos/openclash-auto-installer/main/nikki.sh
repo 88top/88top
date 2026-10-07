@@ -1,12 +1,28 @@
 #!/bin/sh
 set -eu
 
+detect_pkg_mgr() {
+    # Some APK firmware still ships the opkg executable without usable feeds.
+    if command -v apk >/dev/null 2>&1 && [ -s /lib/apk/db/installed ]; then
+        printf 'apk'
+    elif command -v opkg >/dev/null 2>&1; then
+        printf 'opkg'
+    elif command -v apk >/dev/null 2>&1; then
+        printf 'apk'
+    else
+        printf '%s\n' "[ERROR] 未检测到 opkg 或 apk" >&2
+        return 1
+    fi
+}
+
 LOCKDIR="/tmp/nikki-install.lock"
 FEED_SCRIPT_URL="https://raw.githubusercontent.com/nikkinikki-org/OpenWrt-nikki/main/feed.sh"
 INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/nikkinikki-org/OpenWrt-nikki/main/install.sh"
 NIKKI_REPO_URL="https://nikkinikki.pages.dev"
+TMP_SCRIPT=""
 
 cleanup() {
+    [ -z "$TMP_SCRIPT" ] || rm -f "$TMP_SCRIPT"
     rmdir "$LOCKDIR" 2>/dev/null || true
 }
 
@@ -27,6 +43,16 @@ die() {
 
 need_cmd() {
     command -v "$1" >/dev/null 2>&1 || die "缺少命令: $1"
+}
+
+run_official_script() {
+    script_url="$1"
+    TMP_SCRIPT="$(mktemp /tmp/nikki-script.XXXXXX)"
+    wget -qO "$TMP_SCRIPT" "$script_url" || die "下载 Nikki 官方脚本失败: $script_url"
+    [ -s "$TMP_SCRIPT" ] || die "Nikki 官方脚本为空: $script_url"
+    sh "$TMP_SCRIPT" || die "执行 Nikki 官方脚本失败: $script_url"
+    rm -f "$TMP_SCRIPT"
+    TMP_SCRIPT=""
 }
 
 detect_firewall_stack() {
@@ -100,13 +126,7 @@ log "System release: ${REL_RAW:-unknown}"
 need_cmd wget
 need_cmd awk
 
-if command -v opkg >/dev/null 2>&1; then
-    PKG_MGR="opkg"
-elif command -v apk >/dev/null 2>&1; then
-    PKG_MGR="apk"
-else
-    die "未检测到 opkg 或 apk"
-fi
+PKG_MGR="$(detect_pkg_mgr)"
 
 log "检测到包管理器: $PKG_MGR"
 FIREWALL_STACK="$(detect_firewall_stack)"
@@ -122,18 +142,18 @@ if [ "$FIREWALL_STACK" = "iptables" ]; then
 EOF
     exit 1
 fi
-if [ "$PKG_MGR" = "apk" ]; then
-    log "当前包管理器为 apk，将使用 Nikki 官方 OpenWrt 25.12 feed"
-fi
+NIKKI_BRANCH="$(detect_nikki_branch)"
+[ -n "$NIKKI_BRANCH" ] || die "Nikki 官方源不支持 ${REL_RAW:-unknown}；支持 24.10、25.12 和 SNAPSHOT，不能仅修改版本号强行安装"
+log "匹配 Nikki 官方 feed: $NIKKI_BRANCH / ${DISTRIB_ARCH:-unknown}"
 
 case "$PKG_MGR" in
     opkg)
         OLD_VER="$(get_installed_nikki_version)"
         log "当前已安装版本: ${OLD_VER:-not installed}"
         log "按官方方式导入 Nikki feed"
-        wget -qO- "$FEED_SCRIPT_URL" | sh || die "执行 Nikki feed.sh 失败"
+        run_official_script "$FEED_SCRIPT_URL"
         log "按官方方式安装 / 更新 Nikki"
-        wget -qO- "$INSTALL_SCRIPT_URL" | sh || die "执行 Nikki 官方 install.sh 失败"
+        run_official_script "$INSTALL_SCRIPT_URL"
         opkg install luci-i18n-nikki-zh-cn || warn "安装 Nikki 中文语言包失败"
         NEW_VER="$(get_installed_nikki_version)"
         ;;
@@ -144,13 +164,14 @@ case "$PKG_MGR" in
         log "刷新软件源"
         apk update || die "apk update 失败，请检查 Nikki feed 或网络连接"
         log "按 Nikki 官方 apk feed 安装 / 更新 Nikki"
-        apk add --allow-untrusted -X "$FEED_URL/packages.adb" mihomo-meta nikki luci-app-nikki || die "安装 Nikki apk 包失败，请检查当前架构是否存在 Nikki 官方构建"
-        apk add --allow-untrusted -X "$FEED_URL/packages.adb" luci-i18n-nikki-zh-cn || warn "安装 Nikki 中文语言包失败"
+        apk add -X "$FEED_URL/packages.adb" mihomo-meta nikki luci-app-nikki || die "安装 Nikki apk 包失败，请检查当前架构是否存在 Nikki 官方构建"
+        apk add -X "$FEED_URL/packages.adb" luci-i18n-nikki-zh-cn || warn "安装 Nikki 中文语言包失败"
         NEW_VER="$(get_installed_nikki_version)"
         ;;
 esac
 
-log "安装后版本: ${NEW_VER:-unknown}"
+[ -n "$NEW_VER" ] || die "安装后未查到 luci-app-nikki 版本，不能确认安装成功"
+log "安装后版本: $NEW_VER"
 refresh_luci
 warn "默认不主动改写 Nikki 配置；如界面初次显示异常，可手动刷新页面或重新登录 LuCI"
 warn "如界面初次显示为英文，请刷新页面，中文语言包会自动生效"

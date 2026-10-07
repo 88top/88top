@@ -65,7 +65,10 @@ parse_args() {
 }
 
 detect_pkg_mgr() {
-    if command -v opkg >/dev/null 2>&1; then
+    # An active APK database takes precedence over a leftover opkg binary.
+    if command -v apk >/dev/null 2>&1 && [ -s /lib/apk/db/installed ]; then
+        printf 'apk'
+    elif command -v opkg >/dev/null 2>&1; then
         printf 'opkg'
     elif command -v apk >/dev/null 2>&1; then
         printf 'apk'
@@ -87,7 +90,7 @@ get_distr_arch() {
 detect_smartdns_arch() {
     RAW_ARCH="$(uname -m 2>/dev/null || true)"
     DIST_ARCH="$(get_distr_arch)"
-    MATCH_STR="$RAW_ARCH $DIST_ARCH"
+    MATCH_STR="${DIST_ARCH:-$RAW_ARCH}"
 
     case "$MATCH_STR" in
         *x86_64*|*amd64*)
@@ -99,10 +102,13 @@ detect_smartdns_arch() {
         *aarch64*|*arm64*|*armv8*)
             printf 'aarch64'
             ;;
+        armeb*|arm_fa526|armv4*)
+            printf ''
+            ;;
         *arm*)
             printf 'arm'
             ;;
-        *mipsel*)
+        *mips64el*|*mipsel*|*mipsle*)
             printf 'mipsel'
             ;;
         *mips*)
@@ -252,6 +258,12 @@ install_release_packages() {
     $INSTALL_CMD "$LUCI_PKG" || die "安装 LuCI SmartDNS 失败，请检查系统依赖或软件源"
 }
 
+verify_smartdns_core() {
+    CORE_CHECK="$(smartdns -v 2>&1)" ||
+        die "SmartDNS 包已安装，但核心无法在当前 CPU/ABI 运行（MIPS64 还需要内核支持 32 位程序）: $CORE_CHECK"
+    [ -n "$CORE_CHECK" ] || die "SmartDNS 核心未返回版本信息"
+}
+
 refresh_luci() {
     rm -rf /tmp/luci-* /tmp/.luci* /tmp/etc/config/ucitrack /var/run/luci-indexcache 2>/dev/null || true
     if [ -x /etc/init.d/rpcd ]; then
@@ -299,6 +311,7 @@ main() {
     maybe_update_index "$PKG_MGR"
     fetch_release_json
     install_release_packages "$PKG_MGR" "$SMARTDNS_ARCH"
+    verify_smartdns_core
     restart_smartdns
     refresh_luci
 

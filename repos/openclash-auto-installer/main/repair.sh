@@ -15,7 +15,10 @@ die() {
 }
 
 detect_pkg_mgr() {
-    if command -v opkg >/dev/null 2>&1; then
+    # An active APK database takes precedence over a leftover opkg binary.
+    if command -v apk >/dev/null 2>&1 && [ -s /lib/apk/db/installed ]; then
+        printf 'apk'
+    elif command -v opkg >/dev/null 2>&1; then
         printf 'opkg'
     elif command -v apk >/dev/null 2>&1; then
         printf 'apk'

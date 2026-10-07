@@ -31,7 +31,7 @@ return view.extend({
 				apiName: 'Native API',
 				defaultPort: '9527',
 				defaultDir: '/etc/honk/zashboard',
-				exampleConfig: "experimental {\n    native_api {\n        enabled: true\n        listen: '0.0.0.0:9527'\n        secret: 'honk114514'\n        ui: '/etc/honk/zashboard'\n        config_write: true\n        geosite_download_url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/release/geosite.dat'\n        geoip_download_url: 'https://raw.githubusercontent.com/QiuSimons/geoip-moedove/refs/heads/main/geoip.dat'\n    }\n}",
+				exampleConfig: "experimental {\n    native_api {\n        enabled: true\n        listen: '0.0.0.0:9527'\n        secret: 'honk114514'\n        ui: '/etc/honk/zashboard'\n        config_write: true\n    }\n}",
 				buildUrl: function(info, targetHost, port, secret, protocol, forceFresh) {
 					var hostPart = (targetHost.indexOf(':') !== -1 && targetHost.charAt(0) !== '[') ? '[' + targetHost + ']' : targetHost;
 					var query = 'hostname=' + encodeURIComponent(targetHost) +
@@ -58,7 +58,7 @@ return view.extend({
 				apiName: 'Native API',
 				defaultPort: '9527',
 				defaultDir: '/etc/honk/doona',
-				exampleConfig: "experimental {\n    native_api {\n        enabled: true\n        listen: '0.0.0.0:9527'\n        secret: 'honk114514'\n        ui: '/etc/honk/doona'\n        config_write: true\n        geosite_download_url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/release/geosite.dat'\n        geoip_download_url: 'https://raw.githubusercontent.com/QiuSimons/geoip-moedove/refs/heads/main/geoip.dat'\n    }\n}",
+				exampleConfig: "experimental {\n    native_api {\n        enabled: true\n        listen: '0.0.0.0:9527'\n        secret: 'honk114514'\n        ui: '/etc/honk/doona'\n        config_write: true\n    }\n}",
 				buildUrl: function(info, targetHost, port, secret, protocol, forceFresh) {
 					var hostPart = (targetHost.indexOf(':') !== -1 && targetHost.charAt(0) !== '[') ? '[' + targetHost + ']' : targetHost;
 					var url = protocol + '://' + hostPart + ':' + port + '/ui/';
@@ -556,6 +556,11 @@ return view.extend({
 				}
 
 				downloadPollFn = function() {
+					if (!document.body.contains(progressWrap)) {
+						poll.remove(downloadPollFn);
+						downloadPollFn = null;
+						return Promise.resolve();
+					}
 					return honk.callHonkDownloadStatus().then(function(sResp) {
 						if (!sResp) return;
 						if (sResp.log) {
@@ -660,7 +665,11 @@ return view.extend({
 
 		loadInfo();
 
-		poll.add(function() {
+		var dashStatusPollFn = function() {
+			if (!document.body.contains(iframe)) {
+				poll.remove(dashStatusPollFn);
+				return Promise.resolve();
+			}
 			if (document.hidden) {
 				return Promise.resolve();
 			}
@@ -670,7 +679,10 @@ return view.extend({
 					updateHonkRunningState(isRunning, currentInfo.port);
 				});
 			}
-		}, 5);
+			return Promise.resolve();
+		};
+
+		poll.add(dashStatusPollFn, 5);
 
 		return E('div', { 'class': 'dash-wrap' }, [
 			style,

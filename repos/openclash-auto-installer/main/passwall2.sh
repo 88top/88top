@@ -1,6 +1,20 @@
 #!/bin/sh
 set -eu
 
+detect_pkg_mgr() {
+    # Some APK firmware still ships the opkg executable without usable feeds.
+    if command -v apk >/dev/null 2>&1 && [ -s /lib/apk/db/installed ]; then
+        printf 'apk'
+    elif command -v opkg >/dev/null 2>&1; then
+        printf 'opkg'
+    elif command -v apk >/dev/null 2>&1; then
+        printf 'apk'
+    else
+        printf '%s\n' "[ERROR] 未检测到 opkg 或 apk" >&2
+        return 1
+    fi
+}
+
 LOCKDIR="/tmp/passwall2-install.lock"
 GH_API="https://api.github.com/repos/Openwrt-Passwall/openwrt-passwall2/releases/latest"
 GH_REPO_PAGE="https://github.com/Openwrt-Passwall/openwrt-passwall2"
@@ -173,6 +187,37 @@ download_passwall2_pkg() {
     download_pkg_from_dir "$pkg" "$dir" "$ext"
 }
 
+install_signed_apk() {
+    need_cmd sha256sum
+    key_tmp="$(mktemp /tmp/passwall-key.XXXXXX)"
+    register_tmp "$key_tmp"
+    download_file "$SF_BASE/apk.pub/download" "$key_tmp" || die "下载 PassWall APK 签名公钥失败"
+    key_digest="$(sha256sum "$key_tmp" | awk '{print $1}')"
+    [ "$key_digest" = "52802b143489214e13b78f96599a147a638205cc22d9dd6d71229504e38ddc00" ] ||
+        die "PassWall APK 公钥摘要不匹配；请先核实上游是否更换签名密钥"
+    mkdir -p /etc/apk/keys
+    cp "$key_tmp" /etc/apk/keys/passwall.pub
+
+    feed_base="$SF_BASE/$PACKAGE_DIR"
+    log "使用 PassWall 官方签名 APK 源（不跳过签名验证）"
+    apk add --upgrade --cache-predownload --cache-max-age 0 \
+        -X "$feed_base/passwall_packages/packages.adb" \
+        -X "$feed_base/passwall2/packages.adb" \
+        luci-app-passwall2 luci-i18n-passwall2-zh-cn ||
+        die "签名源安装 passwall2 失败；请检查网络、当前架构的软件包及系统软件源"
+    apk info -e luci-app-passwall2 >/dev/null 2>&1 || die "passwall2 主包未登记到 APK 数据库"
+    apk info -e luci-i18n-passwall2-zh-cn >/dev/null 2>&1 || die "passwall2 中文包未登记到 APK 数据库"
+    NEW_VER="$(get_installed_version luci-app-passwall2)"
+    [ -n "$NEW_VER" ] || die "无法读取 passwall2 安装后版本"
+    log "安装后版本: $NEW_VER"
+    if [ -n "$GH_LATEST" ] && [ "$NEW_VER" != "$(printf '%s' "$GH_LATEST" | sed 's/-\([0-9][0-9]*\)$/-r\1/')" ]; then
+        warn "签名源版本 $NEW_VER 与 GitHub Release $GH_LATEST 不同；保留签名源版本，不强制安装未验证签名的包"
+    fi
+    refresh_luci
+    warn "保留现有 /etc/config/passwall2；请刷新 LuCI 页面"
+    log "passwall2 处理完成"
+}
+
 is_package_installed() {
     pkg="$1"
     case "$PKG_MGR" in
@@ -230,13 +275,7 @@ if ! mkdir "$LOCKDIR" 2>/dev/null; then
     die "已有另一个 PassWall2 任务正在运行"
 fi
 
-if command -v opkg >/dev/null 2>&1; then
-    PKG_MGR="opkg"
-elif command -v apk >/dev/null 2>&1; then
-    PKG_MGR="apk"
-else
-    die "未检测到 opkg 或 apk，当前系统暂不支持"
-fi
+PKG_MGR="$(detect_pkg_mgr)"
 
 need_cmd "$PKG_MGR"
 need_cmd sed
@@ -318,6 +357,10 @@ esac
 OLD_VER="$(get_installed_version luci-app-passwall2)"
 log "当前已安装版本: ${OLD_VER:-not installed}"
 log "按接近手动 ${PKG_EXT} 的方式安装 / 更新 PassWall2"
+if [ "$PKG_MGR" = "apk" ]; then
+    install_signed_apk
+    exit 0
+fi
 maybe_update_pkg_index
 install_passwall2_dependencies
 
