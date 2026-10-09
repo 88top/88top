@@ -994,6 +994,10 @@ export interface OpenboxUpdateStatus {
   version: string
   singboxVersion: string
   builtAt: string
+  // 随包 Geo 规则集的版本 / 日期 / 条目数(GET /update/status 返回,见 server/api/updates.mjs)
+  geoVersion?: string
+  geoDate?: string
+  geoCounts?: { geosite: number; geoip: number }
   channel: { mode: 'direct' | 'mirror'; prefix: string }
   status: OpenboxUpdateProgress
   logTail: string
@@ -1312,6 +1316,146 @@ export const importBackup = (data: OpenboxBackup, subscriptionsMode: OpenboxBack
     body: JSON.stringify(data),
   })
 
+// ---- 系统类接口(对照 server/api/{dns-upstream-test,reset,deploy}.mjs 和 server/system/dns-cache.mjs)
+
+// 「上游 DNS」:系统此刻的上游 DNS(接口上 DHCP 分配或手动指定的)
+export const fetchWanDns = async (): Promise<string[]> => {
+  const data = await requestJson<{ servers?: string[] }>('/api/openbox/dns/wan')
+  return Array.isArray(data.servers) ? data.servers : []
+}
+
+// 启动时那次后台判地区还没做完时 pending 为真;region 是档案里此刻的地区
+export interface OpenboxDnsRegionState {
+  pending: boolean
+  region: string
+}
+export const fetchDnsRegionState = () => requestJson<OpenboxDnsRegionState>('/api/openbox/dns/region-detect')
+
+// 按路由器出口公网 IP 判一次它在哪;判不出来 region 是 null
+export interface OpenboxDnsRegionDetect {
+  region: 'cn' | 'intl' | null
+  ip: string
+  error?: string
+}
+export const detectDnsRegion = () => requestJson<OpenboxDnsRegionDetect>('/api/openbox/dns/region-detect', { method: 'POST' })
+
+// DNS 上游测试:保存前真的用内核按选的协议向那台服务器查一次。
+// server 可以填「上游 DNS」记号 wan(固定直连,协议和端口跟着上游走),回的 server 是实际测的那台地址。
+// ok 为 false 看 error;ok 为 true 且带 warning,表示解析通了、取测速地址那步失败(DNS 本身没问题)
+export interface OpenboxDnsUpstreamTestPayload {
+  side: 'direct' | 'proxy'
+  server: string
+  protocol: string
+  port?: number
+}
+export interface OpenboxDnsUpstreamTestResult {
+  ok: boolean
+  ms: number
+  server: string
+  protocol: string
+  port: number
+  // 经哪个节点测的(空 = 从路由器直连测);chain 是逐跳线路,policy 是它属于哪个站点集
+  via: string
+  chain?: string[]
+  policy?: string
+  wan?: boolean
+  note?: string
+  warning?: string
+  error?: string
+}
+export const testDnsUpstream = (payload: OpenboxDnsUpstreamTestPayload) =>
+  requestJson<OpenboxDnsUpstreamTestResult>('/api/openbox/dns/upstream-test', { method: 'POST', body: JSON.stringify(payload) })
+
+// 清空 DNS 缓存:内核的,加上 dnsmasq / systemd-resolved 各自那一层,有一层清掉就算成功;
+// 全都清不掉时后端回 503,requestJson 会抛出它的 error 文字
+export interface OpenboxDnsFlushResult {
+  kernel: boolean
+  dnsmasq: boolean
+  resolved: boolean
+}
+export const flushDnsCache = () => requestJson<OpenboxDnsFlushResult>('/api/openbox/dns/flush-cache', { method: 'POST' })
+
+// 恢复默认:拿到默认值之后走正常的 saveNodeGroups / saveProfile 写回(校验、落库不另开一条路)
+export const fetchDefaultNodeGroups = async (): Promise<OpenboxUserGroup[]> => {
+  const data = await requestJson<{ groups: OpenboxUserGroup[] }>('/api/openbox/defaults/groups')
+  return data.groups
+}
+export const fetchDefaultRouting = async (): Promise<OpenboxProfileRouting> => {
+  const data = await requestJson<{ routing: OpenboxProfileRouting }>('/api/openbox/defaults/routing')
+  return data.routing
+}
+
+// 恢复出厂设置:整张表清空(订阅、节点、分流、面板设置、背景图、面板密码、登录会话)、统计数据清零,
+// 按随包默认重新播种,内核停掉;做完面板会像第一次那样让人设密码。不可恢复,调用前必须让用户二次确认
+export interface OpenboxFactoryResetResult {
+  ok: boolean
+  seeded: number
+  profileSeeded: boolean
+  kernelStopped: boolean
+}
+export const factoryReset = () => requestJson<OpenboxFactoryResetResult>('/api/openbox/factory-reset', { method: 'POST' })
+
+// 紧急回滚:撤销对系统的接管、恢复直连,并关掉内核开机自启。
+// 任何一步没成 ok 就是 false,failures 里是失败的步骤;整个请求出错时后端回 500 + message,requestJson 会抛
+export interface OpenboxRollbackResult {
+  ok: boolean
+  actions?: unknown
+  failures: Array<{ step: string; message: string }>
+}
+export const rollbackToDirect = () => requestJson<OpenboxRollbackResult>('/api/openbox/rollback', { method: 'POST' })
+
+// ---- 系统类接口(续,对照 server/api/{updates,rulesets,timezone}.mjs 和 server/system/{updater,timezone}.mjs)
+
+// 更新日志:/update/check 探到新版之后,取那一版 Release 的说明(弹窗用)。
+// 这个接口永远回 200,取不到时 note 为 null、error 里是原因;url 是 Release 列表页(看其它版本)。
+// latest 形如 v0.1.299(三段数字,别的写法后端会忽略、自己再探一次)
+export interface OpenboxUpdateNote {
+  version: string
+  // GitHub 返回的发布时间(ISO 字符串);走镜像取说明文件时没有,是空串
+  date: string
+  // Markdown 原文,后端已截断
+  body: string
+}
+export interface OpenboxUpdateNotes {
+  url: string
+  note: OpenboxUpdateNote | null
+  // 说明从哪取到的:'api' = GitHub API,'direct' = 直连下载,其余是镜像前缀;取不到是空串
+  via: string
+  error?: string
+}
+export const fetchUpdateNotes = (latest = '') =>
+  requestJson<OpenboxUpdateNotes>(`/api/openbox/update/notes${latest ? `?latest=${encodeURIComponent(latest)}` : ''}`)
+
+// 路由器的系统时区(后端设置 · 时区)。定时任务按路由器本地时间的钟点跑,所以要让用户看得到、改得了。
+// zones 是可选的时区名单,countries 是时区 → 国家 / 地区两字母代码(UTC 没有),下拉框按国家名搜索用;
+// offset 形如 +08:00,local 形如 2026-10-08 10:03:52,时区名认不出来时这两项是空串
+export interface OpenboxTimezoneState {
+  zone: string
+  offset: string
+  local: string
+  platform: string
+  zones: string[]
+  countries: Record<string, string>
+}
+export const fetchTimezone = () => requestJson<OpenboxTimezoneState>('/api/openbox/system/timezone')
+// 改系统时区:后端先把别名换成名单里的名字,不认识的回 400;改完返回同样的形状
+export const saveTimezone = (zone: string) =>
+  requestJson<OpenboxTimezoneState>('/api/openbox/system/timezone', { method: 'PUT', body: JSON.stringify({ zone }) })
+
+// 规则集链接「立即更新」:名单平时随部署 24 小时才重拉一次,自己维护名单的人改完点这个,立刻重拉重编。
+// 只有名单的构成变了(多出 / 少了 IP 或域名那一份)才要重启内核:needsRestart 为真时提示用户。
+// counts 的结构在 server/system/rule-lists.mjs 里,这里先不展开。
+// 注意:同一前缀下的 /rulesets/check 和 /rulesets/refresh/status 后端回 410(Geo 已随 Open-Box 统一更新),不要封装
+export interface OpenboxRulesetRefreshResult {
+  url: string
+  tag: string
+  total: number
+  counts: unknown
+  needsRestart: boolean
+}
+export const refreshRuleList = (url: string) =>
+  requestJson<OpenboxRulesetRefreshResult>('/api/openbox/rulesets/refresh', { method: 'POST', body: JSON.stringify({ url }) })
+
 // 共享网络 · 保存前的端口检测(server/api/servers.mjs)
 export interface OpenboxPortCheck {
   ok: boolean
@@ -1323,3 +1467,141 @@ export const checkServerPort = (port: number, id: string) =>
 
 // 终端分流选来源用:DHCP 租约里的设备 + 今天流量里出现过的来源 IP
 export const fetchKnownClients = () => requestJson<{ clients: Array<{ ip: string; name: string; mac?: string }> }>('/api/openbox/clients')
+
+// ---- 上游新增的延迟类接口(按 dist 反推,后端见 server/api/{site-latency,node-latency}.mjs)
+
+// 概览「站点延迟」:先取历史把柱子画出来,再即时测一轮。
+// 历史样本沿用上面的 OpenboxLatencySample:delay 为 0 = 没测通,node 是当时经过的线路(策略 → 组 → 节点,用 " → " 连起来)
+export interface OpenboxSiteLatencyHistory {
+  history: OpenboxLatencyHistory
+  // 「不通」的柱子按这个时长算高度(记的是 0,实际等了这么久)
+  timeoutMs: number
+}
+export const fetchSiteLatencyHistory = async (): Promise<OpenboxSiteLatencyHistory> => {
+  const data = await requestJson<Partial<OpenboxSiteLatencyHistory>>('/api/openbox/site-latency/history')
+  return { history: data.history ?? {}, timeoutMs: data.timeoutMs ?? 5000 }
+}
+// 站点表来自面板设置 → 测试站点:最多 8 个,id 只认小写字母数字和横线(与服务端 normalizeSites 一致)
+export interface OpenboxSiteInput {
+  id: string
+  url: string
+}
+export interface OpenboxSiteLatencyResult {
+  id: string
+  url: string
+  // 线路的第一跳(站点集)和完整线路;没认出来时是 null / 空数组
+  via: string | null
+  chain: string[]
+  // 连接建好之后一次请求往返的毫秒数;openMs 是首次打开的总耗时(放悬停提示)
+  ms: number | null
+  openMs: number | null
+  // 失败原因(中文),成功为 null
+  error: string | null
+}
+export interface OpenboxSiteLatencyRun {
+  sites: OpenboxSiteLatencyResult[]
+  testedAt: number
+  history: OpenboxLatencyHistory
+  timeoutMs: number
+}
+export const testSiteLatency = (sites: OpenboxSiteInput[]) =>
+  requestJson<OpenboxSiteLatencyRun>('/api/openbox/site-latency', {
+    method: 'POST',
+    body: JSON.stringify({ sites }),
+    signal: AbortSignal.timeout(30000),
+  })
+
+// 手动测速前看一眼内核的测速排队:busy 为真时界面提示「已排队」(内核没跑 / 老内核没有这个接口时后端回 busy: false)
+export interface OpenboxNodeLatencyQueue {
+  busy: boolean
+  running: number
+  waiting: number
+}
+export const fetchNodeLatencyQueue = () => requestJson<OpenboxNodeLatencyQueue>('/api/openbox/nodes/latency/queue')
+
+// 链式代理编辑框的「测速 / IP 地区」:测框里填的这一份(没保存也能测)
+export interface OpenboxChainLatencyPayload {
+  link: string
+  upstream: string
+  testUrl?: string
+  timeoutMs?: number
+  // 面板设置里选的 IP 信息接口(排好序,后端只认白名单主机)
+  ipUrls?: string[]
+}
+export interface OpenboxChainLatencyResult {
+  // 上游此刻选中的节点
+  via: string
+  ok?: boolean
+  ms?: number
+  error?: string
+  // 带了 ipUrls 才有:正文原样交回(最多 16KB),由前端按答话那一家的格式解析;全部失败时只有 error
+  ip?: { ok: boolean; url?: string; body?: string; error?: string }
+  // 测速实例回的其它字段(如 reason)后端没固定
+  [key: string]: unknown
+}
+export const testChainLatency = (payload: OpenboxChainLatencyPayload) =>
+  requestJson<OpenboxChainLatencyResult>('/api/openbox/chain-proxies/latency', { method: 'POST', body: JSON.stringify(payload) })
+
+// 已保存节点的测速(代理页 / 订阅卡片):按节点名让服务端去测,优先交给内核,不用把含密码的节点配置送来送去。
+// 和上面 testNodeLatency 是同一个接口,服务端按请求体里有没有 url / urls / content 区分:有 = 预览,没有 = 这里的 jobs
+export interface OpenboxStoredLatencyJob {
+  tag: string
+  // 测速地址,不传用档案里的 testUrl
+  url?: string
+  // 是否记进延迟历史,默认记;传 false 只测不记
+  record?: boolean
+}
+export interface OpenboxStoredLatencyResult extends OpenboxLatencyResult {
+  // 没测成时的原因,如 invalid(生成不出这个节点的出站)、not-found(是组,或已不在订阅里)
+  reason?: string
+}
+export interface OpenboxStoredLatencyResponse {
+  // 顺序和请求里的 jobs 一一对应
+  results: OpenboxStoredLatencyResult[]
+  history?: OpenboxLatencyHistory
+}
+export const testStoredLatency = (jobs: OpenboxStoredLatencyJob[], timeoutMs?: number) =>
+  requestJson<OpenboxStoredLatencyResponse>('/api/openbox/nodes/latency', {
+    method: 'POST',
+    body: JSON.stringify({ jobs, ...(timeoutMs ? { timeoutMs } : {}) }),
+  })
+
+// 带进度的版本:服务端回 NDJSON,每测完一批报一行 { done: [jobs 下标] },最后一行才是完整结果。
+// onDone 拿到的下标是请求里 jobs 的下标,可以边测边把对应节点的延迟画出来
+export const testStoredLatencyStream = async (
+  jobs: OpenboxStoredLatencyJob[],
+  onDone: (indices: number[]) => void,
+  timeoutMs?: number,
+): Promise<OpenboxStoredLatencyResponse> => {
+  const response = await fetchServerApi('/api/openbox/nodes/latency', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/x-ndjson' },
+    body: JSON.stringify({ jobs, progress: true, ...(timeoutMs ? { timeoutMs } : {}) }),
+  })
+  if (!response.ok || !response.body) {
+    const data = await response.json().catch(() => null)
+    throw new Error(extractErrorMessage(data) || `request failed: ${response.status}`)
+  }
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  const state: { final: OpenboxStoredLatencyResponse | null } = { final: null }
+  const handle = (text: string) => {
+    if (!text.trim()) return
+    const msg = JSON.parse(text) as { done?: number[]; error?: string; results?: unknown }
+    if (Array.isArray(msg.done)) onDone(msg.done)
+    else if (msg.error) throw new Error(msg.error)
+    else if (Array.isArray(msg.results)) state.final = msg as unknown as OpenboxStoredLatencyResponse
+  }
+  for (;;) {
+    const { value, done } = await reader.read()
+    buffer += decoder.decode(value, { stream: !done })
+    const parts = buffer.split('\n')
+    buffer = parts.pop() ?? ''
+    parts.forEach(handle)
+    if (done) break
+  }
+  handle(buffer)
+  if (!state.final) throw new Error('latency stream ended without results')
+  return state.final
+}
