@@ -318,3 +318,89 @@ test('buildCurrentConfig:故障转移页签里有链式代理时,映射和配置
   assert.deepEqual(sub.outbounds, ['香港-01', '链-香港'])
   assert.ok(config.outbounds.find((o) => o.tag === '故转').outbounds.includes('链-香港'))
 })
+
+// GitHub #518:启动时内核还不认的节点(之前存下的 / 手动加的):跳过它们照常启动,提示是哪几个、为什么
+test('runDeploy:校验报出是某个节点时,把内核不认的节点都找出来、跳过它们重新部署;成功带警告,跳过名单记进生成输入', async () => {
+  const { runDeploy } = await import('./deploy-runner.mjs')
+  const m = new Map()
+  const store = createStore({ get: (k) => (m.has(k) ? m.get(k) : null), set: (k, v) => m.set(k, v), del: (k) => m.delete(k) })
+  const paths = createPaths('/opt/open-box')
+  store.setGroups([])
+  store.setProfile({ routing: { fallbackDefault: 'direct', policies: [{ id: 'cn', name: '国内', default: 'direct', rulesets: ['geosite-cn'] }] }, clientRoutes: [], dns: { split: true, mode: 'off' }, tun: { autoRedirect: false } })
+  store.setSubscriptions([{ id: 's1', name: '机场', urls: ['https://example.com/sub'], enabled: true }])
+  const node = (tag, method) => ({ tag, originalTag: tag, type: 'shadowsocks', server: 'a.example.com', server_port: 8388, fields: { method, password: 'p' }, source: 'clash', subscriptionId: 's1' })
+  store.setNodes([node('好节点', 'aes-256-gcm'), node('坏节点', 'nope'), node('坏节点二', 'nope')])
+  const ctx = createMockContext({ files: { [paths.singbox]: 'x', '/dev/net/tun': '', '/etc/resolv.conf': 'nameserver 223.5.5.5\n', [`${paths.geoDir}/geosite-cn.srs`]: 'SRS' }, execResults: { '/etc/init.d/openbox status': { code: 0, stdout: 'running' } } })
+  const exec = ctx.exec
+  let checks = 0
+  ctx.exec = async (cmd, args = []) => {
+    if (cmd === paths.singbox && args[0] === 'check') {
+      checks += 1
+      const config = JSON.parse(ctx.files[args[2]])
+      const i = (config.outbounds || []).findIndex((o) => o.method === 'nope')
+      if (i >= 0) return { code: 1, stdout: '', stderr: `FATAL[0000] initialize outbound[${i}]: unknown method: nope\n` }
+      return { code: 0, stdout: '', stderr: '' }
+    }
+    return exec(cmd, args)
+  }
+  const fetchImpl = async () => new Response('{}', { status: 404 })
+  const r = await runDeploy({ store, ctx, paths, fetchImpl, lateWatch: false })
+  assert.equal(r.ok, true, `${r.stage}: ${r.message}`)
+  assert.match(r.warning, /有 2 个节点内核不认,这次启动跳过了它们:「坏节点」\(订阅「机场」\):unknown method: nope;「坏节点二」\(订阅「机场」\):unknown method: nope/)
+  const config = JSON.parse(ctx.files[paths.configPath])
+  const tags = config.outbounds.map((o) => o.tag)
+  assert.ok(tags.includes('好节点') && !tags.includes('坏节点') && !tags.includes('坏节点二'), tags.join(','))
+  const meta = JSON.parse(ctx.files[configMetaPath(paths)])
+  assert.deepEqual(meta.buildInputs.skipNodes, ['坏节点', '坏节点二'], '在线更新节点时照样跳过')
+  assert.ok(checks <= 6, `一次把坏节点找全,不是一个个重新部署:check ${checks} 次`)
+})
+
+
+// 规则库换新之后,站点集 / 前置自定义分流里引用着、随包规则库已经没有的分类(上游删掉的):跳过那几项照常启动,提示是哪几个
+test('runDeploy:站点集引用的规则集随包规则库里已经没有了,跳过那几项照常启动并提示;没登记规则库清单时照旧报缺', async () => {
+  const { runDeploy } = await import('./deploy-runner.mjs')
+  const { setAvailableGeoTags } = await import('../engine/routing-model.mjs')
+  const setup = () => {
+    const m = new Map()
+    const store = createStore({ get: (k) => (m.has(k) ? m.get(k) : null), set: (k, v) => m.set(k, v), del: (k) => m.delete(k) })
+    const paths = createPaths('/opt/open-box')
+    store.setGroups([])
+    store.setProfile({
+      routing: {
+        fallbackDefault: 'direct',
+        custom: { rules: [{ type: 'geosite', value: 'whatsapp@ads', outbound: 'block' }, { type: 'domain', value: 'a.example.com', outbound: 'direct' }] },
+        policies: [
+          { id: 'cn', name: '国内', default: 'direct', rulesets: ['geosite-cn', 'geosite-github@ads'] },
+          { id: 'gh', name: 'GitHub 广告', default: 'block', rulesets: ['geosite-github-copilot@ads'] },
+          { id: 'off', name: '停用的', enabled: false, default: 'block', rulesets: ['geosite-nope@ads'] },
+        ],
+      },
+      clientRoutes: [], dns: { split: true, mode: 'off' }, tun: { autoRedirect: false },
+    })
+    store.setNodes([])
+    const ctx = createMockContext({ files: { [paths.singbox]: 'x', '/dev/net/tun': '', '/etc/resolv.conf': 'nameserver 223.5.5.5\n', [`${paths.geoDir}/geosite-cn.srs`]: 'SRS' }, execResults: { '/etc/init.d/openbox status': { code: 0, stdout: 'running' } } })
+    return { store, paths, ctx }
+  }
+  const fetchImpl = async () => new Response('{}', { status: 404 })
+  try {
+    setAvailableGeoTags(['geosite-cn', 'geoip-cn'])
+    const { store, paths, ctx } = setup()
+    const r = await runDeploy({ store, ctx, paths, fetchImpl, lateWatch: false })
+    assert.equal(r.ok, true, `${r.stage}: ${r.message}`)
+    assert.match(r.warning, /规则库更新后已经没有这些规则集,用到它们的那几项这次跳过了:geosite-whatsapp@ads\(「前置自定义分流」\)、geosite-github@ads\(「国内」\)、geosite-github-copilot@ads\(「GitHub 广告」\)。/)
+    assert.doesNotMatch(r.warning, /nope/, '停用的站点集不进配置,不提示')
+    const text = ctx.files[paths.configPath]
+    assert.doesNotMatch(text, /github|whatsapp/, '缺的规则集和只剩它的站点集都不进配置')
+    const config = JSON.parse(text)
+    assert.ok(config.route.rule_set.some((s) => s.tag === 'geosite-cn'))
+    assert.ok(config.route.rules.some((rule) => (rule.domain || []).includes('a.example.com')), '同一个前置分流里别的行照常')
+    // 没登记清单(读不到):和以前一样报缺,不悄悄改配置
+    setAvailableGeoTags(null)
+    const again = setup()
+    const failed = await runDeploy({ store: again.store, ctx: again.ctx, paths: again.paths, fetchImpl, lateWatch: false })
+    assert.equal(failed.ok, false)
+    assert.match(failed.message, /安装包缺少规则集 geosite-/)
+  } finally {
+    setAvailableGeoTags(null)
+  }
+})

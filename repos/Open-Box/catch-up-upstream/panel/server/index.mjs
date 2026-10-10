@@ -54,18 +54,20 @@ import { registerBackupBodyParser, registerBackupRoutes } from './api/backup.mjs
 import { registerDiagnosticsRoutes } from './api/diagnostics.mjs'
 import { readMeta, readUpdateStatus } from './system/updater.mjs'
 import { createMemoryWatchdog, recordWatchdogRestart } from './system/memory-watchdog.mjs'
-import { repairLoginDefaultsBurst, seedDefaultStorage } from './system/seed-defaults.mjs'
+import { repairLoginDefaultsBurst, seedDefaultStorage, upgradeDefaultBackground } from './system/seed-defaults.mjs'
 import { fetchSelections, resolveSelections, regenerateIfPlanChanged, isDeployLocked, runExclusive } from './api/deploy-runner.mjs'
 import { ensureShareRegionLists } from './system/share-region-lists.mjs'
 import { flushDnsCache, registerDnsCacheRoutes } from './system/dns-cache.mjs'
 import { startScheduler } from './system/scheduler.mjs'
 import { startConflictGuard } from './system/conflict-guard.mjs'
 import { createTrafficCollector, createTrafficStore } from './system/traffic-collector.mjs'
-import { registerSubscriptionRoutes } from './api/subscriptions.mjs'
+import { registerSubscriptionRoutes, setNodeVetter } from './api/subscriptions.mjs'
+import { kernelRejectedNodes } from './system/validate.mjs'
 import { registerPublicSubscriptionShareRoutes, registerSubscriptionShareRoutes } from './api/subscription-shares.mjs'
 import { subscriptionFetch } from './system/insecure-fetch.mjs'
 import { createStore } from './store/openbox-store.mjs'
 import { createRealContext } from './system/context-real.mjs'
+import { registerBundledGeoTags } from './system/geodata-tags.mjs'
 import { createPaths } from './system/paths.mjs'
 import { detectPlatform } from './system/platform.mjs'
 
@@ -182,6 +184,16 @@ seedDefaultStorage({
   hasKey: (key) => Boolean(getStorageValueStatement.get(key)),
   log: (m) => console.log(m),
 })
+// 还是以前随包的默认背景(用户没换过)就换成现在随包的;放在下面的修复前面:修复按「图就是随包那张」认新装用户
+try {
+  upgradeDefaultBackground({
+    get: (key) => getStorageValueStatement.get(key)?.value ?? null,
+    set: (key, value) => upsertStorageValueStatement.run(key, value),
+    log: (m) => console.log(m),
+  })
+} catch (err) {
+  console.log(`[defaults] 换默认背景失败:${err instanceof Error ? err.message : err}`)
+}
 // 老版本设密码 / 登录时把路由器上的面板设置冲成了前端出厂值(默认背景没了):升级后第一次启动修一次(同上文件)
 try {
   repairLoginDefaultsBurst({
@@ -280,6 +292,9 @@ const revokeAccessSession = (id) => {
 // ctx 是真实的 exec/fs 抽象(与测试用的 createMockContext 同接口),两者都是无状态的纯对象/闭包,可安全全局复用。
 const obPaths = createPaths(process.env.OPENBOX_ROOT || '/opt/open-box', { platform: obPlatform })
 const obCtx = createRealContext()
+// 随包规则库里有哪些 geosite / geoip:站点集引用着、包里已经没有的(上游删掉的分类)生成配置时跳过并提示,规则页推算、
+// 发给 App 的配置也按同一份(system/geodata-tags.mjs)
+await registerBundledGeoTags(obCtx, obPaths, { log: (m) => console.log(m) })
 // 定时任务按路由器本地时间的钟点跑:OpenWrt 上时区名和系统实际的 POSIX 串对得上,就按时区名设面板自己的 TZ
 // (固件没装 zoneinfo、有夏令时的时区也算得对;见 system/timezone.mjs)。计划任务第一次跑在一分钟后,来得及
 void syncProcessTimezoneOnStartup(obCtx, obPlatform).catch(() => {})
@@ -1264,6 +1279,14 @@ const nodeProber = createNodeProber({ ctx: obCtx, paths: obPaths, log: (m) => co
 const latencyHistory = createLatencyHistory({ store, skip: (tag) => kernelStale.isStale(tag) })
 // 备份导入的 32 MB 请求体解析要排在所有 /api/openbox 路由前面(见 api/backup.mjs,GitHub #303)
 registerBackupBodyParser(app)
+// 添加 / 刷新订阅(含定时更新)时让内核把节点过一遍,它不认的丢掉、记进「跳过」(GitHub #518)。临时配置里有节点凭据,
+// 每次一个文件、用完就删(system/validate.mjs)
+let nodeVetSeq = 0
+setNodeVetter(async (nodes) => {
+  const dir = `${obPaths.etc}/probe`
+  await obCtx.mkdirp(dir)
+  return kernelRejectedNodes(obCtx, obPaths, nodes, `${dir}/vet-${process.pid}-${++nodeVetSeq}.json`)
+})
 registerSubscriptionRoutes(app, { store, fetchImpl: subscriptionFetch, kernelStale, applyNow: () => hotApplier.runNow() })
 registerSubscriptionShareRoutes(app, { store })
 // 地区分流里的规则集链接(给手机用的):存了就在后台编,定时任务每小时再补一次;和部署同一把锁,状态文件不打架

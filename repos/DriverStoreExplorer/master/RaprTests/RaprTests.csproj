@@ -8,10 +8,19 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MSTest.TestAdapter" Version="4.1.0" />
-    <PackageReference Include="MSTest.TestFramework" Version="4.1.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageReference Include="MSTest.TestAdapter" Version="4.5.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="4.5.1" />
+    <PackageReference Include="PortableSettingsProvider" Version="0.2.5" ExcludeAssets="compile;runtime" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="PortableSettingsProvider">
+      <HintPath>..\Rapr\obj\$(Configuration)\SignedAssemblies\PortableSettingsProvider.dll</HintPath>
+    </Reference>
     <ProjectReference Include="..\Rapr\Rapr.csproj" />
   </ItemGroup>
 </Project>

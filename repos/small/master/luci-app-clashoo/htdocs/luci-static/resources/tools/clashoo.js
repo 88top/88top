@@ -143,10 +143,11 @@ const callOverview          = rpc.declare({ object: 'luci.clashoo', method: 'ove
 const callSmartFlushCache       = rpc.declare({ object: 'luci.clashoo', method: 'smart_flush_cache',       expect: {} });
 const callListSingboxProfiles   = rpc.declare({ object: 'luci.clashoo', method: 'list_singbox_profiles',   expect: {} });
 const callGetSingboxProfile     = rpc.declare({ object: 'luci.clashoo', method: 'get_singbox_profile',     params: ['name'],                   expect: {} });
-const callSaveSingboxProfileChunk = rpc.declare({ object: 'luci.clashoo', method: 'save_singbox_profile_chunk', params: ['name', 'content', 'index', 'total'], expect: {} });
+const callGetSingboxProfileChunk = rpc.declare({ object: 'luci.clashoo', method: 'get_singbox_profile_chunk', params: ['name', 'index'], expect: {} });
+const callSaveSingboxProfileChunk = rpc.declare({ object: 'luci.clashoo', method: 'save_singbox_profile_chunk', params: ['name', 'content', 'index', 'total', 'upload'], expect: {} });
 const callSetSingboxProfile     = rpc.declare({ object: 'luci.clashoo', method: 'set_singbox_profile',     params: ['name'],                   expect: {} });
 const callDeleteSingboxProfile  = rpc.declare({ object: 'luci.clashoo', method: 'delete_singbox_profile',  params: ['name'],                   expect: {} });
-const callCreateSingboxConfig   = rpc.declare({ object: 'luci.clashoo', method: 'create_singbox_config',   params: ['sub_url', 'name'], expect: {} });
+const callCreateSingboxConfig   = rpc.declare({ object: 'luci.clashoo', method: 'create_singbox_config',   params: ['sub_url', 'name', 'converter'], expect: {} });
 const callCommitConfig          = rpc.declare({ object: 'luci.clashoo', method: 'commit_config',            expect: {} });
 const callDnsAutoSetup          = rpc.declare({ object: 'luci.clashoo', method: 'dns_auto_setup',           expect: {} });
 const callFetchSingboxNative    = rpc.declare({ object: 'luci.clashoo', method: 'fetch_singbox_native',    params: ['url', 'name'],  expect: {} });
@@ -234,17 +235,73 @@ return baseclass.extend({
     smartFlushCache:    function () { return L.resolveDefault(callSmartFlushCache(),  { success: false }); },
 
     listSingboxProfiles:  function ()           { return L.resolveDefault(callListSingboxProfiles(),          { profiles: [], active: '' }); },
-    getSingboxProfile:    function (name)        { return L.resolveDefault(callGetSingboxProfile(name),        {}); },
+    getSingboxProfile: function (name) {
+        return L.resolveDefault(callGetSingboxProfile(name), {}).then(function (r) {
+            if (!r || r.error !== 'too large') return r || {};
+
+            var decoder = new TextDecoder('utf-8', { fatal: true });
+            var parts = [], total = 0, size = 0, mtime = '', received = 0;
+
+            function readNext(index) {
+                return L.resolveDefault(callGetSingboxProfileChunk(name, String(index)), {}).then(function (chunk) {
+                    if (!chunk || chunk.error)
+                        return { error: (chunk && chunk.error) || 'read_failed' };
+                    if (!Number.isInteger(chunk.index) || !Number.isInteger(chunk.total) ||
+                        !Number.isInteger(chunk.size) || chunk.index !== index ||
+                        chunk.total < 1 || chunk.total > 683 || chunk.size < 1 ||
+                        chunk.size > 16 * 1024 * 1024 || typeof chunk.content_b64 !== 'string')
+                        return { error: 'invalid_chunk' };
+                    if (index === 0) {
+                        total = chunk.total;
+                        size = chunk.size;
+                        mtime = chunk.mtime;
+                    } else if (chunk.total !== total || chunk.size !== size || chunk.mtime !== mtime) {
+                        return { error: 'file_changed' };
+                    }
+
+                    try {
+                        var raw = atob(chunk.content_b64);
+                        var bytes = new Uint8Array(raw.length);
+                        for (var i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+                        received += bytes.length;
+                        parts.push(decoder.decode(bytes, { stream: true }));
+                    } catch (e) {
+                        return { error: 'invalid_chunk' };
+                    }
+                    if (index + 1 < total) return readNext(index + 1);
+                    if (received !== size) return { error: 'file_changed' };
+                    try { parts.push(decoder.decode()); }
+                    catch (e) { return { error: 'invalid_chunk' }; }
+                    return { content: parts.join(''), name: name };
+                });
+            }
+
+            return readNext(0);
+        });
+    },
     saveSingboxProfile: function (name, content) {
         var chunkSize = 24576;
-        var total = Math.max(1, Math.ceil((content || '').length / chunkSize));
+        var value = content || '';
+        var chunks = [];
+        for (var offset = 0; offset < value.length;) {
+            var end = Math.min(offset + chunkSize, value.length);
+            if (end < value.length && /[\uD800-\uDBFF]/.test(value.charAt(end - 1))) end--;
+            chunks.push(value.slice(offset, end));
+            offset = end;
+        }
+        if (!chunks.length) chunks.push('');
+        var total = chunks.length;
         var index = 0;
+        var upload = '';
 
         function sendNext() {
-            var chunk = (content || '').slice(index * chunkSize, (index + 1) * chunkSize);
-            return L.resolveDefault(callSaveSingboxProfileChunk(name, chunk, String(index), String(total)), {}).then(function (r) {
+            var chunk = chunks[index];
+            return L.resolveDefault(callSaveSingboxProfileChunk(name, chunk, String(index), String(total), upload), {}).then(function (r) {
                 if (!r || !r.success)
                     return { success: false, error: (r && r.error) || 'upload_failed', message: (r && (r.message || r.error)) || _('Upload failed') };
+                if (index === 0 && index + 1 < total && !r.upload)
+                    return { success: false, error: 'upload_failed', message: _('Upload failed') };
+                if (r.upload) upload = r.upload;
                 index++;
                 return index < total ? sendNext() : r;
             });
@@ -254,7 +311,7 @@ return baseclass.extend({
     },
     setSingboxProfile:    function (name)        { return L.resolveDefault(callSetSingboxProfile(name),        {}); },
     deleteSingboxProfile: function (name)        { return L.resolveDefault(callDeleteSingboxProfile(name),     {}); },
-    createSingboxConfig:  function (url, name) { return L.resolveDefault(callCreateSingboxConfig(url, name), {}); },
+    createSingboxConfig:  function (url, name, converter) { return L.resolveDefault(callCreateSingboxConfig(url, name, converter || ''), {}); },
     commitConfig:         function ()               { return L.resolveDefault(callCommitConfig(),               { success: false }); },
     dnsAutoSetup:         function ()               { return L.resolveDefault(callDnsAutoSetup(),               { success: false }); },
     fetchSingboxNative:   function (url, name)      { return L.resolveDefault(callFetchSingboxNative(url, name), {}); },

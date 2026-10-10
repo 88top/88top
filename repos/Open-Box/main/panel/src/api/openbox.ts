@@ -101,6 +101,15 @@ export interface OpenboxProfileDns {
   filter?: DnsFilterSettings
   split?: boolean
   mode?: OpenboxDnsMode
+  // DNS 上游(server/engine/dns-upstream.mjs):地址只收 IP 或记号 'wan'(路由器系统的上游 DNS),协议只有 udp / tcp,
+  // 端口默认 53;extras 是备用上游(每侧最多 3 个,和主上游并发查询)。region:路由器在中国大陆(cn)还是之外(intl)
+  region?: 'cn' | 'intl'
+  directProtocol?: 'udp' | 'tcp'
+  directPort?: number
+  directExtras?: { server: string; protocol?: 'udp' | 'tcp'; port?: number }[]
+  proxyProtocol?: 'udp' | 'tcp'
+  proxyPort?: number
+  proxyExtras?: { server: string; protocol?: 'udp' | 'tcp'; port?: number }[]
   direct?: string
   proxy?: string
   // 走代理的域名由内核发占位地址(FakeIP 原型):域名交给选中的节点解析,解析和连接落在同一个节点
@@ -189,17 +198,33 @@ export interface OpenboxClientRoute {
   macs?: string[]
 }
 
+// 链式代理:一个节点不直接拨号,而是经另一个节点 / 节点组去连(内核里的 detour),见 server/engine/chain-proxy.mjs。
+// 名字也是内核里的出站名,和节点、节点组、站点集同一个命名空间
+export interface OpenboxChainProxy {
+  id: string
+  enabled: boolean
+  name: string
+  // 节点本体:一条分享链接,或一小段 Clash / sing-box 节点配置
+  link: string
+  // 上游:某个节点或节点组的名字
+  upstream: string
+  // 保存时服务端按 link 解析出来的摘要,只读(界面列表显示用)
+  node?: { type: string; server: string; port: number }
+}
+
 export interface OpenboxProfile {
   updates?: OpenboxUpdatePlans
   servers?: OpenboxServer[]
   clientRoutes?: OpenboxClientRoute[]
+  chainProxies?: OpenboxChainProxy[]
   // 订阅链接和节点服务器的地址一律直连(默认开)
   directForNodes?: boolean
   region: string
   ipv6: boolean
   // IPv6 开着时走代理的目标怎么处理:node 交给节点(默认)/ ipv4 降为 IPv4(走代理的域名不给 AAAA,裸 v6 明确拒绝)
   ipv6Proxy?: 'node' | 'ipv4' | 'bypass'
-  tun?: { autoRedirect?: boolean }
+  // tun 参数(server/engine/tun-options.mjs):stack 默认 mixed;mtu / tcpMss 为 0 = 内核默认 / 不钳制
+  tun?: { autoRedirect?: boolean; stack?: 'mixed' | 'gvisor' | 'system'; mtu?: number; tcpMss?: number }
   dns: OpenboxProfileDns
   routing: OpenboxProfileRouting
   // 测速地址:testUrl 给自动择优组和面板延迟测试用;directTestUrl 只给内置直连用
@@ -444,7 +469,7 @@ export const fetchSubscriptionShares = async (): Promise<OpenboxSubscriptionShar
   return Array.isArray(data.shares) ? data.shares : []
 }
 
-export const createSubscriptionShare = async (payload: { name: string; host: string; protocol: 'http' | 'https'; subscriptionIds: string[] }): Promise<OpenboxSubscriptionShare> => {
+export const createSubscriptionShare = async (payload: { name: string; host: string; protocol: 'http' | 'https'; subscriptionIds: string[]; token?: string }): Promise<OpenboxSubscriptionShare> => {
   const data = await requestJson<{ share: OpenboxSubscriptionShare }>('/api/openbox/subscription-shares', {
     method: 'POST',
     body: JSON.stringify(payload),
@@ -620,7 +645,8 @@ export interface OpenboxFailoverLaneStatus {
   // 多节点页签:内核子组此刻选中的节点,以及它是否被确认可用
   kernelNow: string | null
   confirmed: boolean | null
-  nodes: Record<string, { ok: boolean | null; delay: number | null; at: number; reason: string | null } | null>
+  // kind / error:失败的类别和原始错误(v0.1.305 起;旧服务端没有)。「状态码 404」就是 kind = 'status' + error = 'unexpected status 404'
+  nodes: Record<string, { ok: boolean | null; delay: number | null; at: number; reason: string | null; kind?: string | null; error?: string | null } | null>
 }
 export interface OpenboxFailoverGroupStatus {
   id: string
@@ -639,20 +665,40 @@ export interface OpenboxFailoverGroupStatus {
   laneOrder?: string[]
   reorder?: { since: number; reason: 'priority-changed' | 'order-unknown'; evaluated: boolean } | null
   inFlight: boolean
+  // 正在跑的这一轮:节点测了几个(界面显示「检测中 x / y」);manualRecheck:点了「重新检测」还没做完(v0.1.305 起)
+  round?: { startedAt: number; done: number; total: number } | null
+  manualRecheck?: boolean
   settings: { interval?: string; intervalMs?: number; tolerance?: number; testUrl?: string } & Partial<OpenboxFailoverSettings>
   lanes: OpenboxFailoverLaneStatus[]
+}
+// 面板全局测速名额此刻的情况(v0.1.305 起):在测 / 排队的数量、上限、最近每秒测完几个、按各组间隔每秒要测几个
+export interface OpenboxProbeStats {
+  interactive: number
+  background: number
+  limit: number
+  throughputPerSec: number | null
+  demandPerSec: number | null
 }
 export interface OpenboxFailoverStatus {
   version: string | null
   paused: string
   lastError?: string
   running?: boolean
+  probes?: OpenboxProbeStats | null
   groups: OpenboxFailoverGroupStatus[]
 }
 export const fetchFailoverStatus = async (): Promise<OpenboxFailoverStatus> =>
   requestJson<OpenboxFailoverStatus>('/api/openbox/failover/status')
 export const refreshFailover = async (): Promise<void> => {
   await requestJson<{ ok: boolean }>('/api/openbox/failover/refresh', { method: 'POST' })
+}
+// 「重新检测」一个故障转移组:正在跑的那轮作废,马上把这个组的节点全部强制测一遍。组不存在回 404
+export const recheckFailover = async (id: string): Promise<void> => {
+  await requestJson<{ ok: boolean }>('/api/openbox/failover/recheck', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id }),
+  })
 }
 
 export interface OpenboxGroupsPayload {

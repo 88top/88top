@@ -20,10 +20,9 @@ namespace Rapr.Utils
             foreach (var driverStoreEntry in driverStoreEntries)
             {
                 var deviceInfo = devicesInfo.OrderByDescending(d => d.IsPresent)?.FirstOrDefault(e =>
-                    string.Equals(e.DriverInf, driverStoreEntry.DriverPublishedName, StringComparison.OrdinalIgnoreCase)
-                    && e.DriverVersion == driverStoreEntry.DriverVersion
-                    && e.DriverDate == driverStoreEntry.DriverDate
-                    || driverStoreEntry.DriverExtensionId != default && e.ExtendedInfs?.Any(extInf => string.Equals(extInf, driverStoreEntry.DriverPublishedName, StringComparison.OrdinalIgnoreCase)) == true);
+                    (!string.IsNullOrEmpty(driverStoreEntry.DriverPublishedName)
+                        && string.Equals(e.DriverInf, driverStoreEntry.DriverPublishedName, StringComparison.OrdinalIgnoreCase))
+                    || e.ExtendedInfs?.Any(extInf => string.Equals(extInf, driverStoreEntry.DriverPublishedName, StringComparison.OrdinalIgnoreCase)) == true);
 
                 driverStoreEntry.DeviceId = deviceInfo?.DeviceId;
                 driverStoreEntry.DeviceName = deviceInfo?.DeviceName;
@@ -37,50 +36,76 @@ namespace Rapr.Utils
         {
             List<DeviceDriverInfo> deviceDriverInfos = new List<DeviceDriverInfo>();
 
-            int deviceListLength = 0;
-            if (NativeMethods.CM_Get_Device_ID_List_Size(
-                ref deviceListLength,
-                null,
-                0) == ConfigManagerResult.Success)
-            {
-                byte[] buffer = new byte[deviceListLength * sizeof(char) + 2];
-                if (NativeMethods.CM_Get_Device_ID_List(
-                    null,
-                    buffer,
-                    deviceListLength,
-                    CM_GETIDLIST_FILTER.NONE) == ConfigManagerResult.Success)
+            var deviceIds = GetDeviceIds(
+                () =>
                 {
-                    string[] deviceIds = Encoding.Unicode.GetString(buffer).Split(new[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+                    int length = 0;
+                    var result = NativeMethods.CM_Get_Device_ID_List_Size(ref length, null, CM_GETIDLIST_FILTER.NONE);
+                    return (result, length);
+                },
+                buffer => NativeMethods.CM_Get_Device_ID_List(null, buffer, buffer.Length / sizeof(char), CM_GETIDLIST_FILTER.NONE));
 
-                    foreach (var deviceId in deviceIds)
-                    {
-                        uint devInst = 0;
-                        if (NativeMethods.CM_Locate_DevNode(
-                            ref devInst,
-                            deviceId,
-                            CM_LOCATE_DEVNODE_FLAG.CM_LOCATE_DEVNODE_PHANTOM) == ConfigManagerResult.Success)
-                        {
-                            try
-                            {
-                                deviceDriverInfos.Add(new DeviceDriverInfo(
-                                    GetDevNodeProperty<string>(devInst, DeviceHelper.DEVPKEY_Device_InstanceId),
-                                    GetDevNodeProperty<string>(devInst, DeviceHelper.DEVPKEY_Device_FriendlyName)
-                                        ?? GetDevNodeProperty<string>(devInst, DeviceHelper.DEVPKEY_Device_DeviceDesc),
-                                    GetDevNodeProperty<string>(devInst, DeviceHelper.DEVPKEY_Device_DriverInfPath),
-                                    GetDevNodeProperty<DateTime>(devInst, DeviceHelper.DEVPKEY_Device_DriverDate),
-                                    GetDevNodeProperty<Version>(devInst, DeviceHelper.DEVPKEY_Device_DriverVersion),
-                                    IsDevicePresent(devInst),
-                                    GetDevNodeProperty<string[]>(devInst, DeviceHelper.DEVPKEY_Device_DriverExtendedInfs)));
-                            }
-                            catch (Win32Exception)
-                            {
-                            }
-                        }
-                    }
+            foreach (var deviceId in deviceIds)
+            {
+                uint devInst = 0;
+                var locateResult = NativeMethods.CM_Locate_DevNode(
+                    ref devInst,
+                    deviceId,
+                    CM_LOCATE_DEVNODE_FLAG.CM_LOCATE_DEVNODE_PHANTOM);
+                if (locateResult == ConfigManagerResult.NoSuchDevnode)
+                {
+                    continue;
                 }
+
+                if (locateResult != ConfigManagerResult.Success)
+                {
+                    throw CreateConfigManagerException(locateResult);
+                }
+
+                deviceDriverInfos.Add(new DeviceDriverInfo(
+                    deviceId,
+                    GetDevNodeProperty<string>(devInst, DeviceHelper.DEVPKEY_Device_FriendlyName)
+                        ?? GetDevNodeProperty<string>(devInst, DeviceHelper.DEVPKEY_Device_DeviceDesc),
+                    GetDevNodeProperty<string>(devInst, DeviceHelper.DEVPKEY_Device_DriverInfPath),
+                    GetDevNodeProperty<DateTime>(devInst, DeviceHelper.DEVPKEY_Device_DriverDate),
+                    GetDevNodeProperty<Version>(devInst, DeviceHelper.DEVPKEY_Device_DriverVersion),
+                    IsDevicePresent(devInst),
+                    GetDevNodeProperty<string[]>(devInst, DeviceHelper.DEVPKEY_Device_DriverExtendedInfs)));
             }
 
             return deviceDriverInfos;
+        }
+
+        private static string[] GetDeviceIds(
+            Func<(ConfigManagerResult Result, int Length)> getSize,
+            Func<byte[], ConfigManagerResult> getList)
+        {
+            ConfigManagerResult result = ConfigManagerResult.Failure;
+
+            // A device can arrive between querying the list size and retrieving it.
+            for (int attempt = 0; attempt < 3; attempt++)
+            {
+                var size = getSize();
+                result = size.Result;
+                if (result != ConfigManagerResult.Success)
+                {
+                    break;
+                }
+
+                byte[] buffer = new byte[checked(size.Length * sizeof(char))];
+                result = getList(buffer);
+                if (result == ConfigManagerResult.Success)
+                {
+                    return Encoding.Unicode.GetString(buffer).Split(new[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+                }
+
+                if (result != ConfigManagerResult.BufferSmall)
+                {
+                    break;
+                }
+            }
+
+            throw new Win32Exception((int)NativeMethods.CM_MapCrToWin32Err(result, 31));
         }
 
         private static bool? IsDevicePresent(uint devInst)
@@ -103,32 +128,53 @@ namespace Rapr.Utils
 
         internal static T GetDevNodeProperty<T>(uint devInst, DevPropKey propertyKey)
         {
-            const int bufferSize = 2048;
-            IntPtr propertyBufferPtr = Marshal.AllocHGlobal(bufferSize);
-            uint propertySize = bufferSize;
-
-            try
+            return ReadDevNodeProperty<T>((buffer, size) =>
             {
-                if (NativeMethods.CM_Get_DevNode_Property(
-                    devInst,
-                    ref propertyKey,
-                    out DevPropType propertyType,
-                    propertyBufferPtr,
-                    ref propertySize,
-                    0) == 0)
+                uint requiredSize = size;
+                var result = NativeMethods.CM_Get_DevNode_Property(devInst, ref propertyKey,
+                    out DevPropType propertyType, buffer, ref requiredSize, 0);
+                return (result, (uint)propertyType, requiredSize);
+            });
+        }
+
+        private static T ReadDevNodeProperty<T>(Func<IntPtr, uint, (ConfigManagerResult Result, uint Type, uint Size)> read)
+        {
+            uint size = 2048;
+            for (int attempt = 0; attempt < 3; attempt++)
+            {
+                IntPtr buffer = Marshal.AllocHGlobal(checked((int)size));
+                try
                 {
-                    if (propertySize > 0)
+                    var property = read(buffer, size);
+                    if (property.Result == ConfigManagerResult.Success)
                     {
-                        return DeviceHelper.ConvertPropToType<T>(propertyBufferPtr, propertyType);
+                        return property.Size > 0 ? DeviceHelper.ConvertPropToType<T>(buffer, (DevPropType)property.Type) : default;
                     }
+
+                    if (property.Result == ConfigManagerResult.NoSuchValue)
+                    {
+                        return default;
+                    }
+
+                    if (property.Result != ConfigManagerResult.BufferSmall)
+                    {
+                        throw CreateConfigManagerException(property.Result);
+                    }
+
+                    size = Math.Max(property.Size, checked(size * 2));
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(buffer);
                 }
             }
-            finally
-            {
-                Marshal.FreeHGlobal(propertyBufferPtr);
-            }
 
-            return default(T);
+            throw CreateConfigManagerException(ConfigManagerResult.BufferSmall);
+        }
+
+        private static Win32Exception CreateConfigManagerException(ConfigManagerResult result)
+        {
+            return new Win32Exception((int)NativeMethods.CM_MapCrToWin32Err(result, 31));
         }
 
         internal static T GetClassProperty<T>(Guid classGuid, DevPropKey propertyKey)
@@ -140,7 +186,7 @@ namespace Rapr.Utils
             try
             {
                 if (NativeMethods.CM_Get_Class_Property(
-                    classGuid,
+                    ref classGuid,
                     ref propertyKey,
                     out DevPropType propertyType,
                     propertyBufferPtr,
@@ -266,9 +312,12 @@ namespace Rapr.Utils
         /// </summary>
         internal static class NativeMethods
         {
+            [DllImport("CfgMgr32.dll")]
+            internal static extern uint CM_MapCrToWin32Err(ConfigManagerResult result, uint defaultError);
+
             [DllImport("CfgMgr32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
             internal static extern ConfigManagerResult CM_Get_Class_Property(
-                Guid classGUID,
+                ref Guid classGUID,
                 ref DevPropKey propertyKey,
                 out DevPropType propertyType,
                 IntPtr buffer,

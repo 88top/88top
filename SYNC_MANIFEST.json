@@ -1,7 +1,7 @@
 {
   "timeflysoon/2FAGuard": {
     "main": {
-      "remote_sha": "9be8f2c9f1ec878dbb8932fbd25845b492ff8813"
+      "remote_sha": "c6fd9ec4bc309f9857a90afd960fae4c4a523831"
     }
   },
   "timeflysoon/3x-ui": {
@@ -131,7 +131,7 @@
   },
   "timeflysoon/MikroTikPatch": {
     "main": {
-      "remote_sha": "c91013d69764b5c687ec77f7b4aafc84f52631ca"
+      "remote_sha": "9b8d2e6f7ab13a637ccf1914ad22154b9a30808c"
     }
   },
   "timeflysoon/MusicFree": {
@@ -231,7 +231,7 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "d5cc964a1f316ad96ffa5cf3c8fa16f3b734ff57"
+      "remote_sha": "9e1e3492ee69d80474b6a647bccf56438351f134"
     }
   },
   "timeflysoon/commonscript": {
@@ -271,7 +271,7 @@
   },
   "timeflysoon/gopeed": {
     "main": {
-      "remote_sha": "ba84a04a434bc65bebddb2fac2f9b8cec68f8c99"
+      "remote_sha": "c6619794fc5c42883afaf32601f5c43ba8ac2db6"
     }
   },
   "timeflysoon/img-installer": {
@@ -281,7 +281,7 @@
   },
   "timeflysoon/immortalwrt": {
     "master": {
-      "remote_sha": "305089f95180d4ab5206437b3527c7ed6cc46bc4"
+      "remote_sha": "11152dd84230f07dcc524137c81db15b818093c9"
     },
     "openwrt-18.06": {
       "remote_sha": "f7bc84bd30a038b0fd251ce59b6619e5eae94848"
@@ -331,7 +331,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "8f67116dc73e7d794028fe310d8de0077b409902"
+      "remote_sha": "d1211b9aae3a6da125df3858f50319b2aa8c5f0b"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -352,13 +352,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "ad2798bba7340c09298f364bebedebbfa4398f5b"
+      "remote_sha": "dad29637471fad8f29e85fdcee6a67d08ee5a779"
     },
     "release": {
-      "remote_sha": "b90e58362328870ad44ea3bfcbf62fc18c7434e3"
+      "remote_sha": "fa4922ac71ae2ac2ae1c1f5b61447b42095fd665"
     },
     "sing": {
-      "remote_sha": "d9e3c4c09747d325d28e9bfe8829011135cfbbbf"
+      "remote_sha": "a77b5d9bf77c91b8596ed10f58903475a4d478cf"
     }
   },
   "timeflysoon/nanopi-openwrt": {
@@ -424,7 +424,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "92b359862646c6eb598ff96e43b2eb5e694079ba"
+      "remote_sha": "1fa1743c18807988942b202b680b6a198cb5a86a"
     }
   },
   "timeflysoon/store": {
@@ -461,10 +461,10 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "ad2798bba7340c09298f364bebedebbfa4398f5b"
+      "remote_sha": "dad29637471fad8f29e85fdcee6a67d08ee5a779"
     },
     "release": {
-      "remote_sha": "b90e58362328870ad44ea3bfcbf62fc18c7434e3"
+      "remote_sha": "fa4922ac71ae2ac2ae1c1f5b61447b42095fd665"
     }
   },
   "timeflysoon/turboacc": {
@@ -474,7 +474,7 @@
   },
   "timeflysoon/v2rayN": {
     "master": {
-      "remote_sha": "5ea8ae6420a4d89ff2945c35f4b87c6c1c307a6b"
+      "remote_sha": "b501efbc45bca3c465df99af7d4ec092c2f4c40f"
     },
     "v7_16": {
       "remote_sha": "654d7d83d09d1683c60501c9fa853a19c3dd9d6b"
@@ -490,7 +490,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "215fa1d5b4b91861f1457ff924ae1f48388df702"
+      "remote_sha": "5e31cd142fc13e8446a0923a69a9b6c540249ee7"
     }
   },
   "timeflysoon/weasel": {
@@ -536,7 +536,7 @@
   },
   "timeflysoon/DriverStoreExplorer": {
     "master": {
-      "remote_sha": "3f5afe4f9c93d982a8d056b6e0264b69f4e09ff2"
+      "remote_sha": "c308bd89c843af7208cd54d12e9516b8dcaefe85"
     }
   },
   "timeflysoon/dlssg_for_sm86": {
@@ -546,10 +546,10 @@
   },
   "timeflysoon/Open-Box": {
     "catch-up-upstream": {
-      "remote_sha": "f3624da5810c8bf0a9a525767ca0d04b604abe19"
+      "remote_sha": "16a94ca6acc4b99e13e3d0ba19ceefc121d31e0b"
     },
     "main": {
-      "remote_sha": "3ba12239b3b508ba38c6af3d5050e281e7a24acc"
+      "remote_sha": "2108680987ef4b9ffac47d9bcfd009866a26e9cb"
     },
     "backup": {
       "remote_sha": "f42122e8b1b6e49d6ac88a84fc26ebb2480d17db"

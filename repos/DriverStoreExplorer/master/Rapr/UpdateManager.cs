@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -137,63 +139,238 @@ namespace Rapr
                 sourceDir = subDirs[0];
             }
 
-            string appDir = Path.GetFullPath(DSEFormHelper.GetApplicationFolder());
-            string currentExePath = Assembly.GetExecutingAssembly().Location;
-
-            // Validate all extracted file paths before making any changes
-            var filesToCopy = Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories);
-            foreach (var file in filesToCopy)
-            {
-                string relativePath = file.Substring(sourceDir.Length + 1);
-                string destPath = Path.GetFullPath(Path.Combine(appDir, relativePath));
-
-                if (!destPath.StartsWith(appDir + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
-                    && !destPath.Equals(appDir, StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new InvalidOperationException($"Update package contains a file that escapes the application directory: {relativePath}");
-                }
-            }
-
-            // Rename the running exe — Windows allows renaming a running executable
-            string oldExePath = currentExePath + ".old";
-            if (File.Exists(oldExePath))
-            {
-                File.Delete(oldExePath);
-            }
-
-            File.Move(currentExePath, oldExePath);
-
-            try
-            {
-                // Copy all files from extracted folder to app directory
-                foreach (var file in filesToCopy)
-                {
-                    string relativePath = file.Substring(sourceDir.Length + 1);
-                    string destPath = Path.Combine(appDir, relativePath);
-                    string destDir = Path.GetDirectoryName(destPath);
-
-                    if (!Directory.Exists(destDir))
-                    {
-                        Directory.CreateDirectory(destDir);
-                    }
-
-                    File.Copy(file, destPath, overwrite: true);
-                }
-            }
-            catch
-            {
-                // Rollback: restore the original exe
-                if (File.Exists(currentExePath))
-                {
-                    File.Delete(currentExePath);
-                }
-
-                File.Move(oldExePath, currentExePath);
-                throw;
-            }
+            InstallUpdate(sourceDir, Assembly.GetExecutingAssembly().Location);
 
             // Clean up temp folder
             try { Directory.Delete(tempBaseDir, true); } catch { }
+        }
+
+        private static void InstallUpdate(string sourceDir, string currentExePath)
+        {
+            sourceDir = Path.GetFullPath(sourceDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            currentExePath = Path.GetFullPath(currentExePath);
+            string appDir = Path.GetDirectoryName(currentExePath);
+            string appDirPrefix = appDir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            string sourceExePath = Path.Combine(sourceDir, typeof(UpdateManager).Assembly.GetName().Name + ".exe");
+            string oldExePath = currentExePath + ".old";
+
+            if (!File.Exists(sourceExePath))
+            {
+                throw new FileNotFoundException(null, sourceExePath);
+            }
+
+            ValidateUpdateExecutable(sourceExePath);
+
+            string GetDestinationPath(string file)
+            {
+                if (file.Equals(sourceExePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    return currentExePath;
+                }
+
+                if (file.Equals(sourceExePath + ".config", StringComparison.OrdinalIgnoreCase))
+                {
+                    return currentExePath + ".config";
+                }
+
+                return Path.GetFullPath(Path.Combine(appDir, file.Substring(sourceDir.Length + 1)));
+            }
+
+            var filesToCopy = Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories);
+            Array.Sort(filesToCopy, StringComparer.OrdinalIgnoreCase);
+            var destinations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            // Validate the replacement and every destination before renaming the running executable.
+            foreach (var file in filesToCopy)
+            {
+                string relativePath = file.Substring(sourceDir.Length + 1);
+                string destPath = GetDestinationPath(file);
+
+                if (!destPath.StartsWith(appDirPrefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException($"Update package contains a file that escapes the application directory: {relativePath}");
+                }
+
+                if (!destinations.Add(destPath) || destPath.Equals(oldExePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidDataException();
+                }
+            }
+
+            string backupDirectory = Path.Combine(sourceDir, ".rollback-" + Guid.NewGuid().ToString("N"));
+            var backups = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var touchedFiles = new List<string>();
+            var createdDirectories = new List<string>();
+            bool executableMoved = false;
+            bool retainBackups = false;
+            try
+            {
+                Directory.CreateDirectory(backupDirectory);
+                foreach (string destination in destinations)
+                {
+                    if (!destination.Equals(currentExePath, StringComparison.OrdinalIgnoreCase) && File.Exists(destination))
+                    {
+                        string backup = Path.Combine(backupDirectory, backups.Count.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                        File.Copy(destination, backup);
+                        backups.Add(destination, backup);
+                    }
+                }
+
+                // Windows allows renaming a running executable.
+                if (File.Exists(oldExePath))
+                {
+                    File.Delete(oldExePath);
+                }
+
+                File.Move(currentExePath, oldExePath);
+                executableMoved = true;
+
+                foreach (var file in filesToCopy)
+                {
+                    string destPath = GetDestinationPath(file);
+                    string destDir = Path.GetDirectoryName(destPath);
+
+                    var missingDirectories = new Stack<string>();
+                    for (string directory = destDir; !Directory.Exists(directory); directory = Path.GetDirectoryName(directory))
+                    {
+                        missingDirectories.Push(directory);
+                    }
+
+                    while (missingDirectories.Count > 0)
+                    {
+                        string directory = missingDirectories.Pop();
+                        Directory.CreateDirectory(directory);
+                        createdDirectories.Add(directory);
+                    }
+
+                    touchedFiles.Add(destPath);
+                    File.Copy(file, destPath, overwrite: true);
+                }
+            }
+            catch (Exception installError)
+            {
+                var rollbackErrors = new List<Exception>();
+                for (int i = touchedFiles.Count - 1; i >= 0; i--)
+                {
+                    string destination = touchedFiles[i];
+                    if (destination.Equals(currentExePath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        if (backups.TryGetValue(destination, out string backup))
+                        {
+                            File.Copy(backup, destination, overwrite: true);
+                        }
+                        else if (File.Exists(destination))
+                        {
+                            File.Delete(destination);
+                        }
+                    }
+                    catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+                    {
+                        rollbackErrors.Add(ex);
+                    }
+                }
+
+                if (executableMoved)
+                {
+                    try
+                    {
+                        if (File.Exists(currentExePath))
+                        {
+                            File.Delete(currentExePath);
+                        }
+                        File.Move(oldExePath, currentExePath);
+                    }
+                    catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+                    {
+                        rollbackErrors.Add(ex);
+                    }
+                }
+
+                for (int i = createdDirectories.Count - 1; i >= 0; i--)
+                {
+                    try
+                    {
+                        Directory.Delete(createdDirectories[i]);
+                    }
+                    catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+                    {
+                        rollbackErrors.Add(ex);
+                    }
+                }
+
+                if (rollbackErrors.Count > 0)
+                {
+                    retainBackups = true;
+                    Trace.TraceError($"Update rollback could not complete. Backups retained at {backupDirectory}");
+                    rollbackErrors.Insert(0, installError);
+                    throw new AggregateException(rollbackErrors);
+                }
+
+                throw;
+            }
+            finally
+            {
+                if (!retainBackups && Directory.Exists(backupDirectory))
+                {
+                    try
+                    {
+                        Directory.Delete(backupDirectory, recursive: true);
+                    }
+                    catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+                    {
+                        Trace.TraceWarning($"Could not remove update backups at {backupDirectory}: {ex}");
+                    }
+                }
+            }
+        }
+
+        private static void ValidateUpdateExecutable(string path)
+        {
+            // Isolate reflection-only loads so retries never reuse an earlier payload's metadata.
+            var domain = AppDomain.CreateDomain("Update payload validation");
+            try
+            {
+                var validator = (ExecutableValidator)domain.CreateInstanceFromAndUnwrap(
+                    typeof(UpdateManager).Assembly.Location, typeof(ExecutableValidator).FullName);
+                validator.Validate(path, typeof(UpdateManager).Assembly.GetName().Name);
+            }
+            finally
+            {
+                AppDomain.Unload(domain);
+            }
+        }
+
+        public sealed class ExecutableValidator : MarshalByRefObject
+        {
+            public void Validate(string path, string expectedName)
+            {
+                var assembly = Assembly.ReflectionOnlyLoad(File.ReadAllBytes(path));
+                assembly.ManifestModule.GetPEKind(out PortableExecutableKinds kind, out ImageFileMachine machine);
+                if (assembly.GetName().Name != expectedName
+                    || assembly.EntryPoint == null || !assembly.EntryPoint.IsStatic
+                    || (kind & PortableExecutableKinds.ILOnly) == 0
+                    || (machine != ImageFileMachine.I386 && machine != ImageFileMachine.AMD64)
+                    || (machine == ImageFileMachine.AMD64 && !Environment.Is64BitOperatingSystem))
+                {
+                    throw new InvalidDataException();
+                }
+
+                using (var reader = new BinaryReader(File.OpenRead(path)))
+                {
+                    reader.BaseStream.Position = 0x3c;
+                    int peOffset = reader.ReadInt32();
+                    reader.BaseStream.Position = peOffset + 22;
+                    if ((reader.ReadUInt16() & 0x2000) != 0)
+                    {
+                        throw new InvalidDataException();
+                    }
+                }
+            }
         }
 
         private static bool IsGitHubUrl(Uri url)

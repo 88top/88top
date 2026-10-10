@@ -51,6 +51,7 @@ Driver Store Explorer (RAPR) is a powerful tool for viewing, managing, and clean
 
 - **Old drivers:** Drivers are considered as "old" when newer versions exist on the system. Removing these can help free up space and reduce clutter, but may impact compatibility with certain devices or configurations. Consider backing up drivers before removal. The "Select Old Driver(s)" can automatically identify old drivers, though results may vary.
 - **Grayed Device Names:** Drivers shown with device names in gray are associated with devices that are not currently connected (such as cameras, phones, or external drives). If you remove these drivers, you will need to reinstall them if you reconnect the device in the future.
+- **Offline Cleanup:** Automatic old/unused driver selection is disabled for offline stores because device usage cannot be established reliably. Drivers can still be selected manually for removal.
 - **Force Deletion:** Use this option if you need to delete a driver that is currently in use. Note: This option may not work for print drivers.
 ---
 
@@ -72,6 +73,12 @@ Driver Store Explorer (RAPR) is a powerful tool for viewing, managing, and clean
 3. Extract the files to a folder of your choice
 4. Run `Rapr.exe`
 
+The in-app updater validates the replacement executable before changing the installation. If you rename the portable executable, updates preserve that filename and its accompanying `.exe.config` filename.
+
+If installation fails, the updater restores overwritten configuration and supporting files along with the original executable, and removes newly installed files. If rollback cannot complete, the error is reported and backups are retained for recovery.
+
+When the application folder is writable, settings are stored alongside the executable. Existing per-user preferences are imported before switching to a new portable configuration; older configurations are retained if migration or save verification fails.
+
 ### Option 2: Install via Winget (Recommended)
 ```powershell
 winget install lostindark.DriverStoreExplorer
@@ -88,6 +95,28 @@ rapr
 4. Run the executable from the output directory
 
 ---
+
+## Creating an Official Release
+
+Open **Actions → Release → Run workflow** on `master`, or run:
+
+```powershell
+gh workflow run release.yml --ref master
+```
+
+No version or build ID is required. With the version input blank, the workflow selects the newest successful `master` push CI run (not necessarily the latest commit if its CI is pending or failed), verifies that its version tag points to its source commit, and downloads that exact run's artifact. It then signs the build, generates release notes, and creates a **draft**. It does not rebuild or assign a new version.
+
+To prepare a specific version again, supply `version` with or without the `v` prefix:
+
+```powershell
+gh workflow run release.yml --ref master -f version=1.0.28
+```
+
+The workflow selects the latest successful CI run for that tagged commit. An existing draft's notes and signed ZIP are refreshed; published releases are never modified.
+
+Approve the SignPath signing request if required, then review and publish the draft under **Releases**. Publication triggers WinGet submission. Existing tags are not moved or overwritten. If the selected artifact has expired, its tag is inconsistent, or the release is already published, the workflow stops instead of releasing a different build.
+
+CI assigns an increasing patch version and tag to each new `master` push; reruns reuse its existing tag. Failed builds can leave gaps in the version sequence. PR builds get unique preview versions and artifact names without creating release tags.
 
 ## Project History
 Originally hosted at [https://driverstoreexplorer.codeplex.com/](https://web.archive.org/web/20190417132137/https://archive.codeplex.com/?p=driverstoreexplorer).
