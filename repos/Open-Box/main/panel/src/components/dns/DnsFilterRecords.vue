@@ -23,19 +23,28 @@
             <option value="">{{ $t('dfAllResults') }}</option>
             <option value="blocked">{{ $t('dfBlocked') }}</option>
             <option value="allowed">{{ $t('dfAllowed') }}</option>
+            <option value="dnsmasq">{{ $t('dfDnsmasqAnswered') }}</option>
             <option value="error">{{ $t('dfError') }}</option>
             <option value="unknown">{{ $t('dfUnknown') }}</option>
           </select>
           <button
-            class="btn btn-sm"
+            v-tip="$t('dfQuery')"
+            class="btn btn-ghost btn-square btn-sm"
             :disabled="loading"
             type="submit"
+            :aria-label="$t('dfQuery')"
           >
-            <ArrowPathIcon class="h-4 w-4" />{{ $t('dfQuery') }}
+            <ArrowPathIcon class="h-4 w-4" />
           </button>
         </form>
       </div>
       <p class="text-base-content/60 text-xs">{{ $t('dfRecordHint') }}</p>
+      <p
+        v-if="(queryLog?.reason === 'user' && !queryLog?.syslog) || queryLog?.reason === 'failed'"
+        class="text-base-content/60 text-xs"
+      >
+        {{ $t(queryLog.reason === 'failed' ? 'dfQueryLogFailed' : 'dfQueryLogUser') }}
+      </p>
       <p
         v-if="!enabled || !connected"
         class="text-base-content/60 text-xs"
@@ -50,7 +59,7 @@
               <th>{{ $t('dfDomain') }}</th>
               <th>{{ $t('dfType') }}</th>
               <th>{{ $t('dfResult') }}</th>
-              <th>{{ $t('dfSource') }}</th>
+              <th>{{ $t('dfDevice') }}</th>
               <th>{{ $t('dfMatchedList') }}</th>
               <th>{{ $t('dfDuration') }}</th>
             </tr>
@@ -76,7 +85,9 @@
                       ? 'badge-error badge-soft'
                       : row.result === 'allowed'
                         ? 'badge-success badge-soft'
-                        : 'badge-ghost'
+                        : row.result === 'cached' || row.result === 'local'
+                          ? 'badge-info badge-soft'
+                          : 'badge-ghost'
                   "
                   >{{ resultLabel(row.result) }}</span
                 >
@@ -84,7 +95,7 @@
               <td class="text-xs">
                 {{
                   row.source === '127.0.0.1' || row.source === '::1'
-                    ? $t('dfRouterSource')
+                    ? $t(row.via === 'dnsmasq' ? 'dfRouterSelf' : 'dfRouterSource')
                     : row.source || '—'
                 }}
               </td>
@@ -108,6 +119,7 @@
         v-model:page="page"
         v-model:page-size="pageSize"
         :total="total"
+        :page-sizes="[10, 20, 50, 100]"
         :disabled="loading"
         @change="load"
       />
@@ -115,20 +127,20 @@
   </section>
 </template>
 <script setup lang="ts">
-import { fetchDnsFilterRecords, type DnsFilterRecord } from '@/api/openbox'
+import { fetchDnsFilterRecords, type DnsFilterQueryLog, type DnsFilterRecord } from '@/api/openbox'
 import AppPagination from '@/components/common/AppPagination.vue'
 import { showNotification } from '@/helper/notification'
 import { ArrowPathIcon } from '@heroicons/vue/24/outline'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-defineProps<{ connected: boolean; enabled: boolean }>()
+defineProps<{ connected: boolean; enabled: boolean; queryLog?: DnsFilterQueryLog }>()
 const route = useRoute(),
   { t } = useI18n()
 const search = ref(String(route.query.dnsDomain || '')),
   result = ref('blocked'),
   page = ref(1),
-  pageSize = ref(20),
+  pageSize = ref(10),
   total = ref(0),
   loading = ref(false)
 const rows = ref<DnsFilterRecord[]>([])
@@ -163,6 +175,8 @@ const resultLabel = (r: string) =>
     error: t('dfError'),
     unknown: t('dfUnknown'),
     policy: t('dfPolicy'),
+    cached: t('dfCached'),
+    local: t('dfLocal'),
   })[r] || r.toUpperCase()
 const searchRecords = () => {
   page.value = 1

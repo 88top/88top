@@ -83,7 +83,6 @@ class WeaselPanel {
   CPoint m_lastCursorPos = {-1, -1};
 
   Context& m_ctx;
-  Context& m_octx;
   Status& m_status;
   const bool& m_in_server;
   UIStyle& m_style;
@@ -127,6 +126,8 @@ class WeaselPanel {
   RECT m_drag_window{0, 0, 0, 0};
   UINT_PTR m_clickTimer = 0;
   UINT_PTR m_autoHideTimer = 0;
+  int m_lastWindowWidth = -1;
+  int m_lastWindowHeight = -1;
 
  public:
   void ShowWithTimeout(size_t millisec);

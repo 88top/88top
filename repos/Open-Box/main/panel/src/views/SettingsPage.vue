@@ -28,6 +28,13 @@
           >
             <component :is="item.component" />
           </div>
+          <!-- 测试站点:概览「站点延迟」测哪几个站,自成一张卡片,固定排在最后 -->
+          <div
+            id="item-testSites"
+            class="card"
+          >
+            <SiteLatencySettings />
+          </div>
         </div>
       </div>
     </div>
@@ -50,12 +57,14 @@
 import GeneralSettings from '@/components/settings/GeneralSettings.vue'
 import ProxiesSettings from '@/components/settings/ProxiesSettings.vue'
 import SettingsMenu from '@/components/settings/SettingsMenu.vue'
+import SiteLatencySettings from '@/components/settings/SiteLatencySettings.vue'
 import { usePaddingForViews } from '@/composables/paddingViews'
 import { isSettingVisible } from '@/composables/settings'
 import { SETTINGS_MENU_KEY, SETTINGS_TAB } from '@/constant'
 import { settingsMenuOrder } from '@/store/settings'
 import ClientAppPage from '@/views/ClientAppPage.vue'
 import ClientRoutingPage from '@/views/ClientRoutingPage.vue'
+import ChainProxiesPage from '@/views/ChainProxiesPage.vue'
 import KernelPage from '@/views/KernelPage.vue'
 import DnsPage from '@/views/DnsPage.vue'
 import RoutingPage from '@/views/RoutingPage.vue'
@@ -66,11 +75,12 @@ import {
   ServerStackIcon,
   DevicePhoneMobileIcon,
   HomeIcon,
+  LinkIcon,
   MapIcon,
-  QrCodeIcon,
   RectangleStackIcon,
   RssIcon,
   ShareIcon,
+  Squares2X2Icon,
 } from '@heroicons/vue/24/outline'
 import { useStorage } from '@vueuse/core'
 import type { Component } from 'vue'
@@ -94,8 +104,9 @@ const tabItems: { key: SETTINGS_TAB; label: string; icon: Component }[] = [
   { key: SETTINGS_TAB.groups, label: 'groupsTab', icon: RectangleStackIcon },
   { key: SETTINGS_TAB.routing, label: 'routingSettings', icon: MapIcon },
   { key: SETTINGS_TAB.clients, label: 'clientRoutingTab', icon: DevicePhoneMobileIcon },
-  { key: SETTINGS_TAB.clientApp, label: 'clientAppTab', icon: QrCodeIcon },
+  { key: SETTINGS_TAB.chain, label: 'chainTitle', icon: LinkIcon },
   { key: SETTINGS_TAB.share, label: 'shareNetworkTab', icon: ShareIcon },
+  { key: SETTINGS_TAB.clientApp, label: 'clientAppTab', icon: Squares2X2Icon },
   { key: SETTINGS_TAB.dns, label: 'dnsSettingsTab', icon: ServerStackIcon },
   { key: SETTINGS_TAB.kernel, label: 'kernelSettings', icon: CpuChipIcon },
 ]
@@ -105,6 +116,7 @@ const TAB_COMPONENTS: Partial<Record<SETTINGS_TAB, Component>> = {
   [SETTINGS_TAB.groups]: SubscriptionsPage,
   [SETTINGS_TAB.routing]: RoutingPage,
   [SETTINGS_TAB.clients]: ClientRoutingPage,
+  [SETTINGS_TAB.chain]: ChainProxiesPage,
   [SETTINGS_TAB.clientApp]: ClientAppPage,
   [SETTINGS_TAB.kernel]: KernelPage,
   [SETTINGS_TAB.dns]: DnsPage,

@@ -132,13 +132,16 @@ export interface DnsFilterStatus {
   applied: { enabled: boolean; key: string } | null
   busy: boolean
   connected: boolean
+  queryLog?: DnsFilterQueryLog
 }
+// dnsmasq 查询日志的接入情况:reason 为 user 表示日志去向被用户另行设置,failed 表示加日志后 dnsmasq 起不来
+export interface DnsFilterQueryLog { reason?: 'user' | 'failed' | string; syslog?: boolean }
 export interface DnsFilterSummary {
   enabled: boolean; connected: boolean; queries: number; blocked: number; averageMs: number | null
   hourly: { hour: number; queries: number; blocked: number; elapsed: number; timed: number }[]
   topDomains: { domain: string; count: number }[]
 }
-export interface DnsFilterRecord { id: number; at: number; domain: string; qtype: string; source: string; result: string; list: string; elapsed: number | null }
+export interface DnsFilterRecord { id: number; at: number; domain: string; qtype: string; source: string; result: string; list: string; elapsed: number | null; via?: string }
 export interface DnsFilterPreviewEntry {
   type: string; value: string; rule: string; action: 'allow' | 'block'; important: boolean; conditional: boolean
 }
@@ -196,6 +199,10 @@ export interface OpenboxClientRoute {
   // 不进内核:按 MAC 在入口就放行(sing-box 1.14 的 exclude_mac_address,需要 auto_redirect),像 OpenClash 的黑名单
   bypass?: boolean
   macs?: string[]
+  // 按什么认终端:ip(sources)或 mac(macs);老档案没有这个字段
+  match?: 'ip' | 'mac'
+  // 只让这些终端进内核(白名单):不指定出口,只决定谁进内核
+  admit?: boolean
 }
 
 // 链式代理:一个节点不直接拨号,而是经另一个节点 / 节点组去连(内核里的 detour),见 server/engine/chain-proxy.mjs。
@@ -219,6 +226,14 @@ export interface OpenboxProfile {
   chainProxies?: OpenboxChainProxy[]
   // 订阅链接和节点服务器的地址一律直连(默认开)
   directForNodes?: boolean
+  // 直连不进内核(默认开):入口旁路 / 默认放行 / 直连应答放行整套开关;关掉后所有流量进内核,连接页和统计才看得到直连流量
+  directBypass?: boolean
+  // 屏蔽 QUIC(默认开):走代理线路的 UDP 443 拒绝,浏览器退回 TCP;直连的站点不受影响
+  rejectQuic?: boolean
+  // 进内核前放行的端口,写法「21114-21119, 2233」,空 = 不放行。黑名单、白名单各存一份,只有 bypassPortsMode 选中的那份生效
+  bypassPorts?: string
+  bypassPortsWhitelist?: string
+  bypassPortsMode?: 'blacklist' | 'whitelist'
   region: string
   ipv6: boolean
   // IPv6 开着时走代理的目标怎么处理:node 交给节点(默认)/ ipv4 降为 IPv4(走代理的域名不给 AAAA,裸 v6 明确拒绝)
@@ -230,6 +245,8 @@ export interface OpenboxProfile {
   // 测速地址:testUrl 给自动择优组和面板延迟测试用;directTestUrl 只给内置直连用
   testUrl?: string
   directTestUrl?: string
+  // 全局的「可接受状态码」:测速回的状态码在这里面才算通,如 200-399 或 204(用 / 连接多段);空 / * = 不限
+  testExpectedStatus?: string
   // 每日流量这些分析数据留多久(月,1~36)
   traffic?: { keepMonths?: number }
   rulesetDir?: string
@@ -285,6 +302,9 @@ export interface OpenboxSubscriptionAutoUpdate {
   hour: number
 }
 
+// url 是 https:// 的 DoH 地址;地址里是域名时 bootstrap 必填(用来解析这个域名的 DNS,IP)
+export interface OpenboxSubscriptionNodeDns { url: string; bootstrap?: string }
+
 export interface OpenboxSubscription {
   id: string
   name: string
@@ -299,6 +319,8 @@ export interface OpenboxSubscription {
   format: string
   nodeCount: number
   renameOptions?: OpenboxRenameOptions
+  // 这份订阅的节点域名专用解析(DoH);没配就是没有这个字段
+  nodeDns?: OpenboxSubscriptionNodeDns | null
   createdAt: number
   updatedAt: number
 }
@@ -521,6 +543,7 @@ export const createSubscription = async (payload: {
   name: string
   renameOptions?: OpenboxRenameOptions
   autoUpdate?: OpenboxSubscriptionAutoUpdate
+  nodeDns?: OpenboxSubscriptionNodeDns | null
 }): Promise<OpenboxSubscriptionSaveResult> => {
   return requestJson('/api/openbox/subscriptions', {
     method: 'POST',
@@ -533,7 +556,7 @@ export const createSubscription = async (payload: {
 // so a plain rename works even while the provider is unreachable (see subscriptions.mjs PATCH).
 export const updateSubscription = async (
   id: string,
-  payload: { name?: string; url?: string; urls?: string[]; content?: string; renameOptions?: OpenboxRenameOptions; autoUpdate?: OpenboxSubscriptionAutoUpdate; enabled?: boolean },
+  payload: { name?: string; url?: string; urls?: string[]; content?: string; renameOptions?: OpenboxRenameOptions; autoUpdate?: OpenboxSubscriptionAutoUpdate; nodeDns?: OpenboxSubscriptionNodeDns | null; enabled?: boolean },
 ): Promise<OpenboxSubscriptionSaveResult> => {
   return requestJson(`/api/openbox/subscriptions/${encodeURIComponent(id)}`, {
     method: 'PATCH',
@@ -844,6 +867,12 @@ export interface OpenboxServiceStatus {
   core: OpenboxServiceInfo
   panel: OpenboxServiceInfo
   conflicts: OpenboxConflictService[]
+  // 以下几项新版服务端才带(server/api/service.mjs):跑在哪种系统上('openwrt' / 'systemd')、
+  // 发行版信息、CPU 架构、还没重启生效的改动。老服务端没有,界面按没有处理。
+  platform?: string
+  osRelease?: string | Record<string, unknown> | null
+  arch?: string
+  pendingRestart?: { pending: boolean; reasons: string[] }
 }
 
 export type OpenboxServiceAction = 'start' | 'stop' | 'restart' | 'enable' | 'disable'
@@ -1274,6 +1303,9 @@ export interface OpenboxTrafficUsage {
   perDay: number
   hourPerDay?: number
   hourKeepDays?: number
+  // 超过这么多天的日子只保留当天流量最大的那些访问目标,其余合并成「其他」;oldPerDay 是合并之后每天的增量(新服务端才有)
+  collapseAfterDays?: number
+  oldPerDay?: number
   oldestDay: string
   newestDay: string
 }
@@ -1322,7 +1354,7 @@ export interface OpenboxBackup {
   exportedAt: string
   openboxVersion?: string
   // 导出时勾了哪些可选部分(老文件没有这个字段)
-  includes?: { subscriptions: boolean; clientRoutes: boolean; servers: boolean }
+  includes?: { subscriptions: boolean; chainProxies?: boolean; clientRoutes: boolean; servers: boolean }
   profile: OpenboxProfile
   groups: unknown[]
   subscriptions?: unknown[]
@@ -1333,6 +1365,8 @@ export interface OpenboxBackup {
 }
 export interface OpenboxBackupOptions {
   subscriptions: boolean
+  // 链式代理(老调用方不传按带上算)
+  chainProxies?: boolean
   clientRoutes: boolean
   servers: boolean
 }
@@ -1354,7 +1388,7 @@ export const fetchDiagnostics = () => requestJson<Record<string, unknown>>('/api
 
 export const fetchBackup = (opts: OpenboxBackupOptions) =>
   requestJson<OpenboxBackup>(
-    `/api/openbox/backup?subscriptions=${opts.subscriptions ? 1 : 0}&clientRoutes=${opts.clientRoutes ? 1 : 0}&servers=${opts.servers ? 1 : 0}`,
+    `/api/openbox/backup?subscriptions=${opts.subscriptions ? 1 : 0}&chainProxies=${opts.chainProxies === false ? 0 : 1}&clientRoutes=${opts.clientRoutes ? 1 : 0}&servers=${opts.servers ? 1 : 0}`,
   )
 export const importBackup = (data: OpenboxBackup, subscriptionsMode: OpenboxBackupSubscriptionsMode = 'replace') =>
   requestJson<OpenboxBackupImportResult>(`/api/openbox/backup/import?subscriptions=${subscriptionsMode}`, {
