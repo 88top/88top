@@ -2,6 +2,7 @@ package eu.darken.sdmse.appcleaner.core.automation.specs.aosp
 
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.view.accessibility.AccessibilityEvent
 import dagger.Binds
 import dagger.Module
@@ -41,6 +42,7 @@ import eu.darken.sdmse.common.BuildWrap
 import eu.darken.sdmse.common.ca.toCaString
 import eu.darken.sdmse.common.debug.Bugs
 import eu.darken.sdmse.common.debug.logging.Logging.Priority.*
+import eu.darken.sdmse.common.debug.logging.asLog
 import eu.darken.sdmse.common.debug.logging.log
 import eu.darken.sdmse.common.debug.logging.logTag
 import eu.darken.sdmse.common.debug.toVisualStrings
@@ -48,6 +50,7 @@ import eu.darken.sdmse.common.device.DeviceDetective
 import eu.darken.sdmse.common.device.RomType
 import eu.darken.sdmse.common.funnel.IPCFunnel
 import eu.darken.sdmse.common.hasApiLevel
+import eu.darken.sdmse.common.pkgs.Pkg
 import eu.darken.sdmse.common.pkgs.features.Installed
 import eu.darken.sdmse.common.pkgs.isSystemApp
 import eu.darken.sdmse.common.pkgs.toPkgId
@@ -275,7 +278,9 @@ class AOSPSpecs @Inject constructor(
     @SuppressLint("InlinedApi")
     private suspend fun StepContext.tryClickViaFocusNavigation(
         labels: Collection<String>,
+        targetPkg: Pkg.Id,
         canInjectInput: Boolean,
+        threeButtonRow: Boolean,
         preClickCheck: (suspend () -> Boolean)? = null,
     ): Boolean? {
         log(tag, INFO) { "Trying DPAD navigation (anchor-based, inputInjection=$canInjectInput)" }
@@ -294,6 +299,11 @@ class AOSPSpecs @Inject constructor(
             { inputInjector.inject(InputInjector.Event.DpadRight); true }
         } else {
             { host.service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_DPAD_RIGHT) }
+        }
+        val dpadLeft: suspend () -> Boolean = if (canInjectInput) {
+            { inputInjector.inject(InputInjector.Event.DpadLeft); true }
+        } else {
+            { host.service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_DPAD_LEFT) }
         }
         val dpadCenter: suspend () -> Boolean = if (canInjectInput) {
             { inputInjector.inject(InputInjector.Event.DpadCenter); true }
@@ -374,21 +384,39 @@ class AOSPSpecs @Inject constructor(
         run {
             val fastBootstrapped = bootstrapAnchor("quick-try")
             if (fastBootstrapped) {
+                var centerSent = false
                 val steppedDown = dpadDown()
                 log(tag, INFO) { "DPAD_DOWN result=$steppedDown (source=quick-try)" }
                 logFocus("quick-try DOWN")
                 delay(stepDelayMs)
                 val moved = dpadRight()
+                log(tag, INFO) { "DPAD_RIGHT result=$moved (source=quick-try)" }
                 if (!moved) {
                     log(tag, WARN) { "DPAD_RIGHT failed (source=quick-try)" }
                     logFocus("quick-try failed RIGHT")
                 }
                 if (moved) {
                     delay(stepDelayMs)
+                }
+                val positioned = if (moved && threeButtonRow) {
+                    // GrapheneOS three-button row, RIGHT is "Manage storage": https://github.com/d4rken-org/sdmaid-se/issues/2842
+                    val movedLeft = dpadLeft()
+                    log(tag, INFO) { "DPAD_LEFT result=$movedLeft (source=quick-try)" }
+                    if (movedLeft) {
+                        delay(stepDelayMs)
+                    } else {
+                        log(tag, WARN) { "DPAD_LEFT failed (source=quick-try)" }
+                        logFocus("quick-try failed LEFT")
+                    }
+                    movedLeft
+                } else {
+                    moved
+                }
+                if (positioned) {
                     if (focusVetoesCenter("quick-try")) {
                         log(tag, WARN) { "DPAD_CENTER skipped, focus outside the button row (source=quick-try)" }
                     } else {
-                        val clicked = if (Bugs.isDryRun) true else dpadCenter()
+                        val clicked = if (Bugs.isDryRun) true else dpadCenter().also { centerSent = it }
                         log(tag, INFO) { "DPAD_CENTER result=$clicked (source=quick-try)" }
                         if (clicked && validateWithDelta("quick-try", preSnapshot, sizeParser, timeoutMs = 800)) {
                             return true
@@ -400,6 +428,38 @@ class AOSPSpecs @Inject constructor(
                 val anchorStillPresent = host.windowRoot()?.crawl()?.map { it.node }
                     ?.any { it.viewIdResourceName == anchorId } == true
                 if (!anchorStillPresent) {
+                    // GrapheneOS adds "Manage storage" for apps with a manageSpaceActivity, and
+                    // DOWN+RIGHT lands on it: https://github.com/d4rken-org/sdmaid-se/issues/2842
+                    var windowPkg: String? = null
+                    var detour = false
+                    if (centerSent) {
+                        for (poll in 1..10) {
+                            windowPkg = host.windowRoot()?.packageName?.toString()
+                            detour = isManageSpaceDetour(centerSent, windowPkg, targetPkg.name)
+                            if (detour) break
+                            delay(100)
+                        }
+                        log(tag, INFO) {
+                            "Quick-try: detour=$detour, rootPkg=$windowPkg, target=${targetPkg.name} (source=$MANAGE_SPACE_DETOUR_SOURCE)"
+                        }
+                    }
+                    if (detour) {
+                        val ops = ManageSpaceDetourOps(
+                            back = { host.service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK) },
+                            awaitAnchor = { waitForLayoutStability(anchorId) != null },
+                            takeSnapshot = { takeStorageSnapshot(sizeParser) },
+                            bootstrapAnchor = { bootstrapAnchor(MANAGE_SPACE_DETOUR_SOURCE) },
+                            dpadDown = dpadDown,
+                            dpadRight = dpadRight,
+                            dpadLeft = dpadLeft,
+                            focusVetoesCenter = { focusVetoesCenter(MANAGE_SPACE_DETOUR_SOURCE) },
+                            dpadCenter = dpadCenter,
+                            validate = { baseline ->
+                                validateWithDelta(MANAGE_SPACE_DETOUR_SOURCE, baseline, sizeParser, timeoutMs = 800)
+                            },
+                        )
+                        return recoverFromManageSpaceDetour(tag, ops, preSnapshot, stepDelayMs)
+                    }
                     log(tag, WARN) {
                         "Quick-try: validation failed but anchor gone, aborting to avoid double-click"
                     }
@@ -606,6 +666,37 @@ class AOSPSpecs @Inject constructor(
                 "dpadManufacturer=$dpadManufacturer, allowlistedDpad=$allowlistedDpad, bandCheckEligible=$bandCheckEligible (MANUFACTURER=${BuildWrap.MANUFACTOR}, PRODUCT=${BuildWrap.PRODUCT})"
             }
 
+            val settingsHasManageStorageText = try {
+                @SuppressLint("DiscouragedApi")
+                val id = host.service.packageManager.getResourcesForApplication(SETTINGS_PKG.name)
+                    .getIdentifier("manage_storage_text", "string", SETTINGS_PKG.name)
+                id != 0
+            } catch (e: Exception) {
+                log(TAG, WARN) { "Failed to look up manage_storage_text: ${e.asLog()}" }
+                false
+            }
+            val manageSpaceActivityName = try {
+                pkg.applicationInfo?.manageSpaceActivityName
+            } catch (e: Exception) {
+                log(TAG, WARN) { "Failed to read manageSpaceActivityName: ${e.asLog()}" }
+                null
+            }
+            val manageSpaceActivityResolves = manageSpaceActivityName != null && try {
+                val intent = Intent(Intent.ACTION_DEFAULT).setClassName(pkg.id.name, manageSpaceActivityName)
+                host.service.packageManager.resolveActivity(intent, 0) != null
+            } catch (e: Exception) {
+                log(TAG, WARN) { "Failed to resolve $manageSpaceActivityName: ${e.asLog()}" }
+                false
+            }
+            val threeButtonRow = predictsManageStorageButton(
+                settingsHasManageStorageText,
+                manageSpaceActivityName,
+                manageSpaceActivityResolves,
+            )
+            log(TAG, INFO) {
+                "threeButtonRow=$threeButtonRow (manageStorageText=$settingsHasManageStorageText, manageSpaceActivity=$manageSpaceActivityName, resolves=$manageSpaceActivityResolves)"
+            }
+
             val bandMinGapPx = if (bandCheckEligible) {
                 val density = host.service.resources.displayMetrics.density
                 if (density > 0f) {
@@ -705,7 +796,15 @@ class AOSPSpecs @Inject constructor(
                     } else {
                         suspend { host.windowRoot()?.hasEmptyButtonBand(bandMinGapPx) == true }
                     }
-                    when (tryClickViaFocusNavigation(clearCacheButtonLabels, canInjectInput, preClickCheck)) {
+                    when (
+                        tryClickViaFocusNavigation(
+                            clearCacheButtonLabels,
+                            pkg.id,
+                            canInjectInput,
+                            threeButtonRow,
+                            preClickCheck,
+                        )
+                    ) {
                         true -> return@action true
                         false -> {
                             dpadExhausted = true

@@ -108,5 +108,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add dae/Makefile
           git diff --cached --quiet && { echo "no change"; exit 0; }
-          git commit -m "chore(dae): assemble pinned source ${DAE_VERSION}-${rel}"
+          git commit -m "Assemble dae source" \
+            -m "改动：将 dae 更新为 ${DAE_VERSION}-r${rel} 并写入新源码哈希。" \
+            -m "原因：确保固定源码与包版本对应。"
           git push origin "HEAD:${{ github.ref_name }}"

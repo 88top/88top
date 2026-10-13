@@ -92,7 +92,7 @@ if panel_healthy ${wait}; then echo healthy; else echo unhealthy; fi`
 
 test('升级顺序:新 Node 在停服务之前试;新面板应答 /api/health 之后才删旧版本,起不来就整体回退、把旧版本的内核拉起来', () => {
   const at = (needle) => {
-    const i = update.indexOf(needle)
+    const i = needle === 'if ! panel_healthy' ? update.lastIndexOf(needle) : update.indexOf(needle)
     assert.ok(i >= 0, `update.sh 里找不到:${needle}`)
     return i
   }
@@ -224,12 +224,13 @@ test('换文件途中失败(含 meta.json 换不上):整体回退,再把旧版�
 write_status() { :; }; info() { :; }; warn() { :; }
 die() { echo "die: $*"; exit 1; }
 rollback_components() { echo rollback >> '${root}/log'; return 0; }
+panel_healthy() { echo healthy >> '${root}/log'; return 0; }
 ${fn(update, 'restart_core')}
 ${fn(update, 'swap_failed')}
 swap_failed "替换 meta.json 失败。"`
   const r = sh(script)
   assert.equal(r.status, 1)
-  assert.equal(fs.readFileSync(path.join(root, 'log'), 'utf8'), `rollback\npanel start\ndeploy ${root}/panel/server/cli/deploy.mjs\n`)
+  assert.equal(fs.readFileSync(path.join(root, 'log'), 'utf8'), `rollback\npanel start\nhealthy\ndeploy ${root}/panel/server/cli/deploy.mjs\n`)
   assert.match(r.stdout, /die: 替换 meta\.json 失败。 已把 .*整体回退到升级前的版本.*;内核已重新生成配置并启动。请检查/)
 })
 
@@ -251,6 +252,7 @@ echo '{"ok":true}'
     const script = `set -eu
 INSTALL_ROOT='${root}'; CORE_WAS_RUNNING=1; TMPDIR='${root}'
 write_status() { :; }; info() { :; }; warn() { echo "[warn] $*"; }
+panel_healthy() { return 0; }
 sleep() { echo "sleep $1" >> '${root}/sleeps'; }
 ${fn(update, 'restart_core')}
 restart_core
@@ -441,4 +443,114 @@ echo DEPS-DONE`, { PATH: `${dir}/bin:/usr/bin:/bin`, D: dir })
     assert.ok(line.includes(`不装也能用;要装请自行执行:${pm} update && ${verb} kmod-nft-queue(固件的软件源里没有这个包`), `${pm}:${line}`)
     assert.ok(!r.stdout.includes('自动查找'), r.stdout)
   }
+})
+
+
+test('回退面板始终不应答时不部署内核,保留明确的手动启动提示(#557)', () => {
+  const r = sh(`set -eu; CORE_WAS_RUNNING=1
+panel_healthy() { return 1; }
+warn() { echo "warn:$*"; }
+${fn(update, 'restart_core')}
+restart_core
+echo "$CORE_MSG"`)
+  assert.equal(r.status, 0, r.stderr)
+  assert.match(r.stdout, /面板尚未应答/)
+  assert.match(r.stdout, /手动启动/)
+})
+
+test('安装内的旧升级脚本先取最新版:拒绝网页,镜像失败再直连,保留渠道和目标版本(#557)', () => {
+  const dir = tmp()
+  const script = `set -eu; TMP_PARENT='${dir}'; REPO=timeflysoon/Open-Box
+CHANNEL=mirror; MIRROR_PREFIX=https://mirror.test; BUILTIN_MIRRORS=https://unused.test
+CHANNEL_OVERRIDE=mirror; CLI_MIRROR_PREFIX=https://mirror.test; ROLLBACK_MODE=0; EXPECT_VERSION=v0.1.318
+OPENBOX_UPDATE_RELOCATED=0
+info() { :; }; write_status() { :; }; die() { echo "$*"; exit 1; }
+detect_downloader() { :; }; ensure_tmp_parent() { :; }; resolve_channel() { :; }; cancel_requested() { return 1; }
+fetch_to_file_probe() {
+  echo "$1" >> '${dir}/urls'
+  case "$1" in https://mirror.test/*) echo '<html>error</html>' > "$2" ;;
+  *) printf '#!/bin/sh\\n# Open-Box 升级脚本\\nprintf "%%s\\n" "$@" > "${dir}/args"\\nprintf "%%s" "$OPENBOX_UPDATE_REFRESHED" > "${dir}/fresh"\\n' > "$2" ;; esac
+}
+${fn(update, 'refresh_update_script')}
+refresh_update_script`
+  const r = sh(script)
+  assert.equal(r.status, 0, r.stderr)
+  assert.deepEqual(fs.readFileSync(path.join(dir, 'args'), 'utf8').trim().split('\n'), ['--mirror', 'https://mirror.test', '--expect', 'v0.1.318'])
+  assert.equal(fs.readFileSync(path.join(dir, 'fresh'), 'utf8'), '1')
+  assert.equal(fs.readFileSync(path.join(dir, 'urls'), 'utf8').trim().split('\n').length, 2)
+})
+
+// 面板 / LuCI 的旧 worker 把渠道放在环境里，取到最新脚本后又通过 argv 接力。
+// 最新脚本必须能真正解析这两份记录，不能只用打印 argv 的假脚本验接力。
+const channelScan = update.slice(update.indexOf('_probe_or_cancel_scan=0'), update.indexOf('\nif [ "$_probe_or_cancel_scan"', update.indexOf('_probe_or_cancel_scan=0')))
+const updateArgs = update.slice(update.indexOf('DETACH=0\n'), update.indexOf('\n# --detach 转发子进程'))
+const parseUpdateArgs = (args, env = {}) => spawnSync('sh', ['-c', `set -eu
+die() { echo "$*" >&2; exit 1; }
+${channelScan}
+${updateArgs}
+printf 'channel=%s\\nprefix=%s\\nexpect=%s\\nrollback=%s\\n' "$CHANNEL_OVERRIDE" "$CLI_MIRROR_PREFIX" "$EXPECT_VERSION" "$ROLLBACK_MODE"`, 'update-test', ...args], { encoding: 'utf8', env: { ...process.env, ...env } })
+
+test('渠道显式参数优先于旧 worker 的环境记录，命令行里的双渠道仍拒绝', () => {
+  const inherited = { OPENBOX_UPDATE_CHANNEL_OVERRIDE: 'mirror', OPENBOX_UPDATE_MIRROR_PREFIX: 'https://old.test' }
+  for (const [args, expected] of [
+    [['--direct'], 'channel=direct\nprefix='],
+    [['--mirror'], 'channel=mirror\nprefix='],
+    [['--mirror', 'https://new.test'], 'channel=mirror\nprefix=https://new.test'],
+  ]) {
+    const r = parseUpdateArgs([...args, '--expect', 'v0.1.319'], inherited)
+    assert.equal(r.status, 0, r.stderr)
+    assert.ok(r.stdout.startsWith(expected + '\n'), r.stdout)
+    assert.match(r.stdout, /expect=v0\.1\.319/)
+  }
+  const worker = parseUpdateArgs([], inherited)
+  assert.equal(worker.status, 0, worker.stderr)
+  assert.match(worker.stdout, /channel=mirror\nprefix=https:\/\/old\.test/)
+  for (const args of [['--direct', '--mirror'], ['--mirror', '--direct']]) {
+    const r = parseUpdateArgs(args, inherited)
+    assert.notEqual(r.status, 0)
+    assert.match(r.stderr, /不能与/)
+  }
+  for (const args of [['--probe', 'direct'], ['--cancel']]) {
+    const r = parseUpdateArgs(args, inherited)
+    assert.equal(r.status, 0, r.stderr)
+    assert.match(r.stdout, /^channel=\nprefix=\n/)
+  }
+})
+
+test('后台 worker 获取最新脚本后实际重新解析，直连、内置镜像、指定镜像均可接力', () => {
+  for (const [channel, prefix, rollback] of [['direct', '', '0'], ['mirror', '', '0'], ['mirror', 'https://mirror.test', '1']]) {
+    const dir = tmp()
+    const fresh = `#!/bin/sh\n# Open-Box 升级脚本\nset -eu\ndie() { echo "$*" >&2; exit 1; }\n${channelScan}\n${updateArgs}\nprintf 'channel=%s\\nprefix=%s\\nexpect=%s\\nrollback=%s\\n' "$CHANNEL_OVERRIDE" "$CLI_MIRROR_PREFIX" "$EXPECT_VERSION" "$ROLLBACK_MODE" > '${dir}/parsed'\n`
+    fs.writeFileSync(path.join(dir, 'latest.sh'), fresh)
+    const r = sh(`set -eu; TMP_PARENT='${dir}'; REPO=timeflysoon/Open-Box
+CHANNEL_OVERRIDE='${channel}'; CLI_MIRROR_PREFIX='${prefix}'; ROLLBACK_MODE='${rollback}'; EXPECT_VERSION=v0.1.319
+OPENBOX_UPDATE_RELOCATED=0; BUILTIN_MIRRORS=https://builtin.test
+write_status() { :; }; die() { echo "$*" >&2; exit 1; }
+detect_downloader() { :; }; ensure_tmp_parent() { :; }; cancel_requested() { return 1; }
+${fn(update, 'resolve_channel')}
+fetch_to_file_probe() { cp '${dir}/latest.sh' "$2"; }
+${fn(update, 'refresh_update_script')}
+refresh_update_script`, { OPENBOX_UPDATE_CHANNEL_OVERRIDE: channel, OPENBOX_UPDATE_MIRROR_PREFIX: prefix, OPENBOX_UPDATE_EXPECT: 'v0.1.319' })
+    assert.equal(r.status, 0, `${channel} ${prefix}: ${r.stderr}`)
+    assert.equal(fs.readFileSync(path.join(dir, 'parsed'), 'utf8'), `channel=${channel}\nprefix=${prefix}\nexpect=v0.1.319\nrollback=${rollback}\n`)
+  }
+})
+
+test('真实启动顺序:后台 worker 未指定镜像前缀时，刷新脚本之前已初始化内置镜像', () => {
+  const dir = tmp()
+  const bin = path.join(dir, 'bin')
+  fs.mkdirSync(bin)
+  const fresh = `#!/bin/sh\n# Open-Box 升级脚本\nset -eu\ndie() { echo "$*" >&2; exit 1; }\n${channelScan}\n${updateArgs}\nprintf '%s\\n' "$CHANNEL_OVERRIDE" > '${dir}/parsed'\n`
+  fs.writeFileSync(path.join(dir, 'latest.sh'), fresh)
+  fs.writeFileSync(path.join(bin, 'curl'), `#!/bin/sh\nwhile [ $# -gt 0 ]; do\ncase "$1" in -o) shift; output="$1" ;; http*) echo "$1" >> '${dir}/urls' ;; esac\nshift\ndone\ncp '${dir}/latest.sh' "$output"\n`, { mode: 0o755 })
+  // 执行真实文件开头直到刷新入口，避免预先在测试里赋 BUILTIN_MIRRORS 而遮住初始化顺序错误。
+  const worker = path.join(dir, 'worker.sh')
+  fs.writeFileSync(worker, update.slice(0, update.indexOf('\n# 走到这里,说明既不是 --probe')))
+  const r = spawnSync('sh', [worker], { encoding: 'utf8', env: { ...process.env,
+    PATH: `${bin}:${process.env.PATH}`, OPENBOX_TMPDIR: dir, OPENBOX_UPDATE_RELOCATED: '1',
+    OPENBOX_UPDATE_REFRESHED: '0', OPENBOX_UPDATE_CHANNEL_OVERRIDE: 'mirror', OPENBOX_UPDATE_MIRROR_PREFIX: '',
+  } })
+  assert.equal(r.status, 0, r.stderr)
+  assert.equal(fs.readFileSync(path.join(dir, 'parsed'), 'utf8').trim(), 'mirror')
+  assert.match(fs.readFileSync(path.join(dir, 'urls'), 'utf8'), /^https:\/\/ghfast\.top\/https:\/\/github\.com\//)
 })

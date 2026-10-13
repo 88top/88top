@@ -36,6 +36,7 @@ namespace Rapr
 
         private HashSet<DriverStoreEntry> driversWithNewerDate = new HashSet<DriverStoreEntry>();
         private HashSet<DriverStoreEntry> unusedDriversToReview = new HashSet<DriverStoreEntry>();
+        private ToolStripMenuItem warnBeforeSelectingUnusedDriversStripMenuItem;
 
         private static readonly IUpdateManager UpdateManager = CreateUpdateManager();
 
@@ -110,9 +111,7 @@ namespace Rapr
 
             this.Icon = DSEFormHelper.ExtractAssociatedIcon(Application.ExecutablePath);
             this.BuildLanguageMenu();
-
-            // Initialize the BootCritical option menu item
-            this.includeBootCriticalDriversStripMenuItem.Checked = Settings.Default.IncludeBootCriticalInOldDriverSelection;
+            this.SetupOptionsMenu();
 
             this.lstDriverStoreEntries.PrimarySortColumn = this.driverClassColumn;
             this.lstDriverStoreEntries.PrimarySortOrder = SortOrder.Ascending;
@@ -348,6 +347,23 @@ namespace Rapr
                     defaultLanguageMenuItem.Checked = true;
                 }
             }
+        }
+
+        // Called after every InitializeComponent(), including when the language is switched,
+        // so the option menu items always reflect the saved settings.
+        private void SetupOptionsMenu()
+        {
+            this.includeBootCriticalDriversStripMenuItem.Checked = Settings.Default.IncludeBootCriticalInOldDriverSelection;
+
+            // Created here because its text has no generated Language property yet.
+            this.warnBeforeSelectingUnusedDriversStripMenuItem = new ToolStripMenuItem
+            {
+                CheckOnClick = true,
+                Checked = Settings.Default.WarnBeforeSelectingUnusedDrivers,
+                Text = Language.ResourceManager.GetString("Menu_Options_WarnBeforeSelectingUnusedDrivers", Language.Culture),
+            };
+            this.warnBeforeSelectingUnusedDriversStripMenuItem.Click += this.WarnBeforeSelectingUnusedDriversStripMenuItem_Click;
+            this.optionsStripMenuItem.DropDownItems.Add(this.warnBeforeSelectingUnusedDriversStripMenuItem);
         }
 
         private void EnsureOnScreen()
@@ -611,7 +627,17 @@ namespace Rapr
                     string infPath = dialog.FileName;
                     bool installDriver = this.cbAddInstall.Checked;
 
-                    var infFiles = FindInfFile(infPath).ToList();
+                    List<string> infFiles;
+                    try
+                    {
+                        infFiles = FindInfFile(infPath).ToList();
+                    }
+                    catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException || ex is SecurityException)
+                    {
+                        // e.g. a subfolder we can't read, or a path that is too long in a deep driver bundle.
+                        this.ShowStatus(Status.Error, ex.Message, ex.ToString(), true);
+                        return;
+                    }
 
                     if (infFiles.Count == 0)
                     {
@@ -766,8 +792,12 @@ namespace Rapr
                     this.ctxMenuSelect.Enabled = true;
 
                     this.ctxMenuOpenDeviceProperties.Enabled = !string.IsNullOrEmpty((this.lstDriverStoreEntries.SelectedObject as DriverStoreEntry)?.DeviceId);
-                    this.ctxMenuOpenFolder.Enabled = this.lstDriverStoreEntries.SelectedObjects.Count == 1;
-                    this.ctxMenuCopyFolderPath.Enabled = this.lstDriverStoreEntries.SelectedObjects.Count == 1;
+
+                    // The folder is unknown when the PnpUtil backend can't match the package to the driver store.
+                    bool hasFolder = this.lstDriverStoreEntries.SelectedObjects.Count == 1
+                        && !string.IsNullOrEmpty((this.lstDriverStoreEntries.SelectedObject as DriverStoreEntry)?.DriverFolderLocation);
+                    this.ctxMenuOpenFolder.Enabled = hasFolder;
+                    this.ctxMenuCopyFolderPath.Enabled = hasFolder;
                 }
                 else
                 {
@@ -931,7 +961,7 @@ namespace Rapr
         {
             if (!this.operationInProgress && this.driverStore.SupportDeviceNameColumn && this.lstDriverStoreEntries.Objects != null)
             {
-                if (!this.ConfirmUnusedDriverSelection())
+                if (Settings.Default.WarnBeforeSelectingUnusedDrivers && !this.ConfirmUnusedDriverSelection())
                 {
                     return;
                 }
@@ -1003,7 +1033,7 @@ namespace Rapr
                     this.ShowStatus(Status.Normal, message, usePopup: true);
                 }
             }
-            catch (Exception ex) when (ex is IOException || ex is SecurityException)
+            catch (Exception ex) when (ex is IOException || ex is SecurityException || ex is UnauthorizedAccessException)
             {
                 this.ShowStatus(Status.Error, string.Format(Language.Export_Failed, ex), usePopup: true);
             }
@@ -1020,6 +1050,10 @@ namespace Rapr
             {
                 byte[] driverStoreViewState = this.lstDriverStoreEntries.SaveState();
 
+                // SaveState/RestoreState only keep the primary sort column, so carry the secondary one over by hand.
+                int secondarySortColumnIndex = this.lstDriverStoreEntries.AllColumns.IndexOf(this.lstDriverStoreEntries.SecondarySortColumn);
+                SortOrder secondarySortOrder = this.lstDriverStoreEntries.SecondarySortOrder;
+
                 Thread.CurrentThread.CurrentCulture = ci;
                 Thread.CurrentThread.CurrentUICulture = ci;
 
@@ -1030,10 +1064,18 @@ namespace Rapr
                 this.Controls.Clear();
                 this.InitializeComponent();
                 this.BuildLanguageMenu();
+                this.SetupOptionsMenu();
                 this.RightToLeft = ci.TextInfo.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
                 this.RightToLeftLayout = ci.TextInfo.IsRightToLeft;
                 this.SetupListViewColumns();
                 this.lstDriverStoreEntries.RestoreState(driverStoreViewState);
+
+                if (secondarySortColumnIndex >= 0)
+                {
+                    this.lstDriverStoreEntries.SecondarySortColumn = this.lstDriverStoreEntries.AllColumns[secondarySortColumnIndex];
+                    this.lstDriverStoreEntries.SecondarySortOrder = secondarySortOrder;
+                }
+
                 this.lstDriverStoreEntries.RightToLeft = this.RightToLeft;
                 this.lstDriverStoreEntries.RightToLeftLayout = this.RightToLeftLayout;
                 this.UpdateDriverStore(this.driverStore);
@@ -1131,8 +1173,17 @@ namespace Rapr
         {
             Settings.Default.DriverStoreViewState = Convert.ToBase64String(this.lstDriverStoreEntries.SaveState());
 
-            Settings.Default.WindowState = this.WindowState;
-            Settings.Default.WindowLocation = this.Location;
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                // Don't reopen minimized, and don't save the off-screen (-32000, -32000) position.
+                Settings.Default.WindowState = FormWindowState.Normal;
+                Settings.Default.WindowLocation = this.RestoreBounds.Location;
+            }
+            else
+            {
+                Settings.Default.WindowState = this.WindowState;
+                Settings.Default.WindowLocation = this.Location;
+            }
 
             if (this.WindowState == FormWindowState.Normal)
             {
@@ -1221,6 +1272,11 @@ namespace Rapr
             if (this.lstDriverStoreEntries.SelectedObject != null)
             {
                 DriverStoreEntry item = (DriverStoreEntry)this.lstDriverStoreEntries.SelectedObject;
+                if (string.IsNullOrEmpty(item.DriverFolderLocation))
+                {
+                    return;
+                }
+
                 Process.Start("explorer.exe", "/select, " + Path.Combine(item.DriverFolderLocation, item.DriverInfName));
             }
         }
@@ -1230,7 +1286,12 @@ namespace Rapr
             if (this.lstDriverStoreEntries.SelectedObject != null)
             {
                 DriverStoreEntry item = (DriverStoreEntry)this.lstDriverStoreEntries.SelectedObject;
-                Clipboard.SetText(item.DriverFolderLocation);
+
+                // Clipboard.SetText throws ArgumentNullException for an empty string.
+                if (!string.IsNullOrEmpty(item.DriverFolderLocation))
+                {
+                    Clipboard.SetText(item.DriverFolderLocation);
+                }
             }
         }
 
@@ -1491,6 +1552,12 @@ namespace Rapr
             Settings.Default.Save();
         }
 
+        private void WarnBeforeSelectingUnusedDriversStripMenuItem_Click(object sender, System.EventArgs e)
+        {
+            Settings.Default.WarnBeforeSelectingUnusedDrivers = this.warnBeforeSelectingUnusedDriversStripMenuItem.Checked;
+            Settings.Default.Save();
+        }
+
         private async void CtxMenuExportDriver_Click(object sender, System.EventArgs e)
         {
             using (var dialog = new CommonOpenFileDialog { IsFolderPicker = true })
@@ -1655,11 +1722,15 @@ namespace Rapr
 
         private IEnumerable<string> FindInfFile(string infPath)
         {
-            // Search for *.inf files in the current directory  
+            // Search for *.inf files in the current directory. A package folder can hold several INFs, so add them all.
             var infFiles = Directory.GetFiles(infPath, "*.inf", SearchOption.TopDirectoryOnly);
             if (infFiles.Length > 0)
             {
-                yield return infFiles[0];
+                foreach (var infFile in infFiles)
+                {
+                    yield return infFile;
+                }
+
                 yield break;
             }
 

@@ -56,6 +56,12 @@ umask 022
 
 REPO="timeflysoon/Open-Box"
 INSTALL_ROOT="/opt/open-box"
+# 获取最新升级脚本早于主流程，也需要内置镜像列表，必须先初始化。
+BUILTIN_MIRRORS="
+https://ghfast.top
+https://gh-proxy.com
+https://gh.llkk.cc
+"
 # /tmp 是 tmpfs，升级包当前约 106MB；在内核和面板运行时把它下载到 /tmp
 # 会额外消耗同等大小的运行内存，512MB 设备可能被 OOM killer 杀掉。默认改用
 # /opt 所在持久化分区，仍可通过 OPENBOX_TMPDIR 指定外接存储等其它目录。
@@ -650,9 +656,11 @@ probe_mirror_prefix() {
 # 用的环境变量意外影响到——哪怕那两个环境变量出于任何原因残留在调用者的环境里,
 # --probe/--cancel 也必须表现得像它们完全不存在一样。
 _probe_or_cancel_scan=0
+_channel_cli_scan=0
 for _a in "$@"; do
   case "$_a" in
-    --probe|--cancel) _probe_or_cancel_scan=1; break ;;
+    --probe|--cancel) _probe_or_cancel_scan=1 ;;
+    --direct|--mirror) _channel_cli_scan=1 ;;
   esac
 done
 
@@ -709,7 +717,9 @@ EXPECT_VERSION="${OPENBOX_UPDATE_EXPECT:-}"
 # 互斥检查会把 CHANNEL_OVERRIDE 非空误判成命令行传了 --direct/--mirror,平白 die()
 # 掉一次跟路线选择毫无关系的探测/取消调用。--probe/--cancel 是一次性只读调用,
 # 犯不着担这个风险,直接不读环境变量最干脆。
-if [ "$_probe_or_cancel_scan" != "1" ]; then
+# 获取最新脚本时，旧 worker 会同时留下渠道环境变量和显式参数。显式参数优先，
+# 只有不带渠道参数的 --detach 子进程才从环境读回；互斥检查仍针对命令行里的重复选择。
+if [ "$_probe_or_cancel_scan" != "1" ] && [ "$_channel_cli_scan" != "1" ]; then
   CHANNEL_OVERRIDE="${OPENBOX_UPDATE_CHANNEL_OVERRIDE:-}"
   case "$CHANNEL_OVERRIDE" in
     ''|direct|mirror) ;;
@@ -1176,6 +1186,68 @@ resolve_channel() {
   esac
 }
 
+# 装好的旧脚本只负责派发:先取最新 Release 的升级脚本,再由它执行这次升级。放在后台派发之后、
+# 获取升级锁之前,LuCI / 面板不会为下载脚本等待,重新执行也不会撞上自己持有的锁。
+# --probe / --cancel 已在上面返回;手动下载到安装目录外的脚本也直接执行(发布验收用)。
+refresh_update_script() {
+  detect_downloader
+  ensure_tmp_parent
+  resolve_channel
+  _fresh="$TMP_PARENT/.openbox-update-fresh.$$.sh"
+  trap 'rm -f -- "$_fresh"; if [ "${OPENBOX_UPDATE_RELOCATED:-0}" = "1" ]; then rm -f -- "$0"; fi' EXIT INT TERM
+  STATUS_PID=$$
+  write_status starting "" "" "正在获取最新升级脚本"
+  _script_url="https://github.com/$REPO/releases/latest/download/update.sh"
+  _sources=""
+  if [ "$CHANNEL" = "mirror" ]; then
+    _sources="${MIRROR_PREFIX:-$BUILTIN_MIRRORS}"
+  fi
+  _ready=0
+  # 镜像先按这次选择的通道试,失败再直连;直连通道不擅自换镜像。
+  for _source in $_sources direct; do
+    rm -f -- "$_fresh"
+    case "$_source" in
+      direct) _url="$_script_url" ;;
+      http://*|https://*) _url="${_source%/}/$_script_url" ;;
+      *) _url="https://${_source%/}/$_script_url" ;;
+    esac
+    if fetch_to_file_probe "$_url" "$_fresh" \
+      && [ "$(head -n 1 "$_fresh")" = '#!/bin/sh' ] \
+      && grep -q '^# Open-Box 升级脚本' "$_fresh" \
+      && sh -n "$_fresh"; then
+      _ready=1
+      break
+    fi
+  done
+  if [ "$_ready" != "1" ]; then
+    write_status failed "" "" "无法获取最新升级脚本,现有安装未改动"
+    die "无法获取最新升级脚本,请检查下载通道后重试。现有安装未改动。"
+  fi
+  if cancel_requested; then
+    write_status cancelled "" "" "已取消(用户请求)"
+    exit 0
+  fi
+  set --
+  [ "$ROLLBACK_MODE" = "0" ] || set -- "$@" --rollback
+  case "$CHANNEL_OVERRIDE" in
+    direct) set -- "$@" --direct ;;
+    mirror)
+      set -- "$@" --mirror
+      [ -z "$CLI_MIRROR_PREFIX" ] || set -- "$@" "$CLI_MIRROR_PREFIX"
+      ;;
+  esac
+  [ -z "$EXPECT_VERSION" ] || set -- "$@" --expect "$EXPECT_VERSION"
+  rm -f -- "$0"
+  # argv 已完整接力，清掉旧 worker 环境记录；镜像暂存着旧脚本时也不会重复解析渠道。
+  OPENBOX_UPDATE_CHANNEL_OVERRIDE= OPENBOX_UPDATE_MIRROR_PREFIX= OPENBOX_UPDATE_EXPECT= \
+    OPENBOX_UPDATE_REFRESHED=1 OPENBOX_UPDATE_RELOCATED=1 OPENBOX_UPDATE_DISPATCHED=1 \
+    exec sh "$_fresh" "$@"
+}
+
+if [ "${OPENBOX_UPDATE_RELOCATED:-0}" = "1" ] && [ "${OPENBOX_UPDATE_REFRESHED:-0}" != "1" ]; then
+  refresh_update_script
+fi
+
 # 走到这里,说明既不是 --probe 也不是 --cancel:这是真正要执行升级逻辑的进程
 # (前台同步调用,或 --detach 派生出的后台子进程)。从这里开始,STATUS_PID 才被
 # 赋值为非空——write_status() 从此真正写文件(见该函数定义处的说明)。清掉可能
@@ -1517,11 +1589,7 @@ OLD_VERSION=$(sed -n 's/.*"version" *: *"\([^"]*\)".*/\1/p' "$INSTALL_ROOT/meta.
 # 内容一致、各自维护一份)。LuCI 渠道选择器(status.js)同样维护着这四个渠道
 # (GitHub 直连 + 这三个),UI 侧的探测最终也是调用下面 select_builtin_mirror() 复用
 # 的同一个 probe_mirror_prefix()(定义已挪到文件靠前的位置,见该函数注释)。
-BUILTIN_MIRRORS="
-https://ghfast.top
-https://gh-proxy.com
-https://gh.llkk.cc
-"
+# 列表在文件开头初始化，获取最新升级脚本与这里的包下载共用。
 
 # 依次尝试内置镜像列表,选中第一个探测通过的前缀写回 MIRROR_PREFIX;全部失败则
 # 报错退出(不触碰现有安装——此时还没开始下载正文)。用户仍可以用
@@ -1853,9 +1921,30 @@ rollback_components() {
 # (开发路由器实测)。那个版本没有这个脚本(只会是降级到老版本)就保持停止,提示去面板点启动。
 # 新版本面板起不来、或者换文件途中失败,整体回退之后也走这里,把旧版本的内核拉起来。结果写进 CORE_MSG
 # (定义放在换文件之前:swap_failed 在换文件途中就会调它)
+# 放在换文件之前:失败回退时也需要等旧面板完成启动 / 数据库迁移。
+panel_healthy() {
+  _ph_port=$(cat "$INSTALL_ROOT/data/panel-port" 2>/dev/null | tr -dc '0-9' || true)
+  [ -n "$_ph_port" ] || _ph_port=2026
+  _ph_deadline=$(( $(date +%s) + $1 ))
+  while :; do
+    case "$DOWNLOADER" in
+      curl) _ph_body=$(curl -fsS --max-time 3 "http://127.0.0.1:$_ph_port/api/health" 2>/dev/null || true) ;;
+      *) _ph_body=$(wget -q -T 3 -O - "http://127.0.0.1:$_ph_port/api/health" 2>/dev/null || true) ;;
+    esac
+    case "$_ph_body" in *'"ok":true'*) return 0 ;; esac
+    [ "$(date +%s)" -lt "$_ph_deadline" ] || return 1
+    sleep 2
+  done
+}
+
 restart_core() {
   CORE_MSG="内核未自动重启——如之前配置并运行着代理服务,请到面板重新启动它。"
   [ "$CORE_WAS_RUNNING" = "1" ] || return 0
+  if ! panel_healthy "${OPENBOX_UPDATE_HEALTH_WAIT:-90}"; then
+    warn "面板尚未应答,没有自动部署内核,请在面板恢复后手动启动。"
+    CORE_MSG="面板尚未应答,内核未自动重启;请在面板恢复后手动启动。"
+    return 0
+  fi
   DEPLOY_CLI="$INSTALL_ROOT/panel/server/cli/deploy.mjs"
   if [ -x "$INSTALL_ROOT/node/bin/node" ] && [ -f "$DEPLOY_CLI" ]; then
     # 面板这时已经起来了,前端能重新读到状态文件:给内核重启单独一个阶段,否则弹窗
@@ -2017,22 +2106,6 @@ if [ "$_acl_changed" = "1" ] && [ -x /etc/init.d/rpcd ]; then
 fi
 fi
 
-# 面板起来没有:轮询 /api/health(不用登录),最多等 $1 秒。端口按 data/panel-port,没有就是 2026。
-# 只看启动命令的返回值不够——procd / systemd 都是立刻返回,Node 随后崩溃循环也照样返回成功
-panel_healthy() {
-  _ph_port=$(cat "$INSTALL_ROOT/data/panel-port" 2>/dev/null | tr -dc '0-9' || true)
-  [ -n "$_ph_port" ] || _ph_port=2026
-  _ph_deadline=$(( $(date +%s) + $1 ))
-  while :; do
-    case "$DOWNLOADER" in
-      curl) _ph_body=$(curl -fsS --max-time 3 "http://127.0.0.1:$_ph_port/api/health" 2>/dev/null || true) ;;
-      *) _ph_body=$(wget -q -T 3 -O - "http://127.0.0.1:$_ph_port/api/health" 2>/dev/null || true) ;;
-    esac
-    case "$_ph_body" in *'"ok":true'*) return 0 ;; esac
-    [ "$(date +%s)" -lt "$_ph_deadline" ] || return 1
-    sleep 2
-  done
-}
 
 info "启动面板..."
 if [ "$PLATFORM" = "openwrt" ]; then

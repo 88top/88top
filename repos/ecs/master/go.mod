@@ -18,8 +18,8 @@ require (
 	github.com/oneclickvirt/nt3 v0.0.26
 	github.com/oneclickvirt/pingtest v0.0.28
 	github.com/oneclickvirt/portchecker v0.0.7
-	github.com/oneclickvirt/privatespeedtest v0.0.24
-	github.com/oneclickvirt/security v0.0.20
+	github.com/oneclickvirt/privatespeedtest v0.0.25
+	github.com/oneclickvirt/security v0.0.21
 	github.com/oneclickvirt/speedtest v0.0.37
 	golang.org/x/term v0.45.0
 )
@@ -79,10 +79,10 @@ require (
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/nxtrace/NTrace-core v1.7.3
-	github.com/oneclickvirt/dd v0.0.2-20250808062818 // indirect
-	github.com/oneclickvirt/fio v0.0.2-20250808045755 // indirect
-	github.com/oneclickvirt/mbw v0.0.1-20250808061222 // indirect
-	github.com/oneclickvirt/stream v0.0.2-20250924154001 // indirect
+	github.com/oneclickvirt/dd v0.0.3 // indirect
+	github.com/oneclickvirt/fio v0.0.3 // indirect
+	github.com/oneclickvirt/mbw v0.0.3 // indirect
+	github.com/oneclickvirt/stream v0.0.3 // indirect
 	github.com/oschwald/maxminddb-golang v1.13.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pion/dtls/v2 v2.2.7 // indirect
