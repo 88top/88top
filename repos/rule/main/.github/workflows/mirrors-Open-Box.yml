@@ -21,9 +21,11 @@ env:
   SOURCE_REPO_NAME: "Open-Box"
   TARGET_REPOS: >-
     git@github-88alt:88alt/Open-Box.git
+    git@github-88top:88top/Open-Box.git
   SSH_HOSTS: >-
     github-timeflysoon:SSH_PRIVATE_KEY_TIMEFLYSOON
     github-88alt:SSH_PRIVATE_KEY_88ALT
+    github-88top:SSH_PRIVATE_KEY_88TOP
 # ============================================================
 # 说明：本 workflow 运行在 timeflysoon/rule 仓库下，与源仓库
 # timeflysoon/Open-Box 是两个不同仓库，默认 GITHUB_TOKEN

@@ -2,7 +2,9 @@ import type { LANG_MESSAGE } from './en'
 import { dnsFilterTw } from './dns-filter'
 import { dnsPageZhTw } from './dns-page'
 import { kernelSettingsZhTw } from './kernel-settings'
+import { clientAppPageZhTw } from './client-app-page-tw'
 import { subscriptionDnsZhTw } from './subscription-dns'
+import { factoryResetZhTw } from './factory-reset'
 
 const zhTW: LANG_MESSAGE = {
   chainProxyAdd: '新增鏈式代理',
@@ -895,6 +897,12 @@ const zhTW: LANG_MESSAGE = {
   tunTcpMss: 'TCP MSS 鉗制',
   tunTcpMssHint: '核心自己發出的 TCP 連線在 SYN 上鉗制 MSS;0 = 不鉗制;否則填 {min} - {max}。',
   tunTcpMssInvalid: 'MSS 要填 0(不鉗制)或 {min} - {max} 的整數',
+  tunStackLabel: '協議棧',
+  tunStackNote: 'mixed(預設):TCP 走系統核心棧、其餘走使用者態,吞吐最高。gvisor:全部走使用者態棧,繞開核心的 DNAT 路徑——MT6000 這類開著硬體流量卸載的機器,有線口直連大檔案損壞時選它。system:全部走系統棧。',
+  tunMtuLabel: 'MTU',
+  tunMtuNote: '0 = 核心預設(9000);範圍 1280–65535。',
+  tunMssLabel: '出站 TCP MSS',
+  tunMssNote: '核心自己發出的 TCP 連線(走代理和直連的都算)在 SYN 上鉗制 MSS;0 = 不鉗制。上游鏈路 MTU 偏小(PPPoE、隧道)、大包卡住時可試 1400 左右;區域網路轉發的流量由系統防火牆的 MSS 鉗制管。',
   tunSaved: 'TUN 參數已儲存,重啟核心後生效。',
   ipv6ProxyNodeNote: 'IPv6 目標和 IPv4 一樣交給選中的節點;節點不支援 IPv6 時會失敗。直連的 IPv6 照常。',
   // 出站節點頁籤 · 鏈式代理卡片
@@ -1272,8 +1280,31 @@ const zhTW: LANG_MESSAGE = {
   uptimeUnderMinute: '不足 1 分鐘',
   // 设置 · 共享网络
   shareNetworkTab: '共享網路',
+  subShareTitle: '訂閱分享',
+  subShareDescription: '產生可供其他裝置或代理軟體直接使用的訂閱連結',
+  subShareAdd: '新增',
+  subShareEmpty: '暫無訂閱分享，點擊右上角「新增」建立',
+  subShareToggle: '啟用/停用',
+  subShareRegenerate: '重新產生',
+  subShareEditTitle: '編輯訂閱分享',
+  subShareAddTitle: '新增訂閱分享',
+  subShareSelect: '選擇要分享的訂閱',
+  subShareNodeCount: '{count} 個節點',
+  subShareNeedSub: '請先新增至少一條訂閱',
+  subShareNameLabel: '標題',
+  subShareNamePlaceholder: '例如:手機代理訂閱',
+  subShareHostLabel: '網域或 IP',
+  subShareHostPlaceholder: '目前位址',
+  subShareLinkLabel: '分享連結',
+  subShareRenew: '重新產生連結(舊連結立即失效)',
+  subShareQrAlt: '訂閱分享二維碼',
+  subShareRenewHint: '儲存後產生新的位址和二維碼',
+  subShareSaved: '訂閱分享已儲存',
+  subShareSaveFailed: '訂閱分享儲存失敗:{message}',
+  subShareDeleteConfirm: '確定刪除「{name}」？',
+  subShareLoadFailed: '訂閱分享載入失敗:{message}',
   serverAdd: '新增伺服器',
-  serverEmpty: '還沒有伺服器,點右上角 + 建立一個。',
+  serverEmpty: '還沒有伺服器。',
   serverAddTitle: '新增伺服器',
   serverEditTitle: '編輯伺服器',
   serverNameLabel: '備註',
@@ -1431,7 +1462,9 @@ const zhTW: LANG_MESSAGE = {
   probeOverloaded: '測速跟不上:每秒要測約 {demand} 個,核心每秒測完約 {done} 個,檢測會變慢;可減少組裡的節點或加大檢測間隔。',
   listSeparator: '、',
   ...dnsPageZhTw,
+  ...clientAppPageZhTw,
   ...subscriptionDnsZhTw,
+  ...factoryResetZhTw,
 }
 
 export default zhTW

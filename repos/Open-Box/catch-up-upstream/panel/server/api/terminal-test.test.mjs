@@ -177,7 +177,9 @@ test('HTTP 路由:非法目标 400;capability 接口回能力;POST 返回测试�
   const ctx = makeCtx({ conntrack: '' })
   const probe = makeProbe([], { probeCapability: async () => ({ ok: false, missing: ['root'], lan: null }) })
   registerTerminalTestRoutes(app, { store, ctx, paths, fetchImpl: fetchConnections([]), probe })
-  const server = app.listen(0)
+  const server = app.listen(0, '127.0.0.1')
+  // 绑了地址的 listen 是异步的,等开始监听再取端口(不等就是 null)
+  await new Promise((r) => server.once('listening', r))
   const base = `http://127.0.0.1:${server.address().port}`
   try {
     const cap = await (await fetch(`${base}/api/openbox/terminal-test/capability`)).json()

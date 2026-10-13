@@ -4,6 +4,7 @@ import { dnsPageZh } from './dns-page'
 import { kernelSettingsZh } from './kernel-settings'
 import { clientAppPageZh } from './client-app-page'
 import { subscriptionDnsZh } from './subscription-dns'
+import { factoryResetZh } from './factory-reset'
 
 const zh: LANG_MESSAGE = {
   ...dnsFilterZh,
@@ -876,6 +877,12 @@ const zh: LANG_MESSAGE = {
   tunTcpMss: 'TCP MSS 钳制',
   tunTcpMssHint: '内核自己发出的 TCP 连接在 SYN 上钳制 MSS;0 = 不钳制;否则填 {min} - {max}。',
   tunTcpMssInvalid: 'MSS 要填 0(不钳制)或 {min} - {max} 的整数',
+  tunStackLabel: '协议栈',
+  tunStackNote: 'mixed(默认):TCP 走系统内核栈、其余走用户态,吞吐最高。gvisor:全部走用户态栈,绕开内核的 DNAT 路径——MT6000 这类开着硬件流量卸载的机器,有线口直连大文件损坏时选它。system:全部走系统栈。',
+  tunMtuLabel: 'MTU',
+  tunMtuNote: '0 = 内核默认(9000);范围 1280–65535。',
+  tunMssLabel: '出站 TCP MSS',
+  tunMssNote: '内核自己发出的 TCP 连接(走代理和直连的都算)在 SYN 上钳制 MSS;0 = 不钳制。上游链路 MTU 偏小(PPPoE、隧道)、大包卡住时可试 1400 左右;局域网转发的流量由系统防火墙的 MSS 钳制管。',
   tunSaved: 'TUN 参数已保存,重启内核后生效。',
   ipv6ProxyNodeNote: 'IPv6 目标和 IPv4 一样交给选中的节点;节点不支持 IPv6 时会失败。直连的 IPv6 照常。',
   // 出站节点页签 · 链式代理卡片
@@ -1273,6 +1280,29 @@ const zh: LANG_MESSAGE = {
   uptimeUnderMinute: '不足 1 分钟',
   // 设置 · 共享网络
   shareNetworkTab: '共享网络',
+  subShareTitle: '订阅分享',
+  subShareDescription: '生成可供其他设备或代理软件直接使用的订阅链接',
+  subShareAdd: '添加',
+  subShareEmpty: '暂无订阅分享，点击右上角“添加”创建',
+  subShareToggle: '启用/停用',
+  subShareRegenerate: '重新生成',
+  subShareEditTitle: '编辑订阅分享',
+  subShareAddTitle: '新增订阅分享',
+  subShareSelect: '选择要分享的订阅',
+  subShareNodeCount: '{count} 个节点',
+  subShareNeedSub: '请先添加至少一条订阅',
+  subShareNameLabel: '标题',
+  subShareNamePlaceholder: '例如:手机代理订阅',
+  subShareHostLabel: '域名或 IP',
+  subShareHostPlaceholder: '当前地址',
+  subShareLinkLabel: '分享链接',
+  subShareRenew: '重新生成链接(旧链接立即失效)',
+  subShareQrAlt: '订阅分享二维码',
+  subShareRenewHint: '保存后生成新的地址和二维码',
+  subShareSaved: '订阅分享已保存',
+  subShareSaveFailed: '订阅分享保存失败:{message}',
+  subShareDeleteConfirm: '确定删除“{name}”？',
+  subShareLoadFailed: '订阅分享加载失败:{message}',
   serverAdd: '添加服务器',
   serverEmpty: '还没有服务器。',
   serverAddTitle: '添加服务器',
@@ -1424,6 +1454,7 @@ const zh: LANG_MESSAGE = {
   ...dnsPageZh,
   ...clientAppPageZh,
   ...subscriptionDnsZh,
+  ...factoryResetZh,
 }
 
 export default zh
