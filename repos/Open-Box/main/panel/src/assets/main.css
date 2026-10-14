@@ -216,7 +216,7 @@ html.apple-mobile-ui {
 }
 
 #app-content .tabs-box .tab {
-  border-radius: var(--app-radius-compact, 0.4rem) !important;
+  border-radius: max(calc(var(--app-radius-nav, 0.875rem) - 0.25rem), 0px) !important;
 }
 
 #app-content .proxy-main-tabs .tab {
@@ -278,7 +278,7 @@ html.apple-mobile-ui {
 }
 
 #app-content .proxy-penetration-mode-btn {
-  border-radius: var(--app-radius-compact, 0.4rem) !important;
+  border-radius: max(calc(var(--app-radius-nav, 0.875rem) - 0.25rem), 0px) !important;
 }
 
 /* 拖拽排序进行中(SortableJS 在按住的那一项上加 sortable-chosen,松手才去掉)整页禁止
@@ -578,7 +578,7 @@ body:has(.sortable-chosen) * {
   @apply bg-neutral text-neutral-content z-[9999] whitespace-pre-line shadow-none;
   /* 圆角跟全局圆角设置走,用和卡片同一档(--app-radius-box,全局圆角 × 0.85),不用 tippy 自带
      的 4px。tippy 自己的样式表不分层、加载顺序也不一定在前,所以和上面那些圆角规则一样加 !important */
-  border-radius: var(--app-radius-box, 0.85rem) !important;
+  border-radius: var(--app-radius-field, 0.5rem) !important;
 }
 .tippy-box[data-placement^='top'] > .tippy-arrow:before {
   @apply border-t-neutral;
@@ -929,4 +929,47 @@ div::-webkit-scrollbar-thumb:hover {
 
 [data-theme='forest'] .app-logo {
   filter: invert(1) hue-rotate(180deg);
+}
+
+/* ===== v0.1.326-align-connections: 切换条 / join 组按钮 / 滚动条(规则取自 v0.1.326 实测) ===== */
+/* 切换条:导航档圆角 + neutral 9% 底色 + 无阴影 */
+#app-content .tabs-box,
+#app-content .ctrls-bar .tabs-box {
+  border-radius: var(--app-radius-nav, 0.875rem) !important;
+  background-color: color-mix(in oklab, var(--color-base-content) 9%, transparent);
+  box-shadow: none;
+}
+/* join 组:子项先归零圆角,首尾项再带回两端圆角(特异性高于 .ctrls-bar .join-item) */
+#app-content .join.join > .join-item.join-item {
+  border-radius: 0 !important;
+}
+#app-content .join.join > .join-item.join-item:first-child {
+  border-top-left-radius: var(--app-radius-field, 0.5rem) !important;
+  border-bottom-left-radius: var(--app-radius-field, 0.5rem) !important;
+}
+#app-content .join.join > .join-item.join-item:last-child {
+  border-top-right-radius: var(--app-radius-field, 0.5rem) !important;
+  border-bottom-right-radius: var(--app-radius-field, 0.5rem) !important;
+}
+/* 紧挨输入框/下拉框的 join 按钮:白底 + 20% 边框 */
+#app-content .join:has(> .input, > .select, > .join-item .input) > .btn.join-item {
+  border: var(--border, 1px) solid color-mix(in oklab, var(--color-base-content) 20%, transparent);
+  background-color: var(--color-base-100);
+}
+
+/* ===== v0.1.326-align-settings-scroll: 设置页主滚动容器常驻滚动条轨道(v0.1.326 实测 overflow-y: scroll) ===== */
+#app-content .settings-menu ~ .flex-1.overflow-y-auto.overflow-y-auto {
+  overflow-y: scroll;
+}
+
+/* ===== modal-scroll-auto: 弹窗里的滚动区域内容超高才出现滚动条,不常驻轨道 ===== */
+.modal .overflow-y-auto,
+.modal-box .overflow-y-auto,
+dialog .overflow-y-auto,
+[role="dialog"] .overflow-y-auto,
+.modal .overflow-y-scroll,
+.modal-box .overflow-y-scroll,
+dialog .overflow-y-scroll,
+[role="dialog"] .overflow-y-scroll {
+  overflow-y: auto !important;
 }

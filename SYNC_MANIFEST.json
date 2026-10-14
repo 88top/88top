@@ -6,12 +6,12 @@
   },
   "timeflysoon/3x-ui": {
     "main": {
-      "remote_sha": "61885c91260a5e62ba2e531876f663c7b9c7fbf0"
+      "remote_sha": "608ef4e4010bf83e2e78328e08f77efc051ad4d7"
     }
   },
   "timeflysoon/Actions-FriendlyWrt": {
     "master": {
-      "remote_sha": "d9db1849202036b19075269fd0247d7e5c972989"
+      "remote_sha": "d8c98e017ea55e1b11f83194abe9dc8d4b86e13e"
     }
   },
   "timeflysoon/Are-u-ok": {
@@ -57,7 +57,7 @@
   },
   "timeflysoon/CloudRunFilesBuilder": {
     "daily": {
-      "remote_sha": "f087c156bcafdeb8b0fcd8d62939fbc9a92087d5"
+      "remote_sha": "0e61747e464cd5bfeb2050fd78ec813d787bf40b"
     }
   },
   "timeflysoon/CloudSaver": {
@@ -231,7 +231,7 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "c50db7a946266aea2b0c9da620e370d23ff2fe8b"
+      "remote_sha": "003fc237041672f6816a023e380f338c92579cfa"
     }
   },
   "timeflysoon/commonscript": {
@@ -261,7 +261,7 @@
   },
   "timeflysoon/github-chinese": {
     "gh-pages": {
-      "remote_sha": "7bffcbb7dcde989b0e41186aa56cad0486c81e4a"
+      "remote_sha": "2cb5d3997d7b6dfd98e345a43011645a390fa367"
     }
   },
   "timeflysoon/gl-inet-onescript": {
@@ -271,7 +271,7 @@
   },
   "timeflysoon/gopeed": {
     "main": {
-      "remote_sha": "b86c2c18e71addb5cbace71aa4fd223271ae2b1a"
+      "remote_sha": "eee39e012f9681983ebe61e7549b5facb9453b77"
     }
   },
   "timeflysoon/img-installer": {
@@ -331,7 +331,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "ffee6145526f5a4a42f76fd253009fa234715518"
+      "remote_sha": "8d4f4139f4a6cd21f3e17af1e92475056bde4568"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -352,13 +352,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "bf52d18cf9f047308cf3b1844e5e9211989d2e03"
+      "remote_sha": "9c8e9f56b6ffadab05bfc933011b2bfc2f4f8288"
     },
     "release": {
-      "remote_sha": "84aa75f1101b68150ea71c40ec0683d38ea9ef0a"
+      "remote_sha": "23fe29f94a2231205af477e27a715e7276c381e0"
     },
     "sing": {
-      "remote_sha": "60deb1f29afd157829e335a3db3fb2ea458f3cd2"
+      "remote_sha": "b0c55a3870624b237c85c8e9ea6656493f8d44b6"
     }
   },
   "timeflysoon/nanopi-openwrt": {
@@ -373,7 +373,7 @@
   },
   "timeflysoon/openwrt-daede": {
     "main": {
-      "remote_sha": "a170e88106a8a78ca57f68b23616632533bfc534"
+      "remote_sha": "74e093eb28a276ff3981d7f41217652b34cefa28"
     }
   },
   "timeflysoon/quickstart": {
@@ -381,7 +381,7 @@
       "remote_sha": "b8015ac6cf7a7e22e452c3a363fbc1f72c5105e6"
     },
     "main": {
-      "remote_sha": "880aeecbb7612799a49073e210d15cc9825e633e"
+      "remote_sha": "63c600d7ca0fc263d78d72cc8a4c3174fde09f3b"
     }
   },
   "timeflysoon/realtek-r8125-dkms": {
@@ -416,7 +416,7 @@
       "remote_sha": "d1ffe2b87a9c57b53088ab9aee1f4f679096b640"
     },
     "main": {
-      "remote_sha": "b860bfacdb2099c80acc4c047ae51f5136385018"
+      "remote_sha": "2511e9d085072ca62f0556bc9be62559cce2a568"
     },
     "translations-deadend": {
       "remote_sha": "e483486dff5deef147fed8605b5dfaa1010649f6"
@@ -424,7 +424,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "50790520297da64db457fc6f6aa7e60918b6b4e3"
+      "remote_sha": "686f405621538119f7d859bd47bb0856dc0641bd"
     }
   },
   "timeflysoon/store": {
@@ -461,20 +461,20 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "bf52d18cf9f047308cf3b1844e5e9211989d2e03"
+      "remote_sha": "9c8e9f56b6ffadab05bfc933011b2bfc2f4f8288"
     },
     "release": {
-      "remote_sha": "84aa75f1101b68150ea71c40ec0683d38ea9ef0a"
+      "remote_sha": "23fe29f94a2231205af477e27a715e7276c381e0"
     }
   },
   "timeflysoon/turboacc": {
     "main": {
-      "remote_sha": "9f88212c70c2586b3038d2e1ad0271fe94fc5a0d"
+      "remote_sha": "a82efe2ce235a42773a04e292c35267ede9e424b"
     }
   },
   "timeflysoon/v2rayN": {
     "master": {
-      "remote_sha": "f1023e08e10a0114dbdeca5afc891e337a95dc9a"
+      "remote_sha": "95f438abc93714150adf55acac7ceb03b3713032"
     },
     "v7_16": {
       "remote_sha": "654d7d83d09d1683c60501c9fa853a19c3dd9d6b"
@@ -490,7 +490,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "c2653d487c2fa8761dc77e62e9677f2321d5b8de"
+      "remote_sha": "669ce0d2740ec640e0762d4dbede77fac0d2d9c2"
     }
   },
   "timeflysoon/weasel": {
@@ -536,20 +536,20 @@
   },
   "timeflysoon/DriverStoreExplorer": {
     "master": {
-      "remote_sha": "46db61dac01747cde3b9449a3b0f0575f9f36a7c"
+      "remote_sha": "1f853e7053b7689344bff3eaa17719dfc2a49163"
     }
   },
   "timeflysoon/dlssg_for_sm86": {
     "main": {
-      "remote_sha": "9621db573e07ed54f50c15bbb585ed9a7bdfac28"
+      "remote_sha": "6dcfd54c51e7fc2eb4fe25e5bb16044809c647b5"
     }
   },
   "timeflysoon/Open-Box": {
     "catch-up-upstream": {
-      "remote_sha": "c6a6ca02774c0e8539c6ae80f5b0831400ad8018"
+      "remote_sha": "b501b70399aee021e78eb8036d6b0217da7a7497"
     },
     "main": {
-      "remote_sha": "68d48781261bcc2109819678f90552a470ad19d9"
+      "remote_sha": "a6e6e5650169e70ea230eeb99a368bf2ec03af86"
     },
     "backup": {
       "remote_sha": "f42122e8b1b6e49d6ac88a84fc26ebb2480d17db"
