@@ -34,7 +34,7 @@ concurrency:
 jobs:
   build:
     name: Build Jekyll site
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout source code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
@@ -51,6 +51,9 @@ jobs:
       - name: Add the root pages
         run: cp CHANGELOG.md PRIVACY_POLICY.md SECURITY.md docs/
 
+      - name: Check translations
+        run: python3 tooling/docs/check_translations.py docs --write-status docs/_data/translation_status.json
+
       - name: Build with Jekyll
         working-directory: docs
         run: bundle exec jekyll build --strict_front_matter --destination ../_site
@@ -60,6 +63,9 @@ jobs:
 
       - name: Check docs links
         run: python3 tooling/docs/check_links.py _site .
+
+      - name: Check translated pages
+        run: python3 tooling/docs/check_translations.py docs --site _site
 
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request'
@@ -71,7 +77,7 @@ jobs:
     name: Deploy to GitHub Pages
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     concurrency:
       group: pages
       cancel-in-progress: false

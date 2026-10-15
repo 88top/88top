@@ -3,6 +3,7 @@ package eu.darken.sdmse.appcleaner.core.automation.specs.aosp
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import dagger.Binds
 import dagger.Module
@@ -15,6 +16,7 @@ import eu.darken.sdmse.appcleaner.core.automation.errors.LockedAppCacheException
 import eu.darken.sdmse.appcleaner.core.automation.specs.AppCleanerSpecGenerator
 import eu.darken.sdmse.appcleaner.core.automation.specs.StorageEntryFinder
 import eu.darken.sdmse.appcleaner.core.automation.specs.clickClearCache
+import eu.darken.sdmse.appcleaner.core.scanner.InaccessibleCacheProvider
 import eu.darken.sdmse.automation.core.common.ACSNodeInfo
 import eu.darken.sdmse.automation.core.common.contentDescMatches
 import eu.darken.sdmse.automation.core.common.crawl
@@ -50,15 +52,18 @@ import eu.darken.sdmse.common.device.DeviceDetective
 import eu.darken.sdmse.common.device.RomType
 import eu.darken.sdmse.common.funnel.IPCFunnel
 import eu.darken.sdmse.common.hasApiLevel
-import eu.darken.sdmse.common.pkgs.Pkg
 import eu.darken.sdmse.common.pkgs.features.Installed
 import eu.darken.sdmse.common.pkgs.isSystemApp
 import eu.darken.sdmse.common.pkgs.toPkgId
 import eu.darken.sdmse.common.progress.withProgress
 import eu.darken.sdmse.common.ui.SizeParser
 import eu.darken.sdmse.common.device.RomTypeProvider
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import kotlin.math.ceil
@@ -72,6 +77,7 @@ class AOSPSpecs @Inject constructor(
     private val romTypeProvider: RomTypeProvider,
     private val stepper: Stepper,
     private val inputInjector: InputInjector,
+    private val inaccessibleCacheProvider: InaccessibleCacheProvider,
 ) : AppCleanerSpecGenerator {
 
     override val tag: String = TAG
@@ -203,12 +209,12 @@ class AOSPSpecs @Inject constructor(
     // Unparseable rows are preserved as ParsedSize(null, raw) so that snapshot sizes remain
     // stable across pre/post comparisons. This matters when cache clears to a locale-specific
     // zero format that SizeParser can't handle (e.g., "0 o" in French).
-    private suspend fun StepContext.takeStorageSnapshot(sizeParser: SizeParser?): StorageSnapshot {
+    private fun StepContext.takeStorageSnapshot(sizeParser: SizeParser?, root: ACSNodeInfo?): StorageSnapshot {
         if (sizeParser == null) {
             log(tag, WARN) { "takeStorageSnapshot(): SizeParser unavailable" }
             return StorageSnapshot(emptyList())
         }
-        val nodes = host.windowRoot()?.crawl()?.map { it.node }
+        val nodes = root?.crawl()?.map { it.node }
             ?.filter { it.viewIdResourceName == "android:id/summary" }
             ?: emptySequence()
         val values = nodes.mapNotNull { node ->
@@ -232,17 +238,26 @@ class AOSPSpecs @Inject constructor(
         preSnapshot: StorageSnapshot,
         sizeParser: SizeParser?,
         timeoutMs: Long = 3000,
+        stats: StatsMode? = null,
+        statsPolls: Int = STATS_SHORT_POLLS,
     ): Boolean {
         if (Bugs.isDryRun) return true
+
+        if (stats != null) return validateWithStats(source, stats, preSnapshot, sizeParser, timeoutMs, statsPolls)
 
         val eventOk = validateClickEffect(source, timeoutMs)
         if (!eventOk) return false
 
-        // No parseable values → can't compare, degrade to event-only validation
-        if (preSnapshot.values.isEmpty()) {
-            log(tag, INFO) { "Delta[$source]: no pre-snapshot values, trusting event" }
-            return true
+        // The first Settings event can be the pressed button's own content change, before a dialog
+        // window is attached, so the anchor has to hold on every poll, not just at the event.
+        if (host.windowRoot()?.hasEntityHeader() != true) {
+            log(tag, WARN) { "Delta[$source]: anchor gone after the event" }
+            return false
         }
+
+        // No parseable values → can't compare, degrade to event-only validation
+        val eventOnly = preSnapshot.values.isEmpty()
+        if (eventOnly) log(tag, INFO) { "Delta[$source]: no pre-snapshot values, only watching the anchor" }
 
         // Retry snapshot comparison: the Settings UI may take a few hundred ms to update
         // accessibility node values after the click (observed ~340ms on Android 17 beta).
@@ -250,7 +265,13 @@ class AOSPSpecs @Inject constructor(
         val retryDelayMs = 250L
         for (attempt in 1..maxAttempts) {
             delay(retryDelayMs)
-            val postSnapshot = takeStorageSnapshot(sizeParser)
+            val root = host.windowRoot()
+            if (root?.hasEntityHeader() != true) {
+                log(tag, WARN) { "Delta[$source]: anchor gone (attempt=$attempt/$maxAttempts)" }
+                return false
+            }
+            if (eventOnly) continue
+            val postSnapshot = takeStorageSnapshot(sizeParser, root)
             when (compareSnapshots(preSnapshot, postSnapshot)) {
                 DeltaResult.SUCCESS -> {
                     log(tag, INFO) { "Delta[$source]: values decreased (attempt=$attempt)" }
@@ -268,20 +289,135 @@ class AOSPSpecs @Inject constructor(
                 }
             }
         }
+        if (eventOnly) {
+            log(tag, INFO) { "Delta[$source]: anchor held for ${maxAttempts * retryDelayMs}ms, trusting event" }
+            return true
+        }
         return false
+    }
+
+    private class StatsMode(val reader: CacheStatsReader, val baseline: CacheStats.Positive)
+
+    // Only the target's cache bytes decide here. The Cache row can be missing from the accessibility tree
+    // (as on a Pixel 9 Pro with Android 17) and "User data" excludes the cache, so a press that cleared it
+    // can leave every row unchanged, and a zero or unparseable row says nothing about the cache. The event
+    // is waited for in parallel, for the log only.
+    private suspend fun StepContext.validateWithStats(
+        source: String,
+        stats: StatsMode,
+        preSnapshot: StorageSnapshot,
+        sizeParser: SizeParser?,
+        eventTimeoutMs: Long,
+        polls: Int,
+    ): Boolean = coroutineScope {
+        val eventLog = launch { validateClickEffect(source, eventTimeoutMs) }
+        try {
+            val windowMs = polls * STATS_POLL_DELAY_MS + STATS_POLL_READ_TIMEOUT_MS
+            val dropped = withTimeoutOrNull(windowMs) {
+                for (poll in 1..polls) {
+                    delay(STATS_POLL_DELAY_MS)
+                    val now = stats.reader.read(STATS_POLL_READ_TIMEOUT_MS)
+                    log(tag, INFO) { "CacheStats[$source]: baseline=${stats.baseline.bytes}, now=$now (poll $poll/$polls)" }
+                    val root = host.windowRoot()
+                    if (root?.hasEntityHeader() != true) {
+                        log(tag, WARN) { "CacheStats[$source]: anchor gone (poll $poll/$polls)" }
+                        return@withTimeoutOrNull false
+                    }
+                    if (now.isBelow(stats.baseline)) return@withTimeoutOrNull true
+                    if (preSnapshot.values.isNotEmpty()) {
+                        val ui = compareSnapshots(preSnapshot, takeStorageSnapshot(sizeParser, root))
+                        log(tag, INFO) { "Delta[$source]: $ui, not used in stats mode (poll $poll/$polls)" }
+                    }
+                }
+                false
+            }
+            if (dropped == null) log(tag, WARN) { "CacheStats[$source]: no drop within ${windowMs}ms" }
+            dropped == true
+        } finally {
+            eventLog.cancel()
+        }
+    }
+
+    private fun ACSNodeInfo.hasEntityHeader(): Boolean =
+        crawl().map { it.node }.any { it.viewIdResourceName == ENTITY_HEADER_CONTENT_ID }
+
+    // A DPAD_CENTER that didn't clear the cache may have opened something else, e.g. Settings'
+    // "Delete app data?" dialog or the app's own manage-space screen. Never sends a DPAD key.
+    private suspend fun StepContext.containStrayPress() {
+        var polledRoot: ACSNodeInfo? = null
+        for (poll in 0..CONTAINMENT_POLLS) {
+            polledRoot = host.windowRoot()
+            if (polledRoot != null || poll == CONTAINMENT_POLLS) break
+            delay(CONTAINMENT_POLL_DELAY_MS)
+        }
+        val root = polledRoot
+        if (root == null) {
+            log(tag, INFO) { "Containment: no window root, state unknown, no BACK sent" }
+            return
+        }
+        if (root.hasEntityHeader()) {
+            log(tag, INFO) { "Containment: storage page still shown, nothing to contain" }
+            return
+        }
+
+        val wentBack = host.service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+        var anchorReturned = false
+        for (poll in 1..CONTAINMENT_POLLS) {
+            delay(CONTAINMENT_POLL_DELAY_MS)
+            if (host.windowRoot()?.hasEntityHeader() == true) {
+                anchorReturned = true
+                break
+            }
+        }
+        log(tag, INFO) {
+            "Containment: GLOBAL_ACTION_BACK result=$wentBack from rootPkg=${root.packageName}, anchorReturned=$anchorReturned"
+        }
+    }
+
+    // Equal anchor reads don't mean the window is at rest: during Settings' entry transition the anchor
+    // read the same twice while the root still sat at Rect(217, 0 - 1177, 2142) on a 960px display.
+    // A root reaching past the display's horizontal bounds is still moving. With the display bounds
+    // unknown, every root counts as at rest.
+    private fun StepContext.windowAtRestCheck(): suspend (ACSNodeInfo) -> Boolean {
+        val display = readDisplayBounds()
+        log(tag, INFO) { "DPAD rest check: display=$display" }
+        if (display == null) return { true }
+        return { root -> root.getScreenBounds().let { it.left >= display.left && it.right <= display.right } }
+    }
+
+    private fun StepContext.readDisplayBounds(): ACSNodeInfo.ScreenBounds? {
+        if (!hasApiLevel(30)) return null
+        return try {
+            host.service.getSystemService(WindowManager::class.java)
+                ?.maximumWindowMetrics
+                ?.bounds
+                ?.takeIf { it.right - it.left > 0 }
+                ?.let { ACSNodeInfo.ScreenBounds(it.left, it.top, it.right, it.bottom) }
+        } catch (e: Exception) {
+            log(tag, WARN) { "DPAD rest check: display bounds unavailable: $e" }
+            null
+        }
     }
 
     /**
      * Returns null when [preClickCheck] rejected the screen after layout stabilization, before any
      * key was sent.
+     *
+     * The key sequence runs under [deadlineMs], cut down to what is left of the step attempt minus
+     * [POST_RUN_RESERVE_MS], and running into it counts as exhausted. If the sequence ends without
+     * success after a DPAD_CENTER, [containStrayPress] runs afterwards, outside the deadline,
+     * followed by one more read of [cacheStats] when the run had a cache baseline: StorageStats can
+     * lag a clear past the last poll.
      */
-    @SuppressLint("InlinedApi")
     private suspend fun StepContext.tryClickViaFocusNavigation(
         labels: Collection<String>,
-        targetPkg: Pkg.Id,
+        target: Installed,
+        cacheStats: CacheStatsReader,
         canInjectInput: Boolean,
         threeButtonRow: Boolean,
+        settingsHasManageStorageText: Boolean,
         preClickCheck: (suspend () -> Boolean)? = null,
+        deadlineMs: Long = DPAD_RUN_DEADLINE_MS,
     ): Boolean? {
         log(tag, INFO) { "Trying DPAD navigation (anchor-based, inputInjection=$canInjectInput)" }
 
@@ -290,6 +426,67 @@ class AOSPSpecs @Inject constructor(
             return false
         }
 
+        val budgetMs = attemptDeadline
+            ?.let { minOf(deadlineMs, -it.elapsedNow().inWholeMilliseconds - POST_RUN_RESERVE_MS) }
+            ?: deadlineMs
+        if (budgetMs <= 0) {
+            log(tag, WARN) { "DPAD skipped, the step attempt has no time left for a run (budget=${budgetMs}ms)" }
+            return false
+        }
+
+        var centerSent = false
+        var finished = false
+        var baseline: CacheStats = CacheStats.Unavailable
+        val result = try {
+            withTimeoutOrNull(budgetMs) {
+                runFocusNavigation(
+                    labels = labels,
+                    target = target,
+                    cacheStats = cacheStats,
+                    canInjectInput = canInjectInput,
+                    threeButtonRow = threeButtonRow,
+                    settingsHasManageStorageText = settingsHasManageStorageText,
+                    preClickCheck = preClickCheck,
+                    onBaseline = { baseline = it },
+                    onCenter = { centerSent = true },
+                ).also { finished = true }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (centerSent) containStrayPress()
+            throw e
+        }
+
+        if (!finished) log(tag, WARN) { "DPAD run hit its ${budgetMs}ms deadline, counting it as exhausted" }
+        if (result != true && centerSent) {
+            containStrayPress()
+            val positive = baseline as? CacheStats.Positive
+            if (positive != null) {
+                val now = cacheStats.read(FINAL_RECHECK_READ_TIMEOUT_MS)
+                val dropped = now.isBelow(positive)
+                log(tag, INFO) { "CacheStats[final-check]: baseline=${positive.bytes}, now=$now, dropped=$dropped" }
+                if (dropped) {
+                    if (host.windowRoot()?.hasEntityHeader() == true) return true
+                    log(tag, WARN) { "CacheStats[final-check]: dropped but the storage page is not shown" }
+                }
+            }
+        }
+        return if (finished) result else false
+    }
+
+    @SuppressLint("InlinedApi")
+    private suspend fun StepContext.runFocusNavigation(
+        labels: Collection<String>,
+        target: Installed,
+        cacheStats: CacheStatsReader,
+        canInjectInput: Boolean,
+        threeButtonRow: Boolean,
+        settingsHasManageStorageText: Boolean,
+        preClickCheck: (suspend () -> Boolean)?,
+        onBaseline: (CacheStats) -> Unit,
+        onCenter: () -> Unit,
+    ): Boolean? {
         val dpadDown: suspend () -> Boolean = if (canInjectInput) {
             { inputInjector.inject(InputInjector.Event.DpadDown); true }
         } else {
@@ -305,10 +502,11 @@ class AOSPSpecs @Inject constructor(
         } else {
             { host.service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_DPAD_LEFT) }
         }
+        // Reported before sending: a press that fails or never returns may still have reached the window.
         val dpadCenter: suspend () -> Boolean = if (canInjectInput) {
-            { inputInjector.inject(InputInjector.Event.DpadCenter); true }
+            { onCenter(); inputInjector.inject(InputInjector.Event.DpadCenter); true }
         } else {
-            { host.service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_DPAD_CENTER) }
+            { onCenter(); host.service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_DPAD_CENTER) }
         }
 
         val maxCycles = 4
@@ -319,8 +517,41 @@ class AOSPSpecs @Inject constructor(
         var anchorHits = 0
         var totalRightSteps = 0
         var hadBootstrapInputFocus = false
+        val isWindowAtRest = windowAtRestCheck()
+        val awaitWindowAtRest: suspend () -> Boolean = {
+            waitForLayoutStability(
+                anchorId = anchorId,
+                maxChecks = LAYOUT_REST_CHECKS,
+                delayMs = LAYOUT_REST_DELAY_MS,
+                isWindowAtRest = isWindowAtRest,
+            ) != null
+        }
 
-        waitForLayoutStability(anchorId)
+        val (atRest, cacheBaseline) = coroutineScope {
+            val baselineRead = async { cacheStats.read(BASELINE_READ_TIMEOUT_MS) }
+            val settled = awaitWindowAtRest()
+            settled to baselineRead.await()
+        }
+        onBaseline(cacheBaseline)
+        when (cacheBaseline) {
+            CacheStats.Zero -> {
+                log(tag, INFO) { "CacheStats[baseline]: cache is empty, nothing to clear" }
+                throw StepAbortException("Cache is already empty for ${target.installId}", treatAsSuccess = true)
+            }
+
+            is CacheStats.Positive -> log(tag, INFO) {
+                "CacheStats[baseline]: baseline=${cacheBaseline.bytes}, presses are verified by cache bytes"
+            }
+
+            CacheStats.Unavailable -> log(tag, INFO) {
+                "CacheStats[baseline]: unavailable, presses are verified by the storage page"
+            }
+        }
+        if (!atRest) {
+            log(tag, WARN) { "DPAD aborted before any key, the storage page never came to rest" }
+            return false
+        }
+        val stats = (cacheBaseline as? CacheStats.Positive)?.let { StatsMode(cacheStats, it) }
 
         if (preClickCheck != null && !preClickCheck()) {
             log(tag, WARN) { "DPAD aborted before any key, pre-click check no longer passes" }
@@ -328,7 +559,7 @@ class AOSPSpecs @Inject constructor(
         }
 
         val sizeParser = runCatching { SizeParser(host.service) }.getOrNull()
-        val preSnapshot = takeStorageSnapshot(sizeParser)
+        val preSnapshot = takeStorageSnapshot(sizeParser, host.windowRoot())
 
         suspend fun bootstrapAnchor(reason: String): Boolean {
             val anchorNode = host.windowRoot()?.crawl()?.map { it.node }
@@ -418,9 +649,15 @@ class AOSPSpecs @Inject constructor(
                     } else {
                         val clicked = if (Bugs.isDryRun) true else dpadCenter().also { centerSent = it }
                         log(tag, INFO) { "DPAD_CENTER result=$clicked (source=quick-try)" }
-                        if (clicked && validateWithDelta("quick-try", preSnapshot, sizeParser, timeoutMs = 800)) {
-                            return true
-                        }
+                        val validated = clicked && validateWithDelta(
+                            source = "quick-try",
+                            preSnapshot = preSnapshot,
+                            sizeParser = sizeParser,
+                            timeoutMs = 800,
+                            stats = stats,
+                            statsPolls = STATS_LONG_POLLS,
+                        )
+                        if (validated) return true
                     }
                 }
                 // Check if anchor is still present before falling through to cycle loop.
@@ -435,19 +672,27 @@ class AOSPSpecs @Inject constructor(
                     if (centerSent) {
                         for (poll in 1..10) {
                             windowPkg = host.windowRoot()?.packageName?.toString()
-                            detour = isManageSpaceDetour(centerSent, windowPkg, targetPkg.name)
+                            detour = isManageSpaceDetour(centerSent, windowPkg, target.id.name)
                             if (detour) break
                             delay(100)
                         }
                         log(tag, INFO) {
-                            "Quick-try: detour=$detour, rootPkg=$windowPkg, target=${targetPkg.name} (source=$MANAGE_SPACE_DETOUR_SOURCE)"
+                            "Quick-try: detour=$detour, rootPkg=$windowPkg, target=${target.id.name} (source=$MANAGE_SPACE_DETOUR_SOURCE)"
                         }
+                    }
+                    // Stock Settings has no third button, but its left button is "Manage space" for apps
+                    // with a manageSpaceActivity, so a retry there would press it again.
+                    if (detour && !settingsHasManageStorageText) {
+                        log(tag, WARN) {
+                            "Quick-try: detour without manage_storage_text, not retrying (source=$MANAGE_SPACE_DETOUR_SOURCE)"
+                        }
+                        return false
                     }
                     if (detour) {
                         val ops = ManageSpaceDetourOps(
                             back = { host.service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK) },
-                            awaitAnchor = { waitForLayoutStability(anchorId) != null },
-                            takeSnapshot = { takeStorageSnapshot(sizeParser) },
+                            awaitAnchor = awaitWindowAtRest,
+                            takeSnapshot = { takeStorageSnapshot(sizeParser, host.windowRoot()) },
                             bootstrapAnchor = { bootstrapAnchor(MANAGE_SPACE_DETOUR_SOURCE) },
                             dpadDown = dpadDown,
                             dpadRight = dpadRight,
@@ -455,7 +700,13 @@ class AOSPSpecs @Inject constructor(
                             focusVetoesCenter = { focusVetoesCenter(MANAGE_SPACE_DETOUR_SOURCE) },
                             dpadCenter = dpadCenter,
                             validate = { baseline ->
-                                validateWithDelta(MANAGE_SPACE_DETOUR_SOURCE, baseline, sizeParser, timeoutMs = 800)
+                                validateWithDelta(
+                                    source = MANAGE_SPACE_DETOUR_SOURCE,
+                                    preSnapshot = baseline,
+                                    sizeParser = sizeParser,
+                                    timeoutMs = 800,
+                                    stats = stats,
+                                )
                             },
                         )
                         return recoverFromManageSpaceDetour(tag, ops, preSnapshot, stepDelayMs)
@@ -539,7 +790,14 @@ class AOSPSpecs @Inject constructor(
                         val clicked = if (Bugs.isDryRun) true else dpadCenter()
                         log(tag, INFO) { "DPAD_CENTER result=$clicked (source=label-match)" }
                         if (!clicked) return false
-                        if (validateWithDelta("label-match", preSnapshot, sizeParser)) return true
+                        val validated = validateWithDelta(
+                            source = "label-match",
+                            preSnapshot = preSnapshot,
+                            sizeParser = sizeParser,
+                            stats = stats,
+                            statsPolls = STATS_LONG_POLLS,
+                        )
+                        if (validated) return true
                         break // Delta validation failed, try next cycle
                     }
 
@@ -593,7 +851,7 @@ class AOSPSpecs @Inject constructor(
                 log(tag, INFO) { "DPAD_CENTER result=$clicked (source=blind-sweep-$rightSteps)" }
                 if (!clicked) continue
 
-                if (validateWithDelta("blind-sweep-$rightSteps", preSnapshot, sizeParser, timeoutMs = 800)) {
+                if (validateWithDelta("blind-sweep-$rightSteps", preSnapshot, sizeParser, timeoutMs = 800, stats = stats)) {
                     return true
                 }
 
@@ -716,6 +974,15 @@ class AOSPSpecs @Inject constructor(
             var sizeParser: SizeParser? = null
             var pendingVerdict = false
             val verdictConfirmer = VerdictConfirmer()
+            // Outlives single DPAD runs and step attempts, so a read that never returned is never doubled.
+            val cacheStats = CacheStatsReader(host.scope, TAG) {
+                inaccessibleCacheProvider.determineCache(pkg)?.totalSize
+            }
+            // Replaying the plan would press the same blind positions again.
+            fun dpadExhaustedAbort(attempt: Int) = StepAbortException(
+                "DPAD exhausted, clear-cache button not reachable (attempt=$attempt)",
+                replayable = false,
+            )
             val nodeAction: suspend StepContext.() -> Boolean = action@{
                 val attempt = nodeActionAttempts++
                 val candidate = findClearCacheCandidate(clearCacheButtonLabels)
@@ -788,7 +1055,7 @@ class AOSPSpecs @Inject constructor(
                 // internally, so we don't need many retries here to wait for the screen to load.
                 val dpadMinAttempts = 2
                 if (useDpadFallback && dpadExhausted) {
-                    throw StepAbortException("DPAD exhausted, clear-cache button not reachable (attempt=$attempt)")
+                    throw dpadExhaustedAbort(attempt)
                 } else if (useDpadFallback && attempt >= dpadMinAttempts && !pendingVerdict) {
                     log(tag, INFO) { "DPAD fallback triggered (attempt=$attempt)" }
                     val preClickCheck: (suspend () -> Boolean)? = if (allowlistedDpad) {
@@ -799,9 +1066,11 @@ class AOSPSpecs @Inject constructor(
                     when (
                         tryClickViaFocusNavigation(
                             clearCacheButtonLabels,
-                            pkg.id,
+                            pkg,
+                            cacheStats,
                             canInjectInput,
                             threeButtonRow,
+                            settingsHasManageStorageText,
                             preClickCheck,
                         )
                     ) {
@@ -809,6 +1078,7 @@ class AOSPSpecs @Inject constructor(
                         false -> {
                             dpadExhausted = true
                             log(tag, WARN) { "DPAD fallback exhausted, won't retry" }
+                            throw dpadExhaustedAbort(attempt)
                         }
 
                         null -> {
@@ -852,6 +1122,27 @@ class AOSPSpecs @Inject constructor(
         // Taken on size check passes, so two in a row span about a second.
         private const val BUTTON_BAND_CONFIRMATIONS = 2
         private const val BUTTON_BAND_MIN_GAP_DP = 48
+
+        // The DPAD run plus containment (two polls of up to 1s) and the final cache read has to fit
+        // into one step attempt. The reserve keeps room for the latter two.
+        private const val DPAD_RUN_DEADLINE_MS = 10_000L
+        private const val POST_RUN_RESERVE_MS = 3_500L
+        private const val CONTAINMENT_POLLS = 10
+        private const val CONTAINMENT_POLL_DELAY_MS = 100L
+
+        // Up to about 3s for Settings' entry transition to end.
+        private const val LAYOUT_REST_CHECKS = 15
+        private const val LAYOUT_REST_DELAY_MS = 200L
+
+        private const val BASELINE_READ_TIMEOUT_MS = 2_000L
+        private const val FINAL_RECHECK_READ_TIMEOUT_MS = 1_000L
+
+        // StorageStats lag a clear: two reads 500ms apart can both still show the old size. The long
+        // window is for the presses most likely to hit "Clear cache".
+        private const val STATS_POLL_DELAY_MS = 250L
+        private const val STATS_POLL_READ_TIMEOUT_MS = 250L
+        private const val STATS_LONG_POLLS = 16
+        private const val STATS_SHORT_POLLS = 3
 
         private val TAG: String = logTag("AppCleaner", "Automation", "AOSP", "Specs")
     }

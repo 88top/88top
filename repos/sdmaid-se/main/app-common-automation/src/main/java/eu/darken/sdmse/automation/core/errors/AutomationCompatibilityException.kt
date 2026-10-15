@@ -1,23 +1,22 @@
 package eu.darken.sdmse.automation.core.errors
 
-import android.content.Intent
 import android.os.Build
-import androidx.core.net.toUri
 import eu.darken.sdmse.automation.R
 import eu.darken.sdmse.common.BuildConfigWrap
+import eu.darken.sdmse.common.WebpageTool
 import eu.darken.sdmse.common.ca.CaString
 import eu.darken.sdmse.common.ca.caString
 import eu.darken.sdmse.common.ca.toCaString
 import eu.darken.sdmse.common.error.HasLocalizedError
 import eu.darken.sdmse.common.error.LocalizedError
-import eu.darken.sdmse.common.debug.logging.Logging.Priority.WARN
-import eu.darken.sdmse.common.debug.logging.asLog
-import eu.darken.sdmse.common.debug.logging.log
-import eu.darken.sdmse.common.debug.logging.logTag
+import eu.darken.sdmse.setup.SetupModule
+import eu.darken.sdmse.setup.SetupRoute
+import eu.darken.sdmse.setup.SetupScreenOptions
 
 open class AutomationCompatibilityException(
     override val message: String = "SD Maid couldn’t figure out the screen layout. If this keeps happening, your language or setup might not be fully supported. Check for updates or reach out to me so I can fix it.",
     private val additionalHint: CaString? = null,
+    val suggestAdbSetup: Boolean = false,
 ) : AutomationException(), HasLocalizedError {
 
     override fun getLocalizedError(): LocalizedError = LocalizedError(
@@ -30,6 +29,10 @@ open class AutomationCompatibilityException(
                 sb.append("\n\n")
                 sb.append(hint.get(this))
             }
+            if (suggestAdbSetup) {
+                sb.append("\n\n")
+                sb.append(getString(R.string.automation_error_compatibility_adb_hint))
+            }
             sb.append("\n\n\n")
             sb.append(
                 """
@@ -40,21 +43,15 @@ open class AutomationCompatibilityException(
             )
             sb.toString()
         },
+        fixActionLabel = eu.darken.sdmse.common.R.string.setup_title.toCaString().takeIf { suggestAdbSetup },
+        fixActionRoute = SetupRoute(
+            options = SetupScreenOptions(
+                showCompleted = true,
+                typeFilter = setOf(SetupModule.Type.SHIZUKU),
+            ),
+        ).takeIf { suggestAdbSetup },
         infoActionLabel = eu.darken.sdmse.common.R.string.general_error_report_bug_action.toCaString(),
-        infoAction = {
-            try {
-                val url = "https://sdmse.darken.eu/bugs".toUri()
-                val intent = Intent(Intent.ACTION_VIEW, url).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                it.startActivity(intent)
-            } catch (e: Exception) {
-                log(TAG, WARN) { "Failed to open bug report URL: ${e.asLog()}" }
-            }
-        }
+        infoAction = { WebpageTool.open(it, "https://sdmse.darken.eu/bugs") }
     )
 
 }
-
-
-private val TAG = logTag("Automation", "Error", "Compatibility")

@@ -62,7 +62,7 @@
   },
   "timeflysoon/CloudSaver": {
     "main": {
-      "remote_sha": "0f110840cf531546d7bbb8bcec94e47b0f7b7a1e"
+      "remote_sha": "672cc48ab656973de2675383c966a5336d9de372"
     }
   },
   "timeflysoon/Cloudflare-Navihive": {
@@ -183,7 +183,7 @@
   },
   "timeflysoon/OpenWrtAction": {
     "main": {
-      "remote_sha": "afed8ac8ec893a122d92415ee1e1d4b3f7f39644"
+      "remote_sha": "1b941653e72651ad3c8d8e40d346e67e9b8867dd"
     }
   },
   "timeflysoon/PVE-manager-status": {
@@ -231,7 +231,7 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "003fc237041672f6816a023e380f338c92579cfa"
+      "remote_sha": "1b602276b61d913e9539fde4245074c15e9234b7"
     }
   },
   "timeflysoon/commonscript": {
@@ -331,7 +331,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "8d4f4139f4a6cd21f3e17af1e92475056bde4568"
+      "remote_sha": "510809554255079e5793e1ebeb72dc70c57d9fb7"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -352,13 +352,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "9c8e9f56b6ffadab05bfc933011b2bfc2f4f8288"
+      "remote_sha": "361f2c8a60b704d12220d3b370ced151f89c678c"
     },
     "release": {
-      "remote_sha": "23fe29f94a2231205af477e27a715e7276c381e0"
+      "remote_sha": "d7fbabb5c7ada92098d967160ef31dc590e5f509"
     },
     "sing": {
-      "remote_sha": "b0c55a3870624b237c85c8e9ea6656493f8d44b6"
+      "remote_sha": "d1c433471f5b6b77051616cfa4a5279d5092f514"
     }
   },
   "timeflysoon/nanopi-openwrt": {
@@ -373,7 +373,7 @@
   },
   "timeflysoon/openwrt-daede": {
     "main": {
-      "remote_sha": "74e093eb28a276ff3981d7f41217652b34cefa28"
+      "remote_sha": "b2ee711a345d171d78af3d510378b689bdfb9830"
     }
   },
   "timeflysoon/quickstart": {
@@ -416,7 +416,7 @@
       "remote_sha": "d1ffe2b87a9c57b53088ab9aee1f4f679096b640"
     },
     "main": {
-      "remote_sha": "2511e9d085072ca62f0556bc9be62559cce2a568"
+      "remote_sha": "9535c04dacc511561838ea711a23369ccce13a76"
     },
     "translations-deadend": {
       "remote_sha": "e483486dff5deef147fed8605b5dfaa1010649f6"
@@ -424,7 +424,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "686f405621538119f7d859bd47bb0856dc0641bd"
+      "remote_sha": "49d60b48d573e14f3592101e728ca5fd09cc36ea"
     }
   },
   "timeflysoon/store": {
@@ -461,10 +461,10 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "9c8e9f56b6ffadab05bfc933011b2bfc2f4f8288"
+      "remote_sha": "361f2c8a60b704d12220d3b370ced151f89c678c"
     },
     "release": {
-      "remote_sha": "23fe29f94a2231205af477e27a715e7276c381e0"
+      "remote_sha": "d7fbabb5c7ada92098d967160ef31dc590e5f509"
     }
   },
   "timeflysoon/turboacc": {
@@ -490,7 +490,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "669ce0d2740ec640e0762d4dbede77fac0d2d9c2"
+      "remote_sha": "1c1f3720cccea9d45c264c728d4ef275b54ac1c7"
     }
   },
   "timeflysoon/weasel": {
@@ -531,7 +531,7 @@
   },
   "timeflysoon/ungoogled-chromium-windows": {
     "master": {
-      "remote_sha": "989b4382364baaddb8b3180e1eb1030ca96a7273"
+      "remote_sha": "a1e3123c8d543b5c9a1eecfaf0f06cf242c0db37"
     }
   },
   "timeflysoon/DriverStoreExplorer": {
@@ -546,10 +546,10 @@
   },
   "timeflysoon/Open-Box": {
     "catch-up-upstream": {
-      "remote_sha": "b501b70399aee021e78eb8036d6b0217da7a7497"
+      "remote_sha": "a265c7c67c694e65696fdf2d677d63279dc00ae5"
     },
     "main": {
-      "remote_sha": "a6e6e5650169e70ea230eeb99a368bf2ec03af86"
+      "remote_sha": "7604f64c628f7a02cf78f6548d73272b4c132ddf"
     },
     "backup": {
       "remote_sha": "f42122e8b1b6e49d6ac88a84fc26ebb2480d17db"

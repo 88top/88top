@@ -2,6 +2,7 @@ import { dnsFilterEn } from './dns-filter'
 import { dnsPageEn } from './dns-page'
 import { subscriptionDnsEn } from './subscription-dns'
 import { factoryResetEn } from './factory-reset'
+import { clientAppRegionDialogEn } from './client-app-region-dialog'
 const en = {
   chainProxyAdd: 'Add chain proxy',
   chainProxyNameLabel: 'Name',
@@ -773,7 +774,7 @@ const en = {
   routingFallbackNoDisable: 'The fallback site set cannot be disabled',
   routingFallbackNoDelete: 'The fallback site set cannot be deleted',
   routingFallbackEditTitle: 'Edit fallback site set',
-  routingFallbackEditHint: 'The name is the outbound tag in the kernel; after renaming, re-pick its line on the Proxies page. Takes effect after a kernel restart.',
+  routingFallbackEditHint: 'The name is the outbound tag in the kernel; after renaming, re-pick its line on the Proxies page.',
   routingPolicyAdd: 'Add site set',
   routingPolicyAddTitle: 'Add site set',
   routingPolicyEditTitle: 'Edit site set',
@@ -1360,7 +1361,7 @@ const en = {
   clientRouteOutboundLabel: 'Outbound',
   clientRouteOutboundBuiltin: 'Built-in',
   clientRouteOutboundGroups: 'Node groups',
-  clientRouteHint: 'All traffic from these clients goes to the chosen outbound, ahead of site-set rules. LAN destinations still go direct. Restart the kernel after saving.',
+  clientRouteHint: 'All traffic from these clients goes to the chosen outbound, ahead of site-set rules. LAN destinations still go direct.',
   clientRouteErrName: 'Name is required',
   clientRouteErrSources: 'Invalid IP / CIDR: {value}',
   clientRouteErrNoSources: 'At least one client is required',
@@ -1422,10 +1423,7 @@ const en = {
   clientAppResetConfirm: 'Restore the three default groups? Your custom groups will be overwritten.',
   clientAppGroupName: 'Name',
   clientAppGroupDesc: 'Description',
-  clientAppGroupRegions: 'Regions (two-letter country codes, space or comma separated)',
   clientAppRegionMatch: 'Used when',
-  clientAppMatchInside: 'Inside these regions',
-  clientAppMatchOutside: 'Outside these regions',
   clientAppCatchAll: 'Everything else',
   clientAppActionDirect: 'Direct',
   clientAppActionProxy: 'Back to router',
@@ -1497,6 +1495,7 @@ const en = {
   ...dnsPageEn,
   ...subscriptionDnsEn,
   ...factoryResetEn,
+  ...clientAppRegionDialogEn,
 }
 
 export type LANG_MESSAGE = typeof en

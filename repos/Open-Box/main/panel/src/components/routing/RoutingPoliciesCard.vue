@@ -219,6 +219,8 @@
       v-model="showFallbackEditor"
       :title="$t('routingFallbackEditTitle')"
       box-class="w-full max-w-2xl"
+      header-class="mx-4 px-0! [&>button]:right-[-0.5rem]!"
+      footer-class="mx-4 px-0!"
     >
       <div
         v-if="fallbackDraft"
@@ -251,28 +253,30 @@
           </div>
         </div>
         <p class="text-base-content/50 text-xs">{{ $t('routingFallbackEditHint') }}</p>
-        <div class="flex justify-end gap-2">
-          <button
-            type="button"
-            class="btn btn-sm"
-            @click="showFallbackEditor = false"
-          >
-            {{ $t('cancel') }}
-          </button>
-          <button
-            type="button"
-            class="btn btn-primary btn-sm"
-            :disabled="saving"
-            @click="saveFallback"
-          >
-            <span
-              v-if="saving"
-              class="loading loading-spinner loading-xs"
-            />
-            {{ $t('save') }}
-          </button>
-        </div>
       </div>
+
+      <!-- 取消 / 保存固定在底栏,和修改站点集弹窗一致 -->
+      <template #footer>
+        <button
+          type="button"
+          class="btn btn-sm"
+          @click="showFallbackEditor = false"
+        >
+          {{ $t('cancel') }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          :disabled="saving"
+          @click="saveFallback"
+        >
+          <span
+            v-if="saving"
+            class="loading loading-spinner loading-xs"
+          />
+          {{ $t('save') }}
+        </button>
+      </template>
     </DialogWrapper>
 
     <!-- 删掉一个站点集会连带删掉内核里那个同名 selector(代理页上就没了),先确认一次 -->
@@ -402,7 +406,7 @@
             <Bars3Icon class="drag-handle text-base-content/40 h-4 w-4 shrink-0 cursor-move" />
             <select
               v-model="rule.type"
-              class="select select-sm w-36 shrink-0 max-sm:w-auto max-sm:min-w-0 max-sm:grow max-sm:basis-[35%]"
+              class="select select-sm w-[9.875rem] shrink-0 max-sm:w-auto max-sm:min-w-0 max-sm:grow max-sm:basis-[35%]"
             >
               <option
                 v-for="opt in ruleTypeOptions(rule.type)"

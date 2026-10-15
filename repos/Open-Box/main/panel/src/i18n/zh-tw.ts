@@ -5,6 +5,7 @@ import { kernelSettingsZhTw } from './kernel-settings'
 import { clientAppPageZhTw } from './client-app-page-tw'
 import { subscriptionDnsZhTw } from './subscription-dns'
 import { factoryResetZhTw } from './factory-reset'
+import { clientAppRegionDialogZhTw } from './client-app-region-dialog'
 
 const zhTW: LANG_MESSAGE = {
   chainProxyAdd: '新增鏈式代理',
@@ -772,7 +773,7 @@ const zhTW: LANG_MESSAGE = {
   routingFallbackNoDisable: '兜底站點集不能停用',
   routingFallbackNoDelete: '兜底站點集不能刪除',
   routingFallbackEditTitle: '修改兜底站點集',
-  routingFallbackEditHint: '名字就是核心裡的出站名,改名後代理頁上原來選的線路要重新選一次;重啟核心後生效。',
+  routingFallbackEditHint: '名字就是核心裡的出站名,改名後代理頁上原來選的線路要重新選一次。',
   routingPolicyAdd: '新增站點集',
   routingPolicyAddTitle: '新增站點集',
   routingPolicyEditTitle: '修改站點集',
@@ -1358,7 +1359,7 @@ const zhTW: LANG_MESSAGE = {
   clientRouteOutboundLabel: '出站',
   clientRouteOutboundBuiltin: '內建',
   clientRouteOutboundGroups: '節點組',
-  clientRouteHint: '這些終端的全部流量都走這裡選的出站,優先級高於站點集;區域網路目標仍直連。儲存後重啟核心生效。',
+  clientRouteHint: '這些終端的全部流量都走這裡選的出站,優先級高於站點集;區域網路目標仍直連。',
   clientRouteErrName: '名稱不能為空',
   clientRouteErrSources: '無效的 IP / 網段:{value}',
   clientRouteErrNoSources: '至少填一個終端',
@@ -1419,10 +1420,7 @@ const zhTW: LANG_MESSAGE = {
   clientAppResetConfirm: '恢復預設三組?自訂的分組會被覆蓋。',
   clientAppGroupName: '名稱',
   clientAppGroupDesc: '說明',
-  clientAppGroupRegions: '地區(兩位國家代碼,空格或逗號分隔)',
   clientAppRegionMatch: '何時使用',
-  clientAppMatchInside: '在這些地區時',
-  clientAppMatchOutside: '在這些地區之外時',
   clientAppCatchAll: '其餘流量',
   clientAppActionDirect: '本機直連',
   clientAppActionProxy: '回路由器',
@@ -1469,6 +1467,7 @@ const zhTW: LANG_MESSAGE = {
   ...clientAppPageZhTw,
   ...subscriptionDnsZhTw,
   ...factoryResetZhTw,
+  ...clientAppRegionDialogZhTw,
 }
 
 export default zhTW

@@ -5,6 +5,7 @@ translation_key: bugs
 permalink: /bugs
 ---
 # Bugs
+{: #bugs }
 
 🐌 🦋 🐛 🐜 🐝 🐞
 
@@ -20,6 +21,7 @@ In any case check that you are on the latest update, the bug might already be fi
 If the bug isn't fixed, then report it :grin:.
 
 ## Reporting a bug
+{: #reporting-a-bug }
 
 Create an issue ticket on GitHub:
 <https://github.com/d4rken-org/sdmaid-se/issues>
@@ -36,18 +38,18 @@ Include a [debug log](#debug-log) if you can reproduce the issue.
 Hint: You can [long press the "Changelog" entry](https://github.com/d4rken-org/sdmaid-se/pull/940) in SD Maid's settings to copy the version to your clipboard.
 
 ## Debug log
+{: #debug-log }
 
 A debug log is a recording of SD Maid's action. You start the recording, reproduce the issue, then stop it and can share a zip file with a chronological account of what SD Maid did.
 
 To start recording a debug log:
 * Go to settings in SD Maid by pressing the settings icon in the bottom right of the dashboard
 * Find the `Support` entry in the settings list
-* Click `Debug log` on the support screen
-* A new notification from SD Maid will pop up and notify you that a log is being recorded (make sure you have given SD Maid notification permission).
+* Tap `Record debug log` on the support screen, then `Record debug log` again in the dialog
+* While recording, the dashboard shows a `Recording debug log` card
 * **Now reproduce the issue you want to record**
-* Once you have reproduced the issue, open your notifications and find the debug log notification from SD Maid
-* Press the `Done` button in the notification. If the `Done` action is not visible, expand the notification.
-* After a short moment you will get a popup that allows you to share the compressed log file.
+* Once you have reproduced the issue, tap `Stop recording` on that dashboard card or on the support screen. If the recording is very short, SD Maid asks first; tap `Stop anyway` to stop it.
+* The `Debug Log` screen opens. Once the log file is compressed, tap `Share` to send it.
 
 The debug log will be recorded until you stop it, the recording will continue, even if you force-stop and restart SD Maid.
 
