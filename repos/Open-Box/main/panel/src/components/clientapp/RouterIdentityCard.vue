@@ -2,12 +2,14 @@
   <!-- 路由器标识:图标 + 名称 + 地区,一行排开,改完自动保存(没有保存按钮) -->
   <div class="card">
     <div class="app-card-inset flex flex-col gap-3">
-      <span class="text-base font-semibold">{{ $t('clientAppServerInfoTitle') }}</span>
-      <p class="text-base-content/60 text-xs">{{ $t('clientAppServerInfoHint') }}</p>
+      <div class="flex flex-col gap-1">
+        <span class="text-base font-semibold">{{ $t('clientAppServerInfoTitle') }}</span>
+        <p class="text-base-content/60 text-xs leading-relaxed">{{ $t('clientAppServerInfoHint') }}</p>
+      </div>
 
       <div class="flex flex-wrap items-end gap-2">
         <div class="flex min-w-[14rem] flex-1 items-end gap-2">
-          <div class="flex w-[4.5rem] shrink-0 flex-col gap-1">
+          <div class="flex shrink-0 flex-col gap-1">
             <label class="text-xs font-medium">{{ $t('clientAppServerIcon') }}</label>
             <CountrySelect
               :model-value="form.icon"
@@ -31,7 +33,7 @@
             />
           </div>
         </div>
-        <div class="flex w-full flex-col gap-1 md:w-52">
+        <div class="flex w-full flex-col gap-1 md:w-44">
           <label class="text-xs font-medium">{{ $t('clientAppServerRegion') }}</label>
           <CountrySelect
             :model-value="form.region"

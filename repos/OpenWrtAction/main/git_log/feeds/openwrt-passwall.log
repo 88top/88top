@@ -1,17 +1,9 @@
 <details> <summary> <b>openwrt-passwall new commit log :rocket: </b> </summary>
 
-#### [:mega: Full Changelog. ](https://github.com/Openwrt-Passwall/openwrt-passwall/compare/2d8e8c8144ff7cde3818513478cc644d56c2ecb8...b0449b1d1139cb730eef7acdf61f60897a140c9d)  
+#### [:mega: Full Changelog. ](https://github.com/Openwrt-Passwall/openwrt-passwall/compare/d8ec3c81988d775ba16ade9059cd972d5d5b8bc0...5bd0740772940edef9cd45bfc4a9f796933c54d9)  
 :heavy_exclamation_mark: The list displays only the latest 15 commit logs.  
 
 SHA|Author|Date|Message
 -|-|-|-
-b0449b1d|A-BO|Sun Oct 11 19:01:17 2026 +0800|luci: optimize
-6410bdf1|A-BO|Sat Oct 10 22:19:04 2026 +0800|luci: reduce HAProxy URL health check overhead and optimize check scheduling
-18632b00|A-BO|Sat Oct 10 21:00:52 2026 +0800|luci: optimize urltest logic
-f0c9adae|A-BO|Fri Oct 9 23:21:22 2026 +0800|luci: refactor curl direct download logic
-701d982a|A-BO|Thu Oct 8 23:39:08 2026 +0800|luci: refactor locking for subscription and rule updates
-92916bed|A-BO|Thu Oct 8 19:00:37 2026 +0800|luci: optimize iface hotplug code
-4db1995c|A-BO|Thu Oct 8 02:07:56 2026 +0800|luci: optimize and fix
-1a15c386|A-BO|Wed Oct 7 13:10:46 2026 +0800|luci: remove `curl_direct` related logic
-2708533e|A-BO|Wed Oct 7 12:56:45 2026 +0800|luci: modify the unit for the hy2 quic receive window setting
+5bd07407|A-BO|Sat Oct 17 00:33:42 2026 +0800|luci: optimize
 </details>

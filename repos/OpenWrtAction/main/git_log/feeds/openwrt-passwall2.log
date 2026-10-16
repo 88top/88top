@@ -1,0 +1,12 @@
+<details> <summary> <b>openwrt-passwall2 new commit log :rocket: </b> </summary>
+
+#### [:mega: Full Changelog. ](https://github.com/Openwrt-Passwall/openwrt-passwall2/compare/74ab9b7901c98ad21fc927b176ac06921d88e3a4...24595ef82ed36724ad3a2d10caa45b518917cdaa)  
+:heavy_exclamation_mark: The list displays only the latest 15 commit logs.  
+
+SHA|Author|Date|Message
+-|-|-|-
+24595ef|A-BO|Sat Oct 17 00:56:16 2026 +0800|luci: add MASQUE support
+ab72ff4|A-BO|Sat Oct 17 00:30:02 2026 +0800|luci: refactor locking for subscription and rule updates
+fc2be8d|A-BO|Fri Oct 16 23:37:32 2026 +0800|luci: add github proxy in app update
+c7acd11|A-BO|Fri Oct 16 22:39:55 2026 +0800|luci: optimize iface hotplug code
+</details>
