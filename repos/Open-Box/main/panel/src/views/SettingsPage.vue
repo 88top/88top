@@ -61,7 +61,6 @@ import SiteLatencySettings from '@/components/settings/SiteLatencySettings.vue'
 import { usePaddingForViews } from '@/composables/paddingViews'
 import { isSettingVisible } from '@/composables/settings'
 import { SETTINGS_MENU_KEY, SETTINGS_TAB } from '@/constant'
-import '@/i18n/settings-tabs'
 import { settingsMenuOrder } from '@/store/settings'
 import ClientAppPage from '@/views/ClientAppPage.vue'
 import ClientRoutingPage from '@/views/ClientRoutingPage.vue'
@@ -107,7 +106,7 @@ const tabItems: { key: SETTINGS_TAB; label: string; icon: Component }[] = [
   { key: SETTINGS_TAB.clients, label: 'clientRoutingTab', icon: DevicePhoneMobileIcon },
   { key: SETTINGS_TAB.chain, label: 'chainProxyTab', icon: LinkIcon },
   { key: SETTINGS_TAB.share, label: 'shareNetworkTab', icon: ShareIcon },
-  { key: SETTINGS_TAB.clientApp, label: 'clientAppTab', icon: Squares2X2Icon },
+  { key: SETTINGS_TAB.clientApp, label: 'clientAppsTab', icon: Squares2X2Icon },
   { key: SETTINGS_TAB.dns, label: 'dnsSettingsTab', icon: ServerStackIcon },
   { key: SETTINGS_TAB.kernel, label: 'kernelSettings', icon: CpuChipIcon },
 ]

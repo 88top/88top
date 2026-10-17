@@ -1,30 +1,32 @@
 <template>
   <!-- 地区分流:紧凑列表(拖动排序 / 编辑 / 删除),细节在编辑弹窗里。每次操作整份保存,不用重启内核 -->
   <div class="app-card-inset flex flex-col gap-3">
-    <div class="flex items-center gap-2">
-      <span class="text-base font-semibold">{{ $t('clientAppRegionsTitle') }}</span>
-      <div class="ml-auto flex items-center gap-1">
-        <button
-          type="button"
-          class="btn btn-ghost btn-square btn-sm"
-          :disabled="saving"
-          v-tip="$t('clientAppResetDefault')"
-          @click="reset"
-        >
-          <ArrowUturnLeftIcon class="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          class="btn btn-primary btn-circle btn-sm"
-          :disabled="saving || list.length >= SHARE_REGION_LIMITS.groups"
-          v-tip="$t('clientAppAddGroup')"
-          @click="openEdit(null)"
-        >
-          <PlusIcon class="h-4 w-4" />
-        </button>
+    <div class="flex flex-col gap-1">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <span class="text-base font-semibold">{{ $t('shareRegionsTitle') }}</span>
+        <div class="flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            class="btn btn-ghost btn-square btn-sm"
+            :disabled="saving"
+            v-tip="$t('cfRestore')"
+            @click="reset"
+          >
+            <ArrowUturnLeftIcon class="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-circle btn-sm"
+            :disabled="saving || list.length >= SHARE_REGION_LIMITS.groups"
+            v-tip="$t('groupAdd')"
+            @click="openEdit(null)"
+          >
+            <PlusIcon class="h-4 w-4" />
+          </button>
+        </div>
       </div>
+      <p class="text-base-content/60 text-xs leading-relaxed">{{ $t('shareRegionsDescription') }}</p>
     </div>
-    <p class="text-base-content/60 text-xs">{{ $t('clientAppRegionsHint') }}</p>
 
     <Draggable
       v-model="list"
@@ -47,7 +49,7 @@
                 v-if="element.default"
                 class="badge badge-sm"
               >
-                {{ $t('clientAppDefaultBadge') }}
+                {{ $t('shareRegionsDefaultBadge') }}
               </span>
             </div>
             <span
@@ -70,13 +72,13 @@
                 />
                 <span class="truncate">{{ summary(element) }}</span>
               </span>
-              <span>{{ $t('clientAppRegionRuleCount', { count: element.rules.length }) }}</span>
-              <span>{{ $t('clientAppRegionRest', { action: actionText(element.catchAll) }) }}</span>
+              <span>{{ $t('shareRegionsRuleCount', { count: element.rules.length }) }}</span>
+              <span>{{ $t('shareRegionsCatchAllSummary', { action: actionText(element.catchAll) }) }}</span>
             </div>
           </div>
           <button
             type="button"
-            class="btn btn-ghost btn-square btn-sm"
+            class="btn btn-ghost btn-square btn-xs"
             v-tip="$t('edit')"
             @click="openEdit(element)"
           >
@@ -84,7 +86,7 @@
           </button>
           <button
             type="button"
-            class="btn btn-ghost btn-square btn-sm hover:text-error"
+            class="btn btn-ghost btn-square btn-xs hover:text-error"
             v-tip="$t('delete')"
             @click="remove(element)"
           >
@@ -158,35 +160,29 @@ const regionName = (code: string) => {
 }
 
 const summary = (g: OpenboxShareRegionGroup) => {
-  if (!g.regions.length) return g.default ? t('clientAppRegionOther') : ''
+  if (!g.regions.length) return g.default ? t('shareRegionsOtherRegions') : ''
   const names = g.regions.map(regionName).join('、')
-  return g.regionMatch === 'outside' ? t('clientAppRegionOutside', { regions: names }) : names
+  return g.regionMatch === 'outside' ? t('shareRegionsOutsideSummary', { regions: names }) : names
 }
 
 const actionText = (action: string) =>
-  t(action === 'proxy' ? 'clientAppActionProxyShort' : 'clientAppActionDirect')
+  t(action === 'proxy' ? 'shareRegionsActionProxy' : 'shareRegionsActionDirect')
 
 // ---- 校验(和后端 engine/share-regions.mjs 同一套规则,后端才是权威)----
 
 type Problem = { content: string; params?: Record<string, string> }
 
 const validate = (groups: OpenboxShareRegionGroup[]): Problem | null => {
-  if (groups.length > SHARE_REGION_LIMITS.groups) {
-    return { content: 'clientAppErrTooMany', params: { n: String(SHARE_REGION_LIMITS.groups) } }
-  }
-  if (groups.filter((g) => g.default).length !== 1) return { content: 'clientAppErrDefault' }
   const claimed = new Map<string, string>()
   for (const g of groups) {
-    if (!g.name) return { content: 'clientAppErrName', params: { id: g.id } }
-    const bad = g.regions.find((r) => !/^[A-Z]{2}$/.test(r))
-    if (bad) return { content: 'clientAppErrRegionCode', params: { value: bad } }
+    if (!g.name) return { content: 'shareRegionsErrName' }
     if (g.regionMatch === 'outside') {
-      if (!g.regions.length) return { content: 'clientAppErrOutside', params: { id: g.id } }
+      if (!g.regions.length) return { content: 'shareRegionsErrOutsideEmpty' }
       continue
     }
     for (const r of g.regions) {
       const other = claimed.get(r)
-      if (other) return { content: 'clientAppErrRegionDup', params: { region: r, a: other, b: g.id } }
+      if (other) return { content: 'shareRegionsErrRegionTaken', params: { region: r } }
       claimed.set(r, g.id)
     }
   }
@@ -199,7 +195,7 @@ const persist = async (groups: OpenboxShareRegionGroup[]): Promise<boolean> => {
   saving.value = true
   try {
     await saveShareRegions(groups)
-    showNotification({ content: 'clientAppSaved', type: 'alert-success' })
+    showNotification({ content: 'shareRegionsSaved', type: 'alert-success' })
     emit('saved')
     return true
   } catch (error) {
@@ -242,15 +238,15 @@ const onDialogSaved = async (group: OpenboxShareRegionGroup) => {
 
 const remove = async (g: OpenboxShareRegionGroup) => {
   if (g.default) {
-    showNotification({ content: 'clientAppDeleteDefault', type: 'alert-warning' })
+    showNotification({ content: 'shareRegionsDeleteDefault', type: 'alert-warning' })
     return
   }
-  if (!window.confirm(t('clientAppDeleteConfirm', { name: groupName(g) }))) return
+  if (!window.confirm(t('shareRegionsDeleteConfirm', { name: groupName(g) }))) return
   await persist(list.value.filter((x) => x.id !== g.id))
 }
 
 const reset = async () => {
-  if (!window.confirm(t('clientAppResetConfirm'))) return
+  if (!window.confirm(t('shareRegionsRestoreConfirm'))) return
   await persist([])
 }
 </script>

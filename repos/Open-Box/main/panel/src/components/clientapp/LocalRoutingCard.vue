@@ -2,8 +2,10 @@
   <!-- 本地分流(客户端):一行 = 设备图标 + 名称 + 最后同步 + 开关 / 二维码 / 复制链接 / 导出文件 -->
   <div class="card">
     <div class="app-card-inset flex flex-col gap-3">
-      <span class="text-base font-semibold">{{ $t('clientAppLocalTitle') }}</span>
-      <p class="text-base-content/60 text-xs">{{ $t('clientAppLocalHint') }}</p>
+      <div class="flex flex-col gap-1">
+        <span class="text-base font-semibold">{{ $t('clientConfigTitle') }}</span>
+        <p class="text-base-content/60 text-xs leading-relaxed">{{ $t('clientConfigDescription') }}</p>
+      </div>
 
       <div
         v-if="loading"
@@ -13,7 +15,7 @@
       </div>
       <div
         v-else-if="issue"
-        class="flex items-center gap-2"
+        class="flex items-center gap-2 py-2"
       >
         <DevicePhoneMobileIcon class="text-base-content/50 h-4 w-4 shrink-0" />
         <div class="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-0.5 text-sm">
@@ -25,42 +27,42 @@
             :off-text="$t('groupDisabledBadge')"
           />
           <span class="text-base-content/50 text-xs">
-            {{ lastSync ? $t('clientAppLastSync', { time: lastSync }) : $t('clientAppNeverSynced') }}
+            {{ lastSync ? $t('clientConfigLastSync', { time: lastSync }) : $t('clientConfigNeverSynced') }}
           </span>
         </div>
         <button
           type="button"
-          class="btn btn-ghost btn-square btn-sm"
+          class="btn btn-ghost btn-square btn-xs"
           :class="issue.enabled ? 'text-success' : 'text-base-content/40'"
           :disabled="toggling"
-          v-tip="$t(issue.enabled ? 'clientAppSyncOn' : 'clientAppSyncOff')"
+          v-tip.contain="$t(issue.enabled ? 'clientConfigPowerOff' : 'clientConfigPowerOn')"
           @click="toggleEnabled"
         >
           <PowerIcon class="h-4 w-4" />
         </button>
         <button
           type="button"
-          class="btn btn-ghost btn-square btn-sm"
+          class="btn btn-ghost btn-square btn-xs"
           :disabled="!code"
-          v-tip="$t('clientAppShowQr')"
+          v-tip.contain="$t('shareCodeButton')"
           @click="showQr = true"
         >
           <QrCodeIcon class="h-4 w-4" />
         </button>
         <button
           type="button"
-          class="btn btn-ghost btn-square btn-sm"
+          class="btn btn-ghost btn-square btn-xs"
           :disabled="!code"
-          v-tip="$t('copyLink')"
+          v-tip.contain="$t('copyLink')"
           @click="copy(code)"
         >
           <ClipboardDocumentIcon class="h-4 w-4" />
         </button>
         <button
           type="button"
-          class="btn btn-ghost btn-square btn-sm"
+          class="btn btn-ghost btn-square btn-xs"
           :disabled="!code || exporting"
-          v-tip="$t('clientAppExport')"
+          v-tip.contain="$t('clientConfigExportFile')"
           @click="exportFile"
         >
           <span
@@ -73,7 +75,7 @@
           />
         </button>
       </div>
-      <div class="border-base-content/10 flex items-center justify-between gap-3 border-t pt-3">
+      <div class="border-base-300/60 flex items-center justify-between gap-3 border-t pt-3">
         <div class="flex min-w-0 flex-col">
           <span class="text-sm">{{ $t('clientSystemDns') }}</span>
           <span class="text-base-content/60 mt-1 text-xs">{{ $t('clientSystemDnsHint') }}</span>
@@ -100,7 +102,7 @@
           class="h-64 w-64 self-center rounded-lg bg-white p-1"
           alt="QR"
         />
-        <p class="text-base-content/60 text-center text-xs">{{ $t('clientAppLocalScanHint') }}</p>
+        <p class="text-base-content/60 text-center text-xs">{{ $t('clientConfigScanHint') }}</p>
         <div class="join w-full">
           <input
             :value="code"
@@ -121,13 +123,13 @@
           v-if="issue && !issue.enabled"
           class="text-warning text-xs"
         >
-          {{ $t('clientAppSyncOffHint') }}
+          {{ $t('clientConfigSyncOffHint') }}
         </p>
         <p
           v-if="issue && !issue.lanAddresses.length"
           class="text-warning text-xs"
         >
-          {{ $t('clientAppLocalNoLan') }}
+          {{ $t('clientConfigNoLan') }}
         </p>
         <div class="flex justify-end">
           <button
@@ -181,7 +183,7 @@ onMounted(async () => {
     const { data } = await getConfigsAPI()
     systemDns.value = (data as unknown as Record<string, unknown>).clientSystemDns !== false
   } catch (error) {
-    showNotification({ content: 'clientAppLoadFailed', params: { message: errorMessage(error) } })
+    showNotification({ content: 'clientConfigLoadFailed', params: { message: errorMessage(error) } })
   } finally {
     systemDnsBusy.value = false
   }
@@ -197,7 +199,7 @@ const setSystemDns = async (event: Event) => {
   } catch (error) {
     input.checked = systemDns.value
     showNotification({
-      content: 'clientSystemDnsSaveFailed',
+      content: 'routingSaveFailed',
       params: { message: errorMessage(error) },
     })
   } finally {
@@ -242,7 +244,7 @@ const load = async () => {
     issue.value = await fetchClientConfig()
   } catch (error) {
     showNotification({
-      content: 'clientAppLoadFailed',
+      content: 'clientConfigLoadFailed',
       params: { message: errorMessage(error) },
       type: 'alert-error',
     })
@@ -312,7 +314,7 @@ const exportFile = async () => {
     URL.revokeObjectURL(url)
   } catch (error) {
     showNotification({
-      content: 'clientAppExportFailed',
+      content: 'backupExportFailed',
       params: { message: errorMessage(error) },
       type: 'alert-error',
     })

@@ -8,10 +8,6 @@ export interface OpenboxProfileRoutingCategory {
   target: string
 }
 
-// 兜底站点集的默认选中项。'proxy' 是迁移留下的占位(表示"第一个节点组"),
-// 其余就是一个出站名(direct / 某个节点组 / block)。
-export type OpenboxRuleAction = 'direct' | 'proxy'
-
 // 一个站点集 = 一组匹配规则 + 内核里一个同名 selector。它不记具体节点:
 // selector 的成员由 outboundOptions 决定,用户在代理页点选。
 export interface OpenboxRoutingPolicy {
@@ -256,12 +252,6 @@ export interface OpenboxProfile {
   rulesetDir?: string
 }
 
-export interface OpenboxProfileDefaults {
-  region: string
-  dns: OpenboxProfileDns
-  routing: OpenboxProfileRouting
-}
-
 // Mirrors server/engine/rename.mjs / dictionaries.mjs — see
 // src/components/subscription/rename-defaults.ts for why this shape has no persistence endpoint
 // of its own and how the editor round-trips it.
@@ -304,6 +294,9 @@ export interface OpenboxSubscriptionAutoUpdate {
   enabled: boolean
   days: number
   hour: number
+  // 'hours' = 每隔 N 小时更新一次(用 hours);没有这个字段 = 按天、按钟点更新(用 days / hour)
+  mode?: string
+  hours?: number
 }
 
 // url 是 https:// 的 DoH 地址;地址里是域名时 bootstrap 必填(用来解析这个域名的 DNS,IP)
@@ -327,6 +320,13 @@ export interface OpenboxSubscription {
   nodeDns?: OpenboxSubscriptionNodeDns | null
   createdAt: number
   updatedAt: number
+  // 机场在订阅响应头(subscription-userinfo)里给的流量用量 / 到期时间;字段都可能缺(null)
+  usage?: {
+    upload: number | null
+    download: number | null
+    total: number | null
+    expire: number | null
+  } | null
 }
 
 export interface OpenboxSubscriptionShare {
@@ -390,41 +390,10 @@ export interface OpenboxSubscriptionSaveResult {
   changed?: boolean
 }
 
-export interface OpenboxDeployResult {
-  ok: boolean
-  stage: 'running' | 'conflict' | 'validate' | 'start' | 'verify' | 'error'
-  message: string
-  badTags: string[]
-}
-
-// GET /deploy/state persists across reloads (store/openbox-store.mjs's DEFAULT_DEPLOY_STATE),
-// so 'idle' (never deployed) is a real value here even though a live deployNow() call itself
-// never returns it.
-export interface OpenboxDeployState {
-  stage: OpenboxDeployResult['stage'] | 'idle'
-  message: string
-  at: number
-  badTags: string[]
-}
-
 // Mirrors server/api/profile.mjs's RULESET_TAG_PATTERN — used client-side purely so the UI can
 // reject obviously-bad input before it round-trips to the server; the server's own check is
 // still the actual authority (see validateProfilePatch).
 export const RULESET_TAG_PATTERN = /^[A-Za-z0-9._!@-]+$/
-
-// config/preview is raw sing-box config JSON straight out of buildConfig — only the shape this
-// UI actually reads (outbounds) is typed; everything else passes through untouched.
-export interface OpenboxConfigOutbound {
-  type: string
-  tag: string
-  outbounds?: string[]
-}
-
-export interface OpenboxConfigPreview {
-  outbounds?: OpenboxConfigOutbound[]
-  [key: string]: unknown
-}
-
 
 // Error bodies aren't consistent across these routes — profile.mjs/subscriptions.mjs answer
 // with {error}, deploy.mjs/service.mjs/penetration.mjs answer with {message} — so both are
@@ -468,13 +437,6 @@ export const fetchProfile = async (): Promise<OpenboxProfile> => {
 export const fetchDnsRewriteDefaults = async (): Promise<OpenboxDnsRewriteRule[]> => {
   const data = await requestJson<{ dnsRewriteDefaults?: OpenboxDnsRewriteRule[] }>('/api/openbox/profile/defaults?region=cn')
   return data.dnsRewriteDefaults ?? []
-}
-
-export const fetchProfileDefaults = async (region: string): Promise<OpenboxProfileDefaults> => {
-  const data = await requestJson<{ defaults: OpenboxProfileDefaults }>(
-    `/api/openbox/profile/defaults?region=${encodeURIComponent(region)}`,
-  )
-  return data.defaults
 }
 
 export const saveProfile = async (patch: Record<string, unknown>): Promise<OpenboxProfile> => {
@@ -718,9 +680,7 @@ export interface OpenboxFailoverStatus {
 }
 export const fetchFailoverStatus = async (): Promise<OpenboxFailoverStatus> =>
   requestJson<OpenboxFailoverStatus>('/api/openbox/failover/status')
-export const refreshFailover = async (): Promise<void> => {
-  await requestJson<{ ok: boolean }>('/api/openbox/failover/refresh', { method: 'POST' })
-}
+
 // 「重新检测」一个故障转移组:正在跑的那轮作废,马上把这个组的节点全部强制测一遍。组不存在回 404
 export const recheckFailover = async (id: string): Promise<void> => {
   await requestJson<{ ok: boolean }>('/api/openbox/failover/recheck', {
@@ -816,39 +776,6 @@ export const refreshSubscription = async (
   })
 }
 
-// deploy.mjs answers with a non-2xx status for every non-'running' stage — requestJson would
-// throw and lose the structured {stage,message,badTags} payload callers need to explain *why*
-// it failed (see RoutingDeployBanner.vue / KernelDeployStateCard.vue), so this parses the body
-// directly instead of reusing requestJson.
-export const deployNow = async (): Promise<OpenboxDeployResult> => {
-  const response = await fetchServerApi('/api/openbox/deploy', {
-    method: 'POST',
-    headers: { Accept: 'application/json' },
-  })
-
-  const data = (await response.json().catch(() => null)) as Partial<OpenboxDeployResult> | null
-
-  return {
-    ok: Boolean(data?.ok),
-    stage: data?.stage || 'error',
-    message: data?.message || '',
-    badTags: data?.badTags || [],
-  }
-}
-
-export const fetchDeployState = async (): Promise<OpenboxDeployState> => {
-  const data = await requestJson<{ state: OpenboxDeployState }>('/api/openbox/deploy/state')
-  return data.state
-}
-
-// Never persists — assembled fresh from the current (already-saved) profile + nodes on every
-// call, so it's safe to call as often as needed to keep the read-only policy-group list current.
-export const fetchConfigPreview = async (): Promise<OpenboxConfigPreview> => {
-  const data = await requestJson<{ config: OpenboxConfigPreview }>('/api/openbox/config/preview')
-  return data.config
-}
-
-
 // --- Kernel/service management, emergency rollback & penetration query (P4b Task 7) ---
 
 export interface OpenboxServiceInfo {
@@ -873,12 +800,14 @@ export interface OpenboxServiceStatus {
   core: OpenboxServiceInfo
   panel: OpenboxServiceInfo
   conflicts: OpenboxConflictService[]
-  // 以下几项新版服务端才带(server/api/service.mjs):跑在哪种系统上('openwrt' / 'systemd')、
+  // 以下几项新版服务端才带(server/api/service.mjs):跑在哪种系统上('openwrt' / 'systemd' / 'container')、
   // 发行版信息、CPU 架构、还没重启生效的改动。老服务端没有,界面按没有处理。
   platform?: string
   osRelease?: string | Record<string, unknown> | null
   arch?: string
   pendingRestart?: { pending: boolean; reasons: string[] }
+  // Docker 容器里跑时('container')才有:容器的局域网 IP,Docker 卡片的提示里要用
+  container?: { lanIp?: string } | null
 }
 
 export type OpenboxServiceAction = 'start' | 'stop' | 'restart' | 'enable' | 'disable'
@@ -1596,14 +1525,6 @@ export const testSiteLatency = (sites: OpenboxSiteInput[]) =>
     body: JSON.stringify({ sites }),
     signal: AbortSignal.timeout(30000),
   })
-
-// 手动测速前看一眼内核的测速排队:busy 为真时界面提示「已排队」(内核没跑 / 老内核没有这个接口时后端回 busy: false)
-export interface OpenboxNodeLatencyQueue {
-  busy: boolean
-  running: number
-  waiting: number
-}
-export const fetchNodeLatencyQueue = () => requestJson<OpenboxNodeLatencyQueue>('/api/openbox/nodes/latency/queue')
 
 // 链式代理编辑框的「测速 / IP 地区」:测框里填的这一份(没保存也能测)
 export interface OpenboxChainLatencyPayload {

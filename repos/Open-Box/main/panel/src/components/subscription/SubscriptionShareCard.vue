@@ -7,7 +7,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 class="flex items-center gap-1 text-base font-semibold">
-            {{ $t('subShareTitle') }}
+            {{ $t('subscriptionShareTitle') }}
             <ChevronUpIcon
               v-if="shareExpanded"
               class="h-4 w-4"
@@ -17,9 +17,9 @@
               class="h-4 w-4"
             />
           </h2>
-          <p class="text-base-content/55 mt-1 text-xs">{{ $t('subShareDescription') }}</p>
+          <p class="text-base-content/55 mt-1 text-xs">{{ $t('subscriptionShareSubtitle') }}</p>
         </div>
-        <button type="button" class="btn btn-primary btn-sm btn-square" v-tip="$t('subShareAdd')" :aria-label="$t('subShareAdd')" @click.stop="openCreate">
+        <button type="button" class="btn btn-primary btn-sm btn-square" v-tip="$t('dnsRewriteAdd')" :aria-label="$t('dnsRewriteAdd')" @click.stop="openCreate">
           <PlusIcon class="h-4 w-4" />
         </button>
       </div>
@@ -27,7 +27,7 @@
 
     <template #content>
       <div v-if="!shares.length" class="text-base-content/55 py-3 text-center text-sm">
-        {{ $t('subShareEmpty') }}
+        {{ $t('subscriptionShareEmpty') }}
       </div>
       <div v-else class="divide-base-content/10 divide-y">
         <div v-for="share in shares" :key="share.id" class="flex flex-wrap items-center gap-3 py-3 first:pt-1 last:pb-1" :class="share.enabled === false && 'opacity-50'">
@@ -36,9 +36,9 @@
           <div class="text-base-content/55 mt-1 truncate font-mono text-xs">{{ shareUrl(share) }}</div>
         </div>
         <div class="flex items-center gap-2">
-          <button type="button" class="btn btn-ghost btn-sm btn-square" :title="$t('subShareToggle')" :class="share.enabled === false ? 'text-base-content/40' : 'text-success'" @click="toggle(share)"><PowerIcon class="h-4 w-4" /></button>
+          <button type="button" class="btn btn-ghost btn-sm btn-square" :title="$t('subscriptionShareToggle')" :class="share.enabled === false ? 'text-base-content/40' : 'text-success'" @click="toggle(share)"><PowerIcon class="h-4 w-4" /></button>
           <button type="button" class="btn btn-ghost btn-sm btn-square" :title="$t('copyLink')" @click="copy(shareUrl(share))"><ClipboardDocumentIcon class="h-4 w-4" /></button>
-          <button type="button" class="btn btn-ghost btn-sm btn-square" :title="$t('subShareRegenerate')" :disabled="busy" @click="regenerate(share)"><ArrowPathIcon class="h-4 w-4" /></button>
+          <button type="button" class="btn btn-ghost btn-sm btn-square" :title="$t('subscriptionShareRegenerate')" :disabled="busy" @click="regenerate(share)"><ArrowPathIcon class="h-4 w-4" /></button>
           <button type="button" class="btn btn-ghost btn-sm btn-square" :title="$t('edit')" @click="openEdit(share)"><PencilSquareIcon class="h-4 w-4" /></button>
           <button type="button" class="btn btn-ghost btn-sm btn-square hover:text-error" :title="$t('delete')" @click="remove(share)"><TrashIcon class="h-4 w-4" /></button>
         </div>
@@ -47,31 +47,29 @@
     </template>
   </CollapseCard>
 
-  <DialogWrapper v-model="dialogOpen" :title="$t(editing ? 'subShareEditTitle' : 'subShareAddTitle')" box-class="w-full max-w-3xl">
+  <DialogWrapper v-model="dialogOpen" :title="$t(editing ? 'subscriptionShareDialogEdit' : 'subscriptionShareDialogNew')" box-class="w-full max-w-3xl">
     <div class="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(280px,0.9fr)]">
       <div class="flex min-h-0 flex-col gap-2">
-        <div class="text-xs font-medium">{{ $t('subShareSelect') }}</div>
+        <div class="text-xs font-medium">{{ $t('subscriptionSharePick') }}</div>
         <div class="max-h-80 overflow-y-auto pr-1">
           <label v-for="sub in subscriptions" :key="sub.id" class="border-base-content/10 flex items-center gap-2 border-b py-2 text-sm first:border-t">
             <input v-model="form.subscriptionIds" type="checkbox" class="checkbox checkbox-sm" :value="sub.id" />
-            <span class="min-w-0 flex-1 truncate">{{ sub.name }}</span><span class="text-base-content/50 text-xs">{{ $t('subShareNodeCount', { count: sub.nodeCount }) }}</span>
+            <span class="min-w-0 flex-1 truncate">{{ sub.name }}</span><span class="text-base-content/50 text-xs">{{ $t('groupAutoNodeCount', { count: sub.nodeCount }) }}</span>
           </label>
         </div>
-        <p v-if="!subscriptions.length" class="text-base-content/55 text-xs">{{ $t('subShareNeedSub') }}</p>
+        <p v-if="!subscriptions.length" class="text-base-content/55 text-xs">{{ $t('subscriptionShareNeedSubscription') }}</p>
       </div>
       <div class="flex flex-col gap-3">
-        <label class="flex flex-col gap-1"><span class="text-xs font-medium">{{ $t('subShareNameLabel') }}</span><input v-model="form.name" class="input input-sm w-full" :placeholder="$t('subShareNamePlaceholder')" /></label>
-        <label class="flex flex-col gap-1"><span class="text-xs font-medium">{{ $t('subShareHostLabel') }}</span><div class="join w-full"><select v-model="form.protocol" class="select select-sm join-item"><option value="http">http://</option><option value="https">https://</option></select><input v-model="form.host" class="input input-sm join-item min-w-0 flex-1 font-mono" :placeholder="$t('subShareHostPlaceholder')" /></div></label>
+        <label class="flex flex-col gap-1"><span class="text-xs font-medium">{{ $t('subscriptionShareName') }}</span><input v-model="form.name" class="input input-sm w-full" :placeholder="$t('subscriptionShareNamePlaceholder')" /></label>
+        <label class="flex flex-col gap-1"><span class="text-xs font-medium">{{ $t('subscriptionShareHost') }}</span><div class="join w-full"><select v-model="form.protocol" class="select select-sm join-item"><option value="http">http://</option><option value="https">https://</option></select><input v-model="form.host" class="input input-sm join-item min-w-0 flex-1 font-mono" :placeholder="$t('subscriptionShareHostPlaceholder')" /></div></label>
         <div class="flex flex-col gap-1">
-          <label class="text-xs font-medium">{{ $t('subShareLinkLabel') }}</label>
+          <label class="text-xs font-medium">{{ $t('subscriptionShareLink') }}</label>
           <div class="join w-full">
             <input :value="displayUrl" readonly class="input input-sm join-item min-w-0 flex-1 font-mono text-xs" />
             <button type="button" class="btn btn-sm join-item" v-tip="$t('copyLink')" @click="copy(displayUrl)"><ClipboardDocumentIcon class="h-4 w-4" /></button>
           </div>
         </div>
-        <label v-if="editing" class="flex cursor-pointer items-center gap-2 text-xs"><input v-model="renewToken" type="checkbox" class="checkbox checkbox-xs" />{{ $t('subShareRenew') }}</label>
-        <img v-if="qrDataUrl" :src="qrDataUrl" :alt="$t('subShareQrAlt')" class="h-44 w-44 self-center rounded-lg bg-white p-1" />
-        <p v-if="editing && renewToken && !generatedShare" class="text-base-content/60 text-xs">{{ $t('subShareRenewHint') }}</p>
+        <img v-if="qrDataUrl" :src="qrDataUrl" :alt="$t('subscriptionShareQr')" class="h-44 w-44 self-center rounded-lg bg-white p-1" />
       </div>
     </div>
     <!-- 底栏:与 v0.1.311 一致,上沿一条通栏分隔线;没选订阅或没填标题时「保存」不可点 -->
@@ -109,14 +107,13 @@ const qrDataUrl = ref('')
 const draftToken = ref('')
 const busy = ref(false)
 // 编辑时才有:勾上保存时换一个新 token(旧链接立即失效);不勾就保持原链接,只改名字 / 主机 / 订阅
-const renewToken = ref(false)
 const form = reactive({ name: '', protocol: 'http' as 'http' | 'https', host: '', subscriptionIds: [] as string[] })
 const currentHost = () => window.location.host
 const currentProtocol = () => window.location.protocol === 'https:' ? 'https' : 'http'
 const shareUrl = (share: OpenboxSubscriptionShare) => `${share.protocol || currentProtocol()}://${share.host || currentHost()}/sub/${share.token}`
 const displayUrl = computed(() => {
   if (generatedShare.value) return shareUrl(generatedShare.value)
-  const token = editing.value ? (renewToken.value ? '' : editing.value.token) : draftToken.value
+  const token = editing.value ? editing.value.token : draftToken.value
   return token ? `${form.protocol}://${form.host || currentHost()}/sub/${token}` : ''
 })
 const makeDraftToken = () => {
@@ -130,23 +127,23 @@ const makeDraftToken = () => {
   return Array.from({ length: 48 }, () => Math.floor(Math.random() * 16).toString(16)).join('')
 }
 const selectedNames = (share: OpenboxSubscriptionShare) => (Array.isArray(share.subscriptionIds) ? share.subscriptionIds : []).map((id) => props.subscriptions.find((s) => s.id === id)?.name || id)
-const reset = () => { form.name = ''; form.protocol = currentProtocol(); form.host = currentHost(); form.subscriptionIds = []; editing.value = null; generatedShare.value = null; draftToken.value = makeDraftToken(); qrDataUrl.value = ''; renewToken.value = false }
+const reset = () => { form.name = ''; form.protocol = currentProtocol(); form.host = currentHost(); form.subscriptionIds = []; editing.value = null; generatedShare.value = null; draftToken.value = makeDraftToken(); qrDataUrl.value = ''; }
 const openCreate = () => { reset(); dialogOpen.value = true }
 const openEdit = (share: OpenboxSubscriptionShare) => { reset(); editing.value = share; form.name = share.name; form.protocol = share.protocol || currentProtocol(); form.host = share.host || currentHost(); form.subscriptionIds = [...share.subscriptionIds]; dialogOpen.value = true }
 const makeQr = async (share: OpenboxSubscriptionShare) => { generatedShare.value = share; qrDataUrl.value = await QRCode.toDataURL(shareUrl(share), { margin: 1, width: 240 }) }
-watch(() => [form.protocol, form.host, draftToken.value, renewToken.value], async () => { if (!generatedShare.value) qrDataUrl.value = displayUrl.value ? await QRCode.toDataURL(displayUrl.value, { margin: 1, width: 240 }) : '' })
+watch(() => [form.protocol, form.host, draftToken.value], async () => { if (!generatedShare.value) qrDataUrl.value = displayUrl.value ? await QRCode.toDataURL(displayUrl.value, { margin: 1, width: 240 }) : '' })
 const save = async () => {
   if (!form.name.trim() || !form.subscriptionIds.length || busy.value) return
   busy.value = true
   try {
     const share = editing.value
-      ? await updateSubscriptionShare(editing.value.id, { name: form.name, host: form.host, protocol: form.protocol, subscriptionIds: form.subscriptionIds, regenerate: renewToken.value })
+      ? await updateSubscriptionShare(editing.value.id, { name: form.name, host: form.host, protocol: form.protocol, subscriptionIds: form.subscriptionIds })
       : await createSubscriptionShare({ name: form.name, host: form.host, protocol: form.protocol, subscriptionIds: form.subscriptionIds, token: draftToken.value })
-    await makeQr(share); emit('changed'); dialogOpen.value = false; showNotification({ content: 'subShareSaved', type: 'alert-success' })
-  } catch (error) { showNotification({ content: 'subShareSaveFailed', type: 'alert-error', params: { message: error instanceof Error ? error.message : String(error) } }) } finally { busy.value = false }
+    await makeQr(share); emit('changed'); dialogOpen.value = false; showNotification({ content: 'subscriptionShareSaved', type: 'alert-success' })
+  } catch (error) { showNotification({ content: 'subscriptionShareSaveFailed', type: 'alert-error', params: { message: error instanceof Error ? error.message : String(error) } }) } finally { busy.value = false }
 }
 const toggle = async (share: OpenboxSubscriptionShare) => { if (busy.value) return; busy.value = true; try { await updateSubscriptionShare(share.id, { name: share.name, host: share.host, protocol: (share.protocol || currentProtocol()) as 'http' | 'https', subscriptionIds: share.subscriptionIds, enabled: share.enabled === false }) ; emit('changed') } finally { busy.value = false } }
 const regenerate = async (share: OpenboxSubscriptionShare) => { if (busy.value) return; busy.value = true; try { await regenerateSubscriptionShare(share.id); emit('changed') } finally { busy.value = false } }
-const remove = async (share: OpenboxSubscriptionShare) => { if (busy.value || !window.confirm(t('subShareDeleteConfirm', { name: share.name }))) return; busy.value = true; try { await deleteSubscriptionShare(share.id); emit('changed') } finally { busy.value = false } }
+const remove = async (share: OpenboxSubscriptionShare) => { if (busy.value || !window.confirm(t('subscriptionShareDeleteConfirm', { name: share.name }))) return; busy.value = true; try { await deleteSubscriptionShare(share.id); emit('changed') } finally { busy.value = false } }
 const copy = async (value: string) => { const ok = await copyToClipboard(value); showNotification({ content: ok ? 'copySuccess' : 'copyFailed', type: ok ? 'alert-success' : 'alert-error' }) }
 </script>

@@ -32,7 +32,8 @@
 </div> -->
 
 
-[![](https://img.shields.io/badge/source-openwrt_25.12-green?logo=openwrt&logoColor=green&style=flat-square)](https://github.com/openwrt/openwrt)
+[![](https://img.shields.io/badge/source-openwrt_25.12-green?logo=openwrt&logoColor=green&style=flat-square)](https://github.com/openwrt/openwrt) 
+![](https://img.shields.io/badge/⭐⭐⭐⭐⭐-Highly_Recommended-brightgreen?style=flat-square)
  ```
 
   _______                     ________        __
@@ -46,7 +47,8 @@
 
 ```
 
-[![](https://img.shields.io/badge/source-immortalwrt_25.12-green?logo=openwrt&logoColor=green&style=flat-square)](https://github.com/immortalwrt/immortalwrt)
+[![](https://img.shields.io/badge/source-immortalwrt_25.12-green?logo=openwrt&logoColor=green&style=flat-square)](https://github.com/immortalwrt/immortalwrt) 
+![](https://img.shields.io/badge/⭐⭐⭐⭐-Generally_Recommended-brightgreen?style=flat-square)
 ```
 .___                               __         .__
 |   | _____   _____   ____________/  |______  |  |
@@ -60,6 +62,7 @@
 ```
 
 [![](https://img.shields.io/badge/source-lean_SNAPSHOT-green?logo=openwrt&logoColor=green&style=flat-square)](https://github.com/coolsnowwolf/lede)
+![](https://img.shields.io/badge/⭐⭐⭐-Recommended-brightgreen?style=flat-square)
 
 ```
      _________
@@ -247,5 +250,3 @@ Special thanks to the following projects/communities for providing inspiration a
 <p align="center">
     <img src="pic/logo/asus.png" width="90"/> <img src="pic/logo/jdcloud.png" width="90"/> <img src="pic/logo/phicomm.png" width="90"/> <img src="pic/logo/RaspberryPi.png" width="90"/> <img src="pic/logo/rockship.png" width="90"/> <img src="pic/logo/xiaomi.png" width="90"/> <img src="pic/logo/x86.png" width="90"/> <img src="pic/logo/xunlei.png" width="90"/>
 </p >
-
-

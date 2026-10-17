@@ -72,7 +72,7 @@
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div
             role="tablist"
-            class="tabs-box tabs tabs-sm"
+            class="tabs-box tabs tabs-xs"
           >
             <a
               role="tab"
@@ -330,7 +330,7 @@ const testingAll = ref(false)
 const latencyText = (originalTag: string) => {
   const r = latency.value[originalTag]
   if (!r) return t('subscriptionLatencyUntested')
-  return r.ok ? `${r.ms}ms` : t('subscriptionLatencyFailed')
+  return r.ok ? `${r.ms}ms` : t('obUpdateStage_failed')
 }
 const latencyClass = (originalTag: string) => {
   const r = latency.value[originalTag]

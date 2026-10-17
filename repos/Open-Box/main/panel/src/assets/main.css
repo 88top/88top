@@ -233,10 +233,7 @@ html.apple-mobile-ui {
   border-radius: var(--app-radius-field, 0.5rem) !important;
 }
 
-#app-content .proxy-node-card {
-  border-radius: var(--app-radius-box, 1rem) !important;
-}
-
+#app-content .proxy-node-card,
 #app-content .connection-table-shell,
 #app-content .domain-penetration-table-card {
   border-radius: var(--app-radius-panel, 1.25rem) !important;
@@ -972,4 +969,11 @@ dialog .overflow-y-auto,
 dialog .overflow-y-scroll,
 [role="dialog"] .overflow-y-scroll {
   overflow-y: auto !important;
+}
+
+/* 代理页选中的节点卡片:自定义背景下 .bg-primary 会被压成 60% 透明(上面 custom-background 那组),
+   v0.1.337 的选中卡片是实心主题色(滑动高亮块画的,卡片自身透明),这里直接把选中卡片钉成实心主题色,
+   悬停也不再变浅 */
+#app-content .proxy-node-card-active {
+  background-color: var(--color-primary) !important;
 }

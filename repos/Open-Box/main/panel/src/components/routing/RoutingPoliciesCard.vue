@@ -219,8 +219,6 @@
       v-model="showFallbackEditor"
       :title="$t('routingFallbackEditTitle')"
       box-class="w-full max-w-2xl"
-      header-class="mx-4 px-0! [&>button]:right-[-0.5rem]!"
-      footer-class="mx-4 px-0!"
     >
       <div
         v-if="fallbackDraft"
@@ -576,7 +574,6 @@ import DialogWrapper from '@/components/common/DialogWrapper.vue'
 import GeoRuleValue from '@/components/routing/GeoRuleValue.vue'
 import RuleUrlValue from '@/components/routing/RuleUrlValue.vue'
 import { showNotification } from '@/helper/notification'
-import '@/i18n/routing-note'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import { Bars3Icon, PencilSquareIcon, PlusIcon, PowerIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import { computed, ref, watch } from 'vue'

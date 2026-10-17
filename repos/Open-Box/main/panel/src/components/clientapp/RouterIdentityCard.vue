@@ -3,27 +3,26 @@
   <div class="card">
     <div class="app-card-inset flex flex-col gap-3">
       <div class="flex flex-col gap-1">
-        <span class="text-base font-semibold">{{ $t('clientAppServerInfoTitle') }}</span>
-        <p class="text-base-content/60 text-xs leading-relaxed">{{ $t('clientAppServerInfoHint') }}</p>
+        <span class="text-base font-semibold">{{ $t('serverInfoTitle') }}</span>
+        <p class="text-base-content/60 text-xs leading-relaxed">{{ $t('serverInfoDescription') }}</p>
       </div>
 
       <div class="flex flex-wrap items-end gap-2">
         <div class="flex min-w-[14rem] flex-1 items-end gap-2">
           <div class="flex shrink-0 flex-col gap-1">
-            <label class="text-xs font-medium">{{ $t('clientAppServerIcon') }}</label>
+            <label class="text-xs font-medium">{{ $t('icon') }}</label>
             <CountrySelect
               :model-value="form.icon"
               clearable
               globes
               brands
               icon-only
-              :placeholder="$t('clientAppServerIconDefault')"
               :placeholder-flag="defaultIcon"
               @update:model-value="onIcon"
             />
           </div>
           <div class="flex min-w-0 flex-1 flex-col gap-1">
-            <label class="text-xs font-medium">{{ $t('clientAppServerName') }}</label>
+            <label class="text-xs font-medium">{{ $t('cfName') }}</label>
             <input
               v-model="form.name"
               type="text"
@@ -34,7 +33,7 @@
           </div>
         </div>
         <div class="flex w-full flex-col gap-1 md:w-44">
-          <label class="text-xs font-medium">{{ $t('clientAppServerRegion') }}</label>
+          <label class="text-xs font-medium">{{ $t('subscriptionRenameTokenRegion') }}</label>
           <CountrySelect
             :model-value="form.region"
             clearable
@@ -91,9 +90,9 @@ const countryLabel = (code: string) => {
 }
 
 const regionPlaceholder = computed(() => {
-  if (detecting.value) return t('clientAppServerRegionAutoDetecting')
-  if (detected.value) return t('clientAppServerRegionAutoDetected', { name: countryLabel(detected.value) })
-  return t('clientAppServerRegionAuto')
+  if (detecting.value) return t('serverInfoRegionAutoDetecting')
+  if (detected.value) return t('serverInfoRegionAutoDetected', { name: countryLabel(detected.value) })
+  return t('serverInfoRegionAuto')
 })
 
 const errorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error))
@@ -129,7 +128,7 @@ const doSave = async () => {
     })
     last = { name, icon, region }
     lastSvg = svg
-    showNotification({ content: 'clientAppServerInfoSaved', type: 'alert-success' })
+    showNotification({ content: 'serverInfoSaved', type: 'alert-success' })
     if (!region && !detected.value) void detect(true)
   } catch (error) {
     Object.assign(form, last)

@@ -2,13 +2,13 @@
   <div class="card bg-base-100 border-base-300/60 border">
     <div class="card-body gap-3 p-4">
       <div class="flex flex-wrap items-start justify-between gap-2">
-        <div>
+        <div class="flex flex-col gap-1">
           <h2 class="text-base font-semibold">{{ $t('bypassPortsTitle') }}</h2>
           <p class="text-base-content/60 text-xs">{{ $t('bypassPortsDescription') }}</p>
         </div>
         <div
           role="tablist"
-          class="tabs-box tabs tabs-sm shrink-0 rounded-full"
+          class="tabs-box tabs tabs-xs shrink-0 rounded-full"
         >
           <a
             v-for="m in MODES"
@@ -32,7 +32,7 @@
           @change="savePorts"
         />
         <p class="text-base-content/50 text-xs">
-          {{ mode === 'whitelist' ? $t('bypassPortsWhitelistHint') : $t('bypassPortsBlacklistHint') }}
+          {{ mode === 'whitelist' ? $t('bypassPortsWhitelistHint') : $t('bypassPortsHint') }}
         </p>
       </div>
     </div>

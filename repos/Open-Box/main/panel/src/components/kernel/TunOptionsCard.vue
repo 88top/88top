@@ -2,8 +2,8 @@
   <div class="card bg-base-100 border-base-300/60 border">
     <div class="card-body gap-3 p-4">
       <div>
-        <h2 class="text-base font-semibold">{{ $t('tunTitle') }}</h2>
-        <p class="text-base-content/60 text-xs">{{ $t('tunDescription') }}</p>
+        <h2 class="text-base font-semibold">{{ $t('tunOptionsTitle') }}</h2>
+        <p class="text-base-content/60 text-xs">{{ $t('tunOptionsDescription') }}</p>
       </div>
 
       <div>
@@ -24,51 +24,46 @@
         :title="$t('tunAdvancedButton')"
         box-class="w-full max-w-2xl"
       >
-        <div class="flex flex-col gap-4 text-sm">
-          <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-3">
-              <label class="w-[7.5rem] shrink-0">{{ $t('tunStackLabel') }}</label>
-              <select
-                class="select select-sm w-36"
-                :value="stack"
-                @change="onStack"
-              >
-                <option value="mixed">mixed</option>
-                <option value="gvisor">gvisor</option>
-                <option value="system">system</option>
-              </select>
-            </div>
-            <p class="text-base-content/60 text-xs">{{ $t('tunStackNote') }}</p>
+        <!-- 结构与 v0.1.337 一致:行间距 gap-3,每行「标签 + 控件」gap-2 可换行,说明独占一行 -->
+        <div class="flex flex-col gap-3 text-sm">
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="w-28 shrink-0 text-sm">{{ $t('tunStackLabel') }}</label>
+            <select
+              class="select select-sm w-36"
+              :value="stack"
+              @change="onStack"
+            >
+              <option value="mixed">mixed</option>
+              <option value="gvisor">gvisor</option>
+              <option value="system">system</option>
+            </select>
+            <p class="text-base-content/60 basis-full text-xs">{{ $t('tunStackNote') }}</p>
           </div>
-          <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-3">
-              <label class="w-[7.5rem] shrink-0">{{ $t('tunMtuLabel') }}</label>
-              <input
-                v-model="mtuText"
-                type="number"
-                min="0"
-                :max="MTU_MAX"
-                class="input input-sm w-28"
-                placeholder="0"
-                @change="saveNumber('mtu')"
-              />
-            </div>
-            <p class="text-base-content/60 text-xs">{{ $t('tunMtuNote') }}</p>
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="w-28 shrink-0 text-sm">{{ $t('tunMtuLabel') }}</label>
+            <input
+              v-model="mtuText"
+              type="number"
+              min="0"
+              :max="MTU_MAX"
+              class="input input-sm w-28"
+              placeholder="0"
+              @change="saveNumber('mtu')"
+            />
+            <p class="text-base-content/60 basis-full text-xs">{{ $t('tunMtuNote') }}</p>
           </div>
-          <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-3">
-              <label class="w-[7.5rem] shrink-0">{{ $t('tunMssLabel') }}</label>
-              <input
-                v-model="mssText"
-                type="number"
-                min="0"
-                :max="MSS_MAX"
-                class="input input-sm w-28"
-                placeholder="0"
-                @change="saveNumber('tcpMss')"
-              />
-            </div>
-            <p class="text-base-content/60 text-xs">{{ $t('tunMssNote') }}</p>
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="w-28 shrink-0 text-sm">{{ $t('tunMssLabel') }}</label>
+            <input
+              v-model="mssText"
+              type="number"
+              min="0"
+              :max="MSS_MAX"
+              class="input input-sm w-28"
+              placeholder="0"
+              @change="saveNumber('tcpMss')"
+            />
+            <p class="text-base-content/60 basis-full text-xs">{{ $t('tunMssNote') }}</p>
           </div>
         </div>
       </DialogWrapper>
@@ -113,7 +108,7 @@ const errorMessage = (error: unknown) => (error instanceof Error ? error.message
 const save = async (patch: Record<string, unknown>) => {
   try {
     await props.patchProfile({ tun: patch })
-    showNotification({ content: 'tunSaved', type: 'alert-success' })
+    showNotification({ content: 'restartPendingToastPlain', type: 'alert-success' })
   } catch (error) {
     showNotification({ content: 'routingSaveFailed', params: { message: errorMessage(error) }, type: 'alert-error' })
   }
@@ -126,7 +121,6 @@ const saveNumber = async (key: 'mtu' | 'tcpMss') => {
   const value = raw === '' ? 0 : Number(raw)
   const [min, max] = key === 'mtu' ? [MTU_MIN, MTU_MAX] : [MSS_MIN, MSS_MAX]
   if (!(value === 0 || (Number.isInteger(value) && value >= min && value <= max))) {
-    showNotification({ content: key === 'mtu' ? 'tunMtuInvalid' : 'tunTcpMssInvalid', params: { min: String(min), max: String(max) }, type: 'alert-error' })
     mtuText.value = String(tun.value.mtu ?? 0)
     mssText.value = String(tun.value.tcpMss ?? 0)
     return

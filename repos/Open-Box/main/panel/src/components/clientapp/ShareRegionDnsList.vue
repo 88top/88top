@@ -103,8 +103,6 @@
       v-model="editorOpen"
       :title="$t(editing ? 'dnsUpstreamEditTitle' : 'dnsUpstreamAddTitle')"
       box-class="w-full max-w-lg"
-      header-class="mx-4 px-0! [&>button]:right-[-0.5rem]!"
-      footer-class="mx-4 px-0!"
     >
       <div
         v-if="draft"
@@ -236,7 +234,6 @@ import {
   isDnsPort,
   regionDnsDefaults,
 } from '@/constant/shareRegionDns'
-import '@/i18n/client-app-dns'
 import { ArrowUturnLeftIcon, PencilSquareIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
