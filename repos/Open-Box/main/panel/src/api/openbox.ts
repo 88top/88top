@@ -8,6 +8,10 @@ export interface OpenboxProfileRoutingCategory {
   target: string
 }
 
+// 兜底站点集的默认选中项。'proxy' 是迁移留下的占位(表示"第一个节点组"),
+// 其余就是一个出站名(direct / 某个节点组 / block)。
+export type OpenboxRuleAction = 'direct' | 'proxy'
+
 // 一个站点集 = 一组匹配规则 + 内核里一个同名 selector。它不记具体节点:
 // selector 的成员由 outboundOptions 决定,用户在代理页点选。
 export interface OpenboxRoutingPolicy {
@@ -252,6 +256,12 @@ export interface OpenboxProfile {
   rulesetDir?: string
 }
 
+export interface OpenboxProfileDefaults {
+  region: string
+  dns: OpenboxProfileDns
+  routing: OpenboxProfileRouting
+}
+
 // Mirrors server/engine/rename.mjs / dictionaries.mjs — see
 // src/components/subscription/rename-defaults.ts for why this shape has no persistence endpoint
 // of its own and how the editor round-trips it.
@@ -366,7 +376,7 @@ export interface OpenboxNodeGroup {
 export interface OpenboxSkippedNode {
   name: string
   type: string
-  reason?: 'unsupported-type' | 'unsupported-plugin' | 'invalid'
+  reason?: 'unsupported-type' | 'unsupported-plugin' | 'unsupported-transport' | 'invalid'
   detail?: string
 }
 export interface OpenboxSubscriptionPreview {
@@ -390,10 +400,41 @@ export interface OpenboxSubscriptionSaveResult {
   changed?: boolean
 }
 
+export interface OpenboxDeployResult {
+  ok: boolean
+  stage: 'running' | 'conflict' | 'validate' | 'start' | 'verify' | 'error'
+  message: string
+  badTags: string[]
+}
+
+// GET /deploy/state persists across reloads (store/openbox-store.mjs's DEFAULT_DEPLOY_STATE),
+// so 'idle' (never deployed) is a real value here even though a live deployNow() call itself
+// never returns it.
+export interface OpenboxDeployState {
+  stage: OpenboxDeployResult['stage'] | 'idle'
+  message: string
+  at: number
+  badTags: string[]
+}
+
 // Mirrors server/api/profile.mjs's RULESET_TAG_PATTERN — used client-side purely so the UI can
 // reject obviously-bad input before it round-trips to the server; the server's own check is
 // still the actual authority (see validateProfilePatch).
 export const RULESET_TAG_PATTERN = /^[A-Za-z0-9._!@-]+$/
+
+// config/preview is raw sing-box config JSON straight out of buildConfig — only the shape this
+// UI actually reads (outbounds) is typed; everything else passes through untouched.
+export interface OpenboxConfigOutbound {
+  type: string
+  tag: string
+  outbounds?: string[]
+}
+
+export interface OpenboxConfigPreview {
+  outbounds?: OpenboxConfigOutbound[]
+  [key: string]: unknown
+}
+
 
 // Error bodies aren't consistent across these routes — profile.mjs/subscriptions.mjs answer
 // with {error}, deploy.mjs/service.mjs/penetration.mjs answer with {message} — so both are
@@ -437,6 +478,13 @@ export const fetchProfile = async (): Promise<OpenboxProfile> => {
 export const fetchDnsRewriteDefaults = async (): Promise<OpenboxDnsRewriteRule[]> => {
   const data = await requestJson<{ dnsRewriteDefaults?: OpenboxDnsRewriteRule[] }>('/api/openbox/profile/defaults?region=cn')
   return data.dnsRewriteDefaults ?? []
+}
+
+export const fetchProfileDefaults = async (region: string): Promise<OpenboxProfileDefaults> => {
+  const data = await requestJson<{ defaults: OpenboxProfileDefaults }>(
+    `/api/openbox/profile/defaults?region=${encodeURIComponent(region)}`,
+  )
+  return data.defaults
 }
 
 export const saveProfile = async (patch: Record<string, unknown>): Promise<OpenboxProfile> => {
@@ -680,7 +728,9 @@ export interface OpenboxFailoverStatus {
 }
 export const fetchFailoverStatus = async (): Promise<OpenboxFailoverStatus> =>
   requestJson<OpenboxFailoverStatus>('/api/openbox/failover/status')
-
+export const refreshFailover = async (): Promise<void> => {
+  await requestJson<{ ok: boolean }>('/api/openbox/failover/refresh', { method: 'POST' })
+}
 // 「重新检测」一个故障转移组:正在跑的那轮作废,马上把这个组的节点全部强制测一遍。组不存在回 404
 export const recheckFailover = async (id: string): Promise<void> => {
   await requestJson<{ ok: boolean }>('/api/openbox/failover/recheck', {
@@ -776,6 +826,39 @@ export const refreshSubscription = async (
   })
 }
 
+// deploy.mjs answers with a non-2xx status for every non-'running' stage — requestJson would
+// throw and lose the structured {stage,message,badTags} payload callers need to explain *why*
+// it failed (see RoutingDeployBanner.vue / KernelDeployStateCard.vue), so this parses the body
+// directly instead of reusing requestJson.
+export const deployNow = async (): Promise<OpenboxDeployResult> => {
+  const response = await fetchServerApi('/api/openbox/deploy', {
+    method: 'POST',
+    headers: { Accept: 'application/json' },
+  })
+
+  const data = (await response.json().catch(() => null)) as Partial<OpenboxDeployResult> | null
+
+  return {
+    ok: Boolean(data?.ok),
+    stage: data?.stage || 'error',
+    message: data?.message || '',
+    badTags: data?.badTags || [],
+  }
+}
+
+export const fetchDeployState = async (): Promise<OpenboxDeployState> => {
+  const data = await requestJson<{ state: OpenboxDeployState }>('/api/openbox/deploy/state')
+  return data.state
+}
+
+// Never persists — assembled fresh from the current (already-saved) profile + nodes on every
+// call, so it's safe to call as often as needed to keep the read-only policy-group list current.
+export const fetchConfigPreview = async (): Promise<OpenboxConfigPreview> => {
+  const data = await requestJson<{ config: OpenboxConfigPreview }>('/api/openbox/config/preview')
+  return data.config
+}
+
+
 // --- Kernel/service management, emergency rollback & penetration query (P4b Task 7) ---
 
 export interface OpenboxServiceInfo {
@@ -806,8 +889,22 @@ export interface OpenboxServiceStatus {
   osRelease?: string | Record<string, unknown> | null
   arch?: string
   pendingRestart?: { pending: boolean; reasons: string[] }
-  // Docker 容器里跑时('container')才有:容器的局域网 IP,Docker 卡片的提示里要用
-  container?: { lanIp?: string } | null
+  // 内核因为和别的代理服务冲突被自动停掉了(界面提示「已自动停止」用)
+  conflictAutoStopped?: boolean
+  // Docker 容器里跑时('container')才有:容器的局域网 IP,以及容器自检结果(Docker 卡片用)
+  container?: {
+    lanIp?: string
+    // 截流方式('tun' / 'stopped' 等)和转发 IP 伪装是否开着
+    mode?: string
+    masquerade?: boolean
+    tun?: boolean
+    netAdmin?: boolean
+    forwarding?: boolean
+    redirectsDisabled?: boolean
+    nftables?: boolean
+    // 策略路由顺序检查:conflicts 是提前查询主路由表的规则
+    routing?: { checked: boolean; conflicts: { priority: number | string; table: number | string }[] } | null
+  } | null
 }
 
 export type OpenboxServiceAction = 'start' | 'stop' | 'restart' | 'enable' | 'disable'
@@ -867,6 +964,8 @@ export interface OpenboxPenetrationRuleCondition {
 export interface OpenboxPenetrationMatched {
   index: number
   rule: OpenboxPenetrationRuleCondition
+  // 这条规则是按目标 IP 命中的(域名解析出来的地址落进了规则集),viaIp 就是那个地址
+  viaIp?: string
   outbound?: string
   action?: string
   // 具体命中的域名/IP 条目(规则集解码后逐条比出来的,或站点集里手写的 'custom');最多 20 条
@@ -881,7 +980,7 @@ export interface OpenboxPenetrationMatched {
 export interface OpenboxRuleAssumption {
   index: number
   rule: Record<string, unknown>
-  needs: ('sourceIp' | 'port' | 'ipVersion')[]
+  needs: ('sourceIp' | 'sourceMac' | 'port' | 'destIp' | 'ipVersion')[]
   outbound?: string
   action?: string
   // 它命中时下钻到的叶子出站;sameOutcome:和这次推算的结果是同一个出站(那它对这次查询没有影响)
@@ -893,6 +992,8 @@ export interface OpenboxDnsAssumption {
   ruleIndex: number
   needs: string[]
   sourceIpCidr: string[]
+  // 按终端 MAC 分流的 DNS 规则:没给终端来源时记成前提,macs 是规则里写的 MAC
+  sourceMac?: string[]
   server?: string
   action?: string
   sameOutcome?: boolean
@@ -933,6 +1034,23 @@ export interface OpenboxPenetrationResult {
   // 内核还在跑旧的分流配置(改了没重启)。为真时「规则路由」是按当前设置推算的,
   // 下面的「真实路由」才是内核此刻的实际行为,两者对不上是正常的。
   routingStale?: boolean
+  // 入口预匹配:新连接的首包由内核按前置自定义分流规则预判。verdict:bypass = 入口放行(kind 区分
+  // 节点服务器 / 直连终端),kernel = 进内核(reason 说明为什么),其它 = 没判出来(error 是原因)
+  preMatch?: {
+    verdict: 'bypass' | 'kernel' | 'unknown'
+    kind?: 'nodes' | 'terminal'
+    reason?: 'fakeip' | 'port' | 'ip' | 'set'
+    port?: number
+    cidr?: string
+    tag?: string
+    // 目标地址没解析出来,命中前置自定义分流的仍按进内核算
+    ipUnknown?: boolean
+    error?: string
+  } | null
+  // 推算时向内核 DNS 解析这个域名的结果:fakeIp = 内核返回的是占位地址(连接进内核后按域名找回目标);
+  // addresses 是解析到的地址;解析不到时 error 是原因。有域名的访问不看 IP 条件,这个地址只拿去比
+  // 内置的私网直连、节点站点直连和按 IP 判的规则
+  resolved?: { fakeIp?: boolean; addresses: string[]; error?: string } | null
   // 部署时第一层的判定(config.meta.json 的 firstLayer,见 server/system/deploy.mjs)
   firstLayer?: {
     dnsMode: string
@@ -940,6 +1058,9 @@ export interface OpenboxPenetrationResult {
     dnsForwardReason: string
     nativeBypass: { enabled: boolean; sets: string[]; reason: string; via?: 'nft' | 'route' }
     dnsSourceRules: boolean
+    // 入口放行方式:whitelist = 默认放行,只有名单里的地址才进内核(needSets 是进内核的集合,
+    // needCidrs 是手写网段的段数);其它 = 默认进内核、名单里的放行,reason 说明为什么没用默认放行
+    entryMode?: { mode: string; needSets?: string[]; needCidrs?: number; reason?: string }
     // 走代理的域名由内核发占位地址(FakeIP 原型)
     fakeIp?: boolean
     // IPv6 分层:off 老关闭语义 / node 代理 v6 交给节点 / ipv4 走代理的降为 IPv4
@@ -1054,14 +1175,22 @@ export interface OpenboxRouteTest {
     connectTo?: string
     // viaProxy:链路末尾是节点(不是内置的直连 / 拒绝)
     viaProxy?: boolean
+    // 实际用的探测方式(GET / HEAD / TCP / TLS)
+    method?: string
+    // 站点被人机验证(Cloudflare)拦下:请求本身是通的,403 不是线路问题
+    challenge?: string
+    // 命中的是只管没有域名的连接的 IP 规则:有域名的访问只按域名判
+    noDomain?: boolean
     notSeen?: boolean
     connectionsError?: string
     debug?: { connections: number; sample: string[] }
   }
 }
 // 服务端每次都会先清内核 DNS 缓存再探测,结果才是当前线路真的问出来的(见 api/route-test.mjs)
-export const testRoute = (target: string, port?: number) =>
-  requestJson<OpenboxRouteTest>('/api/openbox/route-test', { method: 'POST', body: JSON.stringify({ target, port }) })
+// method:探测方式,GET / HEAD(只看响应头)/ TCP(只测连通)/ TLS(连通加握手)
+export type OpenboxProbeMethod = 'GET' | 'HEAD' | 'TCP' | 'TLS'
+export const testRoute = (target: string, port?: number, method: OpenboxProbeMethod = 'GET') =>
+  requestJson<OpenboxRouteTest>('/api/openbox/route-test', { method: 'POST', body: JSON.stringify({ target, port, method }) })
 
 // ---- 模拟 LAN 终端的真实路由测试(server/api/terminal-test.mjs)
 // 面板在路由器上建一个虚拟终端(独立网络命名空间 + veth 接到 LAN 网桥 + DHCP 取址),让它像一台普通 LAN 设备
@@ -1132,7 +1261,8 @@ export interface OpenboxTerminalTest {
   // 具备条件但虚拟终端没建起来(建命名空间 / DHCP 失败),原因原文
   setupError?: string
   firstLayer?: { bypassEnabled: boolean; bypassSets: string[]; dnsMode: string; dnsForward: string }
-  source?: { kind: 'virtual'; name: string; ip: string; mac: string; via: 'dhcp'; dns: string[]; gateway: string; lanDevice: string; reused: boolean; dhcpMs?: number }
+  // override:旁路由场景,DHCP 给的网关不是本机,虚拟终端的网关和 DNS 已改指到本机(gateway 是改成的地址)
+  source?: { kind: 'virtual'; name: string; ip: string; mac: string; via: 'dhcp'; dns: string[]; gateway: string; lanDevice: string; reused: boolean; dhcpMs?: number; override?: { gateway: string } }
   dns?: { skipped: true } | { server: string; ok: boolean; answers: string[]; answers6?: string[]; ms: number; error?: string; error6?: string }
   // dnsmasq 按转发清单把这个域名交给内核 DNS 还是直接问上游(配置推算)
   dnsForward?: { forward: 'kernel' | 'upstream' | 'unknown'; plan: string; suffix?: string; to?: string }
@@ -1142,10 +1272,12 @@ export interface OpenboxTerminalTest {
   // 解析器、经哪个节点发出、上游回了什么。seen=false 时 reason:no-log 连不上日志流 / not-seen 日志里没这条查询
   kernelDns?: OpenboxTerminalKernelDns
   entry?: OpenboxTerminalEntry
-  kernel?: { seen: boolean; inbound?: string; rule?: string; rulePayload?: string; chains?: string[]; destinationIP?: string; host?: string; viaProxy?: boolean }
+  kernel?: { seen: boolean; inbound?: string; rule?: string; rulePayload?: string; chains?: string[]; destinationIP?: string; host?: string; viaProxy?: boolean; noDomain?: boolean }
   exit?: {
     url: string
     port: number
+    method?: string
+    challenge?: string
     connectTo?: string
     localPort?: number
     connectMs?: number
@@ -1160,8 +1292,8 @@ export interface OpenboxTerminalTest {
   timing?: { totalMs: number }
 }
 export const fetchTerminalCapability = () => requestJson<OpenboxTerminalCapability>('/api/openbox/terminal-test/capability')
-export const testTerminal = (target: string, port?: number) =>
-  requestJson<OpenboxTerminalTest>('/api/openbox/terminal-test', { method: 'POST', body: JSON.stringify({ target, port }) })
+export const testTerminal = (target: string, port?: number, method: OpenboxProbeMethod = 'GET') =>
+  requestJson<OpenboxTerminalTest>('/api/openbox/terminal-test', { method: 'POST', body: JSON.stringify({ target, port, method }) })
 
 // ---- 延迟历史(server/api/latency-history.mjs):每个节点最近 10 次测速结果,服务端记、所有浏览器共享
 // node:组的样本带当时选中的节点;节点自己的样本没有
@@ -1612,3 +1744,44 @@ export const testStoredLatencyStream = async (
   if (!state.final) throw new Error('latency stream ended without results')
   return state.final
 }
+
+// 节点信息(服务端 panel/server/api/node-info.mjs):入口地址解析、出口 IP 归属和风控值。
+export interface OpenboxNodeInfo {
+  tag: string
+  type: string
+  protocol: string[]
+  server: string
+  port: number | null
+  // 链式上游:这个节点经哪个节点去连
+  detour?: string
+  addresses: { v4: string[]; v6: string[] }
+  // 入口 IP 的国家(服务端缓存里有才带;没有就再问 entry-country)
+  entryCountry: string
+  resolveError?: string
+}
+
+export interface OpenboxNodeExit {
+  ok: boolean
+  at: number
+  ip: string
+  ipv6: string
+  location: string
+  country: string
+  asn?: string
+  asnOwner?: string
+  ipType: string
+  proxyType: string
+  risk: number | null
+  devices: number | null
+  registeredCountry: string
+  native: boolean | null
+  // 某一路没查到的来源,值是失败原因
+  errors?: { proxycheck?: string; rdap?: string }
+  cached?: boolean
+}
+
+export const fetchNodeInfo = (tag: string) => requestJson<OpenboxNodeInfo>(`/api/openbox/node-info/${encodeURIComponent(tag)}`)
+export const fetchNodeEntryCountry = (tag: string) => requestJson<{ ip: string; country: string }>(`/api/openbox/node-info/${encodeURIComponent(tag)}/entry-country`)
+// refresh = true 跳过 6 小时缓存重新查(服务端 15 秒内的重复刷新仍按缓存答)
+export const fetchNodeExit = (tag: string, refresh = false) =>
+  requestJson<OpenboxNodeExit>(`/api/openbox/node-info/${encodeURIComponent(tag)}/exit`, { method: 'POST', body: JSON.stringify({ refresh }) })

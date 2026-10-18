@@ -1,7 +1,10 @@
-+.apple.www.letv.com
-+.ark.letv.com
-+.dc.letv.com
-+.g3.letv.com
++.click.hunantv.com
++.da.hunantv.com
++.da.mgtv.com
++.log.hunantv.com
++.log.v2.hunantv.com
++.res.hunantv.com
++.log-upload.mihoyo.com
 +.click.gamersky.com
 +.ja.gamersky.com
 +.ja1.gamersky.com
@@ -15,12 +18,10 @@
 log-sdk.gifshow.com
 wlog.kuaishou.com
 apilog-web.acfun.cn
-+.click.hunantv.com
-+.da.hunantv.com
-+.da.mgtv.com
-+.log.hunantv.com
-+.log.v2.hunantv.com
-+.res.hunantv.com
++.apple.www.letv.com
++.ark.letv.com
++.dc.letv.com
++.g3.letv.com
 ads3-normal-hl.zijieapi.com
 ads3-normal.zijieapi.com
 ads5-normal-hl.zijieapi.com
@@ -49,4 +50,3 @@ rtlog5-applog.fqnovel.com
 +.adbehavior.ximalaya.com
 +.adse.wsa.ximalaya.com
 +.adse.ximalaya.com
-+.log-upload.mihoyo.com

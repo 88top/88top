@@ -57,6 +57,20 @@
           </div>
           <!-- 测法切换 + 重新测试,靠右 -->
           <div class="ml-auto flex shrink-0 items-center gap-1">
+            <!-- 探测方式:GET 取内容 / HEAD 只看响应头 / TCP 只测连通 / TLS 连通加握手;换了立刻重测 -->
+            <select
+              v-model="probeMethod"
+              class="select select-sm w-auto"
+              :aria-label="$t('routeProbeMethod')"
+              :title="$t('routeProbeMethod')"
+              :disabled="actualLoading"
+              @change="runActual"
+            >
+              <option value="GET">GET</option>
+              <option value="HEAD">HEAD</option>
+              <option value="TCP">TCP</option>
+              <option value="TLS">TLS</option>
+            </select>
             <div class="join">
               <button
                 type="button"
@@ -264,6 +278,7 @@
               class="route-note"
             >{{ $t('ruleLookupRoutingStale') }}</p>
             <template v-if="rule.matched">
+              <p v-if="rule.matched.viaIp">{{ $t('routeRuleHitByIp', { ip: rule.matched.viaIp }) }}</p>
               <p class="text-base-content/50 font-mono text-[11px] break-all">{{ conditionText }}</p>
               <!-- 第一条已经跟在站点集后面显示了,这里只列其余的 -->
               <div
@@ -339,6 +354,7 @@
               class="text-base-content/50 font-mono text-[11px] break-all"
             >{{ ruleView.rule }}</p>
             <p v-else>{{ $t('routeRuleNoIndex') }}</p>
+            <p v-if="ruleView.noDomain">{{ $t('routeRuleNoDomainNote') }}</p>
             <p>{{ $t('routeRuleDiffBody') }}</p>
           </template>
         </RouteStage>
@@ -361,10 +377,15 @@
             <span class="text-base-content/60 text-xs">{{ ruleEntry.sub }}</span>
           </template>
           <template
-            v-if="ruleEntry.detail"
+            v-if="ruleEntry.detail.length"
             #details
           >
-            <p>{{ ruleEntry.detail }}</p>
+            <p
+              v-for="line in ruleEntry.detail"
+              :key="line"
+            >
+              {{ line }}
+            </p>
           </template>
         </RouteStage>
         <RouteStage
@@ -430,6 +451,10 @@
             <span class="font-medium">{{ ruleDns.rewrite ? $t('routeDnsRewrite') : ruleDns.viaProxy ? $t('routeTestDnsProxy') : $t('routeTestDnsDirect') }}</span>
             <span class="text-base-content/60 font-mono text-xs">{{ ruleDns.serverLine }}</span>
             <span
+              v-if="ruleDns.resolvedShort"
+              class="text-base-content/60 text-xs"
+            >{{ ruleDns.resolvedShort }}</span>
+            <span
               v-if="ruleDns.rewrite"
               class="basis-full text-xs"
             >{{ ruleDns.rewrite }}</span>
@@ -439,6 +464,7 @@
             #details
           >
             <p><span class="text-base-content/50">{{ $t('routeDnsResolver') }}</span> <span class="font-mono">{{ ruleDns.tag }}</span></p>
+            <p v-if="ruleDns.resolvedLine">{{ ruleDns.resolvedLine }}</p>
             <div
               v-if="ruleDns.detour"
               class="flex flex-wrap items-center gap-x-1.5"
@@ -610,6 +636,11 @@
           <template v-if="termBlock">
             <span class="font-medium">{{ termBlock.kind === 'incapable' ? $t('routeTermNotCapable') : $t('routeTermSetupFailed') }}</span>
             <span class="text-base-content/60 basis-full text-xs">{{ termBlock.kind === 'incapable' ? $t('routeTermNotCapableSub', { missing: missingText }) : termBlock.message }}</span>
+            <!-- 虚拟化平台(ESXi 等)要把端口组的「混杂模式」设为接受,否则虚拟网口收不到回包 -->
+            <span
+              v-if="termBlock.kind === 'setup'"
+              class="text-base-content/60 basis-full text-xs"
+            >{{ $t('routeTermSetupFailedHint') }}</span>
             <span class="text-base-content/60 basis-full text-xs">{{ $t('routeTermNoFallbackNote') }}</span>
             <button
               type="button"
@@ -619,7 +650,7 @@
           </template>
           <template v-else-if="mode === 'terminal'">
             <span class="font-medium">{{ terminal?.source ? $t('routeStartVirtual', { name: terminal.source.name }) : $t('routeModeTerminal') }}</span>
-            <span class="text-base-content/60 font-mono text-xs break-all">{{ terminal?.exit?.url || `${target}${port ? `:${port}` : ''}` }}</span>
+            <span class="text-base-content/60 font-mono text-xs break-all">{{ terminal?.exit?.method || probeMethod }} {{ terminal?.exit?.url || `${target}${port ? `:${port}` : ''}` }}</span>
             <span class="text-base-content/60 basis-full text-xs">{{ terminal?.source ? $t('routeStartVirtualSub', { ip: terminal.source.ip }) : $t('routeStartVirtualPending') }}</span>
           </template>
           <template v-else>
@@ -627,7 +658,7 @@
             <span
               v-if="actual?.exit.url"
               class="text-base-content/60 font-mono text-xs break-all"
-            >{{ actual.exit.url }}</span>
+            >{{ actual.exit.method || probeMethod }} {{ actual.exit.url }}</span>
             <span
               v-else
               class="text-base-content/60 text-xs"
@@ -640,6 +671,10 @@
                 v-if="terminal?.source"
                 class="font-mono"
               >{{ $t('routeStartVirtualLease', { mac: terminal.source.mac, gateway: terminal.source.gateway, dns: terminal.source.dns.join(' ') }) }}</p>
+              <p
+                v-if="terminal?.source?.override"
+                class="route-note"
+              >{{ $t('routeStartVirtualOverride', { gateway: terminal.source.override.gateway, ip: terminal.source.gateway }) }}</p>
             </template>
             <template v-else>
               <p>{{ $t('routeStartPanelDetail') }}</p>
@@ -663,7 +698,7 @@ let capabilityPromise: Promise<OpenboxTerminalCapability> | null = null
 
 <script setup lang="ts">
 import type { OpenboxDnsAssumption, OpenboxPenetrationResult, OpenboxRouteTest, OpenboxRuleAssumption, OpenboxTerminalEntry, OpenboxTerminalMissing, OpenboxTerminalTest } from '@/api/openbox'
-import { fetchTerminalCapability, queryPenetration, testRoute, testTerminal } from '@/api/openbox'
+import { fetchTerminalCapability, queryPenetration, testRoute, testTerminal, type OpenboxProbeMethod } from '@/api/openbox'
 import ProxyGroupNow from '@/components/proxies/ProxyGroupNow.vue'
 import ProxyName from '@/components/proxies/ProxyName.vue'
 import RouteStage from '@/components/rules/RouteStage.vue'
@@ -716,6 +751,7 @@ watch(
 // ---------- 真实路由:模拟终端(默认)/ 内核诊断 ----------
 type ActualMode = 'terminal' | 'kernel'
 const mode = ref<ActualMode>('terminal')
+const probeMethod = ref<OpenboxProbeMethod>('GET')
 const capability = ref<OpenboxTerminalCapability | null>(null)
 const terminal = ref<OpenboxTerminalTest | null>(null)
 const actual = ref<OpenboxRouteTest | null>(null)
@@ -744,11 +780,11 @@ const runActual = async () => {
       if (mine !== actualSeq) return
       // 不具备条件:停在这里如实提示,不悄悄改跑内核诊断
       if (!cap.ok) { terminal.value = null; return }
-      const r = await testTerminal(props.target, props.port ?? undefined)
+      const r = await testTerminal(props.target, props.port ?? undefined, probeMethod.value)
       if (mine !== actualSeq) return
       terminal.value = r
     } else {
-      const r = await testRoute(props.target, props.port ?? undefined)
+      const r = await testRoute(props.target, props.port ?? undefined, probeMethod.value)
       if (mine !== actualSeq) return
       actual.value = r
     }
@@ -803,6 +839,9 @@ interface DnsView {
   detour?: string
   // 命中的 DNS 重写:「原域名 → 目标」
   rewrite?: string
+  // 规则推算时向内核 DNS 解析到的结果:resolvedShort 跟在主行后面,resolvedLine 是详情里的完整一句
+  resolvedShort?: string
+  resolvedLine?: string
   v4?: { text: string; tone: Tone }
   // queried:档案开了 IPv6、这次真的查了 AAAA;没查的(未开启 IPv6)不占主行,进详情
   v6?: { text: string; tone: Tone; queried: boolean }
@@ -878,19 +917,31 @@ const ruleOwner = computed(() => rule.value?.matched?.ownerName || '')
 const firstEntry = computed(() => rule.value?.matched?.entries?.[0] || null)
 const ruleReject = computed(() => rule.value?.matched?.action === 'reject')
 // 推算里按"不满足它"跳过的规则,写成一行人话:第 N 条只在<条件>时生效(<去向>);查询没给<信息>,按不满足它的情况推算
-const needWord = (n: string) => t(n === 'sourceIp' ? 'routeNeedSourceIp' : n === 'port' ? 'routeNeedPort' : 'routeNeedIpVersion')
+const needWord = (n: string) =>
+  t(n === 'sourceIp' ? 'routeNeedSourceIp' : n === 'sourceMac' ? 'routeNeedSourceMac' : n === 'port' ? 'routeNeedPort' : n === 'destIp' ? 'routeNeedDestIp' : 'routeNeedIpVersion')
 // 单个地址的 /32、/128 不显示,多个用顿号连
 const hostList = (list: string[]) => list.map((c) => c.replace(/\/(32|128)$/, '')).join(t('routeListJoin'))
 const assumptionLine = (a: OpenboxRuleAssumption) => {
   const r = a.rule
   const scope = a.needs.map((n) => {
     if (n === 'sourceIp') return t('routeAssumeSource', { cidrs: hostList(listOf(r.source_ip_cidr)) })
+    if (n === 'sourceMac') return t('routeAssumeSourceMac', { macs: listOf(r.source_mac_address).join(t('routeListJoin')) })
     if (n === 'port') return t('routeAssumePort', { ports: [...listOf(r.port), ...listOf(r.port_range)].join(t('routeListJoin')) })
+    if (n === 'destIp') {
+      // 目标 IP 落在这些集合 / 网段里:规则集名、手写的网段、私有地址
+      const sets = [...listOf(r.rule_set)]
+      if (listOf(r.ip_cidr).length) sets.push(hostList(listOf(r.ip_cidr)))
+      if (r.ip_is_private) sets.push(t('penetrationRulePrivateIp'))
+      return t('routeAssumeDestIp', { sets: sets.join(t('routeListJoin')) })
+    }
     return t('routeAssumeIpVersion', { v: String(r.ip_version ?? '') })
   }).join(t('routeNeedJoin'))
   const outcome = a.action === 'reject' ? t('routeAssumeReject') : a.outbound ? t('routeAssumeOutbound', { outbound: a.outbound }) : a.action || ''
   const needs = a.needs.map(needWord).join(t('routeNeedJoin'))
-  return a.sameOutcome ? t('routeRuleAssumedSame', { index: a.index + 1, scope, outcome }) : t('routeRuleAssumed', { index: a.index + 1, scope, outcome, needs })
+  if (a.sameOutcome) return t('routeRuleAssumedSame', { index: a.index + 1, scope, outcome })
+  // 只差目标 IP 的规则:这次没有解析到域名的地址,不用再列「查询没给什么」
+  if (a.needs.length === 1 && a.needs[0] === 'destIp') return t('routeRuleAssumedDestIp', { index: a.index + 1, scope, outcome })
+  return t('routeRuleAssumed', { index: a.index + 1, scope, outcome, needs })
 }
 // 会改变出口的前提(relevant)才影响这次推算的结论;去向和结果一样的(same)只在详情里一句带过
 const ruleAssumptions = computed(() => {
@@ -900,6 +951,11 @@ const ruleAssumptions = computed(() => {
 const dnsAssumptionLines = (list?: OpenboxDnsAssumption[]) => {
   const line = (a: OpenboxDnsAssumption) => {
     const outcome = a.action === 'reject' ? t('routeAssumeReject') : a.server ? t('routeAssumeDnsServer', { server: a.server }) : ''
+    // 按终端 MAC 分流的规则:没给终端来源,认不出是哪台终端
+    if (a.sourceMac?.length) {
+      const macs = a.sourceMac.join(t('routeListJoin'))
+      return a.sameOutcome ? t('routeDnsAssumedSameMac', { index: a.ruleIndex + 1, macs, outcome }) : t('routeDnsAssumedMac', { index: a.ruleIndex + 1, macs, outcome })
+    }
     const cidrs = hostList(a.sourceIpCidr || [])
     return a.sameOutcome ? t('routeDnsAssumedSame', { index: a.ruleIndex + 1, cidrs, outcome }) : t('routeDnsAssumed', { index: a.ruleIndex + 1, cidrs, outcome })
   }
@@ -926,25 +982,78 @@ const ruleDns = computed<DnsView>(() => {
   if (!d || 'skipped' in d) return { kind: 'skip', state: 'skip', badge: t('routeDnsSkippedBadge'), tone: 'muted' }
   if ('error' in d) return { kind: 'error', state: 'pending', badge: t('routeDnsUnknown'), tone: 'pending', message: d.error }
   if (d.rejected) return { kind: 'reject', state: 'ok', badge: t('routeDnsPredicted'), tone: 'muted' }
+  // 推算时向内核 DNS 解析到了什么:占位地址 / N 个地址 / 没解析到
+  const res = rule.value.resolved
+  const resolvedShort = res ? (res.fakeIp ? t('routeDnsResolvedFakeIpShort') : res.addresses.length ? t('routeDnsResolvedShort', { count: res.addresses.length }) : t('routeDnsResolveFailedShort')) : ''
+  const resolvedLine = res
+    ? res.fakeIp
+      ? t('routeDnsResolvedFakeIp')
+      : res.addresses.length
+        ? t('routeDnsResolvedAddresses', { list: res.addresses.join(t('routeListJoin')) })
+        : t('routeDnsResolveFailed', { error: res.error || '' })
+    : ''
   return {
     kind: 'decision', state: 'ok', badge: t('routeDnsPredicted'), tone: 'muted',
     viaProxy: Boolean(d.viaProxy), serverLine: serverLineOf(d.server) || d.server?.tag || '', tag: d.server?.tag || '', detour: d.server?.detour || '',
     rewrite: rewriteLineOf(d.rewrite),
     assumptions: dnsAssumptionLines(d.assumed).relevant, assumptionsSame: dnsAssumptionLines(d.assumed).same,
+    resolvedShort, resolvedLine,
   }
 })
 // ③ 左:入口是配置状态,不是本目标的观测——只有目标是 IP、且命中的规则集正好在旁路集合里,才能说它会在入口旁路
 const ruleEntry = computed(() => {
   const f = rule.value?.firstLayer
-  if (!rule.value || ruleError.value) return { state: 'ok' as RouteStageState, value: '', sub: '', detail: '' }
-  if (!f) return { state: 'pending' as RouteStageState, value: t('routeEntryUnknown'), sub: t('routeEntryNoMeta'), detail: '' }
+  if (!rule.value || ruleError.value) return { state: 'ok' as RouteStageState, value: '', sub: '', detail: [] as string[] }
+  if (!f) return { state: 'pending' as RouteStageState, value: t('routeEntryUnknown'), sub: t('routeEntryNoMeta'), detail: [] as string[] }
+  // 入口预匹配:新连接的首包由内核按前置自定义分流规则预判(节点服务器 / 直连终端直接在入口放行,
+  // 其余要看是不是命中前置规则才进内核)。服务端给了 preMatch 就按它说,不再按旁路集合推算。
+  const pre = rule.value.preMatch
+  if (pre) {
+    const why =
+      pre.reason === 'fakeip'
+        ? t('routePreMatchWhyFakeIp')
+        : pre.reason === 'port'
+          ? pre.port === 53
+            ? t('routePreMatchWhyDns')
+            : t('routePreMatchWhyPort', { port: pre.port ?? '' })
+          : pre.reason === 'ip'
+            ? t('routePreMatchWhyIp', { cidr: pre.cidr || '' })
+            : pre.reason === 'set'
+              ? t('routePreMatchWhySet', { tag: pre.tag || '' })
+              : ''
+    const detail = [t('routePreMatchDetail'), pre.ipUnknown ? t('routePreMatchIpUnknown') : ''].filter(Boolean)
+    if (pre.verdict === 'bypass') {
+      return { state: 'ok' as RouteStageState, value: t(pre.kind === 'nodes' ? 'routePreMatchNodes' : 'routePreMatchTerminal'), sub: '', detail }
+    }
+    if (pre.verdict === 'kernel') {
+      return { state: 'ok' as RouteStageState, value: t('routePreMatchKernel', { why }), sub: '', detail }
+    }
+    return { state: 'pending' as RouteStageState, value: t('routePreMatchUnknown', { error: pre.error || '' }), sub: '', detail }
+  }
+  // 入口默认放行:走代理的域名拿占位地址进内核,其余地址不在「进内核」名单里就在入口放行
+  if (f.entryMode?.mode === 'whitelist') {
+    const need = [
+      t('routeEntryNeedFakeIp'),
+      ...(f.entryMode.needSets || []),
+      ...(f.entryMode.needCidrs ? [t('routeEntryNeedCidrs', { count: f.entryMode.needCidrs })] : []),
+    ].join(', ')
+    return {
+      state: 'ok' as RouteStageState,
+      value: t('routeEntryWhitelist'),
+      sub: '',
+      detail: [t('routeEntryWhitelistNeed', { list: need }), t('routeEntryWhitelistDetail')],
+    }
+  }
+  // 没用默认放行时,服务端说明了原因,跟在各条详情后面
+  const whyBlacklist = f.entryMode?.reason ? t('routeEntryWhyBlacklist', { reason: f.entryMode.reason }) : ''
   if (!f.nativeBypass?.enabled) {
-    return { state: 'ok' as RouteStageState, value: t('routeEntryKernel'), sub: t('routeEntryNoBypass'), detail: t('ruleLookupFirstLayerBypassOff', { reason: f.nativeBypass?.reason || '' }) }
+    return { state: 'ok' as RouteStageState, value: t('routeEntryKernel'), sub: t('routeEntryNoBypass'), detail: [t('ruleLookupFirstLayerBypassOff', { reason: f.nativeBypass?.reason || '' }), whyBlacklist].filter(Boolean) }
   }
   const sets = f.nativeBypass.sets
+  const bypassOn = t('ruleLookupFirstLayerBypassOn', { sets: sets.join(', '), via: f.nativeBypass.via === 'route' ? t('ruleLookupFirstLayerViaRoute') : 'nft' })
   const hit = targetKind.value === 'domain' ? '' : listOf((rule.value.matched?.rule as Record<string, unknown> | undefined)?.rule_set).find((s) => sets.includes(s)) || ''
-  if (hit) return { state: 'ok' as RouteStageState, value: t('routeEntryBypassHit', { set: hit }), sub: '', detail: t('ruleLookupFirstLayerBypassOn', { sets: sets.join(', '), via: f.nativeBypass.via === 'route' ? t('ruleLookupFirstLayerViaRoute') : 'nft' }) }
-  return { state: 'pending' as RouteStageState, value: t('routeEntryBypassUndetermined'), sub: '', detail: t('routeEntryBypassUndeterminedDetail') }
+  if (hit) return { state: 'ok' as RouteStageState, value: t('routeEntryBypassHit', { set: hit }), sub: '', detail: [bypassOn, whyBlacklist].filter(Boolean) }
+  return { state: 'pending' as RouteStageState, value: t('routeEntryBypassUndetermined'), sub: '', detail: [bypassOn, t('routeEntryBypassUndeterminedDetail'), whyBlacklist].filter(Boolean) }
 })
 const ruleMatch = computed<{ state: RouteStageState; badge?: string; tone: Tone }>(() => {
   const r = rule.value
@@ -1203,14 +1312,14 @@ const ruleView = computed(() => {
   if (mode.value === 'terminal') {
     const tr = termResult.value
     const e = tr?.entry
-    if (!tr || !e) return { skipped: false, notSeen: false, owner: '', rule: '' }
-    if (e.kind === 'bypass') return { skipped: true, notSeen: false, owner: '', rule: '' }
+    if (!tr || !e) return { skipped: false, notSeen: false, owner: '', rule: '', noDomain: false }
+    if (e.kind === 'bypass') return { skipped: true, notSeen: false, owner: '', rule: '', noDomain: false }
     const k = tr.kernel
-    if (e.kind === 'kernel' && !k?.seen) return { skipped: false, notSeen: true, owner: '', rule: '' }
-    return { skipped: false, notSeen: false, owner: k?.chains?.[0] || '', rule: k?.rule || '' }
+    if (e.kind === 'kernel' && !k?.seen) return { skipped: false, notSeen: true, owner: '', rule: '', noDomain: false }
+    return { skipped: false, notSeen: false, owner: k?.chains?.[0] || '', rule: k?.rule || '', noDomain: Boolean(k?.noDomain) }
   }
   const e = actual.value?.exit
-  return { skipped: false, notSeen: false, owner: e?.chains?.[0] || '', rule: e?.rule || '' }
+  return { skipped: false, notSeen: false, owner: e?.chains?.[0] || '', rule: e?.rule || '', noDomain: Boolean(e?.noDomain) }
 })
 const actualRule = computed<{ state: RouteStageState; badge?: string; tone: Tone }>(() => {
   if (!hasResult.value || actualError.value) return { state: 'ok', tone: 'muted' }
@@ -1225,18 +1334,20 @@ const exitView = computed(() => {
   if (mode.value === 'terminal') {
     const tr = termResult.value
     const x = tr?.exit
-    if (!tr || !x) return { chains: [] as string[], status: undefined as number | undefined, error: '', ms: undefined as number | undefined, forward: null as { device: string; gateway: string } | null }
+    if (!tr || !x) return { chains: [] as string[], status: undefined as number | undefined, error: '', ms: undefined as number | undefined, forward: null as { device: string; gateway: string } | null, challenge: '' }
     const forward = tr.entry?.kind === 'bypass' ? { device: x.forward?.device || tr.entry.device || '', gateway: x.forward?.gateway || tr.entry.gateway || '' } : null
-    return { chains: tr.kernel?.chains || [], status: x.status, error: x.error || '', ms: x.ms, forward }
+    return { chains: tr.kernel?.chains || [], status: x.status, error: x.error || '', ms: x.ms, forward, challenge: x.challenge || '' }
   }
   const e = actual.value?.exit
-  return { chains: e?.chains || [], status: e?.status, error: e?.error || '', ms: e?.ms, forward: null }
+  return { chains: e?.chains || [], status: e?.status, error: e?.error || '', ms: e?.ms, forward: null, challenge: e?.challenge || '' }
 })
 const actualExit = computed<{ state: RouteStageState; badge?: string; tone: Tone }>(() => {
   if (!hasResult.value || actualError.value) return { state: 'ok', tone: 'muted' }
   const v = exitView.value
   const badge = v.ms !== undefined ? `${v.ms} ms` : undefined
   if (v.error) return { state: 'pending', badge, tone: 'error' }
+  // 被人机验证拦下的 403:请求通了,线路没问题,不按失败显示
+  if (v.challenge) return { state: 'ok', badge, tone: 'good' }
   if (v.status !== undefined && v.status >= 400) return { state: 'ok', badge, tone: 'pending' }
   return { state: 'ok', badge, tone: 'good' }
 })
@@ -1249,11 +1360,14 @@ const exitDetails = computed<DetailLine[]>(() => {
     if (x.connectTo) out.push({ text: t('routeExitTarget', { ip: x.connectTo }), mono: true })
     if (tr.source && x.localPort) out.push({ text: t('routeTermExitLocalPort', { ip: tr.source.ip, port: x.localPort }), mono: true })
     if (x.forward) out.push({ text: t('routeTermExitForwardAddress', { device: x.forward.device, address: x.forward.address || '—' }), mono: true })
+    if (exitView.value.forward?.gateway) out.push({ text: t('routeTermExitGateway', { gateway: exitView.value.forward.gateway }), mono: true })
+    if (x.challenge === 'cloudflare') out.push({ text: t('routeTestChallengeCloudflare'), warn: true })
     if (tr.kernel?.seen && tr.kernel.viaProxy && x.connectTo) out.push({ text: t('routeTestExitByIpDirectDns', { ip: x.connectTo }), warn: true })
     return out
   }
   const a = actual.value
   if (!a) return out
+  if (a.exit.challenge === 'cloudflare') out.push({ text: t('routeTestChallengeCloudflare'), warn: true })
   if (actualExitIp.value) out.push({ text: t('routeExitTarget', { ip: actualExitIp.value }), mono: true })
   if (a.exit6) out.push({ text: `IPv6 ${a.exit6.connectTo}: ${a.exit6.ok ? `HTTP ${a.exit6.status} · ${a.exit6.ms}ms` : t('routeTestRequestFailed', { message: errorText(a.exit6.error || '') })}`, warn: !a.exit6.ok })
   if (exitNodeNote.value) out.push({ text: exitNodeNote.value.text, warn: exitNodeNote.value.warn })

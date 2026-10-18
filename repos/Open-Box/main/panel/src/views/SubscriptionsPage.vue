@@ -27,6 +27,15 @@
             <button
               type="button"
               class="btn btn-sm btn-square"
+              v-tip="$t('groupRestore')"
+              :aria-label="$t('groupRestore')"
+              @click="groupsPanel?.restoreDefaults()"
+            >
+              <ArrowUturnLeftIcon class="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-square"
               v-tip="$t('groupAutoAdd')"
               :aria-label="$t('groupAutoAdd')"
               @click="groupsPanel?.openAutoDialog()"
@@ -176,6 +185,7 @@ import SubscriptionCard from '@/components/subscription/SubscriptionCard.vue'
 import SubscriptionShareCard from '@/components/subscription/SubscriptionShareCard.vue'
 import { usePaddingForViews } from '@/composables/paddingViews'
 import {
+  ArrowUturnLeftIcon,
   PlusIcon,
   RssIcon,
   SparklesIcon,
@@ -283,7 +293,7 @@ const handleToggle = async (sub: OpenboxSubscription, enabled: boolean) => {
   try {
     const res = await updateSubscription(sub.id, { enabled })
     await loadSubscriptions()
-    notifySubscriptionSaved(res.changed, 'saved')
+    notifySubscriptionSaved(res.changed, 'saved', res)
   } catch (error) {
     showNotification({
       content: 'saveFailed',
@@ -301,7 +311,7 @@ const handleRefresh = async (id: string) => {
   try {
     const res = await refreshSubscription(id)
     await loadSubscriptions()
-    notifySubscriptionSaved(res.changed, 'refreshed')
+    notifySubscriptionSaved(res.changed, 'refreshed', res)
   } catch (error) {
     showNotification({
       content: 'subscriptionRefreshFailed',

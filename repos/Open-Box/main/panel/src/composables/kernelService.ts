@@ -7,7 +7,7 @@ import {
   type OpenboxServiceStatus,
 } from '@/api/openbox'
 import { showNotification } from '@/helper/notification'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 export const serviceStatus = ref<OpenboxServiceStatus | null>(null)
@@ -35,6 +35,12 @@ export const isRestartDisabled = computed(
     serviceStatus.value === null ||
     !serviceStatus.value?.core.running ||
     Boolean(serviceStatus.value?.conflicts.length),
+)
+export const isEnableDisabled = computed(
+  () => pendingAction.value !== null || serviceStatus.value === null || serviceStatus.value.core.autostart === true,
+)
+export const isDisableDisabled = computed(
+  () => pendingAction.value !== null || serviceStatus.value === null || serviceStatus.value.core.autostart === false,
 )
 
 // 只采纳最后一次发出的刷新:定时刷新和动作后的刷新会交错,先发后回的旧响应不能把新状态盖回去
@@ -69,6 +75,67 @@ export const useServiceStatusPolling = (intervalMs = 10_000) => {
       timer = null
       watchers = 0
     }
+  })
+}
+
+// 有改动要重启内核才生效:原因组合变了(或第一次出现)就弹一条黄色提示,同一条提示只更新不叠加
+const RESTART_REASON_KEYS: Record<string, string> = {
+  nodes: 'restartPendingReasonNodes',
+  dns: 'restartPendingReasonDns',
+  route: 'restartPendingReasonRoute',
+  inbounds: 'restartPendingReasonInbounds',
+  system: 'restartPendingReasonSystem',
+}
+const restartPendingSignature = computed(() => {
+  const pending = serviceStatus.value?.pendingRestart
+  if (!serviceStatus.value?.core.running || !pending?.pending) return ''
+  return [...(pending.reasons || [])].sort().join(',') || 'pending'
+})
+export const useRestartPendingToast = () => {
+  const { t } = useI18n()
+  useServiceStatusPolling()
+  watch(restartPendingSignature, (next, prev) => {
+    if (!next || next === prev) return
+    const reasons = (serviceStatus.value?.pendingRestart?.reasons || [])
+      .map((reason) => (RESTART_REASON_KEYS[reason] ? t(RESTART_REASON_KEYS[reason]) : ''))
+      .filter(Boolean)
+      .join(t('restartPendingReasonSeparator'))
+    showNotification({
+      content: reasons ? 'restartPendingToast' : 'restartPendingToastPlain',
+      params: { reasons },
+      key: 'restart-pending',
+      type: 'alert-warning',
+      timeout: 8000,
+    })
+  })
+}
+
+// 检测到和别的代理服务冲突:内核在跑 / 已被自动停掉 / 没在跑,三种说法;冲突的服务变了才再弹
+const CONFLICT_TOAST_KEYS = {
+  running: 'kernelConflictToastRunning',
+  autoStopped: 'kernelConflictToastAutoStopped',
+  stopped: 'kernelConflictToast',
+} as const
+const conflictState = computed(() =>
+  serviceStatus.value?.core.running ? 'running' : serviceStatus.value?.conflictAutoStopped ? 'autoStopped' : 'stopped',
+)
+const conflictSignature = computed(() => {
+  const conflicts = serviceStatus.value?.conflicts || []
+  return conflicts.length ? `${conflictState.value}:${conflicts.map((c) => c.id).sort().join(',')}` : ''
+})
+export const useKernelConflictToast = () => {
+  const { t } = useI18n()
+  useServiceStatusPolling()
+  watch(conflictSignature, (next, prev) => {
+    if (!next || next === prev) return
+    const names = (serviceStatus.value?.conflicts || []).map((c) => c.label).join(t('listSeparator'))
+    showNotification({
+      content: CONFLICT_TOAST_KEYS[conflictState.value],
+      params: { names },
+      key: 'proxy-conflict',
+      type: 'alert-warning',
+      timeout: 20000,
+    })
   })
 }
 
