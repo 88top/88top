@@ -582,6 +582,8 @@ export interface OpenboxLatencyResult {
   ok: boolean
   ms?: number
   error?: string
+  // 没测成时的原因,如 invalid(生成不出这个节点的出站)、not-found(是组,或已不在订阅里)、timeout、refused
+  reason?: string
 }
 
 // 服务端用 `sing-box tools fetch` 按节点的完整配置真的拨一次号并发一次 HTTPS 请求,
@@ -615,6 +617,8 @@ export interface OpenboxFailoverLane {
   name: string
   // 页签图标(和分组图标同一套短码);空 = 继承分组的图标
   icon?: string
+  // 手动选择:多节点页签不按测速自动择优,在代理页点选节点(不稳时不会来回跳);不写 = 自动优选
+  manual?: boolean
   members: string[]
 }
 export interface OpenboxFailoverSettings {
@@ -673,7 +677,9 @@ export interface OpenboxFailoverLaneStatus {
   index: number
   role: string
   // 派生模式:single = 直接用那个节点;urltest = 内部自动择优子组;empty = 没有有效节点
-  mode: 'single' | 'urltest' | 'empty'
+  mode: 'single' | 'urltest' | 'selector' | 'empty'
+  // 手动选择的页签(mode 为 selector):内部子组是 selector,由用户点选
+  manual?: boolean
   ref: string | null
   subTag: string | null
   members: string[]
@@ -707,6 +713,8 @@ export interface OpenboxFailoverGroupStatus {
   // 正在跑的这一轮:节点测了几个(界面显示「检测中 x / y」);manualRecheck:点了「重新检测」还没做完(v0.1.305 起)
   round?: { startedAt: number; done: number; total: number } | null
   manualRecheck?: boolean
+  // 重新检测已受理、还没轮到测(服务端 v0.1.305 起有这个字段;没有就按 status === 'failing' 判断)
+  recheckPending?: boolean
   settings: { interval?: string; intervalMs?: number; tolerance?: number; testUrl?: string } & Partial<OpenboxFailoverSettings>
   lanes: OpenboxFailoverLaneStatus[]
 }
@@ -726,15 +734,16 @@ export interface OpenboxFailoverStatus {
   probes?: OpenboxProbeStats | null
   groups: OpenboxFailoverGroupStatus[]
 }
-export const fetchFailoverStatus = async (): Promise<OpenboxFailoverStatus> =>
-  requestJson<OpenboxFailoverStatus>('/api/openbox/failover/status')
+export const fetchFailoverStatus = async (signal?: AbortSignal): Promise<OpenboxFailoverStatus> =>
+  requestJson<OpenboxFailoverStatus>('/api/openbox/failover/status', { signal })
 export const refreshFailover = async (): Promise<void> => {
   await requestJson<{ ok: boolean }>('/api/openbox/failover/refresh', { method: 'POST' })
 }
 // 「重新检测」一个故障转移组:正在跑的那轮作废,马上把这个组的节点全部强制测一遍。组不存在回 404
-export const recheckFailover = async (id: string): Promise<void> => {
+export const recheckFailover = async (id: string, signal?: AbortSignal): Promise<void> => {
   await requestJson<{ ok: boolean }>('/api/openbox/failover/recheck', {
     method: 'POST',
+    signal,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ id }),
   })
@@ -744,7 +753,8 @@ export interface OpenboxGroupsPayload {
   groups: OpenboxUserGroup[]
   types: OpenboxGroupType[]
   // 带订阅名,供成员选择器按订阅筛选;组没有订阅归属,不在这个列表里
-  availableNodes: Array<{ name: string; subscription: string }>
+  // upstream:链式代理节点的前置上游节点名(没挂前置的节点没有这个字段)
+  availableNodes: Array<{ name: string; subscription: string; upstream?: string }>
   availableGroups: string[]
 }
 
@@ -1005,8 +1015,16 @@ export interface OpenboxDnsRewriteHit {
   addresses: string[]
 }
 
+// 命中那条规则的「主人」:站点集(policy,name 是出站名)、前置自定义分流(custom,name 是它的名字)、
+// 内置规则(builtin,name 对应一条文案:private / ntp / nodes / clients / kernel / other)
+export interface OpenboxRuleOwner {
+  kind: 'policy' | 'custom' | 'builtin'
+  name: string
+}
+
 export interface OpenboxPenetrationResult {
   matched: OpenboxPenetrationMatched | null
+  owner?: OpenboxRuleOwner | null
   // 要看终端来源 IP / 目标端口 / 地址族才能判、这次查询没给的规则:推算按"不满足它"的情况继续,这里把前提列出来
   assumed?: OpenboxRuleAssumption[]
   // 规则表里有预解析动作(按 IP 判的规则排在域名规则前面):以域名进内核的连接先解析成真实 IP 再判
@@ -1690,10 +1708,7 @@ export interface OpenboxStoredLatencyJob {
   // 是否记进延迟历史,默认记;传 false 只测不记
   record?: boolean
 }
-export interface OpenboxStoredLatencyResult extends OpenboxLatencyResult {
-  // 没测成时的原因,如 invalid(生成不出这个节点的出站)、not-found(是组,或已不在订阅里)
-  reason?: string
-}
+export type OpenboxStoredLatencyResult = OpenboxLatencyResult
 export interface OpenboxStoredLatencyResponse {
   // 顺序和请求里的 jobs 一一对应
   results: OpenboxStoredLatencyResult[]

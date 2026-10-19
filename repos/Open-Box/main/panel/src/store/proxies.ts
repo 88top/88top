@@ -9,13 +9,21 @@ import {
   isSingBox,
   selectProxyAPI,
 } from '@/api'
-import { failoverDisplayName, failoverMembersOf, isFailoverGroup, isFailoverInternalTag } from '@/store/openboxFailover'
+import {
+  failoverDisplayName,
+  isFailoverGroup,
+  isFailoverInternalTag,
+  isManualFailoverLaneTag,
+  recheckFailoverGroup,
+} from '@/store/openboxFailover'
 import { iconUrlFor } from '@/helper/iconUrl'
+import { summarizeLatencyReasons } from '@/helper/latencyReason'
 import {
   loadOpenboxNodeGroups,
   loadOpenboxSiteSets,
   managedOutbounds,
   nodeProviders,
+  nodeUpstreams,
   siteSetIcons,
   siteSetIconScales,
 } from '@/store/openboxSiteSets'
@@ -30,7 +38,6 @@ import {
 } from '@/constant'
 import { isProxyGroup } from '@/helper'
 import { showNotification } from '@/helper/notification'
-import { i18n } from '@/i18n'
 import type { History, Proxy, ProxyProvider } from '@/types'
 import { useStorage } from '@vueuse/core'
 import { last } from 'lodash'
@@ -460,7 +467,7 @@ export const isManualSelectable = (groupName?: string) => {
   if (!groupName) return false
   const g = proxyMap.value[groupName]
   if (!g || String(g.type || '').toLowerCase() !== 'selector') return false
-  if (isFailoverInternalTag(groupName)) return false
+  if (isFailoverInternalTag(groupName)) return isManualFailoverLaneTag(groupName)
   return !managedOutbounds.value.some((m) => m.name === groupName && m.type === 'failover')
 }
 
@@ -613,7 +620,7 @@ const testLatencyOneByOneWithTip = async (
   let testDone = 0
   let testFailed = 0
   // 失败原因归类:内核 delay 接口超时回 504 / 「Timeout」,其余都算连接失败
-  const reasonCounts = new Map<string, number>()
+  const results: { ok: boolean; reason?: string }[] = []
   // 开始时前面已经有测速在跑(名额被占着):这一批要排队,进度提示换成「已排队」的说法
   const queued = limiter.activeCount + limiter.pendingCount > 0
 
@@ -625,10 +632,10 @@ const testLatencyOneByOneWithTip = async (
         if (res.status !== 200) {
           testFailed++
           const message = String((res.data as { message?: string } | undefined)?.message || '')
-          const reason = i18n.global.t(res.status === 504 || /time\s*out/i.test(message) ? 'latencyReasonTimeout' : 'latencyReasonError')
-          reasonCounts.set(reason, (reasonCounts.get(reason) || 0) + 1)
+          results.push({ ok: false, reason: res.status === 504 || /time\s*out/i.test(message) ? 'timeout' : 'error' })
           setHistory(name, NOT_CONNECTED)
         } else {
+          results.push({ ok: true })
           setHistory(name, res.data.delay)
         }
         testDone++
@@ -648,19 +655,16 @@ const testLatencyOneByOneWithTip = async (
   )
   // 这一批测完让服务端读一次内核,成功的结果进时间线
   void syncLatencyHistory()
-  const reasons = [...reasonCounts]
-    .sort((a, b) => b[1] - a[1])
-    .map(([reason, n]) => i18n.global.t('failoverFailItem', { reason, n }))
-    .join(i18n.global.t('listSeparator'))
+  const reasons = summarizeLatencyReasons(results)
   showNotification({
-    content: reasons ? 'testFinishedReasonsTip' : 'testFinishedResultTip',
+    content: testFailed ? 'testFinishedReasonsTip' : 'testFinishedResultTip',
     key: TIP_KEY + keyName,
     params: {
       name: getNameForNotification(displayName, url),
       total: total.toString(),
       success: `${total - testFailed}`,
       failed: `${testFailed}`,
-      ...(reasons ? { reasons } : {}),
+      reasons,
     },
     type: testFailed ? 'alert-warning' : 'alert-success',
     timeout: 3000,
@@ -688,54 +692,17 @@ export const proxyNodesLatencyTest = async (
   return testLatencyOneByOneWithTip(scopeName, nodes, url, displayName, keyName)
 }
 
-// 故障转移组的整组测速:内核里它是 selector,按 selector 逐个成员测只会测到每个页签当前选中的那一个节点,
-// 兜底拒绝还会算一次超时。这里按页签来——多节点页签走内核的组测速(全员重测 + 组内重选),单节点页签测那个
-// 节点,拒绝不测;最后按各页签里的全部节点报一条统一的「N 成功,M 超时」
-const failoverGroupLatencyTest = async (proxyGroupName: string) => {
-  const url = getTestUrl(proxyGroupName)
-  const timeout = Math.max(5000, speedtestTimeout.value)
-  const members = failoverMembersOf(proxyGroupName, proxyMap.value[proxyGroupName]?.all ?? [])
-  const nodes = new Set<string>()
-  await Promise.allSettled(
-    members.map((member) =>
-      limiter(async () => {
-        const p = proxyMap.value[member]
-        if (p?.type?.toLowerCase() === PROXY_TYPE.URLTest) {
-          for (const n of p.all ?? []) nodes.add(n)
-          await fetchProxyGroupLatencyAPI(member, url, timeout)
-          return
-        }
-        nodes.add(member)
-        const res = await latencyTestForSingle(member, url, timeout)
-        setHistory(member, res.status === 200 ? res.data.delay : NOT_CONNECTED)
-      }),
-    ),
-  )
-  await fetchProxies()
-  const all = [...nodes]
-  const failedNames = all.filter((name) => getLatencyByName(name) === NOT_CONNECTED)
-  void reportLatencyTimeouts(failedNames).then(() => syncLatencyHistory())
-  const testFailed = failedNames.length
-  showNotification({
-    content: 'testFinishedResultTip',
-    key: TIP_KEY + proxyGroupName,
-    params: {
-      name: getNameForNotification(proxyGroupName, url),
-      total: all.length.toString(),
-      success: `${all.length - testFailed}`,
-      failed: `${testFailed}`,
-    },
-    type: testFailed ? 'alert-warning' : 'alert-success',
-    timeout: 3000,
-  })
-}
-
 export const proxyGroupLatencyTest = async (proxyGroupName: string) => {
   const proxyNode = proxyMap.value[proxyGroupName]
   const all = proxyNode.all ?? []
   const url = getTestUrl(proxyGroupName)
 
-  if (isFailoverGroup(proxyGroupName)) return failoverGroupLatencyTest(proxyGroupName)
+  // 故障转移组的测速 = 重新检测:服务端按页签把节点全部重测一遍,做完后再拉一次代理列表
+  if (isFailoverGroup(proxyGroupName)) {
+    await recheckFailoverGroup(proxyGroupName)
+    fetchProxies().catch(() => {})
+    return
+  }
 
   if (
     [PROXY_TYPE.Selector, PROXY_TYPE.LoadBalance, PROXY_TYPE.Smart].includes(
@@ -868,6 +835,17 @@ export const getProxyRouteChain = (name: string) => {
   }
 
   return routeChain
+}
+
+// 把一条路由链拆成「链上的跳 / 前置上游 / 目标」:最后一个节点如果挂了前置上游,
+// 链就是 hops → [前置] 上游 → 目标;没挂前置就原样返回,target 为空
+export const splitChainHops = (chain: string[]) => {
+  const target = chain[chain.length - 1]
+  const upstream = target ? nodeUpstreams.value.get(target) : undefined
+  if (!upstream) return { hops: chain, upstream: [] as string[], target: '' }
+  const seen = new Set(chain)
+  const layers = [upstream, ...getProxyRouteChain(upstream)].filter((n) => !seen.has(n))
+  return { hops: chain.slice(0, -1), upstream: layers, target }
 }
 
 export const getProxyGroupChains = (name: string) => {

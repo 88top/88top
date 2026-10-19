@@ -1,5 +1,6 @@
 import type { OpenboxFailoverGroupStatus, OpenboxFailoverStatus } from '@/api/openbox'
 import { fetchFailoverStatus, recheckFailover } from '@/api/openbox'
+import { latencyReasonText } from '@/helper/latencyReason'
 import { showNotification } from '@/helper/notification'
 import { i18n } from '@/i18n'
 import { managedOutbounds } from '@/store/openboxSiteSets'
@@ -95,6 +96,8 @@ export interface FailoverLaneView {
   valid: string[]
   invalid: string[]
   kernelNow: string | null
+  // 手动选择的页签:成员由用户在代理页点选,不按测速自动择优
+  manual: boolean
   // 页签图标(短码;已按「自己的 → 继承父组」算好),iconScale 跟父组
   icon: string
   iconScale: number
@@ -120,37 +123,9 @@ export const failoverLanesOf = (
     }
     const ref = st ? st.ref : valid.length === 1 ? valid[0]! : subTag
     const kernelNow = subTag ? (proxies[subTag]?.now ?? null) : valid.length === 1 ? valid[0]! : null
-    return { id: lane.id, index, label: lane.name || failoverRoleLabel(index), ref, subTag, valid, invalid, kernelNow, icon: lane.icon || group.icon || '', iconScale: group.iconScale || 0 }
+    return { id: lane.id, index, label: lane.name || failoverRoleLabel(index), ref, subTag, valid, invalid, kernelNow, manual: Boolean(lane.manual || st?.manual || st?.mode === 'selector'), icon: lane.icon || group.icon || '', iconScale: group.iconScale || 0 }
   })
 }
-// 「最近切换:主用 → 备用 1(页签失效)· 14:20:05」这一句(没切换过就是空串)
-export const failoverLastSwitchText = (groupName: string, lanes: FailoverLaneView[]) => {
-  const status = failoverGroupByTag.value.get(groupName)
-  const sw = status?.lastSwitch
-  if (!sw) return ''
-  const t = i18n.global.t
-  const refLabel = (laneId: string | null, ref: string) => {
-    const lane = laneId ? lanes.find((l) => l.id === laneId) : null
-    if (lane) return lane.label
-    if (status && ref === status.rejectTag) return t('failoverReject')
-    return ref || '—'
-  }
-  const reasonKey: Record<string, string> = {
-    'lane-failed': 'failoverReasonLaneFailed',
-    'restore-primary': 'failoverReasonRestore',
-    'all-failed': 'failoverReasonAllFailed',
-    'priority-changed': 'failoverReasonPriority',
-    recovered: 'failoverReasonRecovered',
-    initial: 'failoverReasonInitial',
-  }
-  return t('failoverLastSwitch', {
-    from: refLabel(sw.from.laneId, sw.from.ref),
-    to: refLabel(sw.to.laneId, sw.to.ref),
-    reason: reasonKey[sw.reason] ? t(reasonKey[sw.reason]) : sw.reason,
-    time: new Date(sw.at).toLocaleTimeString(),
-  })
-}
-
 // 内核此刻在哪个页签:先信服务端记录的当前页签,否则按顺序找第一个引用等于父组 now 的
 export const failoverCurrentLaneId = (groupName: string, lanes: FailoverLaneView[], now: string | undefined) => {
   const status = failoverGroupByTag.value.get(groupName)
@@ -179,13 +154,6 @@ export const failoverLaneOfTag = (tag: string) => {
 // 这个组此刻是不是在兜底拒绝上(所有页签都没通过测速,流量被拒绝;服务端每分钟复查一次)
 export const isFailoverRejected = (groupName: string) => failoverGroupByTag.value.get(groupName)?.status === 'reject'
 
-// 失败类别的文案:复用测速失败原因那一套(latencyReasonTimeout 等),没有对应文案就原样显示
-const failKindLabel = (kind: string) => {
-  const camel = kind.replace(/[-_ ]+(.)/g, (_m, c: string) => c.toUpperCase())
-  const key = `latencyReason${camel.charAt(0).toUpperCase()}${camel.slice(1)}`
-  return i18n.global.te(key) ? i18n.global.t(key) : kind
-}
-
 // 「状态码 404(2 个)、超时(1 个)」:这个组所有失败节点按原因归类、多的在前。没有失败节点就是空串
 export const failoverFailReasons = (groupName: string) => {
   const group = failoverGroupByTag.value.get(groupName)
@@ -198,7 +166,7 @@ export const failoverFailReasons = (groupName: string) => {
       if (seen.has(tag) || !node || node.ok !== false) continue
       seen.add(tag)
       const code = node.kind === 'status' ? /unexpected status (\d{3})/.exec(node.error || '')?.[1] : undefined
-      const label = code ? t('failoverFailStatusCode', { code }) : failKindLabel(node.kind || (node.reason === 'timeout' ? 'timeout' : 'error'))
+      const label = code ? t('failoverFailStatusCode', { code }) : latencyReasonText(node.kind || (node.reason === 'timeout' ? 'timeout' : 'error'))
       counts.set(label, (counts.get(label) || 0) + 1)
     }
   }
@@ -217,19 +185,54 @@ export const failoverProbeOverload = computed(() => {
   return { demand: p.demandPerSec, done: p.throughputPerSec }
 })
 
-// 点「重新检测」:通知服务端马上把这个组的节点全部重测一遍,再刷新一次状态
+// 故障转移组的「测速」就是重新检测(与上游 v0.1.338 一致):通知服务端马上把这个组的节点全部重测一遍,
+// 然后每秒看一次状态,直到服务端做完(最多等 2 分钟)。同一个组正在检测时再点不重复发
+const rechecking = new Set<string>()
 export const recheckFailoverGroup = async (groupName: string) => {
-  const group = failoverGroupByTag.value.get(groupName)
-  if (!group) return
+  if (rechecking.has(groupName)) return
+  rechecking.add(groupName)
+  let started = false
+  const controller = new AbortController()
+  const { signal } = controller
+  const deadline = Date.now() + 120_000
+  const timer = setTimeout(() => controller.abort(new Error(i18n.global.t('latencyTimeout'))), 120_000)
   try {
-    await recheckFailover(group.id)
+    let id =
+      failoverGroupByTag.value.get(groupName)?.id ??
+      managedOutbounds.value.find((g) => g.name === groupName && g.type === 'failover')?.id
+    if (!id) {
+      failoverStatus.value = await fetchFailoverStatus(signal)
+      signal.throwIfAborted()
+      id = failoverGroupByTag.value.get(groupName)?.id
+    }
+    if (!id) throw new Error(groupName)
+    await recheckFailover(id, signal)
+    started = true
     showNotification({ content: 'failoverRecheckStarted', params: { name: groupName }, type: 'alert-success' })
+    do {
+      const status = await fetchFailoverStatus(signal)
+      failoverStatus.value = status
+      const group = status.groups.find((g) => g.id === id)
+      if (!group || status.paused || group.paused) break
+      const pending = group.recheckPending ?? group.status === 'failing'
+      if ((!group.manualRecheck && !group.inFlight && !pending) || Date.now() >= deadline) break
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    } while (Date.now() < deadline)
   } catch (error) {
-    showNotification({
-      content: 'failoverRecheckFailed',
-      params: { error: error instanceof Error ? error.message : String(error) },
-      type: 'alert-error',
-    })
+    const message = error instanceof Error ? error.message : String(error)
+    showNotification(
+      started
+        ? { content: 'testRequestFailedTip', params: { message }, type: 'alert-error' }
+        : { content: 'failoverRecheckFailed', params: { error: message }, type: 'alert-error' },
+    )
+  } finally {
+    clearTimeout(timer)
+    rechecking.delete(groupName)
   }
-  await loadFailoverStatus()
 }
+
+// 这个内部子组是不是某个手动选择页签的 selector(是的话它的成员卡片可以点选)
+export const isManualFailoverLaneTag = (tag: string) =>
+  [...failoverGroupByTag.value.values()].some((g) =>
+    g.lanes.some((l) => l.subTag === tag && (l.manual || l.mode === 'selector')),
+  )

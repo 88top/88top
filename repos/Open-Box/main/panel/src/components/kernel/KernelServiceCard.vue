@@ -12,7 +12,7 @@
           />
           <span
             v-if="openboxVersion"
-            class="font-mono text-sm"
+            class="font-mono text-base"
           >{{ openboxVersion }}</span>
         </div>
         <div class="ml-auto flex items-center gap-2">
