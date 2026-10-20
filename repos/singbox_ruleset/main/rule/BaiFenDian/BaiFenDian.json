@@ -1,0 +1,19 @@
+{
+  "rules": [
+    {
+      "domain_suffix": [
+        "percent.cn",
+        "bfdcloud.com",
+        "pdeepmatrix.com",
+        "mediaforce.cn",
+        "xworld.net.cn",
+        "pertalk.cn",
+        "marimall.cn",
+        "bfdcdn.com",
+        "blingoffice.com",
+        "baifendian.com"
+      ]
+    }
+  ],
+  "version": 2
+}

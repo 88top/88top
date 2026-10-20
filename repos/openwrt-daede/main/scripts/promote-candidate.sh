@@ -21,18 +21,20 @@ jq -e --arg sha "$CANDIDATE_SHA" --argjson run "$BUILD_RUN_ID" \
     publish/manifest.json >/dev/null || fail "manifest does not identify this candidate and build"
 cp publish/manifest.json publish/feed/release-manifest.json
 
-run_state=$(gh run view "$BUILD_RUN_ID" --json status,conclusion,headSha \
-    --jq '.status + " " + (.conclusion // "") + " " + .headSha')
-[[ "$run_state" = "completed success $CANDIDATE_SHA" ]] || fail "build run is not successful for the candidate: $run_state"
+# 完整验证来源校验：用 GitHub API 证明 candidate 经过了全部验证
+#（assemble dae/daed、audit、单构建、16 目标矩阵），且每项验证的都是该 SHA。
+# verification.json 只做关联，证明来自 API。fail-closed，发生在改动 main 之前。
+MANIFEST_PATH="$PWD/publish/manifest.json" \
+    bash "$(dirname "$0")/verify-candidate.sh"
 
 git fetch -q origin refs/heads/main
 remote_main=$(git ls-remote origin refs/heads/main | cut -f1)
-remote_staging=$(git ls-remote origin "refs/heads/$STAGING" | cut -f1)
 [[ "$remote_main" = "$BASE_SHA" || "$remote_main" = "$CANDIDATE_SHA" ]] || fail "main moved; candidate must be rebuilt"
-if [[ "$remote_main" = "$BASE_SHA" ]]; then
-    [[ "$remote_staging" = "$CANDIDATE_SHA" ]] || fail "candidate branch moved or vanished"
-    git fetch -q origin "refs/heads/$STAGING"
-fi
+# 冻结语义：candidate 由 tag 标识，不再依赖 staging 分支位置。
+# staging 分支在冻结后可能已移动（新同步开始），不影响本次晋升。
+candidate_tag_sha=$(git ls-remote origin "refs/tags/candidate/${CANDIDATE_SHA}" | cut -f1)
+[[ "$candidate_tag_sha" = "$CANDIDATE_SHA" ]] || fail "candidate tag missing or moved"
+git fetch -q origin "$CANDIDATE_SHA"
 git merge-base --is-ancestor "$BASE_SHA" "$CANDIDATE_SHA" || fail "candidate does not descend from its base"
 
 aggregate_workflow=$(GH_TOKEN="$AGGREGATE_FEED_TOKEN" gh api \
@@ -73,8 +75,12 @@ stage="r2:${R2_BUCKET}/openwrt-feed/daed-candidates/${CANDIDATE_SHA}"
 probe="r2:${R2_BUCKET}/openwrt-feed/daed-candidates/.write-probe-${GITHUB_RUN_ID:-$BUILD_RUN_ID}"
 rclone copyto publish/manifest.json "$probe"
 rclone deletefile "$probe"
-rclone copy publish/ "$stage/" --immutable --fast-list
-rclone check publish/ "$stage/" --download --fast-list
+# --checksum：按内容比对。promote 重试时本地 publish/ 是重新生成的，
+# 文件 mtime 与 stage 里已上传的不同，只按时间戳比对会被 --immutable 误判为已修改。
+rclone copy publish/ "$stage/" --immutable --checksum --fast-list
+# verification.json 是 gate 写入 stage 的验证记录（元数据，不属于发布内容，
+# 本地 publish/ 由构建产物生成、不含此文件），校验时排除。
+rclone check publish/ "$stage/" --download --fast-list --exclude verification.json
 
 # The unified feed also carries luci-app-daede from jell. Its version must not
 # supersede this candidate after main and the tag have moved.
@@ -124,10 +130,45 @@ if [[ "$remote_main" = "$BASE_SHA" ]]; then
 fi
 
 notes="$rclone_dir/release-notes.md"
+BASE="https://github.com/kenzok8/openwrt-daede/releases/download/${tag}"
+ARCHS="aarch64_cortex-a53 aarch64_cortex-a72 aarch64_generic arm_cortex-a7_neon-vfpv4 arm_cortex-a9 arm_cortex-a9_neon i386_pentium4 x86_64"
+cell_ipk() {
+    pkg="$1"; arch="$2"; fallback="$3"
+    f=$(ls publish/release/${pkg}_*_${arch}.ipk 2>/dev/null | head -1)
+    [ -n "$f" ] && echo "[$(basename $f)](${BASE}/$(basename $f))" || echo "$fallback"
+}
+cell_apk() {
+    pkg="$1"; arch="$2"
+    f=$(ls publish/release/${pkg}-*-${arch}.apk 2>/dev/null | head -1)
+    [ -n "$f" ] && echo "[$(basename $f)](${BASE}/$(basename $f))" || echo "—"
+}
+noarch_ipk() {
+    pkg="$1"
+    f=$(ls publish/release/${pkg}_*_all.ipk 2>/dev/null | head -1)
+    [ -n "$f" ] && echo "[$(basename $f)](${BASE}/$(basename $f))" || echo "—"
+}
 {
     printf '# openwrt-daede %s\n\n' "$tag"
     printf 'Pinned upstream dae/daed release from candidate `%s`.\n\n' "$CANDIDATE_SHA"
-    printf 'All 16 SDK targets passed the patch audit and package gate. Build run: %s.\n' "$BUILD_RUN_ID"
+    printf 'All 16 SDK targets passed the patch audit and package gate. Build run: %s.\n\n' "$BUILD_RUN_ID"
+    echo "## Packages / 安装包"
+    echo ""
+    echo "## 📦 SDK 24.10 · 稳定版 (IPK)"
+    echo ""
+    echo "| 架构 | dae | daed | luci-app-daede |"
+    echo "| :--- | :--- | :--- | :--- |"
+    luci_fallback=$(noarch_ipk luci-app-daede)
+    for arch in $ARCHS; do
+        echo "| \`${arch}\` | $(cell_ipk dae $arch —) | $(cell_ipk daed $arch —) | $(cell_ipk luci-app-daede $arch "$luci_fallback") |"
+    done
+    echo ""
+    echo "## 📦 SDK 25.12 · 稳定版 (APK)"
+    echo ""
+    echo "| 架构 | dae | daed | luci-app-daede |"
+    echo "| :--- | :--- | :--- | :--- |"
+    for arch in $ARCHS; do
+        echo "| \`${arch}\` | $(cell_apk dae $arch) | $(cell_apk daed $arch) | $(cell_apk luci-app-daede $arch) |"
+    done
 } > "$notes"
 if ! gh release view "$tag" >/dev/null 2>&1; then
     gh release create "$tag" --draft --verify-tag --target "$CANDIDATE_SHA" \
@@ -165,7 +206,13 @@ aggregate_run=${aggregate_url##*/}
 GH_TOKEN="$AGGREGATE_FEED_TOKEN" gh run watch "$aggregate_run" \
     -R kenzok8/openwrt-clashoo --exit-status
 gh release edit "$tag" --draft=false --prerelease=false
-rclone copyto "$rclone_dir/pending.json" "$state/completed/${CANDIDATE_SHA}.json" --immutable
+# 冻结 tag 已完成使命（v* tag + release 才是 durable 引用）；删掉防止累积。
+# 失败不致命：prune 工作流会清理 7 天以上的残留 candidate tag。
+git -c credential.helper='!gh auth git-credential' push origin \
+    --delete "refs/tags/candidate/${CANDIDATE_SHA}" 2>/dev/null \
+    || echo "warning: cannot delete candidate tag (non-fatal)"
+# --checksum：promote 中断后重跑时文件已存在但内容相同，按内容比对可幂等。
+rclone copyto "$rclone_dir/pending.json" "$state/completed/${CANDIDATE_SHA}.json" --immutable --checksum
 rclone cat "$state/completed/${CANDIDATE_SHA}.json" > "$rclone_dir/completed.json"
 cmp -s "$rclone_dir/pending.json" "$rclone_dir/completed.json" || fail "completion state differs"
 rclone deletefile "$pending"

@@ -1,0 +1,16 @@
+{
+  "rules": [
+    {
+      "domain_suffix": [
+        "aljazeera.com",
+        "aljazeera.net",
+        "ajplus.net",
+        "srebrenica360.com",
+        "syhacked.com",
+        "sarajevopodopsadom.com",
+        "palestineremix.com"
+      ]
+    }
+  ],
+  "version": 2
+}
