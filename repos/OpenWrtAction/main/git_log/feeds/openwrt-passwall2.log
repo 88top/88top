@@ -1,12 +1,22 @@
 <details> <summary> <b>openwrt-passwall2 new commit log :rocket: </b> </summary>
 
-#### [:mega: Full Changelog. ](https://github.com/Openwrt-Passwall/openwrt-passwall2/compare/74ab9b7901c98ad21fc927b176ac06921d88e3a4...24595ef82ed36724ad3a2d10caa45b518917cdaa)  
+#### [:mega: Full Changelog. ](https://github.com/Openwrt-Passwall/openwrt-passwall2/compare/24595ef82ed36724ad3a2d10caa45b518917cdaa...896c586a27c9a7c0b9e3d75b631965dea86b9945)  
 :heavy_exclamation_mark: The list displays only the latest 15 commit logs.  
 
 SHA|Author|Date|Message
 -|-|-|-
-24595ef|A-BO|Sat Oct 17 00:56:16 2026 +0800|luci: add MASQUE support
-ab72ff4|A-BO|Sat Oct 17 00:30:02 2026 +0800|luci: refactor locking for subscription and rule updates
-fc2be8d|A-BO|Fri Oct 16 23:37:32 2026 +0800|luci: add github proxy in app update
-c7acd11|A-BO|Fri Oct 16 22:39:55 2026 +0800|luci: optimize iface hotplug code
+896c586|A-BO|Wed Oct 21 23:54:26 2026 +0800|luci: select nslookup DNS port format based on BusyBox version
+f0a622b|A-BO|Wed Oct 21 22:53:51 2026 +0800|luci: add shared SHA256 verification for update downloads
+300ea00|A-BO|Tue Oct 20 23:21:05 2026 +0800|feat(subscribe): compute md5 on parsed nodes and decouple account info refresh
+20ecdbe|handsomeji|Tue Oct 20 18:14:05 2026 +0800|luci: bump to 26.10.20
+dd70743|ShanStone|Wed Oct 14 17:19:20 2026 +0800|luci: make insert_nftset function accept pipe input only
+6af638d|kuaifan|Tue Oct 20 17:29:44 2026 +0800|fix(app): return 0 from start() so boot creates ready.lock (#1324)
+e378885|A-BO|Sat Oct 17 21:01:58 2026 +0800|luci: optimize socks auto switch
+c2f8389|A-BO|Mon Oct 12 21:17:10 2026 +0800|luci: add odhcpd leases and static DHCP hosts to dnsmasq replicas
+5833edc|A-BO|Wed Oct 7 12:56:45 2026 +0800|luci: modify the unit for the hy2 quic receive window setting
+a008cdc|A-BO|Sun Oct 4 22:15:51 2026 +0800|luci: add quic receive window settings for hy2
+cb2ff04|A-BO|Sat Oct 3 20:42:18 2026 +0800|luci: fix the `remove` function in api
+4a2202c|A-BO|Fri Oct 2 19:30:18 2026 +0800|luci: detach cron jobs with setsid when available
+1509f6a|handsomeji|Tue Oct 6 17:44:10 2026 +0800|i18n: update
+25a36b5|A-BO|Sat Oct 17 12:56:32 2026 +0800|luci: add LuCI main program update function
 </details>
