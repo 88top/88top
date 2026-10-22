@@ -60,6 +60,25 @@ func call(fn string, a []any) (any, error) {
 		return servers.BuildServerInbounds(arg(a, 0), arg(a, 1)), nil
 	case "collectDirectHosts":
 		return directhosts.Collect(arg(a, 0), arg(a, 1)), nil
+	case "bypassSources":
+		return clientroutes.BypassSources(arg(a, 0)), nil
+	case "admitSources":
+		return clientroutes.AdmitSources(arg(a, 0)), nil
+	case "admitDnsDirect":
+		return clientroutes.AdmitDNSDirect(arg(a, 0), arg(a, 1)), nil
+	case "guardTerminalRules":
+		return clientroutes.GuardTerminalRules(arg(a, 0), arg(a, 1)), nil
+	case "isSharedCdnCidr":
+		return directhosts.IsSharedCdnCidr(arg(a, 0)), nil
+	case "nodeDirectRuleSets":
+		d, _ := arg(a, 0).(string)
+		return directhosts.NodeDirectRuleSets(d), nil
+	case "nodeDirectConsts":
+		return map[string]any{
+			"domainTag": directhosts.NodeDirectDomainTag, "ipTag": directhosts.NodeDirectIPTag,
+			"placeholder": map[string]any{"domain": directhosts.NodeDirectPlaceholderDomain, "cidr": directhosts.NodeDirectPlaceholderCidr},
+			"cdn":         directhosts.SharedCdnCidrs,
+		}, nil
 	case "normalizeDnsRewrite":
 		return dnsrewrite.NormalizeDnsRewrite(arg(a, 0)), nil
 	case "rewriteDnsRules":
@@ -75,8 +94,8 @@ func call(fn string, a []any) (any, error) {
 	return nil, fmt.Errorf("未知 fn %s", fn)
 }
 
-// 金标准来自旧版 Node 实现(见 testdata/gen-leaf-golden.mjs)。
-func TestGoldenAgainstOldNode(t *testing.T) {
+// 金标准来自上游 engine 基线(见 testdata/gen-leaf-golden.mjs)。
+func TestLeafGolden(t *testing.T) {
 	b, err := os.ReadFile("../../testdata/leaf_golden.json")
 	if err != nil {
 		t.Fatal(err)
@@ -90,7 +109,7 @@ func TestGoldenAgainstOldNode(t *testing.T) {
 	bad, byFn := 0, map[string]int{}
 	for i, c := range g.Cases {
 		if c.Error != "" {
-			t.Fatalf("#%d %s 旧实现报错 %q,这批语料不该有报错", i, c.Fn, c.Error)
+			t.Fatalf("#%d %s 基线报错 %q,这批语料不该有报错", i, c.Fn, c.Error)
 		}
 		got, err := call(c.Fn, c.Args)
 		if err != nil {

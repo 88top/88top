@@ -1,0 +1,93 @@
+name: Re-apply custom patch on dev
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reapply-patch-dev
+  cancel-in-progress: false
+
+jobs:
+  reapply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Insert patch if missing
+        run: |
+          python3 - <<'PY'
+          import pathlib, re, sys
+
+          MARK = "修改点 1：.asc 签名文件缺失时"
+
+          # 补丁内容：缩进用 4 个空格表示一级，下面会自动转成 Go 的 tab
+          SNIPPET = r'''// ======== 修改点 1：.asc 签名文件缺失时，回退检测 base 索引文件本身 ========
+          if err != nil && strings.HasSuffix(feedCheckURL, ".asc") {
+              fallbackURL := strings.TrimSuffix(feedCheckURL, ".asc")
+              l.Debugf("Fallback checking feed URL: %v", fallbackURL)
+              cmdStr2 := fmt.Sprintf("curl --fail --show-error --max-time 5 -o /dev/null -s -L '%v'", fallbackURL)
+              _, err2 := utils.BatchOutputCmd(context.Background(), cmdStr2, 0)
+              if err2 == nil {
+                  status = NetworkOnlineOK
+              }
+          }
+          // ======== 修改点 1 结束 ========'''
+
+          import textwrap
+          snippet = []
+          for s in textwrap.dedent(SNIPPET).split("\n"):
+              m = re.match(r"^( *)", s)
+              n = len(m.group(1)) // 4
+              snippet.append("\t" * n + s.lstrip(" ") if s.strip() else s)
+
+          files = [p for p in pathlib.Path(".").rglob("network-online.go") if ".git" not in p.parts]
+          if not files:
+              print("未找到 network-online.go", file=sys.stderr)
+              sys.exit(1)
+
+          for p in files:
+              raw = p.read_bytes().decode("utf-8")
+              if MARK in raw:
+                  print(f"{p}: 修改点 1 已存在，跳过")
+                  sys.exit(0)
+              nl = "\r\n" if "\r\n" in raw else "\n"
+              lines = raw.split(nl)
+              for j, line in enumerate(lines):
+                  if "_, err := utils.BatchOutputCmd(" not in line or "cmdStr," not in line:
+                      continue
+                  if not any("feedCheckURL" in lines[x] for x in range(max(0, j - 3), j)):
+                      continue
+                  indent = line[: len(line) - len(line.lstrip())]
+                  pos = j + 1
+                  if pos < len(lines) and lines[pos] == indent + "if err == nil {":
+                      k = pos
+                      while k < len(lines) and lines[k] != indent + "}":
+                          k += 1
+                      pos = k + 1
+                  lines[pos:pos] = [(indent + s) if s.strip() else s for s in snippet]
+                  p.write_bytes(nl.join(lines).encode("utf-8"))
+                  print(f"已插入到 {p}:{pos + 1}")
+                  sys.exit(0)
+
+          print("未找到锚点，请调整脚本", file=sys.stderr)
+          sys.exit(1)
+          PY
+
+      - name: Commit and push
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -am "Re-apply 修改点 1 after sync"
+            git push origin dev
+          else
+            echo "无变化，无需提交"
+          fi

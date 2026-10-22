@@ -1,7 +1,8 @@
 // 生成「configDetailed 叶子模块」的金标准:IP/CIDR 工具、终端分流、服务端入站、直连主机、DNS 重写。
-// 用法: node core/testdata/gen-leaf-golden.mjs <旧 engine 目录> [输出文件]
-//   旧 engine 目录要含 client-routes.mjs、servers.mjs、direct-hosts.mjs、dns-rewrite.mjs、dns-names.mjs,
-//   以及 local-subnets.mjs(来自 origin/backup:panel/server/system/local-subnets.mjs);且需要 {"type":"module"} 的 package.json。
+// 基线:上游 v0.1.318 快照(tag engine-snapshot)里 panel/server/engine/ 的明文源码。
+// 用法: node core/testdata/gen-leaf-golden.mjs <engine 基线目录> [输出文件]
+//   目录要含 client-routes.mjs、servers.mjs、direct-hosts.mjs、dns-rewrite.mjs、dns-names.mjs、cidr.mjs;
+//   上层 panel/server/ 需要 {"type":"module"} 的 package.json。
 import net from 'node:net'
 import { writeFileSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
@@ -10,7 +11,7 @@ import { resolve } from 'node:path'
 const dir = resolve(process.argv[2] || '.')
 const out = resolve(process.argv[3] || new URL('./leaf_golden.json', import.meta.url).pathname)
 const imp = (f) => import(pathToFileURL(resolve(dir, f)).href)
-const [cr, sv, dh, dr, ls] = await Promise.all([imp('client-routes.mjs'), imp('servers.mjs'), imp('direct-hosts.mjs'), imp('dns-rewrite.mjs'), imp('local-subnets.mjs')])
+const [cr, sv, dh, dr, ls] = await Promise.all([imp('client-routes.mjs'), imp('servers.mjs'), imp('direct-hosts.mjs'), imp('dns-rewrite.mjs'), imp('cidr.mjs')])
 
 let seed = 31337
 const rnd = () => {
@@ -99,10 +100,19 @@ for (let i = 0; i < 250; i++) add('buildServerInbounds', [chance(0.05) ? garbage
 // ---------- 直连主机 ----------
 const HOSTS = ['a.com', 'B.EXAMPLE.com', 'localhost', '1.2.3.4', '999.1.1.1', '2001:db8::1', 'bad_host.com', 'nodot', '中文.com', 'sub.中文.cn', '', ' ', 'a b.com', 'x.com.']
 const URLS = ['https://sub.example.com/path?x=1', 'http://Example.COM:8443/a', 'https://1.2.3.4:443/x', 'http://[2001:db8::1]:80/', 'http://[2001:DB8:0:0:0:0:0:1]/', 'sub.example.com/path', 'ss://user@h.example.org:1/#n',
-  'https://中文.com/订阅', 'ftp://files.example.net/', 'mailto:a@b.com', '//host.com/x', 'http://', 'http://a b.com/', 'http://a.com:abc/', ' https://trim.example.com ', 'https://u:p@auth.example.com/', 'HTTPS://UP.EXAMPLE.COM', 'http://localhost:8080/', 'https://[::1]/', 'https://a.com./', '', 5, null, 'vmess://abcd==']
+  'https://中文.com/订阅', 'ftp://files.example.net/', 'mailto:a@b.com', '//host.com/x', 'http://', 'http://a b.com/', 'http://a.com:abc/', ' https://trim.example.com ', 'https://u:p@auth.example.com/', 'HTTPS://UP.EXAMPLE.COM', 'http://localhost:8080/', 'https://[::1]/', 'https://a.com./', '', 5, null, 'vmess://abcd==',
+  // 奇怪写法:IPv4 简写 / 反斜杠 / userinfo / 无斜杠 / 非特殊协议 / 非法 punycode / 端口越界(WHATWG 主机解析)
+  'http://0x7f.1/', 'http://127.1:80/', 'http://1.2.3/', 'http://0300.0250.1.1/', 'http://4294967295/', 'http://4294967296/', 'http://1.2.3.4.5/', 'http://256.1.1.1/', 'http:\\\\back.example.com\\path', 'https:/one.example.com/', 'https:noslash.example.com/x', 'https://u:p@at.example.com:8080/', 'https://a@b@c.example.com/', 'https://:@e.example.com/', 'https://h.example.com:99999/', 'https://h.example.com:0080/', 'https://h.example.com:/', 'https://[2001:db8:0:0:0:0:0:1]:8443/', 'https://[::ffff:1.2.3.4]/', 'https://[::]/', 'https://[1:2:3:4:5:6:7:8]/', 'https://[1::2::3]/', 'https://%41.example.com/', 'https://a%2eb.example.com/', 'https://a%zz.example.com/', 'https://xn--fiq228c.example.com/', 'https://xn--.example.com/', 'https://xn--a.example.com/', 'https://例え.jp/', 'https://пример.рф/', 'https://a_b.example.com/', 'https://a b.example.com/', 'https://a..b.com/', 'https://.a.com/', 'https://a.com../', 'file:///C:/x', 'file://host.example.com/x', 'foo://opaque.example.com/x', 'foo:opaque', 'foo:/x', 'a+b://plus.example.com/', '1http://x.com/', 'HTTP://MiXeD.ExAmPlE.CoM', 'ws://ws.example.com:80/', 'wss://wss.example.com/', '\thttps://tab.example.com/\n', 'https://tab\t.example.com/', 'https:// space.example.com/', 'https://[fe80::1%25eth0]/']
 const node = () => (chance(0.1) ? garbage() : { server: maybe(0.9, () => (chance(0.5) ? pick(HOSTS) : pick([5, null, true]))) })
 const sub = () => (chance(0.1) ? garbage() : { url: maybe(0.7, () => pick(URLS)), urls: maybe(0.5, () => (chance(0.1) ? garbage() : Array.from({ length: int(3) }, () => pick(URLS)))) })
 for (let i = 0; i < 250; i++) add('collectDirectHosts', [Array.from({ length: int(5) }, node), Array.from({ length: int(4) }, sub)], (n, s) => dh.collectDirectHosts(n, s))
+
+// 常量与规则集条目(config 装配用)
+const CDN = ['173.245.48.0/20', '104.16.0.0/13', '162.158.0.0/15', '131.0.72.0/22', '2606:4700::/32', '2a06:98c0::/29', '2c0f:f248::/32']
+const cdnLike = () => pick([() => pick(CDN), () => pick(CDN).replace(/\/\d+$/, '/' + (8 + int(24))), () => pick(CDN).replace(/\/\d+$/, '/' + (30 + int(3))), () => pick(CDN).split('/')[0], () => cidr(), () => cidr(), () => pick(['', ' ', 'x', null, 5, '1.2.3.4/8', '0.0.0.0/0', '::/0', '104.16.0.1', '8.8.8.8/32'])])()
+for (let i = 0; i < 300; i++) add('isSharedCdnCidr', [cdnLike()], (c) => dh.isSharedCdnCidr(c))
+for (const d of ['/opt/open-box/data/rulesets', '/tmp/x', '', 'a b', '中文/目录', '/trailing/']) add('nodeDirectRuleSets', [d], (dir) => dh.nodeDirectRuleSets(dir))
+add('nodeDirectConsts', [], () => ({ domainTag: dh.NODE_DIRECT_DOMAIN_TAG, ipTag: dh.NODE_DIRECT_IP_TAG, placeholder: dh.NODE_DIRECT_PLACEHOLDER, cdn: dh.SHARED_CDN_CIDRS }))
 
 // ---------- DNS 重写 ----------
 const DOMS = ['services.googleapis.cn', 'Example.COM', '*.example.com', '*.', '*', 'a*.com', 'x.com.', 'x.com..', '-bad.com', 'bad-.com', 'under_score.com', 'a..b', ' pad.com ', '', 'x'.repeat(64) + '.com', '*.*.com', 'ok-1.net', '中文.com', 5, null]
@@ -118,6 +128,40 @@ for (let i = 0; i < 150; i++) add('rewriteDnsRules', [dns()], (d) => dr.rewriteD
 for (let i = 0; i < 150; i++) add('normalizeDomain', [chance(0.1) ? garbage() : pick(DOMS), pick([{}, { allowWildcard: true }])], (r, o) => dr.normalizeDomain(r, o))
 for (let i = 0; i < 80; i++) add('normalizeRule', [chance(0.1) ? garbage() : rule(), int(5)], (r, i2) => dr.normalizeRule(r, i2))
 add('rewriteDnsServer', [], () => dr.rewriteDnsServer())
+
+// 终端来源 / 共享网络入站防护(config 装配用):读的是档案里原样的列表,不是整理过的
+const friendly = () => ({ ...route(), enabled: pick([true, true, true, false, undefined]), bypass: pick([true, true, false, undefined, 'true']), admit: pick([true, true, false, undefined, 1]), match: pick(['ip', 'mac', undefined, 'ip']),
+  sources: pick([['192.168.1.5', '192.168.1.0/24'], ['10.0.0.1/8', '10.0.0.1/8'], ['bad', '2001:db8::1'], []]), macs: pick([['aa:bb:cc:dd:ee:ff', 'AA-BB-CC-DD-EE-FF'], ['11:22:33:44:55:66'], ['bad'], []]) })
+const rawList = () => (chance(0.05) ? garbage() : Array.from({ length: int(6) }, () => (chance(0.08) ? garbage() : chance(0.7) ? friendly() : route())))
+for (let i = 0; i < 200; i++) { const l = rawList(); add('bypassSources', [l], (x) => cr.bypassSources(x)); add('admitSources', [l], (x) => cr.admitSources(x)) }
+const dnsOpt = () => pick([{}, {}, { dnsMode: 'hijack', autoRedirect: true, splitDns: true }, { dnsMode: 'dnsmasq', autoRedirect: true, splitDns: true }, { dnsMode: 'off', autoRedirect: true, splitDns: true }, { dnsMode: 'hijack', autoRedirect: false, splitDns: true }, { dnsMode: 'hijack', autoRedirect: true, splitDns: false },
+  { autoRedirect: true }, { autoRedirect: true, splitDns: null }, { autoRedirect: 1, splitDns: 'yes', dnsMode: 'dnsmasq' }, { dnsMode: null, autoRedirect: true }, { dnsMode: 'HIJACK', autoRedirect: true }, { autoRedirect: 0 }])
+for (let i = 0; i < 300; i++) add('admitDnsDirect', [rawList(), dnsOpt()], (l, o) => cr.admitDnsDirect(l, o))
+const cond = () => pick([() => ({ source_ip_cidr: ['192.168.1.5/32'] }), () => ({ source_mac_address: ['aa:bb:cc:dd:ee:ff'] }), () => ({ source_ip_cidr: [], source_mac_address: [] }), () => ({ domain_suffix: ['a.com'] }), () => ({ rule_set: ['geosite-cn'], ip_version: 6 })])()
+const guardRule = () => pick([
+  () => ({ ...cond(), outbound: pick(['美国', 'direct']) }),
+  () => ({ ...cond(), domain: ['a.com'], port: [443], action: 'route', outbound: 'x' }),
+  () => ({ ...cond(), rule_set: ['r1'], network: 'udp', action: 'reject', method: 'default' }),
+  () => ({ ...cond(), server: 'dns-x', action: 'route', strategy: 'ipv4_only', disable_cache: true }),
+  () => ({ ...cond(), type: pick(['default', 'logical', 'x']), mode: pick(['or', 'and']), rules: pick([[], [{ domain: ['b.com'] }], 5]) }),
+  () => ({ ...cond(), inbound: ['dns-in'], invert: false, query_type: ['A'], protocol: 'dns' }),
+  () => ({ domain: ['no-source.com'], outbound: 'x' }),
+  () => ({ action: 'sniff' }),
+  () => ({ type: 'logical', mode: 'and', rules: [cond(), { domain: ['c.com'] }], outbound: 'x' }),
+  () => ({ type: 'logical', mode: 'and', rules: [{ domain: ['c.com'] }, { ip_cidr: ['1.2.3.4/32'] }], outbound: 'x' }),
+  () => ({ type: 'logical', mode: 'or', rules: [cond(), cond()], outbound: 'x' }),
+  () => ({ type: 'logical', rules: [cond()], outbound: 'x' }),
+  () => ({ type: 'logical', mode: 'and', rules: 'x', outbound: 'x' }),
+  () => ({ type: 'logical', mode: 'and', outbound: 'x' }),
+  () => pick([null, 'str', 5, [], {}, [cond()], true]),
+])()
+const shareTags = () => pick([['share-a'], ['share-a', 'share-b'], [], ['', 'share-a'], [5, null, 'share-x'], [''], null, 'share-a', {}, undefined, ['share-1', 'share-1']])
+for (let i = 0; i < 400; i++) add('guardTerminalRules', [chance(0.04) ? pick([null, 'x', {}, 5]) : Array.from({ length: int(6) }, guardRule), shareTags()], (r, t) => cr.guardTerminalRules(r, t))
+
+// 逐个键过一遍:每个条件键、每个常见动作键各一条带来源的规则(规则拆开时按键名分「条件」和「动作」)
+const COND_KEYS = ['source_ip_cidr', 'source_mac_address', 'domain', 'domain_suffix', 'domain_keyword', 'domain_regex', 'rule_set', 'query_type', 'ip_version', 'network', 'protocol', 'port', 'port_range', 'ip_cidr', 'ip_is_private', 'inbound', 'invert', 'source_port', 'source_port_range']
+const ACTION_KEYS = ['outbound', 'action', 'server', 'tag', 'strategy', 'method', 'disable_cache', 'rewrite_ttl', 'client_subnet', 'rcode', 'answer', 'no_drop', 'timeout', 'override_address', 'override_port', 'sniffer', 'domain_resolver', 'ip_accept_any', 'clash_mode', 'rule_set_ip_cidr_match_source', 'source_geoip', 'geoip', 'type', 'mode', 'rules']
+for (const k of COND_KEYS.concat(ACTION_KEYS)) for (const src of [{ source_ip_cidr: ['192.168.1.5/32'] }, { source_mac_address: ['aa:bb:cc:dd:ee:ff'] }]) add('guardTerminalRules', [[{ ...src, [k]: pick(['v', ['v'], 1, true]) }], ['share-a']], (r, t) => cr.guardTerminalRules(r, t))
 
 writeFileSync(out, JSON.stringify({ generatedBy: 'gen-leaf-golden.mjs', cases }) + '\n')
 const by = {}
