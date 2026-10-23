@@ -6,7 +6,7 @@
   },
   "timeflysoon/3x-ui": {
     "main": {
-      "remote_sha": "a8d0700bf2ed06d77c077fc45fc0387d9abdbaab"
+      "remote_sha": "775b2b0b26a699bb5ae361ce3c78b319ab790991"
     }
   },
   "timeflysoon/Are-u-ok": {
@@ -208,7 +208,7 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "8105042528159f1e372a0bed45226ca38cf87b43"
+      "remote_sha": "daefd2ed50d748e5cf6b679618d2b003670d3a35"
     }
   },
   "timeflysoon/dae": {
@@ -223,7 +223,7 @@
   },
   "timeflysoon/github-chinese": {
     "gh-pages": {
-      "remote_sha": "c1d4886909b9109ab9774dc95c50217ee5ad77bc"
+      "remote_sha": "0636be3053420b4a3c302f42cc5a029afaf3fdd8"
     }
   },
   "timeflysoon/gl-inet-onescript": {
@@ -233,7 +233,7 @@
   },
   "timeflysoon/gopeed": {
     "main": {
-      "remote_sha": "d125d4ab750f06dd1faeed428576e166dc9de51d"
+      "remote_sha": "4d659489345d4934f336fce94096e740cce5d65d"
     }
   },
   "timeflysoon/img-installer": {
@@ -293,7 +293,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "c7b42cca25914cc6f12ec47e54b7479f6dfc0b62"
+      "remote_sha": "eb57e1587128c80bff25c598b3367d009ec6c803"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -314,13 +314,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "5b62abd872efea28a44ee1ec0dc3869cff27c739"
+      "remote_sha": "c8c1a27018377ec8a7f60c320efb3023681909eb"
     },
     "release": {
-      "remote_sha": "e8bc98173ca4819600fac6618a4eb9312a86b8f4"
+      "remote_sha": "07dd698bc92c76e2a6692240feb663949c43dbca"
     },
     "sing": {
-      "remote_sha": "f7c7799e6676207b4d4f92745c27402fcc624853"
+      "remote_sha": "620722145f883fc5ef450e9a909011c0528c1424"
     }
   },
   "timeflysoon/openwrt-daede": {
@@ -368,7 +368,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "580f13865403c48ac53a61e09dcc308ae6de1b51"
+      "remote_sha": "3e64785183384c32acb2b6a505af9d742c3c14bc"
     }
   },
   "timeflysoon/store": {
@@ -391,10 +391,10 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "5b62abd872efea28a44ee1ec0dc3869cff27c739"
+      "remote_sha": "c8c1a27018377ec8a7f60c320efb3023681909eb"
     },
     "release": {
-      "remote_sha": "e8bc98173ca4819600fac6618a4eb9312a86b8f4"
+      "remote_sha": "07dd698bc92c76e2a6692240feb663949c43dbca"
     }
   },
   "timeflysoon/turboacc": {
@@ -420,7 +420,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "c1dc51b404ec87936b402d2b4008479091b36517"
+      "remote_sha": "22b0e6f0744c53248f40edf5166cca9084bed1c5"
     }
   },
   "timeflysoon/weasel": {
@@ -461,7 +461,7 @@
   },
   "timeflysoon/ungoogled-chromium-windows": {
     "master": {
-      "remote_sha": "9d0cd624438cd90148b38f34abcded048b6cd62c"
+      "remote_sha": "258d663c6ee6dd3d4cfe2e05eb8e863627e3a5af"
     }
   },
   "timeflysoon/DriverStoreExplorer": {
@@ -476,10 +476,10 @@
   },
   "timeflysoon/Open-Box": {
     "catch-up-upstream": {
-      "remote_sha": "1b6f82a9d3c707e32dbdbe40e0819d60e76d4b88"
+      "remote_sha": "15d23581e3727afd13e3a325826035eec1fb16cb"
     },
     "main": {
-      "remote_sha": "b1e7fcfae6c49e662b07f7c4174c869a112c5e05"
+      "remote_sha": "f7e1ba71f84ae55339a547487cfd0d2e01340d91"
     },
     "backup": {
       "remote_sha": "f42122e8b1b6e49d6ac88a84fc26ebb2480d17db"

@@ -4,7 +4,14 @@
     <div class="card-body gap-3 p-4 text-sm">
       <!-- 标题行:Open-Box 标识 + 版本号;右边是需要注意的提示和「恢复出厂设置」 -->
       <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <div class="inline-flex items-center gap-2 py-1">
+        <a
+          href="https://github.com/timeflysoon/Open-Box"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hover:bg-base-200 inline-flex cursor-pointer items-center gap-2 rounded-lg py-1"
+          aria-label="Open-Box GitHub"
+          v-tip="$t('openboxGithubHint')"
+        >
           <img
             :src="logoUrl"
             class="app-logo h-6 w-auto"
@@ -14,13 +21,11 @@
             v-if="openboxVersion"
             class="font-mono text-base"
           >{{ openboxVersion }}</span>
-        </div>
+          <GithubIcon class="h-5 w-5" />
+          <span class="text-base">GitHub</span>
+          <ArrowTopRightOnSquareIcon class="text-base-content/50 h-4 w-4" />
+        </a>
         <div class="ml-auto flex items-center gap-2">
-          <ExclamationTriangleIcon
-            v-if="warnTip"
-            class="text-warning h-5 w-5 shrink-0"
-            v-tip="warnTip"
-          />
           <FactoryResetButton />
         </div>
       </div>
@@ -69,8 +74,8 @@
       </div>
 
       <div
-        v-if="status && status.conflicts.length > 0"
-        class="alert alert-warning flex-col items-start gap-1"
+        v-if="conflicts.length > 0"
+        class="alert alert-warning flex flex-col items-start gap-1"
       >
         <div class="flex items-center gap-2 font-medium">
           <ExclamationTriangleIcon class="h-4 w-4 shrink-0" />
@@ -78,7 +83,7 @@
         </div>
         <ul class="list-disc pl-6 text-xs">
           <li
-            v-for="c in status.conflicts"
+            v-for="c in conflicts"
             :key="c.id"
           >
             {{ $t('kernelConflictItem', { name: c.label }) }}
@@ -272,6 +277,7 @@ import {
   isStopDisabled,
   pendingAction,
   serviceStatus,
+  useConflictBannerPresence,
   useKernelActions,
 } from '@/composables/kernelService'
 import { refreshUpdateInfo, updateInfo } from '@/composables/openboxUpdate'
@@ -291,6 +297,9 @@ import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
+
+// 本卡片自带冲突横幅:在屏幕上时不再弹右上角的冲突提示
+useConflictBannerPresence()
 
 // Geo 数据、安装通道都来自更新状态(同卡的更新区也会拉;这里没有就自己拉一次)
 onMounted(() => {
@@ -332,12 +341,9 @@ const kernelText = computed(() => {
   return /^sing-box/i.test(raw) ? raw : `sing-box version ${raw}`
 })
 
-// 需要用户注意的事:有冲突的代理工具、或有改动还没重启生效
-const warnTip = computed(() => {
-  if (props.status?.conflicts.length) return t('kernelConflictTitle')
-  if (serviceStatus.value?.pendingRestart?.pending) return t('restartPendingToastPlain')
-  return ''
-})
+// 冲突的代理工具读共享状态,不用页面传进来的那份快照:
+// 快照只在进页面和点动作后更新,进页面时拿到 null,横幅就一直不出现
+const conflicts = computed(() => serviceStatus.value?.conflicts ?? props.status?.conflicts ?? [])
 
 // 本机系统:发行版名 + 版本 + 架构。osRelease 的形状随服务端版本不同,按几种常见写法读
 const osName = computed(() => {

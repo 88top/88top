@@ -1078,7 +1078,9 @@ export interface OpenboxPenetrationResult {
     dnsSourceRules: boolean
     // 入口放行方式:whitelist = 默认放行,只有名单里的地址才进内核(needSets 是进内核的集合,
     // needCidrs 是手写网段的段数);其它 = 默认进内核、名单里的放行,reason 说明为什么没用默认放行
-    entryMode?: { mode: string; needSets?: string[]; needCidrs?: number; reason?: string }
+    entryMode?: { mode: string; needSets?: string[]; needCidrs?: number; reason?: string; directAnswer?: boolean }
+    // 走直连出口、没有挂在原生旁路名单里的 IP 规则个数(旁路没开时,这些 IP 要先进内核才能放行)
+    directIpBypassCount?: number
     // 走代理的域名由内核发占位地址(FakeIP 原型)
     fakeIp?: boolean
     // IPv6 分层:off 老关闭语义 / node 代理 v6 交给节点 / ipv4 走代理的降为 IPv4
@@ -1315,7 +1317,7 @@ export const testTerminal = (target: string, port?: number, method: OpenboxProbe
 
 // ---- 延迟历史(server/api/latency-history.mjs):每个节点最近 10 次测速结果,服务端记、所有浏览器共享
 // node:组的样本带当时选中的节点;节点自己的样本没有
-export type OpenboxLatencySample = { time: string; delay: number; node?: string }
+export type OpenboxLatencySample = { time: string; delay: number; node?: string; reason?: string }
 export type OpenboxLatencyHistory = Record<string, OpenboxLatencySample[]>
 export const fetchLatencyHistory = () => requestJson<{ history: OpenboxLatencyHistory; updatedAt: number }>('/api/openbox/latency-history')
 // 只回最近一次写入的时刻:代理页每 15 秒轮询它,变了才拉整份
@@ -1559,15 +1561,6 @@ export interface OpenboxFactoryResetResult {
   kernelStopped: boolean
 }
 export const factoryReset = () => requestJson<OpenboxFactoryResetResult>('/api/openbox/factory-reset', { method: 'POST' })
-
-// 紧急回滚:撤销对系统的接管、恢复直连,并关掉内核开机自启。
-// 任何一步没成 ok 就是 false,failures 里是失败的步骤;整个请求出错时后端回 500 + message,requestJson 会抛
-export interface OpenboxRollbackResult {
-  ok: boolean
-  actions?: unknown
-  failures: Array<{ step: string; message: string }>
-}
-export const rollbackToDirect = () => requestJson<OpenboxRollbackResult>('/api/openbox/rollback', { method: 'POST' })
 
 // ---- 系统类接口(续,对照 server/api/{updates,rulesets,timezone}.mjs 和 server/system/{updater,timezone}.mjs)
 
