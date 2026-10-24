@@ -107,7 +107,7 @@ jobs:
               # for amd64
               $release = "build\windows\x64\runner\Release\"
               # Use the same toolchain as cgo instead of Git's bundled DLLs.
-              $cc = (Get-Command -Name (go env CC) -CommandType Application -ErrorAction Stop).Source
+              $cc = (Get-Command -Name (go env CC) -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
               foreach ($dll in @("libstdc++-6.dll", "libgcc_s_seh-1.dll", "libwinpthread-1.dll")) {
                   $runtimePath = [string](& $cc "-print-file-name=$dll")
                   if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($runtimePath)) {
