@@ -21,9 +21,9 @@
           class="modal-box bg-base-100 relative overflow-hidden p-0"
           :class="[
             blurIntensity < 5 && 'backdrop-blur-sm!',
-            !mobileFullscreen && 'flex max-h-[90dvh] flex-col max-md:max-h-[70dvh]',
+            'flex max-h-[90dvh] flex-col max-md:max-h-[70dvh]',
             mobileFullscreen &&
-              'max-md:h-dvh max-md:min-h-dvh max-md:w-screen max-md:max-w-none max-md:rounded-none max-md:m-0',
+              'h-[90dvh] max-md:h-dvh max-md:max-h-dvh max-md:min-h-dvh max-md:w-screen max-md:max-w-none max-md:rounded-none max-md:m-0',
             boxClass,
           ]"
           @click.stop
@@ -48,12 +48,17 @@
               <XMarkIcon class="h-4 w-4" />
             </button>
           </div>
+          <!-- 工具栏(可选):页签这类要固定在内容区上面的东西,内容多了只滚下面的内容区 -->
+          <div
+            v-if="slots.toolbar && isOpen"
+            class="dialog-toolbar max-h-[40dvh] min-h-0 shrink-0 overflow-y-auto overscroll-contain px-4 pt-4"
+          >
+            <slot name="toolbar" />
+          </div>
           <div
             v-if="isOpen"
             :class="[
-              mobileFullscreen
-                ? 'h-[calc(100dvh-3rem)] max-h-[calc(100dvh-3rem)] overflow-hidden'
-                : 'min-h-0 flex-1 overflow-y-auto overscroll-contain',
+              'dialog-content min-h-0 flex-1 overflow-y-auto overscroll-contain',
               noPadding ? 'p-0' : 'p-4',
               contentClass,
             ]"

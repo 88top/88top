@@ -410,6 +410,10 @@ export const EXAMPLES: Record<string, unknown> = {
     "scope": "admin",
     "token": "new-token-string"
   },
+  "Blocker": {
+    "code": "tools",
+    "detail": "awg"
+  },
   "Client": {
     "adTag": "0123456789abcdef0123456789abcdef",
     "allowedIPs": [
@@ -722,6 +726,10 @@ export const EXAMPLES: Record<string, unknown> = {
     "serverDescription": "",
     "shuffleHost": false,
     "sni": "",
+    "sniSharedRandom": false,
+    "snis": [
+      ""
+    ],
     "sockoptParams": null,
     "sortOrder": 0,
     "tags": [
@@ -772,6 +780,10 @@ export const EXAMPLES: Record<string, unknown> = {
     "serverDescription": "",
     "shuffleHost": false,
     "sni": "",
+    "sniSharedRandom": false,
+    "snis": [
+      ""
+    ],
     "sockoptParams": "",
     "sortOrder": 0,
     "tags": [
@@ -944,6 +956,9 @@ export const EXAMPLES: Record<string, unknown> = {
     "status": "online",
     "tlsVerifyMode": "verify",
     "transitive": false,
+    "unavailableMetrics": [
+      ""
+    ],
     "updatedAt": 1700000000,
     "uptimeSecs": 86400,
     "xrayError": "",
@@ -1009,6 +1024,9 @@ export const EXAMPLES: Record<string, unknown> = {
     "status": "online",
     "tlsVerifyMode": "verify",
     "transitive": false,
+    "unavailableMetrics": [
+      ""
+    ],
     "updatedAt": 1700003600,
     "uptimeSecs": 86400,
     "xrayError": "",
@@ -1047,10 +1065,23 @@ export const EXAMPLES: Record<string, unknown> = {
     "memPct": 45.2,
     "panelVersion": "v3.x.x",
     "status": "online",
+    "unavailableMetrics": [
+      ""
+    ],
     "uptimeSecs": 86400,
     "xrayError": "",
     "xrayState": "",
     "xrayVersion": "25.10.31"
+  },
+  "Readiness": {
+    "blockers": [
+      {
+        "code": "tools",
+        "detail": "awg"
+      }
+    ],
+    "installCommand": "sudo /usr/local/x-ui/x-ui install-awg-kernel",
+    "ready": false
   },
   "RealityScanResult": {
     "alpn": "h2",
@@ -1098,6 +1129,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "jmax": 0,
     "jmin": 0,
     "keepaliveTimeout": "",
+    "kernelMode": false,
     "maxHandshakeAttempts": "",
     "mtu": 0,
     "primaryDns": "",

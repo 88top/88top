@@ -313,50 +313,64 @@
     <DialogWrapper
       v-model="showEditor"
       :title="$t(editingCustom ? 'routingCustomEditTitle' : editing ? 'routingPolicyEditTitle' : 'routingPolicyAddTitle')"
-      box-class="w-full max-w-4xl h-[90dvh]"
+      :box-class="editingCustom
+        ? 'w-full max-w-4xl [&>.dialog-toolbar]:[scrollbar-gutter:stable] [&>.dialog-content]:[scrollbar-gutter:stable]'
+        : 'w-full max-w-4xl'"
+      mobile-fullscreen
     >
-      <div
-        v-if="draft"
-        class="flex flex-col gap-4"
-      >
-        <div class="flex items-end gap-2">
-          <div class="flex flex-col gap-1">
-            <label class="text-xs font-medium">{{ $t('groupIconLabel') }}</label>
-            <div class="w-56">
-              <CountrySelect
-                v-model="draft.icon"
-                clearable
-                globes
-                brands
-                :placeholder="$t('groupIconNone')"
+      <!-- 图标 / 名称 / 规则表头固定在上面,规则再多也只滚下面那块 -->
+      <template #toolbar>
+        <div
+          v-if="draft"
+          class="flex flex-col gap-4"
+        >
+          <div class="flex flex-wrap items-end gap-2">
+            <div class="flex min-w-0 flex-col gap-1 max-sm:flex-1">
+              <label class="text-xs font-medium">{{ $t('groupIconLabel') }}</label>
+              <div class="w-56 max-sm:w-full">
+                <CountrySelect
+                  v-model="draft.icon"
+                  clearable
+                  globes
+                  brands
+                  :placeholder="$t('groupIconNone')"
+                />
+              </div>
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-medium">{{ $t('iconScaleLabel') }}</label>
+              <IconScaleInput v-model="draft.iconScale" />
+            </div>
+            <div class="flex min-w-0 flex-1 flex-col gap-1 max-sm:basis-full">
+              <label class="text-xs font-medium">{{ $t('routingPolicyNameLabel') }}</label>
+              <input
+                v-model="draft.name"
+                type="text"
+                class="input input-sm w-full"
+                :placeholder="$t('routingPolicyNamePlaceholder')"
               />
             </div>
           </div>
-          <div class="flex flex-col gap-1">
-            <label class="text-xs font-medium">{{ $t('iconScaleLabel') }}</label>
-            <IconScaleInput v-model="draft.iconScale" />
-          </div>
-          <div class="flex min-w-0 flex-1 flex-col gap-1">
-            <label class="text-xs font-medium">{{ $t('routingPolicyNameLabel') }}</label>
-            <input
-              v-model="draft.name"
-              type="text"
-              class="input input-sm w-full"
-              :placeholder="$t('routingPolicyNamePlaceholder')"
-            />
-          </div>
-        </div>
 
-        <!-- 一条规则一行:拖动柄 + 类型 + 值 + 备注(前置自定义分流还多一列这一行自己的出口)。
-             前置自定义分流按拖动后的顺序保存(顺序即匹配顺序);站点集里各行是「或」的关系,
-             拖完按类型归位,备注挂在「类型:值」上。站点集走哪条线路不在这儿定:在「代理」页点选。 -->
-        <div class="flex flex-col gap-2">
+          <!-- 一条规则一行:拖动柄 + 类型 + 值 + 备注(前置自定义分流还多一列这一行自己的出口)。
+               前置自定义分流按拖动后的顺序保存(顺序即匹配顺序);站点集里各行是「或」的关系,
+               拖完按类型归位,备注挂在「类型:值」上。站点集走哪条线路不在这儿定:在「代理」页点选。 -->
           <div class="flex items-center justify-between gap-2">
             <label class="text-xs font-medium">{{ $t('routingPolicyRulesLabel') }}</label>
             <div class="flex items-center gap-1">
               <button
+                v-if="editingCustom"
+                type="button"
+                class="btn btn-ghost btn-xs shrink-0"
+                @click="addTab"
+              >
+                <PlusIcon class="h-3.5 w-3.5" />
+                {{ $t('routingCustomAddTab') }}
+              </button>
+              <button
                 type="button"
                 class="btn btn-ghost btn-xs"
+                :disabled="editingCustom && !activeTab"
                 @click="openRuleImport"
               >
                 {{ $t('routingPolicyRuleImport') }}
@@ -364,6 +378,7 @@
               <button
                 type="button"
                 class="btn btn-ghost btn-xs"
+                :disabled="editingCustom && !activeTab"
                 @click="addRule()"
               >
                 <PlusIcon class="h-3.5 w-3.5" />
@@ -379,16 +394,74 @@
             {{ $t('routingCustomRulesHint') }}
           </p>
 
-          <p
-            v-if="!rules.length"
-            class="text-base-content/50 text-xs"
+          <!-- 前置自定义分流:一个页签 = 一个出口,页签从左到右匹配,页签内按规则顺序匹配 -->
+          <div
+            v-if="editingCustom && customTabs.length"
+            class="flex min-w-0 items-center gap-2"
           >
-            {{ $t('routingPolicyNoRuleYet') }}
-          </p>
+            <Draggable
+              v-model="customTabs"
+              :animation="150"
+              :force-fallback="true"
+              :fallback-tolerance="5"
+              :fallback-on-body="true"
+              :delay="200"
+              :delay-on-touch-only="true"
+              handle=".custom-tab-handle"
+              ghost-class="opacity-40"
+              item-key="id"
+              role="tablist"
+              :aria-label="$t('routingCustomOutboundTabs')"
+              class="tabs-box tabs tabs-xs flex w-fit max-w-full min-w-0 flex-wrap"
+            >
+              <template #item="{ element: tab }">
+                <div
+                  :class="['tab shrink-0 gap-1 px-2', activeTabId === tab.id && 'tab-active']"
+                  :data-custom-tab="tab.id"
+                >
+                  <button
+                    type="button"
+                    role="tab"
+                    :aria-selected="activeTabId === tab.id"
+                    class="custom-tab-handle flex min-w-0 cursor-move items-center gap-1"
+                    :title="tab.outbound || $t('routingCustomUnassigned')"
+                    @click="activeTabId = tab.id"
+                  >
+                    <Bars3Icon class="h-3 w-3 shrink-0 opacity-50" />
+                    <span class="max-w-36 shrink-0 truncate">{{ tab.outbound || $t('routingCustomUnassigned') }}</span>
+                    <span class="shrink-0 opacity-60">({{ tabRuleCount(tab.id) }})</span>
+                  </button>
+                </div>
+              </template>
+            </Draggable>
+            <button
+              type="button"
+              class="btn btn-ghost btn-square btn-sm hover:text-error ml-auto shrink-0"
+              :disabled="!activeTab"
+              v-tip="$t('routingCustomDeleteTabTitle')"
+              :aria-label="$t('routingCustomDeleteTabLabel', { name: activeTab?.outbound || $t('routingCustomUnassigned') })"
+              @click="askDeleteTab"
+            >
+              <TrashIcon class="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </template>
+
+      <div
+        v-if="draft"
+        class="flex flex-col gap-4"
+      >
+        <p
+          v-if="!visibleRules.length"
+          class="text-base-content/50 text-xs"
+        >
+          {{ $t(editingCustom && !activeTab ? 'routingCustomNoTab' : 'routingPolicyNoRuleYet') }}
+        </p>
 
           <Draggable
-            v-if="rules.length"
-            v-model="rules"
+            v-if="visibleRules.length"
+            v-model="visibleRules"
             :animation="150"
             :force-fallback="true"
             :fallback-tolerance="5"
@@ -399,12 +472,15 @@
             class="flex flex-col gap-2"
             @end="sortRules"
           >
-            <template #item="{ element: rule, index }">
-              <div class="flex items-center gap-2 max-sm:flex-wrap">
+            <template #item="{ element: rule }">
+              <div
+                :data-rule-key="rule.key"
+                class="flex flex-wrap items-center gap-2 sm:flex-nowrap"
+              >
             <Bars3Icon class="drag-handle text-base-content/40 h-4 w-4 shrink-0 cursor-move" />
             <select
               v-model="rule.type"
-              class="select select-sm w-[9.875rem] shrink-0 max-sm:w-auto max-sm:min-w-0 max-sm:grow max-sm:basis-[35%]"
+              class="select select-sm w-36 shrink-0 max-sm:w-auto max-sm:min-w-0 max-sm:grow max-sm:basis-[35%]"
             >
               <option
                 v-for="opt in ruleTypeOptions(rule.type)"
@@ -416,13 +492,13 @@
             </select>
             <!-- geosite/geoip 的值来自上游真有的那份名单,给带搜索的下拉框,
                  外加一个「详情」看它到底包含哪些域名/IP -->
-            <div class="flex min-w-0 flex-1 items-center gap-2">
+            <div class="flex min-w-0 flex-1 items-center gap-2 max-sm:order-3 max-sm:grow max-sm:basis-[60%]">
               <GeoRuleValue
                 v-if="rule.type === 'geosite' || rule.type === 'geoip'"
                 v-model="rule.value"
                 :kind="rule.type"
                 :placeholder="$t(placeholderKey(rule.type))"
-                :exclude="pickedElsewhere(index)"
+                :exclude="pickedElsewhere(rule)"
               />
               <!-- 规则集链接:填完网址自动拉回来解析,后面跟「详情(N)」,和上面同一个弹窗 -->
               <RuleUrlValue
@@ -433,10 +509,11 @@
               <input
                 v-else
                 v-model="rule.value"
+                data-rule-value
                 type="text"
                 class="input input-sm min-w-0 flex-1 font-mono text-xs"
                 :placeholder="$t(placeholderKey(rule.type))"
-                @change="splitRule(index)"
+                @change="splitRule(rules.findIndex((r) => r.key === rule.key))"
               />
             </div>
             <!-- 备注:给这一行写一句说明,存在这一行自己身上 -->
@@ -447,125 +524,110 @@
               :placeholder="$t('routingPolicyRuleNotePlaceholder')"
               :maxlength="NOTE_MAX"
             />
-            <!-- 这一行自己的出口:和终端分流用同一个选择器(带搜索,分「节点 / 节点组」两个
-                 页签,内置的直连 / 拒绝排在节点页签最前)。站点集没有这一列:它整个集共用
-                 一条线路,在代理页点选。 -->
-            <div
-              v-if="editingCustom"
-              class="w-52 shrink-0"
-            >
-              <OutboundPicker
-                v-model="rule.outbound"
-                :options="outboundOptions"
-                :placeholder="$t('outboundPickerPlaceholder')"
-              />
-            </div>
             <button
               type="button"
               class="btn btn-ghost btn-square btn-sm hover:text-error max-sm:order-2"
               v-tip="$t('delete')"
               :aria-label="$t('delete')"
-              @click="rules.splice(index, 1)"
+              @click="removeRule(rule.key)"
             >
               <TrashIcon class="h-4 w-4" />
             </button>
               </div>
             </template>
           </Draggable>
-        </div>
       </div>
 
       <!-- 取消 / 保存固定在底栏,规则多了只滚中间 -->
       <template #footer>
-        <button
-          type="button"
-          class="btn btn-sm"
-          @click="showEditor = false"
-        >
-          {{ $t('cancel') }}
-        </button>
-        <button
-          type="button"
-          class="btn btn-primary btn-sm"
-          :disabled="saving"
-          @click="saveDraft"
-        >
-          <span
-            v-if="saving"
-            class="loading loading-spinner loading-xs"
-          />
-          {{ $t('subscriptionSave') }}
-        </button>
-      </template>
-    </DialogWrapper>
-
-    <DialogWrapper
-      v-model="showRuleImport"
-      :title="$t('routingPolicyRuleImportTitle')"
-      box-class="w-full max-w-2xl"
-    >
-      <div class="flex flex-col gap-3">
-        <p class="text-base-content/60 text-xs">{{ $t('routingPolicyRuleImportHint') }}</p>
-        <div class="flex items-center gap-2">
-          <input
-            v-model="importUrl"
-            type="url"
-            class="input input-sm min-w-0 flex-1 font-mono text-xs"
-            :placeholder="$t('routingPolicyRuleUrlPlaceholder')"
-            @keydown.enter.prevent="previewImport"
-          />
-          <button
-            type="button"
-            class="btn btn-primary btn-sm"
-            :disabled="importLoading || !importUrl.trim()"
-            @click="previewImport"
+        <div class="flex w-full flex-col gap-2">
+          <!-- 当前页签统一使用的出口:改了出口,页签名跟着变,同出口的页签会合并 -->
+          <div
+            v-if="editingCustom && activeTab"
+            class="flex flex-col gap-1"
           >
-            <span v-if="importLoading" class="loading loading-spinner loading-xs" />
-            {{ $t('routingPolicyRuleImportPreview') }}
-          </button>
-        </div>
-        <p v-if="importError" class="text-error text-xs">{{ importError }}</p>
-        <template v-if="importPreview">
-          <p class="text-base-content/60 text-xs">
-            {{ $t('routingPolicyRuleImportCount', { count: importPreview.length }) }}
-          </p>
-          <div class="border-base-300/60 max-h-80 overflow-y-auto rounded-lg border">
-            <p v-if="!importPreview.length" class="text-base-content/50 py-8 text-center text-xs">
-              {{ $t('geoEntriesEmpty') }}
-            </p>
-            <ul v-else>
-              <li
-                v-for="(entry, index) in importPreview"
-                :key="`${entry.type}:${entry.value}:${index}`"
-                class="border-base-300/40 flex items-center gap-2 border-b px-3 py-1.5 last:border-b-0"
-              >
-                <span class="badge badge-ghost badge-xs shrink-0">{{ importTypeLabel(entry.type) }}</span>
-                <span class="min-w-0 flex-1 truncate font-mono text-xs">{{ entry.value }}</span>
-              </li>
-            </ul>
+            <div class="flex items-center gap-2">
+              <label class="shrink-0 text-xs font-medium">{{ $t('routingCustomExitLabel') }}</label>
+              <div class="min-w-0 flex-1">
+                <OutboundPicker
+                  :model-value="activeTab.outbound"
+                  :options="outboundOptions"
+                  :placeholder="$t('outboundPickerPlaceholder')"
+                  @update:model-value="setTabOutbound"
+                />
+              </div>
+            </div>
+            <p class="text-base-content/50 text-xs">{{ $t('routingCustomExitGroupHint') }}</p>
           </div>
           <div class="flex justify-end gap-2">
-            <button type="button" class="btn btn-sm" @click="showRuleImport = false">
+            <button
+              type="button"
+              class="btn btn-sm"
+              @click="showEditor = false"
+            >
               {{ $t('cancel') }}
             </button>
             <button
               type="button"
               class="btn btn-primary btn-sm"
-              :disabled="!importPreview.length"
-              @click="applyImportedRules"
+              :disabled="saving"
+              @click="saveDraft"
             >
-              {{ $t('routingPolicyRuleImportApply') }}
+              <span
+                v-if="saving"
+                class="loading loading-spinner loading-xs"
+              />
+              {{ $t('subscriptionSave') }}
             </button>
           </div>
-        </template>
-      </div>
+        </div>
+      </template>
     </DialogWrapper>
+
+    <!-- 删除页签:页签里有内容才确认,空页签直接删 -->
+    <DialogWrapper
+      v-model="showDeleteTab"
+      :title="$t('routingCustomDeleteTabTitle')"
+    >
+      <p class="text-sm">{{ $t('routingCustomDeleteTabConfirm', { name: deleteTabName }) }}</p>
+      <template #footer>
+        <button
+          type="button"
+          class="btn btn-sm"
+          @click="showDeleteTab = false"
+        >
+          {{ $t('cancel') }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-error btn-sm"
+          @click="confirmDeleteTab"
+        >
+          {{ $t('confirm') }}
+        </button>
+      </template>
+    </DialogWrapper>
+
+    <!-- 导入规则:和客户端分流、地区组共用同一个弹窗 -->
+    <RuleImportDialog
+      v-model="showRuleImport"
+      :max="RULE_IMPORT_MAX"
+      @import="applyImportedRules"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import type { OpenboxCustomPolicy, OpenboxCustomRule, OpenboxProfile, OpenboxRoutingPolicy, OpenboxUserGroup } from '@/api/openbox'
-import { fetchNodeGroups, importRuleList, RULESET_TAG_PATTERN } from '@/api/openbox'
+import type {
+  OpenboxCustomPolicy,
+  OpenboxCustomRule,
+  OpenboxCustomTab,
+  OpenboxProfile,
+  OpenboxRoutingPolicy,
+  OpenboxUserGroup,
+} from '@/api/openbox'
+import { fetchNodeGroups, RULESET_TAG_PATTERN } from '@/api/openbox'
+import RuleImportDialog from '@/components/clientapp/RuleImportDialog.vue'
 import CountryFlag from '@/components/common/CountryFlag.vue'
 import CountrySelect from '@/components/common/CountrySelect.vue'
 import IconScaleInput from '@/components/common/IconScaleInput.vue'
@@ -768,8 +830,64 @@ interface RuleRow {
   outbound: string
   // 这一行的备注:站点集存进 policy.notes,前置自定义分流存在规则自己的 note 字段里
   note: string
+  // 只有前置自定义分流有:所属出口页签。页签的出口就是这一行的出口。
+  tabId?: string
 }
 let ruleKeySeed = 0
+
+// ---------- 前置自定义分流的出口页签 ----------
+// 一个页签 = 一个出口。同出口的页签合并成第一个;规则按页签顺序排列,出口以页签为准。
+const flattenTabs = (tabs: OpenboxCustomTab[], rows: RuleRow[]): RuleRow[] =>
+  tabs.flatMap((tab) => rows.filter((r) => r.tabId === tab.id).map((r) => ({ ...r, outbound: tab.outbound })))
+const normalizeTabs = (tabs: OpenboxCustomTab[], rows: RuleRow[]) => {
+  const merged: OpenboxCustomTab[] = []
+  const byOutbound = new Map<string, OpenboxCustomTab>()
+  const idMap = new Map<string, string>()
+  for (const tab of tabs) {
+    const outbound = tab.outbound.trim()
+    let target = outbound ? byOutbound.get(outbound) : undefined
+    if (!target) {
+      target = { ...tab, outbound }
+      merged.push(target)
+      if (outbound) byOutbound.set(outbound, target)
+    }
+    idMap.set(tab.id, target.id)
+  }
+  const remapped = rows.map((r) => ({ ...r, tabId: idMap.get(r.tabId || '') || r.tabId }))
+  return { tabs: merged, rows: flattenTabs(merged, remapped) }
+}
+// 打开编辑器:存过 tabs 且每条规则都对得上就直接用;老档案(没有 tabs)按「相邻且同出口」归并成页签
+const seedTabs = (rows: RuleRow[], saved: OpenboxCustomTab[] | undefined, newId: () => string) => {
+  const byId = new Map((saved || []).map((tab) => [tab.id, tab]))
+  if (
+    saved &&
+    byId.size === saved.length &&
+    saved.every((tab) => tab.id) &&
+    rows.every((r) => r.tabId && byId.get(r.tabId)?.outbound === r.outbound)
+  ) {
+    return normalizeTabs(saved, rows)
+  }
+  const tabs: OpenboxCustomTab[] = []
+  const tagged = rows.map((r) => {
+    let last = tabs[tabs.length - 1]
+    if (!last || last.outbound !== r.outbound) {
+      last = { id: newId(), outbound: r.outbound }
+      tabs.push(last)
+    }
+    return { ...r, tabId: last.id }
+  })
+  return normalizeTabs(tabs, tagged)
+}
+// 页签内拖拽排序:只重排这个页签的规则,别的页签原位不动
+const reorderWithinTab = (all: RuleRow[], next: RuleRow[], tabId: string) => {
+  const keys = new Set(all.filter((r) => r.tabId === tabId).map((r) => r.key))
+  if (next.length !== keys.size || new Set(next.map((r) => r.key)).size !== keys.size || next.some((r) => r.tabId !== tabId || !keys.has(r.key))) {
+    return [...all]
+  }
+  let i = 0
+  return all.map((r) => (r.tabId === tabId ? (next[i++] as RuleRow) : r))
+}
+const hasContent = (...values: string[]) => values.some((v) => v.trim())
 
 const policies = computed<OpenboxRoutingPolicy[]>(() => props.profile.routing.policies || [])
 // 拖拽要求 v-model 绑一个 ref(vuedraggable 会整个替换数组),所以列表在本地存一份
@@ -860,12 +978,78 @@ const editing = ref<OpenboxRoutingPolicy | null>(null)
 const draft = ref<OpenboxRoutingPolicy | null>(null)
 const rules = ref<RuleRow[]>([])
 
+// 前置自定义分流的页签状态
+const customTabs = ref<OpenboxCustomTab[]>([])
+const activeTabId = ref('')
+const activeTab = computed(() => customTabs.value.find((tab) => tab.id === activeTabId.value))
+// 编辑区显示的规则:前置自定义分流只显示当前页签的,站点集显示全部
+const visibleRules = computed<RuleRow[]>({
+  get: () => (editingCustom.value ? rules.value.filter((r) => r.tabId === activeTabId.value) : rules.value),
+  set: (next) => {
+    rules.value = editingCustom.value ? reorderWithinTab(rules.value, next, activeTabId.value) : next
+  },
+})
+const tabRuleCount = (id: string) => rules.value.filter((r) => r.tabId === id && r.value.trim()).length
+const newTabId = () => `custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`
+const currentOutbound = () => (editingCustom.value && activeTab.value?.outbound) || ''
+
+const addTab = () => {
+  const tab: OpenboxCustomTab = { id: newTabId(), outbound: '' }
+  customTabs.value.push(tab)
+  activeTabId.value = tab.id
+  addRule()
+}
+// 改当前页签的出口:页签里的规则一起跟着变;和别的页签出口相同就合并
+const setTabOutbound = (outbound: string) => {
+  const tab = activeTab.value
+  if (!tab) return
+  tab.outbound = outbound
+  for (const r of rules.value) if (r.tabId === tab.id) r.outbound = outbound
+  const next = normalizeTabs(customTabs.value, rules.value)
+  customTabs.value = next.tabs
+  rules.value = next.rows
+  activeTabId.value =
+    next.tabs.find((x) => x.id === tab.id)?.id || next.tabs.find((x) => x.outbound === outbound)?.id || ''
+}
+
+const showDeleteTab = ref(false)
+const deleteTabId = ref('')
+const deleteTabName = computed(
+  () => customTabs.value.find((tab) => tab.id === deleteTabId.value)?.outbound || t('routingCustomUnassigned'),
+)
+const removeTab = () => {
+  const id = deleteTabId.value
+  const index = customTabs.value.findIndex((tab) => tab.id === id)
+  if (index !== -1) {
+    customTabs.value = customTabs.value.filter((tab) => tab.id !== id)
+    rules.value = rules.value.filter((r) => r.tabId !== id)
+    if (activeTabId.value === id) {
+      activeTabId.value = customTabs.value[Math.min(index, customTabs.value.length - 1)]?.id || ''
+    }
+  }
+  showDeleteTab.value = false
+}
+const askDeleteTab = () => {
+  const tab = activeTab.value
+  if (!tab || saving.value) return
+  deleteTabId.value = tab.id
+  // 页签里一条有内容的规则都没有就直接删,不打扰
+  if (!rules.value.some((r) => r.tabId === tab.id && hasContent(r.value, r.note))) {
+    removeTab()
+    return
+  }
+  showDeleteTab.value = true
+}
+const confirmDeleteTab = removeTab
+
+const removeRule = (key: number) => {
+  const index = rules.value.findIndex((r) => r.key === key)
+  if (index !== -1) rules.value.splice(index, 1)
+}
+
 type ImportedRule = { type: string; value: string }
+const RULE_IMPORT_MAX = 200
 const showRuleImport = ref(false)
-const importUrl = ref('')
-const importPreview = ref<ImportedRule[] | null>(null)
-const importLoading = ref(false)
-const importError = ref('')
 
 const importTypeMap: Record<string, RuleType | undefined> = {
   domain: 'domain',
@@ -873,54 +1057,50 @@ const importTypeMap: Record<string, RuleType | undefined> = {
   domain_keyword: 'domainKeyword',
   ip_cidr: 'ipCidr',
 }
-const importTypeLabel = (type: string) => {
-  const mapped = importTypeMap[type]
-  return mapped ? t(RULE_TYPES.find((item) => item.type === mapped)?.labelKey || type) : type
-}
 const openRuleImport = () => {
-  importUrl.value = ''
-  importPreview.value = null
-  importError.value = ''
+  if (editingCustom.value && !activeTab.value) return
   showRuleImport.value = true
 }
-const previewImport = async () => {
-  const url = importUrl.value.trim()
-  if (!url || importLoading.value) return
-  importLoading.value = true
-  importError.value = ''
-  try {
-    const result = await importRuleList(url)
-    importPreview.value = (result.entries || []).filter((entry) => importTypeMap[entry.type] && entry.value.trim())
-  } catch (error) {
-    importPreview.value = null
-    importError.value = error instanceof Error ? error.message : String(error)
-  } finally {
-    importLoading.value = false
-  }
-}
-const applyImportedRules = () => {
-  if (!importPreview.value?.length) return
-  const outbound = rules.value[rules.value.length - 1]?.outbound || ''
-  const imported = importPreview.value.flatMap((entry) => {
+const applyImportedRules = (entries: ImportedRule[]) => {
+  if (!entries.length) return
+  if (editingCustom.value && !activeTab.value) return
+  const outbound = currentOutbound()
+  const imported = entries.flatMap((entry) => {
     const type = importTypeMap[entry.type]
-    return type ? [{ key: ++ruleKeySeed, type, value: entry.value, outbound, note: '' }] : []
+    return type
+      ? [{ key: ++ruleKeySeed, type, value: entry.value, outbound, note: '', ...(editingCustom.value ? { tabId: activeTabId.value } : {}) }]
+      : []
   })
   // 导入是追加本地明细:原有的规则集链接必须保留,两种来源可以同时生效。
-  rules.value = [...rules.value.filter((rule) => rule.value.trim()), ...imported]
+  // 前置自定义分流只清当前页签里的空行,别的页签原样保留。
+  rules.value = [
+    ...rules.value.filter((rule) => (editingCustom.value && rule.tabId !== activeTabId.value) || rule.value.trim()),
+    ...imported,
+  ]
   showRuleImport.value = false
 }
 
 // 这一行以外、同类型规则已经选了的分类:下拉框里不再出现,同一个集不会被加两遍
-const pickedElsewhere = (index: number) =>
-  rules.value.filter((r, i) => i !== index && r.type === rules.value[index]?.type).map((r) => r.value)
+// (前置自定义分流只在同一个页签内去重)
+const pickedElsewhere = (row: RuleRow) =>
+  rules.value
+    .filter((r) => r.key !== row.key && r.type === row.type && (!editingCustom.value || r.tabId === row.tabId))
+    .map((r) => r.value)
 const saving = ref(false)
 
 const NOTE_MAX = 40
 
-const addRule = (type: RuleType = 'domainSuffix', value = '', outbound?: string, note = '') => {
-  // 新行沿用上一行的出口:连着写好几条都走同一个节点是常态,每行重选一遍很烦
-  const last = rules.value[rules.value.length - 1]
-  rules.value.push({ key: ++ruleKeySeed, type, value, outbound: outbound ?? last?.outbound ?? '', note })
+// 前置自定义分流的新行归当前页签、出口跟页签走;站点集的行没有出口
+const addRule = (type: RuleType = 'domainSuffix', value = '', note = '') => {
+  if (editingCustom.value && !activeTab.value) return
+  rules.value.push({
+    key: ++ruleKeySeed,
+    type,
+    value,
+    outbound: currentOutbound(),
+    note,
+    ...(editingCustom.value ? { tabId: activeTabId.value } : {}),
+  })
 }
 
 const ruleRow = (type: RuleType, value: string, note = ''): RuleRow => ({ key: ++ruleKeySeed, type, value, outbound: '', note })
@@ -959,7 +1139,7 @@ const splitRule = (index: number) => {
   rules.value.splice(
     index + 1,
     0,
-    ...parts.slice(1).map((value) => ({ key: ++ruleKeySeed, type: row.type, value, outbound: row.outbound, note: '' })),
+    ...parts.slice(1).map((value) => ({ ...row, key: ++ruleKeySeed, value, note: '' })),
   )
 }
 const splitAllRules = () => {
@@ -986,6 +1166,8 @@ const sortRules = () => {
 
 const openEditor = (policy: OpenboxRoutingPolicy | null) => {
   editingCustom.value = false
+  customTabs.value = []
+  activeTabId.value = ''
   editing.value = policy
   draft.value = policy ? JSON.parse(JSON.stringify(policy)) : { id: '', name: '', icon: '', iconScale: 0 }
   rules.value = []
@@ -994,27 +1176,35 @@ const openEditor = (policy: OpenboxRoutingPolicy | null) => {
     for (const url of policy.ruleUrls || []) rules.value.push(ruleRow('ruleUrl', url, notes[`ruleUrl:${url}`] || ''))
     for (const tag of policy.rulesets || []) rules.value.push(rulesetToRow(tag, notes[`ruleset:${tag}`] || ''))
     for (const type of ['domainSuffix', 'domain', 'domainKeyword', 'ipCidr'] as const) {
-      for (const value of policy[type] || []) addRule(type, value, undefined, notes[`${type}:${value}`] || '')
+      for (const value of policy[type] || []) addRule(type, value, notes[`${type}:${value}`] || '')
     }
   }
   if (!rules.value.length) addRule()
   showEditor.value = true
 }
-// 前置自定义分流用同一个弹窗:多一个「固定出口」下拉,少一个"新增/修改"的区别
+// 前置自定义分流用同一个弹窗:规则按出口分页签,出口在底栏按当前页签选
 const openCustomEditor = () => {
   const c = customPolicy.value
   editingCustom.value = true
   editing.value = null
   draft.value = { id: '', name: c.name || DEFAULT_CUSTOM_NAME, icon: c.icon || DEFAULT_CUSTOM_ICON, iconScale: c.iconScale || 0 }
-  // 存的就是一行一条,按存的顺序读回来(顺序即匹配顺序)
-  rules.value = (c.rules || []).map((r) => ({
-    key: ++ruleKeySeed,
-    type: r.type as RuleType,
-    value: r.value,
-    outbound: r.outbound,
-    note: r.note || '',
-  }))
-  if (!rules.value.length) addRule()
+  // 存的是一行一条规则 + 出口页签;老档案没有页签,按相邻同出口的规则归并
+  const seeded = seedTabs(
+    (c.rules || []).map((r) => ({
+      key: ++ruleKeySeed,
+      type: r.type as RuleType,
+      value: r.value,
+      outbound: r.outbound,
+      note: r.note || '',
+      tabId: r.tabId,
+    })),
+    c.tabs,
+    newTabId,
+  )
+  customTabs.value = seeded.tabs
+  rules.value = seeded.rows
+  activeTabId.value = seeded.tabs[0]?.id || ''
+  showDeleteTab.value = false
   void loadOutbounds()
   showEditor.value = true
 }
@@ -1043,15 +1233,13 @@ const saveDraft = async () => {
     showNotification({ content: 'routingPolicyNameDuplicate', type: 'alert-error' })
     return
   }
-  // 前置自定义分流按行存:一行一条规则、一行一个出口,顺序即匹配顺序。
-  // 站点集那套"按类型合成几个数组"在这儿不适用——合并了就分不出哪条走哪个出口。
+  // 前置自定义分流按页签存:页签有自己的出口,页签内一行一条规则(顺序即匹配顺序)。
+  // 页签顺序也是匹配顺序,所以连同 tabs 一起存。站点集那套"按类型合成几个数组"在这儿不适用。
   if (editingCustom.value) {
-    const kept = rules.value.filter((r) => r.value.trim())
-    if (!kept.length) {
-      showNotification({ content: 'routingPolicyConditionRequired', type: 'alert-error' })
-      return
-    }
-    if (kept.some((r) => !r.outbound)) {
+    const kept = flattenTabs(customTabs.value, rules.value).filter((r) => r.value.trim())
+    const missing = kept.find((r) => !r.outbound)
+    if (missing) {
+      activeTabId.value = missing.tabId || ''
       showNotification({ content: 'routingCustomOutboundRequired', type: 'alert-error' })
       return
     }
@@ -1072,7 +1260,8 @@ const saveDraft = async () => {
     const customRules: OpenboxCustomRule[] = kept.map((r) => ({
       type: r.type as OpenboxCustomRule['type'],
       value: r.value.trim(),
-      outbound: r.outbound as string,
+      outbound: r.outbound,
+      tabId: r.tabId,
       ...(r.note.trim() ? { note: r.note.trim() } : {}),
     }))
     saving.value = true
@@ -1084,6 +1273,7 @@ const saveDraft = async () => {
             icon: draft.value.icon || '',
             iconScale: draft.value.iconScale || 0,
             enabled: customPolicy.value.enabled !== false,
+            tabs: customTabs.value.map((tab) => ({ ...tab })),
             rules: customRules,
           },
         },

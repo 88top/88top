@@ -47,6 +47,14 @@ export interface OpenboxCustomRule {
   outbound: string
   // 这一行的备注(可选)
   note?: string
+  // 所属页签 id(同一页签的规则共用一个出口)
+  tabId?: string
+}
+
+// 前置自定义分流的「出口页签」:页签顺序即匹配优先级,页签内按规则顺序匹配
+export interface OpenboxCustomTab {
+  id: string
+  outbound: string
 }
 
 export interface OpenboxCustomPolicy {
@@ -56,6 +64,8 @@ export interface OpenboxCustomPolicy {
   enabled?: boolean
   // 顺序即匹配顺序,先命中的先生效
   rules?: OpenboxCustomRule[]
+  // 出口页签(从左到右匹配);老档案没有这个字段,打开编辑器时按相邻同出口的规则归并
+  tabs?: OpenboxCustomTab[]
 }
 
 // 「出站」页签:每个站点集的 selector 里能选到哪几类东西
@@ -181,6 +191,8 @@ export interface OpenboxServer {
   port: number
   // 客户端连接用的域名 / IP,只用来生成节点分享链接;默认取当前打开面板的主机名
   address?: string
+  // 指定出口:从这个共享入口进来的连接都走它(节点 / 节点组 / 直连等);不填就按现有分流规则
+  outbound?: string
   password?: string
   method?: string
   uuid?: string
@@ -312,6 +324,28 @@ export interface OpenboxSubscriptionAutoUpdate {
 // url 是 https:// 的 DoH 地址;地址里是域名时 bootstrap 必填(用来解析这个域名的 DNS,IP)
 export interface OpenboxSubscriptionNodeDns { url: string; bootstrap?: string }
 
+// 机场在订阅响应头(subscription-userinfo)里给的流量用量 / 到期时间;字段都可能缺(null)
+export interface OpenboxSubscriptionUsage {
+  upload: number | null
+  download: number | null
+  total: number | null
+  expire: number | null
+}
+
+// 「登录」来源:Xboard / V2Board 账号登录后服务端记下的账号信息(密码不回传)
+export interface OpenboxSubscriptionAccount {
+  id: string
+  url: string
+  userAgent?: string
+  username: string
+  planName?: string | null
+  // 流量重置日期(秒级时间戳)/ 距下次重置的天数;都没有时看 resetKnown:true = 确定没有重置
+  resetAt?: number | null
+  resetDays?: number | null
+  resetKnown?: boolean
+  expiryKnown?: boolean
+}
+
 export interface OpenboxSubscription {
   id: string
   name: string
@@ -330,13 +364,11 @@ export interface OpenboxSubscription {
   nodeDns?: OpenboxSubscriptionNodeDns | null
   createdAt: number
   updatedAt: number
-  // 机场在订阅响应头(subscription-userinfo)里给的流量用量 / 到期时间;字段都可能缺(null)
-  usage?: {
-    upload: number | null
-    download: number | null
-    total: number | null
-    expire: number | null
-  } | null
+  usage?: OpenboxSubscriptionUsage | null
+  // 拉取订阅时用的 User-Agent;没配 = 默认
+  userAgent?: string
+  // 「登录」来源的订阅带账号信息
+  account?: OpenboxSubscriptionAccount | null
 }
 
 export interface OpenboxSubscriptionShare {
@@ -356,6 +388,8 @@ export interface OpenboxNodeSummary {
   originalTag: string
   type: string
   server: string
+  // 机场给的节点倍率(登录来源才有)
+  rate?: number | null
 }
 
 export interface OpenboxRenamePreviewEntry {
@@ -389,6 +423,15 @@ export interface OpenboxSubscriptionPreview {
   disabled?: Array<{ name: string }>
   preview: OpenboxRenamePreviewEntry[]
   groups: OpenboxNodeGroup[]
+  // 登录来源的预览会带上账号信息和用量
+  account?: OpenboxSubscriptionAccount
+  usage?: OpenboxSubscriptionUsage | null
+}
+
+// 登录成功的结果:除了预览本身,还有后续预览 / 保存用的 loginId
+export interface OpenboxSubscriptionLoginResult extends OpenboxSubscriptionPreview {
+  loginId: string
+  account: OpenboxSubscriptionAccount
 }
 
 export interface OpenboxSubscriptionSaveResult {
@@ -537,6 +580,8 @@ export const previewSubscription = async (payload: {
   url?: string
   urls?: string[]
   content?: string
+  userAgent?: string
+  loginId?: string
   // 只在 renameOptions.usePrefix 打开时有意义:服务端拿它当节点名前缀。
   name?: string
   renameOptions?: OpenboxRenameOptions
@@ -550,10 +595,27 @@ export const previewSubscription = async (payload: {
 // url 与 content 二选一(见 server/api/subscriptions.mjs 的 normalizeSource):
 // content 走的是「节点」模式——手上只有一堆分享链接、没有订阅地址时直接粘贴保存,
 // 服务端会把内容一并存下来,以便日后改重命名规则时重新解析。
+// 账号登录:成功后服务端存账号,回 loginId;之后预览 / 保存 / 测速只带 loginId。
+export const loginSubscription = async (payload: {
+  url: string
+  userAgent?: string
+  username: string
+  password: string
+  name?: string
+  renameOptions?: OpenboxRenameOptions
+}): Promise<OpenboxSubscriptionLoginResult> => {
+  return requestJson<OpenboxSubscriptionLoginResult>('/api/openbox/subscriptions/login', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
 export const createSubscription = async (payload: {
   url?: string
   urls?: string[]
   content?: string
+  userAgent?: string
+  loginId?: string
   name: string
   renameOptions?: OpenboxRenameOptions
   autoUpdate?: OpenboxSubscriptionAutoUpdate
@@ -570,7 +632,7 @@ export const createSubscription = async (payload: {
 // so a plain rename works even while the provider is unreachable (see subscriptions.mjs PATCH).
 export const updateSubscription = async (
   id: string,
-  payload: { name?: string; url?: string; urls?: string[]; content?: string; renameOptions?: OpenboxRenameOptions; autoUpdate?: OpenboxSubscriptionAutoUpdate; nodeDns?: OpenboxSubscriptionNodeDns | null; enabled?: boolean },
+  payload: { name?: string; url?: string; urls?: string[]; content?: string; userAgent?: string; loginId?: string; renameOptions?: OpenboxRenameOptions; autoUpdate?: OpenboxSubscriptionAutoUpdate; nodeDns?: OpenboxSubscriptionNodeDns | null; enabled?: boolean },
 ): Promise<OpenboxSubscriptionSaveResult> => {
   return requestJson(`/api/openbox/subscriptions/${encodeURIComponent(id)}`, {
     method: 'PATCH',
@@ -593,8 +655,11 @@ export const testNodeLatency = async (payload: {
   url?: string
   urls?: string[]
   content?: string
+  userAgent?: string
+  loginId?: string
   name?: string
   renameOptions?: OpenboxRenameOptions
+  nodeDns?: OpenboxSubscriptionNodeDns | null
   tags: string[]
   timeoutMs?: number
 }): Promise<OpenboxLatencyResult[]> => {
@@ -637,6 +702,8 @@ export interface OpenboxFailoverSettings {
 // 成员怎么来:static 手工挑(members),dynamic 按关键词现算(keywords)。
 // 动态组的意义是"以后加的订阅也自动进来"——成员在生成配置时按当前节点算。
 export type OpenboxGroupMode = 'static' | 'dynamic'
+// dynamic 用:多个关键词怎么组合。or = 命中任一个就进组(默认);and = 必须同时命中全部
+export type OpenboxKeywordMode = 'or' | 'and'
 
 export interface OpenboxUserGroup {
   id: string
@@ -652,8 +719,12 @@ export interface OpenboxUserGroup {
   icon?: string
   // 图标缩放:整数像素偏移,0 = 不缩放
   iconScale?: number
-  // dynamic 用:命中任一关键词的节点即成员;为空 = 全部节点
+  // dynamic 用:按关键词命中的节点即成员(or 命中任一个,and 同时命中全部);为空 = 范围内的全部节点
   keywords?: string[]
+  // dynamic 用:关键词组合方式,缺省 = or
+  keywordMode?: OpenboxKeywordMode
+  // dynamic 用:只在这条订阅(订阅 id)的节点里按关键词匹配;空 = 全部订阅
+  subscriptionId?: string
   // static 用:手工挑出来的节点名/组名
   members: string[]
   interval?: string
@@ -754,7 +825,18 @@ export interface OpenboxGroupsPayload {
   types: OpenboxGroupType[]
   // 带订阅名,供成员选择器按订阅筛选;组没有订阅归属,不在这个列表里
   // upstream:链式代理节点的前置上游节点名(没挂前置的节点没有这个字段)
-  availableNodes: Array<{ name: string; subscription: string; upstream?: string }>
+  // chain:链式代理节点;region:识别出的地区名,动态组关键词一并参与匹配
+  availableNodes: Array<{
+    name: string
+    subscription: string
+    // 所属订阅的 id(动态组按订阅范围匹配用)
+    subscriptionId?: string
+    chain?: boolean
+    upstream?: string
+    region?: string
+  }>
+  // 订阅列表(id + 名字),动态组的「订阅范围」下拉用
+  subscriptions?: Array<{ id: string; name: string }>
   availableGroups: string[]
 }
 

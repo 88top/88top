@@ -181,6 +181,18 @@
 
       <p class="text-base-content/60 text-xs">{{ $t(needsTls ? 'serverTlsHint' : form.protocol === 'mixed' ? 'serverMixedHint' : 'serverPlainHint') }}</p>
 
+      <!-- 出口:不指定就按现有分流规则;指定后这个共享入口进来的连接都走所选出口 -->
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-medium">{{ $t('serverOutboundLabel') }}</label>
+        <OutboundPicker
+          v-model="outboundModel"
+          :options="outboundOptions"
+          :placeholder="$t('serverOutboundUnspecified')"
+          :empty-label="$t('serverOutboundUnspecified')"
+        />
+        <p class="text-base-content/60 text-xs">{{ $t('serverOutboundHint') }}</p>
+      </div>
+
       <!-- 分享链接(节点 URI)+ 二维码,填了域名/IP 才有 -->
       <div class="flex flex-col gap-1">
         <label class="text-xs font-medium">{{ $t('serverShareLinkLabel') }}</label>
@@ -208,7 +220,10 @@
         class="h-44 w-44 self-center rounded-lg bg-white p-1"
         alt="QR"
       />
+    </div>
 
+    <!-- 取消 / 保存放底栏:内容区下面一条分割线(两端缩进到和内容边界对齐),和标题栏下面那条上下呼应 -->
+    <template #footer>
       <div class="flex justify-end gap-2">
         <button
           type="button"
@@ -230,13 +245,14 @@
           {{ $t('save') }}
         </button>
       </div>
-    </div>
+    </template>
   </DialogWrapper>
 </template>
 
 <script setup lang="ts">
 import { checkServerPort, type OpenboxServer, type OpenboxServerProtocol } from '@/api/openbox'
 import DialogWrapper from '@/components/common/DialogWrapper.vue'
+import OutboundPicker, { type OutboundPickerOptions } from '@/components/common/OutboundPicker.vue'
 import { copyText as copyToClipboard } from '@/helper/clipboard'
 import { showNotification } from '@/helper/notification'
 import {
@@ -257,6 +273,8 @@ const props = defineProps<{
   server: OpenboxServer | null
   // 其它服务器占用的端口,用来提示重复
   usedPorts: number[]
+  // 出口候选:内置直连 / 拒绝、节点组、单个节点
+  outboundOptions: OutboundPickerOptions
 }>()
 
 const emit = defineEmits<{
@@ -293,9 +311,17 @@ const blank = (): OpenboxServer => ({
   tls: true,
   obfs: '',
   username: '',
+  outbound: '',
 })
 
 const form = reactive<OpenboxServer>(blank())
+// OutboundPicker 的 v-model 要求是 string;没指定出口时存的是 undefined / 空串
+const outboundModel = computed({
+  get: () => form.outbound || '',
+  set: (v: string) => {
+    form.outbound = v
+  },
+})
 const checking = ref(false)
 
 watch(
@@ -381,6 +407,7 @@ const submit = async () => {
     port: form.port,
     address: (form.address || '').trim(),
   }
+  if ((form.outbound || '').trim()) out.outbound = (form.outbound || '').trim()
   if (form.protocol === 'shadowsocks') {
     out.method = form.method || 'aes-256-gcm'
     out.password = (form.password || '').trim()

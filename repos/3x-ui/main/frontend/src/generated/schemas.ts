@@ -1677,6 +1677,23 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "Blocker": {
+    "description": "Blocker is one unmet requirement.",
+    "properties": {
+      "code": {
+        "example": "tools",
+        "type": "string"
+      },
+      "detail": {
+        "example": "awg",
+        "type": "string"
+      }
+    },
+    "required": [
+      "code"
+    ],
+    "type": "object"
+  },
   "Client": {
     "description": "Client represents a client configuration for Xray inbounds with traffic limits and settings.",
     "properties": {
@@ -2806,6 +2823,15 @@ export const SCHEMAS: Record<string, unknown> = {
       "sni": {
         "type": "string"
       },
+      "sniSharedRandom": {
+        "type": "boolean"
+      },
+      "snis": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
       "sockoptParams": {},
       "sortOrder": {
         "type": "integer"
@@ -2859,6 +2885,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "serverDescription",
       "shuffleHost",
       "sni",
+      "sniSharedRandom",
       "sockoptParams",
       "sortOrder",
       "tags",
@@ -2991,6 +3018,15 @@ export const SCHEMAS: Record<string, unknown> = {
       "sni": {
         "type": "string"
       },
+      "sniSharedRandom": {
+        "type": "boolean"
+      },
+      "snis": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
       "sockoptParams": {
         "type": "string"
       },
@@ -3039,6 +3075,8 @@ export const SCHEMAS: Record<string, unknown> = {
       "serverDescription",
       "shuffleHost",
       "sni",
+      "sniSharedRandom",
+      "snis",
       "sockoptParams",
       "sortOrder",
       "tags",
@@ -3714,6 +3752,13 @@ export const SCHEMAS: Record<string, unknown> = {
       "transitive": {
         "type": "boolean"
       },
+      "unavailableMetrics": {
+        "description": "Nil on legacy rows and responses: zero remains a valid measured value.",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
       "updatedAt": {
         "example": 1700000000,
         "format": "int64",
@@ -4022,6 +4067,12 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": false,
         "type": "boolean"
       },
+      "unavailableMetrics": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
       "updatedAt": {
         "example": 1700003600,
         "format": "int64",
@@ -4234,6 +4285,12 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": "online",
         "type": "string"
       },
+      "unavailableMetrics": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
       "uptimeSecs": {
         "example": 86400,
         "format": "int64",
@@ -4262,6 +4319,37 @@ export const SCHEMAS: Record<string, unknown> = {
       "xrayError",
       "xrayState",
       "xrayVersion"
+    ],
+    "type": "object"
+  },
+  "Readiness": {
+    "description": "Readiness is the host's ability to run any kernel-mode inbound at all.",
+    "properties": {
+      "blockers": {
+        "example": [
+          {
+            "code": "tools",
+            "detail": "awg"
+          }
+        ],
+        "items": {
+          "$ref": "#/components/schemas/Blocker"
+        },
+        "type": "array"
+      },
+      "installCommand": {
+        "example": "sudo /usr/local/x-ui/x-ui install-awg-kernel",
+        "type": "string"
+      },
+      "ready": {
+        "example": false,
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "blockers",
+      "installCommand",
+      "ready"
     ],
     "type": "object"
   },
@@ -4446,6 +4534,10 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "keepaliveTimeout": {
         "type": "string"
+      },
+      "kernelMode": {
+        "description": "KernelMode runs this inbound on the AmneziaWG kernel module (internal/amneziawgkern)\ninstead of the embedded amneziawg-go + gVisor stack.",
+        "type": "boolean"
       },
       "maxHandshakeAttempts": {
         "type": "string"

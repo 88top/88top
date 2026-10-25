@@ -320,6 +320,12 @@ Restart is debounced via an atomic "need restart" flag (`SetToNeedRestart` /
 **Key files:** `service/xray.go` (orchestration), `xray/hot_diff.go` (the diff algorithm),
 `xray/process.go` (process lifecycle), `xray/api.go` (gRPC calls), `xray/config.go` (config model).
 
+Inbound-list statistics read only UUID, email and subscription ID from `clients`, joined
+through `client_inbounds` in batches of up to 400 distinct inbound IDs. Full client records
+remain the source for Xray and subscriptions. Missing shared-client traffic is fetched by
+email, including rows owned by an inbound outside the requested list; enrichment preserves
+the stored traffic, lifecycle and last-online fields.
+
 ### 5.2 Runtime abstraction — Local vs Remote (multi-node) ⭐ most important
 
 A "node" (`model.Node`) is another 3x-ui instance this panel controls. Every state-changing
@@ -385,6 +391,17 @@ merged with GUID-based baselines to avoid double counting after resets.
 A client reset is queued per hosting node in `model.NodePendingReset` (`service/node_reset_queue.go`)
 and replayed by the node sync until the node accepts it.
 Periodic resets: `job/periodic_traffic_reset_job.go` (keyed off `Inbound.TrafficReset`).
+
+Cross-panel totals are stored per master GUID and hosted email, separately from local
+`client_traffics`. Directional counter changes, including lower values and resets, persist
+on the next push. Identical totals refresh only when the persisted timestamp is at least
+one hour old; pushes still send the same batches. Display and quota reads retain the
+inclusive 24-hour persisted-row freshness window. Full-list snapshots remain local-only,
+while slim/detail reads and downstream forwarding retain their global overlays.
+
+The heartbeat coarsens liveness, not counter propagation: an idle master can expire up to
+one hour earlier relative to its final unchanged push. Active hourly refresh leaves roughly
+23 hours of missed-push margin. No cache, external service or configurable interval is added.
 
 ### 5.4 Background jobs (cron)
 
