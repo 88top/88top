@@ -67,6 +67,43 @@ type Generator struct {
 	cat      Catalog
 	sys      System
 	opt      Options
+	filter   FilterSource
+}
+
+// FilterSource 提供域名过滤的产物(*dnsfilter.Service 满足)。
+// enabled 为假:档案里没开过滤,什么都不用传。ready 为假:开了但还没按当前设置应用过,
+// 生成配置时当作过滤还没生效(把档案里的 dns.filter.enabled 当作关),
+// 免得 core 因为产物对不上而拒绝生成,连带测速、预览都用不了。
+type FilterSource interface {
+	CoreArtifact(ctx context.Context, prof map[string]any) (artifact map[string]any, key string, enabled, ready bool, err error)
+}
+
+// WithFilter 接上域名过滤的产物来源;不接就不传 dnsFilter(档案里开了过滤也当作没生效)。返回 g 方便链式调用。
+func (g *Generator) WithFilter(f FilterSource) *Generator {
+	g.filter = f
+	return g
+}
+
+// filterOff 返回 p 的副本,其中 dns.filter.enabled 为 false;不改 p。
+func filterOff(p map[string]any) map[string]any {
+	out := make(map[string]any, len(p))
+	for k, v := range p {
+		out[k] = v
+	}
+	dns, _ := p["dns"].(map[string]any)
+	nd := make(map[string]any, len(dns))
+	for k, v := range dns {
+		nd[k] = v
+	}
+	f, _ := dns["filter"].(map[string]any)
+	nf := make(map[string]any, len(f)+1)
+	for k, v := range f {
+		nf[k] = v
+	}
+	nf["enabled"] = false
+	nd["filter"] = nf
+	out["dns"] = nd
+	return out
 }
 
 // NewGenerator 创建生成器。core 为 nil 时 Build 返回 ErrCoreUnavailable。
@@ -79,12 +116,14 @@ func NewGenerator(c Caller, st *store.Store, p Profiles, g Groups, cat Catalog, 
 
 // Built 是一次生成的结果。
 type Built struct {
-	Config         map[string]any `json:"config"`
-	DNSRuleOwners  any            `json:"dnsRuleOwners"`
-	DirectHosts    any            `json:"directHosts"`
-	Failover       any            `json:"failover"`
-	NodeCount      int            `json:"-"`
-	ProfileSecret  string         `json:"-"`
+	Config        map[string]any `json:"config"`
+	DNSRuleOwners any            `json:"dnsRuleOwners"`
+	DirectHosts   any            `json:"directHosts"`
+	Failover      any            `json:"failover"`
+	NodeCount     int            `json:"-"`
+	ProfileSecret string         `json:"-"`
+	// ListIssues:规则集链接没处理好的(tag → 原因),只有 ListedBuilder 会填;部署据此把原因写给用户。
+	ListIssues     map[string]string `json:"-"`
 	rawConfigBytes []byte
 }
 
@@ -177,6 +216,9 @@ type Override struct {
 	Subs  []any
 	// ExtraChains 额外加上的链式节点(tag / detour / chain 已填好),用于测链式代理编辑框里还没保存的那一份。
 	ExtraChains []any
+	// RuleLists 非 nil:传给 core 的 ruleLists(规则集链接编出了域名 / IP 哪几份),core 据此决定引用哪几份 .srs。
+	// 不传时 core 对每个链接只引用 list-<hash> 一份。
+	RuleLists map[string]ListShape
 }
 
 // PreviewOverride 把一份预览出来的节点(还没保存的订阅)变成 Override。
@@ -263,6 +305,20 @@ func (g *Generator) BuildWith(ctx context.Context, o *Override) (*Built, error) 
 		p[k] = v
 	}
 	p["clashApiSecret"] = secret
+	var filterArt map[string]any
+	var filterKey string
+	if enabled := dnsFilterEnabled(prof); enabled {
+		ready := false
+		if g.filter != nil {
+			var err error
+			if filterArt, filterKey, _, ready, err = g.filter.CoreArtifact(ctx, prof); err != nil {
+				return nil, fmt.Errorf("读取域名过滤状态失败: %w", err)
+			}
+		}
+		if !ready {
+			p, filterArt = filterOff(p), nil
+		}
+	}
 
 	var chains []any
 	if replaced {
@@ -298,6 +354,12 @@ func (g *Generator) BuildWith(ctx context.Context, o *Override) (*Built, error) 
 		"localSubnets":  strs(subnets),
 		"chainNodes":    chains,
 	}
+	if o != nil && o.RuleLists != nil {
+		args["ruleLists"] = o.RuleLists
+	}
+	if filterArt != nil {
+		args["dnsFilter"], args["filterExpectedKey"] = filterArt, filterKey
+	}
 	var res struct {
 		Config        json.RawMessage `json:"config"`
 		DNSRuleOwners any             `json:"dnsRuleOwners"`
@@ -313,6 +375,14 @@ func (g *Generator) BuildWith(ctx context.Context, o *Override) (*Built, error) 
 		return nil, fmt.Errorf("核心返回的配置不是 JSON 对象: %w", err)
 	}
 	return b, nil
+}
+
+// dnsFilterEnabled 档案里是否开了域名过滤。
+func dnsFilterEnabled(prof map[string]any) bool {
+	dns, _ := prof["dns"].(map[string]any)
+	f, _ := dns["filter"].(map[string]any)
+	on, _ := f["enabled"].(bool)
+	return on
 }
 
 func strs(s []string) []any {

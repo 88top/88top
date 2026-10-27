@@ -3,6 +3,7 @@ package system
 import (
 	"io"
 	"log/slog"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -17,6 +18,9 @@ func TestLoadConfigDefaults(t *testing.T) {
 	}
 	if cfg.Listen != "0.0.0.0:3036" || cfg.LogLevel != slog.LevelInfo {
 		t.Fatalf("默认值不对: %+v", cfg)
+	}
+	if cfg.CoreService != DefaultCoreService || cfg.PanelService != DefaultPanelService {
+		t.Fatalf("默认服务名不对: %+v", cfg)
 	}
 	if cfg.Paths != func() Paths { p := DefaultPaths(); p.DataDir = filepath.Clean(p.DataDir); return p }() {
 		t.Fatalf("默认路径不对: %+v", cfg.Paths)
@@ -42,8 +46,50 @@ func TestLoadConfigPrecedence(t *testing.T) {
 	if cfg.Listen != ":2222" || cfg.DataDir != filepath.Clean("/flag/data") {
 		t.Fatalf("命令行参数应优先于环境变量: %+v", cfg)
 	}
+	cfg, err = LoadConfig([]string{"-core-service", "my-singbox"}, func(k string) string {
+		if k == EnvPanelService {
+			return "my-panel"
+		}
+		return ""
+	}, io.Discard)
+	if err != nil || cfg.CoreService != "my-singbox" || cfg.PanelService != "my-panel" {
+		t.Fatalf("服务名参数 / 环境变量没生效: %+v %v", cfg, err)
+	}
 	if cfg.StateDir() != filepath.Join(cfg.DataDir, "state") {
 		t.Fatalf("StateDir 不对: %s", cfg.StateDir())
+	}
+}
+
+func TestLoadConfigGeoDir(t *testing.T) {
+	cfg, err := LoadConfig(nil, noEnv, io.Discard)
+	if err != nil || cfg.GeoDir != filepath.Clean(DefaultPaths().GeoDir) {
+		t.Fatalf("默认规则库目录不对: %q %v", cfg.GeoDir, err)
+	}
+	fromEnv := func(k string) string {
+		if k == EnvGeoDir {
+			return "/env/geo"
+		}
+		return ""
+	}
+	cfg, err = LoadConfig(nil, fromEnv, io.Discard)
+	if err != nil || cfg.GeoDir != filepath.Clean("/env/geo") {
+		t.Fatalf("环境变量没生效: %q %v", cfg.GeoDir, err)
+	}
+	cfg, err = LoadConfig([]string{"-geo-dir", "/flag/geo"}, fromEnv, io.Discard)
+	if err != nil || cfg.GeoDir != filepath.Clean("/flag/geo") {
+		t.Fatalf("命令行参数应优先于环境变量: %q %v", cfg.GeoDir, err)
+	}
+	if _, err := LoadConfig([]string{"-geo-dir", " "}, noEnv, io.Discard); err == nil {
+		t.Fatal("规则库目录为空应报错")
+	}
+	// 规则库是只读目录,由安装包放入,Ensure 不创建它
+	root := t.TempDir()
+	p := Paths{DataDir: filepath.Join(root, "data"), ConfigDir: filepath.Join(root, "conf"), GeoDir: filepath.Join(root, "geo")}
+	if err := p.Ensure(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(p.GeoDir); !os.IsNotExist(err) {
+		t.Fatalf("Ensure 不该创建规则库目录: %v", err)
 	}
 }
 
@@ -57,6 +103,9 @@ func TestLoadConfigErrors(t *testing.T) {
 		"路径为空":        {"-web-dir", " "},
 		"未知参数":        {"-nope"},
 		"sing-box 为空": {"-sing-box", ""},
+		"服务名带空格":      {"-core-service", "a b"},
+		"服务名以-开头":     {"-core-service=-rf"},
+		"服务名为空":       {"-panel-service", ""},
 	}
 	for name, args := range cases {
 		t.Run(name, func(t *testing.T) {

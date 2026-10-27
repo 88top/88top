@@ -25,8 +25,19 @@ const (
 	EnvDataDir   = "OPENBOX_DATA_DIR"
 	EnvConfigDir = "OPENBOX_CONFIG_DIR"
 	EnvWebDir    = "OPENBOX_WEB_DIR"
+	EnvGeoDir    = "OPENBOX_GEO_DIR"
 	EnvSingBox   = "OPENBOX_SINGBOX"
 	EnvCore      = "OPENBOX_CORE"
+
+	// 服务名:交给系统服务管理器(OpenWrt init.d / systemd)的名字
+	EnvCoreService  = "OPENBOX_CORE_SERVICE"
+	EnvPanelService = "OPENBOX_PANEL_SERVICE"
+)
+
+// 服务名默认值。M6 打包时再和安装脚本对齐。
+const (
+	DefaultCoreService  = "sing-box"
+	DefaultPanelService = "openbox-backend"
 )
 
 // Paths 是后端用到的全部外部路径。M6 打包时再和安装脚本对齐默认值。
@@ -34,6 +45,7 @@ type Paths struct {
 	DataDir   string // 后端自己的数据(密码哈希、订阅、设置……)
 	ConfigDir string // 生成给 sing-box 的配置
 	WebDir    string // 前端构建产物(panel/dist)
+	GeoDir    string // 随包规则库(只读):<分类名>.srs,如 geosite-cn.srs、geoip-cn.srs
 	SingBox   string // sing-box 可执行文件(可以只写名字,从 PATH 找)
 	Core      string // openbox-core 可执行文件
 }
@@ -44,6 +56,7 @@ func DefaultPaths() Paths {
 		DataDir:   "/var/lib/openbox-backend",
 		ConfigDir: "/etc/openbox-backend",
 		WebDir:    "/usr/share/openbox-backend/panel",
+		GeoDir:    "/usr/share/openbox-backend/geodata",
 		SingBox:   "sing-box",
 		Core:      "openbox-core",
 	}
@@ -67,6 +80,8 @@ type Config struct {
 	Listen   string
 	LogLevel slog.Level
 	Paths
+	CoreService  string // sing-box 的服务名
+	PanelService string // 后端自己的服务名(只用来查开机自启)
 }
 
 // LoadConfig 解析命令行参数和环境变量。getenv 传入 os.Getenv;usage 输出写到 out。
@@ -86,8 +101,11 @@ func LoadConfig(args []string, getenv func(string) string, out io.Writer) (Confi
 	dataDir := fs.String("data-dir", env(EnvDataDir, def.DataDir), "数据目录(环境变量 "+EnvDataDir+")")
 	configDir := fs.String("config-dir", env(EnvConfigDir, def.ConfigDir), "sing-box 配置目录(环境变量 "+EnvConfigDir+")")
 	webDir := fs.String("web-dir", env(EnvWebDir, def.WebDir), "前端文件目录,即 panel/dist(环境变量 "+EnvWebDir+")")
+	geoDir := fs.String("geo-dir", env(EnvGeoDir, def.GeoDir), "随包规则库目录,里面是 geosite-*.srs / geoip-*.srs(环境变量 "+EnvGeoDir+")")
 	singBox := fs.String("sing-box", env(EnvSingBox, def.SingBox), "sing-box 可执行文件(环境变量 "+EnvSingBox+")")
 	core := fs.String("core", env(EnvCore, def.Core), "openbox-core 可执行文件(环境变量 "+EnvCore+")")
+	coreSvc := fs.String("core-service", env(EnvCoreService, DefaultCoreService), "sing-box 的服务名(环境变量 "+EnvCoreService+")")
+	panelSvc := fs.String("panel-service", env(EnvPanelService, DefaultPanelService), "后端自己的服务名(环境变量 "+EnvPanelService+")")
 	if err := fs.Parse(args); err != nil {
 		return Config{}, err
 	}
@@ -102,18 +120,26 @@ func LoadConfig(args []string, getenv func(string) string, out io.Writer) (Confi
 	if err := validateListen(*listen); err != nil {
 		return Config{}, err
 	}
+	for name, v := range map[string]string{"core-service": *coreSvc, "panel-service": *panelSvc} {
+		if err := ValidServiceName(strings.TrimSpace(v)); err != nil {
+			return Config{}, fmt.Errorf("参数 %s 无效: %w", name, err)
+		}
+	}
 	cfg := Config{
-		Listen:   strings.TrimSpace(*listen),
-		LogLevel: level,
+		Listen:       strings.TrimSpace(*listen),
+		LogLevel:     level,
+		CoreService:  strings.TrimSpace(*coreSvc),
+		PanelService: strings.TrimSpace(*panelSvc),
 		Paths: Paths{
 			DataDir:   filepath.Clean(strings.TrimSpace(*dataDir)),
 			ConfigDir: filepath.Clean(strings.TrimSpace(*configDir)),
 			WebDir:    filepath.Clean(strings.TrimSpace(*webDir)),
+			GeoDir:    filepath.Clean(strings.TrimSpace(*geoDir)),
 			SingBox:   strings.TrimSpace(*singBox),
 			Core:      strings.TrimSpace(*core),
 		},
 	}
-	for name, v := range map[string]string{"data-dir": *dataDir, "config-dir": *configDir, "web-dir": *webDir, "sing-box": *singBox, "core": *core} {
+	for name, v := range map[string]string{"data-dir": *dataDir, "config-dir": *configDir, "web-dir": *webDir, "geo-dir": *geoDir, "sing-box": *singBox, "core": *core} {
 		if strings.TrimSpace(v) == "" {
 			return Config{}, errors.New("参数 " + name + " 不能为空")
 		}

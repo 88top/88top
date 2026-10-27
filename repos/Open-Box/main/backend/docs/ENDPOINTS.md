@@ -85,7 +85,7 @@
 |---|---|---|---|---|
 | POST | `/api/openbox/chain-proxies/latency` | `testChainLatency` (api/openbox.ts:1775) | OpenboxChainLatencyResult | (payload: OpenboxChainLatencyPayload) |
 
-> 实现约定(M1):`link` 解析不了、缺 `upstream`、上游不存在或成环返回 400。测速用 `internal/probe`(临时 sing-box + 本机 http 入站,后端自己计时);`testUrl` 不传用档案的 `testUrl`;`via` 是按配置静态推出的上游选中节点(selector 取 default,urltest 取第一个成员),内核接入后改读控制接口。找不到 sing-box 返回 503。**未做**:`ipUrls`(IP 地区),响应里没有 `ip` 字段。
+> 实现约定(M1):`link` 解析不了、缺 `upstream`、上游不存在或成环返回 400。测速用 `internal/probe`(临时 sing-box + 本机 http 入站,后端自己计时);`testUrl` 不传用档案的 `testUrl`;`via` 是按配置静态推出的上游选中节点(selector 取 default,urltest 取第一个成员),内核接入后改读控制接口。找不到 sing-box 返回 503。`ipUrls`(可选,IP 地区):只认 https 的 `api.ip.sb`、`ipwho.is`、`api.ipapi.is` 三个主机(端口只能是 443、不能带账号),主机名转小写、去掉 `:443` 与片段后去重,最多 5 个;有不合规的地址返回 400,文案里带「ipUrls」(前端靠它丢掉 IP 信息后重测)。带了之后和测速同一次起内核、并行,按顺序请求到第一个答 2xx 的为止(3xx 不跟随、非 2xx、空正文都按失败),每次尝试各有一份超时(`timeoutMs`);响应多一个 `ip`:成功 `{ok:true,url,body}`(`url` 是答话的那一家,`body` 是正文原样、最多 16 KiB、已规整成合法 UTF-8),全部失败 `{ok:false,error}`(`error` 按「主机: 原因」逐家列出,用「;」隔开)。没带或带空数组则没有 `ip` 字段。线路不通时测速失败,`ip` 也如实失败,不会让整个请求报错。这一路和测速一样不校验对方证书(路由器上常常没有根证书包)。
 
 ## `/api/openbox/client-app`
 
@@ -163,6 +163,14 @@
 | POST | `/api/openbox/dns/upstream-test` | `testDnsUpstream` (api/openbox.ts:1616) | OpenboxDnsUpstreamTestResult | (payload: OpenboxDnsUpstreamTestPayload) |
 | GET | `/api/openbox/dns/wan` | `fetchWanDns` (api/openbox.ts:1572) | { servers?: string[] } | () |
 
+> 实现约定(M2):`dns/wan` 只读,回 `{ "servers": string[] }`(读不到是空数组,不报错);服务器取自 netifd / systemd-resolved 记录的上游文件,不读指向本机的 `/etc/resolv.conf`(顺序见 `internal/system/wandns.go`)。
+
+> 实现约定(M2):`dns/region-detect` 的 GET 回 `{ pending, region }`(`pending` 只在一次判断进行中为真,`region` 取档案 `dns.region`);POST 按出口公网 IP 判一次,回 `{ region: "cn" | "intl" | null, ip, error? }`,判不出来仍是 200、`region` 为 null;只查不写档案,不在启动时自动判。
+
+> 实现约定(M2):`dns/flush-cache` 只接受 POST,回 `{ kernel, dnsmasq, resolved }`(每层是否清成功,各层独立);至少一层成功是 200,全都没清掉是 503 加 `error`。内核层走 sing-box 的 `POST /cache/dns/flush`,dnsmasq 层发 SIGHUP,resolved 层 `resolvectl flush-caches`;只让缓存失效,不改配置、不重启。
+
+> 实现约定(M2):`dns/upstream-test` 只接受 POST,请求 `{ side: "direct" | "proxy", server, protocol, port? }`:`server` 只收 IPv4 / IPv6 或 `wan`(不收域名),`protocol` 只有 `udp` / `tcp`(缺省:直连 udp、代理 tcp),`port` 缺省 53;不合法回 400 加 `error`,没有 sing-box 或核心不可用回 503。测了但没通是 200、`ok: false` 加 `error`(超时、上游回错误码、内核起不来都在里面)。做法:起临时 sing-box,只开 127.0.0.1 的 direct 入站并把进来的 DNS 查询劫持给内核自己的 DNS 模块,内核 DNS 里只有被测的这一台,后端发一个 A 查询并计时,所以测的是内核按所选协议、经所选线路真的去问。`wan` 固定直连、固定 UDP 53,测系统上游 DNS 的第一台(读不到按地区退回 223.5.5.5 / 1.1.1.1,并写进 `note`),`wan` 为真。代理侧经生成配置的兜底出站(`route.final`)去连,`policy` 是这个出口的名字,`via` / `chain` 是它当前默认选中的节点和逐跳线路(链首在前);出口是自动选择组时内核按延迟挑,`via` 只能写组名并在 `note` 里说明;兜底出口是直连时 `via` 为空。测试域名取档案:代理侧 `testUrl` 的主机、直连侧 `directTestUrl` 的主机。`warning` 暂不出现:解析之后再请求测速地址那一步没有做。
+
 ## `/api/openbox/dns-filter`
 
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
@@ -173,6 +181,8 @@
 | GET | `/api/openbox/dns-filter/preview?{x})}` | `fetchDnsFilterPreview` (api/openbox.ts:173) | DnsFilterPreview | (url: string, search: string, page: number, pageSize = 20, action: DnsFilterPrev |
 | GET | `/api/openbox/dns-filter/records?{x})}` | `fetchDnsFilterRecords` (api/openbox.ts:172) | { rows: DnsFilterRecord[]; total: number; page: number; pageSize: number } | (search: string, result: string, page: number, pageSize = 20) |
 | GET | `/api/openbox/dns-filter/summary` | `fetchDnsFilterSummary` (api/openbox.ts:171) | DnsFilterSummary | () |
+
+实现约定(M2):`apply` 请求体可空,`{ update?: bool, listId?: string }`:`update` 为真重新下载启用的名单(带 `listId` 只重下那一份),否则只下载没有缓存的;之后编成规则集并走一次完整部署,成功返回新的状态。关闭过滤时也走 `apply`(把规则撤下来),不下载名单。错误码:409 = 已有应用在进行,或内核没在运行(名单已更新保存但没应用,不会替用户启动内核);400 = 没有这份名单 / 一份能用的名单都没有;500 = 部署失败(`error` 里写着回滚情况);503 = 没接应用服务。GET 返回的 `lists[id].error` 是上次下载 / 解析失败的原因(失败时沿用上次的缓存),`pending` 表示设置与已应用的不一致。
 
 ## `/api/openbox/factory-reset`
 
@@ -242,6 +252,8 @@
 |---|---|---|---|---|
 | GET | `/api/openbox/policies/entries?{x}` | `fetchPolicyEntries` (api/openbox.ts:1214) | OpenboxPolicyEntries | (params: { name: string tab?: 'all' \| 'domain' \| 'ip' q?: string sort?: 'type' |
 
+> 实现约定(M1):`name` 是站点集名(必填,缺少 400,没有这个站点集 404)。取自档案的路由,先交给核心 `normalizeRouting` 规范化。`name` 等于兜底站点集名时返回 `fallback:true` 和空条目(兜底命中其余所有目标);等于前置自定义分流名时展开它的每一行(含端口规则,`family:"other"`);否则展开该站点集的手写条件(来源 `custom`)和规则集链接(来源是链接的「主机 + 路径」,不带账号、查询串和片段)。条目 `type` 为 `domain` / `domain_suffix` / `domain_keyword` / `domain_regex` / `ip_cidr`(和 `rulesets/preview` 一致)或 `port`;同类型、同内容、同来源去重,总量最多 30 万条。`tab` 取 `all` / `domain` / `ip`(其它 400);`counts` 是各档总条数(不受 `tab` 和 `q` 影响,`other` 族只算进 `all`),`total` 是当前档的条数,`matched` 是当前档里命中 `q` 的条数;`q` 不区分大小写,匹配内容和来源;`sort` 取 `type` / `content` / `source`(其它 400,缺省保持原顺序),`dir` 取 `asc` / `desc`;`limit` 默认 50、最大 500。规则库分类(`geosite-*` / `geoip-*`,含前置自定义分流里的 `geosite` / `geoip` / `ruleset` 行)按 `rulesets/entries` 同一套随包规则库展开,条目来源写分类名(例如 `geosite-cn`),搜索词也能匹配来源;`missing` 列出展开不了的来源:规则库里没有的分类(或名字不合法、没有 `sing-box`、解码失败)、拉取失败的规则集链接(只写「主机 + 路径」)、没有链接可展开的 `list-*`、被截断的分类(带「条目太多,只统计了前 30 万条」的提示);单个来源失败不会让整个请求失败。没有 openbox-core 时返回 503。
+
 ## `/api/openbox/profile`
 
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
@@ -263,7 +275,7 @@
 
 ## `/api/openbox/rulesets`
 
-实现约定(M1):`preview` / `import` 已实现,只收文本名单(Clash 经典 `.list`、YAML `payload`、一行一条的域名 / IP);条目 `type` 为 `domain` / `domain_suffix` / `domain_keyword` / `domain_regex` / `ip_cidr`,去重保序。`preview` 的 `q` 按值做不区分大小写的子串过滤,`total` 是名单总条数、`matched` 是命中数,`limit` 默认 50、最大 500;同一链接 60 秒内走内存缓存(搜索框边打边搜)。`import` 一次返回全部,超过 5 万条返回 400。二进制名单(.mrs / .srs)返回 400 并说明不支持;拉取失败 502。`entries`(按分类名)和 `refresh` 暂返回 501,等随包规则库、配置生成与 `sing-box` 就绪后再做。`/rulesets/check` 与 `/rulesets/refresh/status` 前端不调用,不实现。
+实现约定(M1):`preview` / `import` 已实现,只收文本名单(Clash 经典 `.list`、YAML `payload`、一行一条的域名 / IP);条目 `type` 为 `domain` / `domain_suffix` / `domain_keyword` / `domain_regex` / `ip_cidr`,去重保序。`preview` 的 `q` 按值做不区分大小写的子串过滤,`total` 是名单总条数、`matched` 是命中数,`limit` 默认 50、最大 500;同一链接 60 秒内走内存缓存(搜索框边打边搜)。`import` 一次返回全部,超过 5 万条返回 400。二进制名单(.mrs / .srs)返回 400 并说明不支持;拉取失败 502。`entries`(按随包规则库的分类名查)已实现:`tag` 必填(缺少 400;不是 `geosite-` / `geoip-` 开头加字母数字和 `. _ ! @ -` 的名字 400;规则库里没有这个分类 404),`q` / `offset` / `limit` 与 `preview` 一致(`limit` 默认 50、最大 500),返回 `tag`、`total`(分类总条数)、`matched`(命中 `q` 的条数)、`offset`、`limit`、`entries`(空分类是 `[]`);分类条目超过 30 万时只列前面的并多一个 `truncated:true`。后端不自己解析 .srs,而是对 `<规则库目录>/<tag>.srs` 运行 `sing-box rule-set decompile`,所以看到的就是内核会匹配的那份;规则库目录由 `-geo-dir`(环境变量 `OPENBOX_GEO_DIR`)指定,只读、不下载,本地没有的分类如实 404;目录不存在或没有 `sing-box` 返回 503,解码失败返回 500 并带 `sing-box` 的原因。同一分类的解码结果在内存里缓存(按文件大小和修改时间失效,最多 2 个分类),同一时刻只解一个。`refresh` 已实现:POST `{ url }`(只收 http / https),对这一个链接跳过缓存重新联网拉取,拆成域名 / IP 两份编成 `<规则集目录>/list-<hash>.srs` / `list-<hash>-ip.srs`,只改规则集文件,不重启、不部署、不清理别的文件。响应 `{ url, tag, total, counts, needsRestart, changed, dropped, referenced }`:`total` 与 `preview` 同口径;`counts` 是按条目类型的条数(`domain` / `domain_suffix` / `domain_keyword` / `domain_regex` / `ip_cidr`,只含有的类型);`needsRestart` 仅当档案里正在用这个链接、且「有域名份 / 有 IP 份」的组合变了才为 `true`;`changed` 是有文件被改写或删除;`dropped` 是被丢掉的非法正则条数;`referenced` 是链接当前是否被站点集 / 前置自定义分流引用。失败时旧文件不动:链接不合格 400、二进制或空名单 400、对端拉取失败 502、没有 `sing-box` 503、编译失败 500(带 `sing-box` 的原因)。`/rulesets/check` 与 `/rulesets/refresh/status` 前端不调用,不实现。
 
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
 |---|---|---|---|---|
@@ -284,6 +296,8 @@
 |---|---|---|---|---|
 | POST | `/api/openbox/service/core/{x}` | `runServiceAction` (api/openbox.ts:1030) | OpenboxServiceActionResult | (action: OpenboxServiceAction) |
 | GET | `/api/openbox/service/status` | `fetchServiceStatus` (api/openbox.ts:1022) | OpenboxServiceStatus | () |
+
+实现约定(M1):`status` 的 `conflicts` 是正在运行的其它代理服务 `[{ id, label, running: true }]`,只读检测(OpenWrt 查 `/etc/init.d/<名> running`,systemd 用 `systemctl is-active`),名单见 `internal/system/conflicts.go` 的 `KnownConflicts`,自己的 sing-box 和后端服务名不算;检测失败当作没有,接口不报错。`pendingRestart` 暂恒为「没有」(随部署接 HTTP 再做),没有 `container` / `conflictAutoStopped`(后端不自动停别的服务)。
 
 ## `/api/openbox/site-latency`
 

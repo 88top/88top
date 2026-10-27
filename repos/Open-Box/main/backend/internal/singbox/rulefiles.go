@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/timeflysoon/Open-Box/backend/internal/geodata"
 	"github.com/timeflysoon/Open-Box/backend/internal/store"
 )
 
@@ -22,7 +23,8 @@ import (
 //	flip-dynamic obflip-byp-* / obflip-need-*:热切换的动态集(二进制 .srs,初始是占位,之后由热切换功能改写)
 //	ruleset      其余(geoip-* / geosite-* / 用户规则集链接编成的 .srs):内容来自规则库或用户的名单
 //
-// 本文件负责前两类里内容完全确定的部分:node-direct 和 flip-dynamic 的占位。其余的在 Missing 里如实报告。
+// 本文件负责内容完全确定的部分:node-direct、flip-dynamic 的占位,以及从随包规则库拷贝的 geoip-* / geosite-*。
+// 其余的(热切换开关、用户规则集链接编成的 .srs)在 Missing 里如实报告。
 const (
 	KindNodeDirect  Kind = "node-direct"
 	KindFlipFlag    Kind = "flip-flag"
@@ -43,6 +45,11 @@ const (
 	compileTimeout = 30 * time.Second
 	// 规则集源码里的 version:和内核 1.13 / 1.14 都认的 3 一致。
 	ruleSetSourceVersion = 3
+
+	// 从规则库拷贝的 .srs 的体积上限(与 geodata 解码上限一致)。
+	maxGeoCopy = 32 << 20
+	// 二进制规则集(.srs)的文件头:"SRS" 加一个版本字节。
+	srsMagic = "SRS"
 )
 
 // Kind 是本地规则集文件的类别。
@@ -112,12 +119,14 @@ func (r *FilesReport) OK() bool { return len(r.Missing) == 0 }
 // Files 把配置引用的本地规则集落盘。
 type Files struct {
 	SingBox string // sing-box 可执行文件,编译占位 .srs 用;空 = "sing-box"
+	GeoDir  string // 随包规则库目录(只读,<分类名>.srs);空 = 没有规则库,geoip-* / geosite-* 如实报缺
 }
 
 // WriteLocalSets 处理 cfg 引用的本地规则集:
 //   - node-direct:每次按 direct(Built.DirectHosts)改写,没有地址时写占位;
 //   - flip-dynamic:不存在才写占位(用 sing-box 编译),已存在的不动,免得覆盖热切换写进去的内容;
-//   - flip-flag、ruleset:这里生成不了,报在 Missing 里(原因写明白)。
+//   - ruleset 里的 geoip-* / geosite-*:从规则库目录拷到配置指定的路径(内容相同则不动),规则库里没有就报缺;
+//   - flip-flag、其余 ruleset(用户规则集链接):这里生成不了,报在 Missing 里(原因写明白)。
 //
 // 单个文件失败不会中断其它文件,都记在 Missing 里;只有 ctx 取消这类整体性错误才返回 error。
 func (f Files) WriteLocalSets(ctx context.Context, cfg map[string]any, direct any) (*FilesReport, error) {
@@ -164,7 +173,28 @@ func (f Files) WriteLocalSets(ctx context.Context, cfg map[string]any, direct an
 		case KindFlipFlag:
 			miss("热切换开关的内容取决于每个站点集此刻走直连还是走代理,需要 core 提供开关状态(见 STATUS.md「需要 core 配合」)")
 		default:
-			miss("规则库 / 用户规则集的 .srs 还没有生成来源(依赖随包规则库和 rulesets entries)")
+			if !geodata.ValidTag(s.Tag) {
+				// 用户规则集链接编成的 list-*:由 ListFiles.Sync 在生成配置前落盘,这里只确认文件在
+				if hasSRS(s.Path) {
+					rep.Kept = append(rep.Kept, s.Path)
+				} else {
+					miss("用户规则集链接的 .srs 还没有生成(拉取失败或没有走部署流程的规则集准备)")
+				}
+				continue
+			}
+			if s.Format != "binary" {
+				miss("格式应为 binary,配置里是 " + s.Format)
+				continue
+			}
+			changed, err := f.copyGeo(s.Tag, s.Path)
+			switch {
+			case err != nil:
+				miss(err.Error())
+			case changed:
+				rep.Written = append(rep.Written, s.Path)
+			default:
+				rep.Kept = append(rep.Kept, s.Path)
+			}
 		}
 	}
 	return rep, nil
@@ -225,34 +255,41 @@ func writeFile(path string, data []byte) error {
 // writePlaceholderSRS 用 `sing-box rule-set compile` 把占位源码编成 .srs 再原子放到 path。
 // 用已安装的内核编,得到的二进制格式版本和它一致。
 func (f Files) writePlaceholderSRS(ctx context.Context, path string) error {
-	bin := f.SingBox
+	src, err := marshalSource(map[string]any{"ip_cidr": []string{placeholderCIDR4, placeholderCIDR6}})
+	if err != nil {
+		return err
+	}
+	_, err = compileSRS(ctx, f.SingBox, path, src, "placeholder.json")
+	return err
+}
+
+// compileSRS 把规则集源码 JSON 编成 .srs,原子放到 path。已有的文件内容完全相同则不改写(changed=false)。
+// label 用来替换错误信息里的临时文件路径。
+func compileSRS(ctx context.Context, singBox, path string, src []byte, label string) (changed bool, err error) {
+	bin := singBox
 	if bin == "" {
 		bin = "sing-box"
 	}
 	exe, err := exec.LookPath(bin)
 	if err != nil {
-		return ErrNoSingBox
+		return false, ErrNoSingBox
 	}
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0o700); err != nil {
-		return fmt.Errorf("创建目录失败: %w", err)
-	}
-	src, err := marshalSource(map[string]any{"ip_cidr": []string{placeholderCIDR4, placeholderCIDR6}})
-	if err != nil {
-		return err
+		return false, fmt.Errorf("创建目录失败: %w", err)
 	}
 	in, err := os.CreateTemp(dir, ".compile-*.json")
 	if err != nil {
-		return fmt.Errorf("创建临时文件失败: %w", err)
+		return false, fmt.Errorf("创建临时文件失败: %w", err)
 	}
 	inName := in.Name()
 	defer os.Remove(inName)
 	if _, err := in.Write(src); err != nil {
 		in.Close()
-		return fmt.Errorf("写临时文件失败: %w", err)
+		return false, fmt.Errorf("写临时文件失败: %w", err)
 	}
 	if err := in.Close(); err != nil {
-		return err
+		return false, err
 	}
 	outName := inName + ".srs"
 	defer os.Remove(outName)
@@ -263,8 +300,11 @@ func (f Files) writePlaceholderSRS(ctx context.Context, path string) error {
 	lw := &limitedWriter{max: maxCheckOut}
 	cmd.Stdout, cmd.Stderr = lw, lw
 	if err := cmd.Run(); err != nil {
+		if ctx.Err() != nil {
+			return false, ctx.Err()
+		}
 		if cctx.Err() != nil {
-			return fmt.Errorf("sing-box rule-set compile 超时(%s)", compileTimeout)
+			return false, fmt.Errorf("sing-box rule-set compile 超时(%s)", compileTimeout)
 		}
 		var ee *exec.ExitError
 		if errors.As(err, &ee) {
@@ -272,16 +312,80 @@ func (f Files) writePlaceholderSRS(ctx context.Context, path string) error {
 			if msg == "" {
 				msg = ee.Error()
 			}
-			return fmt.Errorf("sing-box rule-set compile 失败: %s", strings.ReplaceAll(msg, inName, "placeholder.json"))
+			return false, fmt.Errorf("sing-box rule-set compile 失败: %s", strings.ReplaceAll(msg, inName, label))
 		}
-		return fmt.Errorf("运行 sing-box 失败: %w", err)
+		return false, fmt.Errorf("运行 sing-box 失败: %w", err)
 	}
 	data, err := os.ReadFile(outName)
 	if err != nil {
-		return fmt.Errorf("读编译结果失败: %w", err)
+		return false, fmt.Errorf("读编译结果失败: %w", err)
 	}
 	if len(data) == 0 {
-		return errors.New("sing-box rule-set compile 没有产出文件")
+		return false, errors.New("sing-box rule-set compile 没有产出文件")
 	}
-	return writeFile(path, data)
+	if old, err := os.ReadFile(path); err == nil && string(old) == string(data) {
+		return false, nil
+	}
+	if err := writeFile(path, data); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// copyGeo 把规则库里的 <tag>.srs 拷到 dst(拷贝而不是软链:规则库目录可能在别的分区、随升级替换,
+// 软链断了内核会起不来)。dst 已存在且内容完全相同则不动,返回 changed=false。
+// 只做文件头检查("SRS"),不解码:解码是 sing-box check 的事,出错会在校验阶段暴露。
+func (f Files) copyGeo(tag, dst string) (changed bool, err error) {
+	if f.GeoDir == "" {
+		return false, errors.New("没有配置规则库目录(-geo-dir),没法放入 " + tag)
+	}
+	src := filepath.Join(f.GeoDir, tag+".srs")
+	fi, err := os.Stat(src)
+	if err != nil || !fi.Mode().IsRegular() {
+		return false, errors.New("规则库里没有分类 " + tag)
+	}
+	if fi.Size() > maxGeoCopy {
+		return false, fmt.Errorf("规则库里的 %s 太大(超过 %d MiB)", tag, maxGeoCopy>>20)
+	}
+	if same, _ := sameFile(src, dst); same {
+		return false, nil // 目标就是规则库里的那个文件(规则集目录直接指向规则库)
+	}
+	data, err := os.ReadFile(src)
+	if err != nil {
+		return false, fmt.Errorf("读规则库里的 %s 失败: %w", tag, err)
+	}
+	if len(data) < len(srsMagic)+1 || string(data[:len(srsMagic)]) != srsMagic {
+		return false, fmt.Errorf("规则库里的 %s 不是有效的 .srs 文件", tag)
+	}
+	if old, err := os.ReadFile(dst); err == nil && string(old) == string(data) {
+		return false, nil
+	}
+	if err := writeFile(dst, data); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func sameFile(a, b string) (bool, error) {
+	fa, err := os.Stat(a)
+	if err != nil {
+		return false, err
+	}
+	fb, err := os.Stat(b)
+	if err != nil {
+		return false, err
+	}
+	return os.SameFile(fa, fb), nil
+}
+
+// hasSRS 报告 path 是不是一个文件头合格的 .srs。
+func hasSRS(path string) bool {
+	f, err := os.Open(path)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+	head := make([]byte, len(srsMagic)+1)
+	n, _ := f.Read(head)
+	return n == len(head) && string(head[:len(srsMagic)]) == srsMagic
 }

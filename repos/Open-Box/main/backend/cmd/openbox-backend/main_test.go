@@ -64,6 +64,20 @@ func TestAppWiring(t *testing.T) {
 		t.Fatalf("登录后未知接口应为 404: %d %s", code, body)
 	}
 
+	// 上游 DNS 接口已装配:登录后可读,读不到文件时也是 {"servers":[...]} 而不是 404
+	if code, body := get(c, ts.URL+"/api/openbox/dns/wan"); code != 200 || !strings.Contains(body, `"servers":[`) {
+		t.Fatalf("dns/wan: %d %s", code, body)
+	}
+
+	if code, body := get(c, ts.URL+"/api/openbox/dns/region-detect"); code != 200 || !strings.Contains(body, `"pending":false`) || !strings.Contains(body, `"region":"cn"`) {
+		t.Fatalf("dns/region-detect: %d %s", code, body)
+	}
+
+	// 清 DNS 缓存已装配:POST 才有;测试机上没有可清的层时是 503 + error,而不是 404 / 405
+	if code, _ := get(c, ts.URL+"/api/openbox/dns/flush-cache"); code != 405 {
+		t.Fatalf("dns/flush-cache GET: %d", code)
+	}
+
 	// 重启:密码保留,旧 Cookie 仍有效
 	ts2, _ := start()
 	jar, _ := cookiejar.New(nil)
