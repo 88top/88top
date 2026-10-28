@@ -1,0 +1,164 @@
+{
+  "host": "192.168.30.7",
+  "views": [
+    {
+      "appTextLength": 1600,
+      "passwordForm": false,
+      "overflow": false,
+      "title": "iStoreOS - LuCI",
+      "name": "home",
+      "width": 1440
+    },
+    {
+      "appTextLength": 1215,
+      "passwordForm": false,
+      "overflow": false,
+      "title": "iStoreOS - LuCI",
+      "name": "devices",
+      "width": 1440
+    },
+    {
+      "appTextLength": 200,
+      "passwordForm": false,
+      "overflow": false,
+      "title": "iStoreOS - LuCI",
+      "name": "network",
+      "width": 1440
+    },
+    {
+      "appTextLength": 1508,
+      "passwordForm": false,
+      "overflow": false,
+      "title": "iStoreOS - LuCI",
+      "name": "home",
+      "width": 390
+    },
+    {
+      "appTextLength": 1215,
+      "passwordForm": false,
+      "overflow": false,
+      "title": "iStoreOS - LuCI",
+      "name": "devices",
+      "width": 390
+    },
+    {
+      "appTextLength": 200,
+      "passwordForm": false,
+      "overflow": false,
+      "title": "iStoreOS - LuCI",
+      "name": "network",
+      "width": 390
+    },
+    {
+      "appTextLength": 1509,
+      "passwordForm": false,
+      "overflow": false,
+      "title": "iStoreOS - LuCI",
+      "name": "home",
+      "width": 320
+    },
+    {
+      "appTextLength": 1215,
+      "passwordForm": false,
+      "overflow": false,
+      "title": "iStoreOS - LuCI",
+      "name": "devices",
+      "width": 320
+    },
+    {
+      "appTextLength": 200,
+      "passwordForm": false,
+      "overflow": false,
+      "title": "iStoreOS - LuCI",
+      "name": "network",
+      "width": 320
+    }
+  ],
+  "pageErrors": [],
+  "failedRequests": [],
+  "cancelledRequests": [
+    {
+      "path": "/cgi-bin/luci/istore/lanctrl/v2/devices/",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/cgi-bin/luci/istore/lanctrl/v2/router-context/",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/cgi-bin/luci/istore/lanctrl/v2/devices/",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/cgi-bin/luci/istore/lanctrl/v2/router-context/",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/cgi-bin/luci/istore/lanctrl/v2/devices/",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/cgi-bin/luci/istore/lanctrl/v2/router-context/",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "badResponses": [],
+  "expectedAuthDenials": [
+    {
+      "path": "/cgi-bin/luci/admin/quickstart/",
+      "status": 403
+    }
+  ],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/ubus/"
+    },
+    {
+      "method": "POST",
+      "path": "/ubus/"
+    },
+    {
+      "method": "POST",
+      "path": "/ubus/"
+    },
+    {
+      "method": "POST",
+      "path": "/ubus/"
+    },
+    {
+      "method": "POST",
+      "path": "/ubus/"
+    },
+    {
+      "method": "POST",
+      "path": "/ubus/"
+    },
+    {
+      "method": "POST",
+      "path": "/ubus/"
+    },
+    {
+      "method": "POST",
+      "path": "/ubus/"
+    },
+    {
+      "method": "POST",
+      "path": "/ubus/"
+    },
+    {
+      "method": "POST",
+      "path": "/ubus/"
+    },
+    {
+      "method": "POST",
+      "path": "/ubus/"
+    },
+    {
+      "method": "POST",
+      "path": "/ubus/"
+    }
+  ],
+  "anonymousPasswordForm": true,
+  "afterCookieRemovalPasswordForm": true
+}

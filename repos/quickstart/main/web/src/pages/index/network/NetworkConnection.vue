@@ -246,20 +246,28 @@ const getDnsProto = (dnsProto?: string) => {
     }
 }
 
+let portPollingActive = true
+let portPollingTimer: ReturnType<typeof setTimeout> | undefined
 const getPortList = () => {
+    if (!portPollingActive) return
     (porter.load && document.hidden ? Promise.resolve() : request.Network.PortList.GET().then(res => {
-        if (res?.data) {
+        if (portPollingActive && res?.data) {
             const { result } = res?.data
             if (result) {
                 porter.portList = result.ports || []
             }
         }
     })).finally(() => {
+        if (!portPollingActive) return
         porter.load = true
-        setTimeout(getPortList, 10000)
+        portPollingTimer = setTimeout(getPortList, 10000)
     })
 }
 getPortList()
+onUnmounted(() => {
+    portPollingActive = false
+    if (portPollingTimer !== undefined) clearTimeout(portPollingTimer)
+})
 const stampForm = utils.stampForm
 
 const goDeviceManagement = () => {

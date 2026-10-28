@@ -1,0 +1,76 @@
+{
+  "checkedAt": "2026-10-18T11:26:23.412737+00:00",
+  "repositories": [
+    {
+      "name": "business",
+      "path": "/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/94c4-develop-quicksta/quickstart",
+      "branch": "af/94c4-develop-quicksta",
+      "head": "b8a44efee8125e419d925f8281a5c83319b720ad",
+      "status": [
+        "M scripts/ops/home-current-acceptance.py",
+        "?? docs/evidence/m70/netpolicy-preparation/arm64-inputs-0163.json",
+        "?? docs/evidence/m70/netpolicy-preparation/arm64-ipk-0163-1.json",
+        "?? docs/evidence/m70/netpolicy-preparation/b-after-helper-preservation-0163.json",
+        "?? docs/evidence/m70/netpolicy-preparation/b-after-install-preservation-0163.json",
+        "?? docs/evidence/m70/netpolicy-preparation/b-at-install-check-0163.json",
+        "?? docs/evidence/m70/netpolicy-preparation/b-dhns-helper-refresh-0163.json",
+        "?? docs/evidence/m70/netpolicy-preparation/b-dry-run-0163.log",
+        "?? docs/evidence/m70/netpolicy-preparation/b-install-0163.log",
+        "?? docs/evidence/m70/netpolicy-preparation/b-installed-0163-full-1/",
+        "?? docs/evidence/m70/netpolicy-preparation/b-installed-0163-provider-1/",
+        "?? docs/evidence/m70/netpolicy-preparation/b-installed-0163-provider-2/",
+        "?? docs/evidence/m70/netpolicy-preparation/reject-stale-dhns-0163/",
+        "?? docs/evidence/m70/netpolicy-preparation/x64-inputs-0163.json",
+        "?? docs/evidence/m70/netpolicy-preparation/x64-ipk-0163-2.json"
+      ]
+    },
+    {
+      "name": "app-hub",
+      "path": "/projects/workspace-linkease-ubuntu/openwrt-apps/istoreos-app-hub",
+      "branch": "main",
+      "head": "a10b53b5d7a43968f7efe2e12d712864bc00a14c",
+      "status": []
+    },
+    {
+      "name": "nas-test",
+      "path": "/var/cache/build-cache/users/911/projects/quickstart-6fd8ef14aa05/work/feed-home-016",
+      "branch": "quickstart-home-016",
+      "head": "7e1a215ad348312b1c1b3ec791e45fd1de8e226d",
+      "status": []
+    },
+    {
+      "name": "nas-luci-test",
+      "path": "/var/cache/build-cache/users/911/projects/quickstart-6fd8ef14aa05/work/feed-luci-home-016",
+      "branch": "quickstart-home-016",
+      "head": "965e2f615efd59b12e6e3212b0a2d8eb18d0ce5d",
+      "status": []
+    },
+    {
+      "name": "sdk-test",
+      "path": "/var/cache/build-cache/users/911/projects/quickstart-6fd8ef14aa05/work/sdk-home-016",
+      "branch": "quickstart-home-016",
+      "head": "9c4f01a26d9c20b22472ef949a0f445132e3274d",
+      "status": []
+    },
+    {
+      "name": "protected-original-sdk",
+      "path": "/projects/workspace-linkease-ubuntu/openwrt-apps/openwrt-sdk-builder",
+      "branch": "main",
+      "head": "a3defaae7a19a43e8144b87671031a7ea933405a",
+      "status": [
+        "M scripts/build/inside-container.sh",
+        " M tests/test_contract.py",
+        "?? configs/feeds/linkease-176.conf",
+        "?? configs/platforms/openwrt-241-arm.env",
+        "?? configs/platforms/openwrt-241-arm64.env",
+        "?? configs/platforms/openwrt-241-x64.env",
+        "?? configs/profiles/linkease-176-arm.env",
+        "?? configs/profiles/linkease-176-arm64.env",
+        "?? configs/profiles/linkease-176-x64.env",
+        "?? patches/linkease-176-validation.patch"
+      ]
+    }
+  ],
+  "protectedOriginalBuilderCurrent": "deployments/runtime-linkease-176-source-date-fix-20260930",
+  "noPushReleaseOrAction": true
+}

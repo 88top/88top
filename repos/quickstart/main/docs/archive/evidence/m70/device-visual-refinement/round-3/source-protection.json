@@ -1,0 +1,8 @@
+{
+  "result": "passed",
+  "baseline": "d3a7620",
+  "listScriptIdentical": true,
+  "scriptSha256": "f5e0d93bdabb67b797ac09bea6110cdedf3d9a49759c936ff5b96bc5ea0d09cc",
+  "businessHandlersAndModelsIdentical": true,
+  "unchangedBusinessChildren": true
+}

@@ -23,13 +23,13 @@ func TestBuildCommandsCreatesGuestIfaceCommands(t *testing.T) {
 		`uci -q delete wireless.guest5g`,
 		`uci set wireless.guest5g="wifi-iface"`,
 		`uci set wireless.guest5g.device="${WIFI_DEV}"`,
-		`uci set wireless.guest5g.ifname="wlan11"`,
+		`uci set wireless.guest5g.ifname=wlan11`,
 		`uci set wireless.guest5g.mode="ap"`,
 		`uci set wireless.guest5g.network="guest"`,
 		`uci set wireless.guest5g.guest="1"`,
-		`uci set wireless.guest5g.ssid="iStoreOS-5G-Guest"`,
-		`uci set wireless.guest5g.encryption="psk2+ccmp"`,
-		`uci set wireless.guest5g.key="goodlife"`,
+		`uci set wireless.guest5g.ssid=iStoreOS-5G-Guest`,
+		`uci set wireless.guest5g.encryption=psk2+ccmp`,
+		`uci set wireless.guest5g.key=goodlife`,
 		`uci set wireless.guest5g.disabled=0`,
 		`uci set wireless.guest5g.isolate=1`,
 		`uci set wireless.guest5g.wds=1`,
@@ -52,7 +52,7 @@ func TestBuildCommandsUsesDefaults(t *testing.T) {
 		Encryption:     "mixed-psk",
 	})
 
-	if got[10] != `uci set wireless.guest2g.key="goodlife"` {
+	if got[10] != `uci set wireless.guest2g.key=goodlife` {
 		t.Fatalf("default key command = %q", got[10])
 	}
 	if got[len(got)-1] != "wifi" {

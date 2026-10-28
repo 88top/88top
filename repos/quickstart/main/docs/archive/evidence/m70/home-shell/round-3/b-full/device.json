@@ -1,0 +1,54 @@
+{
+  "checkedAt": "2026-10-18T12:31:09.648016+00:00",
+  "host": "192.168.30.244",
+  "scope": "homepage-config-only",
+  "board": {
+    "kernel": "6.6.86",
+    "hostname": "iStoreOS",
+    "system": "Intel(R) N100",
+    "model": "QEMU Standard PC (Q35 + ICH9, 2009)",
+    "board_name": "qemu-standard-pc-q35-ich9-2009",
+    "rootfs_type": "squashfs",
+    "release": {
+      "distribution": "iStoreOS",
+      "version": "24.10.1",
+      "revision": "2025052311",
+      "target": "x86/64",
+      "description": "iStoreOS 24.10.1 2025052311",
+      "builddate": "1747907388"
+    }
+  },
+  "version": "0.16.5-test20261018 9d74bd3a0a04463b3503d67af3afff048619c3f4 .20261018.121432",
+  "fingerprints": [
+    "564422a99fba64a993085adaa3aad55af76dd95f0992e071cd479ab16732e6d9  /usr/sbin/quickstart",
+    "f8ace583a7b059029a90a8b5d92ba53cc6e5f5c526857221049f3ce205c85baa  /www/luci-static/quickstart/index.js",
+    "f3eeb261eea3e2d56fed2a112de09260e44abf246019c5eb7c5926f30d011606  /www/luci-static/quickstart/style.css",
+    "c0b21cdb150a56ebbac9edaf15e3a143d603f08c78b48ffa4d3012b211377761  /www/luci-static/quickstart/vendor.js",
+    "2da3ec81c6d15ca52a574576486e534acf4a040d61adbc34cad360b91af76a4f  /www/luci-static/quickstart/i18n/en.json"
+  ],
+  "processFingerprints": [
+    "564422a99fba64a993085adaa3aad55af76dd95f0992e071cd479ab16732e6d9  /proc/535176/exe",
+    "564422a99fba64a993085adaa3aad55af76dd95f0992e071cd479ab16732e6d9  /proc/535313/exe"
+  ],
+  "packages": [
+    "luci-app-quickstart - 0.16.5-test20261018-r2",
+    "quickstart - 0.16.5-test20261018-2",
+    "quickstart-netpolicy - 0.2.0-test20260928-2"
+  ],
+  "netpolicy": {
+    "binarySha256": "3a1c633f346f876d771b03f622aeff8215920683c5ed1945fca354bac77ba6c2",
+    "manifest": {
+      "product": "quickstart-netpolicy",
+      "version": "0.2.0-test20260928",
+      "target": "x86_64-unknown-linux-musl",
+      "policyInterfaceVersion": "1",
+      "gitSha": "597e82f2de08185837c70966be4370775b781561",
+      "binarySha256": "3a1c633f346f876d771b03f622aeff8215920683c5ed1945fca354bac77ba6c2"
+    },
+    "enabled": "0",
+    "running": false
+  },
+  "matchedManifest": "9d74bd3a0a04463b3503d67af3afff048619c3f4",
+  "uiExitCode": 0,
+  "sessionsDestroyed": 2
+}

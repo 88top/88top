@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-18T00:17:36.326Z",
+  "observedExitCode": 143,
+  "cause": "SIGTERM received; origin not established",
+  "completedSuites": 26,
+  "pending": [
+    "row-sort-review",
+    "structure-resource-review"
+  ],
+  "runtimeAndSuiteFingerprintsUnchanged": true,
+  "productFailure": false
+}

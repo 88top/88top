@@ -1,0 +1,35 @@
+{
+  "health": {
+    "owner": "/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/94c4-develop-quicksta/quickstart/docs/product/ui-design",
+    "pid": 4999,
+    "mode": "vue-design-built"
+  },
+  "publicAssetsMatchSSD": true,
+  "assets": [
+    {
+      "path": "/assets/index.927de2e6.js",
+      "sha256": "73ffa4c4cb229dc57d08dc4b39aa5e9481526736d8afdfd3a71e703e422c00a0",
+      "bytes": 50376
+    },
+    {
+      "path": "/assets/mount.47a0bdea.css",
+      "sha256": "4fd9a12a934fb6fc0ba466595fa52a57a196a469de647cf4287ab093769cd4c6",
+      "bytes": 834148
+    },
+    {
+      "path": "/assets/mount.4db0dfe6.js",
+      "sha256": "25cc313f898bae9199325082bd651b2c8f394fa7efb70c7822d9251c929b8ec2",
+      "bytes": 1557747
+    }
+  ],
+  "source": {
+    "web/src/design/OrderedHome.vue": "17d4042f97cc1b5e47e6338b98422bef78dd1e98d5e224a63d0762da0980c77f",
+    "web/src/design/homeColorStyles.css": "153edc4959c668ddbd05b78ca3b2b29bf85bad60eff99fba54a10567a5185ded",
+    "web/src/design/widgetActionGroup.css": "f2fbc9bdbd6e6342c05fef90ad10b41f4d4f2599e1ea94f30474af222875e8c3",
+    "web/src/design/WidgetMenu.vue": "efb3116208a954d3d99a3f3387fe7a825c26bcfbd7c62cf795585decccbfdfab",
+    "web/src/design/mount.ts": "39146ec6a4dab2c04b4fe07e50310e5961702d5a53f12e1158cdc8f2b2fb4e9c",
+    "docs/product/ui-design/home-color-review.cjs": "a1a4f2912c3e2dc2c9a611bf2931ea984576f3d24ad19b3afb3adf32f70e9ae2",
+    "docs/product/ui-design/home-color-recovery-review.cjs": "d335aeb0914ee193e00ffadd65306233c701e6facc8a340e15f6f5c9dee6298b"
+  },
+  "productionSourceDiff": []
+}

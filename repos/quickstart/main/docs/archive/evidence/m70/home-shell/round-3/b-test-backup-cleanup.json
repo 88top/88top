@@ -1,0 +1,26 @@
+{
+  "scope": "restore only the two test-affected backups; retain current primary revisions",
+  "domains": {
+    "layout": {
+      "primaryValueRestored": true,
+      "originalRevision": 27,
+      "currentRevision": 32,
+      "originalBackupSha256": "f00a438d3d5bcac2622ff20707e0a0eb8acf7ea62f78f303a1c6b17fe88b5f62",
+      "testBackupSha256": "bd415f853554fe4a6162f159dfae9302afbb585696e9f21cc96910b770b3112b"
+    },
+    "launcher": {
+      "primaryValueRestored": true,
+      "originalRevision": 15,
+      "currentRevision": 17,
+      "originalBackupSha256": "648b6161d63c240280a4c18c371e51c734cb03689f512a14393d290e65f6d69f",
+      "testBackupSha256": "bcd17021645219c448ee25ed86ee260120444c3dbc1f3a11291ba1e75f20a1a2"
+    }
+  },
+  "result": "passed",
+  "postRestartFingerprints": {
+    "/etc/quickstart/home-layout.json": "574d0652d77c24614202ae555e694958b1dc2f8881faec78cdf244309182b69e",
+    "/etc/quickstart/home-layout.json.bak": "f00a438d3d5bcac2622ff20707e0a0eb8acf7ea62f78f303a1c6b17fe88b5f62",
+    "/etc/quickstart/home-launcher.json": "30282f1dd87fa2f5adbfeab170441e5fbe6dcc128b9e03b3ec73f2726c804d9e",
+    "/etc/quickstart/home-launcher.json.bak": "648b6161d63c240280a4c18c371e51c734cb03689f512a14393d290e65f6d69f"
+  }
+}

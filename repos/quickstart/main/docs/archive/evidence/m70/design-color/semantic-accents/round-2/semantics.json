@@ -1,0 +1,320 @@
+{
+  "result": "passed",
+  "states": [
+    {
+      "theme": "light",
+      "scenario": "normal",
+      "state": "netSuccess",
+      "text": "rgb(0, 130, 54)",
+      "good": "rgb(0, 130, 54)",
+      "muted": "rgb(91, 104, 122)",
+      "uptime": "rgb(91, 104, 122)",
+      "title": "接口在线时长，不代表互联网持续可用"
+    },
+    {
+      "theme": "light",
+      "scenario": "network-dns",
+      "state": "dnsFailed",
+      "text": "rgb(37, 50, 71)",
+      "good": "rgb(0, 130, 54)",
+      "muted": "rgb(91, 104, 122)",
+      "uptime": "rgb(91, 104, 122)",
+      "title": "接口在线时长，不代表互联网持续可用"
+    },
+    {
+      "theme": "light",
+      "scenario": "network-offline",
+      "state": "netFailed",
+      "text": "rgb(37, 50, 71)",
+      "good": "rgb(0, 130, 54)",
+      "muted": "rgb(91, 104, 122)",
+      "uptime": "rgb(91, 104, 122)",
+      "title": "接口在线时长，不代表互联网持续可用"
+    },
+    {
+      "theme": "light",
+      "scenario": "network-unknown",
+      "state": "unknown",
+      "text": "rgb(37, 50, 71)",
+      "good": "rgb(0, 130, 54)",
+      "muted": "rgb(91, 104, 122)",
+      "uptime": "rgb(91, 104, 122)",
+      "title": "接口在线时长，不代表互联网持续可用"
+    },
+    {
+      "theme": "light",
+      "scenario": "network-error",
+      "state": "unavailable",
+      "text": "rgb(37, 50, 71)",
+      "good": "rgb(0, 130, 54)",
+      "muted": "rgb(91, 104, 122)",
+      "uptime": "rgb(91, 104, 122)",
+      "title": "接口在线时长，不代表互联网持续可用"
+    },
+    {
+      "theme": "dark",
+      "scenario": "normal",
+      "state": "netSuccess",
+      "text": "rgb(112, 226, 178)",
+      "good": "rgb(112, 226, 178)",
+      "muted": "rgb(177, 189, 206)",
+      "uptime": "rgb(177, 189, 206)",
+      "title": "接口在线时长，不代表互联网持续可用"
+    },
+    {
+      "theme": "dark",
+      "scenario": "network-dns",
+      "state": "dnsFailed",
+      "text": "rgb(230, 235, 243)",
+      "good": "rgb(112, 226, 178)",
+      "muted": "rgb(177, 189, 206)",
+      "uptime": "rgb(177, 189, 206)",
+      "title": "接口在线时长，不代表互联网持续可用"
+    },
+    {
+      "theme": "dark",
+      "scenario": "network-offline",
+      "state": "netFailed",
+      "text": "rgb(230, 235, 243)",
+      "good": "rgb(112, 226, 178)",
+      "muted": "rgb(177, 189, 206)",
+      "uptime": "rgb(177, 189, 206)",
+      "title": "接口在线时长，不代表互联网持续可用"
+    },
+    {
+      "theme": "dark",
+      "scenario": "network-unknown",
+      "state": "unknown",
+      "text": "rgb(230, 235, 243)",
+      "good": "rgb(112, 226, 178)",
+      "muted": "rgb(177, 189, 206)",
+      "uptime": "rgb(177, 189, 206)",
+      "title": "接口在线时长，不代表互联网持续可用"
+    },
+    {
+      "theme": "dark",
+      "scenario": "network-error",
+      "state": "unavailable",
+      "text": "rgb(230, 235, 243)",
+      "good": "rgb(112, 226, 178)",
+      "muted": "rgb(177, 189, 206)",
+      "uptime": "rgb(177, 189, 206)",
+      "title": "接口在线时长，不代表互联网持续可用"
+    }
+  ],
+  "services": [
+    {
+      "theme": "light",
+      "business": "downloads",
+      "title": "Aria2",
+      "ink": "rgb(194, 65, 12)",
+      "icon": "rgb(194, 65, 12)",
+      "state": "未启用",
+      "stateInk": "rgb(91, 104, 122)",
+      "background": "rgb(255, 247, 237)",
+      "hoverContrast": 4.877374837467894
+    },
+    {
+      "theme": "light",
+      "business": "downloads",
+      "title": "qBittorrent",
+      "ink": "rgb(82, 96, 120)",
+      "icon": "rgb(82, 96, 120)",
+      "state": "未启用",
+      "stateInk": "rgb(91, 104, 122)",
+      "background": "rgb(245, 247, 250)",
+      "hoverContrast": 5.923845256749014
+    },
+    {
+      "theme": "light",
+      "business": "downloads",
+      "title": "Transmission",
+      "ink": "rgb(0, 122, 116)",
+      "icon": "rgb(0, 122, 116)",
+      "state": "未启用",
+      "stateInk": "rgb(91, 104, 122)",
+      "background": "rgb(239, 251, 249)",
+      "hoverContrast": 4.914991595213597
+    },
+    {
+      "theme": "light",
+      "business": "sharing",
+      "title": "易有云",
+      "ink": "rgb(21, 93, 252)",
+      "icon": "rgb(21, 93, 252)",
+      "state": "未配置",
+      "stateInk": "rgb(91, 104, 122)",
+      "background": "rgb(241, 246, 255)",
+      "hoverContrast": 4.83764701068067
+    },
+    {
+      "theme": "light",
+      "business": "sharing",
+      "title": "SAMBA",
+      "ink": "rgb(0, 126, 52)",
+      "icon": "rgb(0, 126, 52)",
+      "state": "已启用",
+      "stateInk": "rgb(91, 104, 122)",
+      "background": "rgb(239, 250, 243)",
+      "hoverContrast": 4.86835609532237
+    },
+    {
+      "theme": "light",
+      "business": "sharing",
+      "title": "WEBDAV",
+      "ink": "rgb(136, 40, 204)",
+      "icon": "rgb(136, 40, 204)",
+      "state": "未启用",
+      "stateInk": "rgb(91, 104, 122)",
+      "background": "rgb(250, 243, 255)",
+      "hoverContrast": 5.998537336325675
+    },
+    {
+      "theme": "light",
+      "business": "remote",
+      "title": "DDNSTO",
+      "ink": "rgb(21, 93, 252)",
+      "icon": "rgb(21, 93, 252)",
+      "state": "正常",
+      "stateInk": "rgb(91, 104, 122)",
+      "background": "rgb(241, 246, 255)",
+      "hoverContrast": 4.83764701068067
+    },
+    {
+      "theme": "light",
+      "business": "remote",
+      "title": "IPv4",
+      "ink": "rgb(0, 126, 52)",
+      "icon": "rgb(0, 126, 52)",
+      "state": "离线",
+      "stateInk": "rgb(91, 104, 122)",
+      "background": "rgb(239, 250, 243)",
+      "hoverContrast": 4.86835609532237
+    },
+    {
+      "theme": "light",
+      "business": "remote",
+      "title": "IPv6",
+      "ink": "rgb(82, 96, 120)",
+      "icon": "rgb(82, 96, 120)",
+      "state": "离线",
+      "stateInk": "rgb(91, 104, 122)",
+      "background": "rgb(245, 247, 250)",
+      "hoverContrast": 5.923845256749014
+    },
+    {
+      "theme": "dark",
+      "business": "downloads",
+      "title": "Aria2",
+      "ink": "rgb(255, 176, 119)",
+      "icon": "rgb(255, 176, 119)",
+      "state": "未启用",
+      "stateInk": "rgb(177, 189, 206)",
+      "background": "rgb(61, 52, 44)",
+      "hoverContrast": 6.795253841264711
+    },
+    {
+      "theme": "dark",
+      "business": "downloads",
+      "title": "qBittorrent",
+      "ink": "rgb(177, 189, 206)",
+      "icon": "rgb(177, 189, 206)",
+      "state": "未启用",
+      "stateInk": "rgb(177, 189, 206)",
+      "background": "rgb(52, 58, 67)",
+      "hoverContrast": 6.025104229542886
+    },
+    {
+      "theme": "dark",
+      "business": "downloads",
+      "title": "Transmission",
+      "ink": "rgb(110, 219, 211)",
+      "icon": "rgb(110, 219, 211)",
+      "state": "未启用",
+      "stateInk": "rgb(177, 189, 206)",
+      "background": "rgb(43, 58, 56)",
+      "hoverContrast": 7.215812109561087
+    },
+    {
+      "theme": "dark",
+      "business": "sharing",
+      "title": "易有云",
+      "ink": "rgb(145, 185, 255)",
+      "icon": "rgb(145, 185, 255)",
+      "state": "未配置",
+      "stateInk": "rgb(177, 189, 206)",
+      "background": "rgb(44, 54, 68)",
+      "hoverContrast": 6.161875429195937
+    },
+    {
+      "theme": "dark",
+      "business": "sharing",
+      "title": "SAMBA",
+      "ink": "rgb(111, 221, 160)",
+      "icon": "rgb(111, 221, 160)",
+      "state": "已启用",
+      "stateInk": "rgb(177, 189, 206)",
+      "background": "rgb(43, 58, 49)",
+      "hoverContrast": 7.148410818559849
+    },
+    {
+      "theme": "dark",
+      "business": "sharing",
+      "title": "WEBDAV",
+      "ink": "rgb(209, 164, 255)",
+      "icon": "rgb(209, 164, 255)",
+      "state": "未启用",
+      "stateInk": "rgb(177, 189, 206)",
+      "background": "rgb(56, 48, 63)",
+      "hoverContrast": 6.294097783761285
+    },
+    {
+      "theme": "dark",
+      "business": "remote",
+      "title": "DDNSTO",
+      "ink": "rgb(145, 185, 255)",
+      "icon": "rgb(145, 185, 255)",
+      "state": "正常",
+      "stateInk": "rgb(177, 189, 206)",
+      "background": "rgb(44, 54, 68)",
+      "hoverContrast": 6.161875429195937
+    },
+    {
+      "theme": "dark",
+      "business": "remote",
+      "title": "IPv4",
+      "ink": "rgb(111, 221, 160)",
+      "icon": "rgb(111, 221, 160)",
+      "state": "离线",
+      "stateInk": "rgb(177, 189, 206)",
+      "background": "rgb(43, 58, 49)",
+      "hoverContrast": 7.148410818559849
+    },
+    {
+      "theme": "dark",
+      "business": "remote",
+      "title": "IPv6",
+      "ink": "rgb(177, 189, 206)",
+      "icon": "rgb(177, 189, 206)",
+      "state": "离线",
+      "stateInk": "rgb(177, 189, 206)",
+      "background": "rgb(52, 58, 67)",
+      "hoverContrast": 6.025104229542886
+    }
+  ],
+  "focus": [
+    {
+      "theme": "light",
+      "visible": true,
+      "outline": "rgb(21, 93, 252) solid 2px",
+      "outlineWidth": "2px"
+    },
+    {
+      "theme": "dark",
+      "visible": true,
+      "outline": "rgb(167, 199, 255) solid 2px",
+      "outlineWidth": "2px"
+    }
+  ],
+  "errors": []
+}

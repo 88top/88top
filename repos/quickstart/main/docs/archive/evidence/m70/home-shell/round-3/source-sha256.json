@@ -1,0 +1,9 @@
+{
+  "web/src/home/HomeLayout.vue": "4bcb11e68ed548b800facd053bfcdc749d7537b09c67059d9ca47cd61a611fa3",
+  "web/src/home/HomeQuickActions.vue": "73a167cc99f2fa5c91c63b2b6382ab924a1c519bbe6995a94f998170c7d2350d",
+  "web/src/home/homeTop.css": "48ef6a4fa462d2c24f5e65f54a1b21168ba26edbf73a10f6aa09fae0db244815",
+  "web/src/home/HomeApplications.vue": "c74ac089279f4499c275de48abf026078e92336d9e6f03d24e97a56cc7d1a56e",
+  "web/src/home/launcherBrowserHost.ts": "0e40dd8f4ed646e3622bb5de6d7284ae58bc1e568ede521f1a0e22af56d671ad",
+  "web/src/pages/index/index.vue": "4a9332c82dedb1bac01f7fe7de20ddcec81c1cd9eeaeace73f1675d423df5fad",
+  "web/src/pages/index/nav/QuickActions.vue": "541ad18625bdfa26d1de21c0b91b8aa01564da84bc2efbd229f6f4e871ad347a"
+}

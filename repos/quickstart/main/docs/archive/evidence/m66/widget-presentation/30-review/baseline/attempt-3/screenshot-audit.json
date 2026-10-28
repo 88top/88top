@@ -1,0 +1,582 @@
+{
+  "checkedAt": "2026-10-16T03:04:33.278Z",
+  "images": [
+    {
+      "file": "1024-dark-en-normal.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 411,
+        "h": 177,
+        "cyan": 78
+      },
+      "cyan": 15152,
+      "pass": true
+    },
+    {
+      "file": "1024-dark-en-viewport.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 411,
+        "h": 177,
+        "cyan": 78
+      },
+      "cyan": 15152,
+      "pass": true
+    },
+    {
+      "file": "1024-dark-zh-cn-normal.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 411,
+        "h": 177,
+        "cyan": 78
+      },
+      "cyan": 15152,
+      "pass": true
+    },
+    {
+      "file": "1024-dark-zh-cn-viewport.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 411,
+        "h": 177,
+        "cyan": 78
+      },
+      "cyan": 15152,
+      "pass": true
+    },
+    {
+      "file": "1024-light-en-normal.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 411,
+        "h": 177,
+        "cyan": 42
+      },
+      "cyan": 9055,
+      "pass": true
+    },
+    {
+      "file": "1024-light-en-viewport.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 411,
+        "h": 177,
+        "cyan": 42
+      },
+      "cyan": 9055,
+      "pass": true
+    },
+    {
+      "file": "1024-light-zh-cn-normal.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 411,
+        "h": 177,
+        "cyan": 42
+      },
+      "cyan": 9055,
+      "pass": true
+    },
+    {
+      "file": "1024-light-zh-cn-viewport.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 411,
+        "h": 177,
+        "cyan": 42
+      },
+      "cyan": 9055,
+      "pass": true
+    },
+    {
+      "file": "1440-dark-en-normal.png",
+      "canvasBounds": {
+        "x": 254,
+        "y": 298,
+        "w": 651,
+        "h": 177,
+        "cyan": 78
+      },
+      "cyan": 23941,
+      "pass": true
+    },
+    {
+      "file": "1440-dark-en-viewport.png",
+      "canvasBounds": {
+        "x": 254,
+        "y": 298,
+        "w": 651,
+        "h": 177,
+        "cyan": 78
+      },
+      "cyan": 23941,
+      "pass": true
+    },
+    {
+      "file": "1440-dark-zh-cn-normal.png",
+      "canvasBounds": {
+        "x": 254,
+        "y": 298,
+        "w": 651,
+        "h": 177,
+        "cyan": 78
+      },
+      "cyan": 23941,
+      "pass": true
+    },
+    {
+      "file": "1440-dark-zh-cn-viewport.png",
+      "canvasBounds": {
+        "x": 254,
+        "y": 298,
+        "w": 651,
+        "h": 177,
+        "cyan": 78
+      },
+      "cyan": 23941,
+      "pass": true
+    },
+    {
+      "file": "1440-light-en-normal.png",
+      "canvasBounds": {
+        "x": 254,
+        "y": 298,
+        "w": 651,
+        "h": 177,
+        "cyan": 42
+      },
+      "cyan": 14306,
+      "pass": true
+    },
+    {
+      "file": "1440-light-en-viewport.png",
+      "canvasBounds": {
+        "x": 254,
+        "y": 298,
+        "w": 651,
+        "h": 177,
+        "cyan": 42
+      },
+      "cyan": 14306,
+      "pass": true
+    },
+    {
+      "file": "1440-light-zh-cn-normal.png",
+      "canvasBounds": {
+        "x": 254,
+        "y": 298,
+        "w": 651,
+        "h": 177,
+        "cyan": 42
+      },
+      "cyan": 14306,
+      "pass": true
+    },
+    {
+      "file": "1440-light-zh-cn-viewport.png",
+      "canvasBounds": {
+        "x": 254,
+        "y": 298,
+        "w": 651,
+        "h": 177,
+        "cyan": 42
+      },
+      "cyan": 14306,
+      "pass": true
+    },
+    {
+      "file": "1920-dark-en-normal.png",
+      "canvasBounds": {
+        "x": 262,
+        "y": 298,
+        "w": 929,
+        "h": 177,
+        "cyan": 79
+      },
+      "cyan": 34065,
+      "pass": true
+    },
+    {
+      "file": "1920-dark-en-viewport.png",
+      "canvasBounds": {
+        "x": 262,
+        "y": 298,
+        "w": 929,
+        "h": 177,
+        "cyan": 79
+      },
+      "cyan": 34065,
+      "pass": true
+    },
+    {
+      "file": "1920-dark-zh-cn-normal.png",
+      "canvasBounds": {
+        "x": 262,
+        "y": 298,
+        "w": 929,
+        "h": 177,
+        "cyan": 79
+      },
+      "cyan": 34065,
+      "pass": true
+    },
+    {
+      "file": "1920-dark-zh-cn-viewport.png",
+      "canvasBounds": {
+        "x": 262,
+        "y": 298,
+        "w": 929,
+        "h": 177,
+        "cyan": 79
+      },
+      "cyan": 34065,
+      "pass": true
+    },
+    {
+      "file": "1920-light-en-normal.png",
+      "canvasBounds": {
+        "x": 262,
+        "y": 298,
+        "w": 929,
+        "h": 177,
+        "cyan": 42
+      },
+      "cyan": 20321,
+      "pass": true
+    },
+    {
+      "file": "1920-light-en-viewport.png",
+      "canvasBounds": {
+        "x": 262,
+        "y": 298,
+        "w": 929,
+        "h": 177,
+        "cyan": 42
+      },
+      "cyan": 20321,
+      "pass": true
+    },
+    {
+      "file": "1920-light-zh-cn-normal.png",
+      "canvasBounds": {
+        "x": 262,
+        "y": 298,
+        "w": 929,
+        "h": 177,
+        "cyan": 42
+      },
+      "cyan": 20321,
+      "pass": true
+    },
+    {
+      "file": "1920-light-zh-cn-viewport.png",
+      "canvasBounds": {
+        "x": 262,
+        "y": 298,
+        "w": 929,
+        "h": 177,
+        "cyan": 42
+      },
+      "cyan": 20321,
+      "pass": true
+    },
+    {
+      "file": "320-dark-en-normal.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 289,
+        "w": 264,
+        "h": 152,
+        "cyan": 76
+      },
+      "cyan": 8168,
+      "pass": true
+    },
+    {
+      "file": "320-dark-en-viewport.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 289,
+        "w": 264,
+        "h": 152,
+        "cyan": 76
+      },
+      "cyan": 8168,
+      "pass": true
+    },
+    {
+      "file": "320-dark-zh-cn-normal.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 271,
+        "w": 264,
+        "h": 170,
+        "cyan": 74
+      },
+      "cyan": 9326,
+      "pass": true
+    },
+    {
+      "file": "320-dark-zh-cn-viewport.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 271,
+        "w": 264,
+        "h": 170,
+        "cyan": 74
+      },
+      "cyan": 9326,
+      "pass": true
+    },
+    {
+      "file": "320-light-en-normal.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 289,
+        "w": 264,
+        "h": 152,
+        "cyan": 44
+      },
+      "cyan": 4938,
+      "pass": true
+    },
+    {
+      "file": "320-light-en-viewport.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 289,
+        "w": 264,
+        "h": 152,
+        "cyan": 44
+      },
+      "cyan": 4938,
+      "pass": true
+    },
+    {
+      "file": "320-light-zh-cn-normal.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 271,
+        "w": 264,
+        "h": 170,
+        "cyan": 51
+      },
+      "cyan": 5557,
+      "pass": true
+    },
+    {
+      "file": "320-light-zh-cn-viewport.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 271,
+        "w": 264,
+        "h": 170,
+        "cyan": 51
+      },
+      "cyan": 5557,
+      "pass": true
+    },
+    {
+      "file": "390-dark-en-normal.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 271,
+        "w": 334,
+        "h": 170,
+        "cyan": 76
+      },
+      "cyan": 11789,
+      "pass": true
+    },
+    {
+      "file": "390-dark-en-viewport.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 271,
+        "w": 334,
+        "h": 170,
+        "cyan": 76
+      },
+      "cyan": 11789,
+      "pass": true
+    },
+    {
+      "file": "390-dark-zh-cn-normal.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 271,
+        "w": 334,
+        "h": 170,
+        "cyan": 76
+      },
+      "cyan": 11789,
+      "pass": true
+    },
+    {
+      "file": "390-dark-zh-cn-viewport.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 271,
+        "w": 334,
+        "h": 170,
+        "cyan": 76
+      },
+      "cyan": 11789,
+      "pass": true
+    },
+    {
+      "file": "390-light-en-normal.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 271,
+        "w": 334,
+        "h": 170,
+        "cyan": 50
+      },
+      "cyan": 7026,
+      "pass": true
+    },
+    {
+      "file": "390-light-en-viewport.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 271,
+        "w": 334,
+        "h": 170,
+        "cyan": 50
+      },
+      "cyan": 7026,
+      "pass": true
+    },
+    {
+      "file": "390-light-zh-cn-normal.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 271,
+        "w": 334,
+        "h": 170,
+        "cyan": 50
+      },
+      "cyan": 7026,
+      "pass": true
+    },
+    {
+      "file": "390-light-zh-cn-viewport.png",
+      "canvasBounds": {
+        "x": 28,
+        "y": 271,
+        "w": 334,
+        "h": 170,
+        "cyan": 50
+      },
+      "cyan": 7026,
+      "pass": true
+    },
+    {
+      "file": "768-dark-en-normal.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 476,
+        "h": 157,
+        "cyan": 73
+      },
+      "cyan": 15209,
+      "pass": true
+    },
+    {
+      "file": "768-dark-en-viewport.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 476,
+        "h": 157,
+        "cyan": 73
+      },
+      "cyan": 15209,
+      "pass": true
+    },
+    {
+      "file": "768-dark-zh-cn-normal.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 476,
+        "h": 157,
+        "cyan": 73
+      },
+      "cyan": 15209,
+      "pass": true
+    },
+    {
+      "file": "768-dark-zh-cn-viewport.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 476,
+        "h": 157,
+        "cyan": 73
+      },
+      "cyan": 15209,
+      "pass": true
+    },
+    {
+      "file": "768-light-en-normal.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 476,
+        "h": 157,
+        "cyan": 42
+      },
+      "cyan": 8925,
+      "pass": true
+    },
+    {
+      "file": "768-light-en-viewport.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 476,
+        "h": 157,
+        "cyan": 42
+      },
+      "cyan": 8925,
+      "pass": true
+    },
+    {
+      "file": "768-light-zh-cn-normal.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 476,
+        "h": 157,
+        "cyan": 42
+      },
+      "cyan": 8925,
+      "pass": true
+    },
+    {
+      "file": "768-light-zh-cn-viewport.png",
+      "canvasBounds": {
+        "x": 246,
+        "y": 298,
+        "w": 476,
+        "h": 157,
+        "cyan": 42
+      },
+      "cyan": 8925,
+      "pass": true
+    }
+  ],
+  "result": "pass"
+}

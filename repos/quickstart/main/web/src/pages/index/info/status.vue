@@ -1,29 +1,30 @@
 <template>
-    <ul class="app-container_docker">
+    <ul class="app-container_docker service-docker">
         <li class="docker-item">
             <div class="docker-item_name">
-                <span>{{ $gettext("当前状态:") }}</span>
+                <span>{{ t('运行状态','Status') }}</span>
             </div>
-            <template v-if="props.docker?.status">
+            <div v-if="!['running','stopped','not installed'].includes(props.docker?.status || '')" class="docker-item_value">{{ t('状态未知','Unknown') }}</div>
+            <template v-else>
                 <div class=" docker-item_value" v-if="!isInstall">
                     <span class="configure">{{ $gettext("未安装") }}</span>
                 </div>
                 <div class="docker-item_value" v-else>
                     <label class="input-switch">
-                        <input type="checkbox" hidden :value="!data.enable" v-model="data.enable"
+                        <input type="checkbox" class="docker-switch-input" role="switch" :aria-label="t('启用 Docker','Enable Docker')" :value="!data.enable" v-model="data.enable"
                             :disabled="data.disabled" @change="onChangeSwitchDocker">
                         <span :class="data.enable ? 'enable' : 'close'">
                             <em></em>
                         </span>
                     </label>
                     <span class="status-icon" v-if="data.enable">{{ $gettext("运行中") }}</span>
-                    <span class="status-icon" style="background: #e9ebef;color: #4a5565;" v-if="!data.enable">{{ $gettext("未启用") }}</span>
+                    <span class="status-icon" style="background: #e9ebef;color: #4a5565;" v-if="!data.enable">{{ t('未运行','Stopped') }}</span>
                 </div>
             </template>
         </li>
-        <li class="content" v-if="docker?.status == 'running'">
+        <li class="content service-root" v-if="docker?.status == 'running'">
             <div class="docker-item_name">
-                <span :style="{color:'var(--app-container_title-color)'}">{{ $gettext("Docker根目录：") }}</span>
+                <span>{{ t('根目录','Root directory') }}</span>
             </div>
             <div class="docker_box">
                 <div class="path">{{ docker?.path }}</div>
@@ -54,10 +55,12 @@
     </ul>
 </template>
 <script setup lang="ts">
+import '/@/home/serviceWidgetBody.css'
 import { log } from 'console';
 import { computed, PropType, reactive, ref } from 'vue';
 import { useGettext, formatNumber } from '/@/plugins/i18n'
 const { $gettext, $ngettext } = useGettext()
+const t=(zh:string,en:string)=>window.vue_lang==='en'?en:zh
 
 import HintSvg from "/@/components/svg/hint.vue"
 import request from '/@/request';
@@ -237,6 +240,9 @@ li.docker-item {
     display: inline-block;
     cursor: pointer;
     position: relative;
+
+    .docker-switch-input {position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;}
+    &:focus-within {outline:2px solid var(--c-accent,#155dfc);outline-offset:3px;border-radius:6px;}
 
     span {
         display: block;

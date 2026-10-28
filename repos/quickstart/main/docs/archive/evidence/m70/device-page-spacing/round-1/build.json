@@ -1,0 +1,19 @@
+{
+  "result": "passed",
+  "typeCheckExitCode": 0,
+  "frontendTests": {
+    "passed": 135,
+    "failed": 0
+  },
+  "buildWebExitCode": 0,
+  "cacheWrapper": "/var/cache/build-cache/run.sh",
+  "actualOutput": "/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/94c4-develop-quicksta/quickstart/web/dist",
+  "outputRemainsInProject": true,
+  "zipSha256": "27cd87b0c4f1b48439e0cdfec9794f84a57a56bd8c38c28e96b6573d6ae93ccd",
+  "changedArchiveEntries": [
+    "luci-static/quickstart/index.js",
+    "luci-static/quickstart/style.css"
+  ],
+  "sourceBusinessProtection": "business-protection.json",
+  "note": "Style edit also changes Vue SFC scope ID and bundled minifier identifiers; JS is not claimed byte-identical. Source template and script are byte-identical."
+}

@@ -1,0 +1,451 @@
+{
+  "checkedAt": "2026-10-18T07:41:04.864Z",
+  "checks": [
+    "Unauthenticated config read denied",
+    "Real root session renders persisted homepage",
+    "Two independent root sessions: stale save conflicts and draft remains",
+    "Layout save survives real device reload",
+    "HTTP router origin: custom link saves and survives reload",
+    "Homepage deviceId opens real complete management detail"
+  ],
+  "errors": [],
+  "views": [
+    {
+      "name": "b-home-1440",
+      "overflow": false,
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 666,
+          "h": 404.578125
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 444,
+          "h": 236.59375
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "w": 444,
+          "h": 149.984375
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 555,
+          "h": 318.078125
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 555,
+          "h": 318.078125
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 555,
+          "h": 329
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 555,
+          "h": 329
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 371.265625,
+          "h": 335.171875
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 360.359375,
+          "h": 335.171875
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 360.375,
+          "h": 335.171875
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "w": 1128,
+          "h": 290
+        }
+      ]
+    },
+    {
+      "name": "b-home-1024",
+      "overflow": false,
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 728,
+          "h": 320
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 728,
+          "h": 237.796875
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "w": 728,
+          "h": 151.390625
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 400,
+          "h": 448
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 310,
+          "h": 448
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 380,
+          "h": 327
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 330,
+          "h": 327
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 360.296875,
+          "h": 259.984375
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 349.703125,
+          "h": 259.984375
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 728,
+          "h": 304.484375
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "w": 728,
+          "h": 493
+        }
+      ]
+    },
+    {
+      "name": "b-home-768",
+      "overflow": false,
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 680,
+          "h": 320
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 680,
+          "h": 220
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "w": 680,
+          "h": 141.984375
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 400,
+          "h": 428
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 262,
+          "h": 428
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 380,
+          "h": 317
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 282,
+          "h": 317
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 335.9375,
+          "h": 239.984375
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 326.0625,
+          "h": 239.984375
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 680,
+          "h": 284.484375
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "w": 680,
+          "h": 471
+        }
+      ]
+    },
+    {
+      "name": "b-home-390",
+      "overflow": false,
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 330,
+          "h": 300
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 330,
+          "h": 220
+        },
+        {
+          "id": "networkInterface",
+          "form": "standard",
+          "w": 330,
+          "h": 191.578125
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 330,
+          "h": 374.296875
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 330,
+          "h": 428
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 330,
+          "h": 317
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 330,
+          "h": 235.984375
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 330,
+          "h": 235.796875
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 330,
+          "h": 239.984375
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 330,
+          "h": 315.171875
+        },
+        {
+          "id": "system",
+          "form": "summary",
+          "w": 330,
+          "h": 148
+        }
+      ]
+    },
+    {
+      "name": "b-home-320",
+      "overflow": false,
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 260,
+          "h": 300
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 260,
+          "h": 220
+        },
+        {
+          "id": "networkInterface",
+          "form": "standard",
+          "w": 260,
+          "h": 191.578125
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 260,
+          "h": 399.09375
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 260,
+          "h": 428
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 260,
+          "h": 347
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 260,
+          "h": 255.484375
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 260,
+          "h": 235.796875
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 260,
+          "h": 258.171875
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 260,
+          "h": 338.265625
+        },
+        {
+          "id": "system",
+          "form": "summary",
+          "w": 260,
+          "h": 148
+        }
+      ]
+    },
+    {
+      "name": "b-home-320-dark",
+      "overflow": false,
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 260,
+          "h": 300
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 260,
+          "h": 220
+        },
+        {
+          "id": "networkInterface",
+          "form": "standard",
+          "w": 260,
+          "h": 191.578125
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 260,
+          "h": 399.09375
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 260,
+          "h": 428
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 260,
+          "h": 347
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 260,
+          "h": 255.484375
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 260,
+          "h": 235.796875
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 260,
+          "h": 258.171875
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 260,
+          "h": 338.265625
+        },
+        {
+          "id": "system",
+          "form": "summary",
+          "w": 260,
+          "h": 148
+        }
+      ]
+    }
+  ],
+  "restoration": [
+    "layout: unchanged",
+    "launcher: unchanged"
+  ],
+  "result": "passed"
+}

@@ -1,0 +1,180 @@
+{
+  "startedAt": "2026-10-17T10:07:39.562Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "header-action-interaction-review",
+      "startedAt": "2026-10-17T10:07:39.567Z",
+      "endedAt": "2026-10-17T10:07:46.283Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 6,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/header-action-interaction-review/report.json"
+    },
+    {
+      "name": "widget-actions-review",
+      "startedAt": "2026-10-17T10:07:39.567Z",
+      "endedAt": "2026-10-17T10:07:58.638Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/widget-actions-review/report.json"
+    },
+    {
+      "name": "home-widget-header-review",
+      "startedAt": "2026-10-17T10:07:46.285Z",
+      "endedAt": "2026-10-17T10:07:58.858Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 14,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/home-widget-header-review/report.json"
+    },
+    {
+      "name": "home-widget-standard-review",
+      "startedAt": "2026-10-17T10:07:58.639Z",
+      "endedAt": "2026-10-17T10:08:17.092Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/home-widget-standard-review/report.json"
+    },
+    {
+      "name": "header-action-matrix-review",
+      "startedAt": "2026-10-17T10:07:39.563Z",
+      "endedAt": "2026-10-17T10:08:26.681Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 27,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/header-action-matrix-review/report.json"
+    },
+    {
+      "name": "network-interaction-review",
+      "startedAt": "2026-10-17T10:07:58.858Z",
+      "endedAt": "2026-10-17T10:08:37.548Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 14,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/network-interaction-review/report.json"
+    },
+    {
+      "name": "launcher-actions-review",
+      "startedAt": "2026-10-17T10:08:37.548Z",
+      "endedAt": "2026-10-17T10:08:48.550Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/launcher-actions-review/report.json"
+    },
+    {
+      "name": "launcher-home-review",
+      "startedAt": "2026-10-17T10:08:48.550Z",
+      "endedAt": "2026-10-17T10:08:56.065Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/launcher-home-review/report.json"
+    },
+    {
+      "name": "business-widgets-review",
+      "startedAt": "2026-10-17T10:08:17.092Z",
+      "endedAt": "2026-10-17T10:09:02.393Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 19,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/business-widgets-review/report.json"
+    },
+    {
+      "name": "business-actions-review",
+      "startedAt": "2026-10-17T10:08:26.681Z",
+      "endedAt": "2026-10-17T10:09:02.594Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/business-actions-review/report.json"
+    },
+    {
+      "name": "launcher-editor-review",
+      "startedAt": "2026-10-17T10:08:56.066Z",
+      "endedAt": "2026-10-17T10:09:06.593Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/launcher-editor-review/report.json"
+    },
+    {
+      "name": "launchpad-browser-review",
+      "startedAt": "2026-10-17T10:09:02.393Z",
+      "endedAt": "2026-10-17T10:09:09.508Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 11,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/launchpad-browser-review/report.json"
+    },
+    {
+      "name": "launchpad-links-review",
+      "startedAt": "2026-10-17T10:09:02.594Z",
+      "endedAt": "2026-10-17T10:09:10.412Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 7,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/launchpad-links-review/report.json"
+    },
+    {
+      "name": "launchpad-capacity-review",
+      "startedAt": "2026-10-17T10:09:06.593Z",
+      "endedAt": "2026-10-17T10:09:17.184Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 5,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/launchpad-capacity-review/report.json"
+    },
+    {
+      "name": "launchpad-resource-review",
+      "startedAt": "2026-10-17T10:09:09.508Z",
+      "endedAt": "2026-10-17T10:09:22.447Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/launchpad-resource-review/report.json"
+    },
+    {
+      "name": "boundary-interaction-review",
+      "startedAt": "2026-10-17T10:09:17.185Z",
+      "endedAt": "2026-10-17T10:09:24.818Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 10,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/boundary-interaction-review/report.json"
+    },
+    {
+      "name": "structure-interaction-review",
+      "startedAt": "2026-10-17T10:09:22.447Z",
+      "endedAt": "2026-10-17T10:09:40.064Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/structure-interaction-review/report.json"
+    },
+    {
+      "name": "home-widget-chart-review",
+      "startedAt": "2026-10-17T10:09:10.412Z",
+      "endedAt": "2026-10-17T10:09:40.469Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 18,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/home-widget-chart-review/report.json"
+    },
+    {
+      "name": "structure-resource-review",
+      "startedAt": "2026-10-17T10:09:24.818Z",
+      "endedAt": "2026-10-17T10:09:51.072Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/header-actions/review/optimization-1/structure-resource-review/report.json"
+    }
+  ],
+  "endedAt": "2026-10-17T10:09:51.072Z",
+  "result": "pass",
+  "groups": 210
+}

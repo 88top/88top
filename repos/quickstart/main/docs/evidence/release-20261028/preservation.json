@@ -1,0 +1,10 @@
+{
+  "allConfigAndCredentialHashesUnchanged": true,
+  "defaultRouteUnchanged": true,
+  "addedRoutes": [
+    "172.18.0.0/16 dev br-028ca5ed1728 proto kernel scope link src 172.18.0.1 "
+  ],
+  "removedRoutes": [],
+  "routeChangeAttribution": "Docker bridge for a separate kai-ms-desktop-opt-20261028 container. No Docker writes performed by this audit.",
+  "newQuickstartStateIncludedBySysupgradeList": true
+}

@@ -1,0 +1,556 @@
+{
+  "date": "2026-10-14",
+  "scope": "Reference existence and local regression gate; no per-requirement current hardware acceptance claimed.",
+  "requirements": [
+    {
+      "id": "DEV-PRES-001",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "DEV-PRES-002",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "DEV-PRES-003",
+      "priority": "P1",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "DEV-PRES-004",
+      "priority": "P1",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "DEV-PROFILE-001",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "DEV-PROFILE-002",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "DEV-PROFILE-003",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "DEV-PROFILE-004",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "DEV-PROFILE-005",
+      "priority": "P1",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "DEV-PROFILE-006",
+      "priority": "P1",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "NET-DEVICE-001",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "NET-DEVICE-002",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "NET-DEVICE-003",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "NET-DEVICE-004",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "NET-DEVICE-005",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "NET-DEVICE-006",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "NET-DEVICE-007",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "NET-DEVICE-008",
+      "priority": "P1",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "NET-DEVICE-009",
+      "priority": "P1",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "NET-DEVICE-010",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "NET-DEVICE-011",
+      "priority": "P1",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "NET-DEVICE-012",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "NET-DEVICE-013",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "NET-DEVICE-014",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "NET-DEVICE-015",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "GROUP-001",
+      "priority": "P1",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "GROUP-002",
+      "priority": "P1",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "GROUP-003",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "GROUP-004",
+      "priority": "P1",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "GROUP-005",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "LAN-001",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "LAN-002",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "LAN-003",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "LAN-004",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "LAN-005",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "LAN-006",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "LAN-007",
+      "priority": "P1",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "LAN-008",
+      "priority": "P2",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "OPS-001",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "OPS-002",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "OPS-003",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "OPS-004",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "OPS-005",
+      "priority": "P1",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "OPS-006",
+      "priority": "P2",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "OPS-007",
+      "priority": "P2",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "OPS-008",
+      "priority": "P1",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "OPS-009",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "OPS-010",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "P0-IA-001",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "P0-MIG-001",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "P0-CAP-001",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "P0-TXN-001",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "P0-EFFECT-001",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "P0-CTX-001",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    },
+    {
+      "id": "P0-ICON-001",
+      "priority": "P0",
+      "referenceFilesPresent": true,
+      "missing": [],
+      "historicalStatus": "verified",
+      "currentLocalGate": "pass",
+      "currentBDeviceAcceptance": "not_verified_old_backend",
+      "currentCDeviceAcceptance": "not_verified_partial_readonly_only"
+    }
+  ]
+}

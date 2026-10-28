@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-14",
+  "sourceHeadBeforeEdits": "54cfecf702bb27970797bea7c7fe3f9a931ee65c",
+  "localChecks": {
+    "verify-lan-device-business": { "exitCode": 0, "log": "local-business.log" },
+    "build-web": { "exitCode": 0, "log": "local-web-build.log", "deployed": false },
+    "netpolicy-test": { "exitCode": 0, "tests": 43, "log": "local-netpolicy-test.log" },
+    "builder-test": { "exitCode": 0, "tests": 10, "scope": "Existing dirty worktree; not deployed runtime" }
+  },
+  "currentDeviceAcceptance": {
+    "B": "failed: installed backend 0.9.9, v2 404 and subsequent timeouts, old LuCI",
+    "C": "partial: business read results and responsive navigation only; ARP false degradation and disabled engine"
+  },
+  "historicalArtifactIntegrity": {
+    "quickstart-both-20260928-115329": { "buildStatus": "success", "sha256sumExitCode": 0 },
+    "quickstart-arm64-both-20260929-0830-final": { "buildStatus": "success", "sha256sumExitCode": 0 }
+  },
+  "longObservation": "deferred, not run, not passed",
+  "gatewayA": "single serial readonly baseline only",
+  "routerInstallationsPerformed": false,
+  "published": false
+}

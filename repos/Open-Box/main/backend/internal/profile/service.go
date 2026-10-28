@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/timeflysoon/Open-Box/backend/internal/clientapp"
 	"github.com/timeflysoon/Open-Box/backend/internal/core"
+	"github.com/timeflysoon/Open-Box/backend/internal/shareservers"
 	"github.com/timeflysoon/Open-Box/backend/internal/store"
 )
 
@@ -104,7 +106,14 @@ func (s *Service) Patch(ctx context.Context, patch map[string]any) (map[string]a
 	err := s.st.Update(storeName, &stored, func() error {
 		cur := effective(stored)
 		s.migrate(ctx, cur)
-		next := Merge(cur, prepare(cur, patch))
+		clean := prepare(cur, patch)
+		if err := normalizeClientApp(cur, clean); err != nil {
+			return &ValidationError{Msg: err.Error()}
+		}
+		if err := normalizeServers(clean); err != nil {
+			return &ValidationError{Msg: err.Error()}
+		}
+		next := Merge(cur, clean)
 		if _, patched := patch["routing"]; patched {
 			s.migrate(ctx, next) // 新写入的 routing 同样可能带旧字段(例如从旧备份导入)
 		}
@@ -118,6 +127,44 @@ func (s *Service) Patch(ctx context.Context, patch map[string]any) (map[string]a
 		return nil, err
 	}
 	return result, nil
+}
+
+// normalizeClientApp 校验并规整补丁里的 shareRegions / serverInfo(规则见 clientapp.NormalizeShareRegions /
+// NormalizeServerInfo)。只在补丁带了这两个键时做:档案里已有的旧数据不会拦住不相关的保存。
+// serverInfo 是整份覆盖(传 {} = 全用默认),所以先把 cur 里的旧值摘掉,免得被深度合并留下旧字段。
+// clean 必须是 prepare 返回的副本;cur 必须是 effective 得到的副本(都可以随意改)。
+func normalizeClientApp(cur, clean map[string]any) error {
+	if v, ok := clean["shareRegions"]; ok && v != nil {
+		norm, err := clientapp.NormalizeShareRegions(v)
+		if err != nil {
+			return err
+		}
+		clean["shareRegions"] = norm
+	}
+	if v, ok := clean["serverInfo"]; ok && v != nil {
+		norm, err := clientapp.NormalizeServerInfo(v)
+		if err != nil {
+			return err
+		}
+		clean["serverInfo"] = norm
+		delete(cur, "serverInfo")
+	}
+	return nil
+}
+
+// normalizeServers 校验并规整补丁里的 servers(共享网络的服务器,规则见 shareservers.Normalize)。
+// 只在补丁带了 servers 时做:档案里已有的旧数据不会拦住不相关的保存。servers 是整份数组,合并时整体替换。
+func normalizeServers(clean map[string]any) error {
+	v, ok := clean["servers"]
+	if !ok || v == nil {
+		return nil
+	}
+	norm, err := shareservers.Normalize(v)
+	if err != nil {
+		return err
+	}
+	clean["servers"] = norm
+	return nil
 }
 
 // prepare 清理 patch 里不该由客户端写的内容,返回新的 patch(不改入参)。

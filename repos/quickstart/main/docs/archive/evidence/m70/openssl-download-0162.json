@@ -1,0 +1,12 @@
+{
+  "buildId": "quickstart-home-x64-0162-20261018-1",
+  "observedStallSecondsAtLeast": 1130,
+  "observedCommand": "curl -f --connect-timeout 5 --retry 3 --location https://www.openssl.org/source/openssl-3.5.5.tar.gz",
+  "expectedSha256": "b28c91532a8b65a1f983b4c28b7488174e4a01008e29ce8e69bd789f28bc2a89",
+  "officialMirror": "https://sources.openwrt.org/openssl-3.5.5.tar.gz",
+  "independentMirrorDownloadMatchesRecipe": true,
+  "sharedCompletedArchiveMatchesRecipe": true,
+  "action": "Verified container BUILD_ID and exact /proc/1022/cmdline inside that container, then sent SIGTERM only to the stalled curl. Existing correct archive was not replaced; builder entered its normal serial retry.",
+  "container": "44be489e93f9cd982c2f5258bf582c17f6703c1676278505f4b31145d7b70783",
+  "scope": "own x64 SDK download only; no device or unrelated process changed"
+}

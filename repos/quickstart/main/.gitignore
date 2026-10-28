@@ -20,6 +20,9 @@ profile.cov
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+# Local third-party source checkouts for reference or independent builds
+/third_party/
+
 # Go workspace file
 go.work
 go.work.sum
@@ -37,6 +40,48 @@ go.work.sum
 # Release artifacts
 bin/
 
+# Generated acceptance evidence (keep source scripts, summaries and input manifests)
+/docs/evidence/**/*.png
+/docs/evidence/**/*.jpg
+/docs/evidence/**/*.jpeg
+/docs/evidence/**/*.webp
+/docs/evidence/**/*.gif
+/docs/evidence/**/*.mp4
+/docs/evidence/**/*.webm
+/docs/evidence/**/*.zip
+/docs/evidence/**/*.tar
+/docs/evidence/**/*.tar.gz
+/docs/evidence/**/*.tgz
+/docs/evidence/**/*.log
+/docs/evidence/**/*.txt
+/docs/evidence/**/*.tsv
+/docs/evidence/**/report.json
+/docs/evidence/**/attempt-*.json
+
+# Archived acceptance evidence follows the same artifact policy.
+/docs/archive/evidence/**/*.png
+/docs/archive/evidence/**/*.jpg
+/docs/archive/evidence/**/*.jpeg
+/docs/archive/evidence/**/*.webp
+/docs/archive/evidence/**/*.gif
+/docs/archive/evidence/**/*.mp4
+/docs/archive/evidence/**/*.webm
+/docs/archive/evidence/**/*.zip
+/docs/archive/evidence/**/*.tar
+/docs/archive/evidence/**/*.tar.gz
+/docs/archive/evidence/**/*.tgz
+/docs/archive/evidence/**/*.log
+/docs/archive/evidence/**/*.txt
+/docs/archive/evidence/**/*.tsv
+/docs/archive/evidence/**/report.json
+/docs/archive/evidence/**/attempt-*.json
+
+# This historical source document was tracked before relocation.
+!/docs/archive/prototypes/lan-device-management/coverage.md
+
 # Editor/IDE
 # .idea/
 # .vscode/
+
+.agentflow
+

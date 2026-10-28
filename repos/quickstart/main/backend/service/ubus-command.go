@@ -10,7 +10,7 @@ import (
 )
 
 func UbusCall(ctx context.Context, arg string) (*simplejson.Json, error) {
-	args := strings.Split(arg, " ")
+	args := strings.SplitN(arg, " ", 3)
 	args = append([]string{"-S", "call"}, args...)
 	ret, err := exec.CommandContext(ctx, "ubus", args...).Output()
 	if err != nil {
@@ -22,7 +22,7 @@ func UbusCall(ctx context.Context, arg string) (*simplejson.Json, error) {
 }
 
 func UbusCallWithObject(ctx context.Context, arg string, obj interface{}) error {
-	args := strings.Split(arg, " ")
+	args := strings.SplitN(arg, " ", 3)
 	args = append([]string{"-S", "call"}, args...)
 	ret, err := exec.CommandContext(ctx, "ubus", args...).Output()
 	if err != nil {

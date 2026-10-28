@@ -1,12 +1,11 @@
 module github.com/istoreos/quickstart/backend
 
-go 1.23.0
+go 1.26.0
 
-toolchain go1.23.5
+toolchain go1.26.10
 
 require (
 	github.com/bitly/go-simplejson v0.5.0
-	github.com/cloudfoundry/gosigar v1.3.3
 	github.com/digineo/go-uci v0.0.0-20210918132103-37c7b10c14fa
 	github.com/jedib0t/go-pretty/v6 v6.3.1
 	github.com/julienschmidt/httprouter v1.3.0
@@ -15,7 +14,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.22.3
 	github.com/ti-mo/conntrack v0.5.2
 	github.com/urfave/cli/v2 v2.4.0
-	golang.org/x/sys v0.33.0
+	golang.org/x/sys v0.49.0
 	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f
 )
 
@@ -26,7 +25,6 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/josharian/native v1.1.0 // indirect
-	github.com/kr/pretty v0.2.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20220326011226-f1430873d8db // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
@@ -41,9 +39,9 @@ require (
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
 	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	golang.org/x/net v0.39.0 // indirect
-	golang.org/x/sync v0.14.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
+	golang.org/x/net v0.62.0 // indirect
+	golang.org/x/sync v0.24.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
 replace github.com/digineo/go-uci => github.com/linkease/go-uci v0.0.0-20250720160013-1cec2c44dc49

@@ -1,0 +1,28 @@
+# 当前可评审候选标识（未验收通过）
+
+2026-10-15。公开预览 `http://192.168.9.19:5180/`，owner为本仓库`docs/product/ui-design`，PID29262，mode=vue-design-built。脚本按进程归属重新构建启动，未处理其他项目进程。
+
+当前HTTP入口脚本为`/assets/index.56215cec.js`，从公开入口读取的SHA256为`9cff9eeb84bffc1150e92c633dfef60bf814fae089ced16630a61b819ad7e391`。构建后只新增文档/检查记录，没有再修改原型业务源码；源代码未提交，不用基线HEAD代表当前候选。
+
+当前TypeScript退出0；M66.10交互attempt-6通过13组；M66.11主检查attempt-4通过，但补充权限弹层和PNG审计失败，整体结果仍未通过。详见unresolved.md，不进入M66.12最终签字。
+
+## 源码与验证脚本SHA256
+
+```text
+d2cad05bbed88e5211c445d8eb171e5a306384f6eb7f215e47630126e1f347aa  web/src/design/OrderedHome.vue
+c06ac5b93effff415a8b33845b268255a767351e7cb0bf3b258478e8411de6d8  web/src/design/orderedHome.css
+674f59114e55936be3d725390aaf8f9b3638fac984fc38bf66d47d8652fefdd1  web/src/design/orderedLayout.ts
+f26ad36ea3888e1b627917af13d322f733226c0ecf84cda47b6c52192c1e7a19  web/src/design/CompactPreviewCard.vue
+c75104f6d1cbaf776b94a8cf10323c54a9c93c64ecde24328f3ffb924bc8337d  web/src/design/LayoutPreviewCard.vue
+40584185c4e3e5630dc381ec0e90af38f45fad85ce866504e2a2d3bcef94cafb  web/src/design/layoutPreviewCard.css
+06bb503b481070c722348fd00cb0662ba58eb37cda988a0e6c4186310fcdfbab  web/src/design/CanvasModule.vue
+5174817953f205518932cfc3f153bc0ae7af2adf5e410273dbeac24d9ea327c8  web/src/design/HomeApplications.vue
+21331e7b8069f74f761fab38e47eccfc5b8cc0d84d581a01afb412dfe465a03e  web/src/design/HomePreview.vue
+0f5d58eb474da0432cc4166d69e06645b894d8887c9c6b9767f9d0334ed6bf1e  web/src/design/studioModel.ts
+0abe31beb7ea20ed9ade7f3dbbf384e7ce18c8ed5e4d8201e006eaef52903662  web/src/design/fixtures.ts
+63328f15e04773312ae1e3425d241a0c8984aec5e7fb0582548d7fcbc371d83f  web/src/design/devices.ts
+6a1a3b968ee90a67937c8525cad625195b19f440991f1819ce33c33057a87b3f  docs/product/ui-design/ordered-interaction-review.cjs
+5016f237bc31dae7d467bb033da79cf8317a09186c9db64707266da53e455222  docs/product/ui-design/ordered-visual-review.cjs
+a13c3fc6ae805923298e8053f219198f8df635dcafb9ac9ea5471c3469b5c365  docs/product/ui-design/ordered-screenshot-audit.cjs
+c4011bd2704bb1284b3054fafc46c62a38590dd84dc8bbd7d5391db048915f79  docs/product/ui-design/ordered-authority-popover-review.cjs
+```

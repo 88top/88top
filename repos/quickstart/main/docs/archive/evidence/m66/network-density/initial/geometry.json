@@ -1,0 +1,991 @@
+[
+  {
+    "key": "1440-light-zh-cn",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 463.203125,
+        "height": 238,
+        "intrinsic": 237.796875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 463.203125,
+        "height": 136,
+        "intrinsic": 136,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认"
+      }
+    ]
+  },
+  {
+    "key": "1440-light-en",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 463.203125,
+        "height": 238,
+        "intrinsic": 237.796875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 463.203125,
+        "height": 136,
+        "intrinsic": 136,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown"
+      }
+    ]
+  },
+  {
+    "key": "1440-dark-zh-cn",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 463.203125,
+        "height": 238,
+        "intrinsic": 237.796875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 463.203125,
+        "height": 136,
+        "intrinsic": 136,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认"
+      }
+    ]
+  },
+  {
+    "key": "1440-dark-en",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 463.203125,
+        "height": 238,
+        "intrinsic": 237.796875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 463.203125,
+        "height": 136,
+        "intrinsic": 136,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown"
+      }
+    ]
+  },
+  {
+    "key": "1280-light-zh-cn",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 399.1875,
+        "height": 237,
+        "intrinsic": 236.59375,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 399.1875,
+        "height": 136,
+        "intrinsic": 136,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认"
+      }
+    ]
+  },
+  {
+    "key": "1280-light-en",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 399.1875,
+        "height": 237,
+        "intrinsic": 236.59375,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 399.1875,
+        "height": 136,
+        "intrinsic": 136,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown"
+      }
+    ]
+  },
+  {
+    "key": "1280-dark-zh-cn",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 399.1875,
+        "height": 237,
+        "intrinsic": 236.59375,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 399.1875,
+        "height": 136,
+        "intrinsic": 136,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认"
+      }
+    ]
+  },
+  {
+    "key": "1280-dark-en",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 399.1875,
+        "height": 237,
+        "intrinsic": 236.59375,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 399.1875,
+        "height": 136,
+        "intrinsic": 136,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown"
+      }
+    ]
+  },
+  {
+    "key": "1024-light-zh-cn",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 303.203125,
+        "height": 235.03125,
+        "intrinsic": 234.59375,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 303.203125,
+        "height": 200.96875,
+        "intrinsic": 200.96875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认"
+      }
+    ]
+  },
+  {
+    "key": "1024-light-en",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 303.203125,
+        "height": 235.03125,
+        "intrinsic": 234.59375,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 303.203125,
+        "height": 205.96875,
+        "intrinsic": 205.96875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown"
+      }
+    ]
+  },
+  {
+    "key": "1024-dark-zh-cn",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 303.203125,
+        "height": 235.03125,
+        "intrinsic": 234.59375,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 303.203125,
+        "height": 200.96875,
+        "intrinsic": 200.96875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认"
+      }
+    ]
+  },
+  {
+    "key": "1024-dark-en",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 303.203125,
+        "height": 235.03125,
+        "intrinsic": 234.59375,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 303.203125,
+        "height": 205.96875,
+        "intrinsic": 205.96875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown"
+      }
+    ]
+  },
+  {
+    "key": "768-light-zh-cn",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 520,
+        "height": 220,
+        "intrinsic": 220,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 520,
+        "height": 230.5625,
+        "intrinsic": 230.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\n1/ 3\n端口已连接\n链路状态\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认\n端口连接不代表互联网可用"
+      }
+    ]
+  },
+  {
+    "key": "768-light-en",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 520,
+        "height": 220,
+        "intrinsic": 220,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 520,
+        "height": 230.5625,
+        "intrinsic": 230.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\n1/ 3\nports connected\nLink state\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown\nLink state does not establish Internet access"
+      }
+    ]
+  },
+  {
+    "key": "768-dark-zh-cn",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 520,
+        "height": 220,
+        "intrinsic": 220,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 520,
+        "height": 230.5625,
+        "intrinsic": 230.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\n1/ 3\n端口已连接\n链路状态\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认\n端口连接不代表互联网可用"
+      }
+    ]
+  },
+  {
+    "key": "768-dark-en",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 520,
+        "height": 220,
+        "intrinsic": 220,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 520,
+        "height": 230.5625,
+        "intrinsic": 230.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\n1/ 3\nports connected\nLink state\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown\nLink state does not establish Internet access"
+      }
+    ]
+  },
+  {
+    "key": "390-light-zh-cn",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 362,
+        "height": 220,
+        "intrinsic": 220,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 362,
+        "height": 230.5625,
+        "intrinsic": 230.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\n1/ 3\n端口已连接\n链路状态\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认\n端口连接不代表互联网可用"
+      }
+    ]
+  },
+  {
+    "key": "390-light-en",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 362,
+        "height": 220,
+        "intrinsic": 220,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 362,
+        "height": 230.5625,
+        "intrinsic": 230.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\n1/ 3\nports connected\nLink state\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown\nLink state does not establish Internet access"
+      }
+    ]
+  },
+  {
+    "key": "390-dark-zh-cn",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 362,
+        "height": 220,
+        "intrinsic": 220,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 362,
+        "height": 230.5625,
+        "intrinsic": 230.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\n1/ 3\n端口已连接\n链路状态\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认\n端口连接不代表互联网可用"
+      }
+    ]
+  },
+  {
+    "key": "390-dark-en",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 362,
+        "height": 220,
+        "intrinsic": 220,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 362,
+        "height": 230.5625,
+        "intrinsic": 230.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\n1/ 3\nports connected\nLink state\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown\nLink state does not establish Internet access"
+      }
+    ]
+  },
+  {
+    "key": "320-light-zh-cn",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 292,
+        "height": 220,
+        "intrinsic": 220,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 292,
+        "height": 230.5625,
+        "intrinsic": 230.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\n1/ 3\n端口已连接\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认\n端口连接不代表互联网可用"
+      }
+    ]
+  },
+  {
+    "key": "320-light-en",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 292,
+        "height": 220,
+        "intrinsic": 220,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 292,
+        "height": 235.5625,
+        "intrinsic": 235.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\n1/ 3\nports connected\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown\nLink state does not establish Internet access"
+      }
+    ]
+  },
+  {
+    "key": "320-dark-zh-cn",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 292,
+        "height": 220,
+        "intrinsic": 220,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 292,
+        "height": 230.5625,
+        "intrinsic": 230.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\n1/ 3\n端口已连接\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认\n端口连接不代表互联网可用"
+      }
+    ]
+  },
+  {
+    "key": "320-dark-en",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 292,
+        "height": 220,
+        "intrinsic": 220,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 292,
+        "height": 235.5625,
+        "intrinsic": 235.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\n1/ 3\nports connected\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown\nLink state does not establish Internet access"
+      }
+    ]
+  },
+  {
+    "key": "1440/network-dns",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 463.203125,
+        "height": 238,
+        "intrinsic": 237.796875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\nDNS错误\nDNS配置\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 463.203125,
+        "height": 136,
+        "intrinsic": 136,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认"
+      }
+    ]
+  },
+  {
+    "key": "1440/network-source",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 463.203125,
+        "height": 238,
+        "intrinsic": 237.796875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n软件源错误\n软件源配置\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 463.203125,
+        "height": 136,
+        "intrinsic": 136,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认"
+      }
+    ]
+  },
+  {
+    "key": "1440/network-offline",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 463.203125,
+        "height": 238,
+        "intrinsic": 237.796875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n未联网\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 463.203125,
+        "height": 136,
+        "intrinsic": 136,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认"
+      }
+    ]
+  },
+  {
+    "key": "1440/network-error",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 463.203125,
+        "height": 237.796875,
+        "intrinsic": 237.796875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n连接信息暂不可用\n重试\n—\nIPv4\n暂无地址\n—\nIPv6\n暂无地址\nDNS\n—\n来源待确认"
+      },
+      {
+        "kind": "interface",
+        "width": 463.203125,
+        "height": 143.59375,
+        "intrinsic": 143.59375,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\n接口信息暂不可用\n重试"
+      }
+    ]
+  },
+  {
+    "key": "1440/network-no-address",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 463.203125,
+        "height": 238,
+        "intrinsic": 237.796875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n—\nIPv4\n暂无地址\n—\nIPv6\n暂无地址\nDNS\n—\n来源待确认"
+      },
+      {
+        "kind": "interface",
+        "width": 463.203125,
+        "height": 136,
+        "intrinsic": 136,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认"
+      }
+    ]
+  },
+  {
+    "key": "1440/network-many",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 463.203125,
+        "height": 238,
+        "intrinsic": 237.796875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n2001:db8::1 · 2001:db8::2\n+46\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 463.203125,
+        "height": 136,
+        "intrinsic": 136,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认"
+      }
+    ]
+  },
+  {
+    "key": "1440/ports-error",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 463.203125,
+        "height": 237.796875,
+        "intrinsic": 237.796875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 463.203125,
+        "height": 143.59375,
+        "intrinsic": 143.59375,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\n接口信息暂不可用\n重试"
+      }
+    ]
+  },
+  {
+    "key": "1440/ports-empty",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 463.203125,
+        "height": 238,
+        "intrinsic": 237.796875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n••••••••••\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 463.203125,
+        "height": 136,
+        "intrinsic": 136,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\n\n暂未读取到网络接口"
+      }
+    ]
+  },
+  {
+    "key": "320/network-dns",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 292,
+        "height": 238.78125,
+        "intrinsic": 238.78125,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nDNS error\nDNS settings\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 292,
+        "height": 235.5625,
+        "intrinsic": 235.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\n1/ 3\nports connected\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown\nLink state does not establish Internet access"
+      }
+    ]
+  },
+  {
+    "key": "320/network-source",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 292,
+        "height": 238.78125,
+        "intrinsic": 238.78125,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nSoftware source error\nSource settings\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 292,
+        "height": 235.5625,
+        "intrinsic": 235.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\n1/ 3\nports connected\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown\nLink state does not establish Internet access"
+      }
+    ]
+  },
+  {
+    "key": "320/network-offline",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 292,
+        "height": 220,
+        "intrinsic": 220,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nNot connected\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 292,
+        "height": 235.5625,
+        "intrinsic": 235.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\n1/ 3\nports connected\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown\nLink state does not establish Internet access"
+      }
+    ]
+  },
+  {
+    "key": "320/network-error",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 292,
+        "height": 224.96875,
+        "intrinsic": 224.96875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection unavailable\nRetry\n—\nIPv4\nNo address\n—\nIPv6\nNo address\nDNS\n—\nSource unknown"
+      },
+      {
+        "kind": "interface",
+        "width": 292,
+        "height": 160.984375,
+        "intrinsic": 160.984375,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\nInterface information unavailable\nRetry\nLink state does not establish Internet access"
+      }
+    ]
+  },
+  {
+    "key": "320/network-no-address",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 292,
+        "height": 224.96875,
+        "intrinsic": 224.96875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n—\nIPv4\nNo address\n—\nIPv6\nNo address\nDNS\n—\nSource unknown"
+      },
+      {
+        "kind": "interface",
+        "width": 292,
+        "height": 235.5625,
+        "intrinsic": 235.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\n1/ 3\nports connected\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown\nLink state does not establish Internet access"
+      }
+    ]
+  },
+  {
+    "key": "320/network-many",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 292,
+        "height": 227.59375,
+        "intrinsic": 227.59375,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n2001:db8::1 · 2001:db8::2\n+46\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 292,
+        "height": 235.5625,
+        "intrinsic": 235.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\n32/ 128\nports connected\neth0\nWAN / WAN6\nConnected\n1000 Mbps\neth1\nLAN\nDisconnected\nSpeed unknown\nLink state does not establish Internet access"
+      }
+    ]
+  },
+  {
+    "key": "320/ports-error",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 292,
+        "height": 220,
+        "intrinsic": 220,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 292,
+        "height": 160.984375,
+        "intrinsic": 160.984375,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\nInterface information unavailable\nRetry\nLink state does not establish Internet access"
+      }
+    ]
+  },
+  {
+    "key": "320/ports-empty",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 292,
+        "height": 220,
+        "intrinsic": 220,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Connection & IP\nDevices\n⋮\nConnection normal\n1d 6h 16m 41s\nIPv4（wan）\n••••••••••\nStatic\nIPv6\n••••••••••\nDNS\n192.168.30.1\nManual"
+      },
+      {
+        "kind": "interface",
+        "width": 292,
+        "height": 164.390625,
+        "intrinsic": 164.390625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "Network interfaces\nConfigure\n⋮\n0/ 0\nports connected\n\nNo interfaces returned\n\nLink state does not establish Internet access"
+      }
+    ]
+  },
+  {
+    "key": "1440/long-revealed",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 463.203125,
+        "height": 238,
+        "intrinsic": 237.796875,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n2001:db8:1234:5678:90ab:cdef:1234:5678\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 463.203125,
+        "height": 136,
+        "intrinsic": 136,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认"
+      }
+    ]
+  },
+  {
+    "key": "390/long-revealed",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 362,
+        "height": 228.59375,
+        "intrinsic": 228.59375,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n2001:db8:1234:5678:90ab:cdef:1234:5678\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 362,
+        "height": 230.5625,
+        "intrinsic": 230.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\n1/ 3\n端口已连接\n链路状态\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认\n端口连接不代表互联网可用"
+      }
+    ]
+  },
+  {
+    "key": "320/long-revealed",
+    "cards": [
+      {
+        "kind": "connection",
+        "width": 292,
+        "height": 228.59375,
+        "intrinsic": 228.59375,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络连接\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n••••••••••\n静态网络\nIPv6\n2001:db8:1234:5678:90ab:cdef:1234:5678\nDNS\n192.168.30.1\n手动配置"
+      },
+      {
+        "kind": "interface",
+        "width": 292,
+        "height": 230.5625,
+        "intrinsic": 230.5625,
+        "overflowX": false,
+        "overflowY": false,
+        "text": "网络接口\n接口配置\n⋮\n1/ 3\n端口已连接\neth0\nWAN / WAN6\n已连接\n1000 Mbps\neth1\nLAN\n未连接\n速率待确认\n端口连接不代表互联网可用"
+      }
+    ]
+  }
+]

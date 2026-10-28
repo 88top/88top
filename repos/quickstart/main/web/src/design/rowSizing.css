@@ -1,0 +1,15 @@
+/* Selected-row editing affordances. Hit areas capture touch only on grips. */
+.natural-home .ordered-column{position:relative}
+.natural-home .row-stack-grip,.natural-home .row-bottom-grip{position:absolute;z-index:39;width:72px;height:44px;min-height:44px;box-sizing:border-box;padding:0!important;background:transparent!important;color:var(--c-accent);cursor:row-resize;touch-action:none;display:grid;place-items:center;left:50%;transform:translate(-50%,-50%);border:0}
+.natural-home .row-stack-grip>span,.natural-home .row-bottom-grip>span{display:grid;place-items:center;width:44px;height:16px;border:1px solid var(--c-line);border-radius:7px;background:var(--c-panel);box-shadow:0 2px 8px #0001;line-height:8px;letter-spacing:3px;font-size:14px}
+.natural-home .row-bottom-grip{top:100%}
+.natural-home .row-bottom-grip>span{width:56px;background:var(--c-soft);border-color:var(--c-accent)}
+.natural-home .row-stack-grip:hover>span,.natural-home .row-bottom-grip:hover>span{border-color:var(--c-accent)}
+.natural-home .row-size-hint{position:absolute;z-index:40;bottom:14px;left:14px;max-width:calc(100% - 28px);padding:7px 10px;border:1px solid var(--c-line);border-radius:8px;background:var(--c-panel);color:var(--c-muted);font-size:12px;pointer-events:none;box-shadow:0 2px 10px #0001}
+/* Intrinsic measurement ignores user allocation, including chart stretching.
+ * The attribute exists only during one synchronous read and is never painted. */
+.natural-home .ordered-row[data-size-measuring]{height:auto!important;min-height:0!important}
+.natural-home .ordered-row[data-size-measuring]>.ordered-column{grid-template-rows:max-content!important;grid-auto-rows:max-content!important;align-self:start!important}
+.natural-home .ordered-row[data-size-measuring] .ordered-card{height:auto!important;align-self:start!important}
+.natural-home .ordered-row[data-size-measuring] .widget-traffic{height:auto!important;min-height:var(--natural-chart-height)!important}
+.natural-home .ordered-row[data-size-measuring] .widget-traffic .network_container{height:var(--natural-chart-height)!important;min-height:var(--natural-chart-height)!important;flex:none!important}

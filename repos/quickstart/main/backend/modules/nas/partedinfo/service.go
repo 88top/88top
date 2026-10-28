@@ -2,7 +2,9 @@ package partedinfo
 
 import (
 	"context"
+	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/istoreos/quickstart/backend/models"
 	"github.com/istoreos/quickstart/backend/modules/raid/inventory"
@@ -28,6 +30,9 @@ func NewService(store Store) *Service {
 }
 
 func (svc *Service) Read(ctx context.Context, device string, includeFree bool) (*models.NasDiskInfo, error) {
+	if strings.Contains(device, "/") || !utils.ValidDevicePath("/dev/"+device) {
+		return nil, errors.New("invalid disk name")
+	}
 	rootPaths := svc.store.RootPaths(ctx)
 	dockerDevicePath := svc.store.DockerDevicePath(ctx)
 	stdout := svc.store.Parted(ctx, device)

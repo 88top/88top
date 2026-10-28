@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-10-18T07:45:00.545465+00:00",
+  "host": "192.168.30.244",
+  "scope": "homepage-config-only",
+  "board": {
+    "kernel": "6.6.86",
+    "hostname": "iStoreOS",
+    "system": "Intel(R) N100",
+    "model": "QEMU Standard PC (Q35 + ICH9, 2009)",
+    "board_name": "qemu-standard-pc-q35-ich9-2009",
+    "rootfs_type": "squashfs",
+    "release": {
+      "distribution": "iStoreOS",
+      "version": "24.10.1",
+      "revision": "2025052311",
+      "target": "x86/64",
+      "description": "iStoreOS 24.10.1 2025052311",
+      "builddate": "1747907388"
+    }
+  },
+  "version": "0.16.0-test20261018 7f68320df7a6723d7bd52c068eda20dea3e6e5e5 .20261018.074354",
+  "fingerprints": [
+    "182e90b81ede4d37f8eec6c72e0c77ef7b9190a604c8cd4a40cfc5b3589d5723  /usr/sbin/quickstart",
+    "f48b937713511ee9af25b2a3ca580c9a59f816433451c77f0e6c9ea00477c1ce  /www/luci-static/quickstart/index.js",
+    "cc8101d122af5f9409c716fe74457f64547d1b3fdb37a7e6c23f2e565647f637  /www/luci-static/quickstart/i18n/en.json"
+  ],
+  "uiExitCode": 0,
+  "sessionsDestroyed": 2
+}

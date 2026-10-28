@@ -1,0 +1,9 @@
+# Proposal only; NOT applied. Preserve management and existing services from
+# 192.168.30.0/24 while removing the unrestricted WAN input policy.
+set firewall.@zone[1].input='REJECT'
+set firewall.demon.enabled='0'
+set firewall.quickstart_trusted_management='rule'
+set firewall.quickstart_trusted_management.name='Allow-trusted-management-subnet'
+set firewall.quickstart_trusted_management.src='wan'
+set firewall.quickstart_trusted_management.src_ip='192.168.30.0/24'
+set firewall.quickstart_trusted_management.target='ACCEPT'

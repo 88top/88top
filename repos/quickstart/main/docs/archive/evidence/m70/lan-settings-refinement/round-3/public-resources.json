@@ -1,0 +1,26 @@
+{
+  "result": "passed",
+  "assetVersion": "0.16.6-test20261018-preview-9f31d4f-697cfb959c91",
+  "resources": [
+    {
+      "url": "http://192.168.30.244/luci-static/quickstart/index.js?v=0.16.6-test20261018-preview-9f31d4f-697cfb959c91",
+      "sha256": "8c26e370ce8c21e774f1839f24c58cb892ff289c21895c5e54f19a74b459edf9",
+      "bytes": 798695
+    },
+    {
+      "url": "http://192.168.30.244/luci-static/quickstart/style.css?v=0.16.6-test20261018-preview-9f31d4f-697cfb959c91",
+      "sha256": "6b77ac3ea90af68d8cba8e944998da2e76358ee1bfa1f25961722fb53364313d",
+      "bytes": 589028
+    },
+    {
+      "url": "http://192.168.30.244/luci-static/quickstart/vendor.js?v=0.16.6-test20261018-preview-9f31d4f-697cfb959c91",
+      "sha256": "2d10df1751d0d3e778744c01f8edf8db96082b8d0939cf65ef38ea05eea39867",
+      "bytes": 631855
+    },
+    {
+      "url": "http://192.168.30.244/luci-static/quickstart/i18n/en.json?v=0.16.6-test20261018-preview-9f31d4f-697cfb959c91",
+      "sha256": "bd5ffbade61b84d680f1f7982b3db76fa4d5a8d9a756b115663f02870c1a3fcb",
+      "bytes": 89660
+    }
+  ]
+}

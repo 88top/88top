@@ -45,8 +45,8 @@ func TestMountRunsBusyboxMountCommands(t *testing.T) {
 	}
 
 	want := [][]string{{
-		"test -d '/mnt/data' || mkdir -p '/mnt/data'",
-		"busybox mount '/dev/sda1' '/mnt/data'",
+		"test -d /mnt/data || mkdir -p /mnt/data",
+		"busybox mount /dev/sda1 /mnt/data",
 	}}
 	if !reflect.DeepEqual(runner.outErrCalls, want) {
 		t.Fatalf("unexpected mount commands:\nwant=%#v\ngot=%#v", want, runner.outErrCalls)
@@ -87,8 +87,8 @@ func TestUnmountVariants(t *testing.T) {
 	}
 
 	want := [][]string{
-		{"umount '/dev/sda1'"},
-		{"umount '/mnt/data'"},
+		{"umount /dev/sda1"},
+		{"umount /mnt/data"},
 	}
 	if !reflect.DeepEqual(runner.outErrCalls, want) {
 		t.Fatalf("unexpected unmount commands:\nwant=%#v\ngot=%#v", want, runner.outErrCalls)
@@ -142,7 +142,7 @@ func TestAddFstabCreatesNewMount(t *testing.T) {
 	want := [][]string{{
 		"uci add fstab mount",
 		"uci set fstab.@mount[-1].uuid=uuid-1",
-		"uci set 'fstab.@mount[-1].target=/mnt/data'",
+		"uci set fstab.@mount[-1].target=/mnt/data",
 		"uci set fstab.@mount[-1].enabled=1",
 	}}
 	if !reflect.DeepEqual(runner.runCalls, want) {
@@ -163,7 +163,7 @@ func TestAddFstabUpdatesExistingMount(t *testing.T) {
 
 	want := [][]string{{
 		"uci set fstab.cfg123.uuid=uuid-1",
-		"uci set 'fstab.cfg123.target=/mnt/new'",
+		"uci set fstab.cfg123.target=/mnt/new",
 		"uci set fstab.cfg123.enabled=1",
 	}}
 	if !reflect.DeepEqual(runner.runCalls, want) {

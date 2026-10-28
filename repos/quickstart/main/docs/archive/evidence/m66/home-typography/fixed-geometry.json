@@ -1,0 +1,66 @@
+[
+  {
+    "id": "devices",
+    "height": 338,
+    "scrollHeight": 338,
+    "children": [
+      {
+        "kind": "HEADER",
+        "top": 18,
+        "bottom": 35.5
+      },
+      {
+        "kind": "inventory-heading",
+        "top": 45.5,
+        "bottom": 76.296875
+      },
+      {
+        "kind": "canvas-devices",
+        "top": 84.296875,
+        "bottom": 202.296875
+      },
+      {
+        "kind": "module-notice",
+        "top": 206.296875,
+        "bottom": 249.890625
+      },
+      {
+        "kind": "inventory-footer",
+        "top": 259.609375,
+        "bottom": 322
+      }
+    ]
+  },
+  {
+    "id": "storage",
+    "height": 328,
+    "scrollHeight": 328,
+    "children": [
+      {
+        "kind": "HEADER",
+        "top": 18,
+        "bottom": 35.5
+      },
+      {
+        "kind": "storage-summary",
+        "top": 41.5,
+        "bottom": 76.5
+      },
+      {
+        "kind": "disk-grid",
+        "top": 88.5,
+        "bottom": 236.0625
+      },
+      {
+        "kind": "disk-overflow-note",
+        "top": 242.0625,
+        "bottom": 275.65625
+      },
+      {
+        "kind": "module-bottom-link",
+        "top": 283.65625,
+        "bottom": 309.453125
+      }
+    ]
+  }
+]

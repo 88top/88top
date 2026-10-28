@@ -1,0 +1,16 @@
+{
+  "typeCheck": "passed",
+  "frontendTests": {
+    "passed": 135,
+    "failed": 0
+  },
+  "build": "passed",
+  "uiAcceptance": "failed",
+  "output": "/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/94c4-develop-quicksta/quickstart/web/dist",
+  "zipSha256": "4ea59fcf2f0a5c324a0a7bc38e927af7dfe9c16ecc3c11ef74bec80c57826bdb",
+  "changedArchiveEntries": [
+    "luci-static/quickstart/index.js",
+    "luci-static/quickstart/style.css"
+  ],
+  "deployed": false
+}

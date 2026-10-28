@@ -29,8 +29,8 @@ func TestGuideNetworkBasicsCommandAdaptersPreservePPPoEAndInterfaceBatches(t *te
 	want := [][]string{
 		{
 			"uci set network.wan.proto='pppoe'",
-			"uci set network.wan.username='user'",
-			"uci set network.wan.password='pass'",
+			"uci set network.wan.username=user",
+			"uci set network.wan.password=pass",
 			"uci del network.wan.dns",
 			"uci del network.wan.peerdns",
 			"uci del network.wan.defaultroute",
@@ -83,8 +83,8 @@ func TestGuideNetworkBasicsDNSCommandAdapterPreservesManualBatches(t *testing.T)
 		{
 			"uci del network.wan.dns",
 			"uci set network.wan.peerdns=0",
-			"uci add_list network.wan.dns='1.1.1.1'",
-			"uci add_list network.wan.dns='8.8.8.8'",
+			"uci add_list network.wan.dns=1.1.1.1",
+			"uci add_list network.wan.dns=8.8.8.8",
 		},
 	}
 	if !reflect.DeepEqual(got, want) {
@@ -129,5 +129,20 @@ func TestGuideNetworkBasicsDNSCommandAdapterPreservesErrorBehavior(t *testing.T)
 	}
 	if calls != 1 {
 		t.Fatalf("expected one command batch, got %d", calls)
+	}
+}
+
+func TestInvalidWANAddressDoesNotRunPartialBatches(t *testing.T) {
+	previous := runGuideNetworkBasicsUCICommands
+	defer func() { runGuideNetworkBasicsUCICommands = previous }()
+	calls := 0
+	runGuideNetworkBasicsUCICommands = func(context.Context, []string) error { calls++; return nil }
+	for _, values := range [][3]string{{"bad", "255.255.255.0", "10.0.0.1"}, {"10.0.0.2", "255.255.255.0", "bad"}, {"10.0.0.2", "255.255.-1.0", "10.0.0.1"}} {
+		if err := uciSetInterfaceWithoutCommit(context.Background(), "wan", "static", values[1], values[0], values[2]); err == nil {
+			t.Fatal("invalid WAN address accepted")
+		}
+	}
+	if calls != 0 {
+		t.Fatal("invalid WAN config changed default-route settings")
 	}
 }

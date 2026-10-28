@@ -1,0 +1,1148 @@
+{
+  "scope": "literal method/path registration inventory, not full behavioral equivalence proof",
+  "legacyUniqueRoutes": 142,
+  "legacyPublicRoutes": 135,
+  "retainedPublicRoutes": 132,
+  "replacedPublicRoutes": 3,
+  "internalRetained": 7,
+  "currentLiteralRoutes": 194,
+  "dynamicHomeRoutes": 8,
+  "rows": [
+    {
+      "method": "GET",
+      "path": "/api/dhns/connect/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/dhns_routers.go:15:3",
+      "currentSource": "backend/modules/dhns/routes.go:26:3",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/api/dhns/dhcpValid/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/dhns_routers.go:19:3",
+      "currentSource": "backend/modules/dhns/routes.go:30:3",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/api/dhns/dhnsChange/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/dhns_routers.go:18:3",
+      "currentSource": "backend/modules/dhns/routes.go:29:3",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/api/dhns/forward/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/dhns_routers.go:17:3",
+      "currentSource": "backend/modules/dhns/routes.go:28:3",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/api/dhns/proxy/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/dhns_routers.go:16:3",
+      "currentSource": "backend/modules/dhns/routes.go:27:3",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/api/lcd/simple/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1106:2",
+      "currentSource": "backend/modules/lcd/routes.go:21:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/api/lcd/st7789/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1097:2",
+      "currentSource": "backend/modules/lcd/routes.go:17:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/app/check/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:283:2",
+      "currentSource": "backend/modules/app/routes.go:20:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/app/install-list/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:301:2",
+      "currentSource": "backend/modules/app/routes.go:52:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/app/install/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:292:2",
+      "currentSource": "backend/modules/app/routes.go:28:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/aria2/init/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:411:2",
+      "currentSource": "backend/modules/guidestorage/routes.go:30:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/guide/client-mode/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:330:2",
+      "currentSource": "backend/modules/guidecore/routes.go:35:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/client-mode/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:339:2",
+      "currentSource": "backend/modules/guidecore/routes.go:39:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/guide/ddns/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:601:2",
+      "currentSource": "backend/modules/guideddns/routes.go:28:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/ddns/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:612:2",
+      "currentSource": "backend/modules/guideddns/routes.go:35:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/ddnsto/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:615:2",
+      "currentSource": "backend/modules/guideddns/routes.go:42:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/ddnsto/address/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:624:2",
+      "currentSource": "backend/modules/guideddns/routes.go:46:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/guide/ddnsto/config/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:633:2",
+      "currentSource": "backend/modules/guideddns/routes.go:50:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/guide/dns-config/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:312:2",
+      "currentSource": "backend/modules/guidecore/routes.go:27:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/dns-config/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:321:2",
+      "currentSource": "backend/modules/guidecore/routes.go:31:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/guide/docker/partition/list/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:456:2",
+      "currentSource": "backend/modules/guidestorage/routes.go:50:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/guide/docker/status/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:465:2",
+      "currentSource": "backend/modules/guidestorage/routes.go:54:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/docker/switch/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:866:2",
+      "currentSource": "backend/modules/guidestorage/routes.go:62:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/docker/transfer/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:474:2",
+      "currentSource": "backend/modules/guidestorage/routes.go:58:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/guide/download-service/status/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:438:2",
+      "currentSource": "backend/modules/guidestorage/routes.go:42:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/guide/download/partition/list/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:447:2",
+      "currentSource": "backend/modules/guidestorage/routes.go:46:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/finish/setup/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:366:2",
+      "currentSource": "backend/modules/guidecore/routes.go:51:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/gateway-router/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:348:2",
+      "currentSource": "backend/modules/guidecore/routes.go:43:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/guide/global-folders/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:875:2",
+      "currentSource": "backend/modules/guidestorage/routes.go:78:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/global-folders/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:884:2",
+      "currentSource": "backend/modules/guidestorage/routes.go:82:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/guide/lan/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:402:2",
+      "currentSource": "backend/modules/guidecore/routes.go:67:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/lan/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:393:2",
+      "currentSource": "backend/modules/guidecore/routes.go:63:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/guide/need/setup/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:357:2",
+      "currentSource": "backend/modules/guidecore/routes.go:47:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/guide/pppoe/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:375:2",
+      "currentSource": "backend/modules/guidecore/routes.go:55:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/pppoe/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:384:2",
+      "currentSource": "backend/modules/guidecore/routes.go:59:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/qbittorrent/init/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:420:2",
+      "currentSource": "backend/modules/guidestorage/routes.go:34:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/guide/soft-source/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:483:2",
+      "currentSource": "backend/modules/guidestorage/routes.go:66:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/soft-source/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:492:2",
+      "currentSource": "backend/modules/guidestorage/routes.go:70:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/guide/soft-source/list/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:501:2",
+      "currentSource": "backend/modules/guidestorage/routes.go:74:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/guide/transmission/init/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:429:2",
+      "currentSource": "backend/modules/guidestorage/routes.go:38:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/lanctrl/dhcpGatewayConfig/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:39:2",
+      "currentSource": "backend/modules/lancontrol/routes.go:94:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/lanctrl/dhcpTagsConfig/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:30:2",
+      "currentSource": "backend/modules/lancontrol/routes.go:90:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/lanctrl/enableFloatGateway/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:66:2",
+      "currentSource": "backend/modules/lancontrol/routes.go:112:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/lanctrl/enableSpeedLimit/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:57:2",
+      "currentSource": "backend/modules/lancontrol/routes.go:102:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/lanctrl/globalConfigs/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:84:2",
+      "currentSource": "backend/modules/lancontrol/routes.go:120:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/lanctrl/listDevices/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:93:2",
+      "currentSource": "backend/modules/lancontrol/routes.go:124:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/lanctrl/listSpeedLimitedDevices/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:111:2",
+      "currentSource": "backend/modules/lancontrol/routes.go:291:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/lanctrl/listStaticDevices/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:102:2",
+      "currentSource": "backend/modules/lancontrol/routes.go:287:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/lanctrl/speedLimitConfig/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:48:2",
+      "currentSource": "backend/modules/lancontrol/routes.go:98:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/lanctrl/speedsForDevices/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:13:2",
+      "currentSource": "backend/modules/lancontrol/routes.go:82:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/lanctrl/speedsForOneDevice/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:21:2",
+      "currentSource": "backend/modules/lancontrol/routes.go:86:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/lanctrl/staticDeviceConfig/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:75:2",
+      "currentSource": "backend/modules/lancontrol/routes.go:116:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/nas/disk/init/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:199:2",
+      "currentSource": "backend/modules/nas/routes.go:41:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/nas/disk/initrest/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:217:2",
+      "currentSource": "backend/modules/nas/routes.go:49:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/nas/disk/mountpoint/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:208:2",
+      "currentSource": "backend/modules/nas/routes.go:45:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/nas/disk/partition/format",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:226:2",
+      "currentSource": "backend/modules/nas/routes.go:53:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/nas/disk/partition/mount",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:235:2",
+      "currentSource": "backend/modules/nas/routes.go:57:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/nas/disk/status/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:190:2",
+      "currentSource": "backend/modules/nas/routes.go:37:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/nas/linkease/enable",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:279:2",
+      "currentSource": "backend/modules/nas/routes.go:61:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/nas/samba/create",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:244:2",
+      "currentSource": null,
+      "classification": "replaced_by_unishare",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/nas/sandbox/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:575:2",
+      "currentSource": "backend/modules/nas/routes.go:91:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/nas/sandbox/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:528:2",
+      "currentSource": "backend/modules/nas/routes.go:68:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/nas/sandbox/commit/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:545:2",
+      "currentSource": "backend/modules/nas/routes.go:72:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/nas/sandbox/disks/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:566:2",
+      "currentSource": "backend/modules/nas/routes.go:87:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/nas/sandbox/exit/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:548:2",
+      "currentSource": "backend/modules/nas/routes.go:79:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/nas/sandbox/reset/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:557:2",
+      "currentSource": "backend/modules/nas/routes.go:83:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/nas/service/status/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:187:2",
+      "currentSource": "backend/modules/nas/routes.go:30:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/nas/webdav/create",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:253:2",
+      "currentSource": null,
+      "classification": "replaced_by_unishare",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/nas/webdav/status/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:262:2",
+      "currentSource": null,
+      "classification": "replaced_by_unishare",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/network/checkPublicNet/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:642:2",
+      "currentSource": "backend/modules/network/routes.go:57:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/network/device/list/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:65:2",
+      "currentSource": "backend/modules/network/routes.go:45:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/network/homebox/enable",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:74:2",
+      "currentSource": "backend/modules/network/routes.go:49:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/network/interface/config/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:848:2",
+      "currentSource": "backend/modules/network/routes.go:69:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/network/interface/config/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:857:2",
+      "currentSource": "backend/modules/network/routes.go:73:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/network/interface/status/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:584:2",
+      "currentSource": "backend/modules/network/routes.go:53:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/network/port/list/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:651:2",
+      "currentSource": "backend/modules/network/routes.go:65:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/network/setup/finish/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:56:2",
+      "currentSource": "backend/modules/network/routes.go:41:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/network/statistics/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:43:2",
+      "currentSource": "backend/modules/network/routes.go:27:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/network/status/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:54:2",
+      "currentSource": "backend/modules/network/routes.go:34:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/quickstart/delete/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:839:2",
+      "currentSource": "backend/modules/quickstart/routes.go:50:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/quickstart/get/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:825:2",
+      "currentSource": "backend/modules/quickstart/routes.go:28:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/quickstart/set/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:836:2",
+      "currentSource": "backend/modules/quickstart/routes.go:39:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/raid/add/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:678:2",
+      "currentSource": "backend/modules/raid/routes.go:33:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/raid/autofix/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:723:2",
+      "currentSource": "backend/modules/raid/routes.go:53:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/raid/create/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:660:2",
+      "currentSource": "backend/modules/raid/routes.go:25:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/raid/create/list/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:732:2",
+      "currentSource": "backend/modules/raid/routes.go:57:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/raid/delete/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:669:2",
+      "currentSource": "backend/modules/raid/routes.go:29:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/raid/detail/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:696:2",
+      "currentSource": "backend/modules/raid/routes.go:41:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/raid/list/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:714:2",
+      "currentSource": "backend/modules/raid/routes.go:49:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/raid/recover/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:705:2",
+      "currentSource": "backend/modules/raid/routes.go:45:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/raid/remove/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:687:2",
+      "currentSource": "backend/modules/raid/routes.go:37:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/share/protocol/samba/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:986:2",
+      "currentSource": "backend/modules/share/routes.go:68:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/share/protocol/samba/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:995:2",
+      "currentSource": "backend/modules/share/routes.go:72:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/share/protocol/webdav/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:968:2",
+      "currentSource": "backend/modules/share/routes.go:60:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/share/protocol/webdav/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:977:2",
+      "currentSource": "backend/modules/share/routes.go:64:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/share/service/create/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:940:2",
+      "currentSource": "backend/modules/share/routes.go:48:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/share/service/delete/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:958:2",
+      "currentSource": "backend/modules/share/routes.go:56:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/share/service/list/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:930:2",
+      "currentSource": "backend/modules/share/routes.go:44:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/share/service/update/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:949:2",
+      "currentSource": "backend/modules/share/routes.go:52:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/share/user/create/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:903:2",
+      "currentSource": "backend/modules/share/routes.go:32:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/share/user/delete/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:921:2",
+      "currentSource": "backend/modules/share/routes.go:40:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/share/user/list/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:894:2",
+      "currentSource": "backend/modules/share/routes.go:28:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/share/user/update/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:912:2",
+      "currentSource": "backend/modules/share/routes.go:36:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/smart/attribute/result/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:799:2",
+      "currentSource": "backend/modules/smart/routes.go:54:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/smart/config/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:761:2",
+      "currentSource": "backend/modules/smart/routes.go:35:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/smart/config/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:770:2",
+      "currentSource": "backend/modules/smart/routes.go:39:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/smart/extend/result/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:808:2",
+      "currentSource": "backend/modules/smart/routes.go:58:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/smart/list/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:749:2",
+      "currentSource": "backend/modules/smart/routes.go:24:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/smart/log/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:752:2",
+      "currentSource": "backend/modules/smart/routes.go:31:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/smart/test/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:787:2",
+      "currentSource": "backend/modules/smart/routes.go:43:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/smart/test/result/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:790:2",
+      "currentSource": "backend/modules/smart/routes.go:50:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/system/auto-check-update/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:104:2",
+      "currentSource": "backend/modules/system/routes.go:42:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/system/check-update/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:95:2",
+      "currentSource": "backend/modules/system/routes.go:38:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/system/cpu/status/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:142:2",
+      "currentSource": "backend/modules/system/routes.go:67:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/system/cpu/temperature/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:151:2",
+      "currentSource": "backend/modules/system/routes.go:71:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/system/getToken/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:124:2",
+      "currentSource": "backend/modules/system/routes.go:58:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/system/memery/status/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:160:2",
+      "currentSource": "backend/modules/system/routes.go:75:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/system/module-settings/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1061:2",
+      "currentSource": "backend/modules/system/routes.go:91:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/system/module-settings/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1070:2",
+      "currentSource": "backend/modules/system/routes.go:95:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/system/poweroff/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:519:2",
+      "currentSource": "backend/modules/system/routes.go:87:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/system/reboot/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:510:2",
+      "currentSource": "backend/modules/system/routes.go:83:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/system/setPassword/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:114:2",
+      "currentSource": "backend/modules/system/routes.go:50:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/system/status/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:169:2",
+      "currentSource": "backend/modules/system/routes.go:79:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/system/time/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:133:2",
+      "currentSource": "backend/modules/system/routes.go:63:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/system/version/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:92:2",
+      "currentSource": "backend/modules/system/routes.go:31:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/u/guide/ddns/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:602:2",
+      "currentSource": "backend/modules/guideddns/routes.go:28:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/u/guide/ddns/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:613:2",
+      "currentSource": "backend/modules/guideddns/routes.go:35:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/u/nas/linkease/enable",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:280:2",
+      "currentSource": "backend/modules/nas/routes.go:61:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/u/nas/sandbox/commit/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:546:2",
+      "currentSource": "backend/modules/nas/routes.go:72:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/u/nas/service/status/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:188:2",
+      "currentSource": "backend/modules/nas/routes.go:30:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/u/network/statistics/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:44:2",
+      "currentSource": "backend/modules/network/routes.go:27:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/u/network/status/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:55:2",
+      "currentSource": "backend/modules/network/routes.go:34:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/u/quickstart/get/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:826:2",
+      "currentSource": "backend/modules/quickstart/routes.go:28:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/u/quickstart/set/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:837:2",
+      "currentSource": "backend/modules/quickstart/routes.go:39:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/u/smart/list/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:750:2",
+      "currentSource": "backend/modules/smart/routes.go:24:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/u/smart/test/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:788:2",
+      "currentSource": "backend/modules/smart/routes.go:43:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/u/system/version/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:93:2",
+      "currentSource": "backend/modules/system/routes.go:31:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/wireless/edit-iface/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1037:2",
+      "currentSource": "backend/modules/wireless/routes.go:34:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/wireless/enable-iface/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1013:2",
+      "currentSource": "backend/modules/wireless/routes.go:26:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "GET",
+      "path": "/cgi-bin/luci/istore/wireless/list-iface/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1004:2",
+      "currentSource": "backend/modules/wireless/routes.go:22:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/wireless/set-device-power/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1025:2",
+      "currentSource": "backend/modules/wireless/routes.go:30:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    },
+    {
+      "method": "POST",
+      "path": "/cgi-bin/luci/istore/wireless/setup/",
+      "legacySource": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1049:2",
+      "currentSource": "backend/modules/wireless/routes.go:38:2",
+      "classification": "retained",
+      "behavioralAcceptance": "local regression + selected live read checks; destructive writes not tested on hardware"
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "stageOnly": true,
+  "architectures": [
+    {
+      "arch": "x64",
+      "buildStatus": "status=building",
+      "packages": [
+        {
+          "metadata": {
+            "Package": "quickstart-netpolicy",
+            "Version": "0.2.0-test20260928-2",
+            "Depends": "libc, ca-bundle",
+            "Source": "feeds/nas/network/services/quickstart-netpolicy",
+            "SourceName": "quickstart-netpolicy",
+            "Section": "net",
+            "SourceDateEpoch": "1790733165",
+            "Architecture": "x86_64",
+            "Installed-Size": "2687725",
+            "Description": " Independent eBPF network-policy engine for Quickstart device rate limits."
+          },
+          "elfSha256": "3a1c633f346f876d771b03f622aeff8215920683c5ed1945fca354bac77ba6c2"
+        },
+        {
+          "metadata": {
+            "Package": "quickstart",
+            "Version": "0.16.2-test20261018-2",
+            "Depends": "libc, shadow-utils, shadow-useradd, mount-utils, block-mount, lsblk, e2fsprogs, parted, smartmontools, smartd, smartmontools-drivedb, mdadm, ip-full, ubus, uci, bash",
+            "Source": "feeds/nas/network/services/quickstart",
+            "SourceName": "quickstart",
+            "Section": "net",
+            "SourceDateEpoch": "1790580238",
+            "Architecture": "x86_64",
+            "Installed-Size": "5744920",
+            "Description": " Quickstart is a dashboard & user guide"
+          },
+          "elfSha256": "d50b179e10c4610fc6c293ae0c095826a160f950a05f82926ca304b73702106d"
+        },
+        {
+          "metadata": {
+            "Package": "luci-app-quickstart",
+            "Version": "0.16.2-test20261018-r2",
+            "Depends": "libc, quickstart, luci-app-store",
+            "Source": "feeds/nas_luci/luci/luci-app-quickstart",
+            "SourceName": "luci-app-quickstart",
+            "Section": "luci",
+            "SourceDateEpoch": "1790580253",
+            "Maintainer": "OpenWrt LuCI community",
+            "Architecture": "all",
+            "Installed-Size": "715294",
+            "Description": " LuCI support for quickstart "
+          },
+          "elfSha256": null
+        }
+      ]
+    },
+    {
+      "arch": "arm64",
+      "buildStatus": "status=building",
+      "packages": [
+        {
+          "metadata": {
+            "Package": "quickstart-netpolicy",
+            "Version": "0.2.0-test20260928-r2",
+            "Depends": "libc, ca-bundle",
+            "Source": "feeds/nas/network/services/quickstart-netpolicy",
+            "SourceName": "quickstart-netpolicy",
+            "Section": "net",
+            "SourceDateEpoch": "1790733165",
+            "URL": "https://github.com/istoreos/quickstart-netpolicy",
+            "Architecture": "aarch64_generic",
+            "Installed-Size": "5140480",
+            "Description": " Independent eBPF network-policy engine for Quickstart device rate limits."
+          },
+          "elfSha256": "7fa35c1cea934c18d6858c154a60f78d502d722ccd485d7bf0fe28ab1d27cc5d"
+        },
+        {
+          "metadata": {
+            "Package": "quickstart",
+            "Version": "0.16.2-test20261018-r2",
+            "Depends": "libc, shadow-utils, shadow-useradd, mount-utils, block-mount, lsblk, e2fsprogs, parted, smartmontools, smartd, smartmontools-drivedb, mdadm, ip-full, ubus, uci, bash",
+            "Source": "feeds/nas/network/services/quickstart",
+            "SourceName": "quickstart",
+            "Section": "net",
+            "SourceDateEpoch": "1790580238",
+            "URL": "https://easepi.linkease.com/",
+            "Architecture": "aarch64_generic",
+            "Installed-Size": "14295040",
+            "Description": " Quickstart is a dashboard & user guide"
+          },
+          "elfSha256": "ea3b200064df2118605817a2237cc037d37684760dfd89c2b9fff162c84cc164"
+        },
+        {
+          "metadata": {
+            "Package": "luci-app-quickstart",
+            "Version": "0.16.2-test20261018-r2",
+            "Depends": "libc, quickstart, luci-app-store, luci-lua-runtime",
+            "Source": "feeds/nas_luci/luci/luci-app-quickstart",
+            "SourceName": "luci-app-quickstart",
+            "Section": "luci",
+            "SourceDateEpoch": "1790580253",
+            "URL": "https://github.com/openwrt/luci",
+            "Maintainer": "OpenWrt LuCI community",
+            "Architecture": "all",
+            "Installed-Size": "2304000",
+            "Description": " LuCI support for quickstart "
+          },
+          "elfSha256": null
+        }
+      ]
+    }
+  ]
+}

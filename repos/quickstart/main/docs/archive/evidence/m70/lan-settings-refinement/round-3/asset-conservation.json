@@ -1,0 +1,9 @@
+{
+  "result": "passed",
+  "assetFiles": 36,
+  "changed": [
+    "luci-static/quickstart/i18n/en.json",
+    "luci-static/quickstart/index.js",
+    "luci-static/quickstart/style.css"
+  ]
+}

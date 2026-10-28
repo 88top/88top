@@ -1,0 +1,282 @@
+use super::*;
+
+pub(super) struct SlowUpstream {
+    pub(super) calls: AtomicUsize,
+    pub(super) delay: Duration,
+    pub(super) response: Vec<u8>,
+}
+
+#[async_trait::async_trait]
+impl DnsUpstreamPool for SlowUpstream {
+    async fn query(&self, _name: &str, _raw: &[u8]) -> anyhow::Result<Vec<u8>> {
+        self.calls.fetch_add(1, Ordering::SeqCst);
+        tokio::time::sleep(self.delay).await;
+        Ok(self.response.clone())
+    }
+}
+
+pub(super) fn test_controller(
+    response: Vec<u8>,
+    delay: Duration,
+) -> (Arc<DnsController>, Arc<SlowUpstream>) {
+    let upstream = Arc::new(SlowUpstream {
+        calls: AtomicUsize::new(0),
+        delay,
+        response,
+    });
+    let controller = controller_for_upstream(upstream.clone());
+    (Arc::new(controller), upstream)
+}
+
+pub(super) fn controller_with_limit(
+    upstream: Arc<dyn DnsUpstreamPool>,
+    udp_query_limit: usize,
+) -> Arc<DnsController> {
+    Arc::new(controller_for_upstream_and_config(
+        upstream,
+        &honk_config::dns::DnsConfig::default(),
+        udp_query_limit,
+    ))
+}
+
+pub(super) fn hold_query_slots(controller: &DnsController) -> Vec<super::super::AdmittedDnsQuery> {
+    (0..2047)
+        .map(|_| controller.try_admit_query(false).expect("test query slot"))
+        .collect()
+}
+
+pub(super) fn controller_with_dns_config(
+    upstream: Arc<dyn DnsUpstreamPool>,
+    config: &honk_config::dns::DnsConfig,
+) -> Arc<DnsController> {
+    Arc::new(controller_for_upstream_and_config(upstream, config, 256))
+}
+
+fn controller_for_upstream(upstream: Arc<dyn DnsUpstreamPool>) -> DnsController {
+    controller_for_upstream_and_config(upstream, &honk_config::dns::DnsConfig::default(), 256)
+}
+
+fn controller_for_upstream_and_config(
+    upstream: Arc<dyn DnsUpstreamPool>,
+    config: &honk_config::dns::DnsConfig,
+    udp_query_limit: usize,
+) -> DnsController {
+    let forwarder = Arc::new(DnsForwarder::new(
+        upstream,
+        Arc::new(tokio::sync::Mutex::new(crate::dns::cache::DnsCache::new(
+            16,
+        ))),
+        Arc::new(crate::dns::routing::DnsRouter::new_from_dns_config(config).expect("router")),
+    ));
+    DnsController::new(
+        forwarder,
+        Arc::new(RwLock::new(Box::new(
+            crate::ebpf::mock::MockEbpfBackend::new(),
+        ))),
+        Arc::new(RwLock::new(
+            Router::new(&[], "direct").expect("test router"),
+        )),
+        udp_query_limit,
+    )
+}
+
+pub(super) fn projection_controller(
+    forwarder: Arc<DnsForwarder>,
+) -> (DnsController, Arc<RwLock<Box<dyn EbpfBackend>>>) {
+    use honk_config::routing::{RoutingCondition, RoutingOutbound, RoutingRule};
+
+    let router = Arc::new(
+        Router::new(
+            &[RoutingRule {
+                name: "dns".into(),
+                condition: RoutingCondition {
+                    domain: vec!["example.com".into()],
+                    ..Default::default()
+                },
+                outbound: RoutingOutbound::Simple("direct".into()),
+                priority: 0,
+                must: false,
+                mark: 0,
+            }],
+            "direct",
+        )
+        .unwrap(),
+    );
+    let plan = crate::control::routing_matcher::RoutingPushPlan::compile(
+        &router,
+        &std::collections::HashMap::from([("direct".to_owned(), 0)]),
+        honk_config::types::DialMode::Domain,
+    )
+    .unwrap();
+    let mut backend = crate::ebpf::mock::MockEbpfBackend::new();
+    backend.publish_routing_plan(&plan, &[]).unwrap();
+    let ebpf: Arc<RwLock<Box<dyn crate::ebpf::EbpfBackend>>> =
+        Arc::new(RwLock::new(Box::new(backend)));
+    let runtime = crate::dns::runtime::DnsRuntime::new(crate::dns::runtime::DnsRuntimeParts {
+        generation: crate::dns::runtime::RuntimeGeneration::new(1),
+        forwarder,
+        routing_projection: Arc::new(crate::dns::runtime::RoutingProjectionSnapshot::new(
+            1, router,
+        )),
+        outbound_runtime: None,
+        transport: Arc::new(NoopRuntimeTransport),
+        udp_query_limit: 16,
+    });
+    let controller = DnsController::new_with_runtime(
+        Arc::new(crate::dns::runtime::DnsServiceProvider::new(runtime)),
+        Arc::clone(&ebpf),
+    );
+    (controller, ebpf)
+}
+
+pub(super) fn query_with_txid(domain: &str, txid: u16) -> Vec<u8> {
+    let mut query = crate::dns::forwarder::build_dns_query(domain, 1);
+    query[0..2].copy_from_slice(&txid.to_be_bytes());
+    query
+}
+
+pub(super) fn response_with_txid(domain: &str, txid: u16) -> Vec<u8> {
+    let mut response = query_with_txid(domain, txid);
+    response[2] = 0x81;
+    response[3] = 0x80;
+    response
+}
+
+pub(super) struct SnapshotUpstream {
+    pub(super) ip: [u8; 4],
+    pub(super) calls: AtomicUsize,
+    pub(super) entered: Option<Arc<Notify>>,
+    pub(super) release: Option<Arc<Notify>>,
+}
+
+#[async_trait::async_trait]
+impl DnsUpstreamPool for SnapshotUpstream {
+    async fn query(&self, _name: &str, raw: &[u8]) -> anyhow::Result<Vec<u8>> {
+        let call = self.calls.fetch_add(1, Ordering::SeqCst);
+        if call == 0
+            && let (Some(entered), Some(release)) = (&self.entered, &self.release)
+        {
+            entered.notify_one();
+            release.notified().await;
+        }
+        Ok(a_response(raw, self.ip))
+    }
+}
+
+pub(super) fn a_response(query: &[u8], ip: [u8; 4]) -> Vec<u8> {
+    let mut response = query.to_vec();
+    response[2] = 0x81;
+    response[3] = 0x80;
+    response[6..8].copy_from_slice(&1_u16.to_be_bytes());
+    response.extend_from_slice(&[
+        0xc0, 0x0c, 0, 1, 0, 1, 0, 0, 0, 30, 0, 4, ip[0], ip[1], ip[2], ip[3],
+    ]);
+    response
+}
+
+pub(super) fn snapshot_forwarder(upstream: Arc<SnapshotUpstream>) -> Arc<DnsForwarder> {
+    Arc::new(
+        DnsForwarder::new(
+            upstream,
+            Arc::new(tokio::sync::Mutex::new(crate::dns::cache::DnsCache::new(
+                16,
+            ))),
+            Arc::new(
+                crate::dns::routing::DnsRouter::new_from_dns_config(
+                    &honk_config::dns::DnsConfig::default(),
+                )
+                .expect("router"),
+            ),
+        )
+        .with_cache_enabled(false),
+    )
+}
+
+pub(super) fn snapshot_controller(forwarder: Arc<DnsForwarder>) -> Arc<DnsController> {
+    Arc::new(DnsController::new(
+        forwarder,
+        Arc::new(RwLock::new(Box::new(
+            crate::ebpf::mock::MockEbpfBackend::new(),
+        ))),
+        Arc::new(RwLock::new(
+            Router::new(&[], "direct").expect("test router"),
+        )),
+        1,
+    ))
+}
+
+pub(super) async fn publish_snapshot_forwarder(
+    controller: &DnsController,
+    forwarder: Arc<DnsForwarder>,
+) {
+    let provider = controller.runtime_provider();
+    let current = provider.current();
+    let runtime = crate::dns::runtime::DnsRuntime::new(crate::dns::runtime::DnsRuntimeParts {
+        generation: crate::dns::runtime::RuntimeGeneration::new(
+            current.generation().get().saturating_add(1),
+        ),
+        forwarder: Arc::clone(&forwarder),
+        routing_projection: Arc::clone(current.routing_projection()),
+        outbound_runtime: None,
+        transport: Arc::new(NoopRuntimeTransport),
+        udp_query_limit: 256,
+    });
+    drop(current);
+    provider.publish(runtime);
+}
+
+pub(super) struct BlockingFirstUpstream {
+    pub(super) first_entered: Notify,
+    pub(super) release_first: Notify,
+}
+
+#[async_trait::async_trait]
+impl DnsUpstreamPool for BlockingFirstUpstream {
+    async fn query(&self, _name: &str, raw: &[u8]) -> anyhow::Result<Vec<u8>> {
+        let (domain, _) = crate::dns::forwarder::parse_dns_question(raw).expect("valid test query");
+        if domain == "first.example" {
+            self.first_entered.notify_one();
+            self.release_first.notified().await;
+        }
+        Ok(response_with_txid(
+            &domain,
+            u16::from_be_bytes([raw[0], raw[1]]),
+        ))
+    }
+}
+
+pub(super) async fn tcp_pair() -> (TcpStream, TcpStream) {
+    let listener = tokio::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, 0))
+        .await
+        .expect("bind test listener");
+    let addr = listener.local_addr().expect("listener address");
+    let (client, accepted) = tokio::join!(TcpStream::connect(addr), listener.accept());
+    (
+        client.expect("connect test client"),
+        accepted.expect("accept test connection").0,
+    )
+}
+
+pub(super) async fn write_tcp_query(stream: &mut TcpStream, query: &[u8]) {
+    use tokio::io::AsyncWriteExt;
+    stream
+        .write_all(&(query.len() as u16).to_be_bytes())
+        .await
+        .expect("write query length");
+    stream.write_all(query).await.expect("write query");
+}
+
+pub(super) async fn read_tcp_response(stream: &mut TcpStream) -> Vec<u8> {
+    use tokio::io::AsyncReadExt;
+    let mut length = [0u8; 2];
+    stream
+        .read_exact(&mut length)
+        .await
+        .expect("read response length");
+    let mut response = vec![0u8; usize::from(u16::from_be_bytes(length))];
+    stream
+        .read_exact(&mut response)
+        .await
+        .expect("read response");
+    response
+}

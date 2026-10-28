@@ -1,0 +1,61 @@
+{
+  "result": "passed",
+  "metadata": {
+    "build_id": "quickstart-home-x64-ipk-0163-20261018-2",
+    "profile": "quickstart-home-x64",
+    "platform": "x64",
+    "source_mode": "feeds",
+    "build_mode": "fast",
+    "feed_refresh": "always",
+    "formats": "ipk",
+    "packages": "quickstart quickstart-netpolicy luci-app-quickstart",
+    "jobs": "4",
+    "runtime_release": "runtime-9c4f01a26d9c",
+    "started_at": "2026-10-18T11:06:26Z",
+    "ipk_sdk": "openwrt-sdk-21.02.3-x86-64_gcc-8.4.0_musl.Linux-x86_64",
+    "ipk_arch": "x86_64",
+    "ipk_feed_update_mode": "fresh",
+    "ipk_sdk_sha256": "a1d79d94ac574b40233cf1360b675c09f85b17fe41a676ea758083e0abed5adf",
+    "completed_at": "2026-10-18T11:19:03Z"
+  },
+  "feeds": [
+    [
+      "ipk",
+      "base",
+      "42a15ca378e1bc52f125f894d748c31ce3c52903",
+      "https://git.openwrt.org/openwrt/openwrt.git"
+    ],
+    [
+      "ipk",
+      "luci",
+      "fe09ab990256d8b63e76cc1ab2435baef921b8b4",
+      "https://git.openwrt.org/project/luci.git"
+    ],
+    [
+      "ipk",
+      "packages",
+      "78bcd00c13587571b5c79ed2fc3363aa674aaef7",
+      "https://git.openwrt.org/feed/packages.git"
+    ],
+    [
+      "ipk",
+      "nas",
+      "bee9750470cf903ce5d9f3c563dc1ea2ac56929e",
+      "https://github.com/linkease/nas-packages.git"
+    ],
+    [
+      "ipk",
+      "nas_luci",
+      "a370c0b3a56f9175192b449830c9116d46fada16",
+      "https://github.com/linkease/nas-packages-luci.git"
+    ],
+    [
+      "ipk",
+      "istore",
+      "a97ace34f2da358a015b094d326bba2697697f2e",
+      "https://github.com/linkease/istore.git"
+    ]
+  ],
+  "patchSha256": "ccf15b74ac0e8cf3ac24128c43c82ce68dbba42877fdcbfa36aa0172cb3d4e79",
+  "persistentOutput": "bin/releases/c78f62c/sdk/quickstart-home-x64-ipk-0163-20261018-2"
+}

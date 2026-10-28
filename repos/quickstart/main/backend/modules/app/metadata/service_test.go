@@ -90,3 +90,21 @@ func TestServiceListPropagatesGlobError(t *testing.T) {
 		t.Fatalf("expected glob error, got %v", err)
 	}
 }
+
+func TestStrictCatalogueRejectsInvalidIdentityWithoutChangingLegacyList(t *testing.T) {
+	for _, body := range []string{`null`, `{}`, `{"name":""}`, `{"name":"invalid/name"}`} {
+		t.Run(body, func(t *testing.T) {
+			store := &fakeStore{paths: []string{"/meta/app.json"}, files: map[string][]byte{"/meta/app.json": []byte(body)}}
+			service := NewService(store)
+			if _, err := service.ListStrict("/meta"); err == nil {
+				t.Fatal("invalid metadata was reported as a complete catalogue")
+			}
+			if _, err := service.List("/meta"); err != nil {
+				t.Fatal("legacy list compatibility changed")
+			}
+		})
+	}
+	if apps, err := NewService(&fakeStore{}).ListStrict("/meta"); err != nil || len(apps) != 0 {
+		t.Fatal("genuine empty catalogue must remain successful")
+	}
+}

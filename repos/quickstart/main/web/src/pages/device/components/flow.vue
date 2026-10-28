@@ -4,12 +4,14 @@
         <div class="flow-data">
             <span v-if="currUpload">{{ $gettext("上传:") }} {{ currUpload }}</span>
             <span v-if="currDownload">{{ $gettext("下载:") }} {{ currDownload }}</span>
+            <span v-if="flowError" class="flow-error">{{ flowError }}</span>
         </div>
     </div>
 </template>
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import * as echarts from 'echarts/core';
+import 'echarts/theme/v5';
 import {
     TitleComponent,
     GridComponent,
@@ -26,6 +28,7 @@ import request from '/@/request';
 import utils from '/@/utils';
 import { isDark } from '/@/utils/theme';
 import { useGettext } from '/@/plugins/i18n'
+import { requestErrorMessage } from '../requestError';
 const { $gettext } = useGettext()
 echarts.use([
     TitleComponent,
@@ -42,6 +45,7 @@ const props = defineProps({
 })
 const ipParam = ref(props.ipParam)
 const statistics = ref<NetworkStatisticsModel[]>()
+const flowError = ref('')
 const renderTime = (index: number) => {
     const item = statistics.value?.[index]
     return (!item || item.startTime == 0) ? "" : (dateForm(item.startTime * 1000 as unknown as string) + "-" + dateForm(item.endTime * 1000 as unknown as string))
@@ -97,6 +101,11 @@ const getData = async () => {
     try {
         const res = await request.DeviceMangement.speedsForOneDevice.POST({ip:ipParam.value})
         if (res.data) {
+            if (res.data.error) {
+                flowError.value = String(res.data.error)
+                return
+            }
+            flowError.value = ''
             if (res.data.result?.items) {
                 const slots = res.data.result.slots || 10
                 if (res.data.result.items.length < slots) {
@@ -113,7 +122,7 @@ const getData = async () => {
             }
         }
     } catch (error) {
-        console.log(error);
+        flowError.value = requestErrorMessage(error, $gettext('读取结果失败'))
     }
 }
 const dateForm = utils.dateForm
@@ -124,7 +133,7 @@ let MyChart: echarts.ECharts | null = null
 // 基础面积图
 const NewBasic = (event: HTMLElement) => {
     const dark = isDark()
-    MyChart = echarts.init(event, dark ? 'dark' : "light");
+    MyChart = echarts.init(event, dark ? 'dark' : "v5");
     MyChart.setOption({
         animation: false,
         backgroundColor: dark ? "#88888822" : "#fff",
@@ -411,10 +420,17 @@ onUnmounted(() => {
             font-family: PingFangSC-Semibold, PingFang SC;
 
         }
+
+        .flow-error {
+            max-width: 220px;
+            color: #d46b08;
+            font-weight: 400;
+            text-align: right;
+        }
     }
 }
 
-@media screen and(max-width: 600px) {
+@media screen and (max-width: 600px) {
     .flow {
         height: 55vw;
     }

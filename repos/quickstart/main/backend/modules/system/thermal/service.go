@@ -46,11 +46,24 @@ func (temperature AutocoreTemperature) CPUTemperature() (int, error) {
 	ret, err := utils.BatchOutputCmd(context.Background(), "/sbin/cpuinfo | grep -Eom1 '[ (]\\+?[0-9.]+°C' | head -1 | grep -Eom1 '[0-9.]+'", 0)
 	if err == nil {
 		msg := strings.Trim(string(ret), "\n")
-		temp, err := strconv.ParseFloat(msg, 64)
-		if err == nil {
+		temp, parseErr := strconv.ParseFloat(msg, 64)
+		if parseErr == nil {
 			return int(temp), nil
 		}
+		err = parseErr
 	}
+
+	// Some targets (e.g. mediatek, ipq40xx, ipq806x and qualcommax) do not
+	// print a temperature in /sbin/cpuinfo, so the command above yields
+	// nothing. Fall back to the thermal zone instead of reporting 0 °C.
+	zone := DetectZone()
+	if zone == "" {
+		zone = "thermal_zone0"
+	}
+	if temp, zoneErr := ReadZoneTemperature(zone); zoneErr == nil {
+		return temp, nil
+	}
+
 	return 0, err
 }
 

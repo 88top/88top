@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"errors"
+	"regexp"
 
 	"github.com/istoreos/quickstart/backend/models"
 )
@@ -23,6 +24,9 @@ func NewService(store Store) *Service {
 }
 
 func (service *Service) Check(ctx context.Context, req models.AppCheckRequest) (*models.AppCheckResponse, error) {
+	if !packageName.MatchString(req.Name) {
+		return nil, errors.New("invalid package name")
+	}
 	model := models.AppCheckResponseResult{Name: req.Name}
 	didInstall, err := service.store.IsInstalled(ctx, req.Name)
 	if err != nil {
@@ -47,6 +51,9 @@ func (service *Service) Install(ctx context.Context, req models.AppInstallReques
 	if len(req.Name) == 0 {
 		return nil, errors.New("missing param")
 	}
+	if !packageName.MatchString(req.Name) {
+		return nil, errors.New("invalid package name")
+	}
 	ret, err := service.store.Install(ctx, req.Name)
 	if err != nil {
 		resp := models.SDKNormalResponse{
@@ -58,6 +65,8 @@ func (service *Service) Install(ctx context.Context, req models.AppInstallReques
 	success := models.ResponseSuccess(int64(0))
 	return &models.SDKNormalResponse{Success: &success, Detail: ret}, nil
 }
+
+var packageName = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_.+-]{0,127}$`)
 
 func (service *Service) InstalledList(ctx context.Context) (models.AppInstalledListResponse, error) {
 	modelApps, err := service.store.InstalledList(ctx)

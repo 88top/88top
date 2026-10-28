@@ -1,0 +1,15 @@
+{
+  "result": "passed",
+  "comparedWith": "25e8399",
+  "component": "web/src/pages/index/info/SystemInfo.vue",
+  "businessScriptByteIdentical": true,
+  "scriptSha256": "db6738bcff3f51d616bcd21086f289d2e899eee3491d42539c091d6ca424d637",
+  "preservedBindings": [
+    "systemStatus?.localtime || '\u2014'",
+    "systemStatus?stamp(systemStatus.uptime):'\u2014'",
+    "version?.model || '\u2014'",
+    "version?.firmwareVersion || '\u2014'",
+    "version?.kernelVersion || '\u2014'"
+  ],
+  "scope": "Only timing-row grouping and presentation styles changed; script/data/actions/readers untouched"
+}

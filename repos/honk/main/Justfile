@@ -1,0 +1,255 @@
+# honk — eBPF transparent proxy engine
+# https://github.com/Glassyiris/honk
+
+ebpf_toolchain := `sed -n 's/^channel[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' crates/honk-ebpf/rust-toolchain.toml`
+
+# ── Default ──────────────────────────────────────────────
+default: build
+
+# ── Build ───────────────────────────────────────────────
+
+# Build all workspace crates (release) — boring-sys needs cmake + a C
+# compiler + libclang (bindgen) installed
+build:
+    cargo build --release
+
+# Build honk-core with eBPF (clash-api is in the default features)
+build-core:
+    cargo build --release -p honk-core --features "ebpf"
+
+# Build honk-core for VyOS/Debian (static musl, portable)
+# The features argument adds to the crate defaults (clash-api,mimalloc,rprx),
+# so `just build-musl ebpf` is the clash-api-only shape; use build-musl-native
+# for the exact native-api-only feature set.
+# Uses zig cc/c++ as the musl toolchain (ci/zigcc, ci/zigcxx): boring-sys
+# (BoringSSL, C++) needs a clang-compatible compiler — under cross, CMake
+# injects clang-style --target flags into the ASM rules that real GCC rejects
+# ("unrecognized command-line option '--target=...'") and zig rejects in Rust
+# triple spelling, so the wrappers strip them and re-anchor on the zig triple.
+# link-self-contained=no lets zig supply the CRT (Rust's self-contained
+# rcrt1.o + zig's crt1.o both define _start). Requires zig (0.14+) in PATH.
+build-musl features="ebpf,native-api":
+    ZIGCC_TARGET=x86_64-linux-musl \
+    CC_x86_64_unknown_linux_musl={{justfile_directory()}}/ci/zigcc \
+    CXX_x86_64_unknown_linux_musl={{justfile_directory()}}/ci/zigcxx \
+    CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER={{justfile_directory()}}/ci/zigcc \
+    CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-C link-self-contained=no" \
+    BINDGEN_EXTRA_CLANG_ARGS="$({{justfile_directory()}}/ci/zig-bindgen-env x86_64-linux-musl)" \
+    cargo build --release -p honk-core --features "{{features}}" --target x86_64-unknown-linux-musl
+    @echo "Binary: target/x86_64-unknown-linux-musl/release/honk-core"
+
+# build-musl with the pinned doona UI embedded (native-ui implies native-api);
+# fetches it unless HONK_DOONA_DIR is set
+build-musl-embedded-ui:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    doona="${HONK_DOONA_DIR:-$(ci/fetch-doona.sh)}"
+    HONK_DOONA_DIR="$doona" {{just_executable()}} build-musl "ebpf,native-ui"
+
+# Native-api-only musl build (no clash-api), matching the release asset.
+# Unlike build-musl, this passes --no-default-features for an exact set.
+build-musl-native:
+    ZIGCC_TARGET=x86_64-linux-musl \
+    CC_x86_64_unknown_linux_musl={{justfile_directory()}}/ci/zigcc \
+    CXX_x86_64_unknown_linux_musl={{justfile_directory()}}/ci/zigcxx \
+    CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER={{justfile_directory()}}/ci/zigcc \
+    CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-C link-self-contained=no" \
+    BINDGEN_EXTRA_CLANG_ARGS="$({{justfile_directory()}}/ci/zig-bindgen-env x86_64-linux-musl)" \
+    cargo build --release -p honk-core --no-default-features --features "ebpf,native-api,rprx,mimalloc" --target x86_64-unknown-linux-musl
+    @echo "Binary: target/x86_64-unknown-linux-musl/release/honk-core"
+
+# Build eBPF object standalone (optional; honk-core build.rs auto-builds it)
+# NOTE: an environment RUSTFLAGS overrides crates/honk-ebpf/.cargo/config.toml
+# rustflags (--btf, debuginfo) — the object then silently loses its .BTF
+# section and aya refuses to load it ("no BTF parsed for object").
+build-ebpf:
+    @test -z "${RUSTFLAGS:-}" || echo "warning: RUSTFLAGS is set and overrides crates/honk-ebpf/.cargo/config.toml (--btf) — the object may lack .BTF"
+    cd crates/honk-ebpf && cargo +{{ebpf_toolchain}} build --release -Zbuild-std=core --target bpfel-unknown-none
+    @readelf -S crates/honk-ebpf/target/bpfel-unknown-none/release/honk-ebpf | grep -q '\.BTF' \
+        || (echo "error: eBPF object has no .BTF section (see RUSTFLAGS note above)" && exit 1)
+
+# Build all (core with embedded ebpf)
+build-all: build-core
+
+# ── Check ────────────────────────────────────────────────
+
+# Fast compile check
+check:
+    cargo check
+
+# Clippy lint all (fetches the pinned doona for native-ui unless HONK_DOONA_DIR is set)
+lint:
+    HONK_DOONA_DIR="${HONK_DOONA_DIR:-$(ci/fetch-doona.sh)}" cargo clippy --all --all-targets --features honk-core/native-ui,honk-core/udp-bench -- -D warnings
+
+# Format all
+fmt:
+    cargo fmt --all
+
+# Check formatting
+fmt-check:
+    cargo fmt --all -- --check
+
+# ── Test ─────────────────────────────────────────────────
+
+# Run the full workspace suite.
+test:
+    cargo test --all
+
+# Workspace CI gate (requires cargo-nextest).
+test-ci:
+    # Without nextest: cargo test --workspace --features honk-core/native-ui --no-fail-fast
+    HONK_DOONA_DIR="${HONK_DOONA_DIR:-$(ci/fetch-doona.sh)}" cargo nextest run --workspace --features honk-core/native-ui --profile ci
+
+# Run core + outbound tests
+test-core:
+    cargo test -p honk-core -p honk-outbound
+
+# Run config unit and integration tests
+test-config:
+    cargo test -p honk-config
+
+
+# Compare with the pinned dae parser (Go 1.26+, Python 3.11+, network).
+parser-ci:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    work=$(mktemp -d)
+    trap 'rm -rf "$work"' EXIT
+    (cd tools/dae-parse && go build -o "$work/dae-parse" .)
+    python3 tools/dae-parse/fetch.py "$work/conformance-src"
+    DAE_PARSE_BIN="$work/dae-parse" CONFORMANCE_SRC="$work/conformance-src" \
+      cargo test -p honk-config --features conformance --test conformance -- --nocapture
+    just fuzz-replay
+
+# Replay saved inputs with stable Rust; no Go or nightly required.
+fuzz-replay:
+    env -u DAE_PARSE_BIN cargo test -p honk-config --features fuzz-checks --test fuzz_replay -- --nocapture
+
+# Fuzz one parser target for a while (needs the eBPF nightly and cargo-fuzz);
+# grown inputs go under fuzz/target, the committed seeds stay seeds.
+fuzz target seconds="60":
+    mkdir -p fuzz/target/grown/{{target}}
+    cd fuzz && cargo +{{ebpf_toolchain}} fuzz run {{target}} target/grown/{{target}} corpus/{{target}} -- -max_total_time={{seconds}} -timeout=10
+
+# Run eBPF common tests
+test-ebpf:
+    cargo test -p honk-ebpf-common
+
+
+# Real kernel gate, including routing (VM prerequisites: skill honk-real-ebpf-tests).
+test-routing:
+    CARGO_BUILD_JOBS=1 CARGO_PROFILE_TEST_DEBUG=0 .github/ci/run-vm-gate.sh floor
+
+# Root-cgroup hooks are not isolated by netns; share the complete disposable VM gate.
+test-netns: test-routing
+
+# Full honk-outbound gate after outbound changes (fmt + clippy + config & outbound suites)
+outbound-ci:
+    ci/outbound-ci.sh
+
+# outbound-ci plus live hysteria2 e2e (needs HONK_HY2_SERVER=...)
+outbound-ci-e2e:
+    ci/outbound-ci.sh --with-e2e-env
+
+# DNS subsystem gate (fmt + clippy + runtime/projection/resolver/control/outbound suites)
+dns-ci:
+    ci/dns-ci.sh
+
+# Unprivileged actual-process DNS listener smoke on the release honk-core (UDP + persistent TCP + SIGHUP)
+dns-smoke:
+    python3 ci/dns-smoke.py
+
+# Clash API gate (including Clash-only DNS query/flush scenarios)
+clash-ci:
+    ci/clash-ci.sh
+
+# ── Run ──────────────────────────────────────────────────
+
+# Run honk-core with eBPF (clash API comes from config.dae experimental section)
+run-debug:
+    cargo build --release -p honk-core --features "ebpf"
+    @pkill honk-core 2>/dev/null || true
+    @ip link del dae0 2>/dev/null || true
+    @ip netns del daens 2>/dev/null || true
+    @find /sys/fs/bpf -maxdepth 1 -type f ! -name UDP_DECISION_SEQUENCE ! -name ROUTING_GENERATION_SEQUENCE -delete 2>/dev/null || true
+    sleep 1
+    RUST_LOG=info ./target/release/honk-core \
+        --config config.dae \
+        --bpf-object crates/honk-ebpf/target/bpfel-unknown-none/release/honk-ebpf
+
+# Run honk-core with the example dae config
+run-dae:
+    cargo run --release -p honk-core --features ebpf -- --config config.dae --mock-ebpf
+
+# ── Debug (clash API on :9090) ─────────────────────────────
+
+# Query clash API version/status
+debug-status:
+    @curl -s http://localhost:9090/version | python3 -m json.tool && curl -s http://localhost:9090/configs | python3 -m json.tool
+
+# Query proxy groups and selections
+debug-config:
+    @curl -s http://localhost:9090/proxies | python3 -m json.tool
+
+# Query alive nodes and per-group delay
+debug-alive:
+    @curl -s 'http://localhost:9090/group/omg/delay?timeout=3000' | python3 -m json.tool
+
+# Query per-outbound stats
+debug-stats:
+    @curl -s http://localhost:9090/stats | python3 -m json.tool
+
+# Watch live connections (refresh every 2s)
+watch-debug:
+    watch -n2 'curl -s http://localhost:9090/connections | python3 -m json.tool'
+
+# Show BPF program stats
+bpf-progs:
+    bpftool prog show 2>/dev/null | grep -E "lan_ingress|wan_egress|sk_lookup|dae0"
+
+# Show BPF maps
+bpf-maps:
+    ls -la /sys/fs/bpf/ 2>/dev/null
+
+# ── Clean ────────────────────────────────────────────────
+
+# Clean build artifacts
+clean:
+    cargo clean
+
+# Clean transient honk-core state while preserving the boot-lifetime UDP
+# decision and routing generation sequence pins. The MASQUERADE/table-2023 lines remove only legacy
+# leftovers; no iptables rules are installed by the live engine.
+clean-all:
+    @echo "=== Stopping honk-core ==="
+    @pkill honk-core 2>/dev/null || true
+    @sleep 1
+    @echo "=== Removing link + netns ==="
+    @ip link del dae0 2>/dev/null || true
+    @ip netns del daens 2>/dev/null || true
+    @echo "=== Cleaning ephemeral BPF maps (preserving UDP_DECISION_SEQUENCE and ROUTING_GENERATION_SEQUENCE) ==="
+    @find /sys/fs/bpf -maxdepth 1 -type f ! -name UDP_DECISION_SEQUENCE ! -name ROUTING_GENERATION_SEQUENCE -delete 2>/dev/null || true
+    @echo "=== Cleaning policy routes (live: table 100) ==="
+    @ip rule del fwmark 0x8000000/0x8000000 table 100 2>/dev/null || true
+    @ip route flush table 100 2>/dev/null || true
+    @echo "=== Cleaning legacy iptables/table-2023 leftovers ==="
+    @iptables -t nat -D POSTROUTING -s 192.168.254.0/24 -j MASQUERADE 2>/dev/null || true
+    @iptables -t nat -D POSTROUTING -s 169.254.0.0/16 -j MASQUERADE 2>/dev/null || true
+    @ip rule del fwmark 0x8000000/0x8000000 table 2023 2>/dev/null || true
+    @ip route flush table 2023 2>/dev/null || true
+    @echo "=== Done ==="
+
+# Deploy to VyOS router (static musl binary)
+deploy-vyos HOST="10.10.10.1": build-musl
+    scp target/x86_64-unknown-linux-musl/release/honk-core "root@{{ HOST }}:/config/vyos-scripts/podman/dae/dae"
+    ssh "root@{{ HOST }}" 'chmod +x /config/vyos-scripts/podman/dae/dae && /config/vyos-scripts/podman/dae/dae --help'
+
+# ── Dev ──────────────────────────────────────────────────
+
+# Watch for changes and rebuild core
+watch-core:
+    cargo watch -x 'build --release -p honk-core --features ebpf'
+
+# Full cycle: clean + core (auto-embeds ebpf)
+cycle: clean-all build-core
+    @echo "Ready to run: just run-debug"

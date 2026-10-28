@@ -1,0 +1,523 @@
+{
+  "at": "2026-10-28T05:48:13.739008+00:00",
+  "host": "192.168.30.7",
+  "checks": [
+    {
+      "name": "no cookie; valid root forwarding headers",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "no cookie; lowercase forwarding headers",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "no cookie; underscore forwarding headers",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "no cookie; mixed forwarding headers",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "no cookie; duplicate forwarding headers",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "guest cookie; valid root forwarding headers",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "guest cookie; underscore root forwarding headers",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "tokenless root session cookie",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "forged HTTP_AUTH_USER/PASS CGI headers",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "query session id is not authentication",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "HTTPS anonymous system/version/",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "HTTPS anonymous u/system/version/",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "HTTPS anonymous system/getToken/",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "HTTPS anonymous home/v1/layout/",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "HTTPS valid root session control",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "HTTP10000 anonymous system/version/",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "HTTP10000 anonymous u/system/version/",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "HTTP10000 anonymous system/getToken/",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "HTTP10000 anonymous home/v1/layout/",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "HTTP10000 valid root session control",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "anonymous write system/setPassword/",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "anonymous write system/reboot/",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "anonymous write lanctrl/v2/network-rules/",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "Unix-only route inaccessible over LuCI /api/dhns/connect/",
+      "passed": true,
+      "http": 404,
+      "success": null,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "Unix-only route inaccessible over LuCI /api/lcd/simple/",
+      "passed": true,
+      "http": 404,
+      "success": null,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "anonymous /ubus session.get",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": -32002,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "anonymous /ubus session.list",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": -32002,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "anonymous /ubus session.create",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": -32002,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "anonymous /ubus session.set",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": -32002,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "anonymous /ubus session.grant",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": -32002,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "anonymous cannot target root using argument SID",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": -32002,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "non-root session cannot read session data via /ubus",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": -32002,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "anonymous LuCI ubus alias session.get",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": -32002,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "anonymous LuCI ubus alias session.list",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": -32002,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "anonymous LuCI ubus alias session.create",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": -32002,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "anonymous LuCI ubus alias session.set",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": -32002,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "anonymous LuCI ubus alias session.grant",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": -32002,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "/ubus login missing password",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": null,
+      "ubusStatus": 2,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "/ubus login null password",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": null,
+      "ubusStatus": 2,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "/ubus login numeric password",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": null,
+      "ubusStatus": 2,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "/ubus login empty password",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": null,
+      "ubusStatus": 6,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "/ubus login invalid password",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": null,
+      "ubusStatus": 6,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "/ubus login missing username",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": null,
+      "ubusStatus": 2,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "LuCI form missing password",
+      "passed": true,
+      "http": 403,
+      "success": null,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "LuCI form invalid password",
+      "passed": true,
+      "http": 403,
+      "success": null,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "root token belongs to validated session",
+      "passed": true,
+      "http": 200,
+      "success": null,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "authenticated password guard missing field",
+      "passed": true,
+      "http": 200,
+      "success": -1000,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "authenticated password guard null request",
+      "passed": true,
+      "http": 200,
+      "success": -1000,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "authenticated password guard null field",
+      "passed": true,
+      "http": 200,
+      "success": -1000,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "authenticated password guard empty string",
+      "passed": true,
+      "http": 200,
+      "success": -1000,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "authenticated password guard NUL terminator",
+      "passed": true,
+      "http": 200,
+      "success": -1000,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "authenticated password guard embedded NUL",
+      "passed": true,
+      "http": 200,
+      "success": -1000,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "authenticated password guard line feed",
+      "passed": true,
+      "http": 200,
+      "success": -1000,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "authenticated password guard carriage return",
+      "passed": true,
+      "http": 200,
+      "success": -1000,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "shadow unchanged after rejected password requests",
+      "passed": true
+    },
+    {
+      "name": "LuCI logout clears session cookie",
+      "passed": true,
+      "http": 302,
+      "success": null,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "old root cookie after actual LuCI logout",
+      "passed": true,
+      "http": 200,
+      "success": -1001,
+      "rpcError": null,
+      "ubusStatus": null,
+      "sessionCookieIssued": false
+    },
+    {
+      "name": "logout destroyed rpcd session",
+      "passed": true
+    }
+  ],
+  "completed": true,
+  "cleanupErrors": 0,
+  "passwordLoginVerified": false,
+  "passed": true,
+  "malformedRestParamsSentToProduction": false
+}

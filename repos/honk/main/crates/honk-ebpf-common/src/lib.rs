@@ -1,0 +1,822 @@
+#![no_std]
+
+use crate::dae_ip::In6Addr;
+
+pub mod conn;
+pub mod dae_ip;
+pub mod event;
+pub mod receive_trace;
+pub mod redirect_need;
+pub mod routing_policy;
+
+// Re-export types moved to sub-modules (for honk-core compatibility)
+pub use crate::conn::{
+    ConnState, FlowIncarnationSequence, FlowMapValue, RetirementFence, UdpDecisionSequence,
+    UdpDecisionState,
+};
+pub use crate::redirect_need::{
+    DomainRouting, ROUTING_BITMAP_WORDS, RoutingHandoffEntry, RoutingResult, SocketIdentity,
+    TCP_BINDING_CHILD, TcpSocketBinding, Tuples, TuplesKey,
+};
+pub use routing_policy::{
+    KernelRouteOutput, KernelRouteWitness, ROUTE_FACT_DESTINATION, ROUTE_FACT_DOMAIN,
+    ROUTE_FACT_MAC, ROUTE_FACT_PRESENT_SHIFT, ROUTE_FACT_SOURCE, ROUTE_TRACE_AMBIGUOUS,
+    ROUTE_TRACE_CAPACITY, ROUTE_TRACE_COMPLETE, ROUTE_TRACE_DNS_OVERRIDE, ROUTE_TRACE_ENABLED,
+    ROUTE_TRACE_LOST, ROUTE_TRACE_MATCHED, ROUTE_TRACE_NOT_MATCHED, ROUTE_TRACE_OVERFLOW,
+    ROUTE_TRACE_SKIPPED, ROUTE_TRACE_UNAVAILABLE, ROUTE_TRACE_VALUES, ROUTE_TRACE_VERSION,
+    ROUTE_TRACE_VERSION_MASK, ROUTE_TRACE_WORDS, ROUTING_FACT_CAPACITY, ROUTING_FEATURE_DOMAIN,
+    ROUTING_FEATURE_DOMAIN_REROUTE, ROUTING_FEATURE_PROCESS, ROUTING_INPUT_ALLOW_DIRECT_FINALITY,
+    ROUTING_INPUT_MAC_PRESENT, ROUTING_POLICY_ROOT_NAME, ROUTING_PROCESS_MAX_LEN,
+    ROUTING_SLOT_NAMES, RoutingDecision, RoutingInput, RoutingPolicyDescriptor, RoutingTestResult,
+    normalize_process_name,
+};
+
+pub const TASK_COMM_LEN: usize = 16;
+pub const TPROXY_MARK: u32 = 0x0800_0000;
+/// Final classification flag for native, NFQUEUE and userspace direct packets.
+/// Linux policy rules match the low 30 bits, excluding the reserved flags.
+pub const CLASSIFIED_MARK: u32 = 0x4000_0000;
+/// Packet must be held by the owned NFQUEUE before conntrack and NAT.
+pub const NFQUEUE_PENDING_MARK: u32 = 0x8000_0000;
+/// Exact two-bit carrier signature owned by staged NFQUEUE packets.
+pub const NFQUEUE_SIGNATURE_MARK: u32 = CLASSIFIED_MARK | NFQUEUE_PENDING_MARK;
+/// Persistent decision tokens occupy the remaining skb-mark bits.
+pub const NFQUEUE_TOKEN_MASK: u32 = !NFQUEUE_SIGNATURE_MARK;
+/// Low-order monotonic sequence bits within one UDP decision generation.
+pub const UDP_DECISION_SEQUENCE_MASK: u32 = 0x0fff_ffff;
+/// Number of low-order sequence bits in a persistent UDP decision token.
+pub const UDP_DECISION_GENERATION_SHIFT: u32 = 28;
+/// Generation tag carried in the remaining token bits.
+pub const UDP_DECISION_GENERATION_MASK: u32 = 0x3;
+
+/// Maximum non-wrapping routing generation, reserved persistently across restarts and queue fences.
+pub const DNS_ROUTE_GENERATION_MAX: u64 = (1 << 20) - 1;
+/// Carrier kind, outbound/index and generation bits ignored by daens routing.
+pub const DNS_ROUTE_MARK_MASK: u32 = 0x37ff_ffff;
+const DNS_DIRECT_MARK_KIND: u32 = 0x100;
+
+/// Per-packet UDP DNS routing authority for dae0 or native host reassembly.
+/// Generation bits occupy 0..7, 9..15, 24..26 and 28..29.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UdpDnsRoute {
+    outbound: u8,
+    generation: u32,
+    direct_mark: bool,
+}
+
+impl UdpDnsRoute {
+    #[inline(always)]
+    pub const fn new(outbound: u8, generation: u64) -> Option<Self> {
+        if generation == 0
+            || generation > DNS_ROUTE_GENERATION_MAX
+            || !((outbound >= OutboundIndex::UserBase as u8
+                && outbound < OutboundIndex::MustRules as u8)
+                || outbound == OutboundIndex::ControlPlaneRouting as u8)
+        {
+            None
+        } else {
+            Some(Self {
+                outbound,
+                generation: generation as u32,
+                direct_mark: false,
+            })
+        }
+    }
+
+    /// A marked must-direct WAN datagram carries its immutable policy index.
+    #[inline(always)]
+    pub const fn direct(index: u8, generation: u64) -> Option<Self> {
+        if generation == 0 || generation > DNS_ROUTE_GENERATION_MAX {
+            None
+        } else {
+            Some(Self {
+                outbound: index,
+                generation: generation as u32,
+                direct_mark: true,
+            })
+        }
+    }
+
+    #[inline(always)]
+    pub const fn direct_mark_index(&self) -> Option<u8> {
+        if self.direct_mark {
+            Some(self.outbound)
+        } else {
+            None
+        }
+    }
+
+    #[inline(always)]
+    pub const fn outbound(&self) -> u8 {
+        if self.direct_mark {
+            OutboundIndex::Direct as u8
+        } else {
+            self.outbound
+        }
+    }
+
+    #[inline(always)]
+    pub const fn generation(&self) -> u32 {
+        self.generation
+    }
+
+    #[inline(always)]
+    pub const fn to_mark(self) -> u32 {
+        let generation = self.generation;
+        TPROXY_MARK
+            | (self.outbound as u32) << 16
+            | if self.direct_mark {
+                DNS_DIRECT_MARK_KIND
+            } else {
+                0
+            }
+            | generation & 0xff
+            | (generation & 0x7f00) << 1
+            | (generation & 0x3_8000) << 9
+            | (generation & 0xc_0000) << 10
+    }
+
+    #[inline(always)]
+    pub const fn from_mark(mark: u32) -> Option<Self> {
+        if mark & !DNS_ROUTE_MARK_MASK != TPROXY_MARK {
+            return None;
+        }
+        let outbound = (mark >> 16) as u8;
+        let generation =
+            mark & 0xff | (mark >> 1) & 0x7f00 | (mark >> 9) & 0x3_8000 | (mark >> 10) & 0xc_0000;
+        if mark & DNS_DIRECT_MARK_KIND != 0 {
+            Self::direct(outbound, generation as u64)
+        } else {
+            Self::new(outbound, generation as u64)
+        }
+    }
+
+    #[inline(always)]
+    pub const fn to_nfqueue_mark(self) -> u32 {
+        self.to_mark() | NFQUEUE_SIGNATURE_MARK
+    }
+
+    #[inline(always)]
+    pub const fn from_nfqueue_mark(mark: u32) -> Option<Self> {
+        if mark & NFQUEUE_SIGNATURE_MARK != NFQUEUE_SIGNATURE_MARK
+            || mark & DNS_DIRECT_MARK_KIND != 0
+        {
+            return None;
+        }
+        Self::from_mark(mark & !NFQUEUE_SIGNATURE_MARK)
+    }
+}
+
+#[inline(always)]
+pub const fn udp_decision_token(generation: u32, sequence: u32) -> Option<u32> {
+    if generation > UDP_DECISION_GENERATION_MASK
+        || sequence == 0
+        || sequence > UDP_DECISION_SEQUENCE_MASK
+    {
+        None
+    } else {
+        Some((generation << UDP_DECISION_GENERATION_SHIFT) | sequence)
+    }
+}
+
+#[inline(always)]
+pub const fn udp_decision_token_generation(token: u32) -> u32 {
+    (token >> UDP_DECISION_GENERATION_SHIFT) & UDP_DECISION_GENERATION_MASK
+}
+/// Routing marks may not consume datapath-owned classification bits.
+pub const SKB_MARK_RESERVED_MASK: u32 = NFQUEUE_SIGNATURE_MARK;
+
+#[inline(always)]
+pub const fn skb_mark_has_reserved_bits(mark: u32) -> bool {
+    mark & SKB_MARK_RESERVED_MASK != 0
+}
+
+/// Packs a valid persistent token into the exact mark consumed by the NFQUEUE rule.
+#[inline(always)]
+pub const fn pack_nfqueue_mark(token: u32) -> Option<u32> {
+    if token == 0 || token & !NFQUEUE_TOKEN_MASK != 0 {
+        None
+    } else {
+        Some(NFQUEUE_SIGNATURE_MARK | token)
+    }
+}
+
+/// Extracts a nonzero token only from a mark owned by the NFQUEUE staging path.
+#[inline(always)]
+pub const fn extract_nfqueue_token(mark: u32) -> Option<u32> {
+    if mark & NFQUEUE_SIGNATURE_MARK != NFQUEUE_SIGNATURE_MARK {
+        return None;
+    }
+    let token = mark & NFQUEUE_TOKEN_MASK;
+    if token == 0 { None } else { Some(token) }
+}
+/// Socket mark bit used by the control plane to tell the eBPF datapath to
+/// pass its own traffic through without re-routing it.
+pub const DAE_BYPASS_MARK: u32 = 0x100;
+pub const MAX_OUTBOUNDS: u32 = 256;
+
+// Rust struct with a memory layout identical to the C struct.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct DaeParam {
+    pub tproxy_port: u32,
+    pub control_plane_pid: u32,
+    pub dae0_ifindex: u32,
+    pub dae_netns_id: u32,
+    pub wan_ifindex: u32,
+    pub dae0peer_mac: [u8; 6],
+    pub padding_after_mac: [u8; 2], // Padding to align to use_redirect_peer
+    pub use_redirect_peer: u8,
+    pub has_bpf_get_current_task: u8,
+    /// Datapath log gate (convention only; layout unchanged): bit 0 enables
+    /// the per-flow `info!` logging in honk-ebpf (e.g. "lan new flow").
+    /// Userspace always writes 0, so these logs are OFF by default; set
+    /// bit 0 to re-enable them for debugging.
+    pub padding2: u16,
+    pub dae_socket_mark: u32,
+    pub local_ip: u32,
+    /// Host-relative ID of the FD-owned daens; negative means unconfigured.
+    pub tcp_daens_netns_id: i32,
+}
+
+const _: () = assert!(core::mem::offset_of!(DaeParam, tcp_daens_netns_id) == 40);
+const _: () = assert!(core::mem::size_of::<DaeParam>() == 44);
+
+impl DaeParam {
+    pub const DEFAULT: Self = Self {
+        tproxy_port: 0,
+        control_plane_pid: 0,
+        dae0_ifindex: 0,
+        // A negative netns ID selects the packet's namespace, not relative ID zero.
+        dae_netns_id: u32::MAX,
+        wan_ifindex: 0,
+        dae0peer_mac: [0; 6],
+        padding_after_mac: [0; 2],
+        use_redirect_peer: 0,
+        has_bpf_get_current_task: 0,
+        padding2: 0,
+        dae_socket_mark: 0,
+        local_ip: 0,
+        tcp_daens_netns_id: -1,
+    };
+}
+
+impl Default for DaeParam {
+    fn default() -> Self {
+        Self::DEFAULT
+    }
+}
+
+// Pod impls are only needed on the userspace side (honk-core).
+// The BPF side (honk-ebpf) uses aya-ebpf which doesn't have a Pod trait.
+#[cfg(not(target_arch = "bpf"))]
+unsafe impl aya::Pod for DaeParam {}
+
+/// Outbound indices written into eBPF `match_set.outbound`.
+///
+/// These values are aligned with dae-core so that the eBPF datapath can use
+/// the high logical values (>= 0xFC) for rule-composition without colliding
+/// with user-defined outbounds.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
+pub enum OutboundIndex {
+    Direct = 0,
+    Block = 1,
+    /// Base value for user-defined outbound groups. The actual eBPF value for
+    /// user group *i* is `UserBase as u8 + i`.
+    UserBase = 2,
+    MustRules = 0xFC,
+    ControlPlaneRouting = 0xFD,
+    LogicalOr = 0xFE,
+    LogicalAnd = 0xFF,
+}
+
+impl OutboundIndex {
+    pub const fn is_reserved(self) -> bool {
+        let v = self as u8;
+        v < Self::UserBase as u8 || v >= 0xFC
+    }
+    pub const fn to_user_num(self) -> u32 {
+        let v = self as u8;
+        if v >= Self::UserBase as u8 && v < 0xFC {
+            (v - Self::UserBase as u8) as u32
+        } else {
+            0
+        }
+    }
+    pub fn from_user(n: u32) -> Self {
+        match n {
+            0 => Self::Direct,
+            1 => Self::Block,
+            0xFC => Self::MustRules,
+            0xFD => Self::ControlPlaneRouting,
+            0xFE => Self::LogicalOr,
+            0xFF => Self::LogicalAnd,
+            _ => Self::UserBase,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
+pub enum L4ProtoType {
+    Tcp = 1,
+    Udp = 2,
+}
+
+impl L4ProtoType {
+    #[inline(always)]
+    pub const fn from_u8(v: u8) -> Option<Self> {
+        match v {
+            1 => Some(Self::Tcp),
+            2 => Some(Self::Udp),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
+pub enum IpVersionType {
+    V4 = 1,
+    V6 = 2,
+    Any = 3,
+}
+
+impl IpVersionType {
+    #[inline(always)]
+    pub const fn from_u8(v: u8) -> Option<Self> {
+        match v {
+            1 => Some(Self::V4),
+            2 => Some(Self::V6),
+            3 => Some(Self::Any),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub union RoutingMeta {
+    pub raw: u64,
+    pub data: RoutingMetaData,
+}
+
+impl core::fmt::Debug for RoutingMeta {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RoutingMeta")
+            .field("raw", &unsafe { self.raw })
+            .finish()
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[repr(C, packed)]
+pub struct RoutingMetaData {
+    pub outbound: u8, // offset 0 → u64 bits 0-7
+    pub mark: u32,    // offset 1 → u64 bits 8-39
+    pub must: u8,     // offset 5 → u64 bit 40
+    pub dscp: u8,     // offset 6 → u64 bits 48-55
+    pub _pad: u8,     // offset 7 → u64 bits 56-63 (published, offload, WAN userspace)
+}
+
+/// Bit 57 of `RoutingMeta::raw`: a cached native direct decision. LAN sets
+/// it for mode-based direct offload; WAN UDP sets it for unmarked native direct.
+/// Both publish `outbound == Direct`. Native LAN `must`-direct needs no flag:
+/// its `must` bit already encodes offload. Marked WAN UDP instead carries
+/// `ROUTING_META_FLAG_WAN_USERSPACE`, even with `must`.
+pub const ROUTING_META_FLAG_OFFLOAD: u64 = 1 << 57;
+
+/// Bit 56 of `RoutingMeta::raw`: the datapath published a routing decision
+/// for this flow.  The established-packet fast paths ignore the meta
+/// entirely until this bit is set.
+pub const ROUTING_META_FLAG_PUBLISHED: u64 = 1 << 56;
+
+/// Bit 58 of `RoutingMeta::raw`: a WAN UDP decision relayed through userspace.
+/// Unlike native LAN direct/must decisions, its endpoint owns retirement of
+/// conn state and token-zero handoff/redirect metadata under the UDP reader fence.
+pub const ROUTING_META_FLAG_WAN_USERSPACE: u64 = 1 << 58;
+
+impl RoutingMeta {
+    /// Whether the datapath has published a routing decision (bit 56).
+    pub fn is_published(&self) -> bool {
+        let raw = unsafe { self.raw };
+        raw & ROUTING_META_FLAG_PUBLISHED != 0
+    }
+}
+
+// Layout assertions — must hold for the union to work correctly.
+// RoutingMeta is a union of u64 and RoutingMetaData, so both must be 8 bytes
+// and field byte-offsets must match the bit-encoding in build_routing_meta().
+const _RT_META_SIZE: () = assert!(core::mem::size_of::<RoutingMeta>() == 8);
+const _RT_META_RAW_SIZE: () = assert!(core::mem::size_of::<u64>() == 8);
+
+impl Default for RoutingMeta {
+    fn default() -> Self {
+        Self { raw: 0 }
+    }
+}
+
+/// First 64 bits of the dae0/dae0peer ULA addresses (`fd00:686f:6e6b::/64`)
+/// as a big-endian u64.
+pub const DAE0_IPV6_PREFIX_HI: u64 = 0xfd00_686f_6e6b_0000;
+/// The dae0/dae0peer link-local subnet (`169.254.0.0/16`) as a big-endian u32.
+pub const DAE0_IPV4_NET: u32 = 0xA9FE_0000;
+
+/// Directional five-tuple used as the `REDIRECT_TRACK` map key.
+///
+/// The key is deliberately not canonicalized: the redirecting packet is
+/// stored in its original direction and the reply path looks it up using the
+/// exact reverse tuple.  Keeping both ports and L4 protocol prevents flows
+/// sharing an address pair from overwriting one another.
+#[derive(Debug, Clone, Copy, Default)]
+#[repr(C)]
+pub struct RedirectTuple {
+    pub src_ip: In6Addr,
+    pub dst_ip: In6Addr,
+    pub src_port: u16,
+    pub dst_port: u16,
+    pub l4proto: u8,
+    pub padding: [u8; 3],
+}
+
+impl RedirectTuple {
+    /// Construct the directional key from the parsed datapath five-tuple.
+    #[inline(always)]
+    pub const fn from_tuples(tuples: &crate::redirect_need::TuplesKey) -> Self {
+        Self {
+            src_ip: tuples.src_ip,
+            dst_ip: tuples.dst_ip,
+            src_port: tuples.src_port,
+            dst_port: tuples.dst_port,
+            l4proto: tuples.l4proto,
+            padding: [0; 3],
+        }
+    }
+
+    /// Build the opposite-direction key for a reply packet.
+    #[inline(always)]
+    pub const fn reverse(self) -> Self {
+        Self {
+            src_ip: self.dst_ip,
+            dst_ip: self.src_ip,
+            src_port: self.dst_port,
+            dst_port: self.src_port,
+            l4proto: self.l4proto,
+            padding: [0; 3],
+        }
+    }
+}
+
+// `REDIRECT_TRACK` is shared verbatim with the kernel.  Pin its complete
+// layout so a userspace/eBPF rebuild cannot silently change the map ABI.
+const _REDIRECT_TUPLE_SIZE: () = assert!(core::mem::size_of::<RedirectTuple>() == 40);
+const _REDIRECT_TUPLE_SRC_IP_OFFSET: () =
+    assert!(core::mem::offset_of!(RedirectTuple, src_ip) == 0);
+const _REDIRECT_TUPLE_DST_IP_OFFSET: () =
+    assert!(core::mem::offset_of!(RedirectTuple, dst_ip) == 16);
+const _REDIRECT_TUPLE_SRC_PORT_OFFSET: () =
+    assert!(core::mem::offset_of!(RedirectTuple, src_port) == 32);
+const _REDIRECT_TUPLE_DST_PORT_OFFSET: () =
+    assert!(core::mem::offset_of!(RedirectTuple, dst_port) == 34);
+const _REDIRECT_TUPLE_L4PROTO_OFFSET: () =
+    assert!(core::mem::offset_of!(RedirectTuple, l4proto) == 36);
+
+#[derive(Debug, Clone, Copy, Default)]
+#[repr(C)]
+pub struct RedirectEntry {
+    pub last_seen_ns: u64,
+    pub dmac: [u8; 6],
+    pub smac: [u8; 6],
+    pub from_wan: u8,
+    /// Final outbound index of the redirected flow, recorded at redirect
+    /// time so `dae0_ingress` can attribute reply traffic in `OUTBOUND_STATS`.
+    pub outbound: u8,
+    pub padding: [u8; 2],
+    pub ifindex: u32,
+    pub decision_token: u32,
+    pub incarnation: u64,
+}
+
+const _REDIRECT_ENTRY_SIZE: () = assert!(core::mem::size_of::<RedirectEntry>() == 40);
+const _REDIRECT_ENTRY_ALIGN: () = assert!(core::mem::align_of::<RedirectEntry>() == 8);
+const _REDIRECT_ENTRY_LAST_SEEN_OFFSET: () =
+    assert!(core::mem::offset_of!(RedirectEntry, last_seen_ns) == 0);
+const _REDIRECT_ENTRY_DMAC_OFFSET: () = assert!(core::mem::offset_of!(RedirectEntry, dmac) == 8);
+const _REDIRECT_ENTRY_SMAC_OFFSET: () = assert!(core::mem::offset_of!(RedirectEntry, smac) == 14);
+const _REDIRECT_ENTRY_FROM_WAN_OFFSET: () =
+    assert!(core::mem::offset_of!(RedirectEntry, from_wan) == 20);
+const _REDIRECT_ENTRY_OUTBOUND_OFFSET: () =
+    assert!(core::mem::offset_of!(RedirectEntry, outbound) == 21);
+const _REDIRECT_ENTRY_PADDING_OFFSET: () =
+    assert!(core::mem::offset_of!(RedirectEntry, padding) == 22);
+const _REDIRECT_ENTRY_IFINDEX_OFFSET: () =
+    assert!(core::mem::offset_of!(RedirectEntry, ifindex) == 24);
+const _REDIRECT_ENTRY_TOKEN_OFFSET: () =
+    assert!(core::mem::offset_of!(RedirectEntry, decision_token) == 28);
+const _: () = assert!(core::mem::offset_of!(RedirectEntry, incarnation) == 32);
+
+/// Bits of the single-slot `DATAPATH_FLAGS_MAP` array, written by userspace
+/// at runtime (unlike `DaeParam`, which is fixed at load time). Mode/offload
+/// policy and optional witness admission share one new-flow snapshot in
+/// `lan_ingress` and `wan_egress`. Established flows retain their decision and
+/// captured witness; UDP staging re-reads only the NFQUEUE readiness fence.
+///
+/// `DATAPATH_FLAG_OFFLOAD_RULE_DIRECT`: the effective clash mode is `Rule`
+/// (including "clash API disabled", where no mode override ever applies).
+/// `lan_ingress` may offload a non-must direct result only when that same
+/// compiled decision reports `domain_final`.
+pub const DATAPATH_FLAG_OFFLOAD_RULE_DIRECT: u32 = 1 << 0;
+
+/// `DATAPATH_FLAG_OFFLOAD_ALL`: the effective clash policy always selects
+/// direct (`Direct` mode, or `Global` with the exact `direct` selection).
+/// The kernel offloads every non-`must`/non-`block` flow (including flows
+/// routed to a proxy) as `OUTBOUND_DIRECT` without the SNI constraint, so a
+/// `block` or `must` rule reachable only through a sniffed domain does not
+/// apply, unlike the userspace override.
+pub const DATAPATH_FLAG_OFFLOAD_ALL: u32 = 1 << 1;
+
+/// Admit optional witnesses for new routing invocations. Clearing this bit never
+/// revokes an already captured witness or changes the routing decision.
+pub const DATAPATH_FLAG_TRACE_ENABLED: u32 = 1 << 2;
+
+/// NFQUEUE staging is configured; without readiness, eligible new flows fail closed.
+pub const DATAPATH_FLAG_NFQ_ENABLED: u32 = 1 << 3;
+
+/// The queue and its owned nftables rule are ready to hold staged packets.
+pub const DATAPATH_FLAG_NFQ_READY: u32 = 1 << 4;
+
+/// LPM trie key for IP/CIDR routing.
+/// Matches the kernel's `struct bpf_lpm_trie_key` layout:
+/// prefixlen (u32) + data (4 × u32 = IPv6 / IPv4-mapped).
+#[derive(Debug, Clone, Copy, Default)]
+#[repr(C)]
+pub struct LpmKey {
+    pub prefix_len: u32,
+    pub data: [u32; 4],
+}
+
+#[cfg(not(target_arch = "bpf"))]
+unsafe impl aya::Pod for LpmKey {}
+
+/// One per-CPU `OUTBOUND_STATS` value for an outbound. Keeping the four
+/// counters together lets the datapath update a packet and its byte count
+/// after one map lookup, while preserving contention-free per-CPU updates.
+#[derive(Debug, Clone, Copy, Default)]
+#[repr(C)]
+pub struct OutboundStatsCounters {
+    pub tx_packets: u64,
+    pub tx_bytes: u64,
+    pub rx_packets: u64,
+    pub rx_bytes: u64,
+}
+
+#[cfg(not(target_arch = "bpf"))]
+unsafe impl aya::Pod for OutboundStatsCounters {}
+
+impl OutboundStatsCounters {
+    #[inline(always)]
+    pub const fn for_outbound(outbound: u8) -> u32 {
+        outbound as u32
+    }
+
+    #[inline(always)]
+    pub fn add_tx(&mut self, bytes: u64) {
+        self.tx_packets = self.tx_packets.wrapping_add(1);
+        self.tx_bytes = self.tx_bytes.wrapping_add(bytes);
+    }
+
+    #[inline(always)]
+    pub fn add_rx(&mut self, bytes: u64) {
+        self.rx_packets = self.rx_packets.wrapping_add(1);
+        self.rx_bytes = self.rx_bytes.wrapping_add(bytes);
+    }
+
+    #[inline(always)]
+    pub fn wrapping_add_assign(&mut self, other: &Self) {
+        self.tx_packets = self.tx_packets.wrapping_add(other.tx_packets);
+        self.tx_bytes = self.tx_bytes.wrapping_add(other.tx_bytes);
+        self.rx_packets = self.rx_packets.wrapping_add(other.rx_packets);
+        self.rx_bytes = self.rx_bytes.wrapping_add(other.rx_bytes);
+    }
+}
+
+/// Total entries of the eBPF `OUTBOUND_STATS` per-CPU array: one packed
+/// counter value for each possible `u8` outbound index.
+pub const OUTBOUND_STATS_MAP_LEN: u32 = MAX_OUTBOUNDS;
+
+const _OUTBOUND_STATS_COUNTERS_SIZE: () =
+    assert!(core::mem::size_of::<OutboundStatsCounters>() == 32);
+const _OUTBOUND_STATS_COUNTERS_ALIGN: () =
+    assert!(core::mem::align_of::<OutboundStatsCounters>() == core::mem::align_of::<u64>());
+const _OUTBOUND_STATS_TX_PACKETS_OFFSET: () =
+    assert!(core::mem::offset_of!(OutboundStatsCounters, tx_packets) == 0);
+const _OUTBOUND_STATS_TX_BYTES_OFFSET: () =
+    assert!(core::mem::offset_of!(OutboundStatsCounters, tx_bytes) == 8);
+const _OUTBOUND_STATS_RX_PACKETS_OFFSET: () =
+    assert!(core::mem::offset_of!(OutboundStatsCounters, rx_packets) == 16);
+const _OUTBOUND_STATS_RX_BYTES_OFFSET: () =
+    assert!(core::mem::offset_of!(OutboundStatsCounters, rx_bytes) == 24);
+
+/// Aggregate statistics layout retained for userspace consumers.
+/// Kernel packet/byte counters use `OutboundStatsCounters` instead;
+/// the control plane accounts traffic independently in `StatsManager`.
+#[derive(Debug, Clone, Copy, Default)]
+#[repr(C)]
+pub struct OutboundStats {
+    pub tx_bytes: u64,
+    pub rx_bytes: u64,
+    pub tx_packets: u64,
+    pub rx_packets: u64,
+    pub active_conns: u32,
+    pub total_conns: u32,
+    pub errors: u32,
+    pub _pad: u32,
+}
+
+#[cfg(not(target_arch = "bpf"))]
+unsafe impl aya::Pod for RedirectTuple {}
+#[cfg(not(target_arch = "bpf"))]
+unsafe impl aya::Pod for RedirectEntry {}
+
+#[cfg(test)]
+mod nfqueue_abi_tests {
+    use super::*;
+
+    #[test]
+    fn token_marks_require_exact_signature_and_nonzero_token() {
+        assert_eq!(pack_nfqueue_mark(0), None);
+        assert_eq!(pack_nfqueue_mark(NFQUEUE_SIGNATURE_MARK), None);
+        assert_eq!(extract_nfqueue_token(0), None);
+        assert_eq!(extract_nfqueue_token(NFQUEUE_PENDING_MARK | 1), None);
+        assert_eq!(extract_nfqueue_token(CLASSIFIED_MARK | 1), None);
+        assert_eq!(extract_nfqueue_token(NFQUEUE_SIGNATURE_MARK), None);
+        assert_eq!(extract_nfqueue_token(1), None);
+
+        for token in [1, NFQUEUE_TOKEN_MASK - 1, NFQUEUE_TOKEN_MASK] {
+            let mark = pack_nfqueue_mark(token).expect("nonzero in-range token");
+            assert_eq!(mark & NFQUEUE_SIGNATURE_MARK, NFQUEUE_SIGNATURE_MARK);
+            assert_eq!(extract_nfqueue_token(mark), Some(token));
+        }
+    }
+
+    #[test]
+    fn decision_generations_share_mark_space_without_aliasing() {
+        for generation in 0..=UDP_DECISION_GENERATION_MASK {
+            let token = udp_decision_token(generation, 1).unwrap();
+            assert_eq!(udp_decision_token_generation(token), generation);
+            assert!(pack_nfqueue_mark(token).is_some());
+        }
+        assert_eq!(udp_decision_token(0, 0), None);
+        assert_eq!(udp_decision_token(0, UDP_DECISION_SEQUENCE_MASK + 1), None);
+    }
+
+    #[test]
+    fn reserved_mark_bits_are_exact() {
+        assert_eq!(SKB_MARK_RESERVED_MASK, 0xc000_0000);
+        assert!(!skb_mark_has_reserved_bits(0x3fff_ffff));
+        assert!(skb_mark_has_reserved_bits(CLASSIFIED_MARK));
+        assert!(skb_mark_has_reserved_bits(NFQUEUE_PENDING_MARK));
+    }
+}
+
+#[cfg(test)]
+mod udp_dns_route_tests {
+    use super::*;
+
+    #[test]
+    fn carrier_round_trips_every_bit_range() {
+        assert_eq!(DNS_ROUTE_MARK_MASK, 0x37ff_ffff);
+        for (generation, carrier_bit) in [
+            (1, 1),
+            (1 << 7, 1 << 7),
+            (1 << 8, 1 << 9),
+            (1 << 14, 1 << 15),
+            (1 << 15, 1 << 24),
+            (1 << 17, 1 << 26),
+            (1 << 18, 1 << 28),
+            (1 << 19, 1 << 29),
+        ] {
+            assert_eq!(
+                UdpDnsRoute::new(2, generation).unwrap().to_mark(),
+                TPROXY_MARK | (2 << 16) | carrier_bit
+            );
+        }
+        for outbound in [
+            OutboundIndex::UserBase as u8,
+            OutboundIndex::MustRules as u8 - 1,
+            OutboundIndex::ControlPlaneRouting as u8,
+        ] {
+            for generation in [
+                1,
+                0xff,
+                0x100,
+                0x7fff,
+                0x8000,
+                0x3_ffff,
+                0x4_0000,
+                DNS_ROUTE_GENERATION_MAX,
+            ] {
+                let route = UdpDnsRoute::new(outbound, generation).unwrap();
+                assert_eq!(route.outbound(), outbound);
+                assert_eq!(route.generation(), generation as u32);
+                let mark = route.to_mark();
+                assert_eq!(mark & !DNS_ROUTE_MARK_MASK, TPROXY_MARK);
+                assert_eq!(UdpDnsRoute::from_mark(mark), Some(route));
+                assert_eq!(
+                    UdpDnsRoute::from_nfqueue_mark(route.to_nfqueue_mark()),
+                    Some(route)
+                );
+                assert_eq!(UdpDnsRoute::from_mark(route.to_nfqueue_mark()), None);
+            }
+        }
+    }
+
+    #[test]
+    fn carrier_rejects_invalid_generation_owner_and_signature() {
+        assert_eq!(UdpDnsRoute::new(2, 0), None);
+        assert_eq!(UdpDnsRoute::new(2, DNS_ROUTE_GENERATION_MAX + 1), None);
+        for outbound in [0, 1, 0xfc, 0xfe, 0xff] {
+            assert_eq!(UdpDnsRoute::new(outbound, 1), None);
+        }
+
+        let mark = UdpDnsRoute::new(2, 1).unwrap().to_mark();
+        for invalid in [
+            mark & !TPROXY_MARK,
+            mark | CLASSIFIED_MARK,
+            mark | NFQUEUE_PENDING_MARK,
+        ] {
+            assert_eq!(UdpDnsRoute::from_mark(invalid), None);
+        }
+        assert_eq!(UdpDnsRoute::from_mark(TPROXY_MARK | (2 << 16)), None);
+        assert_eq!(UdpDnsRoute::from_mark(TPROXY_MARK | (0xfc << 16) | 1), None);
+    }
+
+    #[test]
+    fn nfqueue_carrier_rejects_incomplete_signature_and_invalid_dns_authority() {
+        let mark = UdpDnsRoute::new(2, 1).unwrap().to_nfqueue_mark();
+        for invalid in [
+            mark & !NFQUEUE_SIGNATURE_MARK,
+            mark & !CLASSIFIED_MARK,
+            mark & !NFQUEUE_PENDING_MARK,
+            mark & !TPROXY_MARK,
+            mark | DAE_BYPASS_MARK,
+            mark & !1,
+        ] {
+            assert_eq!(UdpDnsRoute::from_nfqueue_mark(invalid), None);
+        }
+        for outbound in [0, 1, 0xfc, 0xfe, 0xff] {
+            let invalid = (mark & !(0xff << 16)) | (outbound << 16);
+            assert_eq!(UdpDnsRoute::from_nfqueue_mark(invalid), None);
+        }
+    }
+
+    #[test]
+    fn direct_mark_carrier_preserves_index_and_generation_without_tuple_state() {
+        for index in 0..=u8::MAX {
+            for generation in [1, 0x100, 0x8000, DNS_ROUTE_GENERATION_MAX] {
+                let route = UdpDnsRoute::direct(index, generation).unwrap();
+                assert_eq!(route.direct_mark_index(), Some(index));
+                assert_eq!(route.outbound(), OutboundIndex::Direct as u8);
+                assert_eq!(UdpDnsRoute::from_mark(route.to_mark()), Some(route));
+                assert_eq!(route.to_mark() & !DNS_ROUTE_MARK_MASK, TPROXY_MARK);
+                assert_eq!(
+                    UdpDnsRoute::from_nfqueue_mark(route.to_nfqueue_mark()),
+                    None
+                );
+            }
+        }
+        assert_eq!(UdpDnsRoute::direct(0, 0), None);
+        assert_eq!(UdpDnsRoute::direct(255, DNS_ROUTE_GENERATION_MAX + 1), None);
+        assert_eq!(UdpDnsRoute::new(2, 1).unwrap().direct_mark_index(), None);
+    }
+}
+
+#[cfg(test)]
+mod outbound_stats_counter_tests {
+    use super::*;
+
+    #[test]
+    fn outbound_stats_counter_layout_and_wrapping_are_stable() {
+        assert_eq!(OUTBOUND_STATS_MAP_LEN, MAX_OUTBOUNDS);
+        assert_eq!(OutboundStatsCounters::for_outbound(0), 0);
+        assert_eq!(
+            OutboundStatsCounters::for_outbound(u8::MAX),
+            MAX_OUTBOUNDS - 1
+        );
+        assert_eq!(core::mem::size_of::<OutboundStatsCounters>(), 32);
+
+        let mut counters = OutboundStatsCounters {
+            tx_packets: u64::MAX,
+            tx_bytes: u64::MAX,
+            rx_packets: u64::MAX,
+            rx_bytes: u64::MAX,
+        };
+        counters.add_tx(1);
+        counters.add_rx(1);
+        assert_eq!(counters.tx_packets, 0);
+        assert_eq!(counters.tx_bytes, 0);
+        assert_eq!(counters.rx_packets, 0);
+        assert_eq!(counters.rx_bytes, 0);
+    }
+}

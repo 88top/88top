@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-15T10:50:04.254Z",
+  "checks": [
+    {
+      "name": "editor",
+      "result": "pass"
+    },
+    {
+      "name": "movement",
+      "result": "pass"
+    },
+    {
+      "name": "layout",
+      "result": "pass"
+    },
+    {
+      "name": "inputs",
+      "result": "pass"
+    },
+    {
+      "name": "resources",
+      "result": "pass"
+    }
+  ],
+  "result": "pass"
+}

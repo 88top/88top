@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-10-18T07:25:05.637Z",
+  "checks": [
+    "Unauthenticated config read denied"
+  ],
+  "errors": [],
+  "views": [],
+  "restoration": [
+    "layout: unchanged",
+    "launcher: unchanged"
+  ],
+  "result": "failed",
+  "failure": "locator.isEnabled: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: '自定义首页', exact: true })\u001b[22m\n\n    at ready (/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/94c4-develop-quicksta/quickstart/scripts/ops/home-current-acceptance.cjs:17:217)\n    at async /config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/94c4-develop-quicksta/quickstart/scripts/ops/home-current-acceptance.cjs:19:3"
+}

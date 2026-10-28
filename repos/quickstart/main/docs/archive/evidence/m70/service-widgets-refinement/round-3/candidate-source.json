@@ -1,0 +1,17 @@
+{
+  "result": "UI failed; not deployed",
+  "baseline": "1ecef10",
+  "sourceSha256": {
+    "web/src/design/homeWidgetDetails.css": "978a5c8d88b6845e5889d4e6bcf8a4134f72200f14fe9f189a302b29fcbbe1b1",
+    "web/src/home/BusinessCard.vue": "cac0b5d902b9bd38b5f0f328bc76a19de25700f561e5d9cdbd6b92a0c539aa4c",
+    "web/src/home/homeWidgetDetails.css": "978a5c8d88b6845e5889d4e6bcf8a4134f72200f14fe9f189a302b29fcbbe1b1",
+    "web/src/pages/index/info/status.vue": "517a2c7493ff956af815e9e88fd5e933cf9d49d4f5e06901562cd83523c9a5eb",
+    "web/src/pages/index/service/DownloadService.vue": "b28793648ddb8016188e3862a521204372481c371cc191712d8e037447ddf756",
+    "web/src/pages/index/service/RemoteDomain.vue": "93b634edaef2af935eb8af28b0bd2beceb05fcdafb35521f6e990f17d501d90f",
+    "web/src/pages/index/service/aria2.vue": "98015c64b3bf3575a94ad6626e7b0d1bbc6f2e574197cc54c5171e24cdf82f78",
+    "web/src/pages/index/service/qbittorrent.vue": "e7b8cb25455eb7121e8de12c3447c73085dc1582c3c31b650aefd0584d07ef2d",
+    "web/src/pages/index/service/transmission.vue": "53ead56605cc77c77267aca20d6359ce081d4649ccf4c0876e79a2ce983412f6",
+    "web/src/home/serviceWidgetBody.css": "dfa569d4425ef73dc2ac7bdaf4d38d845866013bc9c99f20e26bb8d335545b6e",
+    "web/src/home/servicePresentation.ts": "65f394dc971002aba3bb2e282ef5070fb5dcf8585f19e60b83d8861b7f77c3bb"
+  }
+}

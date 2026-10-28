@@ -1,0 +1,594 @@
+{
+  "1440-light-zh": {
+    "overflow": false,
+    "cards": {
+      "connection": {
+        "x": 944.796875,
+        "y": 177,
+        "width": 463.203125,
+        "height": 301.984375,
+        "right": 1408,
+        "bottom": 478.984375,
+        "text": "网络连接和IP地址\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分41秒\nIPv4（wan）\n静态网络\n已启用\n••••••••••\nIPv6\n已启用\n••••••••••\nDNS（手动配置）\n192.168.30.1",
+        "scroll": false,
+        "links": [],
+        "body": null
+      },
+      "storage": {
+        "x": 232,
+        "y": 996.25,
+        "width": 579,
+        "height": 402,
+        "right": 811,
+        "bottom": 1398.25,
+        "text": "磁盘信息\n文件管理\n⋮\n系统根目录\nsda【32 GiB】(Preview disk)\n使用率：38%\n已使用：12 GiB\n已挂载磁盘\nsdb【32 GiB】(Preview disk)\n使用率：38%\n已使用：12 GiB\nsdc【32 GiB】(Preview disk)\n使用率：38%\n已使用：12 GiB",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/nas/raid",
+          "/cgi-bin/luci/admin/nas/smart",
+          "/cgi-bin/luci/admin/system/diskman",
+          "/cgi-bin/luci/admin/system/mounts"
+        ],
+        "body": {
+          "x": 247,
+          "y": 1051.25,
+          "width": 549,
+          "height": 326,
+          "right": 796,
+          "bottom": 1377.25
+        }
+      },
+      "sharing": {
+        "x": 829,
+        "y": 996.25,
+        "width": 579,
+        "height": 402,
+        "right": 1408,
+        "bottom": 1398.25,
+        "text": "存储服务\n配置存储服务\n⋮\n易有云\n已配置\nSAMBA\n已启用\nWEBDAV\n已启用\n当前状态:\n已配置\n服务地址:\nhttp://192.168.9.19:8897\n下载易有云客户端，随时随地相册备份、远程访问",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/nas/unishare",
+          "http://192.168.9.19:8897",
+          "https://www.linkease.com"
+        ],
+        "body": {
+          "x": 844,
+          "y": 1063.25,
+          "width": 549,
+          "height": 230.484375,
+          "right": 1393,
+          "bottom": 1293.734375
+        }
+      },
+      "docker": {
+        "x": 232,
+        "y": 1416.25,
+        "width": 387.59375,
+        "height": 433.296875,
+        "right": 619.59375,
+        "bottom": 1849.546875,
+        "text": "Docker\nDocker迁移\n⋮\n当前状态:\n运行中\nDocker根目录：\n/mnt/sdb1/docker",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/services/dockerman/overview"
+        ],
+        "body": {
+          "x": 247,
+          "y": 1483.25,
+          "width": 357.59375,
+          "height": 147.796875,
+          "right": 604.59375,
+          "bottom": 1631.046875
+        }
+      },
+      "downloads": {
+        "x": 637.59375,
+        "y": 1416.25,
+        "width": 376.203125,
+        "height": 433.296875,
+        "right": 1013.796875,
+        "bottom": 1849.546875,
+        "text": "下载服务\n下载管理\n⋮\nAria2\n已启用\nqBittorrent\n已启用\nTransmission\n已启用\n当前状态:\n已启动\n下载目录:\n/mnt/sdb1/downloads\n网络地址:\nhttp://192.168.9.19:5180/aria2\n认证失败？\n点此自动配置 AriaNg\n使用易有云APP，随时随地远程下载",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/services/linkease/file/?path=/root/mnt/sdb1/downloads",
+          "http://192.168.9.19:5180/aria2",
+          "http://192.168.9.19:5180/aria2/#!/settings/rpc/set/http/192.168.9.19/6800/jsonrpc/cHJldmlldy10b2tlbg%3D%3D",
+          "https://doc.linkease.com/zh/guide/linkease_app/tutorial.html#%E8%BF%9C%E7%A8%8B%E4%B8%8B%E8%BD%BD"
+        ],
+        "body": {
+          "x": 652.59375,
+          "y": 1483.25,
+          "width": 346.203125,
+          "height": 345.296875,
+          "right": 998.796875,
+          "bottom": 1828.546875
+        }
+      },
+      "remote": {
+        "x": 1031.796875,
+        "y": 1416.25,
+        "width": 376.1875,
+        "height": 433.296875,
+        "right": 1407.984375,
+        "bottom": 1849.546875,
+        "text": "远程域名\n域名配置\n⋮\nDDNSTO\n正常\nIPv4\n正常\nIPv6\n正常\nDDNSTO\n正常\n智能内网穿透服务\nhttps://demo.example.invalid\n控制台",
+        "scroll": false,
+        "links": [
+          "https://demo.example.invalid",
+          "https://www.kooldns.cn/app/#/devices"
+        ],
+        "body": {
+          "x": 1046.796875,
+          "y": 1483.25,
+          "width": 346.1875,
+          "height": 234.078125,
+          "right": 1392.984375,
+          "bottom": 1717.328125
+        }
+      },
+      "system": {
+        "x": 232,
+        "y": 1867.546875,
+        "width": 1176,
+        "height": 290,
+        "right": 1408,
+        "bottom": 2157.546875,
+        "text": "系统信息\n信息概览\n⋮\n1%\nCPU使用率\n48℃\nCPU温度\n27%\n内存使用率\n设备型号\nQEMU Standard PC (Q35 + ICH9, 2009)\n固件版本\niStoreOS 24.10.1 2025011019\n内核：6.6.86\n系统时间：\n2026-10-16 12:52:59\n已启动：\n1天6小时16分41秒",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/system/flash",
+          "/cgi-bin/luci/admin/store/pages/maintance"
+        ],
+        "body": {
+          "x": 247,
+          "y": 1934.546875,
+          "width": 1146,
+          "height": 202,
+          "right": 1393,
+          "bottom": 2136.546875
+        }
+      }
+    }
+  },
+  "1440-dark-zh": {
+    "overflow": false,
+    "cards": {
+      "connection": {
+        "x": 944.796875,
+        "y": 177,
+        "width": 463.203125,
+        "height": 301.984375,
+        "right": 1408,
+        "bottom": 478.984375,
+        "text": "网络连接和IP地址\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分42秒\nIPv4（wan）\n静态网络\n已启用\n••••••••••\nIPv6\n已启用\n••••••••••\nDNS（手动配置）\n192.168.30.1",
+        "scroll": false,
+        "links": [],
+        "body": null
+      },
+      "storage": {
+        "x": 232,
+        "y": 996.25,
+        "width": 579,
+        "height": 402,
+        "right": 811,
+        "bottom": 1398.25,
+        "text": "磁盘信息\n文件管理\n⋮\n系统根目录\nsda【32 GiB】(Preview disk)\n使用率：38%\n已使用：12 GiB\n已挂载磁盘\nsdb【32 GiB】(Preview disk)\n使用率：38%\n已使用：12 GiB\nsdc【32 GiB】(Preview disk)\n使用率：38%\n已使用：12 GiB",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/nas/raid",
+          "/cgi-bin/luci/admin/nas/smart",
+          "/cgi-bin/luci/admin/system/diskman",
+          "/cgi-bin/luci/admin/system/mounts"
+        ],
+        "body": {
+          "x": 247,
+          "y": 1051.25,
+          "width": 549,
+          "height": 326,
+          "right": 796,
+          "bottom": 1377.25
+        }
+      },
+      "sharing": {
+        "x": 829,
+        "y": 996.25,
+        "width": 579,
+        "height": 402,
+        "right": 1408,
+        "bottom": 1398.25,
+        "text": "存储服务\n配置存储服务\n⋮\n易有云\n已配置\nSAMBA\n已启用\nWEBDAV\n已启用\n当前状态:\n已配置\n服务地址:\nhttp://192.168.9.19:8897\n下载易有云客户端，随时随地相册备份、远程访问",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/nas/unishare",
+          "http://192.168.9.19:8897",
+          "https://www.linkease.com"
+        ],
+        "body": {
+          "x": 844,
+          "y": 1063.25,
+          "width": 549,
+          "height": 230.484375,
+          "right": 1393,
+          "bottom": 1293.734375
+        }
+      },
+      "docker": {
+        "x": 232,
+        "y": 1416.25,
+        "width": 387.59375,
+        "height": 433.296875,
+        "right": 619.59375,
+        "bottom": 1849.546875,
+        "text": "Docker\nDocker迁移\n⋮\n当前状态:\n运行中\nDocker根目录：\n/mnt/sdb1/docker",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/services/dockerman/overview"
+        ],
+        "body": {
+          "x": 247,
+          "y": 1483.25,
+          "width": 357.59375,
+          "height": 147.796875,
+          "right": 604.59375,
+          "bottom": 1631.046875
+        }
+      },
+      "downloads": {
+        "x": 637.59375,
+        "y": 1416.25,
+        "width": 376.203125,
+        "height": 433.296875,
+        "right": 1013.796875,
+        "bottom": 1849.546875,
+        "text": "下载服务\n下载管理\n⋮\nAria2\n已启用\nqBittorrent\n已启用\nTransmission\n已启用\n当前状态:\n已启动\n下载目录:\n/mnt/sdb1/downloads\n网络地址:\nhttp://192.168.9.19:5180/aria2\n认证失败？\n点此自动配置 AriaNg\n使用易有云APP，随时随地远程下载",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/services/linkease/file/?path=/root/mnt/sdb1/downloads",
+          "http://192.168.9.19:5180/aria2",
+          "http://192.168.9.19:5180/aria2/#!/settings/rpc/set/http/192.168.9.19/6800/jsonrpc/cHJldmlldy10b2tlbg%3D%3D",
+          "https://doc.linkease.com/zh/guide/linkease_app/tutorial.html#%E8%BF%9C%E7%A8%8B%E4%B8%8B%E8%BD%BD"
+        ],
+        "body": {
+          "x": 652.59375,
+          "y": 1483.25,
+          "width": 346.203125,
+          "height": 345.296875,
+          "right": 998.796875,
+          "bottom": 1828.546875
+        }
+      },
+      "remote": {
+        "x": 1031.796875,
+        "y": 1416.25,
+        "width": 376.1875,
+        "height": 433.296875,
+        "right": 1407.984375,
+        "bottom": 1849.546875,
+        "text": "远程域名\n域名配置\n⋮\nDDNSTO\n正常\nIPv4\n正常\nIPv6\n正常\nDDNSTO\n正常\n智能内网穿透服务\nhttps://demo.example.invalid\n控制台",
+        "scroll": false,
+        "links": [
+          "https://demo.example.invalid",
+          "https://www.kooldns.cn/app/#/devices"
+        ],
+        "body": {
+          "x": 1046.796875,
+          "y": 1483.25,
+          "width": 346.1875,
+          "height": 234.078125,
+          "right": 1392.984375,
+          "bottom": 1717.328125
+        }
+      },
+      "system": {
+        "x": 232,
+        "y": 1867.546875,
+        "width": 1176,
+        "height": 290,
+        "right": 1408,
+        "bottom": 2157.546875,
+        "text": "系统信息\n信息概览\n⋮\n1%\nCPU使用率\n48℃\nCPU温度\n27%\n内存使用率\n设备型号\nQEMU Standard PC (Q35 + ICH9, 2009)\n固件版本\niStoreOS 24.10.1 2025011019\n内核：6.6.86\n系统时间：\n2026-10-16 12:52:59\n已启动：\n1天6小时16分42秒",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/system/flash",
+          "/cgi-bin/luci/admin/store/pages/maintance"
+        ],
+        "body": {
+          "x": 247,
+          "y": 1934.546875,
+          "width": 1146,
+          "height": 202,
+          "right": 1393,
+          "bottom": 2136.546875
+        }
+      }
+    }
+  },
+  "390-light-zh": {
+    "overflow": false,
+    "cards": {
+      "connection": {
+        "x": 14,
+        "y": 476.5,
+        "width": 362,
+        "height": 270.875,
+        "right": 376,
+        "bottom": 747.375,
+        "text": "网络连接和IP地址\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分42秒\nIPv4（wan）\n静态网络\n已启用\n••••••••••\nIPv6\n已启用\n••••••••••\nDNS（手动配置）\n192.168.30.1",
+        "scroll": false,
+        "links": [],
+        "body": null
+      },
+      "storage": {
+        "x": 14,
+        "y": 1836.234375,
+        "width": 362,
+        "height": 384.5,
+        "right": 376,
+        "bottom": 2220.734375,
+        "text": "磁盘信息\n文件管理\n⋮\n系统根目录\nsda【32 GiB】(Preview disk)\n使用率：38%\n已使用：12 GiB\n已挂载磁盘\nsdb【32 GiB】(Preview disk)\n使用率：38%\n已使用：12 GiB\nsdc【32 GiB】(Preview disk)\n使用率：38%\n已使用：12 GiB",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/nas/raid",
+          "/cgi-bin/luci/admin/nas/smart",
+          "/cgi-bin/luci/admin/system/diskman",
+          "/cgi-bin/luci/admin/system/mounts"
+        ],
+        "body": {
+          "x": 25,
+          "y": 1881.234375,
+          "width": 340,
+          "height": 328.5,
+          "right": 365,
+          "bottom": 2209.734375
+        }
+      },
+      "sharing": {
+        "x": 14,
+        "y": 2238.734375,
+        "width": 362,
+        "height": 310.921875,
+        "right": 376,
+        "bottom": 2549.65625,
+        "text": "存储服务\n配置存储服务\n⋮\n易有云\n已配置\nSAMBA\n已启用\nWEBDAV\n已启用\n当前状态:\n已配置\n服务地址:\nhttp://192.168.9.19:8897\n下载易有云客户端，随时随地相册备份、远程访问",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/nas/unishare",
+          "http://192.168.9.19:8897",
+          "https://www.linkease.com"
+        ],
+        "body": {
+          "x": 25,
+          "y": 2295.734375,
+          "width": 340,
+          "height": 242.921875,
+          "right": 365,
+          "bottom": 2538.65625
+        }
+      },
+      "docker": {
+        "x": 14,
+        "y": 2567.65625,
+        "width": 362,
+        "height": 235.796875,
+        "right": 376,
+        "bottom": 2803.453125,
+        "text": "Docker\nDocker迁移\n⋮\n当前状态:\n运行中\nDocker根目录：\n/mnt/sdb1/docker",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/services/dockerman/overview"
+        ],
+        "body": {
+          "x": 25,
+          "y": 2624.65625,
+          "width": 340,
+          "height": 147.796875,
+          "right": 365,
+          "bottom": 2772.453125
+        }
+      },
+      "downloads": {
+        "x": 14,
+        "y": 2821.453125,
+        "width": 362,
+        "height": 413.296875,
+        "right": 376,
+        "bottom": 3234.75,
+        "text": "下载服务\n下载管理\n⋮\nAria2\n已启用\nqBittorrent\n已启用\nTransmission\n已启用\n当前状态:\n已启动\n下载目录:\n/mnt/sdb1/downloads\n网络地址:\nhttp://192.168.9.19:5180/aria2\n认证失败？\n点此自动配置 AriaNg\n使用易有云APP，随时随地远程下载",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/services/linkease/file/?path=/root/mnt/sdb1/downloads",
+          "http://192.168.9.19:5180/aria2",
+          "http://192.168.9.19:5180/aria2/#!/settings/rpc/set/http/192.168.9.19/6800/jsonrpc/cHJldmlldy10b2tlbg%3D%3D",
+          "https://doc.linkease.com/zh/guide/linkease_app/tutorial.html#%E8%BF%9C%E7%A8%8B%E4%B8%8B%E8%BD%BD"
+        ],
+        "body": {
+          "x": 25,
+          "y": 2878.453125,
+          "width": 340,
+          "height": 345.296875,
+          "right": 365,
+          "bottom": 3223.75
+        }
+      },
+      "remote": {
+        "x": 14,
+        "y": 3252.75,
+        "width": 362,
+        "height": 302.078125,
+        "right": 376,
+        "bottom": 3554.828125,
+        "text": "远程域名\n域名配置\n⋮\nDDNSTO\n正常\nIPv4\n正常\nIPv6\n正常\nDDNSTO\n正常\n智能内网穿透服务\nhttps://demo.example.invalid\n控制台",
+        "scroll": false,
+        "links": [
+          "https://demo.example.invalid",
+          "https://www.kooldns.cn/app/#/devices"
+        ],
+        "body": {
+          "x": 25,
+          "y": 3309.75,
+          "width": 340,
+          "height": 234.078125,
+          "right": 365,
+          "bottom": 3543.828125
+        }
+      },
+      "system": {
+        "x": 14,
+        "y": 3572.828125,
+        "width": 362,
+        "height": 148,
+        "right": 376,
+        "bottom": 3720.828125,
+        "text": "系统信息\n信息概览\n⋮\nCPU使用率\n1%\nCPU温度\n48℃\n内存使用率\n27%\n\n已启动\n1天6小时16分42秒",
+        "scroll": false,
+        "links": [],
+        "body": null
+      }
+    }
+  },
+  "390-dark-zh": {
+    "overflow": false,
+    "cards": {
+      "connection": {
+        "x": 14,
+        "y": 476.5,
+        "width": 362,
+        "height": 270.875,
+        "right": 376,
+        "bottom": 747.375,
+        "text": "网络连接和IP地址\n设备管理\n⋮\n网络连接正常\n1天 6小时 16分42秒\nIPv4（wan）\n静态网络\n已启用\n••••••••••\nIPv6\n已启用\n••••••••••\nDNS（手动配置）\n192.168.30.1",
+        "scroll": false,
+        "links": [],
+        "body": null
+      },
+      "storage": {
+        "x": 14,
+        "y": 1836.234375,
+        "width": 362,
+        "height": 384.5,
+        "right": 376,
+        "bottom": 2220.734375,
+        "text": "磁盘信息\n文件管理\n⋮\n系统根目录\nsda【32 GiB】(Preview disk)\n使用率：38%\n已使用：12 GiB\n已挂载磁盘\nsdb【32 GiB】(Preview disk)\n使用率：38%\n已使用：12 GiB\nsdc【32 GiB】(Preview disk)\n使用率：38%\n已使用：12 GiB",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/nas/raid",
+          "/cgi-bin/luci/admin/nas/smart",
+          "/cgi-bin/luci/admin/system/diskman",
+          "/cgi-bin/luci/admin/system/mounts"
+        ],
+        "body": {
+          "x": 25,
+          "y": 1881.234375,
+          "width": 340,
+          "height": 328.5,
+          "right": 365,
+          "bottom": 2209.734375
+        }
+      },
+      "sharing": {
+        "x": 14,
+        "y": 2238.734375,
+        "width": 362,
+        "height": 310.921875,
+        "right": 376,
+        "bottom": 2549.65625,
+        "text": "存储服务\n配置存储服务\n⋮\n易有云\n已配置\nSAMBA\n已启用\nWEBDAV\n已启用\n当前状态:\n已配置\n服务地址:\nhttp://192.168.9.19:8897\n下载易有云客户端，随时随地相册备份、远程访问",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/nas/unishare",
+          "http://192.168.9.19:8897",
+          "https://www.linkease.com"
+        ],
+        "body": {
+          "x": 25,
+          "y": 2295.734375,
+          "width": 340,
+          "height": 242.921875,
+          "right": 365,
+          "bottom": 2538.65625
+        }
+      },
+      "docker": {
+        "x": 14,
+        "y": 2567.65625,
+        "width": 362,
+        "height": 235.796875,
+        "right": 376,
+        "bottom": 2803.453125,
+        "text": "Docker\nDocker迁移\n⋮\n当前状态:\n运行中\nDocker根目录：\n/mnt/sdb1/docker",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/services/dockerman/overview"
+        ],
+        "body": {
+          "x": 25,
+          "y": 2624.65625,
+          "width": 340,
+          "height": 147.796875,
+          "right": 365,
+          "bottom": 2772.453125
+        }
+      },
+      "downloads": {
+        "x": 14,
+        "y": 2821.453125,
+        "width": 362,
+        "height": 413.296875,
+        "right": 376,
+        "bottom": 3234.75,
+        "text": "下载服务\n下载管理\n⋮\nAria2\n已启用\nqBittorrent\n已启用\nTransmission\n已启用\n当前状态:\n已启动\n下载目录:\n/mnt/sdb1/downloads\n网络地址:\nhttp://192.168.9.19:5180/aria2\n认证失败？\n点此自动配置 AriaNg\n使用易有云APP，随时随地远程下载",
+        "scroll": false,
+        "links": [
+          "/cgi-bin/luci/admin/services/linkease/file/?path=/root/mnt/sdb1/downloads",
+          "http://192.168.9.19:5180/aria2",
+          "http://192.168.9.19:5180/aria2/#!/settings/rpc/set/http/192.168.9.19/6800/jsonrpc/cHJldmlldy10b2tlbg%3D%3D",
+          "https://doc.linkease.com/zh/guide/linkease_app/tutorial.html#%E8%BF%9C%E7%A8%8B%E4%B8%8B%E8%BD%BD"
+        ],
+        "body": {
+          "x": 25,
+          "y": 2878.453125,
+          "width": 340,
+          "height": 345.296875,
+          "right": 365,
+          "bottom": 3223.75
+        }
+      },
+      "remote": {
+        "x": 14,
+        "y": 3252.75,
+        "width": 362,
+        "height": 302.078125,
+        "right": 376,
+        "bottom": 3554.828125,
+        "text": "远程域名\n域名配置\n⋮\nDDNSTO\n正常\nIPv4\n正常\nIPv6\n正常\nDDNSTO\n正常\n智能内网穿透服务\nhttps://demo.example.invalid\n控制台",
+        "scroll": false,
+        "links": [
+          "https://demo.example.invalid",
+          "https://www.kooldns.cn/app/#/devices"
+        ],
+        "body": {
+          "x": 25,
+          "y": 3309.75,
+          "width": 340,
+          "height": 234.078125,
+          "right": 365,
+          "bottom": 3543.828125
+        }
+      },
+      "system": {
+        "x": 14,
+        "y": 3572.828125,
+        "width": 362,
+        "height": 148,
+        "right": 376,
+        "bottom": 3720.828125,
+        "text": "系统信息\n信息概览\n⋮\nCPU使用率\n1%\nCPU温度\n48℃\n内存使用率\n27%\n\n已启动\n1天6小时16分42秒",
+        "scroll": false,
+        "links": [],
+        "body": null
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+// Existing regressions plus launchpad flows, all against one static candidate.
+const {spawnSync}=require('node:child_process');
+const suites=['launchpad-browser-review','launchpad-links-review','launchpad-states-review','launchpad-resource-review','launchpad-matrix-review','launchpad-capacity-review',
+ 'launcher-actions-review','launcher-home-review','launcher-editor-review','launcher-states-review','launcher-resource-review','launcher-matrix-review','launcher-overflow-state-review',
+ 'visual-refinement-matrix-review','home-widget-chart-review','network-interaction-review','business-widgets-review','business-actions-review','widget-actions-review','home-widget-header-review','home-widget-standard-review','boundary-interaction-review','row-sort-review','structure-interaction-review','structure-resource-review','presentation-devices-review','visual-refinement-apps-review','visual-refinement-review'];
+const child=spawnSync('rtk',['proxy','node',require('node:path').join(__dirname,'launcher-final-runner.cjs'),...suites],{env:{...process.env,QS_DESIGN_EVIDENCE_ROOT:process.env.QS_DESIGN_EVIDENCE_ROOT||'docs/archive/evidence/m66/launchpad/68-review'},stdio:'inherit'});process.exitCode=child.status??1;

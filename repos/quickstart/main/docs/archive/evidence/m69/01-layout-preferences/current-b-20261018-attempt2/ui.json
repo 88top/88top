@@ -1,0 +1,43 @@
+{
+  "views": [
+    {
+      "name": "home",
+      "width": 1440,
+      "loggedIn": true,
+      "currentDeviceSurface": false,
+      "overflow": false
+    },
+    {
+      "name": "devices",
+      "width": 1440,
+      "loggedIn": true,
+      "currentDeviceSurface": false,
+      "overflow": false
+    },
+    {
+      "name": "home",
+      "width": 390,
+      "loggedIn": true,
+      "currentDeviceSurface": false,
+      "overflow": true
+    },
+    {
+      "name": "devices",
+      "width": 390,
+      "loggedIn": true,
+      "currentDeviceSurface": false,
+      "overflow": true
+    }
+  ],
+  "errors": [
+    "pageerror",
+    "pageerror",
+    "pageerror",
+    "pageerror",
+    "pageerror",
+    "pageerror",
+    "pageerror",
+    "pageerror"
+  ],
+  "badResponses": []
+}

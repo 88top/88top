@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-10-14T08:01:44.299Z",
+  "sourceHashes": {
+    "web/src/design/CanvasHome.vue": "c283645793ee1cba12d579ab6c8143a7983acd5f6cdc55801dde0ccc49202e19",
+    "web/src/design/CanvasModule.vue": "8f989fa0b6cc8894554989ddb4e4ce7d513b99f85737dbd92c4c0fdae7cbc119",
+    "web/src/design/CanvasTools.vue": "c9c532f1e2aedc8204ec3aca8f583852b0654a4fe9571b964a661b471664453e",
+    "web/src/design/canvas.css": "c30d810fbd0581cf4b987d1a38a6758e2f2d4f4c14c24b638bf38a6c5da313b3",
+    "web/src/design/canvasLayout.ts": "8f8a1d3205632dbc62c8dc8f1d7c86e5d27a1630ce73ee020c41565e93076ccc",
+    "web/src/design/canvasModules.css": "ba6cf19c1b1717f7a3706df9202ac5a40aa3364a20e7e5253339b7adeffaae77",
+    "web/src/design/HomePreview.vue": "af61b45e57e4cd74eecbb68d1d037b1c25d3d7273e05d495d387e499c9f6f471",
+    "web/src/design/studioModel.ts": "f3465fade128602e0568337822deae87d1205659e6fa68742ea5681eb5cb7848",
+    "web/src/design/fixtures.ts": "27c5141151f223a4da74647e775a716f5af26d30a6e62e0bc6c1d313965965b5",
+    "web/src/pages/index/network/NetworkFlow.vue": "3186030e26a58f53c1ed6417e2a530c9c57fa73dc9467bcd12fae374465269c5",
+    "docs/product/ui-design/canvas-review.cjs": "39377acec2cde3825355a431b2ee7fc4c7450ae268bd859a983e83a92bde252a"
+  },
+  "currentPrototype": "pass",
+  "frontendTests": {
+    "passed": 65,
+    "failed": 0
+  },
+  "typecheck": "pass",
+  "productionBuild": "pass",
+  "productionDesignEntryIsolation": "pass",
+  "visualReview": "screenshots inspected; ready for user design review",
+  "originalChartSourceChanged": false,
+  "previewOutput": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work/vue-preview",
+  "routerDeviceAcceptance": "not performed by this design iteration"
+}

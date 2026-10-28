@@ -1,0 +1,13 @@
+{
+  "result": "passed",
+  "commands": [
+    "rtk proxy /var/cache/build-cache/run.sh -- npm --prefix web run tsc",
+    "rtk proxy /var/cache/build-cache/run.sh -- make build-web",
+    "rtk proxy /var/cache/build-cache/run.sh -- node --test web/test/formalDeviceUi.test.mjs"
+  ],
+  "typeCheckExitCode": 0,
+  "webBuildExitCode": 0,
+  "tests": {"passed": 19, "failed": 0},
+  "actualOutputs": ["web/dist/luci-static/quickstart", "web/dist/quickstart_web.zip"],
+  "warnings": "Existing ::v-deep deprecation warnings"
+}

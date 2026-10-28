@@ -1,0 +1,58 @@
+{
+  "host": "192.168.30.244",
+  "frontendGitSha": "5c1ececd8d65bbf503cd8863014db1e96f7a5c4c",
+  "assetVersion": "0.16.6-test20261018-preview-5c1ecec-2e154e2c9a93",
+  "privateBackup": "/root/quickstart-backups/home-0166-time-5c1ecec-r2",
+  "scope": "Frontend files/cache key only; no package installation or service reload",
+  "result": "passed",
+  "updated": [
+    "style.css",
+    "index.js"
+  ],
+  "before": {
+    "quickstartPIDs": [
+      "14546",
+      "9386"
+    ],
+    "startdhnsPIDs": [
+      "14546"
+    ],
+    "fastnetPIDs": [
+      10304
+    ],
+    "protected": [
+      "983a1c8b819e29a5ac7e053898afa66ccdc8653e535219482c92052b3a90ba11  /usr/sbin/quickstart",
+      "3a1c633f346f876d771b03f622aeff8215920683c5ed1945fca354bac77ba6c2  /usr/bin/quickstart-netpolicy",
+      "f3be309f97d8e1cede74d6ba8283e864ccba2c6558fdbaef44d9e6645e66df80  /usr/sbin/FastNet",
+      "c760d7f5a36a71ee12228e849c387473eeef37a5f42b94346baa00d5f1c0a628  /etc/config/fastnet",
+      "2cfb7147822538802930074838feb68b14d730c170c4663fa6050a5aa40ab8a1  /usr/libexec/istoree/fastnet.sh",
+      "eeccf129cb674ad20b95faa1a58549b8bd7bf34c359519e1fbd03de4e92a79ea  /usr/lib/opkg/status"
+    ],
+    "defaultRoute": "default via 192.168.30.1 dev br-lan proto static src 192.168.30.244",
+    "policyEnabled": "0",
+    "policyPIDs": []
+  },
+  "after": {
+    "quickstartPIDs": [
+      "14546",
+      "9386"
+    ],
+    "startdhnsPIDs": [
+      "14546"
+    ],
+    "fastnetPIDs": [
+      10304
+    ],
+    "protected": [
+      "983a1c8b819e29a5ac7e053898afa66ccdc8653e535219482c92052b3a90ba11  /usr/sbin/quickstart",
+      "3a1c633f346f876d771b03f622aeff8215920683c5ed1945fca354bac77ba6c2  /usr/bin/quickstart-netpolicy",
+      "f3be309f97d8e1cede74d6ba8283e864ccba2c6558fdbaef44d9e6645e66df80  /usr/sbin/FastNet",
+      "c760d7f5a36a71ee12228e849c387473eeef37a5f42b94346baa00d5f1c0a628  /etc/config/fastnet",
+      "2cfb7147822538802930074838feb68b14d730c170c4663fa6050a5aa40ab8a1  /usr/libexec/istoree/fastnet.sh",
+      "eeccf129cb674ad20b95faa1a58549b8bd7bf34c359519e1fbd03de4e92a79ea  /usr/lib/opkg/status"
+    ],
+    "defaultRoute": "default via 192.168.30.1 dev br-lan proto static src 192.168.30.244",
+    "policyEnabled": "0",
+    "policyPIDs": []
+  }
+}

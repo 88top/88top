@@ -1,0 +1,34 @@
+{
+  "files": {
+    "/usr/lib/lua/luci/controller/istore_backend.lua": {
+      "snapshot": "lua-proxy.lua",
+      "sha256": "cec4b600b3f481f22670a1c43c380d2f43793d9d4dbd37c1e3e921083dfff700"
+    },
+    "/usr/share/ucode/luci/dispatcher.uc": {
+      "snapshot": "luci-dispatcher.uc",
+      "sha256": "150280204f8c6d25e4933c6caf769d164166d353c38e5c2f88c9c70054539d6d"
+    },
+    "/usr/share/ucode/luci/controller/admin/index.uc": {
+      "snapshot": "luci-admin-index.uc",
+      "sha256": "521953cba8615121a6a43a5c29176d7e3916c9055e77abdfaf02ac686dfc2703"
+    },
+    "/usr/share/rpcd/acl.d/unauthenticated.json": {
+      "snapshot": "anonymous-acl.json",
+      "sha256": "f9ffec0554e0dd2e429f7c1fc843393c6bd97c4af843ba8f4c0d1020a7d22a67"
+    }
+  },
+  "references": {
+    "rpcd": "https://github.com/openwrt/rpcd/blob/9f4b86e7/session.c",
+    "uhttpd": "https://github.com/openwrt/uhttpd/blob/34a8a74d/ubus.c",
+    "advisory": "https://github.com/openwrt/uhttpd/security/advisories/GHSA-2mpg-6wp5-435p"
+  },
+  "review": [
+    "LuCI invokes rpcd session.login only with supplied username/password; issues cookie only after successful session reply.",
+    "Lua filters incoming FORWARDED CGI headers and injects session SID/token loaded locally from rpcd.",
+    "Go globally revalidates root identity and token in rpcd, no session auth cache.",
+    "RPCD configured root password references shadow; shadow contains a password hash, not an empty password.",
+    "LuCI cookie Secure on HTTPS, HttpOnly and SameSite=strict; logout destroys rpcd session.",
+    "No production uhttpd restart, firewall or password change was performed."
+  ],
+  "rootShadowState": "HASH_SET"
+}

@@ -9,13 +9,14 @@
                 <div class="title">{{ title }}</div>
             </div>
 
-            <div class="settings-wrapper">
+            <div class="settings-wrapper" :class="{'widget-action-group': home && !homeCustomMenu}">
                 <div v-if="showSettings" class="settings-btn">
                     <!-- <settingIcon class="settings-icon" /> -->
                     <slot name="settings"></slot>
                 </div>
+                <WidgetMenu v-if="home && !homeCustomMenu && homeMenu.length" :label="title + $gettext('更多操作')" :items="homeMenu.map((item,index)=>({id:String(index),label:item.label}))" @select="selectHomeMenu"/>
                 <!-- 下拉菜单 -->
-                <transition name="fade">
+                <transition v-if="!home" name="fade">
                     <div v-show="isOpen" class="dropdown-menu">
                         <slot name="settings-menu"></slot>
                     </div>
@@ -32,6 +33,10 @@
 <script setup>
 import { computed, ref, onMounted, onBeforeUnmount } from "vue"
 
+import {useHomeProjection} from "/@/home/widgetContext"
+import WidgetMenu from "/@/home/WidgetMenu.vue"
+const home=useHomeProjection()
+function selectHomeMenu(id){const item=props.homeMenu[Number(id)];if(item?.action)item.action();else if(item?.href)window.location.assign(item.href)}
 import { useGettext } from '/@/plugins/i18n'
 const { $gettext } = useGettext()
 
@@ -40,6 +45,8 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 
 const props = defineProps({
     title: { type: String, required: true },
+    homeMenu: { type: Array, default:()=>[] },
+    homeCustomMenu: { type:Boolean, default:false },
     showSettings: { type: Boolean, default: true },
     isSettingsMenuOpen: { type: Boolean, default: false }
 })

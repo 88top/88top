@@ -1,0 +1,67 @@
+{
+  "checkedAt": "2026-10-14T06:53:00.525Z",
+  "viewports": [
+    {
+      "variant": "studio",
+      "viewport": "desktop",
+      "theme": "light",
+      "width": 1440,
+      "deviceRows": 6
+    },
+    {
+      "variant": "studio",
+      "viewport": "desktop",
+      "theme": "dark",
+      "width": 1440,
+      "deviceRows": 6
+    }
+  ],
+  "states": [],
+  "interactions": [],
+  "contrast": [
+    {
+      "theme": "light",
+      "kind": "ink",
+      "ratio": 15.8
+    },
+    {
+      "theme": "light",
+      "kind": "muted",
+      "ratio": 4.9
+    },
+    {
+      "theme": "light",
+      "kind": "accent",
+      "ratio": 5.47
+    },
+    {
+      "theme": "light",
+      "kind": "good",
+      "ratio": 4.63
+    },
+    {
+      "theme": "dark",
+      "kind": "ink",
+      "ratio": 14.39
+    },
+    {
+      "theme": "dark",
+      "kind": "muted",
+      "ratio": 7.2
+    },
+    {
+      "theme": "dark",
+      "kind": "accent",
+      "ratio": 6.75
+    },
+    {
+      "theme": "dark",
+      "kind": "good",
+      "ratio": 9.2
+    }
+  ],
+  "errors": [],
+  "outside": [],
+  "result": "fail",
+  "failure": "AssertionError [ERR_ASSERTION]: light ink: contrast 1.329227140679397\n    at /config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/0153-device-lists-sho/quickstart/docs/product/ui-design/studio-review.cjs:35:13"
+}

@@ -1,0 +1,11 @@
+{
+  "command": "rtk proxy /var/cache/build-cache/run.sh -- make build-web",
+  "exitCode": 0,
+  "actualOutput": "web/dist",
+  "changed": [
+    "luci-static/quickstart/index.js",
+    "luci-static/quickstart/style.css"
+  ],
+  "added": [],
+  "removed": []
+}

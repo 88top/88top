@@ -195,8 +195,8 @@ func TestRegisterSystemRoutesGetTokenPassesSessionIDInContext(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected status 200, got %d", rec.Code)
 	}
-	if backend.sessionID != "main-session" {
-		t.Fatalf("sessionID = %q, want main-session", backend.sessionID)
+	if backend.sessionID != "sid-1" {
+		t.Fatalf("sessionID = %q, want authenticated forwarded session sid-1", backend.sessionID)
 	}
 }
 

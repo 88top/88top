@@ -1,0 +1,9 @@
+{
+  "result": "failed",
+  "threshold": 4.5,
+  "background": "#edf2f8",
+  "serviceGreen": { "foreground": "#008236", "ratio": 4.394 },
+  "serviceTeal": { "foreground": "#007d77", "ratio": 4.442 },
+  "scope": "Additional hover-state inspection after the 60-view default-state matrix passed",
+  "action": "Darken green/teal glyph and service-name ink slightly in the second candidate; preserve hue, pale surfaces and geometry. Extend the existing contrast matrix to hover background."
+}

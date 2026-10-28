@@ -9,6 +9,7 @@ import (
 
 	"github.com/istoreos/quickstart/backend/modules/raid/inventory"
 	"github.com/istoreos/quickstart/backend/modules/raid/writecommands"
+	"github.com/istoreos/quickstart/backend/utils"
 )
 
 type Partition struct {
@@ -80,22 +81,43 @@ func (svc *Service) Create(ctx context.Context, input CreateInput) (string, erro
 	}
 
 	diskPartPaths := make([]string, 0, len(input.DevicePaths))
+	disks := make([]*Disk, 0, len(input.DevicePaths))
+	seen := make(map[string]bool)
 	for _, devicePath := range input.DevicePaths {
+		if !utils.ValidDevicePath(devicePath) || seen[devicePath] {
+			return "", errors.New("无效或重复的成员设备")
+		}
+		seen[devicePath] = true
 		name := deviceNameFromPath(devicePath)
 		disk, err := svc.store.ReadDisk(ctx, name)
 		if err != nil {
 			return "", err
 		}
+		if disk == nil || disk.Path != devicePath {
+			return "", errors.New("disk not found")
+		}
 		for _, part := range disk.Partitions {
 			if strings.HasPrefix(part.MountPoint, "Raid Member:") {
 				return "", errors.New(part.MountPoint + " already found")
 			}
+		}
+		disks = append(disks, disk)
+	}
+	idx := svc.store.FindFreeMd(0)
+	if idx == -1 {
+		return "", errors.New("生成raid路径失败")
+	}
+	// Validate every member and finish all unmounts before erasing any disk.
+	for _, disk := range disks {
+		for _, part := range disk.Partitions {
 			if len(part.MountPoint) > 0 && part.MountPoint != "" {
 				if err := svc.store.Unmount(ctx, part.MountPoint); err != nil {
 					return "", err
 				}
 			}
 		}
+	}
+	for _, disk := range disks {
 		if err := svc.store.Erase(ctx, disk.Path); err != nil {
 			return "", err
 		}
@@ -106,10 +128,6 @@ func (svc *Service) Create(ctx context.Context, input CreateInput) (string, erro
 	}
 	svc.store.WaitAfterPartition(ctx)
 
-	idx := svc.store.FindFreeMd(0)
-	if idx == -1 {
-		return "", errors.New("生成raid路径失败")
-	}
 	path := fmt.Sprintf("/dev/md%v", idx)
 	command := writecommands.BuildCreateCommand(path, level, diskPartPaths)
 	if err := svc.store.RunCreate(ctx, command); err != nil {

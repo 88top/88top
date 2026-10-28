@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-14",
+  "owner": "/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/0153-device-lists-sho/quickstart/docs/product/ui-design",
+  "pid": 19593,
+  "mode": "vue-design-built",
+  "idempotentStart": true,
+  "runRefusedOccupiedPort": true,
+  "otherWorktreeStartRefused": true,
+  "otherWorktreeStopPreservedServer": true,
+  "normalStopStartPreviouslyExercised": true
+}

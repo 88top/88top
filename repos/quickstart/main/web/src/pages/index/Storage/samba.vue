@@ -21,10 +21,10 @@
         </li>
 
         <li class="samba-item" v-for="item in sambas">
-            <div class="samba-item_name">
+            <div class="samba-item_name" :data-label="$gettext('地址')">
                 <span>smb://{{ hostname }}/{{ item.shareName }}</span>
             </div>
-            <div class="samba-item_value" :title="item.path">
+            <div class="samba-item_value" :title="item.path" :data-label="$gettext('目录')">
                 <a target="_blank" :href="'/cgi-bin/luci/admin/services/linkease/file/?path=/root' + item.path">{{ item.path
                 }}</a>
             </div>

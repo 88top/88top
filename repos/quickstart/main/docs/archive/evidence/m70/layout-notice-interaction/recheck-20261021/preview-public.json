@@ -1,0 +1,17 @@
+{
+  "result": "passed",
+  "resources": [
+    {
+      "asset": "index.0f6426aa.js",
+      "sha256": "be194f14a2c60c9ec962078fcd91a59fb5d546b67a9ea3f7dddc9e5f54e3e1e7",
+      "legacyNotice": false,
+      "newNotice": false
+    },
+    {
+      "asset": "mount.12d9cc8d.js",
+      "sha256": "149f0f8322494c201d3f2050cbaff3f594c6ddb3d52d448fa3cd2648b56c98f0",
+      "legacyNotice": false,
+      "newNotice": true
+    }
+  ]
+}

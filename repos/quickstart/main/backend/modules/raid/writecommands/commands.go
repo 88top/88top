@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/istoreos/quickstart/backend/utils"
 )
 
 func NormalizeLevel(level string) string {
@@ -26,6 +28,12 @@ func NormalizeLevel(level string) string {
 }
 
 func ValidateMemberCount(level string, count int) error {
+	if level == "" {
+		return errors.New("不支持的RAID级别")
+	}
+	if level == "6" && count < 4 {
+		return errors.New("没有足够的成员设备")
+	}
 	if level == "5" || level == "6" {
 		if count < 3 {
 			return errors.New("没有足够的成员设备")
@@ -47,34 +55,34 @@ func ValidateMemberCount(level string, count int) error {
 func BuildCreateCommand(device string, level string, memberPaths []string) string {
 	return fmt.Sprintf(
 		"mdadm -C %v --run --quiet --assume-clean --homehost=any -n %v -l %v %v",
-		device,
+		utils.ShellQuote(device),
 		len(memberPaths),
-		level,
-		strings.Join(memberPaths, " "),
+		utils.ShellQuote(level),
+		quotePaths(memberPaths),
 	)
 }
 
 func BuildDeleteCommands(path string, members []string) []string {
-	memberPaths := strings.Join(members, " ")
+	memberPaths := quotePaths(members)
 	return []string{
-		fmt.Sprintf("mdadm --stop %v", path),
-		fmt.Sprintf("mdadm --remove %v", path),
+		fmt.Sprintf("mdadm --stop %v", utils.ShellQuote(path)),
+		fmt.Sprintf("mdadm --remove %v", utils.ShellQuote(path)),
 		fmt.Sprintf("mdadm --zero-superblock %v", memberPaths),
 	}
 }
 
 func BuildAddCommand(path string, memberPath string) string {
-	return fmt.Sprintf("mdadm -a %v %v", path, memberPath)
+	return fmt.Sprintf("mdadm -a %v %v", utils.ShellQuote(path), utils.ShellQuote(memberPath))
 }
 
 func BuildGrowCommand(path string, count uint64) string {
-	return fmt.Sprintf("mdadm -G %v -n %v", path, count)
+	return fmt.Sprintf("mdadm -G %v -n %v", utils.ShellQuote(path), count)
 }
 
 func BuildRemoveCommands(path string, memberPath string) []string {
 	return []string{
-		fmt.Sprintf("mdadm --manage %v --fail %v", path, memberPath),
-		fmt.Sprintf("mdadm --manage %v --remove %v", path, memberPath),
+		fmt.Sprintf("mdadm --manage %v --fail %v", utils.ShellQuote(path), utils.ShellQuote(memberPath)),
+		fmt.Sprintf("mdadm --manage %v --remove %v", utils.ShellQuote(path), utils.ShellQuote(memberPath)),
 	}
 }
 
@@ -86,7 +94,7 @@ func BuildRaidPartitionCommand(device string) (string, error) {
 	if device == "" {
 		return "", errors.New("param missing")
 	}
-	return fmt.Sprintf("parted -a opt %v mkpart primary ext4 16M 100%% set 1 raid on", device), nil
+	return fmt.Sprintf("parted -a opt %v mkpart primary ext4 16M 100%% set 1 raid on", utils.ShellQuote(device)), nil
 }
 
 func BuildAutoFixUUIDCommand() string {
@@ -100,13 +108,21 @@ func BuildDeleteFirstMdadmArrayCommand() []string {
 func BuildMdadmArrayCommands(device string, uuid string) []string {
 	return []string{
 		"uci add mdadm array",
-		fmt.Sprintf("uci set mdadm.@array[-1].device=%v", device),
-		fmt.Sprintf("uci set mdadm.@array[-1].uuid=%v", uuid),
+		fmt.Sprintf("uci set mdadm.@array[-1].device=%v", utils.ShellQuote(device)),
+		fmt.Sprintf("uci set mdadm.@array[-1].uuid=%v", utils.ShellQuote(uuid)),
 	}
 }
 
 func BuildCommitMdadmCommand() []string {
 	return []string{"uci commit mdadm"}
+}
+
+func quotePaths(paths []string) string {
+	quoted := make([]string, len(paths))
+	for i, path := range paths {
+		quoted[i] = utils.ShellQuote(path)
+	}
+	return strings.Join(quoted, " ")
 }
 
 func BuildRestartMdadmCommand() []string {

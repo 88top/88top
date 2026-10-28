@@ -15,6 +15,13 @@ func TestValidateDownloadPath(t *testing.T) {
 		{name: "root path", path: "/root/download"},
 		{name: "relative path", path: "mnt/data", wantErr: "路径错误，请输入绝对路径"},
 		{name: "unsupported absolute path", path: "/tmp/data", wantErr: "路径错误，必须选择硬盘的路径或者/root的路径"},
+		{name: "similar prefix", path: "/mnt-other/data", wantErr: "路径错误，必须选择硬盘的路径或者/root的路径"},
+		{name: "root prefix", path: "/root-other/data", wantErr: "路径错误，必须选择硬盘的路径或者/root的路径"},
+		{name: "parent escape", path: "/mnt/../etc", wantErr: "路径错误，必须选择硬盘的路径或者/root的路径"},
+		{name: "control character", path: "/mnt/data\nother", wantErr: "路径错误，必须选择硬盘的路径或者/root的路径"},
+		{name: "normal nested path", path: "/mnt/data/My Files"},
+		{name: "root anchor", path: "/root", wantErr: "路径错误，必须选择硬盘的路径或者/root的路径"},
+		{name: "mount anchor", path: "/mnt", wantErr: "路径错误，必须选择硬盘的路径或者/root的路径"},
 	}
 
 	for _, tt := range tests {
@@ -36,8 +43,8 @@ func TestValidateDownloadPath(t *testing.T) {
 func TestBuildEnsureDownloadDirCommands(t *testing.T) {
 	got := BuildEnsureDownloadDirCommands("/mnt/download")
 	want := []string{
-		"if [ ! -d '/mnt/download' ]; then mkdir -p '/mnt/download'; fi",
-		"chmod 777 '/mnt/download'",
+		"if [ ! -d /mnt/download ]; then mkdir -p /mnt/download; fi",
+		"chmod 777 /mnt/download",
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("expected %#v, got %#v", want, got)

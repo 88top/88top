@@ -1,104 +1,55 @@
 <template>
     <Card :title='$gettext("远程域名")' :showSettings="true" style="width: 100%;height: 100%; display: block;">
-        <template #icon>
-            <earthIcon color="#00a63e" class="icon" />
-        </template>
+        <template #icon><earthIcon color="#00a63e" class="icon" /></template>
         <template #settings>
-            <div class="btn_settings" @click="onSetting">
-                <earthIcon color="#0a0a0a" class="icon1 earthIcon" style="margin-right: 6px;" />
-                {{ $gettext("域名配置") }}
-            </div>
+            <button type="button" class="btn_settings" @click="onSetting">
+                <earthIcon color="#0a0a0a" class="icon1 earthIcon" style="margin-right: 6px;" />{{ $gettext("域名配置") }}
+            </button>
         </template>
-        <div class="content">
+        <div class="content service-remote">
             <div class="tab">
-                <div class="item cloud" :class="{ active: activeIndex == 0 }" @click="tabChange(0)">
-                    <earthIcon color="#155dfc" class="icon2" />
-                    <div class="title">DDNSTO</div>
-                    <span v-if="DdnsStatus?.ddnstoDomain">{{ $gettext("正常") }}</span>
-                    <span v-else>{{ $gettext("未启动") }}</span>
-                </div>
-                <div class="item memory" v-if="ipv4Domain" :class="{ active: activeIndex == 1 }" @click="tabChange(1)">
-                    <topologyIcon color="#00a63e" class="icon2" />
-                    <div class="title">IPv4</div>
-                    <span v-if="ipv4Domain == 'Stopped' || ipv4Domain == 'Disabled'">{{ $gettext("离线") }}</span>
-                    <span v-else>{{ $gettext("正常") }}</span>
-                </div>
-                <div class="item network" v-if="ipv6Domain" :class="{ active: activeIndex == 2 }" @click="tabChange(2)">
-                    <routerIcon class="icon2" />
-                    <div class="title">IPv6</div>
-                    <span v-if="ipv6Domain == 'Stopped' || ipv6Domain == 'Disabled'">{{ $gettext("离线") }}</span>
-                    <span v-else>{{ $gettext("正常") }}</span>
-                </div>
+                <button type="button" :aria-pressed="activeIndex == 0" class="item cloud" :class="{ active: activeIndex == 0 }" @click="tabChange(0)">
+                    <earthIcon color="#155dfc" class="icon2" /><div class="title">DDNSTO</div>
+                    <span :data-service-state="domainState(DdnsStatus?.ddnstoDomain)">{{ stateLabel(domainState(DdnsStatus?.ddnstoDomain), english) }}</span>
+                </button>
+                <button type="button" :aria-pressed="activeIndex == 1" class="item memory" v-if="ipv4Domain" :class="{ active: activeIndex == 1 }" @click="tabChange(1)">
+                    <topologyIcon color="#00a63e" class="icon2" /><div class="title">IPv4</div>
+                    <span :data-service-state="domainState(DdnsStatus?.ipv4Domain)">{{ stateLabel(domainState(DdnsStatus?.ipv4Domain), english) }}</span>
+                </button>
+                <button type="button" :aria-pressed="activeIndex == 2" class="item network" v-if="ipv6Domain" :class="{ active: activeIndex == 2 }" @click="tabChange(2)">
+                    <routerIcon class="icon2" /><div class="title">IPv6</div>
+                    <span :data-service-state="domainState(DdnsStatus?.ipv6Domain)">{{ stateLabel(domainState(DdnsStatus?.ipv6Domain), english) }}</span>
+                </button>
             </div>
-            <div class="info" v-if="activeIndex == 0">
-                <div class="status">
-                    <div>DDNSTO</div>
-                    <span v-if="DdnsStatus?.ddnstoDomain">{{ $gettext("正常") }}</span>
-                    <span v-else class="offline">{{ $gettext("未启动") }}</span>
-                </div>
-                <div class="title_box">
-                    <div class="title">{{ $gettext("智能内网穿透服务") }}</div>
-                    <div class="path">
-                        <a v-if="DdnsStatus?.ddnstoDomain" class="configure" :href="DdnsStatus?.ddnstoDomain"
-                            target="_blank" rel="noopener noreferrer" :title="DdnsStatus?.ddnstoDomain">
-                            {{ DdnsStatus?.ddnstoDomain }}
-                        </a>
-                        <div v-else>{{ $gettext("未安装或未配置") }}</div>
-                        <span><a class="item_btn" href="https://www.kooldns.cn/app/#/devices" target="_blank">{{
-                            $gettext("控制台")
-                                }}</a></span>
-                    </div>
-                </div>
+            <div class="remote-details" v-if="activeIndex == 0">
+                <div class="remote-address-heading"><span>{{ t('访问地址','Access address') }}</span><a class="remote-console" href="https://www.kooldns.cn/app/#/devices" target="_blank" rel="noopener noreferrer">{{ $gettext("控制台") }}</a></div>
+                <a v-if="DdnsStatus?.ddnstoDomain" class="remote-address" :href="DdnsStatus?.ddnstoDomain" target="_blank" rel="noopener noreferrer" :title="DdnsStatus?.ddnstoDomain">{{ DdnsStatus?.ddnstoDomain }}</a>
+                <p v-else class="service-idle">{{ t('尚未配置访问地址。','No access address is configured.') }}</p>
+                <p class="remote-description">{{ $gettext("智能内网穿透服务") }}</p>
             </div>
-            <div class="info" v-if="activeIndex == 1">
-                <div class="status">
-                    <div>{{ $gettext("当前状态:") }}</div>
-                    <span v-if="ipv4Domain == 'Stopped' || ipv4Domain == 'Disabled'" class="offline">{{ $gettext("离线")
-                        }}</span>
-                    <span v-else>{{ $gettext("正常") }}</span>
-                </div>
-                <div class="title_box">
-                    <div class="title">IPv4 {{ $gettext("动态域名解析") }}</div>
-                    <div class="path">
-                        <div v-if="ipv4Domain == 'Stopped' || ipv4Domain == 'Disabled'">
-                            {{ ipv4Domain }}
-                        </div>
-                        <a class="configure" :href="ipv4Domain" target="_blank" rel="noopener noreferrer" v-else>
-                            {{ ipv4Domain }}
-                        </a>
-                        <a href="/cgi-bin/luci/admin/services/ddns" v-if="ipv4Domain">
-                            <editIcon class="icon3" />
-                        </a>
-                    </div>
-                </div>
+            <div class="remote-details" v-if="activeIndex == 1">
+                <div class="remote-address-heading"><span>IPv4 {{ t('访问地址','Access address') }}</span><a v-if="ipv4Domain" class="remote-console" href="/cgi-bin/luci/admin/services/ddns" :aria-label="t('配置 IPv4 动态域名','Configure IPv4 DDNS')"><editIcon class="icon3" />{{ t('配置','Configure') }}</a></div>
+                <p v-if="ipv4Domain == 'Stopped' || ipv4Domain == 'Disabled'" class="service-idle">{{ t('尚无可用访问地址，请检查域名配置。','No access address is available. Check domain settings.') }}</p>
+                <a v-else class="remote-address" :href="ipv4Domain" target="_blank" rel="noopener noreferrer">{{ ipv4Domain }}</a>
+                <p class="remote-description">{{ $gettext("动态域名解析") }}</p>
             </div>
-            <div class="info" v-if="activeIndex == 2">
-                <div class="status">
-                    <div>{{ $gettext("当前状态:") }}</div>
-                    <span v-if="ipv6Domain == 'Stopped' || ipv6Domain == 'Disabled'" class="offline">{{ $gettext("离线")
-                        }}</span>
-                    <span v-else>{{ $gettext("正常") }}</span>
-                </div>
-                <div class="title_box">
-                    <div class="title">IPv6 {{ $gettext("动态域名解析") }}</div>
-                    <div class="path">
-                        <div v-if="ipv6Domain == 'Stopped' || ipv6Domain == 'Disabled'">
-                            {{ ipv6Domain }}
-                        </div>
-                        <a class="configure" :href="ipv6Domain" target="_blank" rel="noopener noreferrer" v-else>
-                            {{ ipv6Domain }}
-                        </a>
-                        <a href="/cgi-bin/luci/admin/services/ddns" v-if="ipv6Domain">
-                            <editIcon class="icon3" />
-                        </a>
-                    </div>
-                </div>
+            <div class="remote-details" v-if="activeIndex == 2">
+                <div class="remote-address-heading"><span>IPv6 {{ t('访问地址','Access address') }}</span><a v-if="ipv6Domain" class="remote-console" href="/cgi-bin/luci/admin/services/ddns" :aria-label="t('配置 IPv6 动态域名','Configure IPv6 DDNS')"><editIcon class="icon3" />{{ t('配置','Configure') }}</a></div>
+                <p v-if="ipv6Domain == 'Stopped' || ipv6Domain == 'Disabled'" class="service-idle">{{ t('尚无可用访问地址，请检查域名配置。','No access address is available. Check domain settings.') }}</p>
+                <a v-else class="remote-address" :href="ipv6Domain" target="_blank" rel="noopener noreferrer">{{ ipv6Domain }}</a>
+                <p class="remote-description">{{ $gettext("动态域名解析") }}</p>
             </div>
         </div>
     </Card>
 </template>
 
 <script lang="ts" setup>
+import '/@/home/serviceWidgetBody.css'
+import {useOwnedBusinessActions} from "/@/home/useOwnedBusinessActions"
+import {domainState,stateLabel} from '/@/home/servicePresentation'
+const english=window.vue_lang==='en',t=(zh:string,en:string)=>english?en:zh
+const openAction=useOwnedBusinessActions()
+import {useHomeSnapshot} from "/@/home/widgetContext"
 import Card from "../components/Card.vue"
 import earthIcon from "/@/components/svg/earth.vue"
 import topologyIcon from "/@/components/svg/topology.vue"
@@ -155,7 +106,9 @@ const getDdns = function () {
         timerId = window.setTimeout(getDdns, 3000)
     })
 }
+const homeOwned=useHomeSnapshot('remote', value=>{DdnsStatus.value=value;setActiveByStatus()})
 onMounted(() => {
+    if(homeOwned)return
     mounted = true
     timerId = window.setTimeout(getDdns, 1100)
 })
@@ -165,7 +118,7 @@ onUnmounted(() => {
     mounted = false
 })
 const onSetting = () => {
-    ActionDomain({
+    openAction(ActionDomain,{
         url: DdnsStatus.value.ddnstoDomain
     })
 }

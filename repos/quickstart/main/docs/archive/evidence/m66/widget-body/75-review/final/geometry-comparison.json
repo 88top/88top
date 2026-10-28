@@ -1,0 +1,590 @@
+[
+  {
+    "width": 1440,
+    "theme": "light",
+    "widget": "connection",
+    "before": {
+      "x": 944.796875,
+      "y": 177,
+      "width": 463.203125,
+      "height": 294.953125
+    },
+    "after": {
+      "id": "connection",
+      "x": 944.796875,
+      "y": 177,
+      "width": 463.203125,
+      "height": 301.984375,
+      "scrollWidth": 463,
+      "clientWidth": 463
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 1440,
+    "theme": "light",
+    "widget": "storage",
+    "before": {
+      "x": 232,
+      "y": 989.21875,
+      "width": 579,
+      "height": 432
+    },
+    "after": {
+      "id": "storage",
+      "x": 232,
+      "y": 996.25,
+      "width": 579,
+      "height": 402,
+      "scrollWidth": 579,
+      "clientWidth": 579
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 1440,
+    "theme": "light",
+    "widget": "sharing",
+    "before": {
+      "x": 829,
+      "y": 568.21875,
+      "width": 579,
+      "height": 432
+    },
+    "after": {
+      "id": "sharing",
+      "x": 829,
+      "y": 996.25,
+      "width": 579,
+      "height": 402,
+      "scrollWidth": 579,
+      "clientWidth": 579
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 1440,
+    "theme": "light",
+    "widget": "docker",
+    "before": {
+      "x": 232,
+      "y": 1018.21875,
+      "width": 387.59375,
+      "height": 365
+    },
+    "after": {
+      "id": "docker",
+      "x": 232,
+      "y": 1416.25,
+      "width": 387.59375,
+      "height": 380.484375,
+      "scrollWidth": 388,
+      "clientWidth": 388
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 1440,
+    "theme": "light",
+    "widget": "downloads",
+    "before": {
+      "x": 637.59375,
+      "y": 317.21875,
+      "width": 376.203125,
+      "height": 365
+    },
+    "after": {
+      "id": "downloads",
+      "x": 637.59375,
+      "y": 1416.25,
+      "width": 376.203125,
+      "height": 380.484375,
+      "scrollWidth": 376,
+      "clientWidth": 376
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 1440,
+    "theme": "light",
+    "widget": "remote",
+    "before": {
+      "x": 1031.796875,
+      "y": 317.21875,
+      "width": 376.1875,
+      "height": 365
+    },
+    "after": {
+      "id": "remote",
+      "x": 1031.796875,
+      "y": 1416.25,
+      "width": 376.1875,
+      "height": 380.484375,
+      "scrollWidth": 376,
+      "clientWidth": 376
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 1440,
+    "theme": "light",
+    "widget": "system",
+    "before": {
+      "x": 232,
+      "y": 700.21875,
+      "width": 1176,
+      "height": 417
+    },
+    "after": {
+      "id": "system",
+      "x": 232,
+      "y": 1814.734375,
+      "width": 1176,
+      "height": 418,
+      "scrollWidth": 1176,
+      "clientWidth": 1176
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 1440,
+    "theme": "dark",
+    "widget": "connection",
+    "before": {
+      "x": 944.796875,
+      "y": 177,
+      "width": 463.203125,
+      "height": 294.953125
+    },
+    "after": {
+      "id": "connection",
+      "x": 944.796875,
+      "y": 177,
+      "width": 463.203125,
+      "height": 301.984375,
+      "scrollWidth": 463,
+      "clientWidth": 463
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 1440,
+    "theme": "dark",
+    "widget": "storage",
+    "before": {
+      "x": 232,
+      "y": 989.21875,
+      "width": 579,
+      "height": 432
+    },
+    "after": {
+      "id": "storage",
+      "x": 232,
+      "y": 996.25,
+      "width": 579,
+      "height": 402,
+      "scrollWidth": 579,
+      "clientWidth": 579
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 1440,
+    "theme": "dark",
+    "widget": "sharing",
+    "before": {
+      "x": 829,
+      "y": 568.21875,
+      "width": 579,
+      "height": 432
+    },
+    "after": {
+      "id": "sharing",
+      "x": 829,
+      "y": 996.25,
+      "width": 579,
+      "height": 402,
+      "scrollWidth": 579,
+      "clientWidth": 579
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 1440,
+    "theme": "dark",
+    "widget": "docker",
+    "before": {
+      "x": 232,
+      "y": 1018.21875,
+      "width": 387.59375,
+      "height": 365
+    },
+    "after": {
+      "id": "docker",
+      "x": 232,
+      "y": 1416.25,
+      "width": 387.59375,
+      "height": 380.484375,
+      "scrollWidth": 388,
+      "clientWidth": 388
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 1440,
+    "theme": "dark",
+    "widget": "downloads",
+    "before": {
+      "x": 637.59375,
+      "y": 317.21875,
+      "width": 376.203125,
+      "height": 365
+    },
+    "after": {
+      "id": "downloads",
+      "x": 637.59375,
+      "y": 1416.25,
+      "width": 376.203125,
+      "height": 380.484375,
+      "scrollWidth": 376,
+      "clientWidth": 376
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 1440,
+    "theme": "dark",
+    "widget": "remote",
+    "before": {
+      "x": 1031.796875,
+      "y": 317.21875,
+      "width": 376.1875,
+      "height": 365
+    },
+    "after": {
+      "id": "remote",
+      "x": 1031.796875,
+      "y": 1416.25,
+      "width": 376.1875,
+      "height": 380.484375,
+      "scrollWidth": 376,
+      "clientWidth": 376
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 1440,
+    "theme": "dark",
+    "widget": "system",
+    "before": {
+      "x": 232,
+      "y": 700.21875,
+      "width": 1176,
+      "height": 417
+    },
+    "after": {
+      "id": "system",
+      "x": 232,
+      "y": 1814.734375,
+      "width": 1176,
+      "height": 418,
+      "scrollWidth": 1176,
+      "clientWidth": 1176
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 390,
+    "theme": "light",
+    "widget": "connection",
+    "before": {
+      "x": 14,
+      "y": 476.5,
+      "width": 362,
+      "height": 264.34375
+    },
+    "after": {
+      "id": "connection",
+      "x": 14,
+      "y": -972.5,
+      "width": 362,
+      "height": 270.875,
+      "scrollWidth": 362,
+      "clientWidth": 362
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 390,
+    "theme": "light",
+    "widget": "storage",
+    "before": {
+      "x": 14,
+      "y": 1829.703125,
+      "width": 362,
+      "height": 414.5
+    },
+    "after": {
+      "id": "storage",
+      "x": 14,
+      "y": 387.234375,
+      "width": 362,
+      "height": 384.5,
+      "scrollWidth": 362,
+      "clientWidth": 362
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 390,
+    "theme": "light",
+    "widget": "sharing",
+    "before": {
+      "x": 14,
+      "y": 725.203125,
+      "width": 362,
+      "height": 253
+    },
+    "after": {
+      "id": "sharing",
+      "x": 14,
+      "y": 789.734375,
+      "width": 362,
+      "height": 289.484375,
+      "scrollWidth": 362,
+      "clientWidth": 362
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 390,
+    "theme": "light",
+    "widget": "docker",
+    "before": {
+      "x": 14,
+      "y": 996.203125,
+      "width": 362,
+      "height": 205
+    },
+    "after": {
+      "id": "docker",
+      "x": 14,
+      "y": 1097.21875,
+      "width": 362,
+      "height": 215.890625,
+      "scrollWidth": 362,
+      "clientWidth": 362
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 390,
+    "theme": "light",
+    "widget": "downloads",
+    "before": {
+      "x": 14,
+      "y": 1018.203125,
+      "width": 362,
+      "height": 345
+    },
+    "after": {
+      "id": "downloads",
+      "x": 14,
+      "y": 1331.109375,
+      "width": 362,
+      "height": 360.484375,
+      "scrollWidth": 362,
+      "clientWidth": 362
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 390,
+    "theme": "light",
+    "widget": "remote",
+    "before": {
+      "x": 14,
+      "y": 690.203125,
+      "width": 362,
+      "height": 315
+    },
+    "after": {
+      "id": "remote",
+      "x": 14,
+      "y": 1709.59375,
+      "width": 362,
+      "height": 311.984375,
+      "scrollWidth": 362,
+      "clientWidth": 362
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 390,
+    "theme": "light",
+    "widget": "system",
+    "before": {
+      "x": 14,
+      "y": 1018.203125,
+      "width": 362,
+      "height": 148
+    },
+    "after": {
+      "id": "system",
+      "x": 14,
+      "y": 2039.578125,
+      "width": 362,
+      "height": 148,
+      "scrollWidth": 362,
+      "clientWidth": 362
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 390,
+    "theme": "dark",
+    "widget": "connection",
+    "before": {
+      "x": 14,
+      "y": 476.5,
+      "width": 362,
+      "height": 264.34375
+    },
+    "after": {
+      "id": "connection",
+      "x": 14,
+      "y": -972.5,
+      "width": 362,
+      "height": 270.875,
+      "scrollWidth": 362,
+      "clientWidth": 362
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 390,
+    "theme": "dark",
+    "widget": "storage",
+    "before": {
+      "x": 14,
+      "y": 1829.703125,
+      "width": 362,
+      "height": 414.5
+    },
+    "after": {
+      "id": "storage",
+      "x": 14,
+      "y": 387.234375,
+      "width": 362,
+      "height": 384.5,
+      "scrollWidth": 362,
+      "clientWidth": 362
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 390,
+    "theme": "dark",
+    "widget": "sharing",
+    "before": {
+      "x": 14,
+      "y": 725.203125,
+      "width": 362,
+      "height": 253
+    },
+    "after": {
+      "id": "sharing",
+      "x": 14,
+      "y": 789.734375,
+      "width": 362,
+      "height": 289.484375,
+      "scrollWidth": 362,
+      "clientWidth": 362
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 390,
+    "theme": "dark",
+    "widget": "docker",
+    "before": {
+      "x": 14,
+      "y": 996.203125,
+      "width": 362,
+      "height": 205
+    },
+    "after": {
+      "id": "docker",
+      "x": 14,
+      "y": 1097.21875,
+      "width": 362,
+      "height": 215.890625,
+      "scrollWidth": 362,
+      "clientWidth": 362
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 390,
+    "theme": "dark",
+    "widget": "downloads",
+    "before": {
+      "x": 14,
+      "y": 1018.203125,
+      "width": 362,
+      "height": 345
+    },
+    "after": {
+      "id": "downloads",
+      "x": 14,
+      "y": 1331.109375,
+      "width": 362,
+      "height": 360.484375,
+      "scrollWidth": 362,
+      "clientWidth": 362
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 390,
+    "theme": "dark",
+    "widget": "remote",
+    "before": {
+      "x": 14,
+      "y": 690.203125,
+      "width": 362,
+      "height": 315
+    },
+    "after": {
+      "id": "remote",
+      "x": 14,
+      "y": 1709.59375,
+      "width": 362,
+      "height": 311.984375,
+      "scrollWidth": 362,
+      "clientWidth": 362
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  },
+  {
+    "width": 390,
+    "theme": "dark",
+    "widget": "system",
+    "before": {
+      "x": 14,
+      "y": 1018.203125,
+      "width": 362,
+      "height": 148
+    },
+    "after": {
+      "id": "system",
+      "x": 14,
+      "y": 2039.578125,
+      "width": 362,
+      "height": 148,
+      "scrollWidth": 362,
+      "clientWidth": 362
+    },
+    "interpretation": "Natural body height may change; layout document and preferences independently compared exactly in all 24 combinations"
+  }
+]

@@ -8,6 +8,43 @@ import (
 	"github.com/istoreos/quickstart/backend/models"
 )
 
+func TestSpeedPreparationPreservesProviderAndAvoidsReinstall(t *testing.T) {
+	for _, tc := range []struct {
+		name            string
+		selected        string
+		state           models.CapabilityState
+		nativeInstalled bool
+		wantState       models.CapabilityState
+		wantAction      string
+	}{
+		{"legacy missing and alternative installed", "eqos", "not_installed", true, "error", "retry"},
+		{"legacy disabled and alternative installed", "eqos", "disabled", true, "error", "retry"},
+		{"working legacy stays usable", "eqos", "available", true, "available", ""},
+		{"no package keeps installation", "eqos", "not_installed", false, "not_installed", "install"},
+		{"selected native keeps its own diagnosis", nativePolicyProviderName, "error", true, "error", "retry"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			capability := &models.DeviceManagementCapability{State: tc.state, Reason: "original_reason"}
+			decorateCapabilityActions(capability, "quickstart-netpolicy")
+			speed := &models.LANCtrlSpeedLimitModule{Provider: tc.selected, Providers: []*models.RateLimitProviderOption{{ID: nativePolicyProviderName, Installed: tc.nativeInstalled}}}
+			clarifySpeedPreparation(capability, speed)
+			if capability.State != tc.wantState || speed.Provider != tc.selected {
+				t.Fatalf("capability=%+v selected=%s", capability, speed.Provider)
+			}
+			if tc.wantAction == "" {
+				if len(capability.Actions) != 0 {
+					t.Fatalf("unexpected actions: %+v", capability.Actions)
+				}
+			} else if len(capability.Actions) != 1 || capability.Actions[0].Kind != tc.wantAction {
+				t.Fatalf("actions=%+v, want %s", capability.Actions, tc.wantAction)
+			}
+			if tc.selected != nativePolicyProviderName && tc.nativeInstalled && tc.state != "available" && capability.Reason != "selected_provider_unavailable" {
+				t.Fatalf("misleading reason: %s", capability.Reason)
+			}
+		})
+	}
+}
+
 type fakeGlobalConfigLanStatusReader struct {
 	readLanStatusFn func(ctx context.Context) (LanStatusSnapshot, error)
 }
@@ -138,6 +175,90 @@ func TestLanGlobalConfigServiceBuildsParentGatewaySelection(t *testing.T) {
 	}
 	if got := resp.Result.DhcpGlobal.GatewaySels[1].Title; got != "parent" {
 		t.Fatalf("expected second gateway selection title %q, got %q", "parent", got)
+	}
+}
+
+func TestBuildDeviceManagementCapabilityStates(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name       string
+		installed  bool
+		enabled    bool
+		err        error
+		wantState  string
+		wantReason string
+	}{
+		{name: "available", installed: true, enabled: true, wantState: "available"},
+		{name: "disabled", installed: true, wantState: "disabled"},
+		{name: "not installed", wantState: "not_installed", wantReason: "dependency_not_installed"},
+		{name: "status error", installed: true, enabled: true, err: errors.New("read failed"), wantState: "error", wantReason: "status_unavailable"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := buildDeviceManagementCapability(tt.installed, tt.enabled, tt.err)
+			if string(got.State) != tt.wantState || got.Reason != tt.wantReason {
+				t.Fatalf("capability = %#v, want state=%q reason=%q", got, tt.wantState, tt.wantReason)
+			}
+		})
+	}
+}
+
+func TestBuildDeviceManagementCapabilitiesDegradeIndependently(t *testing.T) {
+	t.Parallel()
+
+	capabilities := buildDeviceManagementCapabilities(
+		FloatIPStatus{}, errors.New("float status unavailable"),
+		SpeedLimitStatus{}, nil,
+	)
+	if capabilities.InternetAccess.State != "available" || capabilities.TrafficInsights.State != "available" {
+		t.Fatalf("base capabilities were degraded: %#v", capabilities)
+	}
+	if capabilities.FloatGateway.State != "error" || len(capabilities.FloatGateway.Actions) != 1 || capabilities.FloatGateway.Actions[0].Kind != "retry" {
+		t.Fatalf("floating gateway capability = %#v", capabilities.FloatGateway)
+	}
+	if capabilities.SpeedLimit.State != "not_installed" || len(capabilities.SpeedLimit.Actions) != 1 || capabilities.SpeedLimit.Actions[0].Target != "quickstart-netpolicy" {
+		t.Fatalf("speed capability = %#v", capabilities.SpeedLimit)
+	}
+}
+
+func TestLanGlobalConfigServiceReportsOptionalCapabilityErrorsWithoutLosingDhcp(t *testing.T) {
+	t.Parallel()
+
+	svc := &LanGlobalConfigService{
+		LanStatusReader: &fakeGlobalConfigLanStatusReader{
+			readLanStatusFn: func(ctx context.Context) (LanStatusSnapshot, error) {
+				return LanStatusSnapshot{LanAddr: "192.168.100.1"}, nil
+			},
+		},
+		DhcpStore: &fakeLanDhcpStateReader{
+			loadLanStateFn: func(ctx context.Context) (*LanDhcpState, error) {
+				return &LanDhcpState{}, nil
+			},
+		},
+		FloatIPReader: &fakeGlobalConfigFloatIPReader{
+			readFloatIPStatusFn: func(ctx context.Context) (FloatIPStatus, error) {
+				return FloatIPStatus{}, errors.New("float status unavailable")
+			},
+		},
+		SpeedLimitReader: &fakeGlobalConfigSpeedLimitReader{
+			readSpeedLimitStatusFn: func(ctx context.Context) (SpeedLimitStatus, error) {
+				return SpeedLimitStatus{}, errors.New("speed status unavailable")
+			},
+		},
+	}
+
+	resp, err := svc.GetGlobalConfigs(context.Background())
+	if err != nil {
+		t.Fatalf("optional capability errors must not fail global config: %v", err)
+	}
+	if resp.Result == nil || resp.Result.DhcpGlobal == nil || resp.Result.Capabilities == nil {
+		t.Fatalf("expected dhcp and capabilities, got %#v", resp)
+	}
+	if resp.Result.Capabilities.FloatGateway.State != "error" || resp.Result.Capabilities.SpeedLimit.State != "error" {
+		t.Fatalf("unexpected capabilities: %#v", resp.Result.Capabilities)
 	}
 }
 

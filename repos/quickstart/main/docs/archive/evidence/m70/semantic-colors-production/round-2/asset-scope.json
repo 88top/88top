@@ -1,0 +1,9 @@
+{
+  "result": "passed",
+  "changedAssets": [
+    "luci-static/quickstart/index.js",
+    "luci-static/quickstart/style.css"
+  ],
+  "zipSha256": "f48f04cc82c79e58f15a7fde338a296b547ee9c1ed98b315ca3f8345f7bed029",
+  "otherAssetsByteIdentical": true
+}

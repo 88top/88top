@@ -1,0 +1,60 @@
+{
+  "arch": "x86_64",
+  "packages": [
+    {
+      "path": "/var/cache/build-cache/users/911/projects/quickstart-6fd8ef14aa05/work/sdk-home-016/artifacts/quickstart-home-x64-ipk-0165-20261018-1/ipk/nas/quickstart-netpolicy_0.2.0-test20260928-2_x86_64.ipk",
+      "sha256": "b7302306588c09937283ff837ddfc0c2c5b29432b265fc8e72d8a099f7eeac06",
+      "metadata": {
+        "Package": "quickstart-netpolicy",
+        "Version": "0.2.0-test20260928-2",
+        "Depends": "libc, ca-bundle",
+        "Source": "feeds/nas/network/services/quickstart-netpolicy",
+        "SourceName": "quickstart-netpolicy",
+        "Section": "net",
+        "SourceDateEpoch": "1790733165",
+        "Architecture": "x86_64",
+        "Installed-Size": "2687725",
+        "Description": " Independent eBPF network-policy engine for Quickstart device rate limits."
+      },
+      "elfSha256": "3a1c633f346f876d771b03f622aeff8215920683c5ed1945fca354bac77ba6c2",
+      "payloadFileCount": 6
+    },
+    {
+      "path": "/var/cache/build-cache/users/911/projects/quickstart-6fd8ef14aa05/work/sdk-home-016/artifacts/quickstart-home-x64-ipk-0165-20261018-1/ipk/nas/quickstart_0.16.5-test20261018-2_x86_64.ipk",
+      "sha256": "cdf139034c9c75e7c2815aa983c73ea5cf48f8bce620240051246f3e229e3059",
+      "metadata": {
+        "Package": "quickstart",
+        "Version": "0.16.5-test20261018-2",
+        "Depends": "libc, shadow-utils, shadow-useradd, mount-utils, block-mount, lsblk, e2fsprogs, parted, smartmontools, smartd, smartmontools-drivedb, mdadm, ip-full, ubus, uci, bash",
+        "Source": "feeds/nas/network/services/quickstart",
+        "SourceName": "quickstart",
+        "Section": "net",
+        "SourceDateEpoch": "1790580238",
+        "Architecture": "x86_64",
+        "Installed-Size": "5744894",
+        "Description": " Quickstart is a dashboard & user guide"
+      },
+      "elfSha256": "564422a99fba64a993085adaa3aad55af76dd95f0992e071cd479ab16732e6d9",
+      "payloadFileCount": 10
+    },
+    {
+      "path": "/var/cache/build-cache/users/911/projects/quickstart-6fd8ef14aa05/work/sdk-home-016/artifacts/quickstart-home-x64-ipk-0165-20261018-1/ipk/nas_luci/luci-app-quickstart_0.16.5-test20261018-r2_all.ipk",
+      "sha256": "a700f13cea764b0be1b8559f1817b002bb35421e5f837b20eec574a7ea89a700",
+      "metadata": {
+        "Package": "luci-app-quickstart",
+        "Version": "0.16.5-test20261018-r2",
+        "Depends": "libc, quickstart, luci-app-store",
+        "Source": "feeds/nas_luci/luci/luci-app-quickstart",
+        "SourceName": "luci-app-quickstart",
+        "Section": "luci",
+        "SourceDateEpoch": "1790580253",
+        "Maintainer": "OpenWrt LuCI community",
+        "Architecture": "all",
+        "Installed-Size": "719727",
+        "Description": " LuCI support for quickstart "
+      },
+      "elfSha256": null,
+      "payloadFileCount": 44
+    }
+  ]
+}

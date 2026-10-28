@@ -1,0 +1,18 @@
+{
+  "result": "passed",
+  "assetVersion": "0.16.6-test20261018-preview-f4cff5e-ed50560ff61c",
+  "resources": [
+    {
+      "file": "index.js",
+      "sha256": "7e321e7646e68ddbef0593a22e33f9bca592e85a95888e4ad71d3c370a5fa624",
+      "matchesFrozen": true,
+      "legacyNotice": false
+    },
+    {
+      "file": "style.css",
+      "sha256": "4f92cfa26128ae99c6eeeee515182bc5cd09d92608c0d528f9a9d006e6f5f7ec",
+      "matchesFrozen": true,
+      "legacyNotice": false
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "at": "2026-10-18T00:19:14.077Z",
+  "result": "pass",
+  "suites": 28,
+  "groups": 291,
+  "protectedFiles": 346,
+  "originalBusinessFiles": 64,
+  "originalScriptsAndBindings": 8,
+  "typecheck": {
+    "command": "rtk proxy /var/cache/build-cache/run.sh -- node node_modules/vue-tsc/bin/vue-tsc.js --noEmit",
+    "cwd": "web",
+    "output": "",
+    "result": "pass"
+  },
+  "pid": 15918,
+  "assets": [
+    {
+      "path": "/assets/index.a3f465e9.js",
+      "entry": true,
+      "sha256": "89195b451042f2bb7ffa12d294e749f73f92de6616bac30cffc1ff3fd0de48cd",
+      "bytes": 50129,
+      "buildFile": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work/vue-preview/assets/index.a3f465e9.js"
+    },
+    {
+      "path": "/assets/mount.1e63307d.css",
+      "entry": false,
+      "sha256": "0d703265fb17aa31b959dffb4c00f259b8fa4d2033623904fafa3bfd4187a30c",
+      "bytes": 614142,
+      "buildFile": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work/vue-preview/assets/mount.1e63307d.css"
+    },
+    {
+      "path": "/assets/mount.97b595b3.js",
+      "entry": false,
+      "sha256": "3885e92daa682bcca77d9e475c680df0e617e10f777413d31e42520c98cd6034",
+      "bytes": 1406249,
+      "buildFile": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work/vue-preview/assets/mount.97b595b3.js"
+    }
+  ],
+  "developerVisualReview": "Recorded separately after actual image inspection; automated checks do not prove beauty",
+  "userVisualConfirmation": "pending",
+  "prototypeOnly": true,
+  "physicalRouters": "not accessed",
+  "persistence": "memory only"
+}

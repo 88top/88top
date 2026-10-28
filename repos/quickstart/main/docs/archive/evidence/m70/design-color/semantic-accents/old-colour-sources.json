@@ -1,0 +1,294 @@
+{
+  "reference": "da46bfa",
+  "sources": [
+    {
+      "path": "web/src/pages/index/service/DownloadService.vue",
+      "colours": [
+        {
+          "line": 5,
+          "source": "<downloadIcon color=\"#00a63e\" class=\"icon\" />"
+        },
+        {
+          "line": 9,
+          "source": "<downloadIcon color=\"#0a0a0a\" class=\"icon1 downloadIcon\" style=\"margin-right: 6px;\" />"
+        },
+        {
+          "line": 24,
+          "source": "<downloadIcon color=\"#f54900\" class=\"icon2\" />"
+        },
+        {
+          "line": 30,
+          "source": "<downloadIcon color=\"#4a5565\" class=\"icon2\" />"
+        },
+        {
+          "line": 37,
+          "source": "<downloadIcon color=\"#009689\" class=\"icon2\" />"
+        },
+        {
+          "line": 153,
+          "source": "color: #1e1e1e;"
+        },
+        {
+          "line": 162,
+          "source": "color: #333;"
+        },
+        {
+          "line": 196,
+          "source": "background-color: #fff7ed;"
+        },
+        {
+          "line": 197,
+          "source": "color: #ca3500;"
+        },
+        {
+          "line": 201,
+          "source": "background-color: #f9fafb;"
+        },
+        {
+          "line": 202,
+          "source": "color: #364153;"
+        },
+        {
+          "line": 206,
+          "source": "background-color: #f0fdfa;"
+        },
+        {
+          "line": 207,
+          "source": "color: #277881;"
+        }
+      ]
+    },
+    {
+      "path": "web/src/pages/index/Storage/index.vue",
+      "colours": [
+        {
+          "line": 4,
+          "source": "<shareIcon color=\"#4f39f6\" class=\"icon\" />"
+        },
+        {
+          "line": 8,
+          "source": "<settingIcon color=\"#0a0a0a\" class=\"icon1 settings-icon\" style=\"margin-right: 6px;\" />"
+        },
+        {
+          "line": 21,
+          "source": "<cloudIcon color=\"#155dfc\" class=\"icon2\" />"
+        },
+        {
+          "line": 27,
+          "source": "<memoryIcon color=\"#0bab47\" class=\"icon2\" />"
+        },
+        {
+          "line": 32,
+          "source": "<networkIcon color=\"#9810fa\" class=\"icon2\" />"
+        },
+        {
+          "line": 135,
+          "source": "color: #1e1e1e;"
+        },
+        {
+          "line": 144,
+          "source": "color: #333;"
+        },
+        {
+          "line": 178,
+          "source": "background-color: #eff6ff;"
+        },
+        {
+          "line": 179,
+          "source": "color: #1447e6;"
+        },
+        {
+          "line": 183,
+          "source": "background-color: #dbfce7;"
+        },
+        {
+          "line": 184,
+          "source": "color: #008236;"
+        },
+        {
+          "line": 188,
+          "source": "background-color: #faf5ff;"
+        },
+        {
+          "line": 189,
+          "source": "color: #8200db;"
+        }
+      ]
+    },
+    {
+      "path": "web/src/pages/index/service/RemoteDomain.vue",
+      "colours": [
+        {
+          "line": 4,
+          "source": "<earthIcon color=\"#00a63e\" class=\"icon\" />"
+        },
+        {
+          "line": 8,
+          "source": "<earthIcon color=\"#0a0a0a\" class=\"icon1 earthIcon\" style=\"margin-right: 6px;\" />"
+        },
+        {
+          "line": 15,
+          "source": "<earthIcon color=\"#155dfc\" class=\"icon2\" />"
+        },
+        {
+          "line": 21,
+          "source": "<topologyIcon color=\"#00a63e\" class=\"icon2\" />"
+        },
+        {
+          "line": 235,
+          "source": "color: #333;"
+        },
+        {
+          "line": 270,
+          "source": "background-color: #eff6ff;"
+        },
+        {
+          "line": 271,
+          "source": "color: #1447e6;"
+        },
+        {
+          "line": 275,
+          "source": "background-color: #f0fdf4;"
+        },
+        {
+          "line": 276,
+          "source": "color: #008236;"
+        },
+        {
+          "line": 280,
+          "source": "background-color: #f9fafb;"
+        },
+        {
+          "line": 281,
+          "source": "color: #4a5565;"
+        },
+        {
+          "line": 297,
+          "source": "color: #030213;"
+        },
+        {
+          "line": 306,
+          "source": "color: #fff;"
+        },
+        {
+          "line": 341,
+          "source": "color: #553afb;"
+        }
+      ]
+    },
+    {
+      "path": "web/src/pages/index/network/NetworkFlow.vue",
+      "colours": [
+        {
+          "line": 6,
+          "source": "<flowIcon color=\"#20c7f7\" class=\"icon\" />"
+        },
+        {
+          "line": 22,
+          "source": "<div style=\"color: #1596fd\">{{ currDownload }}</div>"
+        },
+        {
+          "line": 26,
+          "source": "<div style=\"color: #00a63e;\">{{ currUpload }}</div>"
+        },
+        {
+          "line": 35,
+          "source": "<div style=\"color: #1596fd\">{{ currDownload }}</div>"
+        },
+        {
+          "line": 39,
+          "source": "<div style=\"color: #00a63e;\">{{ currUpload }}</div>"
+        },
+        {
+          "line": 50,
+          "source": "<div style=\"color: #155dfc\">2.34 GB</div>"
+        },
+        {
+          "line": 54,
+          "source": "<div style=\"color: #00aea8\">473 MB</div>"
+        },
+        {
+          "line": 58,
+          "source": "<div style=\"color: #9839fb\">1.2 MB/s</div>"
+        },
+        {
+          "line": 62,
+          "source": "<div style=\"color: #f54a00\">156.8 KB/s</div>"
+        },
+        {
+          "line": 554,
+          "source": "color: #999;"
+        },
+        {
+          "line": 560,
+          "source": "color: #333;"
+        }
+      ]
+    },
+    {
+      "path": "web/src/pages/index/network/NetworkConnection.vue",
+      "colours": [
+        {
+          "line": 6,
+          "source": "<topologyIcon color=\"#3a3a3a\" class=\"device-manage-icon\" />"
+        },
+        {
+          "line": 11,
+          "source": "<networkIcon color=\"#0a0a0a\" class=\"icon networkIcon\" />"
+        },
+        {
+          "line": 18,
+          "source": "<successIcon color=\"#00a63e\" class=\"icon\" />"
+        },
+        {
+          "line": 34,
+          "source": "<div class=\"status_time\" style=\"background: #ffe2e2;color: #c10007;\">"
+        },
+        {
+          "line": 42,
+          "source": "<softwareIcon color=\"#9810fa\" style=\"width: 1.5rem;height: 1.5rem;margin-right: 4px;\" />"
+        },
+        {
+          "line": 49,
+          "source": "<div class=\"status_time\" style=\"background: #ffe2e2;color: #c10007;\">{{"
+        },
+        {
+          "line": 58,
+          "source": "<div class=\"status_time\" style=\"background: #ffe2e2;color: #c10007;\">{{"
+        },
+        {
+          "line": 64,
+          "source": "<wifiIcon color=\"#d08700\" class=\"icon\" />"
+        },
+        {
+          "line": 328,
+          "source": "color: #008236;"
+        },
+        {
+          "line": 363,
+          "source": "color: #155dfc;"
+        },
+        {
+          "line": 368,
+          "source": "color: #00a663;"
+        },
+        {
+          "line": 441,
+          "source": "background-color: #00b8db;"
+        },
+        {
+          "line": 453,
+          "source": "background-color: #26a7c7;"
+        },
+        {
+          "line": 462,
+          "source": "background-color: #f751a9;"
+        },
+        {
+          "line": 474,
+          "source": "background-color: #e60076;"
+        }
+      ]
+    }
+  ]
+}

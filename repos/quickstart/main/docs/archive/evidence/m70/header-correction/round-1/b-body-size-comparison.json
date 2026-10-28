@@ -1,0 +1,6 @@
+{
+  "baseline": "baseline-b/b-home-1440.png",
+  "candidate": "round-1/b-final-shell/b-home-1440.png",
+  "widgets": 11,
+  "result": "All real-device card widths, heights and presentation modes unchanged at the same viewport"
+}

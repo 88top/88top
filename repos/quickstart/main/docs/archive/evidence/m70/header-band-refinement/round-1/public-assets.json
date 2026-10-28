@@ -1,0 +1,30 @@
+{
+  "result": "passed",
+  "assetVersion": "0.16.6-test20261018-preview-48b4a95-c648599bf482",
+  "checks": [
+    {
+      "name": "index.js",
+      "sha256": "e38aac759d109d014c0c02d80194727a40ffb4042377c2bece8a7079e2a0579b",
+      "bytes": 789243,
+      "status": 200
+    },
+    {
+      "name": "style.css",
+      "sha256": "6c458793c0f55b2a8529db379493dafda6f37e5eec5cca2ea1c6b55e2e296845",
+      "bytes": 582334,
+      "status": 200
+    },
+    {
+      "name": "vendor.js",
+      "sha256": "2d10df1751d0d3e778744c01f8edf8db96082b8d0939cf65ef38ea05eea39867",
+      "bytes": 631855,
+      "status": 200
+    },
+    {
+      "name": "i18n/en.json",
+      "sha256": "2da3ec81c6d15ca52a574576486e534acf4a040d61adbc34cad360b91af76a4f",
+      "bytes": 88094,
+      "status": 200
+    }
+  ]
+}

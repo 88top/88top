@@ -1,38 +1,36 @@
 <template>
-    <Card :title='$gettext("存储服务")' style="width: 100%;height: 100%; display: block;" :is-settings-menu-open="isSettingsMenuOpen" @update:isSettingsMenuOpen="(val: boolean) => isSettingsMenuOpen = val">
+    <Card :home-menu="[{label:$gettext('统一共享高级配置'),href:'/cgi-bin/luci/admin/nas/unishare'}]" :title='$gettext("存储服务")' style="width: 100%;height: 100%; display: block;" :is-settings-menu-open="isSettingsMenuOpen" @update:isSettingsMenuOpen="(val: boolean) => isSettingsMenuOpen = val">
         <template #icon>
             <shareIcon color="#4f39f6" class="icon" />
         </template>
         <template #settings>
-            <div class="btn_settings" @click="onSetting">
+            <button type="button" class="btn_settings" @click="onSetting">
                 <settingIcon color="#0a0a0a" class="icon1 settings-icon" style="margin-right: 6px;" />
-                <span>{{ $gettext('配置存储服务') }}</span>
-                <div class="rotation" @click.stop="isSettingsMenuOpen = !isSettingsMenuOpen">
-                    <moreItem class="moreIcon" />
-                </div>
-            </div>
+                <span>{{ $gettext('存储配置') }}</span>
+
+            </button>
         </template>
         <template #settings-menu>
             <div><a href="/cgi-bin/luci/admin/nas/unishare">{{ $gettext("统一共享高级配置") }}</a></div>
         </template>
         <div class="content">
             <div class="tab">
-                <div class="item cloud" :class="{ active: activeIndex == 0 }" @click="tabChange(0)">
+                <button type="button" :aria-pressed="activeIndex == 0" class="item cloud" :class="{ active: activeIndex == 0 }" @click="tabChange(0)">
                     <cloudIcon color="#155dfc" class="icon2" />
                     <div class="title">{{ $gettext("易有云") }}</div>
                     <span v-if="service?.linkease?.enabel">{{ $gettext("已配置") }}</span>
                     <span v-else>{{ $gettext("未配置") }}</span>
-                </div>
-                <div class="item memory" :class="{ active: activeIndex == 1 }" @click="tabChange(1)">
+                </button>
+                <button type="button" :aria-pressed="activeIndex == 1" class="item memory" :class="{ active: activeIndex == 1 }" @click="tabChange(1)">
                     <memoryIcon color="#0bab47" class="icon2" />
                     <div class="title">SAMBA</div>
                     <span>{{ service?.sambas?.length ? $gettext('已启用') : $gettext('未启用') }}</span>
-                </div>
-                <div class="item network" :class="{ active: activeIndex == 2 }" @click="tabChange(2)">
+                </button>
+                <button type="button" :aria-pressed="activeIndex == 2" class="item network" :class="{ active: activeIndex == 2 }" @click="tabChange(2)">
                     <networkIcon color="#9810fa" class="icon2" />
                     <div class="title">WEBDAV</div>
                     <span>{{ service?.webdav?.path ? $gettext('已启用') : $gettext('未启用') }}</span>
-                </div>
+                </button>
             </div>
             <linkease-vue v-if="activeIndex == 0" :linkease="service?.linkease"></linkease-vue>
             <samba-vue v-else-if="activeIndex == 1" :sambas="service?.sambas"></samba-vue>
@@ -42,6 +40,9 @@
 </template>
 
 <script lang="ts" setup>
+import {useOwnedBusinessActions} from "/@/home/useOwnedBusinessActions"
+const openAction=useOwnedBusinessActions()
+import {useHomeSnapshot,useHomeProjection} from "/@/home/widgetContext";
 import { ref } from "vue"
 import Card from "../components/Card.vue"
 import shareIcon from "/@/components/svg/share.vue"
@@ -77,9 +78,8 @@ const getData = () => {
         }
     })
 }
-getData()
 const onSetting = () => {
-    ActionNAS({
+    openAction(ActionNAS,{
         setup: 0
     })
 }
@@ -100,6 +100,8 @@ const tabChange = (index: number) => {
     activeIndex.value = index
     hasUserSelectedTab.value = true
 }
+const projection=useHomeProjection()
+if (!useHomeSnapshot('sharing', value => { service.value = projection?.bounded()?{...value,sambas:value.sambas?.slice(0,2)}:value; setActiveByStatus(); if(value.webdav)nasStore.webdav=value.webdav })) getData()
 </script>
 
 <style lang="scss" scoped>

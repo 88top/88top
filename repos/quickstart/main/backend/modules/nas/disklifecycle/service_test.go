@@ -19,6 +19,17 @@ type fakeSnapshotReader struct {
 	readDiskIncludeFreeCalls   int
 }
 
+func TestInitRejectsMismatchedDiskPathBeforeWrites(t *testing.T) {
+	for _, path := range []string{"/dev/sdb", "/tmp/image", "/dev/sda extra"} {
+		reader := &fakeSnapshotReader{readDiskResults: []*DiskSnapshot{{Name: "sda", Path: "/dev/sda", Partitions: []PartitionSnapshot{{MountPoint: "/mnt/data"}}}}}
+		store := &fakeCommandStore{}
+		_, err := NewService(reader, store, &fakeMountPointGenerator{}).InitDisk(context.Background(), InitInput{Name: "sda", Path: path})
+		if err == nil || len(store.eraseCalls)+len(store.unmountCalls)+len(store.ext4Calls)+len(store.makePartCalls) != 0 {
+			t.Fatalf("mismatched identity caused writes: %q", path)
+		}
+	}
+}
+
 func (reader *fakeSnapshotReader) ReadAll(ctx context.Context) ([]DiskSnapshot, error) {
 	if reader.readAllErr != nil {
 		return nil, reader.readAllErr

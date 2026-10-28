@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/istoreos/quickstart/backend/models"
+	"github.com/istoreos/quickstart/backend/utils"
 )
 
 type Store interface {
@@ -22,8 +24,11 @@ func NewService(store Store) *Service {
 }
 
 func (service *Service) StartTest(ctx context.Context, req models.SmartTestRequest) (*models.SmartTestResponse, error) {
+	if !utils.ValidDevicePath(req.DevicePath) || req.Type == "" || strings.ContainsAny(req.Type, "\x00\r\n") {
+		return nil, errors.New("smart参数错误")
+	}
 	stdout, _, err := service.store.OutputWithErr(ctx, []string{
-		fmt.Sprintf("smartctl -t %v %v", req.Type, req.DevicePath),
+		fmt.Sprintf("smartctl -t %v %v", utils.ShellQuote(req.Type), utils.ShellQuote(req.DevicePath)),
 	})
 	model := models.SmartTestResponseResult{}
 	if err != nil {
@@ -35,8 +40,11 @@ func (service *Service) StartTest(ctx context.Context, req models.SmartTestReque
 }
 
 func (service *Service) TestResult(ctx context.Context, req models.SmartTestResultRequest) (*models.SmartTestResultResponse, error) {
+	if !utils.ValidDevicePath(req.DevicePath) || req.Type == "" || strings.ContainsAny(req.Type, "\x00\r\n") {
+		return nil, errors.New("smart获取测试结果失败")
+	}
 	out, err := service.store.Output(ctx, []string{
-		fmt.Sprintf("smartctl -l %v %v", req.Type, req.DevicePath),
+		fmt.Sprintf("smartctl -l %v %v", utils.ShellQuote(req.Type), utils.ShellQuote(req.DevicePath)),
 	})
 	if err != nil {
 		return nil, errors.New("smart获取测试结果失败")
@@ -46,8 +54,11 @@ func (service *Service) TestResult(ctx context.Context, req models.SmartTestResu
 }
 
 func (service *Service) AttributeResult(ctx context.Context, req models.SmartAttributeResultRequest) (*models.SmartAttributeResultResponse, error) {
+	if !utils.ValidDevicePath(req.DevicePath) {
+		return nil, errors.New("smart获取测试结果失败")
+	}
 	out, err := service.store.Output(ctx, []string{
-		fmt.Sprintf("smartctl -A %v", req.DevicePath),
+		fmt.Sprintf("smartctl -A %v", utils.ShellQuote(req.DevicePath)),
 	})
 	if err != nil {
 		return nil, errors.New("smart获取测试结果失败")
@@ -57,8 +68,11 @@ func (service *Service) AttributeResult(ctx context.Context, req models.SmartAtt
 }
 
 func (service *Service) ExtendResult(ctx context.Context, req models.SmartExtendResultRequest) (*models.SmartExtendResultResponse, error) {
+	if !utils.ValidDevicePath(req.DevicePath) {
+		return nil, errors.New("smart获取测试结果失败")
+	}
 	out, err := service.store.Output(ctx, []string{
-		fmt.Sprintf("smartctl -a %v", req.DevicePath),
+		fmt.Sprintf("smartctl -a %v", utils.ShellQuote(req.DevicePath)),
 	})
 	if err != nil {
 		return nil, errors.New("smart获取测试结果失败")

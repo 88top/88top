@@ -1,0 +1,17 @@
+{
+  "expectedSha256": "be4babd8a986d73279f1e75fbb1d33cb41559b75c2063611781bfeb8c2def139",
+  "target": "/builders/shared/openwrt-dl/LVM2.2.03.33.tgz",
+  "observedDuringConcurrentDownloads": [
+    {"sha256": "2fb1dfd39f07d3c37bce2b71816df1e61f7e7c3e959fff8458f9824915254363", "tarMembers": 0},
+    {"sha256": "edb9b0b3ee0d12366c04e1ecdaf7ab734a1e4b3154a34dbd6ed3ecafe945f2a3", "tarMembers": 313}
+  ],
+  "finalSha256AfterStoppingArm": "be4babd8a986d73279f1e75fbb1d33cb41559b75c2063611781bfeb8c2def139",
+  "officialMirror": "https://sources.openwrt.org/LVM2.2.03.33.tgz",
+  "officialDownloadMatchesRecipe": true,
+  "sdkDownloadImplementation": "SDK-local tmp/.filename.flock; shared DL filename.dl and filename.hash; existing-file verification uses the same shared hash temporary file",
+  "diagnosis": "Cross-SDK download competition is consistent with changing archive bytes and the inspected shared temporary names. Stop ARM, let the remaining build retry against the stable validated archive, then build ARM serially.",
+  "manualCacheReplacement": false,
+  "corruptBytesRetained": false,
+  "evidenceLimit": "SDK had completed its download before the quarantine step; only observed bad fingerprints, partial archive counts, and original failure logs remain. No old corrupt archive was fabricated.",
+  "stoppedBuild": "quickstart-home-arm64-0162-20261018-1"
+}

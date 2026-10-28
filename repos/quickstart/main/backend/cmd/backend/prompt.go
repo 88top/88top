@@ -14,9 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jedib0t/go-pretty/v6/list"
 	"github.com/istoreos/quickstart/backend/service"
 	"github.com/istoreos/quickstart/backend/utils"
+	"github.com/jedib0t/go-pretty/v6/list"
 	"github.com/manifoldco/promptui"
 )
 
@@ -266,8 +266,18 @@ func promptInstallX86() error {
 	if err != nil {
 		return err
 	}
+	installer := x86Installer{
+		selectPrompt:      func(prompt promptui.Select) (int, string, error) { return prompt.Run() },
+		logicalSectorSize: readX86LogicalSectorSize,
+		install:           writeX86Disk,
+		output:            os.Stdout,
+	}
+	return installer.run(x86Install)
+}
+
+func (installer x86Installer) run(x86Install *service.DiskInfoForX86Install) error {
 	if len(x86Install.Devs) == 0 {
-		fmt.Println("Warning: No disk to install, please check! (Only support disk > 2.5 GiB)")
+		fmt.Fprintln(installer.output, "Warning: No disk to install, please check! (Only support disk > 2.5 GiB)")
 		return errors.New("No disk to install")
 	}
 
@@ -283,7 +293,7 @@ func promptInstallX86() error {
 			Items: devItems,
 		}
 
-		index, result, err := prompt.Run()
+		index, result, err := installer.selectPrompt(prompt)
 		if err != nil {
 			return err
 		}
@@ -292,6 +302,10 @@ func promptInstallX86() error {
 		}
 
 		dev := x86Install.Devs[index]
+		if err := installer.checkSectorSizes(x86Install.Root, dev); err != nil {
+			fmt.Fprintln(installer.output, "Installation refused:", err)
+			continue
+		}
 		prompt = promptui.Select{
 			Label: fmt.Sprintf("Install %s to %s, Will Loss All Data", x86Install.Root.Name, dev.Target),
 			Items: []string{
@@ -299,7 +313,7 @@ func promptInstallX86() error {
 				"NO",
 			},
 		}
-		_, result, err = prompt.Run()
+		_, result, err = installer.selectPrompt(prompt)
 		if err != nil {
 			return err
 		}
@@ -315,7 +329,7 @@ func promptInstallX86() error {
 				"QUIT",
 			},
 		}
-		_, result, err = prompt.Run()
+		_, result, err = installer.selectPrompt(prompt)
 		if err != nil {
 			return err
 		}
@@ -325,109 +339,119 @@ func promptInstallX86() error {
 			break
 		}
 
-		if len(dev.Mountpoints) > 0 {
-			umounts := make([]string, 0, len(dev.Mountpoints))
-			for _, v := range dev.Mountpoints {
-				umounts = append(umounts, "umount '"+v+"'")
-			}
-			utils.BatchRun(context.TODO(), umounts, 10)
+		// Confirm compatibility again immediately before any unmount or write.
+		if err := installer.checkSectorSizes(x86Install.Root, dev); err != nil {
+			fmt.Fprintln(installer.output, "Installation refused:", err)
+			continue
 		}
-
-		sourceDev := "/dev/" + x86Install.Root.Name
-		reader, err := os.Open(sourceDev)
-		if err != nil {
-			return err
-		}
-		defer reader.Close()
-		vr := &verboseReader{
-			Reader: reader,
-			step:   x86Install.Root.End / 20,
-		}
-		vr.nextStep = vr.step
-		err = utils.Dd(vr, dev.Target, 4096, x86Install.Root.End)
-		if err != nil {
-			return err
-		}
-		target1, err := os.OpenFile(dev.Target, os.O_RDWR, 0)
-		if err != nil {
-			return err
-		}
-		defer target1.Close()
-		target1.WriteAt([]byte("RESET000"), x86Install.Root.End)
-		target1.Close()
-
-		if x86Install.Root.PType == "GPT" {
-			// fix GPT
-			utils.BatchRun(context.TODO(), []string{
-				"from=" + x86Install.Root.Name,
-				"to=" + dev.Name,
-				"boot_parts=3",
-				// rebuild target disk GPT
-				`parted -s "/dev/$to" mktable gpt`,
-				// copy mbr disk id
-				`dd if="/dev/$from" of="/dev/$to" bs=1 skip=440 seek=440 count=4 conv=notrunc,fsync 2>/dev/null`,
-				// copy gpt disk guid
-				`dd if="/dev/$from" of="/dev/$to" bs=8 skip=71 seek=71 count=2 conv=notrunc,fsync 2>/dev/null`,
-				// copy gpt partition entries
-				`dd if="/dev/$from" of="/dev/$to" bs=128 skip=8 seek=8 count=$boot_parts conv=notrunc,fsync 2>/dev/null`,
-				// copy bios_grub partition entry
-				`dd if="/dev/$from" of="/dev/$to" bs=128 skip=135 seek=135 count=1 conv=notrunc,fsync 2>/dev/null`,
-			}, 0)
-
-			crc32Ctx := crc32.NewIEEE()
-			target, err := os.OpenFile(dev.Target, os.O_RDWR, 0)
-			if err != nil {
-				return err
-			}
-			defer target.Close()
-
-			// fix GPT CRC32 of partition entries (little endian)
-			target.Seek(1024, os.SEEK_SET)
-			io.CopyN(crc32Ctx, target, 16384)
-			crc32result := crc32Ctx.Sum32()
-
-			uint32b := make([]byte, 4)
-			binary.LittleEndian.PutUint32(uint32b, crc32result)
-			target.WriteAt(uint32b, 600)
-
-			// fix GPT CRC32 of header
-			crc32Ctx.Reset()
-			target.Seek(512, os.SEEK_SET)
-			io.CopyN(crc32Ctx, target, 16)
-			binary.LittleEndian.PutUint32(uint32b, 0)
-			crc32Ctx.Write(uint32b)
-			target.Seek(532, os.SEEK_SET)
-			io.CopyN(crc32Ctx, target, 72)
-			crc32result = crc32Ctx.Sum32()
-			binary.LittleEndian.PutUint32(uint32b, crc32result)
-			target.WriteAt(uint32b, 528)
-			target.Close()
-
-			// fix alternative GPT
-			utils.BatchRun(context.TODO(), []string{
-				"to=" + dev.Name,
-				"boot_parts=3",
-				`echo Fix | parted "/dev/$to" print >/dev/null`,
-				"for offset in `seq 2 $boot_parts` ; do",
-				`    parted -s "/dev/$to" set $offset msftdata on`,
-				"done",
-				`partprobe "/dev/$to"`,
-			}, 0)
-		}
-
-		utils.BatchRun(context.TODO(), []string{
-			"sync",
-			"echo 3 >/proc/sys/vm/drop_caches",
-		}, 0)
-
-		// reboot
-		fmt.Println("Please Remove the USB manually, wait 3s to reboot...")
-		time.Sleep(time.Second * 3)
-		fmt.Println("Rebooting")
-		utils.BatchRun(context.Background(), []string{"reboot now > /dev/null 2>&1"}, 0)
-		os.Exit(0)
+		return installer.install(x86Install.Root, dev)
 	}
 
+	return nil
+}
+
+func writeX86Disk(root service.DiskInfoForX86Root, dev service.DiskInfoForX86Dev) error {
+	if len(dev.Mountpoints) > 0 {
+		umounts := make([]string, 0, len(dev.Mountpoints))
+		for _, v := range dev.Mountpoints {
+			umounts = append(umounts, "umount '"+v+"'")
+		}
+		utils.BatchRun(context.TODO(), umounts, 10)
+	}
+
+	sourceDev := "/dev/" + root.Name
+	reader, err := os.Open(sourceDev)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+	vr := &verboseReader{
+		Reader: reader,
+		step:   root.End / 20,
+	}
+	vr.nextStep = vr.step
+	err = utils.Dd(vr, dev.Target, 4096, root.End)
+	if err != nil {
+		return err
+	}
+	target1, err := os.OpenFile(dev.Target, os.O_RDWR, 0)
+	if err != nil {
+		return err
+	}
+	defer target1.Close()
+	target1.WriteAt([]byte("RESET000"), root.End)
+	target1.Close()
+
+	if root.PType == "GPT" {
+		// fix GPT
+		utils.BatchRun(context.TODO(), []string{
+			"from=" + root.Name,
+			"to=" + dev.Name,
+			"boot_parts=3",
+			// rebuild target disk GPT
+			`parted -s "/dev/$to" mktable gpt`,
+			// copy mbr disk id
+			`dd if="/dev/$from" of="/dev/$to" bs=1 skip=440 seek=440 count=4 conv=notrunc,fsync 2>/dev/null`,
+			// copy gpt disk guid
+			`dd if="/dev/$from" of="/dev/$to" bs=8 skip=71 seek=71 count=2 conv=notrunc,fsync 2>/dev/null`,
+			// copy gpt partition entries
+			`dd if="/dev/$from" of="/dev/$to" bs=128 skip=8 seek=8 count=$boot_parts conv=notrunc,fsync 2>/dev/null`,
+			// copy bios_grub partition entry
+			`dd if="/dev/$from" of="/dev/$to" bs=128 skip=135 seek=135 count=1 conv=notrunc,fsync 2>/dev/null`,
+		}, 0)
+
+		crc32Ctx := crc32.NewIEEE()
+		target, err := os.OpenFile(dev.Target, os.O_RDWR, 0)
+		if err != nil {
+			return err
+		}
+		defer target.Close()
+
+		// fix GPT CRC32 of partition entries (little endian)
+		target.Seek(1024, os.SEEK_SET)
+		io.CopyN(crc32Ctx, target, 16384)
+		crc32result := crc32Ctx.Sum32()
+
+		uint32b := make([]byte, 4)
+		binary.LittleEndian.PutUint32(uint32b, crc32result)
+		target.WriteAt(uint32b, 600)
+
+		// fix GPT CRC32 of header
+		crc32Ctx.Reset()
+		target.Seek(512, os.SEEK_SET)
+		io.CopyN(crc32Ctx, target, 16)
+		binary.LittleEndian.PutUint32(uint32b, 0)
+		crc32Ctx.Write(uint32b)
+		target.Seek(532, os.SEEK_SET)
+		io.CopyN(crc32Ctx, target, 72)
+		crc32result = crc32Ctx.Sum32()
+		binary.LittleEndian.PutUint32(uint32b, crc32result)
+		target.WriteAt(uint32b, 528)
+		target.Close()
+
+		// fix alternative GPT
+		utils.BatchRun(context.TODO(), []string{
+			"to=" + dev.Name,
+			"boot_parts=3",
+			`echo Fix | parted "/dev/$to" print >/dev/null`,
+			"for offset in `seq 2 $boot_parts` ; do",
+			`    parted -s "/dev/$to" set $offset msftdata on`,
+			"done",
+			`partprobe "/dev/$to"`,
+		}, 0)
+	}
+
+	utils.BatchRun(context.TODO(), []string{
+		"sync",
+		"echo 3 >/proc/sys/vm/drop_caches",
+	}, 0)
+
+	// reboot
+	fmt.Println("Please Remove the USB manually, wait 3s to reboot...")
+	time.Sleep(time.Second * 3)
+	fmt.Println("Rebooting")
+	utils.BatchRun(context.Background(), []string{"reboot now > /dev/null 2>&1"}, 0)
+	os.Exit(0)
 	return nil
 }
 

@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/istoreos/quickstart/backend/models"
@@ -71,7 +72,7 @@ func InstallApp(name string) (string, error) {
 }
 
 func CheckAppIsRunning(name string) bool {
-	cmdStr := fmt.Sprintf("pgrep '(^|/)%v[^/]*$'", name)
+	cmdStr := "pgrep " + utils.ShellQuote("(^|/)"+regexp.QuoteMeta(name)+"[^/]*$")
 	isRunning, err := utils.BatchOutput(context.Background(), []string{cmdStr}, 0)
 	if err != nil {
 		return false
@@ -159,7 +160,7 @@ func (quickstartConfigStore) EnsureConfig(ctx context.Context) error {
 }
 
 func (quickstartConfigStore) Run(ctx context.Context, commands []string) error {
-	return utils.BatchRun(ctx, commands, 0)
+	return utils.BatchRun(ctx, append([]string{"set -e"}, commands...), 0)
 }
 
 func (quickstartConfigStore) Output(ctx context.Context, commands []string) (string, error) {

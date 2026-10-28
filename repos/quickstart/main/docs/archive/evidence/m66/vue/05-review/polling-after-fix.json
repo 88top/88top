@@ -1,0 +1,8 @@
+{
+  "checkedAt": "2026-10-14T05:54:13.668Z",
+  "method": "Real 11-second wait after three home visits",
+  "leaving": 6,
+  "after": 6,
+  "noPollingAfterUnmount": true,
+  "result": "pass"
+}

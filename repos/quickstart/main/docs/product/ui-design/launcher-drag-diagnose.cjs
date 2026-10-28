@@ -1,0 +1,8 @@
+const {run}=require('./direct-test-utils.cjs');
+run('launcher-drag-diagnose',async({page,visit,report})=>{
+ await visit();await page.locator('[data-applications-hub] [data-widget-more]').click();await page.locator('[data-widget-menu-item=favorites]').click();await page.getByRole('tab',{name:/已安装应用/}).click();await page.locator('[data-select-app=docker]').click();await page.locator('.launcher-editor-preview').scrollIntoViewIfNeeded();
+ await page.evaluate(()=>{window.__dragEvents=[];for(const name of ['pointerdown','pointermove','pointerup','pointercancel','gotpointercapture','lostpointercapture','blur','resize'])window.addEventListener(name,e=>{if(window.__dragEvents.length<60)window.__dragEvents.push({name,target:e.target?.className,x:e.clientX,y:e.clientY,button:e.button,active:!!document.querySelector('[data-shortcut-drag]')})},true)});
+ const source=await page.locator('[data-shortcut-handle=docker]').boundingBox(),target=await page.locator('[data-editor-shortcut]').nth(1).boundingBox();
+ const snapshot=async(name)=>{const state=await page.evaluate(()=>({order:[...document.querySelectorAll('[data-editor-shortcut]')].map(e=>e.dataset.editorShortcut),active:document.querySelector('[data-shortcut-drag]')?.dataset.shortcutDrag,events:window.__dragEvents}));report.checks.push({name,source,target,...state});console.log(JSON.stringify({name,source,target,...state}))};
+ await page.mouse.move(source.x+source.width/2,source.y+source.height/2);await page.mouse.down();await snapshot('down');await page.mouse.move(target.x+target.width/2,target.y+target.height/2,{steps:8});await page.waitForTimeout(200);await snapshot('move');await page.mouse.up();await snapshot('up');
+}).catch(e=>{console.error(e);process.exitCode=1});

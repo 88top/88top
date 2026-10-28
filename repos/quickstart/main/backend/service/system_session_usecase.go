@@ -31,6 +31,9 @@ func (store defaultSystemSessionStore) ReadToken(ctx context.Context, command st
 }
 
 func systemSessionIDFromRequest(r *http.Request) string {
+	if sid := r.Header.Get("X-Forwarded-Sid"); sid != "" {
+		return sid
+	}
 	sessionID, _ := r.Cookie("sysauth")
 	sessionHTTP, _ := r.Cookie("sysauth_http")
 	sessionHTTPS, _ := r.Cookie("sysauth_https")

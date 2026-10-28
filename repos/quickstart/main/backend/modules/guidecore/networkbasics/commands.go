@@ -5,6 +5,8 @@ import (
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/istoreos/quickstart/backend/utils"
 )
 
 type InterfaceInput struct {
@@ -18,8 +20,8 @@ type InterfaceInput struct {
 func BuildPPPoECommands(account string, password string) []string {
 	return []string{
 		fmt.Sprintf("uci set network.wan.proto='%v'", "pppoe"),
-		fmt.Sprintf("uci set network.wan.username='%v'", account),
-		fmt.Sprintf("uci set network.wan.password='%v'", password),
+		fmt.Sprintf("uci set network.wan.username=%v", utils.ShellQuote(account)),
+		fmt.Sprintf("uci set network.wan.password=%v", utils.ShellQuote(password)),
 		"uci del network.wan.dns",
 		"uci del network.wan.peerdns",
 		"uci del network.wan.defaultroute",
@@ -28,11 +30,17 @@ func BuildPPPoECommands(account string, password string) []string {
 }
 
 func BuildInterfaceCommandBatches(input InterfaceInput) ([][]string, error) {
+	if input.Proto != "static" && input.Proto != "dhcp" {
+		return nil, fmt.Errorf("not a valid protocol")
+	}
+	if input.Gateway != "" && net.ParseIP(input.Gateway) == nil {
+		return nil, fmt.Errorf("not a valid gateway")
+	}
 	batches := [][]string{{
 		"uci set network.wan.defaultroute=0",
 		"uci set network.lan.defaultroute=0",
-		fmt.Sprintf("uci del network.%v.defaultroute", input.InterfaceName),
-		fmt.Sprintf("uci set network.%v.proto=%v", input.InterfaceName, input.Proto),
+		fmt.Sprintf("uci del network.%v.defaultroute", utils.ShellQuote(input.InterfaceName)),
+		fmt.Sprintf("uci set network.%v.proto=%v", utils.ShellQuote(input.InterfaceName), utils.ShellQuote(input.Proto)),
 	}}
 
 	if input.Proto == "dhcp" {
@@ -62,7 +70,7 @@ func BuildInterfaceCommandBatches(input InterfaceInput) ([][]string, error) {
 	})
 	if len(input.Gateway) > 0 {
 		batches = append(batches, []string{
-			fmt.Sprintf("uci set network.%v.gateway=%v", input.InterfaceName, input.Gateway),
+			fmt.Sprintf("uci set network.%v.gateway=%v", utils.ShellQuote(input.InterfaceName), utils.ShellQuote(input.Gateway)),
 		})
 	}
 	return batches, nil
@@ -86,7 +94,7 @@ func BuildDNSCommandBatches(interfaceName string, dnsProto string, dnsIPs []stri
 	}
 	for _, dnsIP := range dnsIPs {
 		if len(dnsIP) > 0 {
-			cmdList = append(cmdList, fmt.Sprintf("uci add_list network.%v.dns='%v'", interfaceName, dnsIP))
+			cmdList = append(cmdList, fmt.Sprintf("uci add_list network.%v.dns=%v", utils.ShellQuote(interfaceName), utils.ShellQuote(dnsIP)))
 		}
 	}
 	batches = append(batches, cmdList)
@@ -104,7 +112,7 @@ func subnetMaskToLen(netmask string) (int, error) {
 		if err != nil {
 			return 0, fmt.Errorf("ipMaskToInt call strconv.Atoi error:[%v] string value is: [%s]", err, value)
 		}
-		if intValue > 255 {
+		if intValue < 0 || intValue > 255 {
 			return 0, fmt.Errorf("netmask cannot greater than 255, current value is: [%s]", value)
 		}
 		ipv4MaskArr[i] = byte(intValue)

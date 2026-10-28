@@ -1,0 +1,63 @@
+{
+  "result": "passed",
+  "checks": [
+    {
+      "command": [
+        "npm",
+        "--prefix",
+        "web",
+        "run",
+        "tsc"
+      ],
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "web/test/formalDeviceUi.test.mjs"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "output": "/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/94c4-develop-quicksta/quickstart/web/dist",
+  "nodeModules": "/var/cache/build-cache/users/911/projects/quickstart-6fd8ef14aa05/work/web-deps/node_modules",
+  "builtAssets": {
+    "luci-static/quickstart/vendor.js": "2d10df1751d0d3e778744c01f8edf8db96082b8d0939cf65ef38ea05eea39867",
+    "luci-static/quickstart/index.js": "c6c73c2f173ba5a91a0997ecb1bb35062ca93c038ec809691d5df45a364e742d",
+    "luci-static/quickstart/style.css": "d915eea2e0603d24fe16d6d06709864e2e484e36c7648611de65160bf977dd99",
+    "luci-static/quickstart/i18n/zh-cn.json": "799a23b2c098bf689311a3cb54dead69d472234861cc84c1ecb2f116f5bea1f3",
+    "luci-static/quickstart/i18n/en.json": "2da3ec81c6d15ca52a574576486e534acf4a040d61adbc34cad360b91af76a4f",
+    "luci-static/quickstart/device-icons/unknown.webp": "586f82007312632c62a888778f24e7283430db40e86d5e60ed7595c264fb1813",
+    "luci-static/quickstart/device-icons/printer.webp": "98963de59f526c38eea9861d4276e4a67a7377bc6c209de18ee248e3dcdcb1eb",
+    "luci-static/quickstart/device-icons/sensor.webp": "e222377ea4916504d49974fa87d3b2e58145d9f81edb6df07e8e93522a2fd3c3",
+    "luci-static/quickstart/device-icons/network-bridge.webp": "d5fd123d4e3792fd6f4cfe3b2f319022bf120092b7d577786d86e9fcd39d12a2",
+    "luci-static/quickstart/device-icons/tv.webp": "79077d3a0ff8dc84acbd90694833332b42e19f5793fb555f370bf849a201b2bd",
+    "luci-static/quickstart/device-icons/laptop.webp": "b5bd95e817420998d8134a5dca82d00800284640144f48931c6e744d37a2d0fe",
+    "luci-static/quickstart/device-icons/door-lock.webp": "c42d86fd75aeb665f9066ade02e5cad7946c4ef2267cc13348e558fc532e4473",
+    "luci-static/quickstart/device-icons/camera.webp": "672faae9d2402c13da85b48186d1e4200542ebab8e9daf68b7c0ae26fe622fc6",
+    "luci-static/quickstart/device-icons/game-console.webp": "4206a5805bf63af3fd2dd3b43f0021de658ade8d8cef89f0014a71f108cf5293",
+    "luci-static/quickstart/device-icons/desktop.webp": "036f4d5390606a91b53d2e12afaa2574107da672e6b31088d3acd11f70d161a5",
+    "luci-static/quickstart/device-icons/home-server.webp": "65890c82967d579e801efdb30de338408a96ef956411a944ab74f97a06b126f9",
+    "luci-static/quickstart/device-icons/gaming.webp": "085dd683126431571e8040ebaf9e438c14b495bafb3388656d2fdbd4f1d76e48",
+    "luci-static/quickstart/device-icons/set-top-box.webp": "8712b0ad0d1c6e3a371e824735854eff92f756db82e9d90ffdd88cf5edcc3da4",
+    "luci-static/quickstart/device-icons/manifest.json": "393f9be7ca9252a94646a8111814df2a9e07690cd5777392fab85053b36e7309",
+    "luci-static/quickstart/device-icons/phone.webp": "15639ef366a0602dc90aef6df68ce3cc7a2f403c52dde4c9d1510e15cd6842ea",
+    "luci-static/quickstart/device-icons/smart-speaker.webp": "a501cc7ea35f3660af0248b57773272c673959b8574689a9d32e3116ac8987ce",
+    "luci-static/quickstart/device-icons/smart-home.webp": "ec1694171dfdeede9bd5d2f8f075a6a8fed00a2e877ccca25d3edf3ab4288c23",
+    "luci-static/quickstart/device-icons/wearable.webp": "4da8efb8ec12fd9113569a8fbfa39c78c8f2ada9beec29d783057e07878be319",
+    "luci-static/quickstart/device-icons/network-switch.webp": "ce53010376bd3ed847bff478c03eaf032368f430611d6a3403ae7dbd0be0c8eb",
+    "luci-static/quickstart/device-icons/smart-bulb.webp": "82f8e187cc1a643a75f656c24cd18aa9c21290b9332ccfcdf9fb7638ce7bbf94",
+    "luci-static/quickstart/device-icons/robot-vacuum.webp": "818178d38f30d54923eb134e992182a4105deb39b4bf2aca0710ffde8f9adf7e",
+    "luci-static/quickstart/device-icons/access-point.webp": "14b2b7ab688d6245a26db5046f3b0ca86cd44c60fdbd36d55be5feac7a79d94f",
+    "luci-static/quickstart/device-icons/e-reader.webp": "b4e6e7f9a9a1f8add0bb36d944680e14c0b52f34cdf859178103d5a5d76329e6",
+    "luci-static/quickstart/device-icons/air-conditioner.webp": "c0e54cc7ad393c841305ef733aebc84e558ad42c2f123f66f9c0ff8e3f31f565",
+    "luci-static/quickstart/device-icons/projector.webp": "df70cb8ce47f9d3c19d9cfa71b940e2c33c723786162aa40ab5a49842ff1e212",
+    "luci-static/quickstart/device-icons/computer.webp": "82bb257156dc0dc2d457913cf3ab937d6c89509f99221864794f4c9fa7188189",
+    "luci-static/quickstart/device-icons/thermostat.webp": "34966b0ea77c04ae05cccbe1af11bd5cf93e8ccf9aa538f120fba4d3be7df02d",
+    "luci-static/quickstart/device-icons/network.webp": "99ad870128e25713c73276064969629d0f7dd637946e0087ebabab2fc69493e1",
+    "luci-static/quickstart/device-icons/handheld-game.webp": "e60ed0dbda76dbfd9729d881bc7c56c4003baa02da71e3860abbeb47a61d4996",
+    "luci-static/quickstart/device-icons/storage.webp": "797b4c4ebe880dfddd8c94f98ee2d13a910f9dbd6787ea690cddeec49a3a0cf5",
+    "luci-static/quickstart/device-icons/tablet.webp": "557b1d381a1d02809e7e64a12f7f9aa55a5fa888539a0d2a3769b08bfba3fc06"
+  }
+}

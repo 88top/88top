@@ -51,7 +51,7 @@ func (store defaultShareUserStore) CreateUser(ctx context.Context, index int, in
 		"add unishare user ",
 		fmt.Sprintf("set unishare.%v=%v", target, "user"),
 		fmt.Sprintf("set unishare.%v.username=%v", target, input.UserName),
-		fmt.Sprintf("set unishare.%v.password=%v", target, input.Password),
+		fmt.Sprintf("set unishare.%v.password=%v", target, utils.UCIQuote(input.Password)),
 		"commit unishare",
 	}
 	return utils.UCIBatchRun(ctx, ucicmdList, "/etc/init.d/unishare reload", 0)
@@ -60,7 +60,7 @@ func (store defaultShareUserStore) CreateUser(ctx context.Context, index int, in
 func (store defaultShareUserStore) UpdateUser(ctx context.Context, index int, password string) error {
 	target := fmt.Sprintf("@user[%v]", index)
 	ucicmdList := []string{
-		fmt.Sprintf("set unishare.%v.password=%v", target, password),
+		fmt.Sprintf("set unishare.%v.password=%v", target, utils.UCIQuote(password)),
 		"commit unishare",
 	}
 	return utils.UCIBatchRun(ctx, ucicmdList, "/etc/init.d/unishare reload", 0)

@@ -64,6 +64,10 @@ interface Card {
   tag?: string;
 }
 
+// Declare the existing event so Vue does not also forward the listener to the
+// root div and invoke a navigation/installation action twice for one click.
+defineEmits<{(event: 'click', card: Card): void}>()
+
 // 定义图标组件接口
 interface IconComponent {
   component: any;

@@ -1,0 +1,31 @@
+{
+  "result": "passed",
+  "baseline": "1ecef10",
+  "checks": [
+    {
+      "file": "web/src/pages/index/info/status.vue",
+      "existingScriptIdenticalExceptPresentationImports": true
+    },
+    {
+      "file": "web/src/pages/index/service/DownloadService.vue",
+      "existingScriptIdenticalExceptPresentationImports": true
+    },
+    {
+      "file": "web/src/pages/index/service/RemoteDomain.vue",
+      "existingScriptIdenticalExceptPresentationImports": true
+    },
+    {
+      "file": "web/src/pages/index/service/aria2.vue",
+      "existingScriptIdenticalExceptPresentationImports": true
+    },
+    {
+      "file": "web/src/pages/index/service/qbittorrent.vue",
+      "existingScriptIdenticalExceptPresentationImports": true
+    },
+    {
+      "file": "web/src/pages/index/service/transmission.vue",
+      "existingScriptIdenticalExceptPresentationImports": true
+    }
+  ],
+  "requestLayerDataOwnerBusinessFormsBackendUnchanged": true
+}

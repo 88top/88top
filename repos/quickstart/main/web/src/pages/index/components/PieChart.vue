@@ -17,6 +17,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import * as echarts from 'echarts/core'
+import 'echarts/theme/v5'
 import { PieChart } from 'echarts/charts'
 import { CanvasRenderer } from 'echarts/renderers'
 import { TooltipComponent } from 'echarts/components'
@@ -64,7 +65,7 @@ function getOption(value: number, color?: string): echarts.EChartsCoreOption {
 const initChart = () => {
   if (!chartDom.value) return
   // 复用实例：如果已存在就不再 new 一个
-  chartInstance = chartInstance ?? echarts.init(chartDom.value)
+  chartInstance = chartInstance ?? echarts.init(chartDom.value, 'v5')
   chartInstance.setOption(getOption(props.value, props.color))
 }
 

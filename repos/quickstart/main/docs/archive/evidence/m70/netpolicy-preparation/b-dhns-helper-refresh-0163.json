@@ -1,0 +1,8 @@
+{
+  "target": "192.168.30.244",
+  "result": "passed",
+  "exitCode": 0,
+  "output": "before pid=492910 namespace=dhns sha=d50b179e10c4610fc6c293ae0c095826a160f950a05f82926ca304b73702106d\n91a92aed90db464e247d0dae90467af9b5859daf67463b9b81ec181421c1489d  /proc/512168/exe\nafter pid=512168 namespace=dhns\n",
+  "diagnostic": "",
+  "scope": "Replace the one verified old DHNS process inside its existing network namespace. No UCI, address, route, interface, DHCP, firewall or policy commands."
+}

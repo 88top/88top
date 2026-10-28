@@ -1,16 +1,14 @@
 <template>
-    <Card title="Docker" :showSettings="true" @footer-click="onSetting" style="width: 100%;height: 100%; display: block;" :is-settings-menu-open="isSettingsMenuOpen" @update:isSettingsMenuOpen="(val: boolean) => isSettingsMenuOpen = val">
+    <Card :home-menu="docker?.status==='running'?[{label:$gettext('Docker高级配置'),href:'/cgi-bin/luci/admin/services/dockerman/overview'}]:[]" title="Docker" :showSettings="true" @footer-click="onSetting" style="width: 100%;height: 100%; display: block;" :is-settings-menu-open="isSettingsMenuOpen" @update:isSettingsMenuOpen="(val: boolean) => isSettingsMenuOpen = val">
         <template #icon>
             <dockerIcon color="#155dfc" class="icon" />
         </template>
         <template #settings>
-            <div class="btn_settings" @click="onSetting">
+            <button type="button" class="btn_settings" @click="onSetting">
                 <dockerIcon color="#0a0a0a" class="icon1 dockerIcon" style="margin-right: 6px;" />
-                <span>{{ $gettext('Docker迁移') }}</span>
-                <div class="rotation" @click.stop="isSettingsMenuOpen = !isSettingsMenuOpen" v-if="docker?.status === 'running'">
-                    <moreItem class="moreIcon" />
-                </div>
-            </div>
+                <span>{{ $gettext('数据迁移') }}</span>
+
+            </button>
         </template>
         <template #settings-menu v-if="docker?.status === 'running'">
             <div><a href="/cgi-bin/luci/admin/services/dockerman/overview">{{ $gettext("Docker高级配置") }}</a></div>
@@ -25,12 +23,15 @@
 </template>
 
 <script lang="ts" setup>
+import {useOwnedBusinessActions} from "/@/home/useOwnedBusinessActions"
+const openAction=useOwnedBusinessActions()
 import Card from "../components/Card.vue"
 import dockerIcon from "/@/components/svg/docker.vue"
 import statusVue from './status.vue';
 import moreItem from "/@/components/svg/more.vue"
 
-import { ref } from "vue";
+import { ref, onUnmounted } from "vue";
+import {useHomeSnapshot} from "/@/home/widgetContext";
 import request from '/@/request';
 import ActionDocker from "/@/components/action-docker";
 import { useGettext } from '/@/plugins/i18n'
@@ -42,7 +43,7 @@ const docker = ref<GuideDockerStatus>()
 const isSettingsMenuOpen = ref(false)
 
 const onSetting = () => {
-    ActionDocker({
+    openAction(ActionDocker,{
         setup: 0
     })
 }
@@ -56,7 +57,7 @@ const getData = () => {
         load.value = true
     })
 }
-setTimeout(getData, 1100)
+if (!useHomeSnapshot('docker', value => { docker.value=value; load.value=true })) { const timer=setTimeout(getData,1100); onUnmounted(()=>clearTimeout(timer)) }
 </script>
 
 <style lang="scss" scoped>

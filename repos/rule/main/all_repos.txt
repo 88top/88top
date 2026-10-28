@@ -20,6 +20,7 @@ timeflysoon/DriverStoreExplorer              88alt/DriverStoreExplorer
 timeflysoon/github-chinese                   88alt/github-chinese
 timeflysoon/gl-inet-onescript                88alt/gl-inet-onescript
 timeflysoon/gopeed                           88alt/gopeed
+timeflysoon/honk                             88alt/honk
 timeflysoon/img-installer                    88alt/img-installer
 timeflysoon/immortalwrt                      88alt/immortalwrt
 timeflysoon/ImmortalWrt-ImageBuilder         88alt/ImmortalWrt-ImageBuilder
@@ -36,7 +37,6 @@ timeflysoon/Nrfr                             88alt/Nrfr
 timeflysoon/Open-Box (private)               88alt/Open-Box (private)
 timeflysoon/OpenBackRestore                  88alt/OpenBackRestore
 timeflysoon/OpenClash                        88alt/OpenClash
-timeflysoon/openwrt-daede                    88alt/openwrt-daede
 timeflysoon/OpenWrtAction                    88alt/OpenWrtAction
 timeflysoon/Prism-Browser-Community          88alt/Prism-Browser-Community
 timeflysoon/Prism-Browser-Free (private)     88alt/Prism-Browser-Free (private)

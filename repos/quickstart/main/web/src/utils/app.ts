@@ -51,13 +51,15 @@ const exports =  {
             })
         })
     },
-    checkAndInstallApp : async (pkg: string, app: string, installPkg?: string) => {
+    checkAndInstallApp : async (pkg: string, app: string, installPkg?: string, proceed?:()=>boolean) => {
+        if (proceed && !proceed()) return false
         let load = Toast.Loading($gettext("检查中..."))
         try {
             const res = await request.App.Check.POST({
                 name: pkg
             })
             load.Close()
+            if (proceed && !proceed()) return false
             if (res?.data) {
                 const { result, error } = res.data
                 if (error) {

@@ -1,6 +1,41 @@
 package guideddns
 
-import "testing"
+import (
+	"bytes"
+	"context"
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/istoreos/quickstart/backend/utils"
+)
+
+func TestDDNSValuesRemainLiteralShellArguments(t *testing.T) {
+	dir := t.TempDir()
+	marker, capture := filepath.Join(dir, "executed"), filepath.Join(dir, "arguments")
+	if err := os.WriteFile(filepath.Join(dir, "uci"), []byte("#!/bin/sh\nprintf '%s\\000' \"$@\" >> \"$DDNS_TEST_CAPTURE\"\n"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+":"+os.Getenv("PATH"))
+	t.Setenv("DDNS_TEST_CAPTURE", capture)
+	payload := "two words'; touch " + marker + "; # $(touch " + marker + ")"
+	commands := BuildGuideDDNSApplyCommands(GuideDDNSApplyCommandInput{ConfigName: "myddns_ipv4", UseIPv6: "0", ServiceName: "aliyun.com", Domain: payload, UserName: payload, Password: payload, Interface: "wan", HasPublic: true})
+	if err := utils.BatchRun(context.Background(), commands, 5); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(marker); !os.IsNotExist(err) {
+		t.Fatal("DDNS data executed as shell")
+	}
+	got, err := os.ReadFile(capture)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, field := range []string{"domain", "lookup_host", "username", "password"} {
+		if !bytes.Contains(got, []byte("ddns.myddns_ipv4."+field+"="+payload+"\x00")) {
+			t.Fatalf("%s was altered", field)
+		}
+	}
+}
 
 func TestBuildGuideDDNSServiceNameSupportsKnownProviders(t *testing.T) {
 	t.Parallel()

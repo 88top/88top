@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-10-18T08:40:22.391221+00:00",
+  "apiUrl": "https://api.github.com/repos/istoreos/istoreos-app-hub/releases/tags/quickstart-runtime-v0.15.0-test20260928",
+  "tag": "quickstart-runtime-v0.15.0-test20260928",
+  "assets": [
+    {
+      "name": "quickstart-binary-0.15.0-test20260928.tar.gz",
+      "size": 15150912,
+      "digest": "sha256:d541d86cb3e0f1ee14d9b29cbd13a01f290826dfff3db869944897a7faf3d1cd",
+      "browser_download_url": "https://github.com/istoreos/istoreos-app-hub/releases/download/quickstart-runtime-v0.15.0-test20260928/quickstart-binary-0.15.0-test20260928.tar.gz"
+    },
+    {
+      "name": "quickstart-netpolicy-0.2.0-test20260928-x86_64-unknown-linux-musl.tar.gz",
+      "size": 2686617,
+      "digest": "sha256:a2602b4b4889ea306f50560302c38bdfb5582cc05f90abb22f4e7f8f51f07827",
+      "browser_download_url": "https://github.com/istoreos/istoreos-app-hub/releases/download/quickstart-runtime-v0.15.0-test20260928/quickstart-netpolicy-0.2.0-test20260928-x86_64-unknown-linux-musl.tar.gz"
+    }
+  ]
+}

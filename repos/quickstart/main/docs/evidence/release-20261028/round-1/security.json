@@ -1,0 +1,98 @@
+{
+  "host": "192.168.30.7",
+  "at": "2026-10-28T03:34:55.263419+00:00",
+  "checks": [
+    {
+      "name": "anonymous",
+      "http": 200,
+      "success": -1001,
+      "passed": true
+    },
+    {
+      "name": "forged forwarded headers",
+      "http": 200,
+      "success": -1001,
+      "passed": true
+    },
+    {
+      "name": "zero session",
+      "http": 200,
+      "success": -1001,
+      "passed": true
+    },
+    {
+      "name": "unknown session",
+      "http": 200,
+      "success": -1001,
+      "passed": true
+    },
+    {
+      "name": "non-root live session",
+      "http": 200,
+      "success": -1001,
+      "passed": true
+    },
+    {
+      "name": "sysauth valid root",
+      "http": 200,
+      "passed": false
+    },
+    {
+      "name": "sysauth_http valid root",
+      "http": 200,
+      "passed": false
+    },
+    {
+      "name": "sysauth_https valid root",
+      "http": 200,
+      "passed": false
+    },
+    {
+      "name": "cross-origin JSON",
+      "http": 500,
+      "success": null,
+      "passed": false
+    },
+    {
+      "name": "cross-origin text",
+      "http": 500,
+      "success": null,
+      "passed": false
+    },
+    {
+      "name": "null origin",
+      "http": 500,
+      "success": null,
+      "passed": false
+    },
+    {
+      "name": "cross-site fetch",
+      "http": 200,
+      "success": -1000,
+      "passed": false
+    },
+    {
+      "name": "same-site fetch",
+      "http": 200,
+      "success": -1000,
+      "passed": false
+    },
+    {
+      "name": "HTML form",
+      "http": 500,
+      "success": null,
+      "passed": false
+    },
+    {
+      "name": "plain text",
+      "http": 500,
+      "success": null,
+      "passed": false
+    }
+  ],
+  "businessReads": [],
+  "passwordLoginVerified": false,
+  "tlsCertificateTrusted": false,
+  "temporarySessionsDestroyed": true,
+  "securityPassed": false
+}

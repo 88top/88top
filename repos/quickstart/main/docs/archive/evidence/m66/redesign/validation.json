@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-10-14T07:08:06.120Z",
+  "sourceHashes": {
+    "web/src/design/StudioGlyph.vue": "4db1eb78d4faf9bea177d5a509f873ee020a6a9fc8e422bc985ac6e014083400",
+    "web/src/design/StudioHome.vue": "b9c083c435617025cc6fbb19c908fabd8c745a4bb00abf4b6cc0754462ec3e08",
+    "web/src/design/studio.css": "1751e46d79488a1ab4d1195bdc115ce61ca1cc7cd3fcc6c67293ef3b707c2904",
+    "web/src/design/studioModel.ts": "8af86bfb7edc2e02c37cb5426c956fde704485a7f4a84cd25e68117f7c66af20"
+  },
+  "prototypeResult": "pass",
+  "frontendTests": {
+    "passed": 65,
+    "failed": 0
+  },
+  "typecheck": "pass",
+  "productionBuild": "pass",
+  "productionDesignEntryScan": "pass",
+  "previewOutput": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work/vue-preview",
+  "productionOutput": "web/dist (project explicit output)",
+  "designStatus": "ready_for_review",
+  "productionHomeStatus": "awaiting_design_choice"
+}

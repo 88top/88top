@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "currentProvider": "eqos",
+  "components": [
+    {"id":"quickstart-native","capabilityKey":"device_speed_limit","package":"quickstart-netpolicy","provider":"quickstart-native","selected":false,"status":{"state":"not_installed","reason":"dependency_not_installed","actions":[{"kind":"install"}]}},
+    {"id":"eqos","capabilityKey":"compat_speed_limit","package":"luci-app-eqos","provider":"eqos","selected":true,"status":{"state":"available"}},
+    {"id":"floatip","capabilityKey":"floating_gateway","package":"app-meta-floatip","selected":false,"status":{"state":"disabled"}}
+  ]
+}

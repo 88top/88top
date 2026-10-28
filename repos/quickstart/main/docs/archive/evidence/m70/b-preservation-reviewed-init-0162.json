@@ -1,0 +1,36 @@
+{
+  "host": "192.168.30.244",
+  "checks": [
+    "/etc/quickstart/home-layout.json",
+    "/etc/quickstart/home-layout.json.bak",
+    "/etc/quickstart/home-layout.json.damaged",
+    "/etc/quickstart/home-layout.json.bak.damaged",
+    "/etc/quickstart/home-launcher.json",
+    "/etc/quickstart/home-launcher.json.bak",
+    "/etc/quickstart/home-launcher.json.damaged",
+    "/etc/quickstart/home-launcher.json.bak.damaged",
+    "/etc/config/network",
+    "/etc/config/dhcp",
+    "/etc/config/firewall",
+    "/etc/config/eqos",
+    "/etc/config/floatip",
+    "/etc/config/quickstart",
+    "/etc/quickstart/device-classifications.json",
+    "/etc/quickstart/device-profiles.json",
+    "/etc/quickstart/manual-devices.json",
+    "/etc/quickstart/device-groups.json",
+    "/etc/quickstart/rate-limit-provider",
+    "LAN address and default route unchanged"
+  ],
+  "normalizations": [
+    {
+      "path": "/etc/config/network",
+      "beforeSha256": "49f8c014fd60ef9b0cb3e29ada73ac95991879064576c152e0bfbb26379f7dc4",
+      "afterSha256": "ce86a957cc5702d312e8b5c80c2d2b6e54bcbab95012a9cf49158bb5fb429aa0",
+      "onlyChange": "list ports 'dheth0'",
+      "recoveredPrivateBackup": "/root/quickstart-package-candidates/home-0162-eda99c4-r2/backup/network.before.recovered"
+    }
+  ],
+  "result": "passed",
+  "defaultRoute": "default via 192.168.30.1 dev br-lan proto static src 192.168.30.244"
+}

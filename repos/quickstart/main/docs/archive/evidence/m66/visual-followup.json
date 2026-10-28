@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-10-14T04:01:44.073Z",
+  "reason": "Caption layout and device-name contrast follow-up",
+  "checks": [
+    {
+      "variant": "A",
+      "viewport": "desktop",
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "tablet",
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "mobile",
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "desktop",
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "tablet",
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "mobile",
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "desktop",
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "tablet",
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "mobile",
+      "overflow": false
+    }
+  ],
+  "result": "pass"
+}

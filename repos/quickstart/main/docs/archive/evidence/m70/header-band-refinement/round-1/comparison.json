@@ -1,0 +1,77 @@
+{
+  "result": "passed",
+  "rows": [
+    {
+      "width": 1440,
+      "touch": false,
+      "oldBlueBottom": 105.59375,
+      "newBlueBottom": 89.59375,
+      "oldFirstTop": 125.59375,
+      "newFirstTop": 109.59375,
+      "headerShift": -16.0,
+      "cardShift": -16.0,
+      "sameContentWidth": true,
+      "sameShell": true
+    },
+    {
+      "width": 1024,
+      "touch": false,
+      "oldBlueBottom": 105.59375,
+      "newBlueBottom": 89.59375,
+      "oldFirstTop": 125.59375,
+      "newFirstTop": 109.59375,
+      "headerShift": -16.0,
+      "cardShift": -16.0,
+      "sameContentWidth": true,
+      "sameShell": true
+    },
+    {
+      "width": 768,
+      "touch": false,
+      "oldBlueBottom": 105.59375,
+      "newBlueBottom": 89.59375,
+      "oldFirstTop": 125.59375,
+      "newFirstTop": 109.59375,
+      "headerShift": -16.0,
+      "cardShift": -16.0,
+      "sameContentWidth": true,
+      "sameShell": true
+    },
+    {
+      "width": 390,
+      "touch": true,
+      "oldBlueBottom": 105.59375,
+      "newBlueBottom": 105.59375,
+      "oldFirstTop": 125.59375,
+      "newFirstTop": 125.59375,
+      "headerShift": 0.0,
+      "cardShift": 0.0,
+      "sameContentWidth": true,
+      "sameShell": true
+    },
+    {
+      "width": 320,
+      "touch": true,
+      "oldBlueBottom": 105.59375,
+      "newBlueBottom": 105.59375,
+      "oldFirstTop": 125.59375,
+      "newFirstTop": 125.59375,
+      "headerShift": 0.0,
+      "cardShift": 0.0,
+      "sameContentWidth": true,
+      "sameShell": true
+    },
+    {
+      "width": 1440,
+      "touch": true,
+      "oldBlueBottom": 105.59375,
+      "newBlueBottom": 105.59375,
+      "oldFirstTop": 125.59375,
+      "newFirstTop": 125.59375,
+      "headerShift": 0.0,
+      "cardShift": 0.0,
+      "sameContentWidth": true,
+      "sameShell": true
+    }
+  ]
+}

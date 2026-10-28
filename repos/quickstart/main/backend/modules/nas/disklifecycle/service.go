@@ -166,7 +166,7 @@ func (svc *Service) InitDisk(ctx context.Context, input InitInput) (*models.NasD
 	}
 
 	disk, err := svc.snapshotReader.ReadDisk(ctx, input.Name)
-	if err != nil || disk == nil || disk.Name != input.Name {
+	if err != nil || disk == nil || disk.Name != input.Name || disk.Path == "" || disk.Path != input.Path {
 		return nil, errors.New("disk not found")
 	}
 	for _, partition := range disk.Partitions {
@@ -177,15 +177,15 @@ func (svc *Service) InitDisk(ctx context.Context, input InitInput) (*models.NasD
 		}
 	}
 
-	if err := svc.commandStore.Erase(input.Path); err != nil {
+	if err := svc.commandStore.Erase(disk.Path); err != nil {
 		return nil, err
 	}
 	if usesDirectDeviceFormat(input.Name) {
-		if err := svc.commandStore.Ext4Partition(input.Path); err != nil {
+		if err := svc.commandStore.Ext4Partition(disk.Path); err != nil {
 			return nil, err
 		}
 	} else {
-		if err := svc.commandStore.MakePart(input.Path); err != nil {
+		if err := svc.commandStore.MakePart(disk.Path); err != nil {
 			return nil, err
 		}
 		waitRefresh(3 * time.Millisecond)
@@ -236,7 +236,7 @@ func (svc *Service) InitDiskRest(ctx context.Context, input InitRestInput) (*mod
 	}
 
 	disk, err := svc.snapshotReader.ReadDiskIncludeFree(ctx, input.Name)
-	if err != nil || disk == nil || disk.Name != input.Name {
+	if err != nil || disk == nil || disk.Name != input.Name || disk.Path == "" || disk.Path != input.Path {
 		return nil, errors.New("disk not found")
 	}
 	last := findLastPartition(*disk)

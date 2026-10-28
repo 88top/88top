@@ -1,0 +1,874 @@
+{
+  "checkedAt": "2026-10-17T09:10:01.317Z",
+  "base": "http://192.168.9.19:5180",
+  "health": {
+    "owner": "/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/0153-device-lists-sho/quickstart/docs/product/ui-design",
+    "pid": 7753,
+    "mode": "vue-design-built"
+  },
+  "gitHead": "ca6718de1e234e51b9eeef63d659ecafcbe351e8",
+  "gitDirty": true,
+  "assets": [
+    {
+      "path": "/assets/index.495f23c8.js",
+      "entry": true,
+      "sha256": "fe5fdf2234c383a75e79eeb7d92053bf562dc1fda356987c24c52ae4fcf8b528",
+      "bytes": 50120,
+      "buildFile": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work/vue-preview/assets/index.495f23c8.js"
+    },
+    {
+      "path": "/assets/mount.408a11f4.css",
+      "entry": false,
+      "sha256": "92d82c304aa611185e06e4c3b6007843ce30d2f64d5fbdc9f6d12491b0b70390",
+      "bytes": 595724,
+      "buildFile": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work/vue-preview/assets/mount.408a11f4.css"
+    },
+    {
+      "path": "/assets/mount.c11f514e.js",
+      "entry": false,
+      "sha256": "d0ca11451902fa137e6451033fd3c00b30c7c0a5233f3aa015fac6ce1bcb51e6",
+      "bytes": 1404511,
+      "buildFile": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work/vue-preview/assets/mount.c11f514e.js"
+    }
+  ],
+  "sources": [
+    {
+      "path": "web/src/design/CanvasCommonTools.vue",
+      "sha256": "6359b47d4d72603ed12da44509c71fbd3fc3e53fb5a8377468a5da5b5c28e71d"
+    },
+    {
+      "path": "web/src/design/CanvasHome.vue",
+      "sha256": "36aa8e27803945749e68901849a205d360d4ec729c17a000cfabb653afb71afe"
+    },
+    {
+      "path": "web/src/design/CanvasModule.vue",
+      "sha256": "8720d419add98b9c7f0860c079836ca6bb5c899422c5c54ec467867424cddc5a"
+    },
+    {
+      "path": "web/src/design/CanvasTools.vue",
+      "sha256": "c9c532f1e2aedc8204ec3aca8f583852b0654a4fe9571b964a661b471664453e"
+    },
+    {
+      "path": "web/src/design/CompactPreviewCard.vue",
+      "sha256": "f73c0fb7dcd23dd8716b6722283a9aa2d00cd313dd416882d036d5fa6ada16a7"
+    },
+    {
+      "path": "web/src/design/DesignApp.vue",
+      "sha256": "5f621f36988280b846861d2b9cb064504990272809753ce39d0c1d354b38ddc7"
+    },
+    {
+      "path": "web/src/design/DestinationPreview.vue",
+      "sha256": "d0d8aaac1e7d3e11eef74ceb155102d7e55e49bd5bf567d3980e2904fab26780"
+    },
+    {
+      "path": "web/src/design/DevicePreview.vue",
+      "sha256": "fadab9614cb9653ef23581a6236cf6bce95bb1c759d03203af277aba606ec594"
+    },
+    {
+      "path": "web/src/design/DeviceSummary.vue",
+      "sha256": "3bbc4ebe191753041b4f75beaaaef7726bd35c657f124c3276a9ebd62be595b2"
+    },
+    {
+      "path": "web/src/design/DirectEditPanel.vue",
+      "sha256": "c9da84aeab1e9688a55d08eab98c9a2aded86bba3ccbd5cb2cf20ca64a323360"
+    },
+    {
+      "path": "web/src/design/HomeApplications.vue",
+      "sha256": "822dc33ea661b5f0c5c06dd10d6bbe2f5ad403ee7befb9001e77d580e5076e54"
+    },
+    {
+      "path": "web/src/design/HomePreview.vue",
+      "sha256": "21331e7b8069f74f761fab38e47eccfc5b8cc0d84d581a01afb412dfe465a03e"
+    },
+    {
+      "path": "web/src/design/LauncherFavoriteGrid.vue",
+      "sha256": "666a71f0313a49f7d3a9963bbac62c7c88dc705e1948be59a6d7f26ccd86f249"
+    },
+    {
+      "path": "web/src/design/LauncherLinkForm.vue",
+      "sha256": "c1404653e9ae415d03b85a83d4b1f885506da6d26e3cff9994b52202aafe4580"
+    },
+    {
+      "path": "web/src/design/LauncherToolAction.vue",
+      "sha256": "085260b6c9a6e9f1f94aadc39380ca6392e165fbd1638fde9df2850e694f3552"
+    },
+    {
+      "path": "web/src/design/LayoutDesignHome.vue",
+      "sha256": "293e983bccf85c75d778523ccd036cf9337ca3999a57e6327a641f31ffe13be6"
+    },
+    {
+      "path": "web/src/design/LayoutPreviewCard.vue",
+      "sha256": "c97578b22388ab8d459171fb673a5e9c0ca30c66c1f93cdce255eda9c667e43b"
+    },
+    {
+      "path": "web/src/design/NativeBusinessCard.vue",
+      "sha256": "15163767be70b74d09ae1b1fb0d23eed7cabd23452ad55061b6376a134a32097"
+    },
+    {
+      "path": "web/src/design/NativeBusinessHost.vue",
+      "sha256": "19b62eaac836760f05b1653e26c7b73e33d9e87f475c8daa86e3f0d2ec0faf52"
+    },
+    {
+      "path": "web/src/design/NativeBusinessSurface.vue",
+      "sha256": "21a3ca3c1ba47c5eed81961f1d2bca0fccab5400d854cae9082f1d62f8e5aa13"
+    },
+    {
+      "path": "web/src/design/NativeCardMenu.vue",
+      "sha256": "367536f953f56b1b0d55f664dda1ea3f8e771a42853d2dbb81db4833455d49b0"
+    },
+    {
+      "path": "web/src/design/NativeRemoteFrame.vue",
+      "sha256": "d445024c24a4ea82bbda1045dca21630ec8a0621010fd77d57c05585e47fc509"
+    },
+    {
+      "path": "web/src/design/NetworkBusinessAction.vue",
+      "sha256": "2c2d02edd53fbbe6e0af8a6857cc62981698c82278f94e9c3d2784f582e2e8c4"
+    },
+    {
+      "path": "web/src/design/NetworkConnectionCard.vue",
+      "sha256": "958d6e39ef0e472abdba9926b3def388834b5d41e1a785481f46492115e322dc"
+    },
+    {
+      "path": "web/src/design/NetworkInterfaceCard.vue",
+      "sha256": "1012e4098f2a1247cceeaa39c345542e3d349db4c53bfa392bdf5a239f2ab4d4"
+    },
+    {
+      "path": "web/src/design/NetworkWidgetDialog.vue",
+      "sha256": "22cdbc5fb3a86f2be6b0fc6d7329df541f0a7b9565727c157a6cb4045063e005"
+    },
+    {
+      "path": "web/src/design/OrderedHome.vue",
+      "sha256": "88f631b0ab93d07721364b99eebeadb59a0a054745ac5d8485822fe763f99b41"
+    },
+    {
+      "path": "web/src/design/PresentationSettings.vue",
+      "sha256": "82464315bbd01ddbe3d461014824cba82d05d3cf420917b344d890d2176a9a73"
+    },
+    {
+      "path": "web/src/design/StudioGlyph.vue",
+      "sha256": "4db1eb78d4faf9bea177d5a509f873ee020a6a9fc8e422bc985ac6e014083400"
+    },
+    {
+      "path": "web/src/design/StudioHome.vue",
+      "sha256": "b9c083c435617025cc6fbb19c908fabd8c745a4bb00abf4b6cc0754462ec3e08"
+    },
+    {
+      "path": "web/src/design/SystemOverview.vue",
+      "sha256": "e3e5e01afd9cb60c87355e5fe3d4f76e1bb40953d65f3baf1c7c33f3e2780f46"
+    },
+    {
+      "path": "web/src/design/WidgetMenu.vue",
+      "sha256": "e3ca9a25b4aa829b58b126c787cfb23c01c7e07eb36c7ce3a43aeddd73ee54d4"
+    },
+    {
+      "path": "web/src/design/businessFixtures.ts",
+      "sha256": "3bd550a9056d69bf87a09fae8d1b7076378a6827c1900bbb1da65ffcc98d5705"
+    },
+    {
+      "path": "web/src/design/canvas.css",
+      "sha256": "88d0b79d5185a03cba4dce1a0b1839570474073998e55b2fae5f7f55662582d1"
+    },
+    {
+      "path": "web/src/design/canvasLayout.ts",
+      "sha256": "4273bd635637586b3a4d9b2fc13d902230ba67ebdb6ccaaf0db500f571bed970"
+    },
+    {
+      "path": "web/src/design/canvasModules.css",
+      "sha256": "987e0e79a9cf0bda49e5898435b09fa8607c4f6d41d3f9e56ff9cb3b5faba80a"
+    },
+    {
+      "path": "web/src/design/deviceFixtures.ts",
+      "sha256": "e8ee14160c34ba421015d6c845aa7308a62b581a1bcccc68a7daac99979c3acd"
+    },
+    {
+      "path": "web/src/design/devices.ts",
+      "sha256": "63328f15e04773312ae1e3425d241a0c8984aec5e7fb0582548d7fcbc371d83f"
+    },
+    {
+      "path": "web/src/design/directEdit.css",
+      "sha256": "6d2c425bbbbafdc09e75d48267d0d19465c7e273eb0ee17ec49b48b49115ea4e"
+    },
+    {
+      "path": "web/src/design/directLayout.ts",
+      "sha256": "58330200baf7570b088837c7437f53b9a606241c5c326645b67fe2f8c055792d"
+    },
+    {
+      "path": "web/src/design/fixtures.ts",
+      "sha256": "687eb65dd48bde3903a81363ecd429bb691fed7ab04823cd9fd9c67c3da07ee0"
+    },
+    {
+      "path": "web/src/design/homeApplications.css",
+      "sha256": "c1a00392cf14a201562327f590268501f3461523077ba14e7f1f2a82dfe66ef9"
+    },
+    {
+      "path": "web/src/design/homeApplications.ts",
+      "sha256": "4486547e729bd3baf0c52f406d9f90aa6fc25a3ec6b1a2b24819f8d242300fe9"
+    },
+    {
+      "path": "web/src/design/homeDocument.ts",
+      "sha256": "6b64e9670750322ed9eac49383a5a39789739597e0fc73169afb11185ee5166e"
+    },
+    {
+      "path": "web/src/design/homeTypography.css",
+      "sha256": "df1420f0248b42c5c2c4cf95dd0546f39daee3a8935768c2e226dc720137df93"
+    },
+    {
+      "path": "web/src/design/homeVisualTokens.css",
+      "sha256": "847a78df8e7c14100af85c046f2b00a88d42c967bc674ff8b65e10fbf83bc15c"
+    },
+    {
+      "path": "web/src/design/homeWidgetChrome.css",
+      "sha256": "dd41cf0c4cbe4bc3cb3743ea00ccb08efa155fd30bb5f2a7e7088ef928f4d742"
+    },
+    {
+      "path": "web/src/design/homeWidgetDetails.css",
+      "sha256": "3cb0837447d9ee4c15e964bb27f84d5e2b21500de4f7bcd009f0c5a0a4e5aed1"
+    },
+    {
+      "path": "web/src/design/launcherBrowserHost.ts",
+      "sha256": "3f3c2c3c67c90dd5c952aac883576ffbc1ed33b4b96e4631242f27c0e696cde0"
+    },
+    {
+      "path": "web/src/design/launcherCatalog.ts",
+      "sha256": "7c007c33f13793687100c39fa1519f223ad6ca64ee67e72a7d323020722e37a4"
+    },
+    {
+      "path": "web/src/design/launcherFixtures.ts",
+      "sha256": "01c74f798b78ea9c9d4ed2fcfc89d72019f77324165e7dde8bfcb446404454cc"
+    },
+    {
+      "path": "web/src/design/launcherLibrary.ts",
+      "sha256": "6f4242d84fec4852028c35ff1822441e8b194864a7384ed78a932865443e4bb0"
+    },
+    {
+      "path": "web/src/design/launcherMetadata.ts",
+      "sha256": "6b85f635c4e72cdf7ccc9123c5a45f487338efaf50abd5c9ddfe2b21aace47e8"
+    },
+    {
+      "path": "web/src/design/layoutDesignHome.css",
+      "sha256": "490cb2070b0e9e041943a7b43a1aa83b5c1eade1ee5cc3c51344bdc2d68ea21c"
+    },
+    {
+      "path": "web/src/design/layoutPreviewCard.css",
+      "sha256": "a82dc9bc87f10a7ef96b474d36807b0704904dd3461187b4ec677746707e1ce4"
+    },
+    {
+      "path": "web/src/design/main.ts",
+      "sha256": "d8506946638552b5a0604b8ac68b8777170640ffbc42aa180f5e04191b5b9485"
+    },
+    {
+      "path": "web/src/design/moduleCapability.ts",
+      "sha256": "b38f3ad8666aec9edeab4314d0de1ccc4d748d379252ebea62ed862a037e58b1"
+    },
+    {
+      "path": "web/src/design/mount.ts",
+      "sha256": "75791043a72e2801d74520f34d489347b09204814bf03f8b194726d4cb596eb3"
+    },
+    {
+      "path": "web/src/design/nativeActionBridge.ts",
+      "sha256": "82772e191525f7e4a3903785269cc132d7fb5e3a54b91f3f757f901a09ded1a2"
+    },
+    {
+      "path": "web/src/design/nativePreviewScope.ts",
+      "sha256": "72363235e13d5700476cf863392cece5d257347374c0a3e46edc373d6cc53c7f"
+    },
+    {
+      "path": "web/src/design/nativeStartup.ts",
+      "sha256": "5817a1fcef6f2174de70969caa8d20767812b70c6dc2dd61cc4d02f6dbb705dd"
+    },
+    {
+      "path": "web/src/design/naturalHome.css",
+      "sha256": "ea2560df4d36efdbe7ba466ccdc1eb9e4e6125b78d0f6e4b258cdbc0d8d7bb58"
+    },
+    {
+      "path": "web/src/design/networkBusiness.ts",
+      "sha256": "d6415d750197d7605a830f7a74dc6604901497d81b7df8f4460dd1daeb9b5b61"
+    },
+    {
+      "path": "web/src/design/networkFixtures.ts",
+      "sha256": "3562265bdcd53d333b9b96427774622efea1aab9b7ce712768b9f8220016c120"
+    },
+    {
+      "path": "web/src/design/networkWidgets.css",
+      "sha256": "c495f434e85ac32344d9cf7d777b6fcf49322dded76bc4eb6f04bdc8f20a3e43"
+    },
+    {
+      "path": "web/src/design/orderedHome.css",
+      "sha256": "c06ac5b93effff415a8b33845b268255a767351e7cb0bf3b258478e8411de6d8"
+    },
+    {
+      "path": "web/src/design/orderedLayout.ts",
+      "sha256": "c0bc3cfa307eef61bedf8937c52dbc4f4090ac13aaaadc0b29d8e8366f5e56bd"
+    },
+    {
+      "path": "web/src/design/overviewPlacement.ts",
+      "sha256": "333a9ca7812b0923d27b1fbf873f1db417cf3fe1fbcb75675c982d70081758d5"
+    },
+    {
+      "path": "web/src/design/presentationEdit.css",
+      "sha256": "2c79d0ad33f3584c0dde71337743cfc57609a1da052c6620983093f9ae39f799"
+    },
+    {
+      "path": "web/src/design/rowLayout.ts",
+      "sha256": "bb3908d922ac978e1424c2bc327694a02d1200416586c71563ce30f20150bdf7"
+    },
+    {
+      "path": "web/src/design/rowSizing.css",
+      "sha256": "ffa3942df6adda5240e129ab07fa634e44e9e9e1cb50f0683a193585d4ec5864"
+    },
+    {
+      "path": "web/src/design/rowSizing.ts",
+      "sha256": "919d557315d423ccb7c31fdfe57aeee29c4a7fcebfd1691f9ea91a57f4bd2d60"
+    },
+    {
+      "path": "web/src/design/shell.css",
+      "sha256": "25495ae87ed5f6b044377268b71bd8c91f8b3b24278e423f76d4a420cf12dd33"
+    },
+    {
+      "path": "web/src/design/slotEdit.css",
+      "sha256": "bd535c90c86a0dda6dac193bf5bbb4ebd0bff5e746c4fe6c1ade2f8b18d19476"
+    },
+    {
+      "path": "web/src/design/slotLayout.ts",
+      "sha256": "0611927a4d745ed0edab8575fcc0e97f3e15693eb5e97aff0cae1723cae61c8c"
+    },
+    {
+      "path": "web/src/design/studio.css",
+      "sha256": "1751e46d79488a1ab4d1195bdc115ce61ca1cc7cd3fcc6c67293ef3b707c2904"
+    },
+    {
+      "path": "web/src/design/studioModel.ts",
+      "sha256": "a0337bd498b8362bd9ff4a09d3beed51d14fe06e7daa58447194e39db5b40b88"
+    },
+    {
+      "path": "web/src/design/useAddressPrivacy.ts",
+      "sha256": "822520037c8742c6fa717eb0d38af9d471f82724faa62df4ac8f38614b84d6dd"
+    },
+    {
+      "path": "web/src/design/useLauncherTimers.ts",
+      "sha256": "63589ad4a019af339e548ec4cf04f4586c4d723681d88878d5e2ad30eedf38f8"
+    },
+    {
+      "path": "web/src/design/useNativeBusinessReads.ts",
+      "sha256": "55f3597656bd8bc5f8ae04c93a5ed8708fc83f09b979656b6ce46f53a0cea9ac"
+    },
+    {
+      "path": "web/src/design/useNaturalSizing.ts",
+      "sha256": "d9b243abfc61e5fcbba7da187047b016822dccd2abebcb41b856c56a9206686e"
+    },
+    {
+      "path": "web/src/design/useRowSorting.ts",
+      "sha256": "3442195f2463b5cd0e917a5bdc22c3f392ecfab86aafff5aabda25d7e6b1ec44"
+    },
+    {
+      "path": "web/src/design/widgetActionGroup.css",
+      "sha256": "d37bcf526d2f404bb897ea0a4aa22057c7261f5395432ab0fe3df6b0f53cbed3"
+    },
+    {
+      "path": "web/src/design/widgetPresentation.ts",
+      "sha256": "098b260bbae0ffe56f98c944ffcde3de45f9b13cd0fbec724c29728654a8152a"
+    },
+    {
+      "path": "web/vite.design.config.ts",
+      "sha256": "d25e8a42318c22435ad67be5df8868c33445bdfa8e6930b8167c37fd4d1bf6cd"
+    },
+    {
+      "path": "scripts/ui-design.sh",
+      "sha256": "613658662cc2fed46b605be939d97ce543631ff72f770bf761912484c195e027"
+    },
+    {
+      "path": "scripts/ui-design-server.cjs",
+      "sha256": "9c682bf39cd6b7ea2d02483831161d4aba9245bb6189af99a24a8038a59e7782"
+    },
+    {
+      "path": "web/src/pages/index/network/NetworkFlow.vue",
+      "sha256": "3186030e26a58f53c1ed6417e2a530c9c57fa73dc9467bcd12fae374465269c5"
+    }
+  ],
+  "verificationSources": [
+    {
+      "path": "docs/product/ui-design/boundary-contract-review.cjs",
+      "sha256": "0ebca8ac97d47e5f472c3bbd99728801134cb93a0a4a6b2b69a816fe366d5e2f"
+    },
+    {
+      "path": "docs/product/ui-design/boundary-handoff-review.cjs",
+      "sha256": "42a652e0c8411c23e734354db33827254a92f33a7c46d32af2919271b60a219d"
+    },
+    {
+      "path": "docs/product/ui-design/boundary-interaction-review.cjs",
+      "sha256": "59bd7de914e61593796bf3596c06118ad3c427f49b638db960f197cdea1f868e"
+    },
+    {
+      "path": "docs/product/ui-design/boundary-layout-review.cjs",
+      "sha256": "ac7f09fbfcccd396c9542e106aea3c9267b5f15967d065c768c5f6c34ccc2017"
+    },
+    {
+      "path": "docs/product/ui-design/boundary-resource-review.cjs",
+      "sha256": "a14ec1c2b7f1e318b75ae1872036d241688c75681f41ccfd0d2d3eb9b5bb0561"
+    },
+    {
+      "path": "docs/product/ui-design/boundary-state-review.cjs",
+      "sha256": "5c06d29a82432447bee83195ee1c588dd68e6b3be810dcc8479b59294538560d"
+    },
+    {
+      "path": "docs/product/ui-design/boundary-touch-review.cjs",
+      "sha256": "6e6d98e7cdbd28879135a9c02bf533527ac3a6026b9937de81aa9dbfafa592b8"
+    },
+    {
+      "path": "docs/product/ui-design/business-actions-review.cjs",
+      "sha256": "19b66ce0d845ca4988d884a4a299dadba847f0c78029f974b16e5f25f286b79e"
+    },
+    {
+      "path": "docs/product/ui-design/business-resource-review.cjs",
+      "sha256": "208ce530feb9e43b83654e7e4441a8527fdd1686ceefe36e6f14a0964247a4a1"
+    },
+    {
+      "path": "docs/product/ui-design/business-source-review.cjs",
+      "sha256": "d972fa6a7456e1ec89008b184e157d05d5be2bdc0d33ee9594ca57fa5632733b"
+    },
+    {
+      "path": "docs/product/ui-design/business-visual-review.cjs",
+      "sha256": "8f2ec4eec0d3cd6e49e8700247aa9865b94060984b4b2b95cf99890e8eec5347"
+    },
+    {
+      "path": "docs/product/ui-design/business-widgets-review.cjs",
+      "sha256": "94a4dac03aefce82b2c29ef276e4a33a21910eb8cbd70a6d83d8993155103d1b"
+    },
+    {
+      "path": "docs/product/ui-design/canvas-review.cjs",
+      "sha256": "39377acec2cde3825355a431b2ee7fc4c7450ae268bd859a983e83a92bde252a"
+    },
+    {
+      "path": "docs/product/ui-design/compact-applications-review.cjs",
+      "sha256": "f4730dedcb550260c2e286818ddecd005e0eea41de920194d4407f829b1d7e5b"
+    },
+    {
+      "path": "docs/product/ui-design/contextual-actions-review.cjs",
+      "sha256": "dfc1ef6e7c6d003a4436b14616e614f21ee86f116f4dee299a56fa00d54c046c"
+    },
+    {
+      "path": "docs/product/ui-design/direct-editor-review.cjs",
+      "sha256": "ee4dd3bd234b29c5ee331648c6bd3e93205c81300153f01e892868d847875c6b"
+    },
+    {
+      "path": "docs/product/ui-design/direct-final-regressions.cjs",
+      "sha256": "c1cb98705c083ef8138d21dec22199639352a280a2aa58fb7266ec137ee8996c"
+    },
+    {
+      "path": "docs/product/ui-design/direct-input-review.cjs",
+      "sha256": "0f8646ddd0819ede3de245c75b7ba18903a5db7589e4eebab1fba5c9d53ed597"
+    },
+    {
+      "path": "docs/product/ui-design/direct-layout-review.cjs",
+      "sha256": "90ebcb8fb797423cf7615a1679f3d9bd32fc55f23ed84de56e9b9acc4b5a74e7"
+    },
+    {
+      "path": "docs/product/ui-design/direct-movement-review.cjs",
+      "sha256": "29a61380e03f4850c00472e70dc9c4993e4c7fe3ebee920642dac7a72b2ed7a8"
+    },
+    {
+      "path": "docs/product/ui-design/direct-resource-review.cjs",
+      "sha256": "95b95ca4510be74552bb68ec0f30ff91f28e50f4817ccb2ff03e196e7d876c4c"
+    },
+    {
+      "path": "docs/product/ui-design/direct-test-utils.cjs",
+      "sha256": "bbd0381ea83da86f91ff15946d31294672880dff816c1b9d7ed1d51591d15aad"
+    },
+    {
+      "path": "docs/product/ui-design/direct-visual-review.cjs",
+      "sha256": "11f7e6b6bd871013011bf91827f4bac20fad7acede655f193cc000b93c2ad2eb"
+    },
+    {
+      "path": "docs/product/ui-design/home-typography-dialog-review.cjs",
+      "sha256": "59133e7db426ed0887363bd5c4740dd35096437f8c7275ba919fafb81eba91bf"
+    },
+    {
+      "path": "docs/product/ui-design/home-typography-minimum-review.cjs",
+      "sha256": "7f37e5d7042fa2987504d3d5c0da836ab77f00c46e3b2c844624cf767285a5ec"
+    },
+    {
+      "path": "docs/product/ui-design/home-typography-review.cjs",
+      "sha256": "1a1e7b2541e829b1a79b3ce3880e285b6cf3b5b3fed6c10a3bf24323fd937205"
+    },
+    {
+      "path": "docs/product/ui-design/home-widget-chart-review.cjs",
+      "sha256": "dd6769c7c250a8694d0e2fb61fbb29a9e650f484e06f850c133349abd8352bbd"
+    },
+    {
+      "path": "docs/product/ui-design/home-widget-header-review.cjs",
+      "sha256": "8d862573434755b3f13db29b6218f940dfb626e714ef1fc85448c9d756901de4"
+    },
+    {
+      "path": "docs/product/ui-design/home-widget-standard-review.cjs",
+      "sha256": "d97de04e3468a5dcf9e6d972f03eb13bdfa1d8e67d41abba42b283670954803d"
+    },
+    {
+      "path": "docs/product/ui-design/launcher-actions-review.cjs",
+      "sha256": "380be55b28f49ccfd7c8d2cd2822514b916494f361907e68b9248dd10cec4f4a"
+    },
+    {
+      "path": "docs/product/ui-design/launcher-baseline.cjs",
+      "sha256": "77dcb1274830eaee859186e6009ab59b583b9411c0b7fe51fbdf3e26c6bff053"
+    },
+    {
+      "path": "docs/product/ui-design/launcher-drag-diagnose.cjs",
+      "sha256": "79b6aa01f643b5e2ceb9fd56cc8a183512ac057d58cb35aebc225f208746331a"
+    },
+    {
+      "path": "docs/product/ui-design/launcher-editor-review.cjs",
+      "sha256": "42a36a5d2dcf0a6245401ae0d1d09ca7d9c6f1b7a82ab2ec5a97cd98fcf4e516"
+    },
+    {
+      "path": "docs/product/ui-design/launcher-final-runner.cjs",
+      "sha256": "a51bb6df88cf9dc321d3f4235658993aa281bd31e20f8a008fb8e8a082d9e2bb"
+    },
+    {
+      "path": "docs/product/ui-design/launcher-handoff-review.cjs",
+      "sha256": "3626d2302b0bed05eaef27c9207355a024069824d2c5e946e08bc32bdaae88ff"
+    },
+    {
+      "path": "docs/product/ui-design/launcher-home-review.cjs",
+      "sha256": "fab10c553b4e832ab34499a7e112658a15c99635a548d0a8f420a14e48954cbd"
+    },
+    {
+      "path": "docs/product/ui-design/launcher-matrix-review.cjs",
+      "sha256": "0b2b49df9c6d17f54a19ef75c521533638773bc513194ceda4f63ebadf18b2a7"
+    },
+    {
+      "path": "docs/product/ui-design/launcher-overflow-state-review.cjs",
+      "sha256": "b72cbdb28e117030bd08234b4e52f82c3d77a7fae661b192611523118a8212a8"
+    },
+    {
+      "path": "docs/product/ui-design/launcher-protection-review.cjs",
+      "sha256": "7cd423342775d3ef0ce183cc10b639d937015a317234a32b37c578c787701d73"
+    },
+    {
+      "path": "docs/product/ui-design/launcher-resource-review.cjs",
+      "sha256": "7fb8cf540cac2efed3d5043de4a41d0ea38ffe522be6554f17f2f000a515fab1"
+    },
+    {
+      "path": "docs/product/ui-design/launcher-restore-diagnose.cjs",
+      "sha256": "5e7f0a77727b18e5c3b8c1604f45142096b5a26e8b8c284e9d6ec174f04b6af8"
+    },
+    {
+      "path": "docs/product/ui-design/launcher-states-review.cjs",
+      "sha256": "886f2aa75c79a508096edfee22c04c548bbcf638bbb536bd6fd7c4a4069931ea"
+    },
+    {
+      "path": "docs/product/ui-design/launchpad-baseline.cjs",
+      "sha256": "e0053a4bfea2384c2b01e506b3ac3cd3de687a72fb98ed2cf873cb034f467b43"
+    },
+    {
+      "path": "docs/product/ui-design/launchpad-browser-review.cjs",
+      "sha256": "c99fd16914d3d4fc7f3e420b873a4ab2430fc293b9dd8d16d077cfc78b9e29d0"
+    },
+    {
+      "path": "docs/product/ui-design/launchpad-final-runner.cjs",
+      "sha256": "1a4f94c5723a8a2281141cd506832ed888a011d75bfb3f9f93dcfa95c5249012"
+    },
+    {
+      "path": "docs/product/ui-design/launchpad-handoff-review.cjs",
+      "sha256": "8c2ae6f6786c3da5f9ac1a74b42ba19d7a2f2166b287bbc9525dc3692c2ae544"
+    },
+    {
+      "path": "docs/product/ui-design/launchpad-links-review.cjs",
+      "sha256": "0dea26a15becb1a64cf9754c6465a8bd8d69b2d08fd44c43ee8ab8a053302c5d"
+    },
+    {
+      "path": "docs/product/ui-design/launchpad-matrix-review.cjs",
+      "sha256": "0bef3992968cb74420d159d04a24e2a48cb76cb8ee52906d9b9131f385edb78d"
+    },
+    {
+      "path": "docs/product/ui-design/launchpad-model-review.cjs",
+      "sha256": "2be883001faf17189ad22bb089c41e7ef41828a4a967735963807a3eabb1c98d"
+    },
+    {
+      "path": "docs/product/ui-design/launchpad-protection-review.cjs",
+      "sha256": "b1eda9ade1cbbfd82d091bc159a7bb2564965ea662c3e5703bfbf2bfa48f7150"
+    },
+    {
+      "path": "docs/product/ui-design/launchpad-resource-review.cjs",
+      "sha256": "c6510b30ce64f4251929cc4e814320e11723d53b8e5c1e8baf8319c72c4b11d2"
+    },
+    {
+      "path": "docs/product/ui-design/launchpad-states-review.cjs",
+      "sha256": "8cbbd2f2d5eed287064b5811f2bb35fd65e4ed88da43d135e0c4afe707cc5cee"
+    },
+    {
+      "path": "docs/product/ui-design/natural-contract-review.cjs",
+      "sha256": "4808ff906fed67cc4155df8b056726706a51ae63d9077c88e251ab955d5f9793"
+    },
+    {
+      "path": "docs/product/ui-design/natural-handoff-review.cjs",
+      "sha256": "3f7cbdb16e15f0916370e68b89fbd19e61445b6a30aa47171cf9e8aaaed5c02b"
+    },
+    {
+      "path": "docs/product/ui-design/natural-interaction-review.cjs",
+      "sha256": "1bc69932a0dd1187ac31ae6b556631ca8ba2d57ec37f193c4da5050c4aee6845"
+    },
+    {
+      "path": "docs/product/ui-design/natural-layout-review.cjs",
+      "sha256": "6d63c804dcd0a06a066fa7b9944ac9106b575a4401de13617cfa771550bf240c"
+    },
+    {
+      "path": "docs/product/ui-design/natural-matrix-review.cjs",
+      "sha256": "759def3c939ddf4cfd65226d7a12ba019356f77c3db2af0d9cefc270a6ca0488"
+    },
+    {
+      "path": "docs/product/ui-design/natural-resource-review.cjs",
+      "sha256": "f6c32b5e378bb3104ae7321c29dfad9676844d4712ff340dd8119ab23b6fb954"
+    },
+    {
+      "path": "docs/product/ui-design/natural-system-review.cjs",
+      "sha256": "bd1f651b38d054adaa4cfa646b62ce23d442e07e8589965f9917902a3230dfbe"
+    },
+    {
+      "path": "docs/product/ui-design/network-contract-review.cjs",
+      "sha256": "ad6eb14e86150b708b1b56bb8a4716d66c385d34947c2be450285dcff1f87def"
+    },
+    {
+      "path": "docs/product/ui-design/network-fidelity-review.cjs",
+      "sha256": "f4d43b27f7f9c82741bc3589be021c488f77f9716099fb09b1d7a0fc40c02472"
+    },
+    {
+      "path": "docs/product/ui-design/network-input-review.cjs",
+      "sha256": "c0714150ef3d203432f48ee1adff870212594b3a089afe9c8948541bf77887f4"
+    },
+    {
+      "path": "docs/product/ui-design/network-interaction-review.cjs",
+      "sha256": "9caf9a0b579b7e70d2284aa1fed02c8ca63b6b6febcd19481320aa654ecef6d1"
+    },
+    {
+      "path": "docs/product/ui-design/network-resource-review.cjs",
+      "sha256": "a0610a0c33bac00d583ae40316ac4c99f688d52499be32a8a802399a10f74bcd"
+    },
+    {
+      "path": "docs/product/ui-design/network-source-review.cjs",
+      "sha256": "363fc72e9440e7f528d4c3efbde650f3850f226956ea47b77981d5c05fa1bdae"
+    },
+    {
+      "path": "docs/product/ui-design/network-visual-review.cjs",
+      "sha256": "7828da4e28079547fc202250aad9e01b21ab42177b95362579b77c96b8f7def2"
+    },
+    {
+      "path": "docs/product/ui-design/ordered-authority-popover-review.cjs",
+      "sha256": "da64ce652d7c954439b41eecddfd47cefc6a3189714871adb43a84fc655eff96"
+    },
+    {
+      "path": "docs/product/ui-design/ordered-capture.cjs",
+      "sha256": "08ef1a876221215468aa3790d37a75b00867c06fd4203c3880842669e3b98680"
+    },
+    {
+      "path": "docs/product/ui-design/ordered-closeout-repro.cjs",
+      "sha256": "9e4cde43b780b9e860902f7a1e6dc90727e0de5813d6f8818c69fa05a7613782"
+    },
+    {
+      "path": "docs/product/ui-design/ordered-interaction-review.cjs",
+      "sha256": "c3697fd2ee0dcd0ba079f70e9605b41c20eb730357c42fa0cae97f7c4a975115"
+    },
+    {
+      "path": "docs/product/ui-design/ordered-screenshot-audit.cjs",
+      "sha256": "a1c0eb9caeb448b606540d9f1b03e7cb4a09390b425946a3c4c3ab2842b74ed9"
+    },
+    {
+      "path": "docs/product/ui-design/ordered-visual-review.cjs",
+      "sha256": "d79b19deeb888da4dfb01094c4834a0461fc32b43b796ae1588c2c0110751ebc"
+    },
+    {
+      "path": "docs/product/ui-design/presentation-applications-review.cjs",
+      "sha256": "4cddb02ef83555fbe8da00a449f4506c8f84c4ab44e3e68ed4016caaa78cc0f9"
+    },
+    {
+      "path": "docs/product/ui-design/presentation-boundary-review.cjs",
+      "sha256": "226139ee2d2dabd147c693b773355ce1023152153a4e44764c1bb5710725aa42"
+    },
+    {
+      "path": "docs/product/ui-design/presentation-contract-review.cjs",
+      "sha256": "e9fa2ec5fe66543996b70aa51cd27809c06cc24006d55c68f79dc73ec0d8df1e"
+    },
+    {
+      "path": "docs/product/ui-design/presentation-devices-review.cjs",
+      "sha256": "c1a625a6ebe889bc472d0ddce21511123414b5c609bc06b6c10d444e427eb8ab"
+    },
+    {
+      "path": "docs/product/ui-design/presentation-matrix-review.cjs",
+      "sha256": "0c8ba2819f8c0a0e0bec38aceaa888a5d8dacdd38dc018eff465447747fd7110"
+    },
+    {
+      "path": "docs/product/ui-design/presentation-negotiation-review.cjs",
+      "sha256": "e10ebf92f6e63827321bd437ff4ec3ec7088e19afd0b530822a63ef43fce3b2b"
+    },
+    {
+      "path": "docs/product/ui-design/presentation-regressions.cjs",
+      "sha256": "1fe4a74962ad52e986a8f97ecf6c5a757ec9da761e2fac42c40069a3e871fb78"
+    },
+    {
+      "path": "docs/product/ui-design/presentation-resource-review.cjs",
+      "sha256": "c74c0fb4707c90b8716b0ffd334da0b697f4510e05e33356176481244ffbea4d"
+    },
+    {
+      "path": "docs/product/ui-design/review.cjs",
+      "sha256": "d7e94275243ba7b2aa467a04d92ffa1d42169cec25d7fe3357a8f6e2aacd2fd2"
+    },
+    {
+      "path": "docs/product/ui-design/row-layout-interaction-review.cjs",
+      "sha256": "f2b0a4ddca5695fd58d84363f40a101d0d9dd38a2b0cc7dbd0143d747dc49387"
+    },
+    {
+      "path": "docs/product/ui-design/row-layout-visual-review.cjs",
+      "sha256": "bad22e9d147cc1a03b278e2c5bde8d70f3a20ef67c5061760352746af5c19e20"
+    },
+    {
+      "path": "docs/product/ui-design/row-sort-lifecycle-review.cjs",
+      "sha256": "693b8f90dbdad038ced9a571234bf4aef98255c5622303b0a130c40743c87c55"
+    },
+    {
+      "path": "docs/product/ui-design/row-sort-resource-review.cjs",
+      "sha256": "b21c53afc5990288cf856826c8be3dce824198f317f98074ac80d49473e5f21c"
+    },
+    {
+      "path": "docs/product/ui-design/row-sort-review.cjs",
+      "sha256": "2b144210daa4cd22682ee52c56e62922ee0fba141ed9304cd62bd09ccb33de7c"
+    },
+    {
+      "path": "docs/product/ui-design/row-sort-visual-review.cjs",
+      "sha256": "98fa66333179e7776b82320ba4f09b00e9088e95f9f18817afbca57e3da99717"
+    },
+    {
+      "path": "docs/product/ui-design/slot-candidate.cjs",
+      "sha256": "ab49f0dbc38d5589258e57f63ad7dae2bd963eb001ccf326ad6ea46661734bf6"
+    },
+    {
+      "path": "docs/product/ui-design/slot-contract-review.cjs",
+      "sha256": "a8b075b62f199e6c2a92b1571a100c47451aa96f1ddda46bf3f43317cbfd4d3f"
+    },
+    {
+      "path": "docs/product/ui-design/slot-final-review.cjs",
+      "sha256": "fe89682dd447e1583fa60dd150e7e2388efa1b3da6e5e9dcb6e8d45f150faaaa"
+    },
+    {
+      "path": "docs/product/ui-design/slot-input-review.cjs",
+      "sha256": "56fd4e01bcf1bcf40083d3b47883b9e5b4f42e3d351829211d1b462d1f3b9474"
+    },
+    {
+      "path": "docs/product/ui-design/slot-manual-capture.cjs",
+      "sha256": "6a9feb479e356b9ca63c6e3f4d5b713853ac1e39bc22cc49fec36f4339b565c9"
+    },
+    {
+      "path": "docs/product/ui-design/slot-module-review.cjs",
+      "sha256": "113961d9a50be7bbe74ea6aad4849a3f566c10c14363cc7fd66d80ad38ad44aa"
+    },
+    {
+      "path": "docs/product/ui-design/slot-navigation-review.cjs",
+      "sha256": "6abb79d668bcdb28704ef62ed7f43e82d7c9fa384d5fad8c43058acb9b51da06"
+    },
+    {
+      "path": "docs/product/ui-design/slot-normalization-review.cjs",
+      "sha256": "bfee3cd72c17ea84f4e04dae1ede1f76a6125fdc216738dffa0a686218a8c298"
+    },
+    {
+      "path": "docs/product/ui-design/slot-overview-review.cjs",
+      "sha256": "e55aeb56073c82443a5b469d8c234a40f2fe51e15e65808b85f4b632727be2d8"
+    },
+    {
+      "path": "docs/product/ui-design/slot-primary-review.cjs",
+      "sha256": "6ba622c5629ad8a6d9596a47f4dec063a0175c5f2f2c99044d8f0b6f4e66d608"
+    },
+    {
+      "path": "docs/product/ui-design/slot-resource-review.cjs",
+      "sha256": "bea18bfb30bd8546269de3de5b044286cf630ac52dcd31b46dbc052c6a4b4221"
+    },
+    {
+      "path": "docs/product/ui-design/structure-compatibility-review.cjs",
+      "sha256": "e890bf59a4dcce3722cc921b900c7ae2d6f937f61896e5b412cc33438387adb3"
+    },
+    {
+      "path": "docs/product/ui-design/structure-contract-review.cjs",
+      "sha256": "a6c50f41f4671fad563bf7f0d27a092aaf1b6ef277a239870b73345cafa92884"
+    },
+    {
+      "path": "docs/product/ui-design/structure-handoff-review.cjs",
+      "sha256": "ff8cbe0ad3d8473f59cc178add1b0188ab83578b1cca391ac299d896b8bf6a77"
+    },
+    {
+      "path": "docs/product/ui-design/structure-interaction-review.cjs",
+      "sha256": "5f58c2805e7a34e9f95fd61d12c9f66a548bfe26fb6f2dec2240f436d4a2a8e4"
+    },
+    {
+      "path": "docs/product/ui-design/structure-matrix-review.cjs",
+      "sha256": "915f5496c08978784a100ba688a6d948641bacfbad9d766440228e4db1759da6"
+    },
+    {
+      "path": "docs/product/ui-design/structure-overview-review.cjs",
+      "sha256": "1359835b2f195fa6f237e24915e238ccd8cbd2bf1ea3f34218140eb78aa3a0fa"
+    },
+    {
+      "path": "docs/product/ui-design/structure-port-fit-review.cjs",
+      "sha256": "5ab56613a3b56676101f93b6880481b7c1549b22177cda39e98ba1a8c36b6b9e"
+    },
+    {
+      "path": "docs/product/ui-design/structure-render-review.cjs",
+      "sha256": "ba890f5dcf12a7afea32dc2f2e57ca48eab93cdb85f75b404e00b1cb1966a2a0"
+    },
+    {
+      "path": "docs/product/ui-design/structure-resource-review.cjs",
+      "sha256": "898bca42e1b15e74e7ef076aa0c495a98479416753297bc4ae3c6c1281593807"
+    },
+    {
+      "path": "docs/product/ui-design/structure-spec-review.cjs",
+      "sha256": "6b86094708d0ab5d876d115b5d8fe9c3748ed1cd59dcee50414a78865b53e663"
+    },
+    {
+      "path": "docs/product/ui-design/studio-review.cjs",
+      "sha256": "37f5bce8b6e7edbb3e025abb5bedc264a8e2029ce9f911d729bb9fc9976441ab"
+    },
+    {
+      "path": "docs/product/ui-design/system-boundary-review.cjs",
+      "sha256": "3dd53f41dd19a8fa52a812728b4b2f6cb9c03e06a3aee64e67b51058bbbf9bb2"
+    },
+    {
+      "path": "docs/product/ui-design/visual-refinement-accessibility.cjs",
+      "sha256": "15a6c9fd5694330ba885a3f65123fb1cbc8fd4f0fbe05eb30859839af4a6038c"
+    },
+    {
+      "path": "docs/product/ui-design/visual-refinement-apps-review.cjs",
+      "sha256": "63a8d830f89c986864fdf929dfb2a1fbdb04a06f8cebe943852a3303806d57b3"
+    },
+    {
+      "path": "docs/product/ui-design/visual-refinement-content-review.cjs",
+      "sha256": "2eaae27e8eebd0ba58025397bf07dd0130c905349ea82d06cbced8f51ad23838"
+    },
+    {
+      "path": "docs/product/ui-design/visual-refinement-matrix-review.cjs",
+      "sha256": "1e714883d71dc3ac9fed4f8cefca58a65adf149b461ac4d94ab260ce442c4ba5"
+    },
+    {
+      "path": "docs/product/ui-design/visual-refinement-protection.cjs",
+      "sha256": "38a02bf68404fbbe4d50f946c319d8aba91aa405a7e19a3e4a8b763c8e6ad341"
+    },
+    {
+      "path": "docs/product/ui-design/visual-refinement-review.cjs",
+      "sha256": "10e3cfed8b5994db1393ce8a4b47d277a4337f07cee4533e3a965a998f45d111"
+    },
+    {
+      "path": "docs/product/ui-design/vue-polling-review.cjs",
+      "sha256": "c3f24fa51ccfe0d629414e436616cb0a563e24735d346b87cab39c970590251a"
+    },
+    {
+      "path": "docs/product/ui-design/vue-review.cjs",
+      "sha256": "1314a83b287ccbe1d08ab8c36b4f9dda0732bcce1736e31ca6f592b2e956844e"
+    },
+    {
+      "path": "docs/product/ui-design/vue-state-review.cjs",
+      "sha256": "e6d1b033ae1dd07f2f62a2738c952951ef7c610d33b23c3a538860213ef680b1"
+    },
+    {
+      "path": "docs/product/ui-design/widget-actions-review.cjs",
+      "sha256": "169bfc171d58590e15d375463798bf61aef525b00a3712f6b65f2b2eb4d953da"
+    }
+  ],
+  "sourceState": "working-tree candidate; hashes identify actual source, not a release",
+  "persistence": "memory only; reload resets sample",
+  "physicalRouters": "not accessed",
+  "userExperience": "awaiting human confirmation"
+}

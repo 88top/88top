@@ -19,6 +19,18 @@ type fakeStore struct {
 	deleteErr  error
 }
 
+func TestPasswordControlCharactersAreRejected(t *testing.T) {
+	for _, password := range []string{"line\nbreak", "line\rbreak", "nul\x00value"} {
+		svc := NewService(&fakeStore{})
+		if err := svc.Create(context.Background(), CreateInput{UserName: "alice", Password: password}); err == nil {
+			t.Fatal("invalid create accepted")
+		}
+		if err := svc.Update(context.Background(), UpdateInput{UserName: "alice", Password: password}); err == nil {
+			t.Fatal("invalid update accepted")
+		}
+	}
+}
+
 type createCall struct {
 	index int
 	input CreateInput

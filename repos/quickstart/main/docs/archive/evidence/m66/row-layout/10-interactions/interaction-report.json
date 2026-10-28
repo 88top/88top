@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-10-15T07:58:18.263Z",
+  "base": "http://192.168.9.19:5180",
+  "attempt": 6,
+  "checks": [
+    "three columns; unique modules and real aligned layout",
+    "left large / right two compact summaries at 320px, equal column frames",
+    "mirror preserves large-card and stacked-card roles",
+    "vertical presets, pointer and keyboard; minimum height blocks illegal split",
+    "horizontal pointer/keyboard resize with normalized proportions",
+    "three narrow/wide round trips preserve configuration and column-first order",
+    "template overflow cards move to new rows; invalid height blocked; undo exact",
+    "all ten modules, accessible library focus trap and Escape",
+    "whole-row ordering and undo",
+    "cancel restores; apply persists in memory across real device navigation",
+    "empty layout retains all five quick entries, eight tools and restore access",
+    "real HTML drag/drop swaps cards across visible rows; undo restores exact structure",
+    "touch-sized select/button alternatives; reload explicitly resets example"
+  ],
+  "errors": [],
+  "outside": [],
+  "result": "pass"
+}

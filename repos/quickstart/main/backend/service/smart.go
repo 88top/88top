@@ -45,13 +45,22 @@ func SmartGetConfig(ctx context.Context) (*models.SmartConfigResponse, error) {
 
 // 磁盘热拔插后，自动设置smartd
 func SmartReloadDisks() {
-	old, _ := SmartGetConfig(context.Background())
-	devices, _ := SmartGetList(context.Background())
+	old, err := SmartGetConfig(context.Background())
+	if err != nil || old == nil || old.Result == nil || old.Result.Global == nil {
+		return
+	}
+	devices, err := SmartGetList(context.Background())
+	if err != nil || devices == nil || devices.Result == nil {
+		return
+	}
 	deviceConfigs := []*models.SmartConfigDevice{}
 	for _, disk := range devices.Result.Disks {
+		if disk == nil {
+			continue
+		}
 		deviceConfig := models.SmartConfigDevice{DevicePath: disk.Path, TmpDiff: 5, TmpMax: 50}
 		for _, v := range old.Result.Devices {
-			if v.DevicePath == disk.Path {
+			if v != nil && v.DevicePath == disk.Path {
 				deviceConfig.TmpDiff = v.TmpDiff
 				deviceConfig.TmpMax = v.TmpMax
 			}
@@ -59,32 +68,31 @@ func SmartReloadDisks() {
 		deviceConfigs = append(deviceConfigs, &deviceConfig)
 	}
 	req := models.SmartConfigRequest{Global: old.Result.Global, Devices: deviceConfigs, Tasks: old.Result.Tasks}
-	smartSetConfig(context.Background(), &req)
+	if err := smartSetConfig(context.Background(), &req); err != nil {
+		l.Warnln("update smart config failed", err)
+	}
 }
 
-func smartSetConfig(ctx context.Context, req *models.SmartConfigRequest) {
-
-	//重新生成smard.conf
-	confPath := "/etc/smartd.conf"
-	for i, line := range smartconfig.RenderSmartdConfig(req) {
-		redirect := ">>"
-		if i == 0 {
-			redirect = ">"
-		}
-		utils.BatchOutputCmd(ctx, fmt.Sprintf("printf \"%v\n\" %v %v", line, redirect, confPath), 0)
+func smartSetConfig(ctx context.Context, req *models.SmartConfigRequest) error {
+	if err := smartconfig.Validate(req); err != nil {
+		return err
+	}
+	if err := writeSmartConfig("/etc/smartd.conf", smartconfig.RenderSmartdConfig(req)); err != nil {
+		return err
 	}
 	//更改状态
+	var commands []string
 	if req.Global.Enable {
-		utils.BatchOutputCmd(ctx, "/etc/init.d/smartd enable", 0)
+		commands = append(commands, "/etc/init.d/smartd enable")
 		if CheckAppIsRunning("smartd") {
-			utils.BatchOutputCmd(ctx, "/etc/init.d/smartd reload", 0)
+			commands = append(commands, "/etc/init.d/smartd reload")
 		} else {
-			utils.BatchOutputCmd(ctx, "/etc/init.d/smartd start", 0)
+			commands = append(commands, "/etc/init.d/smartd start")
 		}
 	} else {
-		utils.BatchOutputCmd(ctx, "/etc/init.d/smartd disable", 0)
-		utils.BatchOutputCmd(ctx, "/etc/init.d/smartd stop", 0)
+		commands = []string{"/etc/init.d/smartd disable", "/etc/init.d/smartd stop"}
 	}
+	return utils.BatchRun(ctx, append([]string{"set -e"}, commands...), 0)
 }
 
 func SmartPostConfig(ctx context.Context, r *http.Request) (*models.SmartConfigResponse, error) {
@@ -97,7 +105,9 @@ func SmartPostConfig(ctx context.Context, r *http.Request) (*models.SmartConfigR
 }
 
 func SmartPostConfigTyped(ctx context.Context, req models.SmartConfigRequest) (*models.SmartConfigResponse, error) {
-	smartSetConfig(ctx, &req)
+	if err := smartSetConfig(ctx, &req); err != nil {
+		return nil, err
+	}
 
 	resp, err := SmartGetConfig(ctx)
 	if err != nil {

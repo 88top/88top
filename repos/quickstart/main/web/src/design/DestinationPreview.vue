@@ -1,0 +1,3 @@
+<template><div class="destination"><router-link :to="{path:'/',query:{...route.query,device:undefined}}">← {{english?'Home':'首页'}}</router-link><h2>{{route.query.entry || (english?'Existing settings entry':'现有设置入口')}}</h2><p>{{english?'This entry is retained. Router configuration, installation and external navigation are disabled in design mode.':'此入口保留现有功能。设计模式不执行路由器配置、安装或外部跳转。'}}</p></div></template>
+<script setup lang="ts">import { useRoute } from 'vue-router';const route=useRoute(),english=window.vue_lang==='en'</script>
+<style scoped>.destination{padding:60px 20px;color:var(--tit-color)}.destination h2{background:none;font-size:22px}</style>

@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-10-14",
+  "typescript": "pass",
+  "frontendTests": 65,
+  "frontendTestsResult": "pass",
+  "productionBuild": "pass",
+  "designExcludedFromProduction": true,
+  "designMode": "vue-design-built",
+  "designPid": 27336,
+  "localLinks": "pass",
+  "m66_5Overall": "not_passed_visual_gate",
+  "optimizationAttempts": 3,
+  "visualEvidence": "05-review/visual-limitations.json",
+  "m66_6": "draft_delivered_not_closed"
+}

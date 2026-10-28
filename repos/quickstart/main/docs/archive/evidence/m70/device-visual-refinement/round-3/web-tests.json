@@ -1,0 +1,10 @@
+{
+  "command": [
+    "node",
+    "--test",
+    "web/test/*.test.mjs"
+  ],
+  "files": 26,
+  "exitCode": 0,
+  "result": "passed"
+}

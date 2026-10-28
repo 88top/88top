@@ -1,0 +1,35 @@
+/* The legacy Card adapter and current widgets share one segmented outline.
+ * Children remain separate controls; menus must escape the group's bounds. */
+.natural-home :is(.widget-action-group,.native-business-surface:not(.unbounded):not(.native-compact)>.reusable-card>.card-header>.settings-wrapper){
+ --widget-more-width:24px;
+ --widget-more-height:28px;
+ --widget-more-border:0;
+ --widget-more-radius:0 3px 3px 0;
+ --widget-more-font:18px/1 Arial;
+ --widget-more-ink:var(--color-action-ink,var(--c-text,var(--app-container_title-color)));
+ display:inline-flex;align-items:stretch;gap:0;flex:none;min-height:30px;
+ box-sizing:border-box;border:1px solid var(--color-action-line,var(--c-line,var(--btn-border-color)));
+ border-radius:4px;background:var(--color-action-bg,var(--c-panel,var(--card-bg-color)));color:var(--color-action-ink,var(--c-text,var(--app-container_title-color)));
+}
+.natural-home :is(.widget-action-group,.native-business-surface:not(.unbounded):not(.native-compact)>.reusable-card>.card-header>.settings-wrapper)>.settings-btn{display:flex;align-items:stretch}
+.natural-home :is(.widget-action-group,.native-business-surface:not(.unbounded):not(.native-compact)>.reusable-card>.card-header>.settings-wrapper)>button,
+.natural-home :is(.widget-action-group,.native-business-surface:not(.unbounded):not(.native-compact)>.reusable-card>.card-header>.settings-wrapper)>.settings-btn>.btn_settings{
+ display:flex;align-items:center;justify-content:center;gap:6px;min-height:28px;
+ box-sizing:border-box;border:0;border-radius:3px 0 0 3px;margin:0;
+ padding:6px 12px!important;background:transparent;color:inherit;cursor:pointer;
+ font-family:var(--home-font-family,Arial,'Microsoft YaHei',sans-serif);
+ font-size:var(--home-body-size,14px)!important;line-height:1;white-space:nowrap;
+}
+.natural-home :is(.widget-action-group,.native-business-surface:not(.unbounded):not(.native-compact)>.reusable-card>.card-header>.settings-wrapper)>.widget-menu{border-left:1px solid var(--color-action-line,var(--c-line,var(--btn-border-color)));align-self:stretch}
+.natural-home :is(.widget-action-group,.native-business-surface:not(.unbounded):not(.native-compact)>.reusable-card>.card-header>.settings-wrapper)>.widget-menu>.widget-menu-trigger{flex:1}
+.natural-home .widget-action-group>button:only-child{border-radius:3px}
+.natural-home .widget-action-group>button:hover,.natural-home .settings-btn>.btn_settings:hover{background:var(--c-soft)}
+/* Existing native cards keep their original icon and handlers. Match the shared
+ * component's single leading icon and remove legacy inline extra right margin. */
+.natural-home .settings-btn>.btn_settings>svg{width:16px!important;height:16px!important;margin:0!important;flex:none;color:inherit!important}
+.natural-home .settings-btn>.btn_settings:focus-visible{outline:2px solid var(--c-accent);outline-offset:3px}
+@media(pointer:coarse){
+ .natural-home :is(.widget-action-group,.native-business-surface:not(.unbounded):not(.native-compact)>.reusable-card>.card-header>.settings-wrapper){--widget-more-width:44px;--widget-more-height:44px;min-height:46px}
+ .natural-home :is(.widget-action-group,.native-business-surface:not(.unbounded):not(.native-compact)>.reusable-card>.card-header>.settings-wrapper)>button,
+ .natural-home :is(.widget-action-group,.native-business-surface:not(.unbounded):not(.native-compact)>.reusable-card>.card-header>.settings-wrapper)>.settings-btn>.btn_settings{min-height:44px}
+}

@@ -1,0 +1,75 @@
+{
+  "result": "passed",
+  "refreshCases": [
+    {
+      "case": "b-320-dark-slow",
+      "result": "passed",
+      "firstTop": 125.59375,
+      "finalTop": 125.59375
+    },
+    {
+      "case": "b-390-en-reload",
+      "result": "passed",
+      "firstTop": 125.59375,
+      "finalTop": 125.59375
+    },
+    {
+      "case": "b-catalogue-slow",
+      "result": "passed",
+      "firstTop": 125.59375,
+      "finalTop": 125.59375
+    },
+    {
+      "case": "b-damaged",
+      "result": "passed",
+      "firstTop": 179.09375,
+      "finalTop": 179.09375
+    },
+    {
+      "case": "b-desktop-reload",
+      "result": "passed",
+      "firstTop": 125.59375,
+      "finalTop": 125.59375
+    },
+    {
+      "case": "b-desktop-slow",
+      "result": "passed",
+      "firstTop": 125.59375,
+      "finalTop": 125.59375
+    },
+    {
+      "case": "b-empty",
+      "result": "passed",
+      "firstTop": null,
+      "finalTop": null
+    },
+    {
+      "case": "b-forbidden",
+      "result": "passed",
+      "firstTop": 179.09375,
+      "finalTop": 179.09375
+    },
+    {
+      "case": "b-future",
+      "result": "passed",
+      "firstTop": 179.09375,
+      "finalTop": 179.09375
+    },
+    {
+      "case": "b-timeout-recheck",
+      "result": "passed",
+      "firstTop": 179.09375,
+      "finalTop": 179.09375
+    },
+    {
+      "case": "b-unavailable",
+      "result": "passed",
+      "firstTop": 179.09375,
+      "finalTop": 179.09375
+    }
+  ],
+  "pinnedChecks": 11,
+  "authenticatedRunsIncludingRetainedFailures": 16,
+  "sessionsDestroyed": 32,
+  "retainedHarnessFailure": "b-timeout; corrected sampling window passed in b-timeout-recheck"
+}

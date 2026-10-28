@@ -1,0 +1,15 @@
+/* Keep the blue strip full width and restore LuCI's original content inset
+ * exactly once. The design studio's extra gutter does not belong in LuCI. */
+:global(#maincontent>.container:has(> #app [data-ordered-home])){margin-left:0;margin-right:0;--home-host-inset:20px}
+.ordered-home{--home-gutter:var(--home-host-inset,20px);padding-left:var(--home-gutter);padding-right:var(--home-gutter);padding-bottom:24px;min-height:0}
+.ordered-home>:is(.lab-available,.direct-toolbar,.home-config-state){max-width:none}
+.home-top{margin:0 calc(0px - var(--home-gutter)) 20px;min-width:0;background:var(--primary,#606de8);color:#fff;padding:0 var(--home-gutter)}
+/* Match the legacy theme's 32px colour extension; touch keeps a 48px row. */
+.home-top-actions{height:32px;display:flex;justify-content:flex-end;align-items:center;gap:16px;color:#fff}
+.home-top-actions>a{line-height:1.5;font-size:14px}
+.home-top-actions>.home-module-settings{display:flex;align-items:center;justify-content:center;min-width:24px;min-height:24px;padding:0;color:inherit}
+.home-module-settings>svg{width:16px;height:16px}
+.home-top :focus-visible{outline-color:#fff!important}
+@media(max-width:600px){:global(#maincontent>.container:has(> #app [data-ordered-home])){--home-host-inset:16px}}
+@media(max-width:600px),(pointer:coarse){.home-top-actions{height:48px}}
+@media(pointer:coarse){.home-top-actions>a{display:flex;align-items:center;min-height:44px}.home-top-actions>.home-module-settings{min-width:44px;min-height:44px}}

@@ -1,0 +1,206 @@
+{
+  "checkedAt": "2026-10-14T06:59:24.967Z",
+  "viewports": [
+    {
+      "variant": "studio",
+      "viewport": "desktop",
+      "theme": "light",
+      "width": 1440,
+      "deviceRows": 6
+    },
+    {
+      "variant": "studio",
+      "viewport": "desktop",
+      "theme": "dark",
+      "width": 1440,
+      "deviceRows": 6
+    },
+    {
+      "variant": "network",
+      "viewport": "desktop",
+      "theme": "light",
+      "width": 1440,
+      "deviceRows": 6
+    },
+    {
+      "variant": "network",
+      "viewport": "desktop",
+      "theme": "dark",
+      "width": 1440,
+      "deviceRows": 6
+    },
+    {
+      "variant": "device",
+      "viewport": "desktop",
+      "theme": "light",
+      "width": 1440,
+      "deviceRows": 6
+    },
+    {
+      "variant": "device",
+      "viewport": "desktop",
+      "theme": "dark",
+      "width": 1440,
+      "deviceRows": 6
+    },
+    {
+      "variant": "studio",
+      "viewport": "tablet",
+      "theme": "light",
+      "width": 1024,
+      "deviceRows": 6
+    },
+    {
+      "variant": "studio",
+      "viewport": "tablet",
+      "theme": "dark",
+      "width": 1024,
+      "deviceRows": 6
+    },
+    {
+      "variant": "network",
+      "viewport": "tablet",
+      "theme": "light",
+      "width": 1024,
+      "deviceRows": 6
+    },
+    {
+      "variant": "network",
+      "viewport": "tablet",
+      "theme": "dark",
+      "width": 1024,
+      "deviceRows": 6
+    },
+    {
+      "variant": "device",
+      "viewport": "tablet",
+      "theme": "light",
+      "width": 1024,
+      "deviceRows": 6
+    },
+    {
+      "variant": "device",
+      "viewport": "tablet",
+      "theme": "dark",
+      "width": 1024,
+      "deviceRows": 6
+    },
+    {
+      "variant": "studio",
+      "viewport": "mobile",
+      "theme": "light",
+      "width": 390,
+      "deviceRows": 3
+    },
+    {
+      "variant": "studio",
+      "viewport": "mobile",
+      "theme": "dark",
+      "width": 390,
+      "deviceRows": 3
+    },
+    {
+      "variant": "network",
+      "viewport": "mobile",
+      "theme": "light",
+      "width": 390,
+      "deviceRows": 3
+    },
+    {
+      "variant": "network",
+      "viewport": "mobile",
+      "theme": "dark",
+      "width": 390,
+      "deviceRows": 3
+    },
+    {
+      "variant": "device",
+      "viewport": "mobile",
+      "theme": "light",
+      "width": 390,
+      "deviceRows": 3
+    },
+    {
+      "variant": "device",
+      "viewport": "mobile",
+      "theme": "dark",
+      "width": 390,
+      "deviceRows": 3
+    }
+  ],
+  "states": [
+    "many",
+    "empty",
+    "loading",
+    "error",
+    "stale",
+    "old",
+    "permission",
+    "no-speed",
+    "disabled",
+    "speed-error",
+    "unsupported",
+    "network-error",
+    "storage-error",
+    "services-error"
+  ],
+  "interactions": [
+    "inventory retry",
+    "live draft and cancel",
+    "toggle, reorder, full-width, apply",
+    "stable identity, real drawer, DHCP authority, return preserves layout",
+    "view all opens complete inventory",
+    "drag, restore preset, last visible module protected",
+    "cancel preset restores original",
+    "mobile editor, keyboard focus and Escape",
+    "live scenario and theme switch",
+    "keyboard variant and shareable URL",
+    "disabled module stops polling (6.2s)",
+    "home unmount stops polling (6.2s)"
+  ],
+  "contrast": [
+    {
+      "theme": "light",
+      "kind": "ink",
+      "ratio": 15.8
+    },
+    {
+      "theme": "light",
+      "kind": "muted",
+      "ratio": 4.9
+    },
+    {
+      "theme": "light",
+      "kind": "accent",
+      "ratio": 5.47
+    },
+    {
+      "theme": "light",
+      "kind": "good",
+      "ratio": 4.63
+    },
+    {
+      "theme": "dark",
+      "kind": "ink",
+      "ratio": 15.8
+    },
+    {
+      "theme": "dark",
+      "kind": "muted",
+      "ratio": 4.9
+    },
+    {
+      "theme": "dark",
+      "kind": "accent",
+      "ratio": 5.47
+    },
+    {
+      "theme": "dark",
+      "kind": "good",
+      "ratio": 4.63
+    }
+  ],
+  "errors": [],
+  "outside": [],
+  "result": "pass"
+}

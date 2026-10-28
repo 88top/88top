@@ -1,0 +1,33 @@
+{
+  "startedAt": "2026-10-17T15:37:09.288Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "widget-body-network-disk-review",
+      "startedAt": "2026-10-17T15:37:09.293Z",
+      "endedAt": "2026-10-17T15:37:20.878Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 6,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-2/widget-body-network-disk-review/report.json"
+    },
+    {
+      "name": "widget-body-storage-review",
+      "startedAt": "2026-10-17T15:37:09.288Z",
+      "endedAt": "2026-10-17T15:37:26.184Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 25,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-2/widget-body-storage-review/report.json"
+    },
+    {
+      "name": "widget-body-services-review",
+      "startedAt": "2026-10-17T15:37:09.292Z",
+      "endedAt": "2026-10-17T15:37:30.212Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 10,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-2/widget-body-services-review/report.json"
+    }
+  ]
+}

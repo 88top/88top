@@ -222,7 +222,7 @@ func NasReloadDisk() {
 }
 
 func genMountPoint(name string) string {
-	out, _, err := utils.BatchOutErr(context.Background(), []string{fmt.Sprintf("sh /usr/libexec/blockphy.sh %v", name)}, 0)
+	out, _, err := utils.BatchOutErr(context.Background(), []string{fmt.Sprintf("sh /usr/libexec/blockphy.sh %v", utils.ShellQuote(name))}, 0)
 	if err != nil {
 		return "data_" + name
 	}

@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-10-14T07:06:15.950Z",
+  "result": "pass",
+  "checks": [
+    "local DHCP route editable",
+    "real profile editor updates home alias",
+    "same stable identity on return",
+    "unmodeled mutation blocked"
+  ],
+  "probe": {
+    "unknown": 501,
+    "mutation": 403
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "result": "passed",
+  "host": "192.168.30.244",
+  "snapshot": {
+    "configSha256": "c760d7f5a36a71ee12228e849c387473eeef37a5f42b94346baa00d5f1c0a628",
+    "binarySha256": "f3be309f97d8e1cede74d6ba8283e864ccba2c6558fdbaef44d9e6645e66df80",
+    "runningPIDs": [
+      919605
+    ]
+  },
+  "entryScriptSha256": "2cfb7147822538802930074838feb68b14d730c170c4663fa6050a5aa40ab8a1",
+  "metaCapabilities": [
+    "uci=fastnet",
+    "entrysh"
+  ],
+  "metaPackageVersionRetained": "0.7.7-r5",
+  "policy": "After final UI: no FastNet config/binary/PID changes or real install/remove/start/stop/speed execution"
+}

@@ -1,0 +1,14 @@
+{
+  "command": "rtk proxy /var/cache/build-cache/run.sh -- make build-web",
+  "exitCode": 0,
+  "sourceCommit": "72b2ded9e420785bf14f18c2c246593f494f8cfb",
+  "actualOutput": "web/dist",
+  "frozenCandidate": "bin/previews/72b2ded",
+  "webZipSha256": "f20a10da5c2453ac60e9e42a6b158ebb3f1466f4892ed3013f39d7b3ba1eb497",
+  "comparedWith": "bin/previews/a57a297/quickstart_web.zip",
+  "addedMembers": [],
+  "removedMembers": [],
+  "changedMembers": ["luci-static/quickstart/style.css"],
+  "warnings": ["Existing Vue ::v-deep combinator deprecation warnings"],
+  "scope": "CSS-only frontend fast candidate; no backend rebuild or package installation"
+}

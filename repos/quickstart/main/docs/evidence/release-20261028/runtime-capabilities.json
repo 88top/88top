@@ -1,0 +1,29 @@
+{
+  "migration": {
+    "mode": "adopt_in_place",
+    "canApply": true,
+    "alreadyApplied": false,
+    "conflictCount": 0,
+    "unresolvedCount": 0,
+    "itemsByDisposition": {},
+    "errorCode": null
+  },
+  "components": [
+    {
+      "id": "quickstart-native",
+      "state": "not_installed",
+      "reason": "dependency_not_installed"
+    },
+    {
+      "id": "eqos",
+      "state": "not_installed",
+      "reason": "dependency_not_installed"
+    },
+    {
+      "id": "floatip",
+      "state": "not_installed",
+      "reason": "dependency_not_installed"
+    }
+  ],
+  "sessionDestroyed": true
+}

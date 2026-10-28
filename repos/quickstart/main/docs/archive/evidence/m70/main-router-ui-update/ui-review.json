@@ -1,0 +1,73 @@
+{
+  "result": "failed",
+  "views": [],
+  "errors": [],
+  "httpErrors": [
+    {
+      "path": "/cgi-bin/luci/istore/home/v1/launcher/",
+      "status": 404
+    },
+    {
+      "path": "/cgi-bin/luci/istore/home/v1/layout/",
+      "status": 404
+    }
+  ],
+  "blocked": [],
+  "rpc": [
+    {
+      "method": "list"
+    },
+    {
+      "method": "call",
+      "object": "luci",
+      "operation": "getFeatures"
+    },
+    {
+      "method": "call",
+      "object": "file",
+      "operation": "list"
+    },
+    {
+      "method": "call",
+      "object": "uci",
+      "operation": "changes"
+    },
+    {
+      "method": "call",
+      "object": "uci",
+      "operation": "changes"
+    }
+  ],
+  "publicHashes": {
+    "index.js": "8c26e370ce8c21e774f1839f24c58cb892ff289c21895c5e54f19a74b459edf9",
+    "style.css": "6b77ac3ea90af68d8cba8e944998da2e76358ee1bfa1f25961722fb53364313d",
+    "vendor.js": "2d10df1751d0d3e778744c01f8edf8db96082b8d0939cf65ef38ea05eea39867",
+    "i18n/en.json": "bd5ffbade61b84d680f1f7982b3db76fa4d5a8d9a756b115663f02870c1a3fcb"
+  },
+  "home": {
+    "temporaryDefaults": true,
+    "editingDisabled": true,
+    "notices": [
+      "Homepage: Router configuration is unavailable. Showing built-in defaults temporarily.\nReload",
+      "Apps & tools: Router configuration is unavailable. Showing built-in defaults temporarily.\nReload"
+    ]
+  },
+  "deviceCount": 10,
+  "dhcp": {
+    "settings": {
+      "enabled": true,
+      "poolStart": "192.168.30.2",
+      "poolEnd": "192.168.30.249",
+      "leaseTime": "12h",
+      "defaultTargetId": "self"
+    },
+    "version": "1b0a3fca5ee7e2d729f72b2cef2b46cb1b92dc4c1f4e0afe25c95c33f40b73e4",
+    "editable": true,
+    "affectedDevices": 1,
+    "conflicts": [],
+    "reloadServices": [],
+    "canApply": false,
+    "changed": false
+  },
+  "failure": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /上网路线可编辑|Internet paths editable/. Input:\n\n'This machine is responsible for LAN address allocation\\n' +\n  'Address configuration editable · Route editable · Other services have their own permissions\\n' +\n  'Permission scope'\n\n    at /config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/94c4-develop-quicksta/quickstart/docs/evidence/m70/main-router-ui-update/review.cjs:56:9"
+}

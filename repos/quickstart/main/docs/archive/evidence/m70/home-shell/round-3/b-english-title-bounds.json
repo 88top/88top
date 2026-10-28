@@ -1,0 +1,39 @@
+{
+  "language": "en",
+  "title": "Connection & IP",
+  "heading": {
+    "left": 41,
+    "top": 630.59375,
+    "right": 129.671875,
+    "bottom": 665.59375,
+    "width": 88.671875,
+    "height": 35
+  },
+  "textRects": [
+    {
+      "left": 69,
+      "top": 629.59375,
+      "right": 146.90625,
+      "bottom": 648.59375,
+      "width": 77.90625,
+      "height": 19
+    },
+    {
+      "left": 69,
+      "top": 647.09375,
+      "right": 96.890625,
+      "bottom": 666.09375,
+      "width": 27.890625,
+      "height": 19
+    }
+  ],
+  "action": {
+    "left": 139.671875,
+    "top": 625.09375,
+    "right": 279,
+    "bottom": 671.09375,
+    "width": 139.328125,
+    "height": 46
+  },
+  "textOverlapsAction": true
+}

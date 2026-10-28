@@ -1,0 +1,12 @@
+{
+  "version": "0.17.1-rc20261028",
+  "sourceCommit": "cf483d45f455a96984b9f71848f76c4e3b04f245",
+  "sourceWorktree": "dirty, security fixes and dependency updates included",
+  "sourceInputsDigest": "8997c50e8c248e918e3999b1a2aebe61b37e48b9c712ce49f99127c5e2f482cd",
+  "goToolchain": "go1.26.10",
+  "files": {
+    "quickstart.amd64": "6fa07b1301e709d5d56a6ef69fa2a58bb4d4bfc4815d666f71c33c7f30149574",
+    "quickstart_web.zip": "9eb9fa57041dfa0f44e889a6284821239e2a83c1cb2ed1db5967f36ceab10dc9"
+  },
+  "deploymentRound": 8
+}

@@ -1,14 +1,5 @@
 <template>
     <ul class="app-container_aria2">
-        <li class="aria2-item">
-            <div class="aria2-item_name">
-                <span>{{ $gettext("当前状态:") }}</span>
-            </div>
-            <div class="aria2-item_value">
-                <span class="configure" v-if="aria2?.status == 'running'">{{ $gettext("已启动") }}</span>
-                <span class="configure enabel" v-else>{{ $gettext("未启动") }}</span>
-            </div>
-        </li>
         <template v-if="aria2?.status == 'running'">
             <li class="aria2-item">
                 <div class="aria2-item_name">

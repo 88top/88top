@@ -1,0 +1,32 @@
+{
+  "health": {
+    "owner": "/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/94c4-develop-quicksta/quickstart/docs/product/ui-design",
+    "pid": 29699,
+    "mode": "vue-design-built"
+  },
+  "publicAssetsMatchSSD": true,
+  "assets": [
+    {
+      "path": "/assets/index.c700bb3f.js",
+      "sha256": "43e6d51b522b8589984f19d525e2fc9d41fd154176490c1f7873045f9b0c5621",
+      "bytes": 50376
+    },
+    {
+      "path": "/assets/mount.271d12d2.css",
+      "sha256": "b0bc2c3aa2618ab6ba6ae08958866067555007e790c3e13c691da0c29c9f11c9",
+      "bytes": 833533
+    },
+    {
+      "path": "/assets/mount.ed8c5b46.js",
+      "sha256": "5b792745bc75aafe098b845fea3d0af6a259256fb09edc55174c5a1c0d8426a9",
+      "bytes": 1557730
+    }
+  ],
+  "source": {
+    "web/src/design/OrderedHome.vue": "2ae157f594904309c9e8ff186c901d7bb9729d8ab30973998419e788fb4078c6",
+    "web/src/design/homeColorStyles.css": "03ac026ae536407140ba746d2247e04789e4ee22f1adcdeccaac8f6a52cf6bd1",
+    "web/src/design/widgetActionGroup.css": "4009c48ef5fb4b2aa9bc6428fb1d851bb15638b607bf3c6ccd712cfdf000992a",
+    "web/src/design/WidgetMenu.vue": "df0b87b9038aec0402429f0d09578644dbea4f6de83e0183825acdaaa3f3645d",
+    "web/src/design/mount.ts": "39146ec6a4dab2c04b4fe07e50310e5961702d5a53f12e1158cdc8f2b2fb4e9c"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "checkedAt": "2026-10-15T15:24:07.011Z",
+  "cases": [
+    {
+      "width": 1440,
+      "theme": "light",
+      "lang": "zh-cn",
+      "mode": "half",
+      "file": "half-1440-light-zh-cn.png"
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "mode": "half",
+      "file": "half-1440-dark-zh-cn.png"
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "lang": "zh-cn",
+      "mode": "half",
+      "file": "half-320-light-zh-cn.png"
+    },
+    {
+      "width": 1024,
+      "theme": "light",
+      "lang": "en",
+      "mode": "half",
+      "file": "half-1024-light-en.png"
+    },
+    {
+      "width": 1440,
+      "theme": "light",
+      "lang": "zh-cn",
+      "mode": "overview",
+      "file": "overview-1440-light-zh-cn.png"
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "mode": "finish",
+      "file": "finish-1440-dark-zh-cn.png"
+    }
+  ]
+}

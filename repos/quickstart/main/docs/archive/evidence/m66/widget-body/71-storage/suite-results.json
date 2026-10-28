@@ -1,0 +1,36 @@
+{
+  "startedAt": "2026-10-17T15:08:16.104Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "visual-refinement-content-review",
+      "startedAt": "2026-10-17T15:08:16.109Z",
+      "endedAt": "2026-10-17T15:08:31.662Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/widget-body/71-storage/visual-refinement-content-review/report.json"
+    },
+    {
+      "name": "widget-body-storage-review",
+      "startedAt": "2026-10-17T15:08:16.104Z",
+      "endedAt": "2026-10-17T15:08:32.073Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 25,
+      "report": "docs/evidence/m66/widget-body/71-storage/widget-body-storage-review/report.json"
+    },
+    {
+      "name": "business-widgets-review",
+      "startedAt": "2026-10-17T15:08:16.108Z",
+      "endedAt": "2026-10-17T15:09:00.927Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 19,
+      "report": "docs/evidence/m66/widget-body/71-storage/business-widgets-review/report.json"
+    }
+  ],
+  "endedAt": "2026-10-17T15:09:00.927Z",
+  "result": "pass",
+  "groups": 52
+}

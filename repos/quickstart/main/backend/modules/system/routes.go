@@ -112,6 +112,11 @@ func decodeSystemJSON[T any](r *http.Request) (T, error) {
 const systemSessionIDContextKey = "github.com/istoreos/quickstart/backend/system/session-id"
 
 func systemSessionIDFromRequest(r *http.Request) string {
+	// The assembled HTTP router verifies this session in rpcd. LuCI may have
+	// selected HTTPS while an older sysauth cookie is still in the browser.
+	if sid := r.Header.Get("X-Forwarded-Sid"); sid != "" {
+		return sid
+	}
 	for _, name := range []string{"sysauth", "sysauth_http", "sysauth_https"} {
 		if c, err := r.Cookie(name); err == nil {
 			return c.Value

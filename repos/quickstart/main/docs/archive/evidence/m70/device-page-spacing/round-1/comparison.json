@@ -1,0 +1,114 @@
+{
+  "result": "passed",
+  "configurationPreserved": true,
+  "views": [
+    {
+      "width": 2560,
+      "tab": 0,
+      "oldWidth": 1320,
+      "newWidth": 2280,
+      "oldLeftInset": 500,
+      "newLeftInset": 20,
+      "unchangedInnerPadding": "18px"
+    },
+    {
+      "width": 2560,
+      "tab": 1,
+      "oldWidth": 1320,
+      "newWidth": 2280,
+      "oldLeftInset": 500,
+      "newLeftInset": 20,
+      "unchangedInnerPadding": "18px"
+    },
+    {
+      "width": 2560,
+      "tab": 2,
+      "oldWidth": 1320,
+      "newWidth": 2280,
+      "oldLeftInset": 500,
+      "newLeftInset": 20,
+      "unchangedInnerPadding": "18px"
+    },
+    {
+      "width": 1920,
+      "tab": 0,
+      "oldWidth": 1320,
+      "newWidth": 1640,
+      "oldLeftInset": 180,
+      "newLeftInset": 20,
+      "unchangedInnerPadding": "18px"
+    },
+    {
+      "width": 1920,
+      "tab": 1,
+      "oldWidth": 1320,
+      "newWidth": 1640,
+      "oldLeftInset": 180,
+      "newLeftInset": 20,
+      "unchangedInnerPadding": "18px"
+    },
+    {
+      "width": 1920,
+      "tab": 2,
+      "oldWidth": 1320,
+      "newWidth": 1640,
+      "oldLeftInset": 180,
+      "newLeftInset": 20,
+      "unchangedInnerPadding": "18px"
+    },
+    {
+      "width": 1440,
+      "tab": 0,
+      "oldWidth": 1192,
+      "newWidth": 1192,
+      "oldLeftInset": 20,
+      "newLeftInset": 20,
+      "unchangedInnerPadding": "18px"
+    },
+    {
+      "width": 1440,
+      "tab": 1,
+      "oldWidth": 1192,
+      "newWidth": 1192,
+      "oldLeftInset": 20,
+      "newLeftInset": 20,
+      "unchangedInnerPadding": "18px"
+    },
+    {
+      "width": 1440,
+      "tab": 2,
+      "oldWidth": 1192,
+      "newWidth": 1192,
+      "oldLeftInset": 20,
+      "newLeftInset": 20,
+      "unchangedInnerPadding": "18px"
+    },
+    {
+      "width": 390,
+      "tab": 0,
+      "oldWidth": 358,
+      "newWidth": 358,
+      "oldLeftInset": 16,
+      "newLeftInset": 16,
+      "unchangedInnerPadding": "11px 8px"
+    },
+    {
+      "width": 390,
+      "tab": 1,
+      "oldWidth": 358,
+      "newWidth": 358,
+      "oldLeftInset": 16,
+      "newLeftInset": 16,
+      "unchangedInnerPadding": "11px 8px"
+    },
+    {
+      "width": 390,
+      "tab": 2,
+      "oldWidth": 358,
+      "newWidth": 358,
+      "oldLeftInset": 16,
+      "newLeftInset": 16,
+      "unchangedInnerPadding": "11px 8px"
+    }
+  ]
+}

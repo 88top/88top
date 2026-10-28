@@ -66,6 +66,8 @@
     </action-component>
 </template>
 <script setup lang="ts">
+import {useOwnedTimeout} from "/@/home/useOwnedTimeout"
+const ownedTimeout=useOwnedTimeout()
 import { ref } from 'vue';
 import { useGettext } from '/@/plugins/i18n'
 const { $gettext } = useGettext()
@@ -219,7 +221,7 @@ const onCreateUniShare = async (_unishare: NasCreateUniShare) => {
 
         Toast.Success($gettext("创建成功"))
         success = true
-        window.setTimeout(() => {
+        ownedTimeout(() => {
             location.reload();
         }, 1000)
     } catch (error) {

@@ -1,0 +1,380 @@
+{
+  "host": "192.168.30.7",
+  "at": "2026-10-28T03:59:50.486294+00:00",
+  "checks": [
+    {
+      "name": "anonymous",
+      "http": 200,
+      "success": -1001,
+      "passed": true
+    },
+    {
+      "name": "forged forwarded headers",
+      "http": 200,
+      "success": -1001,
+      "passed": true
+    },
+    {
+      "name": "zero session",
+      "http": 200,
+      "success": -1001,
+      "passed": true
+    },
+    {
+      "name": "unknown session",
+      "http": 200,
+      "success": -1001,
+      "passed": true
+    },
+    {
+      "name": "non-root live session",
+      "http": 200,
+      "success": -1001,
+      "passed": true
+    },
+    {
+      "name": "token bound to authenticated session with mixed cookies",
+      "passed": true
+    },
+    {
+      "name": "expired root session",
+      "http": 200,
+      "success": -1001,
+      "passed": true
+    },
+    {
+      "name": "sysauth valid root",
+      "http": 200,
+      "passed": true
+    },
+    {
+      "name": "sysauth_http valid root",
+      "http": 200,
+      "passed": true
+    },
+    {
+      "name": "sysauth_https valid root",
+      "http": 200,
+      "passed": true
+    },
+    {
+      "name": "cross-origin JSON",
+      "http": 403,
+      "success": null,
+      "passed": true
+    },
+    {
+      "name": "cross-origin text",
+      "http": 403,
+      "success": null,
+      "passed": true
+    },
+    {
+      "name": "null origin",
+      "http": 403,
+      "success": null,
+      "passed": true
+    },
+    {
+      "name": "cross-site fetch",
+      "http": 403,
+      "success": null,
+      "passed": true
+    },
+    {
+      "name": "same-site fetch",
+      "http": 403,
+      "success": null,
+      "passed": true
+    },
+    {
+      "name": "HTML form",
+      "http": 415,
+      "success": null,
+      "passed": true
+    },
+    {
+      "name": "plain text",
+      "http": 415,
+      "success": null,
+      "passed": true
+    },
+    {
+      "name": "same-origin JSON reaches parser",
+      "http": 200,
+      "success": -1000,
+      "passed": true
+    },
+    {
+      "name": "direct forged session",
+      "passed": true
+    },
+    {
+      "name": "direct wrong token",
+      "passed": true
+    },
+    {
+      "name": "direct oversized Content-Length",
+      "passed": true
+    },
+    {
+      "name": "stale layout version",
+      "http": 409,
+      "success": -1,
+      "passed": true
+    },
+    {
+      "name": "stale launcher version",
+      "http": 409,
+      "success": -1,
+      "passed": true
+    },
+    {
+      "name": "revoked session",
+      "http": 200,
+      "success": -1001,
+      "passed": true
+    }
+  ],
+  "businessReads": [
+    {
+      "path": "system/version/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "u/system/version/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "system/time/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "system/status/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "system/module-settings/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "network/status/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "network/statistics/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "network/port/list/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "network/device/list/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "nas/disk/status/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "u/nas/service/status/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "raid/list/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "smart/list/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "guide/docker/status/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "guide/download-service/status/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "u/guide/ddns/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "share/user/list/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "share/service/list/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "share/protocol/webdav/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "share/protocol/samba/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "app/install-list/",
+      "http": 200,
+      "success": null,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "lanctrl/globalConfigs/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "lanctrl/v2/devices/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "lanctrl/v2/router-context/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "lanctrl/v2/device-traffic/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "lanctrl/v2/network-rules/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "lanctrl/v2/migration/plan/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "lanctrl/v2/feature-components/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "lanctrl/v2/device-groups/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "home/v1/layout/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    },
+    {
+      "path": "home/v1/launcher/",
+      "http": 200,
+      "success": 0,
+      "hasResult": true,
+      "hasError": false
+    }
+  ],
+  "passwordLoginVerified": false,
+  "tlsCertificateTrusted": false,
+  "temporarySessionsDestroyed": true,
+  "anonymousPathSweep": {
+    "count": 169,
+    "failures": [],
+    "passed": true
+  },
+  "homeNoOpWrites": [
+    {
+      "domain": "layout",
+      "http": 200,
+      "passed": true
+    },
+    {
+      "domain": "launcher",
+      "http": 200,
+      "passed": true
+    }
+  ],
+  "uiExitCode": 0,
+  "securityPassed": true
+}

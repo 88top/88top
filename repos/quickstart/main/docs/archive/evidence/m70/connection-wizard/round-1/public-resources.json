@@ -1,0 +1,26 @@
+{
+  "result": "passed",
+  "assetVersion": "0.16.6-test20261018-preview-f778f99-addcd9c3a8a6",
+  "resources": [
+    {
+      "path": "index.js",
+      "sha256": "eb7b84362ce341b99479f164fdf308db67d7deed2c2dbfbc347185108efff44c",
+      "matched": true
+    },
+    {
+      "path": "style.css",
+      "sha256": "4c62e72aa0a97783ef639b8a1fed0b752f395bb2e4e5b7278cb4b11328aedf1e",
+      "matched": true
+    },
+    {
+      "path": "vendor.js",
+      "sha256": "2d10df1751d0d3e778744c01f8edf8db96082b8d0939cf65ef38ea05eea39867",
+      "matched": true
+    },
+    {
+      "path": "i18n/en.json",
+      "sha256": "2da3ec81c6d15ca52a574576486e534acf4a040d61adbc34cad360b91af76a4f",
+      "matched": true
+    }
+  ]
+}

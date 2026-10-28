@@ -1,0 +1,60 @@
+{
+  "result": "passed",
+  "scope": "Actual B same viewport/language/theme/current first device, with live traffic allowed to vary",
+  "comparisons": [
+    {
+      "width": 2560,
+      "sameFirstDevice": true,
+      "nativeInsetsBefore": {
+        "left": 20,
+        "right": 20
+      },
+      "nativeInsetsAfter": {
+        "left": 20,
+        "right": 20
+      },
+      "rootWidthBefore": 2280,
+      "rootWidthAfter": 2280,
+      "tabsHeightBefore": 60,
+      "addressColumnWidthAfter": 230,
+      "currentTable": true,
+      "oldTable": true
+    },
+    {
+      "width": 1440,
+      "sameFirstDevice": true,
+      "nativeInsetsBefore": {
+        "left": 20,
+        "right": 20
+      },
+      "nativeInsetsAfter": {
+        "left": 20,
+        "right": 20
+      },
+      "rootWidthBefore": 1192,
+      "rootWidthAfter": 1192,
+      "tabsHeightBefore": 60,
+      "addressColumnWidthAfter": 230,
+      "currentTable": true,
+      "oldTable": true
+    },
+    {
+      "width": 390,
+      "sameFirstDevice": true,
+      "nativeInsetsBefore": {
+        "left": 16,
+        "right": 16
+      },
+      "nativeInsetsAfter": {
+        "left": 16,
+        "right": 16
+      },
+      "rootWidthBefore": 358,
+      "rootWidthAfter": 358,
+      "tabsHeightBefore": 60,
+      "addressColumnWidthAfter": null,
+      "currentTable": false,
+      "oldTable": false
+    }
+  ]
+}

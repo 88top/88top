@@ -1,0 +1,27 @@
+{
+  "startedAt": "2026-10-18T00:06:33.971Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "business-actions-review",
+      "startedAt": "2026-10-18T00:06:33.975Z",
+      "endedAt": "2026-10-18T00:07:11.136Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/widget-composition/78-storage/regression/business-actions-review/report.json"
+    },
+    {
+      "name": "business-widgets-review",
+      "startedAt": "2026-10-18T00:06:33.971Z",
+      "endedAt": "2026-10-18T00:07:20.508Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 19,
+      "report": "docs/evidence/m66/widget-composition/78-storage/regression/business-widgets-review/report.json"
+    }
+  ],
+  "endedAt": "2026-10-18T00:07:20.509Z",
+  "result": "pass",
+  "groups": 32
+}

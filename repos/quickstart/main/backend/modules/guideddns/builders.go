@@ -3,6 +3,8 @@ package guideddns
 import (
 	"errors"
 	"fmt"
+
+	"github.com/istoreos/quickstart/backend/utils"
 )
 
 type GuideDDNSApplyCommandInput struct {
@@ -90,10 +92,10 @@ func BuildGuideDDNSApplyCommands(input GuideDDNSApplyCommandInput) []string {
 		fmt.Sprintf("uci set ddns.%v.enabled='1'", input.ConfigName),
 		fmt.Sprintf("uci set ddns.%v.use_ipv6=%v", input.ConfigName, input.UseIPv6),
 		fmt.Sprintf("uci set ddns.%v.service_name=%v", input.ConfigName, input.ServiceName),
-		fmt.Sprintf("uci set ddns.%v.lookup_host=%v", input.ConfigName, input.Domain),
-		fmt.Sprintf("uci set ddns.%v.domain=%v", input.ConfigName, input.Domain),
-		fmt.Sprintf("uci set ddns.%v.username=%v", input.ConfigName, input.UserName),
-		fmt.Sprintf("uci set ddns.%v.password=%v", input.ConfigName, input.Password),
+		fmt.Sprintf("uci set ddns.%v.lookup_host=%v", input.ConfigName, utils.ShellQuote(input.Domain)),
+		fmt.Sprintf("uci set ddns.%v.domain=%v", input.ConfigName, utils.ShellQuote(input.Domain)),
+		fmt.Sprintf("uci set ddns.%v.username=%v", input.ConfigName, utils.ShellQuote(input.UserName)),
+		fmt.Sprintf("uci set ddns.%v.password=%v", input.ConfigName, utils.ShellQuote(input.Password)),
 		fmt.Sprintf("uci set ddns.%v.interface=%v", input.ConfigName, input.Interface),
 		fmt.Sprintf("uci set ddns.%v.use_syslog=%v", input.ConfigName, "2"),
 		fmt.Sprintf("uci set ddns.%v.check_unit=%v", input.ConfigName, "minutes"),

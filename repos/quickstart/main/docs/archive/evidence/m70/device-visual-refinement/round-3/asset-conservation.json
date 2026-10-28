@@ -1,0 +1,11 @@
+{
+  "result": "passed",
+  "baseline": "668a9fc",
+  "candidate": "599bfa8",
+  "filesCompared": 36,
+  "changed": [
+    "luci-static/quickstart/index.js",
+    "luci-static/quickstart/style.css"
+  ],
+  "noAddedOrRemovedAssets": true
+}

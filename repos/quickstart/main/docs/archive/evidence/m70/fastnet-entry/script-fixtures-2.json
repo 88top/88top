@@ -1,0 +1,77 @@
+{
+  "result": "passed",
+  "scriptSha256": "2cfb7147822538802930074838feb68b14d730c170c4663fa6050a5aa40ab8a1",
+  "cases": [
+    {
+      "name": "running-default",
+      "result": "passed",
+      "exitCode": 0
+    },
+    {
+      "name": "effective-custom-port",
+      "result": "passed",
+      "exitCode": 0
+    },
+    {
+      "name": "ipv6-wildcard",
+      "result": "passed",
+      "exitCode": 0
+    },
+    {
+      "name": "stopped-binary-still-present",
+      "result": "passed",
+      "exitCode": 0
+    },
+    {
+      "name": "loopback-only",
+      "result": "passed",
+      "exitCode": 0
+    },
+    {
+      "name": "port-zero",
+      "result": "passed",
+      "exitCode": 1
+    },
+    {
+      "name": "port-overflow",
+      "result": "passed",
+      "exitCode": 1
+    },
+    {
+      "name": "port-invalid",
+      "result": "passed",
+      "exitCode": 1
+    },
+    {
+      "name": "wrong-command",
+      "result": "passed",
+      "exitCode": 1
+    },
+    {
+      "name": "absent-service",
+      "result": "passed",
+      "exitCode": 0
+    },
+    {
+      "name": "undeployed",
+      "result": "passed",
+      "exitCode": 0
+    },
+    {
+      "name": "ubus-failure",
+      "result": "passed",
+      "exitCode": 1
+    },
+    {
+      "name": "invalid-json",
+      "result": "passed",
+      "exitCode": 1
+    },
+    {
+      "name": "ambiguous-instances",
+      "result": "passed",
+      "exitCode": 1
+    }
+  ],
+  "temporaryFilesCleaned": true
+}

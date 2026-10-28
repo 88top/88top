@@ -1,0 +1,30 @@
+{
+  "result": "passed",
+  "typeCheck": {
+    "command": "npm --prefix web run tsc",
+    "exitCode": 0
+  },
+  "frontendTests": {
+    "command": "node --test web/test/*.test.mjs",
+    "passed": 135,
+    "failed": 0
+  },
+  "build": {
+    "command": "make build-web",
+    "exitCode": 0
+  },
+  "cacheWrapper": "/var/cache/build-cache/run.sh",
+  "actualOutput": "/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/94c4-develop-quicksta/quickstart/web/dist",
+  "outputRemainsInProject": true,
+  "changedArchiveEntries": [
+    "luci-static/quickstart/index.js",
+    "luci-static/quickstart/style.css"
+  ],
+  "zipSha256": "247e50265cbeff99d9d01e26bcc5a174fd07231ca3b65f998f0d436bab0d0d14",
+  "frontendSha256": {
+    "index.js": "0ad954975a7eb79c99c2721e519c86962d212e89d795d2f6ba6892e26d6f0d82",
+    "style.css": "197bb7ea721f1a1b816f31c1551551b3a6668f44864a9ddefe8fe1b241ab7a46",
+    "vendor.js": "2d10df1751d0d3e778744c01f8edf8db96082b8d0939cf65ef38ea05eea39867",
+    "i18n/en.json": "2da3ec81c6d15ca52a574576486e534acf4a040d61adbc34cad360b91af76a4f"
+  }
+}

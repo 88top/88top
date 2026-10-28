@@ -11,7 +11,7 @@ import (
 func TestBuildUpdateCommandsReturnsExactDockerRootCommandList(t *testing.T) {
 	cmds := BuildUpdateCommands("/mnt/data/docker")
 	expected := []string{
-		"uci set dockerd.globals.data_root='/mnt/data/docker'",
+		"uci set dockerd.globals.data_root=/mnt/data/docker",
 		"uci commit dockerd",
 		"/etc/init.d/dockerd restart",
 	}

@@ -1,6 +1,9 @@
 package guestiface
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/istoreos/quickstart/backend/utils"
+)
 
 type Profile struct {
 	IfaceName      string
@@ -26,13 +29,13 @@ func BuildCommands(profile Profile) []string {
 		fmt.Sprintf(`uci -q delete wireless.%s`, profile.IfaceName),
 		fmt.Sprintf(`uci set wireless.%s="wifi-iface"`, profile.IfaceName),
 		fmt.Sprintf(`uci set wireless.%s.device="${WIFI_DEV}"`, profile.IfaceName),
-		fmt.Sprintf(`uci set wireless.%s.ifname="%s"`, profile.IfaceName, profile.WirelessIfName),
+		fmt.Sprintf(`uci set wireless.%s.ifname=%s`, profile.IfaceName, utils.ShellQuote(profile.WirelessIfName)),
 		fmt.Sprintf(`uci set wireless.%s.mode="ap"`, profile.IfaceName),
 		fmt.Sprintf(`uci set wireless.%s.network="guest"`, profile.IfaceName),
 		fmt.Sprintf(`uci set wireless.%s.guest="1"`, profile.IfaceName),
-		fmt.Sprintf(`uci set wireless.%s.ssid="%s"`, profile.IfaceName, profile.SSID),
-		fmt.Sprintf(`uci set wireless.%s.encryption="%s"`, profile.IfaceName, profile.Encryption),
-		fmt.Sprintf(`uci set wireless.%s.key="%s"`, profile.IfaceName, key),
+		fmt.Sprintf(`uci set wireless.%s.ssid=%s`, profile.IfaceName, utils.ShellQuote(profile.SSID)),
+		fmt.Sprintf(`uci set wireless.%s.encryption=%s`, profile.IfaceName, utils.ShellQuote(profile.Encryption)),
+		fmt.Sprintf(`uci set wireless.%s.key=%s`, profile.IfaceName, utils.ShellQuote(key)),
 		fmt.Sprintf(`uci set wireless.%s.disabled=0`, profile.IfaceName),
 		fmt.Sprintf(`uci set wireless.%s.isolate=1`, profile.IfaceName),
 		fmt.Sprintf(`uci set wireless.%s.wds=1`, profile.IfaceName),

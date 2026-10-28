@@ -1,0 +1,4026 @@
+{
+  "result": "passed",
+  "views": [
+    {
+      "palette": "vivid",
+      "theme": "light",
+      "width": 1440,
+      "cards": [
+        {
+          "id": "traffic",
+          "x": 232,
+          "y": 177,
+          "w": 694.796875,
+          "h": 391.796875
+        },
+        {
+          "id": "connection",
+          "x": 944.796875,
+          "y": 177,
+          "w": 463.203125,
+          "h": 237.796875
+        },
+        {
+          "id": "networkInterface",
+          "x": 944.796875,
+          "y": 432.796875,
+          "w": 463.203125,
+          "h": 136
+        },
+        {
+          "id": "devices",
+          "x": 232,
+          "y": 586.796875,
+          "w": 579,
+          "h": 302.078125
+        },
+        {
+          "id": "applications",
+          "x": 829,
+          "y": 586.796875,
+          "w": 579,
+          "h": 302.078125
+        },
+        {
+          "id": "storage",
+          "x": 232,
+          "y": 906.875,
+          "w": 579,
+          "h": 411
+        },
+        {
+          "id": "sharing",
+          "x": 829,
+          "y": 906.875,
+          "w": 579,
+          "h": 411
+        },
+        {
+          "id": "docker",
+          "x": 232,
+          "y": 1335.875,
+          "w": 387.59375,
+          "h": 433.296875
+        },
+        {
+          "id": "downloads",
+          "x": 637.59375,
+          "y": 1335.875,
+          "w": 376.203125,
+          "h": 433.296875
+        },
+        {
+          "id": "remote",
+          "x": 1031.796875,
+          "y": 1335.875,
+          "w": 376.1875,
+          "h": 433.296875
+        },
+        {
+          "id": "system",
+          "x": 232,
+          "y": 1787.171875,
+          "w": 1176,
+          "h": 290
+        }
+      ],
+      "doc": {
+        "schemaVersion": 3,
+        "revision": 0,
+        "rows": [
+          {
+            "id": "network",
+            "template": "left-big",
+            "height": 320,
+            "columns": [
+              {
+                "weight": 60,
+                "split": 50,
+                "cards": [
+                  "traffic"
+                ]
+              },
+              {
+                "weight": 40,
+                "split": 50,
+                "cards": [
+                  "connection",
+                  "networkInterface"
+                ]
+              }
+            ],
+            "heightMode": "chart"
+          },
+          {
+            "id": "devices",
+            "template": "pair",
+            "height": 340,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "devices"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "applications"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "storage",
+            "template": "pair",
+            "height": 330,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "storage"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "sharing"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "services",
+            "template": "triple",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 34,
+                "split": 50,
+                "cards": [
+                  "docker"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "downloads"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "remote"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "system",
+            "template": "single",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 100,
+                "split": 50,
+                "cards": [
+                  "system"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          }
+        ],
+        "widgetPreferences": {
+          "traffic": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "connection": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "networkInterface": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "applications": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "devices": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "system": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "storage": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "sharing": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "docker": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "downloads": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "remote": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          }
+        }
+      },
+      "shell": {
+        "x": 0,
+        "y": 0,
+        "w": 200,
+        "h": 1000,
+        "color": "rgb(104, 112, 128)",
+        "background": "rgb(236, 238, 242)"
+      },
+      "surfaces": [
+        {
+          "id": "traffic",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "connection",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "networkInterface",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "devices",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "applications",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "storage",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "sharing",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "docker",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "downloads",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "remote",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "system",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "palette": "vivid",
+      "theme": "light",
+      "width": 390,
+      "cards": [
+        {
+          "id": "traffic",
+          "x": 14,
+          "y": 158.5,
+          "w": 362,
+          "h": 300
+        },
+        {
+          "id": "connection",
+          "x": 14,
+          "y": 476.5,
+          "w": 362,
+          "h": 220
+        },
+        {
+          "id": "networkInterface",
+          "x": 14,
+          "y": 714.5,
+          "w": 362,
+          "h": 230.5625
+        },
+        {
+          "id": "devices",
+          "x": 14,
+          "y": 963.0625,
+          "w": 362,
+          "h": 358.296875
+        },
+        {
+          "id": "applications",
+          "x": 14,
+          "y": 1339.359375,
+          "w": 362,
+          "h": 428
+        },
+        {
+          "id": "storage",
+          "x": 14,
+          "y": 1785.359375,
+          "w": 362,
+          "h": 398
+        },
+        {
+          "id": "sharing",
+          "x": 14,
+          "y": 2201.359375,
+          "w": 362,
+          "h": 310.921875
+        },
+        {
+          "id": "docker",
+          "x": 14,
+          "y": 2530.28125,
+          "w": 362,
+          "h": 235.796875
+        },
+        {
+          "id": "downloads",
+          "x": 14,
+          "y": 2784.078125,
+          "w": 362,
+          "h": 413.296875
+        },
+        {
+          "id": "remote",
+          "x": 14,
+          "y": 3215.375,
+          "w": 362,
+          "h": 302.078125
+        },
+        {
+          "id": "system",
+          "x": 14,
+          "y": 3535.453125,
+          "w": 362,
+          "h": 148
+        }
+      ],
+      "doc": {
+        "schemaVersion": 3,
+        "revision": 0,
+        "rows": [
+          {
+            "id": "network",
+            "template": "left-big",
+            "height": 320,
+            "columns": [
+              {
+                "weight": 60,
+                "split": 50,
+                "cards": [
+                  "traffic"
+                ]
+              },
+              {
+                "weight": 40,
+                "split": 50,
+                "cards": [
+                  "connection",
+                  "networkInterface"
+                ]
+              }
+            ],
+            "heightMode": "chart"
+          },
+          {
+            "id": "devices",
+            "template": "pair",
+            "height": 340,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "devices"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "applications"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "storage",
+            "template": "pair",
+            "height": 330,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "storage"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "sharing"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "services",
+            "template": "triple",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 34,
+                "split": 50,
+                "cards": [
+                  "docker"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "downloads"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "remote"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "system",
+            "template": "single",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 100,
+                "split": 50,
+                "cards": [
+                  "system"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          }
+        ],
+        "widgetPreferences": {
+          "traffic": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "connection": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "networkInterface": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "applications": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "devices": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "system": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "storage": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "sharing": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "docker": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "downloads": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "remote": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          }
+        }
+      },
+      "shell": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "color": "rgb(104, 112, 128)",
+        "background": "rgb(236, 238, 242)"
+      },
+      "surfaces": [
+        {
+          "id": "traffic",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "connection",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "networkInterface",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "devices",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "applications",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "storage",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "sharing",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "docker",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "downloads",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "remote",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "system",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "palette": "vivid",
+      "theme": "light",
+      "width": 320,
+      "cards": [
+        {
+          "id": "traffic",
+          "x": 14,
+          "y": 158.5,
+          "w": 292,
+          "h": 300
+        },
+        {
+          "id": "connection",
+          "x": 14,
+          "y": 476.5,
+          "w": 292,
+          "h": 220
+        },
+        {
+          "id": "networkInterface",
+          "x": 14,
+          "y": 714.5,
+          "w": 292,
+          "h": 230.5625
+        },
+        {
+          "id": "devices",
+          "x": 14,
+          "y": 963.0625,
+          "w": 292,
+          "h": 358.296875
+        },
+        {
+          "id": "applications",
+          "x": 14,
+          "y": 1339.359375,
+          "w": 292,
+          "h": 428
+        },
+        {
+          "id": "storage",
+          "x": 14,
+          "y": 1785.359375,
+          "w": 292,
+          "h": 398
+        },
+        {
+          "id": "sharing",
+          "x": 14,
+          "y": 2201.359375,
+          "w": 292,
+          "h": 330.421875
+        },
+        {
+          "id": "docker",
+          "x": 14,
+          "y": 2549.78125,
+          "w": 292,
+          "h": 235.796875
+        },
+        {
+          "id": "downloads",
+          "x": 14,
+          "y": 2803.578125,
+          "w": 292,
+          "h": 431.484375
+        },
+        {
+          "id": "remote",
+          "x": 14,
+          "y": 3253.0625,
+          "w": 292,
+          "h": 315.171875
+        },
+        {
+          "id": "system",
+          "x": 14,
+          "y": 3586.234375,
+          "w": 292,
+          "h": 148
+        }
+      ],
+      "doc": {
+        "schemaVersion": 3,
+        "revision": 0,
+        "rows": [
+          {
+            "id": "network",
+            "template": "left-big",
+            "height": 320,
+            "columns": [
+              {
+                "weight": 60,
+                "split": 50,
+                "cards": [
+                  "traffic"
+                ]
+              },
+              {
+                "weight": 40,
+                "split": 50,
+                "cards": [
+                  "connection",
+                  "networkInterface"
+                ]
+              }
+            ],
+            "heightMode": "chart"
+          },
+          {
+            "id": "devices",
+            "template": "pair",
+            "height": 340,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "devices"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "applications"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "storage",
+            "template": "pair",
+            "height": 330,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "storage"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "sharing"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "services",
+            "template": "triple",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 34,
+                "split": 50,
+                "cards": [
+                  "docker"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "downloads"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "remote"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "system",
+            "template": "single",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 100,
+                "split": 50,
+                "cards": [
+                  "system"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          }
+        ],
+        "widgetPreferences": {
+          "traffic": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "connection": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "networkInterface": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "applications": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "devices": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "system": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "storage": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "sharing": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "docker": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "downloads": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "remote": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          }
+        }
+      },
+      "shell": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "color": "rgb(104, 112, 128)",
+        "background": "rgb(236, 238, 242)"
+      },
+      "surfaces": [
+        {
+          "id": "traffic",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "connection",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "networkInterface",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "devices",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "applications",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "storage",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "sharing",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "docker",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "downloads",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "remote",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "system",
+          "border": "1px",
+          "borderColor": "rgb(204, 217, 237)",
+          "shadow": "rgb(91, 131, 230) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "palette": "vivid",
+      "theme": "dark",
+      "width": 1440,
+      "cards": [
+        {
+          "id": "traffic",
+          "x": 232,
+          "y": 177,
+          "w": 694.796875,
+          "h": 391.796875
+        },
+        {
+          "id": "connection",
+          "x": 944.796875,
+          "y": 177,
+          "w": 463.203125,
+          "h": 237.796875
+        },
+        {
+          "id": "networkInterface",
+          "x": 944.796875,
+          "y": 432.796875,
+          "w": 463.203125,
+          "h": 136
+        },
+        {
+          "id": "devices",
+          "x": 232,
+          "y": 586.796875,
+          "w": 579,
+          "h": 302.078125
+        },
+        {
+          "id": "applications",
+          "x": 829,
+          "y": 586.796875,
+          "w": 579,
+          "h": 302.078125
+        },
+        {
+          "id": "storage",
+          "x": 232,
+          "y": 906.875,
+          "w": 579,
+          "h": 411
+        },
+        {
+          "id": "sharing",
+          "x": 829,
+          "y": 906.875,
+          "w": 579,
+          "h": 411
+        },
+        {
+          "id": "docker",
+          "x": 232,
+          "y": 1335.875,
+          "w": 387.59375,
+          "h": 433.296875
+        },
+        {
+          "id": "downloads",
+          "x": 637.59375,
+          "y": 1335.875,
+          "w": 376.203125,
+          "h": 433.296875
+        },
+        {
+          "id": "remote",
+          "x": 1031.796875,
+          "y": 1335.875,
+          "w": 376.1875,
+          "h": 433.296875
+        },
+        {
+          "id": "system",
+          "x": 232,
+          "y": 1787.171875,
+          "w": 1176,
+          "h": 290
+        }
+      ],
+      "doc": {
+        "schemaVersion": 3,
+        "revision": 0,
+        "rows": [
+          {
+            "id": "network",
+            "template": "left-big",
+            "height": 320,
+            "columns": [
+              {
+                "weight": 60,
+                "split": 50,
+                "cards": [
+                  "traffic"
+                ]
+              },
+              {
+                "weight": 40,
+                "split": 50,
+                "cards": [
+                  "connection",
+                  "networkInterface"
+                ]
+              }
+            ],
+            "heightMode": "chart"
+          },
+          {
+            "id": "devices",
+            "template": "pair",
+            "height": 340,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "devices"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "applications"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "storage",
+            "template": "pair",
+            "height": 330,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "storage"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "sharing"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "services",
+            "template": "triple",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 34,
+                "split": 50,
+                "cards": [
+                  "docker"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "downloads"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "remote"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "system",
+            "template": "single",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 100,
+                "split": 50,
+                "cards": [
+                  "system"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          }
+        ],
+        "widgetPreferences": {
+          "traffic": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "connection": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "networkInterface": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "applications": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "devices": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "system": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "storage": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "sharing": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "docker": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "downloads": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "remote": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          }
+        }
+      },
+      "shell": {
+        "x": 0,
+        "y": 0,
+        "w": 200,
+        "h": 1000,
+        "color": "rgb(104, 112, 128)",
+        "background": "rgb(236, 238, 242)"
+      },
+      "surfaces": [
+        {
+          "id": "traffic",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "connection",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "networkInterface",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "devices",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "applications",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "storage",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "sharing",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "docker",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "downloads",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "remote",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "system",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "palette": "vivid",
+      "theme": "dark",
+      "width": 390,
+      "cards": [
+        {
+          "id": "traffic",
+          "x": 14,
+          "y": 158.5,
+          "w": 362,
+          "h": 300
+        },
+        {
+          "id": "connection",
+          "x": 14,
+          "y": 476.5,
+          "w": 362,
+          "h": 220
+        },
+        {
+          "id": "networkInterface",
+          "x": 14,
+          "y": 714.5,
+          "w": 362,
+          "h": 230.5625
+        },
+        {
+          "id": "devices",
+          "x": 14,
+          "y": 963.0625,
+          "w": 362,
+          "h": 358.296875
+        },
+        {
+          "id": "applications",
+          "x": 14,
+          "y": 1339.359375,
+          "w": 362,
+          "h": 428
+        },
+        {
+          "id": "storage",
+          "x": 14,
+          "y": 1785.359375,
+          "w": 362,
+          "h": 398
+        },
+        {
+          "id": "sharing",
+          "x": 14,
+          "y": 2201.359375,
+          "w": 362,
+          "h": 310.921875
+        },
+        {
+          "id": "docker",
+          "x": 14,
+          "y": 2530.28125,
+          "w": 362,
+          "h": 235.796875
+        },
+        {
+          "id": "downloads",
+          "x": 14,
+          "y": 2784.078125,
+          "w": 362,
+          "h": 413.296875
+        },
+        {
+          "id": "remote",
+          "x": 14,
+          "y": 3215.375,
+          "w": 362,
+          "h": 302.078125
+        },
+        {
+          "id": "system",
+          "x": 14,
+          "y": 3535.453125,
+          "w": 362,
+          "h": 148
+        }
+      ],
+      "doc": {
+        "schemaVersion": 3,
+        "revision": 0,
+        "rows": [
+          {
+            "id": "network",
+            "template": "left-big",
+            "height": 320,
+            "columns": [
+              {
+                "weight": 60,
+                "split": 50,
+                "cards": [
+                  "traffic"
+                ]
+              },
+              {
+                "weight": 40,
+                "split": 50,
+                "cards": [
+                  "connection",
+                  "networkInterface"
+                ]
+              }
+            ],
+            "heightMode": "chart"
+          },
+          {
+            "id": "devices",
+            "template": "pair",
+            "height": 340,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "devices"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "applications"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "storage",
+            "template": "pair",
+            "height": 330,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "storage"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "sharing"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "services",
+            "template": "triple",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 34,
+                "split": 50,
+                "cards": [
+                  "docker"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "downloads"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "remote"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "system",
+            "template": "single",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 100,
+                "split": 50,
+                "cards": [
+                  "system"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          }
+        ],
+        "widgetPreferences": {
+          "traffic": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "connection": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "networkInterface": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "applications": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "devices": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "system": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "storage": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "sharing": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "docker": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "downloads": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "remote": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          }
+        }
+      },
+      "shell": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "color": "rgb(104, 112, 128)",
+        "background": "rgb(236, 238, 242)"
+      },
+      "surfaces": [
+        {
+          "id": "traffic",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "connection",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "networkInterface",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "devices",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "applications",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "storage",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "sharing",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "docker",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "downloads",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "remote",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "system",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "palette": "vivid",
+      "theme": "dark",
+      "width": 320,
+      "cards": [
+        {
+          "id": "traffic",
+          "x": 14,
+          "y": 158.5,
+          "w": 292,
+          "h": 300
+        },
+        {
+          "id": "connection",
+          "x": 14,
+          "y": 476.5,
+          "w": 292,
+          "h": 220
+        },
+        {
+          "id": "networkInterface",
+          "x": 14,
+          "y": 714.5,
+          "w": 292,
+          "h": 230.5625
+        },
+        {
+          "id": "devices",
+          "x": 14,
+          "y": 963.0625,
+          "w": 292,
+          "h": 358.296875
+        },
+        {
+          "id": "applications",
+          "x": 14,
+          "y": 1339.359375,
+          "w": 292,
+          "h": 428
+        },
+        {
+          "id": "storage",
+          "x": 14,
+          "y": 1785.359375,
+          "w": 292,
+          "h": 398
+        },
+        {
+          "id": "sharing",
+          "x": 14,
+          "y": 2201.359375,
+          "w": 292,
+          "h": 330.421875
+        },
+        {
+          "id": "docker",
+          "x": 14,
+          "y": 2549.78125,
+          "w": 292,
+          "h": 235.796875
+        },
+        {
+          "id": "downloads",
+          "x": 14,
+          "y": 2803.578125,
+          "w": 292,
+          "h": 431.484375
+        },
+        {
+          "id": "remote",
+          "x": 14,
+          "y": 3253.0625,
+          "w": 292,
+          "h": 315.171875
+        },
+        {
+          "id": "system",
+          "x": 14,
+          "y": 3586.234375,
+          "w": 292,
+          "h": 148
+        }
+      ],
+      "doc": {
+        "schemaVersion": 3,
+        "revision": 0,
+        "rows": [
+          {
+            "id": "network",
+            "template": "left-big",
+            "height": 320,
+            "columns": [
+              {
+                "weight": 60,
+                "split": 50,
+                "cards": [
+                  "traffic"
+                ]
+              },
+              {
+                "weight": 40,
+                "split": 50,
+                "cards": [
+                  "connection",
+                  "networkInterface"
+                ]
+              }
+            ],
+            "heightMode": "chart"
+          },
+          {
+            "id": "devices",
+            "template": "pair",
+            "height": 340,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "devices"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "applications"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "storage",
+            "template": "pair",
+            "height": 330,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "storage"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "sharing"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "services",
+            "template": "triple",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 34,
+                "split": 50,
+                "cards": [
+                  "docker"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "downloads"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "remote"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "system",
+            "template": "single",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 100,
+                "split": 50,
+                "cards": [
+                  "system"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          }
+        ],
+        "widgetPreferences": {
+          "traffic": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "connection": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "networkInterface": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "applications": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "devices": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "system": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "storage": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "sharing": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "docker": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "downloads": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "remote": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          }
+        }
+      },
+      "shell": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "color": "rgb(104, 112, 128)",
+        "background": "rgb(236, 238, 242)"
+      },
+      "surfaces": [
+        {
+          "id": "traffic",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "connection",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "networkInterface",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "devices",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "applications",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "storage",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "sharing",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "docker",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "downloads",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "remote",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "system",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(128, 170, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "palette": "bold",
+      "theme": "light",
+      "width": 1440,
+      "cards": [
+        {
+          "id": "traffic",
+          "x": 232,
+          "y": 177,
+          "w": 694.796875,
+          "h": 391.796875
+        },
+        {
+          "id": "connection",
+          "x": 944.796875,
+          "y": 177,
+          "w": 463.203125,
+          "h": 237.796875
+        },
+        {
+          "id": "networkInterface",
+          "x": 944.796875,
+          "y": 432.796875,
+          "w": 463.203125,
+          "h": 136
+        },
+        {
+          "id": "devices",
+          "x": 232,
+          "y": 586.796875,
+          "w": 579,
+          "h": 302.078125
+        },
+        {
+          "id": "applications",
+          "x": 829,
+          "y": 586.796875,
+          "w": 579,
+          "h": 302.078125
+        },
+        {
+          "id": "storage",
+          "x": 232,
+          "y": 906.875,
+          "w": 579,
+          "h": 411
+        },
+        {
+          "id": "sharing",
+          "x": 829,
+          "y": 906.875,
+          "w": 579,
+          "h": 411
+        },
+        {
+          "id": "docker",
+          "x": 232,
+          "y": 1335.875,
+          "w": 387.59375,
+          "h": 433.296875
+        },
+        {
+          "id": "downloads",
+          "x": 637.59375,
+          "y": 1335.875,
+          "w": 376.203125,
+          "h": 433.296875
+        },
+        {
+          "id": "remote",
+          "x": 1031.796875,
+          "y": 1335.875,
+          "w": 376.1875,
+          "h": 433.296875
+        },
+        {
+          "id": "system",
+          "x": 232,
+          "y": 1787.171875,
+          "w": 1176,
+          "h": 290
+        }
+      ],
+      "doc": {
+        "schemaVersion": 3,
+        "revision": 0,
+        "rows": [
+          {
+            "id": "network",
+            "template": "left-big",
+            "height": 320,
+            "columns": [
+              {
+                "weight": 60,
+                "split": 50,
+                "cards": [
+                  "traffic"
+                ]
+              },
+              {
+                "weight": 40,
+                "split": 50,
+                "cards": [
+                  "connection",
+                  "networkInterface"
+                ]
+              }
+            ],
+            "heightMode": "chart"
+          },
+          {
+            "id": "devices",
+            "template": "pair",
+            "height": 340,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "devices"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "applications"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "storage",
+            "template": "pair",
+            "height": 330,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "storage"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "sharing"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "services",
+            "template": "triple",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 34,
+                "split": 50,
+                "cards": [
+                  "docker"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "downloads"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "remote"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "system",
+            "template": "single",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 100,
+                "split": 50,
+                "cards": [
+                  "system"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          }
+        ],
+        "widgetPreferences": {
+          "traffic": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "connection": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "networkInterface": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "applications": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "devices": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "system": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "storage": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "sharing": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "docker": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "downloads": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "remote": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          }
+        }
+      },
+      "shell": {
+        "x": 0,
+        "y": 0,
+        "w": 200,
+        "h": 1000,
+        "color": "rgb(104, 112, 128)",
+        "background": "rgb(236, 238, 242)"
+      },
+      "surfaces": [
+        {
+          "id": "traffic",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "connection",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "networkInterface",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "devices",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "applications",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "storage",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "sharing",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "docker",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "downloads",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "remote",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "system",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "palette": "bold",
+      "theme": "light",
+      "width": 390,
+      "cards": [
+        {
+          "id": "traffic",
+          "x": 14,
+          "y": 158.5,
+          "w": 362,
+          "h": 300
+        },
+        {
+          "id": "connection",
+          "x": 14,
+          "y": 476.5,
+          "w": 362,
+          "h": 220
+        },
+        {
+          "id": "networkInterface",
+          "x": 14,
+          "y": 714.5,
+          "w": 362,
+          "h": 230.5625
+        },
+        {
+          "id": "devices",
+          "x": 14,
+          "y": 963.0625,
+          "w": 362,
+          "h": 358.296875
+        },
+        {
+          "id": "applications",
+          "x": 14,
+          "y": 1339.359375,
+          "w": 362,
+          "h": 428
+        },
+        {
+          "id": "storage",
+          "x": 14,
+          "y": 1785.359375,
+          "w": 362,
+          "h": 398
+        },
+        {
+          "id": "sharing",
+          "x": 14,
+          "y": 2201.359375,
+          "w": 362,
+          "h": 310.921875
+        },
+        {
+          "id": "docker",
+          "x": 14,
+          "y": 2530.28125,
+          "w": 362,
+          "h": 235.796875
+        },
+        {
+          "id": "downloads",
+          "x": 14,
+          "y": 2784.078125,
+          "w": 362,
+          "h": 413.296875
+        },
+        {
+          "id": "remote",
+          "x": 14,
+          "y": 3215.375,
+          "w": 362,
+          "h": 302.078125
+        },
+        {
+          "id": "system",
+          "x": 14,
+          "y": 3535.453125,
+          "w": 362,
+          "h": 148
+        }
+      ],
+      "doc": {
+        "schemaVersion": 3,
+        "revision": 0,
+        "rows": [
+          {
+            "id": "network",
+            "template": "left-big",
+            "height": 320,
+            "columns": [
+              {
+                "weight": 60,
+                "split": 50,
+                "cards": [
+                  "traffic"
+                ]
+              },
+              {
+                "weight": 40,
+                "split": 50,
+                "cards": [
+                  "connection",
+                  "networkInterface"
+                ]
+              }
+            ],
+            "heightMode": "chart"
+          },
+          {
+            "id": "devices",
+            "template": "pair",
+            "height": 340,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "devices"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "applications"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "storage",
+            "template": "pair",
+            "height": 330,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "storage"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "sharing"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "services",
+            "template": "triple",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 34,
+                "split": 50,
+                "cards": [
+                  "docker"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "downloads"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "remote"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "system",
+            "template": "single",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 100,
+                "split": 50,
+                "cards": [
+                  "system"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          }
+        ],
+        "widgetPreferences": {
+          "traffic": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "connection": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "networkInterface": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "applications": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "devices": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "system": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "storage": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "sharing": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "docker": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "downloads": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "remote": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          }
+        }
+      },
+      "shell": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "color": "rgb(104, 112, 128)",
+        "background": "rgb(236, 238, 242)"
+      },
+      "surfaces": [
+        {
+          "id": "traffic",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "connection",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "networkInterface",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "devices",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "applications",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "storage",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "sharing",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "docker",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "downloads",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "remote",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "system",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "palette": "bold",
+      "theme": "light",
+      "width": 320,
+      "cards": [
+        {
+          "id": "traffic",
+          "x": 14,
+          "y": 158.5,
+          "w": 292,
+          "h": 300
+        },
+        {
+          "id": "connection",
+          "x": 14,
+          "y": 476.5,
+          "w": 292,
+          "h": 220
+        },
+        {
+          "id": "networkInterface",
+          "x": 14,
+          "y": 714.5,
+          "w": 292,
+          "h": 230.5625
+        },
+        {
+          "id": "devices",
+          "x": 14,
+          "y": 963.0625,
+          "w": 292,
+          "h": 358.296875
+        },
+        {
+          "id": "applications",
+          "x": 14,
+          "y": 1339.359375,
+          "w": 292,
+          "h": 428
+        },
+        {
+          "id": "storage",
+          "x": 14,
+          "y": 1785.359375,
+          "w": 292,
+          "h": 398
+        },
+        {
+          "id": "sharing",
+          "x": 14,
+          "y": 2201.359375,
+          "w": 292,
+          "h": 330.421875
+        },
+        {
+          "id": "docker",
+          "x": 14,
+          "y": 2549.78125,
+          "w": 292,
+          "h": 235.796875
+        },
+        {
+          "id": "downloads",
+          "x": 14,
+          "y": 2803.578125,
+          "w": 292,
+          "h": 431.484375
+        },
+        {
+          "id": "remote",
+          "x": 14,
+          "y": 3253.0625,
+          "w": 292,
+          "h": 315.171875
+        },
+        {
+          "id": "system",
+          "x": 14,
+          "y": 3586.234375,
+          "w": 292,
+          "h": 148
+        }
+      ],
+      "doc": {
+        "schemaVersion": 3,
+        "revision": 0,
+        "rows": [
+          {
+            "id": "network",
+            "template": "left-big",
+            "height": 320,
+            "columns": [
+              {
+                "weight": 60,
+                "split": 50,
+                "cards": [
+                  "traffic"
+                ]
+              },
+              {
+                "weight": 40,
+                "split": 50,
+                "cards": [
+                  "connection",
+                  "networkInterface"
+                ]
+              }
+            ],
+            "heightMode": "chart"
+          },
+          {
+            "id": "devices",
+            "template": "pair",
+            "height": 340,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "devices"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "applications"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "storage",
+            "template": "pair",
+            "height": 330,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "storage"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "sharing"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "services",
+            "template": "triple",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 34,
+                "split": 50,
+                "cards": [
+                  "docker"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "downloads"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "remote"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "system",
+            "template": "single",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 100,
+                "split": 50,
+                "cards": [
+                  "system"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          }
+        ],
+        "widgetPreferences": {
+          "traffic": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "connection": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "networkInterface": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "applications": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "devices": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "system": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "storage": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "sharing": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "docker": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "downloads": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "remote": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          }
+        }
+      },
+      "shell": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "color": "rgb(104, 112, 128)",
+        "background": "rgb(236, 238, 242)"
+      },
+      "surfaces": [
+        {
+          "id": "traffic",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "connection",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "networkInterface",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "devices",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "applications",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "storage",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "sharing",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "docker",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "downloads",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "remote",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "system",
+          "border": "1px",
+          "borderColor": "rgb(191, 206, 230)",
+          "shadow": "rgb(52, 102, 217) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "palette": "bold",
+      "theme": "dark",
+      "width": 1440,
+      "cards": [
+        {
+          "id": "traffic",
+          "x": 232,
+          "y": 177,
+          "w": 694.796875,
+          "h": 391.796875
+        },
+        {
+          "id": "connection",
+          "x": 944.796875,
+          "y": 177,
+          "w": 463.203125,
+          "h": 237.796875
+        },
+        {
+          "id": "networkInterface",
+          "x": 944.796875,
+          "y": 432.796875,
+          "w": 463.203125,
+          "h": 136
+        },
+        {
+          "id": "devices",
+          "x": 232,
+          "y": 586.796875,
+          "w": 579,
+          "h": 302.078125
+        },
+        {
+          "id": "applications",
+          "x": 829,
+          "y": 586.796875,
+          "w": 579,
+          "h": 302.078125
+        },
+        {
+          "id": "storage",
+          "x": 232,
+          "y": 906.875,
+          "w": 579,
+          "h": 411
+        },
+        {
+          "id": "sharing",
+          "x": 829,
+          "y": 906.875,
+          "w": 579,
+          "h": 411
+        },
+        {
+          "id": "docker",
+          "x": 232,
+          "y": 1335.875,
+          "w": 387.59375,
+          "h": 433.296875
+        },
+        {
+          "id": "downloads",
+          "x": 637.59375,
+          "y": 1335.875,
+          "w": 376.203125,
+          "h": 433.296875
+        },
+        {
+          "id": "remote",
+          "x": 1031.796875,
+          "y": 1335.875,
+          "w": 376.1875,
+          "h": 433.296875
+        },
+        {
+          "id": "system",
+          "x": 232,
+          "y": 1787.171875,
+          "w": 1176,
+          "h": 290
+        }
+      ],
+      "doc": {
+        "schemaVersion": 3,
+        "revision": 0,
+        "rows": [
+          {
+            "id": "network",
+            "template": "left-big",
+            "height": 320,
+            "columns": [
+              {
+                "weight": 60,
+                "split": 50,
+                "cards": [
+                  "traffic"
+                ]
+              },
+              {
+                "weight": 40,
+                "split": 50,
+                "cards": [
+                  "connection",
+                  "networkInterface"
+                ]
+              }
+            ],
+            "heightMode": "chart"
+          },
+          {
+            "id": "devices",
+            "template": "pair",
+            "height": 340,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "devices"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "applications"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "storage",
+            "template": "pair",
+            "height": 330,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "storage"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "sharing"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "services",
+            "template": "triple",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 34,
+                "split": 50,
+                "cards": [
+                  "docker"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "downloads"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "remote"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "system",
+            "template": "single",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 100,
+                "split": 50,
+                "cards": [
+                  "system"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          }
+        ],
+        "widgetPreferences": {
+          "traffic": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "connection": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "networkInterface": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "applications": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "devices": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "system": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "storage": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "sharing": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "docker": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "downloads": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "remote": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          }
+        }
+      },
+      "shell": {
+        "x": 0,
+        "y": 0,
+        "w": 200,
+        "h": 1000,
+        "color": "rgb(104, 112, 128)",
+        "background": "rgb(236, 238, 242)"
+      },
+      "surfaces": [
+        {
+          "id": "traffic",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "connection",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "networkInterface",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "devices",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "applications",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "storage",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "sharing",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "docker",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "downloads",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "remote",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "system",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "palette": "bold",
+      "theme": "dark",
+      "width": 390,
+      "cards": [
+        {
+          "id": "traffic",
+          "x": 14,
+          "y": 158.5,
+          "w": 362,
+          "h": 300
+        },
+        {
+          "id": "connection",
+          "x": 14,
+          "y": 476.5,
+          "w": 362,
+          "h": 220
+        },
+        {
+          "id": "networkInterface",
+          "x": 14,
+          "y": 714.5,
+          "w": 362,
+          "h": 230.5625
+        },
+        {
+          "id": "devices",
+          "x": 14,
+          "y": 963.0625,
+          "w": 362,
+          "h": 358.296875
+        },
+        {
+          "id": "applications",
+          "x": 14,
+          "y": 1339.359375,
+          "w": 362,
+          "h": 428
+        },
+        {
+          "id": "storage",
+          "x": 14,
+          "y": 1785.359375,
+          "w": 362,
+          "h": 398
+        },
+        {
+          "id": "sharing",
+          "x": 14,
+          "y": 2201.359375,
+          "w": 362,
+          "h": 310.921875
+        },
+        {
+          "id": "docker",
+          "x": 14,
+          "y": 2530.28125,
+          "w": 362,
+          "h": 235.796875
+        },
+        {
+          "id": "downloads",
+          "x": 14,
+          "y": 2784.078125,
+          "w": 362,
+          "h": 413.296875
+        },
+        {
+          "id": "remote",
+          "x": 14,
+          "y": 3215.375,
+          "w": 362,
+          "h": 302.078125
+        },
+        {
+          "id": "system",
+          "x": 14,
+          "y": 3535.453125,
+          "w": 362,
+          "h": 148
+        }
+      ],
+      "doc": {
+        "schemaVersion": 3,
+        "revision": 0,
+        "rows": [
+          {
+            "id": "network",
+            "template": "left-big",
+            "height": 320,
+            "columns": [
+              {
+                "weight": 60,
+                "split": 50,
+                "cards": [
+                  "traffic"
+                ]
+              },
+              {
+                "weight": 40,
+                "split": 50,
+                "cards": [
+                  "connection",
+                  "networkInterface"
+                ]
+              }
+            ],
+            "heightMode": "chart"
+          },
+          {
+            "id": "devices",
+            "template": "pair",
+            "height": 340,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "devices"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "applications"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "storage",
+            "template": "pair",
+            "height": 330,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "storage"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "sharing"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "services",
+            "template": "triple",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 34,
+                "split": 50,
+                "cards": [
+                  "docker"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "downloads"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "remote"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "system",
+            "template": "single",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 100,
+                "split": 50,
+                "cards": [
+                  "system"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          }
+        ],
+        "widgetPreferences": {
+          "traffic": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "connection": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "networkInterface": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "applications": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "devices": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "system": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "storage": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "sharing": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "docker": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "downloads": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "remote": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          }
+        }
+      },
+      "shell": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "color": "rgb(104, 112, 128)",
+        "background": "rgb(236, 238, 242)"
+      },
+      "surfaces": [
+        {
+          "id": "traffic",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "connection",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "networkInterface",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "devices",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "applications",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "storage",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "sharing",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "docker",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "downloads",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "remote",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "system",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "palette": "bold",
+      "theme": "dark",
+      "width": 320,
+      "cards": [
+        {
+          "id": "traffic",
+          "x": 14,
+          "y": 158.5,
+          "w": 292,
+          "h": 300
+        },
+        {
+          "id": "connection",
+          "x": 14,
+          "y": 476.5,
+          "w": 292,
+          "h": 220
+        },
+        {
+          "id": "networkInterface",
+          "x": 14,
+          "y": 714.5,
+          "w": 292,
+          "h": 230.5625
+        },
+        {
+          "id": "devices",
+          "x": 14,
+          "y": 963.0625,
+          "w": 292,
+          "h": 358.296875
+        },
+        {
+          "id": "applications",
+          "x": 14,
+          "y": 1339.359375,
+          "w": 292,
+          "h": 428
+        },
+        {
+          "id": "storage",
+          "x": 14,
+          "y": 1785.359375,
+          "w": 292,
+          "h": 398
+        },
+        {
+          "id": "sharing",
+          "x": 14,
+          "y": 2201.359375,
+          "w": 292,
+          "h": 330.421875
+        },
+        {
+          "id": "docker",
+          "x": 14,
+          "y": 2549.78125,
+          "w": 292,
+          "h": 235.796875
+        },
+        {
+          "id": "downloads",
+          "x": 14,
+          "y": 2803.578125,
+          "w": 292,
+          "h": 431.484375
+        },
+        {
+          "id": "remote",
+          "x": 14,
+          "y": 3253.0625,
+          "w": 292,
+          "h": 315.171875
+        },
+        {
+          "id": "system",
+          "x": 14,
+          "y": 3586.234375,
+          "w": 292,
+          "h": 148
+        }
+      ],
+      "doc": {
+        "schemaVersion": 3,
+        "revision": 0,
+        "rows": [
+          {
+            "id": "network",
+            "template": "left-big",
+            "height": 320,
+            "columns": [
+              {
+                "weight": 60,
+                "split": 50,
+                "cards": [
+                  "traffic"
+                ]
+              },
+              {
+                "weight": 40,
+                "split": 50,
+                "cards": [
+                  "connection",
+                  "networkInterface"
+                ]
+              }
+            ],
+            "heightMode": "chart"
+          },
+          {
+            "id": "devices",
+            "template": "pair",
+            "height": 340,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "devices"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "applications"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "storage",
+            "template": "pair",
+            "height": 330,
+            "columns": [
+              {
+                "weight": 50,
+                "cards": [
+                  "storage"
+                ],
+                "split": 50
+              },
+              {
+                "weight": 50,
+                "cards": [
+                  "sharing"
+                ],
+                "split": 50
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "services",
+            "template": "triple",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 34,
+                "split": 50,
+                "cards": [
+                  "docker"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "downloads"
+                ]
+              },
+              {
+                "weight": 33,
+                "split": 50,
+                "cards": [
+                  "remote"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          },
+          {
+            "id": "system",
+            "template": "single",
+            "height": 280,
+            "columns": [
+              {
+                "weight": 100,
+                "split": 50,
+                "cards": [
+                  "system"
+                ]
+              }
+            ],
+            "heightMode": "content"
+          }
+        ],
+        "widgetPreferences": {
+          "traffic": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "connection": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "networkInterface": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "applications": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "devices": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "system": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "storage": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "sharing": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "docker": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "downloads": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          },
+          "remote": {
+            "mode": "auto",
+            "iconRows": 0,
+            "ruleVersion": 2
+          }
+        }
+      },
+      "shell": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "color": "rgb(104, 112, 128)",
+        "background": "rgb(236, 238, 242)"
+      },
+      "surfaces": [
+        {
+          "id": "traffic",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "connection",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "networkInterface",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "devices",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "applications",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "storage",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "sharing",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "docker",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "downloads",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "remote",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        },
+        {
+          "id": "system",
+          "border": "1px",
+          "borderColor": "rgb(62, 84, 118)",
+          "shadow": "rgb(138, 180, 255) 0px 3px 0px 0px inset, rgba(33, 61, 120, 0.03) 0px 4px 15px 0px"
+        }
+      ],
+      "overflow": false
+    }
+  ],
+  "errors": []
+}

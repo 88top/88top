@@ -18,6 +18,24 @@ type fakeStore struct {
 	normalizeCalls []string
 }
 
+func TestInvalidConfigurationDoesNotApplyOrReload(t *testing.T) {
+	for _, configs := range [][]*models.NetworkInterfaceConfig{
+		nil, {}, {nil},
+		{{Name: "lan", Proto: "dhcp"}, {Name: "lan", Proto: "dhcp"}},
+		{{Name: "lan.bad", Proto: "dhcp"}},
+		{{Name: "lan", Proto: "dhcp other"}},
+		{{Name: "lan", Proto: "dhcp", Devices: []string{"eth0\n"}}},
+	} {
+		store, apply := &fakeStore{}, &fakeApply{}
+		if _, err := NewService(store, apply).ApplyConfigSet(context.Background(), Input{Configs: configs}); err == nil {
+			t.Fatal("invalid input accepted")
+		}
+		if !reflect.DeepEqual(store.appliedPlan, CommandPlan{}) || len(apply.configs) != 0 {
+			t.Fatal("invalid request caused changes")
+		}
+	}
+}
+
 func (store *fakeStore) ReadSnapshot(ctx context.Context) (Snapshot, error) {
 	return store.snapshot, store.readErr
 }

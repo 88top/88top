@@ -1,0 +1,13 @@
+{
+  "host": "192.168.30.244",
+  "stage": "/root/quickstart-package-candidates/home-0166-fastnet-r1",
+  "result": "passed",
+  "exitCode": 0,
+  "privateBackupFingerprints": [
+    "6433a72bd5be225467c0210e9fee3ebd0f2267b51486f0261ccd3b1ad2ce2e3c  /root/quickstart-package-candidates/home-0166-fastnet-r1/backup/preinstall.tar.gz",
+    "30ceb66a8e2724755ba5ef3d4ff0796536ab05e6d1dff346656fc3d1b1f4756b  /root/quickstart-package-candidates/home-0166-fastnet-r1/backup/package-records.tar.gz",
+    "a7587da33f69f40ee59f9d819a0ce8a19bad0f4782396f7b8f96dba182bf33ca  /root/quickstart-package-candidates/home-0166-fastnet-r1/backup/network.before"
+  ],
+  "diagnostic": "",
+  "scope": "private backup only; no config or service changes"
+}

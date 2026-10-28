@@ -1,0 +1,7 @@
+{
+  "result": "failed",
+  "failure": "Unhandled route.fetch: Request context disposed during test context cleanup",
+  "boundary": "First view, default projection and three detail screenshots were captured; no complete UI pass claimed",
+  "sessionsDestroyed": 2,
+  "correction": "Drain in-flight browser projection routes with unrouteAll behavior=wait before closing contexts/browser. No product change or error suppression."
+}

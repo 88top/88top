@@ -1,0 +1,341 @@
+# DNS subsystem
+
+Transparent port-53 interception and the optional `dns.bind` listener share the userspace DNS architecture.
+
+Field-level settings, accepted URI forms, and defaults belong in the [DNS configuration reference](../reference/dns.md). The cache is entirely in userspace; generation-owned routing projection and domain-fact maps store learned predicate facts, not DNS responses.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    T[TCP/UDP :53 after existing ingress and control-plane exclusions] --> TR[Ordered traffic policy]
+    TR -->|direct must| N[Native Linux path]
+    TR -->|block must| DROP[Drop]
+    TR -->|group must| RAW[Raw TCP/UDP group transport]
+    TR -->|non-must, including ordinary block| C[DnsController]
+    B[dns.bind TCP/UDP] --> C
+    C --> G[Generation-pinned DnsService]
+    G --> P[Parse, hosts, strategy, request policy]
+    P --> F[Cache and singleflight]
+    F --> U[UpstreamPool]
+    U --> R[Response policy and strict validation]
+    R --> O[Typed outcome]
+    O --> X[Ingress reply]
+    O --> M[Routing projection]
+    M --> D[Generation-owned domain-fact maps]
+```
+
+Non-`must` transparent DNS and the standalone ingress adapter use the same `DnsController`, current `DnsServiceProvider`, forwarder, cache, singleflight set, upstream pools, and routing projection. An adapter owns admission until reply I/O completes; it does not write domain routes directly. Raw `group(must)` transport bypasses this entire DNS pipeline.
+
+- [`src/dns.rs`](../../../crates/honk-config/src/dns.rs) — `DnsConfig` (`bind`, `upstream`, `routing`, `strategy`, `cache`, `fixed_domain_ttl`). `DnsBindEndpoint` / `DnsBindTransport` / `DnsBindError` parse current-dae listeners with semantic equality; `DnsConfig::bind_endpoint` maps empty to disabled. Bind syntax: [Configuration](../configuration.md). `DnsUpstream`: name, address, `protocol: DnsProtocol`, `tls_server_name`, **`outbound: Option<String>`** dial-path proxy tag.
+  Dae routing: first-match `DnsRequestRule`/`DnsResponseRule`, AND-ed negatable `DnsCond`s. Request: Qname/Qtype/Sip; response: Qname/Qtype/Upstream/Ip. `Sip` accepts mixed host/CIDR arguments, never response rules. Actions: Reject/AsIs/Accept/Upstream(name); legacy `rules`/`fallback` convert. `types.rs::DnsProtocol`: 6 variants—Udp, Tcp, Tls (DoT), Https (DoH), H3 (DoH3), Quic (DoQ). Only the dae parser populates request/response rules, which sit outside serde; routing wrappers serialize only defaults and deserialize only null values.
+- [`src/dns/validation.rs`](../../../crates/honk-config/src/dns/validation.rs) owns named upstream-reference checks called by `Config::validate` at startup, SIGHUP, and public runtime reload. A private request-source selector in `DnsRouting` serves both validation and `effective_request`, preserving legacy field paths without allocating converted rules during validation. Parse-only loaders do not run whole-config validation.
+- DNS hosts use immutable, generation-pinned snapshots. Ordered `use_host` sources merge before request routing, cache lookup, or upstream exchange. Source syntax, precedence, and transactional SIGHUP behavior: [Configuration](../configuration.md).
+
+- [`src/dns/`](../../../crates/honk-core/src/dns/) — module ownership:
+    - `runtime.rs` / `runtime/provider.rs` — `DnsRuntime` and `DnsServiceProvider`; [generations and retirement](#generations-and-reload).
+    - `forwarder/`, `engine/`, `planner.rs`, `policy.rs` — [resolution pipeline](#resolution-pipeline) and request/response policy.
+    - `cache/` — [answer cache and persistence](#cache-and-persistence).
+    - `upstream_pool/`, `transport/` — [upstream sessions and drivers](#upstream-transports); `transport/retry.rs` owns the retry decision, `transport/lifecycle.rs` owns session retirement, and `transport/udp_pool/error_queue.rs` owns Linux quoted-packet error reception.
+    - `projection/` — generation-owned routing projection and domain-fact reconciliation ([routing projection](#routing-projection)).
+    - `service.rs`, `resolver.rs` — current-provider access for transparent DNS, `dns.bind`, Clash API, and application lookups.
+
+## Ingress paths
+
+| Path | Socket and destination model | Reply model |
+| --- | --- | --- |
+| Transparent port 53, without a terminal user `must` result | Valid queries admitted under [traffic-rule ownership](../reference/routing.md#outbound-targets-and-must) enter `DnsController`. | Transparent UDP uses an anyfrom socket bound to the original destination; TCP replies on the intercepted stream. Request action `asis` creates a new query to that destination on honk-originated sockets, preserving TCP/UDP including UDP `TC` fallback to TCP, not the client's network source. |
+| Standalone `dns.bind` | Selected TCP/UDP sockets are ordinary unmarked sockets in the host network namespace. They have no intercepted destination. | TCP replies on the accepted socket. UDP uses packet info so a wildcard bind replies from the exact local address and interface that received the query. |
+
+Native `direct(must)` leaves the original source IP/port untouched by honk, subject to external firewall/NAT. DNS bypassed by native direct or raw group transport contributes no answers to honk's routing projection. Anyfrom is the client-facing reply leg, not upstream source spoofing. Private-DNS bypass migration belongs in the [routing reference](../reference/routing.md#explicit-local-rules).
+
+The control plane owns [TCP handoff and UDP per-packet admission](./control-plane.md#transparent-ingress), including their different routing-generation requirements.
+
+`DnsRequestMeta { source_ip, original_dst }` carries the logical client source and intercepted destination as one immutable value. Both transparent and standalone adapters set `source_ip` from the socket peer; only transparent interception sets `original_dst`. IPv4-mapped IPv6 peers normalize to IPv4. Flow-associated TCP/UDP lookups use the admitted flow's client address and have no intercepted DNS destination. Internal, bootstrap, prefetch, and Clash API queries have neither value.
+
+Stale refresh and preferred-family siblings retain the initiating `DnsRequestMeta`. Source-aware flow resolution without an intercepted destination fails closed when policy selects `asis`.
+
+The standalone listener has these lifecycle and admission invariants:
+
+- It binds every selected transport synchronously and all-or-nothing before starting a supervisor. One bind failure closes the partial set and fails startup.
+- It forwards only complete, structurally valid, single-question requests. Invalid UDP requests receive `FORMERR`; a malformed or partial TCP frame closes the connection.
+- Its UDP ingress profile clamps the advertised response size to `512..=1232`. Packet-info provenance preserves wildcard reply source selection.
+- TCP uses persistent RFC 7766 two-octet framing. Each length read, body read, and response write has a 30-second bound.
+- Standalone TCP may consume at most one quarter of the process-wide connection budget. Each frame on a persistent connection separately enters the DNS query budget.
+- `DnsListener` is process-scoped and owned by `ControlPlane::run`. Shutdown stops admission, drains or aborts children, and joins every supervisor before DNS runtime retirement.
+- A semantic `dns.bind` change on SIGHUP is restart-required. An unchanged listener continues through the newly published DNS generation.
+- Standalone requests pass `original_dst=None`; selecting `asis` therefore produces a DNS failure (`SERVFAIL`) rather than dialing the listener recursively.
+
+Leaving `dns.bind` empty does not disable transparent TCP/UDP interception. A local port-53 listener does not exempt ordinary LAN DNS from traffic policy.
+
+## DNS ownership state machine
+
+This matrix distinguishes LAN ingress from ordinary host/loopback delivery. `Transparent Honk` requires the real eBPF datapath and attached LAN hooks; mock mode cannot intercept packets. `must` suppresses sniff-driven rerouting and preserves the selected outbound, not a blanket bypass of processing.
+
+| Query path | Traffic-policy result | Receiver | Answer path |
+| --- | --- | --- | --- |
+| LAN to gateway or external `:53`, with or without a local dnsmasq / `dns.bind` listener | Non-`must` | Honk DNS controller | Honk hosts/cache/request/response policy and selected upstream; transparent anyfrom/stream reply |
+| LAN to gateway `:53` owned by dnsmasq | `direct(must)` | dnsmasq through native Linux | dnsmasq local data/cache/upstream |
+| LAN to gateway or external `:53`, even with a local listener | `block(must)` | None | Drop |
+| LAN to gateway or external `:53`, even with a local listener | `group(must)` | Honk raw TCP/UDP group transport | Original DNS traffic through the selected group, without `DnsController` processing |
+| Ordinary host/loopback query to dnsmasq `127.0.0.1:53` outside transparent admission | Not applicable | dnsmasq | dnsmasq local data/cache/upstream |
+| Request delivered to the configured non-53 `dns.bind`, such as `127.0.0.1:54` | Not transparent port-53 admission | Honk bind | The same Honk DNS policy and upstream stack |
+| No active datapath, or traffic outside attached hooks | Not evaluated by Honk | Ordinary destination socket | Its local service, or connection refusal/timeout when none exists |
+
+Valid non-`must` DNS queries follow [traffic-rule ownership](../reference/routing.md#outbound-targets-and-must); malformed UDP payloads retain their existing fallback. Neither an exact nor a wildcard local `:53` socket may short-circuit LAN admission. Non-DNS local-socket probing retains its transport, FIB, and TCP pure-SYN rules.
+
+Parsed DNS requests bearing a nonzero exact configured control-plane bypass mark retain native delivery. This request-side exemption is independent of a user's `must` route; replies still follow the existing non-53 routing rules. Ordinary loopback backend access outside attached LAN hooks is unchanged. Binding Honk to a port already occupied by dnsmasq still causes an ordinary socket bind conflict; transparent interception does not reserve host port `53`.
+
+Fragmented LAN UDP queries needing controller/raw handling require ready NFQUEUE and use [kernel reassembly](./nfqueue.md#fragmented-lan-dns), not a native-policy bypass. TCP fragmentation is not handled by that path.
+
+For a dnsmasq backend, LAN queries can enter Honk first while dnsmasq retains its port-53 listener:
+
+```text
+LAN client -> gateway :53 -> transparent Honk DNS policy
+                              | local upstream -> 127.0.0.1:53 -> dnsmasq -> external resolver
+                              | remote upstream -> selected direct/proxy transport
+```
+
+Honk's optional bind may be `:53530`, another free port, or disabled; it is not what intercepts LAN port `53`. Host-loopback requests to dnsmasq do not become LAN requests merely because Honk exists. If dnsmasq instead forwards misses to Honk, do not also point Honk's selected upstream back at that dnsmasq: this creates a recursion loop. Local/DHCP names and cached dnsmasq answers reach Honk only when its DNS policy selects that backend.
+
+## Resolution pipeline
+
+The production path is ordered as follows:
+
+Production `DnsService` callers require strict query/response wire validation before cache publication. The raw `DnsForwarder::resolve*` compatibility surface remains for legacy internal callers.
+
+| Stage | Invariant |
+| --- | --- |
+| 1. Admission and generation | `DnsController` pins one runtime and acquires its owned query permit plus a UDP permit for UDP ingress. The generation's 2,048-query permit remains held through reply completion; saturation degrades to `REFUSED`. |
+| 2. Parse and validate | The adapter requires one complete request. `DnsEngine` parses the wire, rejects zero or multiple usable questions, derives a lowercase routing domain without changing the qname's case, and records the ingress profile. |
+| 3. Family gate and hosts | `ipv4only`/`ipv6only` reject the other address family with NODATA before hosts or upstream work. Otherwise the immutable hosts snapshot runs before request routing, cache, and upstream exchange. |
+| 4. Request planning | Source-ordered request rules choose reject, `asis`, or a named upstream from the routing domain, QTYPE, and logical client source. First match wins. |
+| 5. Reuse | Eligible requests look up the exact-identity positive/negative cache, then share one singleflight exchange on a miss. Ineligible requests bypass both. |
+| 6. Exchange | The request scope selects the intercepted destination or an `UpstreamPool` transport. |
+| 7. Response planning | Every upstream response is strictly matched to the query before policy uses it. Response rules accept, reject, or re-query through a named upstream; traversal is acyclic and contains at most three upstreams. |
+| 8. Publication and rendering | Only a strictly validated final wire response can enter the cache or be published to singleflight waiters. Prefer-family suppression is applied to caller rendering after the validated reusable answer is stored. |
+| 9. Outcome and projection | The forwarder returns a typed outcome. `DnsController` submits that outcome with the pinned generation's projection snapshot, then the ingress adapter writes the reply. |
+
+Each generation has two independent 2,048 limits: controller query lifecycles and active singleflight keys. UDP ingress additionally uses that generation's startup-budgeted slow-path quota (at most 256), separate from generic UDP initialization. One flight accepts at most 256 followers. Saturated flights reject rather than opening unbounded upstream exchanges; the controller renders that overload as `REFUSED`. Publication atomically removes the flight and broadcasts its result to attached followers; a later cache miss can start a fresh flight. Completed failures retain their cause without being cached, so attached followers do not each repeat the failed exchange. Dropping a leader without a published result removes the flight and wakes followers to retry ownership; this includes cancellation and compatibility-only successes without a validated response template.
+
+Initialization and flight fan-out use `SharedError`, an `Arc`-backed error that
+clones the original causal chain for builders and waiters instead of rebuilding
+it from display text. A completed failure is not cached; all attached waiters
+observe the same typed source, including `PacketRejection::Capacity`.
+
+### Hosts snapshot
+
+Generation construction reads every repeatable `use_host` source once and merges them in declaration order. `true` selects `/etc/hosts`, whose parser indexes exact names and aliases; a path selects an OxiDNS-compatible exact, domain-suffix, regexp, and keyword rule file. Later definitions replace earlier matching definitions. Exact and longest-suffix lookups take precedence over ordered regexp and keyword matches. Query handling performs no file I/O.
+
+Only IN-class A and AAAA queries use the snapshot. A known name with no address in the requested family returns `NOERROR`/NODATA and never leaks to an upstream. A host answer has a 60-second TTL, bypasses positive and negative cache reuse, and still produces the normal routing-projection outcome. The snapshot is immutable for its generation; edit its source and send SIGHUP to publish a replacement. A load or parse failure aborts startup or the reload before publication.
+
+### Address-family strategy
+
+| Strategy | Forwarding and result semantics |
+| --- | --- |
+| `both` | Internal/application A+AAAA name resolution starts both eligible family queries concurrently and retains usable records from both. A caller's individual DNS query is not suppressed. |
+| `preferipv4` | A+AAAA name resolution starts both concurrently but returns IPv4 as the preferred result set. For an ordinary AAAA request, the forwarder issues an A sibling through the normal pipeline; it returns NODATA only when that sibling contains usable IPv4 records. |
+| `preferipv6` | Symmetric to `preferipv4`: an A response is suppressed only when the AAAA sibling contains usable IPv6 records. |
+| `ipv4only` | Only A is eligible. AAAA is answered NODATA without upstream I/O. |
+| `ipv6only` | Only AAAA is eligible. A is answered NODATA without upstream I/O. |
+
+A prefer-family sibling query changes only the first question's QTYPE. Transaction ID, flags, QCLASS, EDNS data, ingress profile, logical client source, original destination, and the rest of the wire profile remain unchanged. Ordinary sibling failure or NODATA does not suppress a usable non-preferred response; a typed local packet refusal instead terminates the caller's resolution with that cause. For internal/application hostname resolution, the bootstrap fallback runs once only when every eligible family is unusable, then filters fallback addresses through the same family eligibility.
+
+The strategy also orders bootstrap-resolved upstream dial targets. `both` uses IPv4-first compatibility order; preference modes put their family first while retaining the other family. Stream and QUIC transports walk the ordered candidates. Direct UDP keeps the existing two-attempt bound: after the first candidate fails, its retry selects the other family before another address of the same family and caches the winner.
+
+Typed local packet refusals, including capacity, are not availability failures.
+DoH3/DoQ and proxied reusable-session initialization preserve the same
+`SharedError` cause for the builder and every waiter. The outer route loop and
+name-family aggregation do not turn that cause into another route, bootstrap,
+or system-DNS attempt. Health and URLTest resolver hooks preserve it to the
+final consumer, so denied lookups neither demote nodes nor substitute the
+default UDP check target. Independently permitted probes and configured literal
+fallback IPs remain usable. A typed refusal cannot become a stale-cache answer
+or a successful non-preferred-family answer. Ordinary failures, empty responses,
+and accepted SERVFAIL retain the documented fallback behavior.
+This also covers cold and cached `udp://` attempts carried over a proxy TCP
+session: a refusal stops before resolving a retry, and a refusal on the final
+attempt retains its typed cause instead of becoming a display-only error.
+QUIC health-target resolution is lazy and generation-scoped. A typed refusal
+does not initialize its cache, so a later eligible probe can retry; target
+resolution and that QUIC attempt share one timeout budget. Unsupported UDP
+nodes and explicitly policy-denied targets skip resolution entirely.
+
+### DNS routing
+
+Conditions within one rule are ANDed; arguments inside one condition are ORed; each condition can be negated. The compiled condition model covers qname, qtype, request-only source IP, upstream name, and response IP. Rules are evaluated in source order and stop on the first match. An unknown source makes both `sip(...)` and `!sip(...)` false, and response rules reject `sip` during configuration.
+
+| Phase | Inputs used by policy | Actions |
+| --- | --- | --- |
+| Request | Canonical qname, QTYPE, and logical client source; `asis` additionally requires an intercepted original destination. | `reject`, `asis`, or `upstream(name)` |
+| Response | Canonical qname, QTYPE, current upstream, and extracted answer IPs. | `accept`, `reject`, or `upstream(name)` for re-query |
+
+A response re-query always sends the original request wire to the selected upstream. Cycles are rejected, and the traversal depth is at most three upstreams.
+
+### Cache and singleflight identity
+
+Cache and persistence use this immutable `CacheKey`:
+
+```text
+canonical query wire (TXID zeroed)
++ ingress profile
++ logical request scope
++ DNS policy identity
++ operation (resolve or refresh)
+```
+
+The wire identity retains flags, exact question encoding, QCLASS, and EDNS material. UDP advertised size remains part of the ingress profile. The logical request scope is materialized after request routing: it distinguishes named upstreams from `asis` destinations, while policy identity prevents reuse across semantic reloads.
+
+Client IP is not part of cache or persistence identity. Different sources selecting the same named upstream share its source-neutral answer; sources selecting different upstreams partition naturally, and `asis` remains partitioned by original destination. A foreground `FlightKey::Resolve` wraps the resolve `CacheKey`, always adds strict/compatibility mode, and adds `DnsRequestMeta` only when a preference-sensitive sibling query can change the published response. Other foreground flights still coalesce across clients. A background `FlightKey::Refresh` contains only the refresh `CacheKey`; its leader captures the initiating metadata and mode. Positive, negative, and stale cache hits rerun preference rendering with the current caller's metadata.
+
+A response chain accepted only by compatibility mode (for example, one ending at a response-routing cycle/depth limit or failing strict response-template validation) is not admitted to shared memory cache or persistence. A later strict lookup therefore cannot inherit compatibility-only acceptance. Because HDNS v2 stores no execution-mode provenance, restored entries remain compatibility-only until a current-process exchange replaces them; the persistence codec stays at v2.
+
+Reuse is limited to a standard single-question QUERY with no answer or authority records and at most one option-free EDNS-v0 OPT. ECS, COOKIE, any other EDNS option, EDNS-v1, multiple OPT records, or unusual flags bypass both cache and singleflight. The request still uses the normal strict exchange path.
+
+Configured ECS is a generation-pinned named-upstream transport policy, not ingress identity. The effective IPv4 prefix is included in `PolicyId`; the original query remains the cache/singleflight key. The upstream pool adds ECS only after admission, preserves any client ECS, validates an echoed generated option, and removes generated EDNS state before response analysis and cache publication. `asis` bypasses this transformation. Automatic inference is refreshed transactionally on startup, reload, and network events, so active queries retain their old generation while a replacement is probed and built.
+
+## Cache and persistence
+
+| Mechanism | Invariant |
+| --- | --- |
+| Capacity | At most 16 LRU shards divide `max_cache_size` exactly. Each shard is bounded by entry count only; `max_cache_size` is clamped to 100,000. |
+| Positive TTL | `fixed_domain_ttl` has first priority; zero disables caching for that domain. Otherwise nonzero `optimistic_cache_ttl` overrides the answer minimum TTL. With neither override, a positive NOERROR response uses the minimum of all walked non-OPT record TTLs, including zero; zero supersedes the exact slot without caching. The selected nonzero TTL is also written into cached records. Failure rcodes keep their existing TTL extraction. |
+| Negative TTL | NXDOMAIN uses `min(SOA TTL, SOA MINIMUM, 300)` seconds; missing SOA or zero lifetime supersedes the exact slot without retaining the response. SERVFAIL still defaults to 60 seconds and clamps the SOA-derived lifetime to `1..=300`. `fixed_domain_ttl: 0` prevents caching for every response code without superseding an existing entry. |
+| NODATA TTL | NOERROR with `ANCOUNT=0` retains its full wire in the positive slot. A nonzero `fixed_domain_ttl` overrides SOA and the cap; otherwise lifetime is `min(SOA TTL, SOA MINIMUM, 300)`, with missing SOA or zero superseding the exact slot without caching. `optimistic_cache_ttl` does not apply. NODATA remains stale-eligible; stale rewriting changes SOA TTL, not MINIMUM. |
+| Stale handling | Expired positive answers remain eligible for serve-stale for one hour. An ordinary upstream exchange error or accepted SERVFAIL may return one; typed local packet refusals never do. `optimistic_stale_reply_ttl` defaults to 30 seconds; a non-zero value replaces every non-OPT RR TTL and sets the outcome TTL. `0` preserves cached policy-rewritten TTLs, not authoritative TTLs; the outcome TTL then comes from `extract_min_ttl` of that wire, falling back to 60 seconds when no positive TTL exists. Near-expiry hits start a deduplicated stale-while-revalidate refresh. |
+| Invalidation fence | Exact-ID, name/type and full invalidation serialize at the cache owner. A publication epoch fences older foreground/refresh work; acknowledged persistent deletion also fences queued puts, so selected entries cannot reappear after success. |
+
+A background refresh captures the Resolve slot's publication revision with its positive lookup. Every accepted exact publication, including a negative merge or restore, advances that revision. Publication requires the same revision and a retained positive under the shard lock. A matching cacheable NXDOMAIN removes the refreshed positive before storing the negative; a cacheable positive or NODATA replaces the slot. NXDOMAIN, NODATA, or a zero-TTL positive without a usable lifetime removes the whole slot instead, including any negative value. SERVFAIL without eligible stale fallback retains the positive and merges the negative. A newer publication, a negative-only slot, or eviction discards the refresh result; eviction does not allow re-admission without an owner.
+
+Foreground publication remains last-publication-wins. An uncacheable NXDOMAIN, NODATA, or zero-TTL positive removes the whole exact slot; a cacheable NXDOMAIN still merges over the positive. In particular, a strict foreground SERVFAIL can supersede a compatibility refresh of a restored positive, which becomes visible again after the negative expires. Supersession uses the publication epoch and the accounting-aware shard removal, and is disabled when the forwarder's cache is disabled. Cache hits do not count down wire TTLs.
+
+Ordinary response-driven supersession above is in-memory only: removing a positive need not delete its saved SQLite row. Before that row expires, restart can restore it as compatibility-only; strict mode never reuses it. Explicit API cache deletion/flush instead uses an acknowledged persistence barrier and reports failures. The near-expiry trigger floors remaining seconds, so the original can still have up to `max(min_ttl / 10, 1) + 1` seconds of lifetime when refresh begins. Slot revisions are process-local and do not change the persistence format or strict-response admission.
+
+When `store_dns` enables persistence, a bounded actor mirrors retained positive insertions to SQLite. The actor limits both its command queue and pending set to 1,024 items, batches writes, and fences them by epoch. A flush discards older queued epochs before admitting the current state.
+
+`HDNS` version 2 entries are rows of the state db's `dns_answer` table and encode canonical wire, ingress profile, scope, policy, operation, expiry, and validated response wire. Restore skips expired, corrupt, version-mismatched, collision-mismatched, and policy-mismatched rows. An entry that encodes to more than 4 KiB is dropped before it is queued for the batch and counted as `oversize`, because the table's size `CHECK` would otherwise fail the whole batch transaction.
+
+## Upstream transports
+
+| Protocol | Reuse model | Dial-path proxy |
+| --- | --- | --- |
+| UDP | One connected generation-owned socket and receive task per direct upstream; TCP pool handles `TC` fallback. | A configured proxy intentionally carries the query as pooled TCP-DNS. |
+| TCP | Idle RFC 7766 stream pool. | Supported through the selected node or group leaf. |
+| DoT | Idle TLS stream pool. | Supported over a proxied TCP base stream. |
+| DoH | One long-lived, multiplexed HTTP/2-only TLS session. | Supported over a proxied TCP base stream. |
+| DoQ | One long-lived QUIC connection; one bidirectional stream per query. | Supported through the selected leaf's `PacketTransport`. |
+| DoH3 | One long-lived QUIC and HTTP/3 session. | Supported through the selected leaf's `PacketTransport`. |
+
+Proxied DoQ and DoH3 adapt the generation-pinned leaf `PacketTransport` to quinn's `AsyncUdpSocket`. Each pooled QUIC connection or HTTP/3 session owns one bounded adapter and client endpoint until retry or shutdown closes it. Datagram boundaries and peer metadata remain intact; the inner QUIC payload cap is 1252 bytes. The adapter's receive worker yields to the scheduler after every 32 transport reads, so the endpoint driver can run between bursts of a transport that never suspends. If the queue is still full, the adapter drops the datagram and counts it in `transportRxDrops` instead of backpressuring the transport. A missing proxy registry or packet capability fails closed instead of bypassing to direct. Direct QUIC binds a fresh native bypass-marked endpoint for every dial, so a redial does not inherit the local port of a dead path.
+
+The DNS client's task owner and any captured runtime owner retain the same packet-adapter worker joins, including failed or cancelled handshakes before session publication. Close and pause wait for those joins; worker panics remain sticky after reaping and make the pause fail. Zero-timeout endpoint close only requests closure, never acknowledges joined cleanup. Health probes use the same endpoint close protocol.
+
+`-> node-or-group` forces one generation-pinned dial leaf. Without an explicit target, the upstream endpoint is passed through the pinned traffic router and group snapshot. UDP+proxy deliberately uses TCP-DNS; this policy is separate from the SOCKS5 RFC 1928 UDP transport used by ordinary proxied UDP flows.
+
+Direct upstream sockets carry the bypass mark so their traffic cannot re-enter transparent interception. Hostname endpoints resolve through the generation-captured bootstrap resolver; dials never depend on honk's intercepted resolver path.
+
+Dial/TLS/QUIC/HTTP session setup uses the dial/handshake timeout, while request/response exchange uses the distinct query timeout. A query attempt has one absolute exchange deadline. Every transport retries at most once after failure, resetting an invalid reusable session where required, so aggregate query work remains bounded. Transport slots single-flight concurrent initialization and retain one teardown future per closing resource. Pool shutdown first closes admission and waits for admitted exchanges, then closes idle resources and explicitly joins every receive or protocol-driver task.
+
+DoH and DoH3 judge HTTP status before allocating or reading the response body.
+Statuses outside 2xx/5xx, short DNS bodies and responses exceeding the DNS size
+limit return without resetting or retrying that session; 5xx and transport
+failures retain the one query-level reset/retry. Typed packet refusals remain
+terminal. Closed senders are refreshed before use, while HTTP/3 GOAWAY discovered
+by `send_request` uses the outer retry owner: its teardown is not cancelled by
+the single-query timeout. No extra nested query attempt is introduced.
+
+DoH, DoH3 and DoQ failures identify their session through a weak reference.
+Retaining an error does not keep its driver alive. Retirement checks that
+identity under the slot lock, so a late failure cannot close a replacement.
+Cancelling a closer leaves its teardown in the slot; a subsequent
+acquire or close resumes the same cleanup before rebuilding. Shutdown still
+closes the current resource regardless of which query last used it.
+Dropping the last owner still aborts its driver; task accounting also covers
+cancellation before the task's first poll.
+
+Direct UDP assigns each query a fresh CSPRNG-selected 16-bit ID, verifies both ID and question on receipt, restores the caller ID, and quarantines retired IDs for three seconds. Delayed packets therefore cannot satisfy a different question after reuse.
+
+Both cold and cached-current UDP paths use the same pool acquisition, replacing
+a closed/stopped socket before exchange rather than spending an address attempt
+on it. On Linux, `IP_RECVERR`/`IPV6_RECVERR` supplies the offending datagram to a
+separate ERROR-readiness consumer; ordinary datagrams consume READABLE only.
+A complete quoted ID and question can fail only that pending query, preserving
+the original I/O cause. Short, stale or unrelated quotes cannot fail other
+queries; attribution retains the same finite ID-quarantine limits as responses.
+Receive errors without a usable quote leave queries subject to their deadline,
+including on platforms without error-queue support. A send syscall failure still
+returns its original error to the current exchange; this existing behavior does
+not claim quote attribution for send failures. No send is replayed within the
+exchange, and sending plus awaiting the response share one absolute deadline.
+Socket-fatal receive errors stop admission and fail remaining waiters; repeated
+destination errors alone do not prove socket death.
+
+Transparent DNS reply sockets are also retained after destination-specific send
+failures. Other send failures retain the existing one replacement/retry path;
+standalone `dns.bind` replies use their original listener sockets.
+
+## Routing projection
+
+`DnsController` converts resolution outcomes into generation-owned desired state rather than writing domain facts inline:
+
+| Outcome | Projection observation |
+| --- | --- |
+| Accepted A or AAAA positive | Replace that name's IP set for the queried address family and its expiry, using the outcome's effective TTL when cacheable. Uncacheable positives instead use the existing wire-TTL rule: minimum positive non-OPT record TTL, or 60 seconds if none exists. Cache rejection must not erase an accepted address's routing lifetime. Multiple domain owners of one IP contribute ORed routing bitmaps. |
+| Accepted A or AAAA NODATA | Clear that name's owner for the queried address family only. |
+| Accepted NXDOMAIN | Clear both address-family owners of that name. |
+| Other QTYPEs (for example HTTPS), accepted SERVFAIL or rejected policy result | Retain current state. |
+
+A and AAAA owners of one name are independent, each with its own TTL. An empty AAAA or HTTPS answer for a name with learned IPv4 addresses therefore keeps those IPv4 facts.
+
+The domain association remains global and source-independent within each policy generation. Source-aware request routing isolates DNS exchange scopes and answers; it does not partition eBPF domain observations or ordinary traffic routing. Projection evaluates every domain predicate independently of non-domain rule conditions, including predicates used by negation; a known domain with no matching predicate is eligible for a present zero bitmap.
+
+Projection retains at most 10,000 owners in total, counting a name's A and AAAA owners separately, and admits at most 49,152 unique IP keys into the 65,536-entry domain map. The selected desired/reload set has a separate 32,768-key ceiling for present-zero facts, leaving space for later matching DNS facts; obsolete zero keys awaiting successful deletion can temporarily exceed that sub-limit within the total applied ceiling. The remaining 16,384 map slots are reserved from DNS projection for sniff writes. IPv4 and mapped-IPv6 owners share one key and contribute ORed facts. Incremental reconciliation and reload use the same admission policy: evict zero bitmaps first, then the highest IP within one priority class. Omitted owners remain available for projection on a later policy generation; ordinary refresh can re-admit an omitted IP when space is available. Capacity pressure emits a warning.
+
+An omitted key behaves like an ordinary missing domain fact, not a fabricated zero bitmap. Existing dial-mode and terminal `must`/`block` semantics still apply: eligible unresolved direct results enter control-plane routing, while this budget does not introduce blanket unknown-to-punt behavior or change `ip` mode. Sniff writes share the physical map and can still exhaust their headroom; backend write failures remain observable and retried where applicable.
+
+The worker reconciles generation-tagged desired state in batches of at most 256 sets/removes and schedules remaining ready work without waiting for another DNS observation. Obsolete keys are selected before additions; new DNS keys wait for confirmed removals when the applied projection reaches its IP ceiling, including across removal failures. Failed writes remain dirty and retry with bounded backoff. Before a batch mutates a generation-owned domain-fact map, the worker acquires the backend lock and rechecks the generation while holding the publication fence. Reload installs the replacement projection snapshot under the same backend lock. An old batch can therefore neither enter nor continue mutating the map after a replacement generation is published.
+
+Retry wakeups and batch admission use the same capacity-aware per-IP deadline; an overdue insertion blocked by a full projection cannot spin while a deletion backs off. A successful reload records the exact IP slice installed in the new map as applied state before reconciling current owners, including any that expired during loading. Worker writes and their acknowledgements remain under one generation fence, so an old completion cannot overwrite that published accounting. Reloads that keep the physical map also keep its existing applied state.
+
+Incremental acknowledgement compares the successful write with the current desired bitmap or absence, without retaining historical per-IP revisions. Owner TTL sequences and policy generations remain independent guards.
+
+## Generations and reload
+
+One `DnsRuntime` contains the forwarder and policy, immutable hosts table, routing and group snapshots, transport manager, routing projection, bootstrap resolver capture, and generation-local query/UDP admission. Each newly constructed forwarder owns its singleflight and background refresh/prefetch workers; clones remain within that generation. Each DNS pool owns a fresh outbound runtime fork, independent of traffic session reuse and predecessor DNS sessions. The fork shares its source configuration generation's dial semaphore, the process physical-dial ceiling, and the process VLESS-carrier gate, but not retirement state or protocol pools.
+
+The existing maintenance pass also reaps the active DNS registry's finished tasks and idle VLESS carriers. Terminal registry shutdown releases its cached connectors even while a retired runtime remains retained.
+
+Publication makes the replacement immediately available with independent execution resources: even a saturated predecessor cannot consume its query/UDP quota or make it join an old flight. The completed-answer cache, publication/flush fence, and persistence remain shared; they do not own in-flight work. Old query leases drain naturally through reply I/O, then retirement joins background workers, closes DNS transports, closes their private outbound runtime fork only after those transports drain, and retires the captured traffic registry's non-transferred reusable state.
+
+The 30-second deadline bounds waiting for query leases, not completion of transport and outbound-pool teardown. It is a safety cutoff, not a prerequisite for new service: expiry cancels runtime-owned forwarding and admitted reply futures before transport teardown. Application/bootstrap fallback remains inside the original query lease, so drain waits for it and forced shutdown cancels it too. At most four retired generations remain retained; cap eviction and provider shutdown force the same cancellation. Once a generation has finished retirement and its leases have drained, it releases its runtime and keeps only its outbound registry for that forced shutdown. A ready terminal `SERVFAIL` reply is still attempted, but stalled admitted reply I/O is cancelled; a cancelled TCP write closes the connection.
+
+At query completion, an already-published runtime cancellation wins even if the lookup becomes ready in the same executor poll. Reply I/O deliberately keeps completion priority; a reply that is still pending remains cancellable.
+
+`DnsServiceProvider` owns every retirement and forced-close supervisor; they are reaped and joined at shutdown. Listener sockets and process-wide physical resource limits remain shared, so isolation does not promise service after descriptor exhaustion.
+
+SIGHUP builds policy, `/etc/hosts`, groups, routing, upstream transports, projection data, and the outbound runtime before the commit point. Publication occurs with the control-plane routing/config locks; failed preparation leaves the current generation intact. A semantic `dns.bind` change is the exception: listener ownership is process-scoped and the reload is rejected as restart-required.
+
+Routing publication rejects stale queued DNS metadata before admission; already admitted queries keep their generation leases. The nonwrapping 20-bit carrier uses a persistent boot-lifetime allocator, including descriptor-only NFQUEUE fences. Failed reservations are not reused; ordinary restart does not reset exhaustion. See [routing publication](./routing.md#synchronous-slots-and-atomic-publication).
+
+## Observability
+
+DNS diagnostics use independent monotonic atomic counters. Categories cover cache hit/miss/stale, singleflight saturation/cancel/retry/amplification avoided, persistence drop/flush failure, runtime retirement/forced close, transport initialization/reset, projection stale-generation/write failure/retry, and positive/NODATA/NXDOMAIN/SERVFAIL/rejected/error outcomes.
+
+Recording does not take a shared metrics gate. The internal scrape loads counters independently with relaxed ordering; it is best-effort, not a coherent instant, so cross-counter equations are invalid.
+
+Structured DNS failure events reduce errors to bounded `error_kind` classes: forwarder (`engine`, `exchange`, `response`, `internal`, `rejected_plan`, `overloaded`), persistence (`worker_closed`, `ack_dropped`, `worker_failed`, `database`), projection (`map_full`, `backend_write`), and transport (`exchange_failed` plus a bounded transport label). These event fields contain no query names, upstream addresses, or free-form error payloads.
+
+The counter snapshot remains internal; there is no public DNS metrics endpoint. The opt-in native API separately exposes live diagnostics, exact cache control and completed client outcomes:
+
+- `/dns/query` pins one generation across up to eight requested types, with a ten-second deadline. Request-local `upstream` chooses only a configured upstream; hosts/strategy and response policy remain real. `cache_mode=bypass` cannot read/write/supersede cache, join a writing singleflight or spawn refresh. Ordinary DNS calls retain their production behavior.
+- Cache inspection returns positive/negative exact-incarnation IDs without promoting LRU or hits. Immutable snapshots are bounded to eight/30 seconds/8 MiB. Exact-ID, name/type and flush mutations share publication-to-shard ordering, await persistence outside synchronous locks, and never clear routing/domain maps. Runtime list coverage is not a persistent-database inventory.
+- The process-owned DNS log records actual completed client outcomes once, including known source socket/ingress and parseable refusal/error results; diagnostic calls and background refresh duplicates are excluded. `record_dns_log` defaults true and permits capture under independent DNS-log demand or an explicit runtime `record_dns_log: "on"`; it retains at most 512 records/8 MiB. When effective recording stops, history is released and cursors expire. Eviction removes whole oldest records and invalidates affected cursors. Restart clears it. Query/cache/log response projection is capped at 262144 bytes and fails rather than silently clipping answer sets. Cache and log pages end before the entry that would exceed the cap and return `next_cursor`. An entry that exceeds the cap by itself is served alone and whole, since its 65535-byte wire bounds it, so a page walk never stops at it.
+
+Methods, filters and status/limit details are in the [native DNS contract](../reference/api.md#dns-query-cache-and-outcome-history).
+
+## Related docs
+
+- [Control-plane design](./control-plane.md)
+- [Routing design](./routing.md)
+- [DNS configuration reference](../reference/dns.md)
+- [DNS rollout operations](../operations/dns-rollout.md)

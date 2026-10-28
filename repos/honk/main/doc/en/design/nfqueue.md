@@ -1,0 +1,164 @@
+# NFQUEUE held-first-packet UDP
+
+The NFQUEUE path holds ambiguous LAN-forwarded UDP originals until userspace reaches a terminal direct, proxy, or block decision. It fails closed.
+
+## Activation and scope
+
+The path is enabled by default through `global.nfqueue_enable`. Set that key to `false` to disable it:
+
+```dae
+global {
+    nfqueue_enable: false
+}
+```
+
+Changing the setting requires a process restart; reload rejects the change. Startup treats NFQUEUE as best-effort: mock mode, a build without `ebpf`, a failed fixed-queue preflight, or a queue/rules/health failure before datapath admission logs a warning and disables staging for that process without rewriting the config file. Persistent token-generation recovery failures remain fatal because allocator state is ambiguous. Real mode acquires the singleton instance lock before that preflight, so a normal handoff waits for the old queue owner instead of degrading spuriously. The reserved nftables table is reclaimed during installation after queue binding. Once the service is admitted, listener, queue, watchdog, verdict, cleanup, and retirement failures remain fatal. See the [global configuration reference](../reference/global.md) for the process-scoped knob.
+
+The hook is deliberately narrow:
+
+| Traffic or state | Behavior |
+| --- | --- |
+| New, ambiguous LAN-forwarded UDP after LAN TC | Stage a unique token and hold the original skb in NFQUEUE when enabled and ready |
+| Host-originated WAN UDP | Keep the canonical TPROXY path; host egress does not cross this `inet prerouting` hook |
+| UDP port `53` | Follow [traffic-rule ownership](../reference/routing.md#outbound-targets-and-must); fragmented LAN queries needing controller/raw handling use the complete-datagram path below, never ordinary conn-state or decision tokens |
+| Internal/special or reverse-direction traffic | Never stage |
+| A non-DNS `must` or `block` routing result | Treat as final; never stage |
+| A direct result already safe at route time | Pass through the kernel direct path; never stage |
+| Staging candidate while enabled but not ready | Drop the new flow; unrelated, non-staged UDP keeps its normal path |
+
+“Ambiguous” means the preliminary route can still change after userspace routing, mode/group selection, or domain/QUIC inspection. The path avoids redirecting such a packet through a userspace relay merely because the preliminary result was incomplete.
+
+## Packet-hold mechanism
+
+```mermaid
+flowchart LR
+  TC[LAN TC] -->|Pending mark + token| NFT[inet honk_nfqueue<br/>udp_decision, priority -250]
+  NFT --> Q[NFQUEUE 320]
+  Q --> A[Bounded ingest actor]
+  A --> C[Token correlator + canonical UDP initializer]
+  C -->|Direct| ACCEPT[Marked NF_ACCEPT]
+  C -->|Proxy| PROXY[Drop originals; dial/send once]
+  C -->|Block or cancel| DROP[NF_DROP]
+```
+
+| Mechanism | Current contract |
+| --- | --- |
+| Queue transport | `honk-nfqueue` uses raw `NETLINK_NETFILTER`; it does not shell out to firewall tools or use a netfilter helper library |
+| Queue parameters | Fixed queue `320`, kernel maxlen `4096`, packet-copy range `65535`, and requested socket receive buffer `8 MiB` |
+| Verdict ownership | A non-`Clone`, exactly-once `VerdictGuard`; dropping an uncommitted guard sends `NF_DROP` |
+| Ingest ownership | One actor bounded to `256` entries and `8 MiB` of queued payload; a UDP slow-path permit is attempted only when the actor dequeues an entry |
+| nftables ownership | One atomic transaction owns exact `inet honk_nfqueue` / `udp_decision`, an `inet prerouting` filter chain at priority `-250`; only UDP carrying the pending signature reaches the queue |
+| Failure policy | No queue bypass, fanout, or fail-open flag. Identifiable bad/truncated UDP payloads and invalid checksums receive `NF_DROP`; malformed queue metadata, unidentifiable headers, `ENOBUFS`, listener exit and verdict-socket failure remain fatal |
+
+The service binds queue `320` before publishing the nftables transaction. Installation reclaims the stale reserved table under the singleton process lock; on an orderly final shutdown it drains every dispatched guard, closes the queue, and deletes the owned table last. Same-network-namespace firewall managers must not mutate either reserved nftables object while honk runs.
+
+`honk-core` uses this Linux mechanism only with the `ebpf` feature.
+Parsing uses one exact-sized datagram allocation. The core sampler and `StatsManager` separate current-instance
+depth from process-wide drops accumulated across hard rebinds, report latest
+kernel-read availability/errors, and always refresh held-guard/effective-buffer gauges.
+Each sample opens procfs in the calling thread's queue namespace before reading
+asynchronously through that namespace-bound descriptor; neither the process leader
+nor a blocking worker selects the queue being sampled.
+
+## Fragmented LAN DNS
+
+TC evaluates the offset-zero UDP/53 fragment with the ordinary traffic policy. Native `direct(must)`, `block(must)` and trusted exact control-plane marks retain their actions. Queries requiring the DNS controller or a raw must group keep their route/generation carrier in the host skb mark instead of crossing into `daens`; later fragments also stay in the host. Kernel IPv4/IPv6 defragmentation runs at priority `-400`, before the queue at `-250` and conntrack at `-200`. DNS has no fragment cache; [non-DNS fragment retention](./datapath.md#fragments-of-redirected-datagrams) belongs to the datapath.
+
+The actor distinguishes these complete DNS datagrams from ordinary token-owned flows before success, overflow or rejection handling. It validates the carrier, current generation and admission epoch, confirms `NF_DROP` on the original, then publishes into the same bounded DNS/raw pipeline used by transparent socket ingress. Existing redirect metadata restores replies from the original destination. UDP checksums are verified before dispatch, allowing IPv4's zero checksum and honoring kernel checksum-partial metadata; IPv6 zero checksums without that metadata are rejected.
+
+Queue-disabled or unready controller/raw fragments drop rather than bypassing DNS policy. Unfragmented DNS keeps its TC fast path. This path does not add TCP-fragment support. It traverses host raw hooks, unlike a TC redirect; an earlier firewall drop or mark rewrite can prevent admission. Copy truncation drops the identified packet rather than forwarding an incomplete DNS query.
+
+Ethernet first fragments requiring this path must be addressed to the host (`PACKET_HOST`); pure L2-transit candidates fail closed instead of assuming bridge-to-inet hooks are enabled. LAN and WAN egress also drop an unconsumed DNS queue carrier, including while admission is closed. No bridge firewall sysctl is changed. A bridge/slave MAC mismatch may conservatively reject fragmented queries; unfragmented DNS and native direct-must keep their existing behavior.
+
+`ROUTING_GENERATION_SEQUENCE` is a core-owned, pinned one-entry counter. Reserve a nonwrapping 20-bit value before each routing publication or NFQUEUE fence; a fence replaces only the immutable descriptor and retains the compiled policy/maps. Ordinary cleanup/restart preserves the counter, so an old first fragment cannot authorize a new process's group index. Exhaustion or a failed fence keeps NFQUEUE readiness closed; restarting does not reset it. Preserve this pin, like `UDP_DECISION_SEQUENCE`, while the host namespace can retain packets; reboot clears both host reassembly and bpffs state.
+
+## Decision-token protocol
+
+`UDP_DECISION_SEQUENCE` is a pinned, persistent one-slot spin-locked allocator. Its legacy value is exactly 12 bytes: lock, full raw token in `next`, and `exhausted`. Startup validates this ABI and value but never rewrites it. Ordinary restart and cleanup preserve the pin so an older binary can resume at the same raw-token boundary after rollback.
+
+| Bits or field | Meaning |
+| --- | --- |
+| skb mark bits `31..30` | `CLASSIFIED_MARK | NFQUEUE_PENDING_MARK` = `0xc0000000`, the staging signature selected by the nftables rule |
+| Token mask | `NFQUEUE_TOKEN_MASK` = `0x3fffffff`; the token occupies the remaining mark bits |
+| Token bits `29..28` | Two-bit generation `0..=3` |
+| Token bits `27..0` | 28-bit monotonic sequence within the generation |
+
+A token is ownership, not merely correlation metadata. It must agree across the skb mark, `CONN_STATE_MAP`, `ROUTING_HANDOFF_MAP`, `REDIRECT_TRACK`, the userspace verdict cell, `UdpInitLease`, endpoint or retirement tombstone, and the backend terminal transition. No terminal operation may act on tuple identity alone.
+
+## Terminal transitions
+
+| Decision | Ordered transition |
+| --- | --- |
+| Direct | Token-check `ArmDirect` → issue marked `NF_ACCEPT` for every held original skb in FIFO order → token-check `ActivateDirect` |
+| Proxy | Commit token-bound final outbound and mark → transfer the one retained payload into the canonical UDP initializer → issue `NF_DROP` for the originals → dial and send once |
+| Block | Commit token-bound `Block` → drop every original skb → retire the initializer as a kernel handoff |
+| Cancel or expiry | Abort only the matching pending incarnation → drop every original skb and retire its lease identity |
+
+Direct creates no userspace UDP socket, payload copy or replay, `Ready` endpoint, or `/connections` entry. Its final verdict mark retains classification and removes the pending/token carrier. If another packet for the flow arrives after Arm, the correlator appends only its verdict guard, discards its payload and slow permit, and returns to the FIFO accept loop before activation.
+
+Proxy does not create a second routing path. It reuses the same `UdpInitLease` and `UdpEndpointPool` initializer used by ordinary transparent UDP. Publishing final kernel state before dial/send prevents a reply race; transferring only the retained payload and dropping the originals gives one send, with no replay fallback.
+
+## Deadline and fatality
+
+Every packet has one absolute three-second receipt-to-verdict deadline measured from raw-netlink listener receipt. Actor delay, commit-queue wait and every backend-lock wait consume that same budget, including the second lock acquisition between Direct Arm and Activate. Queue, correlator, slow-path, or deadline saturation drops fail closed rather than extending ownership or memory growth.
+
+`PendingUdpVerdicts` owns a joined pump that batches up to 1,024 terminal requests, locks backend write → correlator cell, and releases the backend lock before endpoint kernel handoff. Synchronous backend work uses `block_in_place` on multi-thread runtimes and runs inline on current-thread runtimes. The pump retains direct/block leases across caller cancellation; it rechecks original deadlines at dequeue, after backend locking, after grace and before each item, expiring late requests without conn mutation. Cancellation waits for armed Direct completion under that same deadline.
+
+A watchdog checks held cells independently and enforces the hard hold bound. Stale token, endpoint-generation, or backend-state mismatches drop without mutating a newer incarnation. A verdict failure or any failure after Direct has armed is process-fatal because userspace can no longer safely infer which originals the kernel accepted.
+
+## Fences and lifecycle
+
+### Reload and shutdown
+
+Reload and shutdown share the same producer fence:
+
+1. Publish `DATAPATH_FLAG_NFQ_READY=false`. New flows that require staging now fail closed.
+2. Complete the synchronous `RETIRE_GRACE_ROOT` barrier, then remove residual `Preparing`, `Pending` and `Aborted` state in bounded, incarnation-checked tuple-fence batches. A delayed queue delivery subsequently fails token lookup; descriptor-generation publication still fences queued DNS fragments.
+3. Close correlator admission and drain or cancel verdict guards, initializer leases, scheduled token cleanups, endpoint tombstones, retirement work and admitted commits before changing runtime ownership. Final shutdown stops and joins the pump; reload retains it. Armed Direct commits can delay reload until their original three-second [receipt-to-verdict deadline](#deadline-and-fatality); cancellation neither aborts them early nor starts a fresh timeout.
+4. A successful reload publishes the replacement runtime generation and reopens correlator admission and readiness last. Shutdown detaches producers, closes queue ownership, and deletes `inet honk_nfqueue` last.
+
+Failure or ambiguity in listener, queue, watchdog, cleanup, verdict, or retirement lifecycle is fatal; the runtime never reopens staging on uncertain ownership.
+
+### Exact tuple retirement
+
+Retirement publishes `RETIRE_ACTIVE` and inserts `RETIRE_FENCE[tuple]` with `BPF_NOEXIST`, retaining separate operation-owner and decision-token identities. Successful same-inner replacement of `RETIRE_GRACE_ROOT` drains pre-fence non-sleepable readers; the backend then revalidates incarnation, token, state and auxiliary authority before deletion. Batches deduplicate fences but retain every request's outcome, partial deletion counts and operation/release errors; release checks the exact owner, and unresolved ownership inhibits admission. Initial `ArmDirect`/`ActivateProxy`/`Block` commits share this protocol, with one grace per batch. `ActivateDirect` alone updates immutable `DirectArmed` in place under native lock (`BPF_EXIST | BPF_F_LOCK`), without fence/grace: the backend write lock excludes other writers and the kernel never renews `Pending`/`DirectArmed` timestamps.
+
+WAN and LAN userspace UDP share this fence even with token zero: the endpoint retains its admission incarnation, and the WAN ownership bit distinguishes marked direct/must from native direct state. Reclaim matching auxiliaries before conn state, including on expiry; preserve foreign metadata and refuse missing/superseded ownership. Userspace [endpoint retirement](./control-plane.md#tcp-relay-and-conn-state-ownership) requires actual conn-deletion evidence.
+
+Before successful publication, a failed kernel producer records terminal `Aborted` with its captured incarnation and actual allocated token (zero if none was allocated). It does not delete tuple entries or convert a completed Pending/native/proxy/block decision. Preparing and Aborted followers cannot renew timestamps; Aborted cannot activate or forward and is immediately eligible for exact fenced hint/janitor cleanup. All physical tuple reclamation stays in the shared backend protocol.
+
+## Sequence exhaustion and rotation
+
+Exhaustion uses the lifecycle fence rather than resetting a live allocator:
+
+1. Fence readiness, quiesce kernel stagers, cancel and drain userspace cells, and hard-rebind the fixed queue so old held skbs and guards cannot survive rotation.
+2. Inspect all four live token-bearing maps: `CONN_STATE_MAP`, `RETIRE_FENCE` (its `decision_token`, never its operation owner), `ROUTING_HANDOFF_MAP`, and `REDIRECT_TRACK`.
+3. Reset only when the candidate generation **and every numerically higher generation through `3`** are absent from all four maps. A rolled-back legacy allocator starting at the candidate can advance through exactly that suffix, so checking only the candidate would permit token reuse.
+4. Reopen admission and readiness only after the locked allocator reset succeeds.
+
+When batch lookup is available, a short successful map batch is not proof of completion; an absence scan continues until terminal `ENOENT`. If no rollback-safe suffix is clear, staging stays fenced and retries after `1`, `2`, `5`, then `30` seconds, remaining at `30` seconds for subsequent failures. Non-staged UDP continues; only new flows requiring staging fail closed.
+
+## Capacity bounds
+
+| Owner | Bound |
+| --- | --- |
+| Kernel NFQUEUE | `4096` queued packets |
+| Userspace ingest actor | `256` entries and `8 MiB` retained queued payload |
+| Verdict correlator | `4096` live flow cells |
+| Commit pump queue | `4096` queued requests, one per live flow cell; reservation waits consume the [original deadline](#deadline-and-fatality) |
+| One flow cell | `64` held verdict guards, including the first packet |
+| UDP slow path | Effective startup budget capped at `256`; a permit is acquired only at actor dequeue |
+
+The effective slow-path, endpoint, dial, and file-descriptor budgets derive from the process startup `RLIMIT_NOFILE` plan, so `256` is a ceiling rather than a guaranteed permit count. See [Control plane](./control-plane.md) for budget derivation and ownership.
+
+## Observability
+
+With the API enabled, `GET /stats` exposes `udp.nfqueue` (the documented dotted path `/stats.udp.nfqueue`): listener/correlator counts, actor depth/bytes/oldest age, kernel queue/drop/read state, held/peak guards and effective receive buffer, terminal verdict and token counters, verdict errors, and receipt-to-successful-verdict latency. See the [API reference](../reference/api.md) for the field inventory.
+
+`EVENT_RINGBUF` emits a rate-limited `udp_decision_token_exhausted` warning as the immediate exhaustion prompt. Recovery does not depend on that lossy channel: the supervisor periodically performs a locked read of `UDP_DECISION_SEQUENCE`, which detects exhaustion even if the event was dropped; failure of this backstop is fatal.
+
+## Related docs
+
+- [eBPF datapath](./datapath.md)
+- [Control plane](./control-plane.md)
+- [Global configuration reference](../reference/global.md)

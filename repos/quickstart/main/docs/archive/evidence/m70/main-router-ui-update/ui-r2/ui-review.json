@@ -1,0 +1,116 @@
+{
+  "result": "passed",
+  "views": [
+    {
+      "width": 1440,
+      "section": 0,
+      "overflow": false,
+      "ownOverflow": false,
+      "text": "This machine is responsible for LAN address allocation\nAddress configuration editable · Route editable · Other services have their own permissions\nPermission scope\nDiscover existing device settings\n\nPreview and take over the existing settings before using only the current device management interface for maintenance.\n\n6 Item\nNetwork services\nInternet path\nRules ledger\nDHCP service\n\nThe LAN device is assigned an address by the machine.When turned off, the device should be assigned an address by another router.\n\nOn\nPool start address\nPool end address\nLease time\nDefault Internet path\nThis router · 192.168.30.1\nSecondary router · 192.168.30.244\nFailover gateway · 192.168.30.3\nCustom gateway · 192.168.100.3\nCustom gateway · 192.168.30.88\nCustom gateway · 192.168.100.2\nReview DHCP settings\nDevice speed limit service\n\nSet the maximum upload and download speeds for your device; network permissions do not depend on this service.\n\nNot enabled\nEnable device speed limits\n\nTotal bandwidth is used to calculate device queues; it is not divided equally among devices.\n\nReview speed limit settings\nCheck again\nAdvanced: enforcement mode and migration"
+    },
+    {
+      "width": 1440,
+      "section": 1,
+      "overflow": false,
+      "ownOverflow": false,
+      "text": "This machine is responsible for LAN address allocation\nAddress configuration editable · Route editable · Other services have their own permissions\nPermission scope\nDiscover existing device settings\n\nPreview and take over the existing settings before using only the current device management interface for maintenance.\n\n6 Item\nNetwork services\nInternet path\nRules ledger\nCustomize your route to the internet\n\nLeave complex network work to the bypass or designated gateway, and the device can choose the route in the details.DNS follows the route.\n\nAdd Route\nSecondary router\n192.168.30.244 · Secondary router\nEdit\nDelete\nCustom gateway\n192.168.100.3 · Custom gateway\nEdit\nDelete\nCustom gateway\n192.168.30.88 · Custom gateway\nEdit\nDelete\nCustom gateway\n192.168.100.2 · Custom gateway\nEdit\nDelete\nFailover gateway\n\nThe main route and the bypass route share a stable entrance, and when the bypass route is abnormal, the main route is automatically switched back.\n\nAvailable\nReading floating gateway status"
+    },
+    {
+      "width": 1440,
+      "section": 2,
+      "overflow": false,
+      "ownOverflow": false,
+      "text": "This machine is responsible for LAN address allocation\nAddress configuration editable · Route editable · Other services have their own permissions\nPermission scope\nDiscover existing device settings\n\nPreview and take over the existing settings before using only the current device management interface for maintenance.\n\n6 Item\nNetwork services\nInternet path\nRules ledger\nRules ledger\n\nFocus on checking for rules that are offline, orphaned, or need to be fixed; new settings can be accessed from the corresponding device details.\n\nReading network rules"
+    },
+    {
+      "width": 390,
+      "section": 0,
+      "overflow": false,
+      "ownOverflow": false,
+      "text": "This machine is responsible for LAN address allocation\nAddress configuration editable · Route editable · Other services have their own permissions\nPermission scope\nDiscover existing device settings\n\nPreview and take over the existing settings before using only the current device management interface for maintenance.\n\n6 Item\nNetwork services\nInternet path\nRules ledger\nDHCP service\n\nThe LAN device is assigned an address by the machine.When turned off, the device should be assigned an address by another router.\n\nOn\nPool start address\nPool end address\nLease time\nDefault Internet path\nThis router · 192.168.30.1\nSecondary router · 192.168.30.244\nFailover gateway · 192.168.30.3\nCustom gateway · 192.168.100.3\nCustom gateway · 192.168.30.88\nCustom gateway · 192.168.100.2\nReview DHCP settings\nDevice speed limit service\n\nSet the maximum upload and download speeds for your device; network permissions do not depend on this service.\n\nNot enabled\nEnable device speed limits\n\nTotal bandwidth is used to calculate device queues; it is not divided equally among devices.\n\nReview speed limit settings\nCheck again\nAdvanced: enforcement mode and migration"
+    },
+    {
+      "width": 390,
+      "section": 1,
+      "overflow": false,
+      "ownOverflow": false,
+      "text": "This machine is responsible for LAN address allocation\nAddress configuration editable · Route editable · Other services have their own permissions\nPermission scope\nDiscover existing device settings\n\nPreview and take over the existing settings before using only the current device management interface for maintenance.\n\n6 Item\nNetwork services\nInternet path\nRules ledger\nCustomize your route to the internet\n\nLeave complex network work to the bypass or designated gateway, and the device can choose the route in the details.DNS follows the route.\n\nAdd Route\nSecondary router\n192.168.30.244 · Secondary router\nEdit\nDelete\nCustom gateway\n192.168.100.3 · Custom gateway\nEdit\nDelete\nCustom gateway\n192.168.30.88 · Custom gateway\nEdit\nDelete\nCustom gateway\n192.168.100.2 · Custom gateway\nEdit\nDelete\nFailover gateway\n\nThe main route and the bypass route share a stable entrance, and when the bypass route is abnormal, the main route is automatically switched back.\n\nAvailable\nReading floating gateway status"
+    },
+    {
+      "width": 390,
+      "section": 2,
+      "overflow": false,
+      "ownOverflow": false,
+      "text": "This machine is responsible for LAN address allocation\nAddress configuration editable · Route editable · Other services have their own permissions\nPermission scope\nDiscover existing device settings\n\nPreview and take over the existing settings before using only the current device management interface for maintenance.\n\n6 Item\nNetwork services\nInternet path\nRules ledger\nRules ledger\n\nFocus on checking for rules that are offline, orphaned, or need to be fixed; new settings can be accessed from the corresponding device details.\n\nReading network rules"
+    }
+  ],
+  "errors": [],
+  "httpErrors": [
+    {
+      "path": "/cgi-bin/luci/istore/home/v1/launcher/",
+      "status": 404
+    },
+    {
+      "path": "/cgi-bin/luci/istore/home/v1/layout/",
+      "status": 404
+    }
+  ],
+  "blocked": [],
+  "rpc": [
+    {
+      "method": "list"
+    },
+    {
+      "method": "call",
+      "object": "luci",
+      "operation": "getFeatures"
+    },
+    {
+      "method": "call",
+      "object": "file",
+      "operation": "list"
+    },
+    {
+      "method": "call",
+      "object": "uci",
+      "operation": "changes"
+    },
+    {
+      "method": "call",
+      "object": "uci",
+      "operation": "changes"
+    }
+  ],
+  "publicHashes": {
+    "index.js": "8c26e370ce8c21e774f1839f24c58cb892ff289c21895c5e54f19a74b459edf9",
+    "style.css": "6b77ac3ea90af68d8cba8e944998da2e76358ee1bfa1f25961722fb53364313d",
+    "vendor.js": "2d10df1751d0d3e778744c01f8edf8db96082b8d0939cf65ef38ea05eea39867",
+    "i18n/en.json": "bd5ffbade61b84d680f1f7982b3db76fa4d5a8d9a756b115663f02870c1a3fcb"
+  },
+  "home": {
+    "temporaryDefaults": true,
+    "editingDisabled": true,
+    "notices": [
+      "Homepage: Router configuration is unavailable. Showing built-in defaults temporarily.\nReload",
+      "Apps & tools: Router configuration is unavailable. Showing built-in defaults temporarily.\nReload"
+    ]
+  },
+  "deviceCount": 10,
+  "dhcp": {
+    "settings": {
+      "enabled": true,
+      "poolStart": "192.168.30.2",
+      "poolEnd": "192.168.30.249",
+      "leaseTime": "12h",
+      "defaultTargetId": "self"
+    },
+    "version": "1b0a3fca5ee7e2d729f72b2cef2b46cb1b92dc4c1f4e0afe25c95c33f40b73e4",
+    "editable": true,
+    "affectedDevices": 1,
+    "conflicts": [],
+    "reloadServices": [],
+    "canApply": false,
+    "changed": false
+  },
+  "contextText": "This machine is responsible for LAN address allocation\nAddress configuration editable · Route editable · Other services have their own permissions\nPermission scope"
+}

@@ -1,0 +1,22 @@
+{
+  "host": "192.168.30.244",
+  "removed": [
+    {
+      "path": "/usr/share/quickstart-netpolicy/hostname_bindings.txt",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/usr/share/quickstart-netpolicy/rate_limit_policy.txt",
+      "size": 11,
+      "sha256": "86d4464946ff4d92632a0eeb45193986fe635dbafc9f85216fb22c86317b51ee"
+    }
+  ],
+  "remaining": [
+    "/usr/share/quickstart-netpolicy/LICENSE",
+    "/usr/share/quickstart-netpolicy/NOTICE",
+    "/usr/share/quickstart-netpolicy/manifest.json"
+  ],
+  "result": "passed",
+  "note": "Both files were absent before the enable rehearsal; native service is stopped and main.enabled=0. Only empty bindings and disabled/zero default policy were removed."
+}

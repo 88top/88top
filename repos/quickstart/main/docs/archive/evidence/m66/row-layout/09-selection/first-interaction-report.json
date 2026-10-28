@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-10-15T06:47:37.205Z",
+  "base": "http://192.168.9.19:5180",
+  "checks": [
+    "R presets, real pointer splitter, keyboard, shared row height"
+  ],
+  "errors": [],
+  "outside": [],
+  "productDecision": "pending",
+  "technicalResult": "fail",
+  "failure": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert.ok(connection.y>=flow.y+flow.height)\n\n    at /config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/0153-device-lists-sho/quickstart/docs/product/ui-design/row-layout-interaction-review.cjs:19:231"
+}

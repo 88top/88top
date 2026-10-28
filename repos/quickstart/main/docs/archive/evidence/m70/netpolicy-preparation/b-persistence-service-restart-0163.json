@@ -1,0 +1,8 @@
+{
+  "target": "192.168.30.244",
+  "result": "passed",
+  "exitCode": 0,
+  "output": "/etc/quickstart/home-layout.json: OK\n/etc/quickstart/home-layout.json.bak: OK\n/etc/quickstart/home-launcher.json: OK\n/etc/quickstart/home-launcher.json.bak: OK\n/etc/config/network: OK\n/etc/config/dhcp: OK\n/etc/config/firewall: OK\n/etc/config/quickstart: OK\n/etc/config/quickstart-netpolicy: OK\n0.16.3-test20261018 c78f62c1e6e0fd41d6572dc2ac64cf81ba2bd9fc .20261018.110153\n91a92aed90db464e247d0dae90467af9b5859daf67463b9b81ec181421c1489d  /proc/512168/exe\n91a92aed90db464e247d0dae90467af9b5859daf67463b9b81ec181421c1489d  /proc/525570/exe\ndefault via 192.168.30.1 dev br-lan proto static src 192.168.30.244 \n",
+  "diagnostic": "",
+  "scope": "Restart only the B Quickstart serve service after UI save/reload tests; verify raw durable configuration unchanged. No network/DHCP/firewall/NetPolicy service restart, system reboot or restore."
+}

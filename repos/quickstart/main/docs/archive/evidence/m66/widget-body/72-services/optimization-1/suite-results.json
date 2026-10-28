@@ -1,0 +1,54 @@
+{
+  "startedAt": "2026-10-17T15:13:17.635Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "widget-body-services-review",
+      "startedAt": "2026-10-17T15:13:17.635Z",
+      "endedAt": "2026-10-17T15:13:39.138Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 10,
+      "report": "docs/evidence/m66/widget-body/72-services/optimization-1/widget-body-services-review/report.json"
+    },
+    {
+      "name": "business-actions-review",
+      "startedAt": "2026-10-17T15:13:17.640Z",
+      "endedAt": "2026-10-17T15:13:54.440Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/widget-body/72-services/optimization-1/business-actions-review/report.json"
+    },
+    {
+      "name": "visual-refinement-content-review",
+      "startedAt": "2026-10-17T15:13:39.139Z",
+      "endedAt": "2026-10-17T15:13:54.743Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/widget-body/72-services/optimization-1/visual-refinement-content-review/report.json"
+    },
+    {
+      "name": "business-widgets-review",
+      "startedAt": "2026-10-17T15:13:17.639Z",
+      "endedAt": "2026-10-17T15:14:03.436Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 19,
+      "report": "docs/evidence/m66/widget-body/72-services/optimization-1/business-widgets-review/report.json"
+    },
+    {
+      "name": "widget-body-storage-review",
+      "startedAt": "2026-10-17T15:13:54.440Z",
+      "endedAt": "2026-10-17T15:14:11.481Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 25,
+      "report": "docs/evidence/m66/widget-body/72-services/optimization-1/widget-body-storage-review/report.json"
+    }
+  ],
+  "endedAt": "2026-10-17T15:14:11.482Z",
+  "result": "pass",
+  "groups": 75
+}

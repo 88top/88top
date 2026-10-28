@@ -1,0 +1,45 @@
+{
+  "result": "measured",
+  "sameBViewportThemeLanguage": true,
+  "configurationPreserved": true,
+  "views": [
+    {
+      "lang": "zh",
+      "theme": "light",
+      "width": 1440,
+      "homeHeights": {
+        "docker": {
+          "before": 335.171875,
+          "after": 251
+        },
+        "downloads": {
+          "before": 335.171875,
+          "after": 251
+        },
+        "remote": {
+          "before": 335.171875,
+          "after": 251
+        }
+      }
+    },
+    {
+      "lang": "en",
+      "theme": "dark",
+      "width": 320,
+      "homeHeights": {
+        "docker": {
+          "before": 301,
+          "after": 213
+        },
+        "downloads": {
+          "before": 328.671875,
+          "after": 310
+        },
+        "remote": {
+          "before": 382.265625,
+          "after": 326
+        }
+      }
+    }
+  ]
+}

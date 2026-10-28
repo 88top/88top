@@ -77,19 +77,23 @@ func BatchRun(ctx context.Context, cmds []string, timeout int) error {
 }
 
 func UCIBatchRun(ctx context.Context, cmds []string, reloadCmd string, timeout int) error {
-	cmdStrArr := []string{
-		"uci -q batch <<-EOF >/dev/null",
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, time.Second*time.Duration(timeout))
+		defer cancel()
 	}
-	cmdStrArr = append(cmdStrArr, cmds...)
-	cmdStrArr = append(cmdStrArr, "EOF")
-	cmdStrArr = append(cmdStrArr, reloadCmd)
-	cmdStrArr = append(cmdStrArr, "")
-	cmd, fn, err := createBatchCommand(ctx, cmdStrArr, timeout)
-	if err != nil {
+	// Send UCI's own batch language directly to UCI. An unquoted shell
+	// heredoc evaluates $(), backticks and variable expansions inside values,
+	// even when a value is surrounded by UCI single quotes.
+	cmd := exec.CommandContext(ctx, "uci", "-q", "batch")
+	cmd.Stdin = strings.NewReader(strings.Join(cmds, "\n") + "\n")
+	if err := cmd.Run(); err != nil {
 		return err
 	}
-	defer fn()
-	return cmd.Run()
+	if reloadCmd != "" {
+		return BatchRun(ctx, []string{reloadCmd}, 0)
+	}
+	return nil
 }
 
 func BatchOutErr(ctx context.Context, cmds []string, timeout int) (string, string, error) {

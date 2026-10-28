@@ -1,14 +1,5 @@
 <template>
     <ul class="app-container_transmission">
-        <li class="transmission-item">
-            <div class="transmission-item_name">
-                <span>{{ $gettext("当前状态:") }}</span>
-            </div>
-            <div class="transmission-item_value">
-                <span class="configure" v-if="transmission?.status == 'running'">{{ $gettext("已启动") }}</span>
-                <span class="configure enabel" v-else>{{ $gettext("未启动") }}</span>
-            </div>
-        </li>
         <template v-if="transmission?.status == 'running'">
             <li class="transmission-item">
                 <div class="transmission-item_name">

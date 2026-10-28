@@ -1,0 +1,57 @@
+[
+  {
+    "id": "traffic",
+    "width": 694.796875,
+    "height": 391.796875
+  },
+  {
+    "id": "connection",
+    "width": 463.203125,
+    "height": 237.796875
+  },
+  {
+    "id": "networkInterface",
+    "width": 463.203125,
+    "height": 136
+  },
+  {
+    "id": "devices",
+    "width": 579,
+    "height": 302.078125
+  },
+  {
+    "id": "applications",
+    "width": 579,
+    "height": 302.078125
+  },
+  {
+    "id": "storage",
+    "width": 579,
+    "height": 411
+  },
+  {
+    "id": "sharing",
+    "width": 579,
+    "height": 411
+  },
+  {
+    "id": "docker",
+    "width": 387.59375,
+    "height": 433.296875
+  },
+  {
+    "id": "downloads",
+    "width": 376.203125,
+    "height": 433.296875
+  },
+  {
+    "id": "remote",
+    "width": 376.1875,
+    "height": 433.296875
+  },
+  {
+    "id": "system",
+    "width": 1176,
+    "height": 290
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "web/src/home/NetworkConnectionCard.vue": {
+    "baseline": "80566abdef988974fa0daf1f9c163a873d5c015e8daec7493f8177966f99c8bd",
+    "current": "80566abdef988974fa0daf1f9c163a873d5c015e8daec7493f8177966f99c8bd"
+  },
+  "web/src/home/networkWidgets.css": {
+    "baseline": "c495f434e85ac32344d9cf7d777b6fcf49322dded76bc4eb6f04bdc8f20a3e43",
+    "current": "c495f434e85ac32344d9cf7d777b6fcf49322dded76bc4eb6f04bdc8f20a3e43"
+  },
+  "web/src/home/homeWidgetChrome.css": {
+    "baseline": "496e9bc84d2173f78a21d5472afb16d9e5faf674c3b21cdcacc54f1943581457",
+    "current": "496e9bc84d2173f78a21d5472afb16d9e5faf674c3b21cdcacc54f1943581457"
+  },
+  "web/src/home/homeTypography.css": {
+    "baseline": "df1420f0248b42c5c2c4cf95dd0546f39daee3a8935768c2e226dc720137df93",
+    "current": "df1420f0248b42c5c2c4cf95dd0546f39daee3a8935768c2e226dc720137df93"
+  },
+  "web/src/home/widgetActionGroup.css": {
+    "baseline": "1295552406a657d8deb0b915ff0af737f2c36862684d810a473f1732234399d5",
+    "current": "1295552406a657d8deb0b915ff0af737f2c36862684d810a473f1732234399d5"
+  },
+  "web/src/home/luciHomeBoundary.css": {
+    "baseline": "2e8194ff58d0307be365da7096928b9b4e7fdd0b43ce68789cc89ae52cd6fc97",
+    "current": "2e8194ff58d0307be365da7096928b9b4e7fdd0b43ce68789cc89ae52cd6fc97"
+  }
+}

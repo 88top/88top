@@ -1,0 +1,94 @@
+{
+  "result": "passed",
+  "comparisons": [
+    {
+      "width": 2560,
+      "beforeRootWidth": 2280,
+      "afterRootWidth": 2280,
+      "originalNativeInsets": {
+        "left": 20,
+        "right": 20
+      },
+      "cards": [
+        {
+          "left": 279,
+          "right": 1394,
+          "top": 322.8125,
+          "bottom": 463.640625,
+          "width": 1115,
+          "height": 140.828125
+        },
+        {
+          "left": 1406,
+          "right": 2521,
+          "top": 322.8125,
+          "bottom": 569.609375,
+          "width": 1115,
+          "height": 246.796875
+        }
+      ],
+      "source": "actual backend unavailable; no invented defaults"
+    },
+    {
+      "width": 1440,
+      "beforeRootWidth": 1192,
+      "afterRootWidth": 1192,
+      "originalNativeInsets": {
+        "left": 20,
+        "right": 20
+      },
+      "cards": [
+        {
+          "left": 247,
+          "right": 818,
+          "top": 322.8125,
+          "bottom": 463.640625,
+          "width": 571,
+          "height": 140.828125
+        },
+        {
+          "left": 830,
+          "right": 1401,
+          "top": 322.8125,
+          "bottom": 569.609375,
+          "width": 571,
+          "height": 246.796875
+        }
+      ],
+      "source": "actual backend unavailable; no invented defaults"
+    },
+    {
+      "width": 390,
+      "beforeRootWidth": 358,
+      "afterRootWidth": 358,
+      "originalNativeInsets": {
+        "left": 16,
+        "right": 16
+      },
+      "cards": [
+        {
+          "left": 25,
+          "right": 365,
+          "top": 357,
+          "bottom": 538.765625,
+          "width": 340,
+          "height": 181.765625
+        },
+        {
+          "left": 25,
+          "right": 365,
+          "top": 550.765625,
+          "bottom": 827.359375,
+          "width": 340,
+          "height": 276.59375
+        }
+      ],
+      "source": "actual backend unavailable; no invented defaults"
+    }
+  ],
+  "realDhcpError": {
+    "success": -1000,
+    "error": "LAN IPv4 address or netmask is invalid",
+    "resultKeys": []
+  }
+}

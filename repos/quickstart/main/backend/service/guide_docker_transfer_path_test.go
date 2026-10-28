@@ -18,13 +18,13 @@ func TestCheckDockerPathCompatibilityUsesServiceShellSnapshot(t *testing.T) {
 	runGuideDockerTransferPathOutput = func(ctx context.Context, cmd string) ([]byte, error) {
 		gotCommands = append(gotCommands, cmd)
 		switch cmd {
-		case "[ -d '/mnt/new/docker' ] || mkdir -p '/mnt/new/docker'":
+		case "[ -d /mnt/new/docker ] || mkdir -p /mnt/new/docker":
 			return []byte{}, nil
-		case "findmnt -T '/mnt/new/docker' -o SOURCE,FSTYPE --json":
+		case "findmnt -T /mnt/new/docker -o SOURCE,FSTYPE --json":
 			return []byte(`{"filesystems":[{"source":"/dev/sda1","fstype":"ext4"}]}`), nil
 		case "findmnt -T /overlay -o SOURCE|sed -n 2p":
 			return []byte("/dev/mmcblk0p2\n"), nil
-		case "findmnt -T '/mnt/origin/docker' -o SOURCE|sed -n 2p":
+		case "findmnt -T /mnt/origin/docker -o SOURCE|sed -n 2p":
 			return []byte("/dev/sdb1\n"), nil
 		default:
 			t.Fatalf("unexpected command: %s", cmd)
@@ -37,10 +37,10 @@ func TestCheckDockerPathCompatibilityUsesServiceShellSnapshot(t *testing.T) {
 	}
 
 	expectedCommands := []string{
-		"[ -d '/mnt/new/docker' ] || mkdir -p '/mnt/new/docker'",
-		"findmnt -T '/mnt/new/docker' -o SOURCE,FSTYPE --json",
+		"[ -d /mnt/new/docker ] || mkdir -p /mnt/new/docker",
+		"findmnt -T /mnt/new/docker -o SOURCE,FSTYPE --json",
 		"findmnt -T /overlay -o SOURCE|sed -n 2p",
-		"findmnt -T '/mnt/origin/docker' -o SOURCE|sed -n 2p",
+		"findmnt -T /mnt/origin/docker -o SOURCE|sed -n 2p",
 	}
 	if !reflect.DeepEqual(gotCommands, expectedCommands) {
 		t.Fatalf("unexpected command sequence: %#v", gotCommands)
@@ -95,13 +95,13 @@ func TestCheckDockerPathCompatibilityPreservesModuleRuleErrors(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			runGuideDockerTransferPathOutput = func(ctx context.Context, cmd string) ([]byte, error) {
 				switch cmd {
-				case "[ -d '/mnt/new/docker' ] || mkdir -p '/mnt/new/docker'":
+				case "[ -d /mnt/new/docker ] || mkdir -p /mnt/new/docker":
 					return []byte{}, nil
-				case "findmnt -T '/mnt/new/docker' -o SOURCE,FSTYPE --json":
+				case "findmnt -T /mnt/new/docker -o SOURCE,FSTYPE --json":
 					return []byte(tt.targetJSON), nil
 				case "findmnt -T /overlay -o SOURCE|sed -n 2p":
 					return []byte(tt.overlay), nil
-				case "findmnt -T '/mnt/origin/docker' -o SOURCE|sed -n 2p":
+				case "findmnt -T /mnt/origin/docker -o SOURCE|sed -n 2p":
 					return []byte(tt.origin), nil
 				default:
 					t.Fatalf("unexpected command: %s", cmd)
@@ -138,9 +138,9 @@ func TestCheckDockerPathCompatibilityPreservesShellAndPathInfoErrors(t *testing.
 
 	runGuideDockerTransferPathOutput = func(ctx context.Context, cmd string) ([]byte, error) {
 		switch cmd {
-		case "[ -d '/mnt/new/docker' ] || mkdir -p '/mnt/new/docker'":
+		case "[ -d /mnt/new/docker ] || mkdir -p /mnt/new/docker":
 			return []byte{}, nil
-		case "findmnt -T '/mnt/new/docker' -o SOURCE,FSTYPE --json":
+		case "findmnt -T /mnt/new/docker -o SOURCE,FSTYPE --json":
 			return []byte(`{"filesystems":[]}`), nil
 		default:
 			t.Fatalf("unexpected command: %s", cmd)

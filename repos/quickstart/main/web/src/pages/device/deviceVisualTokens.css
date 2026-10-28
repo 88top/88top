@@ -1,0 +1,28 @@
+/* Same semantic palette as homeSemanticColors.css, bounded to the LAN page.
+ * A colour never substitutes for presence, policy or sampling status text. */
+.device-management,.device-feature-surface {
+ --device-panel:#fff; --device-soft:#f5f7fa; --device-hover:#edf2f8;
+ --device-text:#253247; --device-muted:#5b687a; --device-line:#e1e6ed;
+ --device-accent:#155dfc; --device-accent-soft:#f0f5ff;
+ --device-good:#008236; --device-upload:#7534d7; --device-download:#0876bd;
+ --device-primary-bg:#155dfc; --device-primary-text:#fff;
+ --device-warning:#946000; --device-warning-soft:#fff5e5;
+}
+@media(prefers-color-scheme:dark) {
+ body:not([theme="light"]) .device-management,body:not([theme="light"]) .device-feature-surface {
+  --device-panel:#2c2c2c; --device-soft:#343a43; --device-hover:#3b4655;
+  --device-text:#e6ebf3; --device-muted:#b1bdce; --device-line:#414b59;
+  --device-accent:#91b9ff; --device-accent-soft:#2c3e59;
+  --device-good:#70e2b2; --device-upload:#c7a0ff; --device-download:#68d6ff;
+  --device-primary-bg:#91b9ff; --device-primary-text:#172b48;
+  --device-warning:#ffce76; --device-warning-soft:#514024;
+ }
+}
+body[theme="dark"] .device-management,body[theme="dark"] .device-feature-surface {
+ --device-panel:#2c2c2c; --device-soft:#343a43; --device-hover:#3b4655;
+ --device-text:#e6ebf3; --device-muted:#b1bdce; --device-line:#414b59;
+ --device-accent:#91b9ff; --device-accent-soft:#2c3e59;
+ --device-good:#70e2b2; --device-upload:#c7a0ff; --device-download:#68d6ff;
+ --device-primary-bg:#91b9ff; --device-primary-text:#172b48;
+ --device-warning:#ffce76; --device-warning-soft:#514024;
+}

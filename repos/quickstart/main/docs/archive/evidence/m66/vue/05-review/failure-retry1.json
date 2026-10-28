@@ -1,0 +1,393 @@
+{
+  "url": "http://192.168.98.2:5180/?layout=below-network&scenario=stale&theme=dark&lang=en&tools=0",
+  "error": "TimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.feature-card').first() to be visible\u001b[22m\n",
+  "body": "",
+  "views": [
+    {
+      "kind": "layout",
+      "layout": "baseline",
+      "viewport": "desktop",
+      "theme": "light",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "baseline",
+      "viewport": "desktop",
+      "theme": "light",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "baseline",
+      "viewport": "desktop",
+      "theme": "dark",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "baseline",
+      "viewport": "desktop",
+      "theme": "dark",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "baseline",
+      "viewport": "tablet",
+      "theme": "light",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "baseline",
+      "viewport": "tablet",
+      "theme": "light",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "baseline",
+      "viewport": "tablet",
+      "theme": "dark",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "baseline",
+      "viewport": "tablet",
+      "theme": "dark",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "baseline",
+      "viewport": "mobile",
+      "theme": "light",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "baseline",
+      "viewport": "mobile",
+      "theme": "light",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "baseline",
+      "viewport": "mobile",
+      "theme": "dark",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "baseline",
+      "viewport": "mobile",
+      "theme": "dark",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "below-network",
+      "viewport": "desktop",
+      "theme": "light",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "below-network",
+      "viewport": "desktop",
+      "theme": "light",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "below-network",
+      "viewport": "desktop",
+      "theme": "dark",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "below-network",
+      "viewport": "desktop",
+      "theme": "dark",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "below-network",
+      "viewport": "tablet",
+      "theme": "light",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "below-network",
+      "viewport": "tablet",
+      "theme": "light",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "below-network",
+      "viewport": "tablet",
+      "theme": "dark",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "below-network",
+      "viewport": "tablet",
+      "theme": "dark",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "below-network",
+      "viewport": "mobile",
+      "theme": "light",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "below-network",
+      "viewport": "mobile",
+      "theme": "light",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "below-network",
+      "viewport": "mobile",
+      "theme": "dark",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "below-network",
+      "viewport": "mobile",
+      "theme": "dark",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "above-network",
+      "viewport": "desktop",
+      "theme": "light",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "above-network",
+      "viewport": "desktop",
+      "theme": "light",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "above-network",
+      "viewport": "desktop",
+      "theme": "dark",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "above-network",
+      "viewport": "desktop",
+      "theme": "dark",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "above-network",
+      "viewport": "tablet",
+      "theme": "light",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "above-network",
+      "viewport": "tablet",
+      "theme": "light",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "above-network",
+      "viewport": "tablet",
+      "theme": "dark",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "above-network",
+      "viewport": "tablet",
+      "theme": "dark",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "above-network",
+      "viewport": "mobile",
+      "theme": "light",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "above-network",
+      "viewport": "mobile",
+      "theme": "light",
+      "lang": "en"
+    },
+    {
+      "kind": "layout",
+      "layout": "above-network",
+      "viewport": "mobile",
+      "theme": "dark",
+      "lang": "zh-cn"
+    },
+    {
+      "kind": "layout",
+      "layout": "above-network",
+      "viewport": "mobile",
+      "theme": "dark",
+      "lang": "en"
+    },
+    {
+      "kind": "scenario",
+      "scenario": "normal",
+      "viewport": "desktop",
+      "theme": "light",
+      "lang": "zh-cn",
+      "count": 6
+    },
+    {
+      "kind": "scenario",
+      "scenario": "normal",
+      "viewport": "tablet",
+      "theme": "dark",
+      "lang": "en",
+      "count": 6
+    },
+    {
+      "kind": "scenario",
+      "scenario": "normal",
+      "viewport": "mobile",
+      "theme": "dark",
+      "lang": "zh-cn",
+      "count": 3
+    },
+    {
+      "kind": "scenario",
+      "scenario": "many",
+      "viewport": "desktop",
+      "theme": "light",
+      "lang": "zh-cn",
+      "count": 6
+    },
+    {
+      "kind": "scenario",
+      "scenario": "many",
+      "viewport": "tablet",
+      "theme": "dark",
+      "lang": "en",
+      "count": 6
+    },
+    {
+      "kind": "scenario",
+      "scenario": "many",
+      "viewport": "mobile",
+      "theme": "dark",
+      "lang": "zh-cn",
+      "count": 3
+    },
+    {
+      "kind": "scenario",
+      "scenario": "empty",
+      "viewport": "desktop",
+      "theme": "light",
+      "lang": "zh-cn",
+      "count": 0
+    },
+    {
+      "kind": "scenario",
+      "scenario": "empty",
+      "viewport": "tablet",
+      "theme": "dark",
+      "lang": "en",
+      "count": 0
+    },
+    {
+      "kind": "scenario",
+      "scenario": "empty",
+      "viewport": "mobile",
+      "theme": "dark",
+      "lang": "zh-cn",
+      "count": 0
+    },
+    {
+      "kind": "scenario",
+      "scenario": "loading",
+      "viewport": "desktop",
+      "theme": "light",
+      "lang": "zh-cn",
+      "count": 0
+    },
+    {
+      "kind": "scenario",
+      "scenario": "loading",
+      "viewport": "tablet",
+      "theme": "dark",
+      "lang": "en",
+      "count": 0
+    },
+    {
+      "kind": "scenario",
+      "scenario": "loading",
+      "viewport": "mobile",
+      "theme": "dark",
+      "lang": "zh-cn",
+      "count": 0
+    },
+    {
+      "kind": "scenario",
+      "scenario": "error",
+      "viewport": "desktop",
+      "theme": "light",
+      "lang": "zh-cn",
+      "count": 0
+    },
+    {
+      "kind": "scenario",
+      "scenario": "error",
+      "viewport": "tablet",
+      "theme": "dark",
+      "lang": "en",
+      "count": 0
+    },
+    {
+      "kind": "scenario",
+      "scenario": "error",
+      "viewport": "mobile",
+      "theme": "dark",
+      "lang": "zh-cn",
+      "count": 0
+    },
+    {
+      "kind": "scenario",
+      "scenario": "stale",
+      "viewport": "desktop",
+      "theme": "light",
+      "lang": "zh-cn",
+      "count": 6
+    }
+  ],
+  "errors": [
+    "WebSocket connection to 'ws://192.168.98.2:5180/' failed: ",
+    "Failed to fetch dynamically imported module: http://192.168.98.2:5180/src/design/mount.ts?t=1791956349636",
+    "WebSocket is already in CLOSING or CLOSED state."
+  ],
+  "outside": []
+}

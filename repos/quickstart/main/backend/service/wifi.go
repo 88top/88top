@@ -111,6 +111,9 @@ func WirelessEnableIface(ctx context.Context, r *http.Request) error {
 }
 
 func WirelessEnableIfaceWithRequest(ctx context.Context, req models.WirelessEnableIfaceRequest) error {
+	if !validWirelessSection(req.IfaceName) {
+		return errors.New("Invalid interface")
+	}
 	uci.LoadConfig("wireless", true)
 	wifi := wifiSelect()
 	if wifi == nil {
@@ -233,6 +236,9 @@ func WirelessSetDevicePower(ctx context.Context, r *http.Request) error {
 }
 
 func WirelessSetDevicePowerWithRequest(ctx context.Context, req models.WirelessSetDevicePowerRequest) error {
+	if !validWirelessSection(req.Device) {
+		return errors.New("Invalid device")
+	}
 	if req.Txpower <= 0 || req.Txpower > 100 {
 		req.Txpower = 100
 	}
@@ -256,6 +262,9 @@ func WirelessEditIface(ctx context.Context, r *http.Request) error {
 }
 
 func WirelessEditIfaceWithRequest(ctx context.Context, req models.WirelessIfaceInfo) error {
+	if !validWirelessSection(req.IfaceName) || strings.ContainsAny(req.Ssid+req.Key, "\x00\r\n") {
+		return errors.New("Invalid interface parameters")
+	}
 	uci.LoadConfig("wireless", true)
 	wifi := wifiSelect()
 	if wifi == nil {

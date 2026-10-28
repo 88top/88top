@@ -1,0 +1,11 @@
+{
+  "currentSha256": "ce86a957cc5702d312e8b5c80c2d2b6e54bcbab95012a9cf49158bb5fb429aa0",
+  "preinstallSha256": "49f8c014fd60ef9b0cb3e29ada73ac95991879064576c152e0bfbb26379f7dc4",
+  "candidates": [
+    {
+      "removedLine": "list ports 'dheth0'",
+      "candidateSha256": "49f8c014fd60ef9b0cb3e29ada73ac95991879064576c152e0bfbb26379f7dc4",
+      "matchesPreinstall": true
+    }
+  ]
+}

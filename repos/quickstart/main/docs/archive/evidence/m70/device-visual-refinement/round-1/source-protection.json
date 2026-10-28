@@ -1,0 +1,13 @@
+{
+  "result": "passed",
+  "baseline": "d3a7620d4ed81e030206c1befa717e915470f7f2",
+  "listScriptIdentical": true,
+  "businessHandlersAndModelsIdentical": true,
+  "scriptSha256": "f5e0d93bdabb67b797ac09bea6110cdedf3d9a49759c936ff5b96bc5ea0d09cc",
+  "allowedTemplateChanges": [
+    "toolbar wrappers/order",
+    "address before status column",
+    "presentation-only classes/title/colgroup/ready-colour binding"
+  ],
+  "unchangedBusinessChildren": []
+}

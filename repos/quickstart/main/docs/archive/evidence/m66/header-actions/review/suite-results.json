@@ -1,0 +1,180 @@
+{
+  "startedAt": "2026-10-17T10:05:17.581Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "header-action-matrix-review",
+      "startedAt": "2026-10-17T10:05:17.581Z",
+      "endedAt": "2026-10-17T10:05:19.521Z",
+      "code": 1,
+      "result": "fail",
+      "groups": 0,
+      "report": "docs/evidence/m66/header-actions/review/header-action-matrix-review/report.json"
+    },
+    {
+      "name": "header-action-interaction-review",
+      "startedAt": "2026-10-17T10:05:17.585Z",
+      "endedAt": "2026-10-17T10:05:25.098Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 6,
+      "report": "docs/evidence/m66/header-actions/review/header-action-interaction-review/report.json"
+    },
+    {
+      "name": "home-widget-header-review",
+      "startedAt": "2026-10-17T10:05:19.521Z",
+      "endedAt": "2026-10-17T10:05:31.976Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 14,
+      "report": "docs/evidence/m66/header-actions/review/home-widget-header-review/report.json"
+    },
+    {
+      "name": "widget-actions-review",
+      "startedAt": "2026-10-17T10:05:17.589Z",
+      "endedAt": "2026-10-17T10:05:36.346Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/header-actions/review/widget-actions-review/report.json"
+    },
+    {
+      "name": "home-widget-standard-review",
+      "startedAt": "2026-10-17T10:05:25.099Z",
+      "endedAt": "2026-10-17T10:05:43.479Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/header-actions/review/home-widget-standard-review/report.json"
+    },
+    {
+      "name": "network-interaction-review",
+      "startedAt": "2026-10-17T10:05:31.976Z",
+      "endedAt": "2026-10-17T10:06:10.900Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 14,
+      "report": "docs/evidence/m66/header-actions/review/network-interaction-review/report.json"
+    },
+    {
+      "name": "business-actions-review",
+      "startedAt": "2026-10-17T10:05:43.480Z",
+      "endedAt": "2026-10-17T10:06:20.323Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/header-actions/review/business-actions-review/report.json"
+    },
+    {
+      "name": "launcher-actions-review",
+      "startedAt": "2026-10-17T10:06:10.901Z",
+      "endedAt": "2026-10-17T10:06:22.342Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/header-actions/review/launcher-actions-review/report.json"
+    },
+    {
+      "name": "business-widgets-review",
+      "startedAt": "2026-10-17T10:05:36.347Z",
+      "endedAt": "2026-10-17T10:06:22.614Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 19,
+      "report": "docs/evidence/m66/header-actions/review/business-widgets-review/report.json"
+    },
+    {
+      "name": "launcher-home-review",
+      "startedAt": "2026-10-17T10:06:20.323Z",
+      "endedAt": "2026-10-17T10:06:27.537Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/header-actions/review/launcher-home-review/report.json"
+    },
+    {
+      "name": "launchpad-browser-review",
+      "startedAt": "2026-10-17T10:06:22.614Z",
+      "endedAt": "2026-10-17T10:06:29.527Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 11,
+      "report": "docs/evidence/m66/header-actions/review/launchpad-browser-review/report.json"
+    },
+    {
+      "name": "launcher-editor-review",
+      "startedAt": "2026-10-17T10:06:22.343Z",
+      "endedAt": "2026-10-17T10:06:33.274Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/header-actions/review/launcher-editor-review/report.json"
+    },
+    {
+      "name": "launchpad-links-review",
+      "startedAt": "2026-10-17T10:06:27.537Z",
+      "endedAt": "2026-10-17T10:06:35.404Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 7,
+      "report": "docs/evidence/m66/header-actions/review/launchpad-links-review/report.json"
+    },
+    {
+      "name": "launchpad-capacity-review",
+      "startedAt": "2026-10-17T10:06:29.528Z",
+      "endedAt": "2026-10-17T10:06:39.927Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 5,
+      "report": "docs/evidence/m66/header-actions/review/launchpad-capacity-review/report.json"
+    },
+    {
+      "name": "launchpad-resource-review",
+      "startedAt": "2026-10-17T10:06:33.274Z",
+      "endedAt": "2026-10-17T10:06:46.226Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/header-actions/review/launchpad-resource-review/report.json"
+    },
+    {
+      "name": "boundary-interaction-review",
+      "startedAt": "2026-10-17T10:06:39.928Z",
+      "endedAt": "2026-10-17T10:06:47.551Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 10,
+      "report": "docs/evidence/m66/header-actions/review/boundary-interaction-review/report.json"
+    },
+    {
+      "name": "structure-interaction-review",
+      "startedAt": "2026-10-17T10:06:46.227Z",
+      "endedAt": "2026-10-17T10:07:03.924Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/header-actions/review/structure-interaction-review/report.json"
+    },
+    {
+      "name": "home-widget-chart-review",
+      "startedAt": "2026-10-17T10:06:35.404Z",
+      "endedAt": "2026-10-17T10:07:05.516Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 18,
+      "report": "docs/evidence/m66/header-actions/review/home-widget-chart-review/report.json"
+    },
+    {
+      "name": "structure-resource-review",
+      "startedAt": "2026-10-17T10:06:47.551Z",
+      "endedAt": "2026-10-17T10:07:13.699Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/header-actions/review/structure-resource-review/report.json"
+    }
+  ],
+  "endedAt": "2026-10-17T10:07:13.700Z",
+  "result": "fail",
+  "groups": 183
+}

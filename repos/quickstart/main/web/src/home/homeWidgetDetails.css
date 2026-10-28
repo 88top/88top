@@ -1,0 +1,269 @@
+/* Native Card CSS is preserved. Explicit prototype-scoped adapters below
+ * normalize repeated visual roles without examining or changing business data. */
+.ordered-home .layout-widget .native-business-surface .content{color:var(--c-text)}
+.ordered-home .layout-widget .native-business-surface .content a{color:var(--c-accent)}
+.ordered-home .layout-widget .native-business-surface .content .tab>.item{
+ border:1px solid transparent;border-radius:8px;background:var(--home-option);
+ color:var(--c-text);transition:background-color var(--home-motion),border-color var(--home-motion);
+}
+.ordered-home .layout-widget .native-business-surface .content .tab>.item.active{
+ border-color:var(--home-option-border);background:var(--home-option-selected);
+}
+.ordered-home .layout-widget .native-business-surface .content .tab>.item:hover{background:var(--c-hover)}
+.ordered-home .layout-widget .native-business-surface .content .tab>.item:is(.cloud,.memory,.network)>.title{color:var(--c-text);font-weight:500}
+.ordered-home .layout-widget .native-business-surface .content .tab>.item:is(.cloud,.memory,.network)>span{color:var(--c-muted)}
+.ordered-home .layout-widget :is(button,a,[role=button],summary):focus-visible{outline:2px solid var(--home-focus)!important;outline-offset:3px}
+.ordered-home .layout-widget :is(.widget-action-group,.settings-wrapper) :is(button,.btn_settings){transition:background-color var(--home-motion),color var(--home-motion)}
+
+/* M66.53: service content uses the same rhythm, keeping every original field,
+ * tab, condition and handler. Long addresses wrap inside their existing cells. */
+.ordered-home .layout-widget :is(.native-sharing,.native-docker,.native-downloads,.native-remote) .content{
+ margin-top:16px;margin-bottom:0;
+}
+.ordered-home .layout-widget .native-business-surface .content .tab{gap:8px;margin-bottom:16px;align-items:stretch}
+.ordered-home .layout-widget .native-business-surface .content .tab>.item{
+ display:grid;grid-template-rows:24px minmax(1.4em,1fr) auto;justify-items:center;
+ gap:4px;padding:12px 8px;min-width:0;text-align:center;
+}
+.ordered-home .layout-widget .native-business-surface .content .tab>.item>.title{
+ margin:0;max-width:100%;line-height:1.4;overflow-wrap:anywhere;align-self:center;
+}
+.ordered-home .layout-widget .native-business-surface .content .tab>.item>svg{width:24px;height:24px;margin:0}
+.ordered-home .layout-widget .native-business-surface .content .tab>.item>span{line-height:1.4}
+.ordered-home .layout-widget :is(.native-sharing,.native-docker,.native-downloads) .content li[class$="-item"]{margin:12px 0}
+.ordered-home .layout-widget :is(.native-sharing,.native-docker,.native-downloads) .content :is([class*="-item_name"],[class*="-item_value"]){
+ min-width:0;white-space:normal;overflow:visible;overflow-wrap:anywhere;
+}
+.ordered-home .layout-widget .native-sharing .content .tit{font-size:var(--home-body-size);font-weight:500;color:var(--c-muted)}
+/* M66.71: a single label/value axis; original status branches and link targets
+ * are untouched. SAMBA is a two-column list, not a pair of unrelated fields. */
+.ordered-home .layout-widget .native-sharing .content li:is(.linkease-item,.webdav-item,.sambas-item,.samba-item){
+ display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:8px 16px;
+ align-items:baseline;margin:0;padding:8px 0;
+}
+.ordered-home .layout-widget .native-sharing .content :is([class*="-item_name"],[class*="-item_value"]){
+ width:auto;max-width:none;padding:0;line-height:1.5;
+}
+.ordered-home .layout-widget .native-sharing .content [class*="-item_name"]{color:var(--c-muted)}
+.ordered-home .layout-widget .native-sharing .content [class*="-item_value"]{color:var(--c-text)}
+.ordered-home .layout-widget .native-sharing .content :is(.linkease-item,.webdav-item):first-child,
+.ordered-home .layout-widget .native-sharing .content>.webdav-item:first-of-type,
+.ordered-home .layout-widget .native-sharing .sambas-item:first-child{
+ padding-top:0;padding-bottom:12px;margin-bottom:4px;border-bottom:1px solid var(--c-line);
+}
+.ordered-home .layout-widget .native-sharing .content :is(.sambas-item:has(.tit),.samba-item){
+ grid-template-columns:repeat(2,minmax(0,1fr));padding:12px 8px;
+}
+.ordered-home .layout-widget .native-sharing .sambas-item:has(.tit)>div{max-width:none}
+.ordered-home .layout-widget .native-sharing .sambas-item:has(.tit){background:var(--home-surface-inset);border-radius:6px}
+.ordered-home .layout-widget .native-sharing .sambas-item:has(.tit)>.tit{color:var(--c-muted)}
+.ordered-home .layout-widget .native-sharing .samba-item{border-bottom:1px solid var(--c-line)}
+.ordered-home .layout-widget .native-sharing .samba-item:last-child{border-bottom:0}
+.ordered-home .layout-widget .native-sharing .samba-item_name{color:var(--c-text)!important;font-variant-numeric:tabular-nums}
+.ordered-home .layout-widget .native-sharing .content .configure{padding:0}
+.ordered-home .layout-widget .native-sharing .content .configure.enabel{color:var(--c-accent);text-decoration:underline;text-underline-offset:3px}
+.ordered-home .layout-widget .native-sharing .app-container_linkease>div{
+ border-top:1px solid var(--c-line);margin-top:12px;padding-top:12px;line-height:1.5;
+}
+.ordered-home .layout-widget .native-system .content{padding:0;margin:16px 0 0}
+.ordered-home .layout-widget .native-system .content .chart_box{padding-bottom:16px;margin-bottom:16px;border-color:var(--c-line)}
+.ordered-home .layout-widget .native-system .content .chart_box>.chart>div:last-child{color:var(--c-muted);line-height:1.5}
+/* Gauge color/thresholds still belong to the original business component.
+ * A neutral center label is readable in both themes without recoloring rings. */
+.ordered-home .layout-widget .native-system .center-label{
+ color:var(--c-text)!important;font-variant-numeric:tabular-nums;font-size:22px;line-height:1.2;font-weight:500;
+}
+.ordered-home .layout-widget .native-system .center-icon{margin-bottom:8px}
+.ordered-home .layout-widget .native-business-surface .content .tab>.item.cloud{--home-service-icon:var(--home-icon-blue)}
+.ordered-home .layout-widget .native-business-surface .content .tab>.item.memory{--home-service-icon:var(--home-icon-teal)}
+.ordered-home .layout-widget .native-business-surface .content .tab>.item.network{--home-service-icon:var(--home-icon-violet)}
+.ordered-home .layout-widget .native-downloads .content .tab>.item.cloud{--home-service-icon:var(--home-icon-orange)}
+.ordered-home .layout-widget .native-business-surface .content .tab>.item>svg{color:var(--home-service-icon)}
+.ordered-home .layout-widget .native-business-surface .content .tab>.item>svg [fill]:not([fill=none]){fill:currentColor}
+.ordered-home .layout-widget .native-business-surface .content .tab>.item>svg [stroke]:not([stroke=none]){stroke:currentColor}
+.ordered-home .layout-widget .native-remote .info .path .item_btn{color:var(--c-accent);border-color:var(--home-field-border)}
+
+/* Preserve the native curve and its geometry. */
+.ordered-home .layout-widget.widget-traffic .speed_item>span{color:var(--c-muted)!important}
+.ordered-home .layout-widget.widget-traffic .speed_item>div{font-weight:500;font-variant-numeric:tabular-nums}
+.ordered-home .layout-widget.widget-traffic .speed_item:first-child>div{color:var(--home-flow-down)!important}
+.ordered-home .layout-widget.widget-traffic .speed_item:last-child>div{color:var(--home-flow-up)!important}
+.ordered-home .layout-widget.widget-traffic .network_tag .tag_dn{background:var(--home-flow-down)!important}
+.ordered-home .layout-widget.widget-traffic .network_tag .tag_up{background:var(--home-flow-up)!important}
+/* M66.73: interface uptime is supporting information, not an Internet health
+ * badge. Only the presentation changes; privacy leases and state stay native. */
+.ordered-home .layout-widget .connection-business:not(.summary) .connection-uptime-badge.normal{color:var(--c-muted);background:var(--c-soft)}
+.ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses{flex:none;justify-content:flex-start;gap:12px}
+.ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses dt{color:var(--c-muted)}
+.ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses dd{color:var(--c-text);margin-top:6px}
+.ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses dd>span{
+ white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;line-height:1.5;
+}
+.ordered-home .layout-widget .connection-business:not(.summary) .connection-ip-tag{background:var(--home-surface-inset);color:var(--c-muted);border-color:var(--c-line)}
+.ordered-home .layout-widget .connection-addresses [data-address-value]{font-variant-numeric:tabular-nums}
+.ordered-home .layout-widget .interface-link-mark{background:var(--c-soft)}
+.ordered-home .layout-widget .compact-ports .interface-list>button{background:var(--home-surface-inset);border-color:var(--c-line)}
+.ordered-home .layout-widget .interface-name strong{font-weight:500}
+.ordered-home .layout-widget .interface-link-state{font-variant-numeric:tabular-nums}
+
+/* M66.55: list rhythm and icon surfaces, without changing tile pitch, capacity,
+ * icon identity, disk thresholds or the original progress-fill width/color. */
+.ordered-home .layout-widget .canvas-devices>button{background:transparent;border-color:var(--c-line)}
+.ordered-home .layout-widget .canvas-devices>button:hover{background:var(--c-soft);border-color:var(--home-option-border)}
+.ordered-home .layout-widget .canvas-devices .device-scene-icon{background:var(--home-surface-inset);border-color:var(--c-line)}
+.ordered-home .layout-widget .canvas-devices strong{font-weight:500}
+.ordered-home .layout-widget .canvas-devices small{color:var(--c-muted)}
+.ordered-home .layout-widget .home-applications .application-icon{background:var(--home-icon-blue-bg);color:var(--home-icon-blue)}
+.ordered-home .layout-widget .home-applications .application-icon.teal{background:var(--home-icon-teal-bg);color:var(--home-icon-teal)}
+.ordered-home .layout-widget .home-applications .application-icon.violet{background:var(--home-icon-violet-bg);color:var(--home-icon-violet)}
+.ordered-home .layout-widget .home-applications .applications-favorites strong{font-weight:500}
+.ordered-home .layout-widget .home-applications .applications-favorites>button{transition:background-color var(--home-motion),color var(--home-motion)}
+.ordered-home .layout-widget .native-storage .content>.item{
+ display:grid;grid-template-columns:24px minmax(0,1fr);gap:12px;padding:12px 0;margin-top:0;
+}
+/* The original root group has an inline zero bottom padding. */
+.ordered-home .layout-widget .native-storage .content>.item:first-of-type{padding-bottom:12px!important}
+.ordered-home .layout-widget .native-storage .content>.line{background:var(--c-line)}
+.ordered-home .layout-widget .native-storage .content .item>.info{min-width:0}
+.ordered-home .layout-widget .native-storage .content .item>.info>.name{margin:0;min-height:24px}
+.ordered-home .layout-widget .native-storage .content .item>.info>.schedule{margin-top:12px}
+.ordered-home .layout-widget .native-storage .content .disk-item{margin:0 0 16px}
+.ordered-home .layout-widget .native-storage .content .disk-item:last-child{margin-bottom:0}
+.ordered-home .layout-widget .native-storage .content .disk-item_name{
+ max-width:100%;min-width:0;padding:0 0 8px;white-space:normal;overflow:visible;overflow-wrap:anywhere;
+}
+.ordered-home .layout-widget .native-storage .content .disk-item_name>span{color:var(--c-muted);line-height:1.5}
+.ordered-home .layout-widget .native-storage .content :is(.disk_value,.disk-item_value){min-width:0}
+.ordered-home .layout-widget .native-storage .content .disk-item .disk_value .disk-item_value .value-data{white-space:normal}
+.ordered-home .layout-widget .native-storage .content .disk-item .disk_value{
+ display:grid;grid-template-columns:minmax(0,1fr) 80px;gap:12px;align-items:center;
+}
+.ordered-home .layout-widget .native-storage .content .disk-item .disk-item_value>.value-data{display:grid;gap:8px}
+.ordered-home .layout-widget .native-storage .content .disk-item .value-data>div{margin:0;flex-wrap:wrap;gap:6px;font-variant-numeric:tabular-nums}
+.ordered-home .layout-widget .native-storage .content .disk-item .disk_icon{padding:0;gap:8px;justify-content:flex-end;min-width:0}
+.ordered-home .layout-widget .native-storage .content .disk_icon>:is(.disk_infoicon,.tooltip-trigger){
+ display:inline-flex;align-items:center;justify-content:center;width:20px;min-height:24px;margin:0;flex:none;
+}
+.ordered-home .layout-widget .native-storage .disk_infoicon>svg{color:var(--c-muted)}
+.ordered-home .layout-widget .native-storage .disk_infoicon>svg [stroke]:not([stroke=none]){stroke:currentColor}
+.ordered-home .layout-widget .native-storage .content .disk-item.load .value-data>button{width:auto;text-align:left;line-height:1.5}
+.ordered-home .layout-widget .native-storage .progress-bar{height:6px!important;border-radius:99px!important;background-color:var(--c-line)!important;box-shadow:none}
+.ordered-home .layout-widget .native-storage .progress-fill{border-radius:99px!important}
+.ordered-home .layout-widget .native-storage .content .item .info .name>div{font-weight:500}
+.ordered-home .layout-widget .native-storage .content .icon_box{background:var(--home-icon-blue-bg)}
+.ordered-home .layout-widget .native-storage .disk-item_name,.ordered-home .layout-widget .native-storage .value-data{font-variant-numeric:tabular-nums}
+/* Neutral native title/action icons stay legible in both themes. Preserve
+ * paths with fill=none and stroke=none, and leave the original curve untouched. */
+.ordered-home .layout-widget .card-header :is(.left,.settings-wrapper) svg{color:var(--c-muted)}
+.ordered-home .layout-widget .card-header :is(.left,.settings-wrapper) svg [fill]:not([fill=none]){fill:currentColor}
+.ordered-home .layout-widget .card-header :is(.left,.settings-wrapper) svg [stroke]:not([stroke=none]){stroke:currentColor}
+
+/* M66.56 matrix coverage: inactive labels remain readable; a hidden native
+ * tooltip must not widen a phone page or be clipped by a card. */
+.ordered-home .layout-widget .native-business-surface:is(.native-downloads,.native-docker) .content span.configure.enabel{color:var(--c-muted)}
+.ordered-home .layout-widget .native-business-surface.native-storage .disk-item.load .disk_value .disk-item_value .value-data>button{color:var(--c-accent)}
+.ordered-home .layout-widget :is(.native-storage,.native-docker) .tooltip-trigger .tooltip-text.tooltip-top{
+ left:auto;right:0;transform:none;box-sizing:border-box;width:max-content;
+ max-width:min(var(--home-warning-width,260px),calc(100vw - 48px));
+}
+/* A disk warning can precede two more actions; keep its right-anchored bubble
+ * inside even the narrowest supported card without moving the original anchor. */
+.ordered-home .layout-widget .native-storage{--home-warning-width:200px}
+.ordered-home .layout-widget :is(.native-storage,.native-docker) .tooltip-trigger .tooltip-text :is(.disk_dir_tip,.docker_dir_tip){min-width:0;max-width:100%;overflow-wrap:anywhere}
+.ordered-home .layout-widget :is(.native-storage,.native-docker) .tooltip-trigger .tooltip-top::after{left:auto;right:8px;margin-left:0}
+
+/* M66.74: touch targets gain space without shrinking type or changing layout
+ * preferences. Disk actions move below the data on coarse pointers. */
+@media(pointer:coarse){
+ .ordered-home .layout-widget :is(.native-sharing,.native-downloads,.native-remote) .content a{
+  display:inline-flex;align-items:center;min-height:44px;min-width:44px;max-width:100%;overflow-wrap:anywhere;
+ }
+ .ordered-home .layout-widget .native-sharing .configure.enabel{
+  display:inline-flex;align-items:center;min-height:44px;min-width:44px;
+ }
+ .ordered-home .layout-widget .native-docker .input-switch{display:inline-flex;align-items:center;min-height:44px}
+ .ordered-home .layout-widget .connection-addresses [data-reveal]{min-height:44px;min-width:44px;padding:6px}
+ .ordered-home .layout-widget .native-storage .content .disk-item .disk_value{grid-template-columns:minmax(0,1fr)}
+ .ordered-home .layout-widget .native-storage .content .disk_icon>:is(.disk_infoicon,.tooltip-trigger){width:44px;min-height:44px}
+ .ordered-home .layout-widget .native-storage .content .disk-item.load .value-data>button{min-height:44px}
+}
+
+/* Keep the existing gauge composition. SystemInfo owns the facts below. */
+.ordered-home .layout-widget .native-system .system-composition{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:center}
+.ordered-home .layout-widget .native-system .system-composition .chart_box{display:flex;justify-content:center;gap:12px;margin:0;padding:0;border:0}
+.ordered-home .layout-widget .native-system .system-composition .chart_box>.chart{flex:0 0 150px!important}
+@container(min-width:840px){
+ .ordered-home .layout-widget .native-system .system-composition{grid-template-columns:minmax(480px,1.35fr) minmax(0,1fr);gap:24px}
+ .ordered-home .layout-widget .native-system .system-composition .system-facts{border-left:1px solid var(--c-line);padding-left:24px}
+}
+
+/* M66.78: compact service selection and one coherent active-service body. */
+.ordered-home .layout-widget .native-business-surface .content .tab{gap:8px;margin-bottom:20px}
+.ordered-home .layout-widget .native-business-surface .content .tab>button.item{
+ appearance:none;font:inherit;color:inherit;cursor:pointer;min-height:56px;
+ display:grid;grid-template-columns:20px minmax(0,1fr);grid-template-rows:minmax(1.4em,1fr) auto;
+ gap:2px 8px;justify-items:start;text-align:left;padding:8px;border-radius:6px;
+}
+.ordered-home .layout-widget .native-business-surface .content .tab>button.item>svg{grid-row:1/3;grid-column:1;width:20px;height:20px;align-self:center}
+.ordered-home .layout-widget .native-business-surface .content .tab>button.item>.title{grid-column:2;grid-row:1;text-align:left}
+.ordered-home .layout-widget .native-business-surface .content .tab>button.item>span{grid-column:2;grid-row:2}
+.ordered-home .layout-widget .native-business-surface .content .tab>button.item:focus-visible{outline:2px solid var(--c-accent);outline-offset:2px}
+.ordered-home .layout-widget .native-sharing .content li:is(.linkease-item,.webdav-item){grid-template-columns:minmax(0,1fr);gap:6px;padding:12px 0}
+.ordered-home .layout-widget .native-sharing .content li:is(.linkease-item,.webdav-item):first-child,
+.ordered-home .layout-widget .native-sharing .content>.webdav-item:first-of-type{grid-template-columns:minmax(0,1fr) auto;padding-top:0;padding-bottom:12px;margin-bottom:4px}
+.ordered-home .layout-widget .native-sharing .content li:is(.linkease-item,.webdav-item):not(:first-child)>[class*="-item_value"]{line-height:1.65}
+.ordered-home .layout-widget .native-sharing .app-container_linkease>div{margin-top:8px}
+.ordered-home .layout-widget .native-sharing .samba-item>[data-label]::before{display:none;content:attr(data-label);color:var(--c-muted);font-size:var(--home-caption-size);line-height:1.5;margin-bottom:4px}
+.ordered-home .layout-widget .native-sharing .content .app-container_samba>.sambas-item:first-child{grid-template-columns:minmax(0,1fr) auto}
+@container(max-width:440px){
+ .ordered-home .layout-widget .native-business-surface .content .tab>button.item{grid-template-columns:minmax(0,1fr);grid-template-rows:18px minmax(1.4em,1fr) auto;gap:2px;justify-items:center;text-align:center;padding:8px 4px!important}
+ .ordered-home .layout-widget .native-business-surface .content .tab>button.item>svg{grid-column:1;grid-row:1;width:18px;height:18px}
+ .ordered-home .layout-widget .native-business-surface .content .tab>button.item>.title{grid-column:1;grid-row:2;text-align:center}
+ .ordered-home .layout-widget .native-business-surface .content .tab>button.item>span{grid-column:1;grid-row:3}
+ .ordered-home .layout-widget .native-sharing .content .sambas-item:has(.tit){display:none}
+ .ordered-home .layout-widget .native-sharing .content .app-container_samba .samba-item{grid-template-columns:minmax(0,1fr);gap:10px;padding:12px 0}
+ .ordered-home .layout-widget .native-sharing .samba-item>[data-label]::before{display:block}
+}
+
+
+/* Compact complete connection rows. Preserve the shared type scale and let
+ * long addresses / errors grow naturally rather than clipping or scrolling. */
+.ordered-home .layout-widget .connection-business:not(.summary) .connection-status{padding-bottom:8px;margin-bottom:0}
+.ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses{gap:0;margin-top:0}
+.ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses>div{display:grid;grid-template-columns:92px minmax(0,1fr);align-items:center;gap:8px;min-height:40px;padding:7px 0;box-sizing:border-box}
+.ordered-home .layout-widget .connection-business .connection-address-group{border-bottom:1px solid var(--c-line)}
+.ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses dt{display:block;min-width:0;overflow-wrap:anywhere}
+.ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses dd{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:6px;margin:0;padding:0;min-width:0}
+.ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses .connection-address-meta{font-size:var(--home-caption-size);line-height:1.4;color:var(--c-muted);justify-self:end;max-width:110px;overflow-wrap:anywhere;grid-column:3}
+.ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses .connection-reveal{display:grid;place-items:center;min-width:24px;min-height:24px;margin:0;padding:2px;color:var(--c-muted);border:0;border-radius:4px;grid-column:2}
+.ordered-home .layout-widget .connection-business .connection-reveal>svg{width:16px;height:16px}
+.ordered-home .layout-widget .connection-business .connection-reveal:hover{background:var(--c-soft);color:var(--c-accent)}
+@container(max-width:340px){
+ .ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses>div{grid-template-columns:76px minmax(0,1fr);gap:6px}
+ .ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses dd{column-gap:4px}
+ .ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses .connection-address-meta{max-width:82px}
+}
+@media(pointer:coarse){
+ .ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses .connection-reveal{min-width:44px;min-height:44px;padding:6px}
+}
+/* M66.80: complete disk records; display:contents only lets existing actions
+ * share the title. Data remains owned by its original business component. */
+.ordered-home .layout-widget .native-storage .content>.item{grid-template-columns:24px minmax(0,1fr);gap:8px 10px}
+.ordered-home .layout-widget .native-storage .content>.item>.info{display:contents}
+.ordered-home .layout-widget .native-storage .content>.item>.icon_box{grid-column:1;grid-row:1;align-self:center}
+.ordered-home .layout-widget .native-storage .content>.item>.info>.name{grid-column:2;grid-row:1;align-self:center;min-height:24px}
+.ordered-home .layout-widget .native-storage .content>.item>.info>.schedule{grid-column:1/-1;margin-top:4px}
+.ordered-home .layout-widget .native-storage .content .disk-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;margin-bottom:16px}
+.ordered-home .layout-widget .native-storage .content .disk-item>.disk-item_name{grid-column:1;grid-row:1;padding:0;align-self:center}
+.ordered-home .layout-widget .native-storage .content .disk-item .disk_value{display:contents}
+.ordered-home .layout-widget .native-storage .content .disk-item .disk-item_value{grid-column:1/-1;grid-row:2;min-width:0}
+.ordered-home .layout-widget .native-storage .content .disk-item .disk_icon{grid-column:2;grid-row:1;align-self:center}
+.ordered-home .layout-widget .native-storage .content .disk-item .disk-item_value>.value-data{gap:8px}
+.ordered-home .layout-widget .native-storage .content .disk-item.error>.disk-item_value{grid-column:1/-1;grid-row:2}
+.ordered-home .layout-widget .native-storage .content .disk-item.load .disk-item_value{grid-column:1/-1}
+@media(pointer:coarse){
+ .ordered-home .layout-widget .native-storage .content .disk-item:has(.disk_icon>:nth-child(2)){grid-template-columns:minmax(0,1fr)}
+ .ordered-home .layout-widget .native-storage .content .disk-item:has(.disk_icon>:nth-child(2)) .disk_icon{grid-column:1;grid-row:3;justify-content:flex-start}
+ .ordered-home .layout-widget .native-storage .content .disk-item:has(.disk_icon>:nth-child(2)) .disk_icon .tooltip-text.tooltip-top{left:0;right:auto}
+ .ordered-home .layout-widget .native-storage .content .disk-item:has(.disk_icon>:nth-child(2)) .disk_icon .tooltip-top::after{left:8px;right:auto}
+}

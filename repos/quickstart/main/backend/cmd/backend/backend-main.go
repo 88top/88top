@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"time"
 
 	"github.com/istoreos/quickstart/backend/dhns"
 	"github.com/istoreos/quickstart/backend/models"
@@ -42,7 +43,14 @@ func startMain(laddr, unixAddr string) error {
 	if unixAddr != "" {
 		go func() {
 			if _, err := os.Stat(path.Dir(unixAddr)); err != nil && os.IsNotExist(err) {
-				os.Mkdir(path.Dir(unixAddr), 0777)
+				if err := os.MkdirAll(path.Dir(unixAddr), 0750); err != nil {
+					l.Warnln("create unix socket directory failed, err=", err)
+					return
+				}
+			}
+			if err := os.Chmod(path.Dir(unixAddr), 0750); err != nil {
+				l.Warnln("secure unix socket directory failed, err=", err)
+				return
 			}
 			os.Remove(unixAddr)
 			lis, err := net.Listen("unix", unixAddr)
@@ -51,8 +59,15 @@ func startMain(laddr, unixAddr string) error {
 				return
 			}
 			defer lis.Close()
+			if err := os.Chmod(unixAddr, 0600); err != nil {
+				l.Warnln("secure unix socket failed, err=", err)
+				return
+			}
 			s := http.Server{
-				Handler: unixRouter,
+				Handler:           unixRouter,
+				ReadHeaderTimeout: 5 * time.Second,
+				IdleTimeout:       30 * time.Second,
+				MaxHeaderBytes:    32 * 1024,
 			}
 			//s.SetKeepAlivesEnabled(false)
 			s.Serve(lis)
@@ -60,7 +75,11 @@ func startMain(laddr, unixAddr string) error {
 	}
 
 	s := http.Server{
-		Handler: httpRouter,
+		Handler:           httpRouter,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		IdleTimeout:       30 * time.Second,
+		MaxHeaderBytes:    32 * 1024,
 	}
 	s.SetKeepAlivesEnabled(false)
 	s.Serve(lis)

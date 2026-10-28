@@ -1,0 +1,148 @@
+[
+  {
+    "width": 1440,
+    "styles": {
+      "devices": {
+        "text": "查看全部",
+        "color": "rgb(66, 99, 158)",
+        "font": "14px / 14px Arial, \"Microsoft YaHei\", sans-serif",
+        "fontWeight": "400",
+        "lineHeight": "14px",
+        "gap": "6px",
+        "padding": "6px 12px",
+        "height": 28,
+        "width": 102,
+        "background": "rgba(0, 0, 0, 0)",
+        "icon": {
+          "width": "16px",
+          "height": "16px",
+          "color": "rgb(66, 99, 158)"
+        }
+      },
+      "applications": {
+        "text": "查看全部",
+        "color": "rgb(37, 50, 71)",
+        "font": "14px / 14px Arial, \"Microsoft YaHei\", sans-serif",
+        "fontWeight": "400",
+        "lineHeight": "14px",
+        "gap": "6px",
+        "padding": "6px 12px",
+        "height": 28,
+        "width": 102,
+        "background": "rgba(0, 0, 0, 0)",
+        "icon": {
+          "width": "16px",
+          "height": "16px",
+          "color": "rgb(37, 50, 71)"
+        }
+      },
+      "networkInterface": {
+        "text": "接口配置",
+        "color": "rgb(37, 50, 71)",
+        "font": "14px / 14px Arial, \"Microsoft YaHei\", sans-serif",
+        "fontWeight": "400",
+        "lineHeight": "14px",
+        "gap": "6px",
+        "padding": "6px 12px",
+        "height": 28,
+        "width": 102,
+        "background": "rgba(0, 0, 0, 0)",
+        "icon": {
+          "width": "16px",
+          "height": "16px",
+          "color": "rgb(37, 50, 71)"
+        }
+      },
+      "storage": {
+        "text": "文件管理",
+        "color": "rgb(37, 50, 71)",
+        "font": "14px / 14px Arial, \"Microsoft YaHei\", sans-serif",
+        "fontWeight": "400",
+        "lineHeight": "14px",
+        "gap": "6px",
+        "padding": "6px 12px",
+        "height": 28,
+        "width": 102,
+        "background": "rgba(0, 0, 0, 0)",
+        "icon": {
+          "width": "16px",
+          "height": "16px",
+          "color": "rgb(37, 50, 71)"
+        }
+      }
+    }
+  },
+  {
+    "width": 390,
+    "styles": {
+      "devices": {
+        "text": "查看全部",
+        "color": "rgb(66, 99, 158)",
+        "font": "13px / 13px Arial, \"Microsoft YaHei\", sans-serif",
+        "fontWeight": "400",
+        "lineHeight": "13px",
+        "gap": "6px",
+        "padding": "6px 12px",
+        "height": 28,
+        "width": 98,
+        "background": "rgba(0, 0, 0, 0)",
+        "icon": {
+          "width": "16px",
+          "height": "16px",
+          "color": "rgb(66, 99, 158)"
+        }
+      },
+      "applications": {
+        "text": "查看全部",
+        "color": "rgb(37, 50, 71)",
+        "font": "13px / 13px Arial, \"Microsoft YaHei\", sans-serif",
+        "fontWeight": "400",
+        "lineHeight": "13px",
+        "gap": "6px",
+        "padding": "6px 12px",
+        "height": 28,
+        "width": 98,
+        "background": "rgba(0, 0, 0, 0)",
+        "icon": {
+          "width": "16px",
+          "height": "16px",
+          "color": "rgb(37, 50, 71)"
+        }
+      },
+      "networkInterface": {
+        "text": "接口配置",
+        "color": "rgb(37, 50, 71)",
+        "font": "13px / 13px Arial, \"Microsoft YaHei\", sans-serif",
+        "fontWeight": "400",
+        "lineHeight": "13px",
+        "gap": "6px",
+        "padding": "6px 12px",
+        "height": 28,
+        "width": 98,
+        "background": "rgba(0, 0, 0, 0)",
+        "icon": {
+          "width": "16px",
+          "height": "16px",
+          "color": "rgb(37, 50, 71)"
+        }
+      },
+      "storage": {
+        "text": "文件管理",
+        "color": "rgb(37, 50, 71)",
+        "font": "13px / 13px Arial, \"Microsoft YaHei\", sans-serif",
+        "fontWeight": "400",
+        "lineHeight": "13px",
+        "gap": "6px",
+        "padding": "6px 12px",
+        "height": 28,
+        "width": 98,
+        "background": "rgba(0, 0, 0, 0)",
+        "icon": {
+          "width": "16px",
+          "height": "16px",
+          "color": "rgb(37, 50, 71)"
+        }
+      }
+    }
+  }
+]

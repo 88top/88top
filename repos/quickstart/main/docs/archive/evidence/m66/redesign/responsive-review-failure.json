@@ -1,0 +1,151 @@
+{
+  "checkedAt": "2026-10-14T06:55:06.661Z",
+  "viewports": [
+    {
+      "variant": "studio",
+      "viewport": "desktop",
+      "theme": "light",
+      "width": 1440,
+      "deviceRows": 6
+    },
+    {
+      "variant": "studio",
+      "viewport": "desktop",
+      "theme": "dark",
+      "width": 1440,
+      "deviceRows": 6
+    },
+    {
+      "variant": "network",
+      "viewport": "desktop",
+      "theme": "light",
+      "width": 1440,
+      "deviceRows": 6
+    },
+    {
+      "variant": "network",
+      "viewport": "desktop",
+      "theme": "dark",
+      "width": 1440,
+      "deviceRows": 6
+    },
+    {
+      "variant": "device",
+      "viewport": "desktop",
+      "theme": "light",
+      "width": 1440,
+      "deviceRows": 6
+    },
+    {
+      "variant": "device",
+      "viewport": "desktop",
+      "theme": "dark",
+      "width": 1440,
+      "deviceRows": 6
+    },
+    {
+      "variant": "studio",
+      "viewport": "tablet",
+      "theme": "light",
+      "width": 1024,
+      "deviceRows": 6
+    },
+    {
+      "variant": "studio",
+      "viewport": "tablet",
+      "theme": "dark",
+      "width": 1024,
+      "deviceRows": 6
+    },
+    {
+      "variant": "network",
+      "viewport": "tablet",
+      "theme": "light",
+      "width": 1024,
+      "deviceRows": 6
+    },
+    {
+      "variant": "network",
+      "viewport": "tablet",
+      "theme": "dark",
+      "width": 1024,
+      "deviceRows": 6
+    },
+    {
+      "variant": "device",
+      "viewport": "tablet",
+      "theme": "light",
+      "width": 1024,
+      "deviceRows": 6
+    },
+    {
+      "variant": "device",
+      "viewport": "tablet",
+      "theme": "dark",
+      "width": 1024,
+      "deviceRows": 6
+    },
+    {
+      "variant": "studio",
+      "viewport": "mobile",
+      "theme": "light",
+      "width": 390,
+      "deviceRows": 3
+    },
+    {
+      "variant": "studio",
+      "viewport": "mobile",
+      "theme": "dark",
+      "width": 390,
+      "deviceRows": 3
+    }
+  ],
+  "states": [],
+  "interactions": [],
+  "contrast": [
+    {
+      "theme": "light",
+      "kind": "ink",
+      "ratio": 15.8
+    },
+    {
+      "theme": "light",
+      "kind": "muted",
+      "ratio": 4.9
+    },
+    {
+      "theme": "light",
+      "kind": "accent",
+      "ratio": 5.47
+    },
+    {
+      "theme": "light",
+      "kind": "good",
+      "ratio": 4.63
+    },
+    {
+      "theme": "dark",
+      "kind": "ink",
+      "ratio": 14.39
+    },
+    {
+      "theme": "dark",
+      "kind": "muted",
+      "ratio": 7.2
+    },
+    {
+      "theme": "dark",
+      "kind": "accent",
+      "ratio": 6.75
+    },
+    {
+      "theme": "dark",
+      "kind": "good",
+      "ratio": 9.2
+    }
+  ],
+  "errors": [],
+  "outside": [],
+  "result": "fail",
+  "failure": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-studio-device]').first() to be visible\u001b[22m\n\u001b[2m    63 × locator resolved to hidden <a class=\"studio-device\" data-studio-device=\"mac:02:00:00:00:00:01\" href=\"/devicemanagement?variant=network&theme=light&tools=0&layout=studio&filter=all&device=mac:02:00:00:00:00:01\">…</a>\u001b[22m\n\n    at /config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/0153-device-lists-sho/quickstart/docs/product/ui-design/studio-review.cjs:22:56"
+}

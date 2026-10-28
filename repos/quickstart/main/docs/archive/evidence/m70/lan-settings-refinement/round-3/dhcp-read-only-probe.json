@@ -1,0 +1,21 @@
+{
+  "scope": "Read-only; no route or config changes",
+  "probes": {
+    "network.lan.proto": {
+      "exitCode": 0,
+      "value": "dhcp"
+    },
+    "network.lan.ipaddr": {
+      "exitCode": 1,
+      "value": ""
+    },
+    "network.lan.netmask": {
+      "exitCode": 1,
+      "value": ""
+    },
+    "runtimeAddress": {
+      "exitCode": 0,
+      "value": "13: br-lan: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000\n    inet 192.168.30.244/24 brd 192.168.30.255 scope global br-lan\n       valid_lft forever preferred_lft forever"
+    }
+  }
+}

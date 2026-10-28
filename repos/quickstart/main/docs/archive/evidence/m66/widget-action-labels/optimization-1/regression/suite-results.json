@@ -1,0 +1,36 @@
+{
+  "startedAt": "2026-10-18T00:38:35.866Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "header-action-interaction-review",
+      "startedAt": "2026-10-18T00:38:35.870Z",
+      "endedAt": "2026-10-18T00:38:42.334Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 6,
+      "report": "docs/evidence/m66/widget-action-labels/optimization-1/regression/header-action-interaction-review/report.json"
+    },
+    {
+      "name": "home-widget-header-review",
+      "startedAt": "2026-10-18T00:38:35.866Z",
+      "endedAt": "2026-10-18T00:38:47.720Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 14,
+      "report": "docs/evidence/m66/widget-action-labels/optimization-1/regression/home-widget-header-review/report.json"
+    },
+    {
+      "name": "home-widget-chart-review",
+      "startedAt": "2026-10-18T00:38:35.871Z",
+      "endedAt": "2026-10-18T00:39:05.936Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 18,
+      "report": "docs/evidence/m66/widget-action-labels/optimization-1/regression/home-widget-chart-review/report.json"
+    }
+  ],
+  "endedAt": "2026-10-18T00:39:05.937Z",
+  "result": "pass",
+  "groups": 38
+}

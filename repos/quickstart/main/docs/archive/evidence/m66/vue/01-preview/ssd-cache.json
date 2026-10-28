@@ -1,0 +1,23 @@
+{
+  "ssd_backing_device": "/dev/nvme0n1p4",
+  "free_gib": 98.8,
+  "minimum_free_gib": 15.0,
+  "environment": {
+    "npm_config_cache": "/var/cache/build-cache/users/911/npm",
+    "GOCACHE": "/var/cache/build-cache/users/911/go/build",
+    "GOMODCACHE": "/var/cache/build-cache/users/911/go/mod",
+    "GOTMPDIR": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/tmp/go",
+    "TMPDIR": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/tmp/common",
+    "CARGO_HOME": "/var/cache/build-cache/users/911/cargo/d925b2bc92e7",
+    "CARGO_TARGET_DIR": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/cargo-target",
+    "ZIG_GLOBAL_CACHE_DIR": "/var/cache/build-cache/users/911/zig/global",
+    "ZIG_LOCAL_CACHE_DIR": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/zig-cache",
+    "BUILD_CACHE_ZIG_OUT_DIR": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/zig-out",
+    "BUILD_CACHE_WORK_DIR": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work",
+    "BUILD_CACHE_ROOT": "/var/cache/build-cache",
+    "BUILD_CACHE_USER_DIR": "/var/cache/build-cache/users/911",
+    "BUILD_CACHE_PROJECT_ROOT": "/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/0153-device-lists-sho/quickstart",
+    "BUILD_CACHE_PROJECT_ID": "quickstart-df92025bd880",
+    "BUILD_CACHE_CARGO_CONFIG_HOME": "/config/.cargo"
+  }
+}

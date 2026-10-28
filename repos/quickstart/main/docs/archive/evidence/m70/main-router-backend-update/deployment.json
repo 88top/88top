@@ -1,0 +1,86 @@
+{
+  "host": "192.168.30.1",
+  "runtimeVersion": "0.16.6-test20261018",
+  "backendGitSha": "c9624a38ffe11b45f484b2858ddf16088ae7a6a7",
+  "binarySHA": "983a1c8b819e29a5ac7e053898afa66ccdc8653e535219482c92052b3a90ba11",
+  "backup": "/root/quickstart-backups/backend-c9624a3-20261022-r1",
+  "scope": "Backend binary + homepage backup retention; restart only Quickstart, preserve frontend/network/packages",
+  "result": "passed",
+  "oldVersion": "0.14.0 b60f6e53dd6af27c213a31d38a815943bf62d0e0 .20260926.080256",
+  "oldSHA": "ff301c5ad570bc662a5218a43a0da649fae3ebdbf10c5e00f1d3bbf45026f11a",
+  "oldPID": "11725",
+  "before": {
+    "protected": [
+      "b4d5787370690cdc7ec86419c098dd75d3f4370fe7035da0d34f8cc9e450af0d  /etc/config/network",
+      "1b0a3fca5ee7e2d729f72b2cef2b46cb1b92dc4c1f4e0afe25c95c33f40b73e4  /etc/config/dhcp",
+      "fcd000d2f55b3b9b5a9ca0950e5fb8e65796bdc549afcc8a89f57637ece6465f  /etc/config/firewall",
+      "ef08226efab11cde7a77b7f54075001bb7487ce1516923d15698f5bf50f83d47  /etc/config/quickstart",
+      "c24cfd0f706e7d34dfa245d47cbd826b1678cc8ee89c995ec482d6f0b4e00823  /etc/init.d/quickstart",
+      "7998ef9394e6a92d91068ef7b4f7113434826ce1a59675a3ac4295c9c3f38e9d  /usr/lib/opkg/status",
+      "d9740d496c2c8ef33a56e745163fbbc57acb10275094f38d94ed7b48cff4a2dc  /usr/lib/lua/luci/view/quickstart/main.htm",
+      "7fc00fe087daffc27b1c3379ae172192a36cc108dbbbffed9836e98b4fb9ad4d  /www/luci-static/quickstart/index.js",
+      "30de0fc21d91b675d36ec47ed406bcdefc968b1e0de98d0d60fbbd87f511f1b5  /www/luci-static/quickstart/style.css",
+      "2d10df1751d0d3e778744c01f8edf8db96082b8d0939cf65ef38ea05eea39867  /www/luci-static/quickstart/vendor.js",
+      "bd5ffbade61b84d680f1f7982b3db76fa4d5a8d9a756b115663f02870c1a3fcb  /www/luci-static/quickstart/i18n/en.json"
+    ],
+    "otherProcesses": [
+      "netifd",
+      "6305",
+      "dnsmasq",
+      "10656 10650",
+      "uhttpd",
+      "10942",
+      "odhcpd",
+      "10390",
+      "startdhns"
+    ],
+    "defaultRoute": "default via 192.168.9.1 dev eth0 proto static",
+    "lanAddresses": "18: br-lan    inet 192.168.30.1/24 brd 192.168.30.255 scope global br-lan\\       valid_lft forever preferred_lft forever",
+    "namespaces": ""
+  },
+  "newPID": "12631",
+  "runningSHA": "983a1c8b819e29a5ac7e053898afa66ccdc8653e535219482c92052b3a90ba11",
+  "newVersion": "0.16.6-test20261018 c9624a38ffe11b45f484b2858ddf16088ae7a6a7 .20261018.145918",
+  "localHealth": {
+    "success": -1001
+  },
+  "keepPaths": [
+    "/etc/quickstart/home-layout.json",
+    "/etc/quickstart/home-layout.json.bak",
+    "/etc/quickstart/home-layout.json.damaged",
+    "/etc/quickstart/home-layout.json.bak.damaged",
+    "/etc/quickstart/home-launcher.json",
+    "/etc/quickstart/home-launcher.json.bak",
+    "/etc/quickstart/home-launcher.json.damaged",
+    "/etc/quickstart/home-launcher.json.bak.damaged"
+  ],
+  "after": {
+    "protected": [
+      "b4d5787370690cdc7ec86419c098dd75d3f4370fe7035da0d34f8cc9e450af0d  /etc/config/network",
+      "1b0a3fca5ee7e2d729f72b2cef2b46cb1b92dc4c1f4e0afe25c95c33f40b73e4  /etc/config/dhcp",
+      "fcd000d2f55b3b9b5a9ca0950e5fb8e65796bdc549afcc8a89f57637ece6465f  /etc/config/firewall",
+      "ef08226efab11cde7a77b7f54075001bb7487ce1516923d15698f5bf50f83d47  /etc/config/quickstart",
+      "c24cfd0f706e7d34dfa245d47cbd826b1678cc8ee89c995ec482d6f0b4e00823  /etc/init.d/quickstart",
+      "7998ef9394e6a92d91068ef7b4f7113434826ce1a59675a3ac4295c9c3f38e9d  /usr/lib/opkg/status",
+      "d9740d496c2c8ef33a56e745163fbbc57acb10275094f38d94ed7b48cff4a2dc  /usr/lib/lua/luci/view/quickstart/main.htm",
+      "7fc00fe087daffc27b1c3379ae172192a36cc108dbbbffed9836e98b4fb9ad4d  /www/luci-static/quickstart/index.js",
+      "30de0fc21d91b675d36ec47ed406bcdefc968b1e0de98d0d60fbbd87f511f1b5  /www/luci-static/quickstart/style.css",
+      "2d10df1751d0d3e778744c01f8edf8db96082b8d0939cf65ef38ea05eea39867  /www/luci-static/quickstart/vendor.js",
+      "bd5ffbade61b84d680f1f7982b3db76fa4d5a8d9a756b115663f02870c1a3fcb  /www/luci-static/quickstart/i18n/en.json"
+    ],
+    "otherProcesses": [
+      "netifd",
+      "6305",
+      "dnsmasq",
+      "10656 10650",
+      "uhttpd",
+      "10942",
+      "odhcpd",
+      "10390",
+      "startdhns"
+    ],
+    "defaultRoute": "default via 192.168.9.1 dev eth0 proto static",
+    "lanAddresses": "18: br-lan    inet 192.168.30.1/24 brd 192.168.30.255 scope global br-lan\\       valid_lft forever preferred_lft forever",
+    "namespaces": ""
+  }
+}

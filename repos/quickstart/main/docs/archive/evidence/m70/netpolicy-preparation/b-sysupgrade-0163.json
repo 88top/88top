@@ -1,0 +1,9 @@
+{
+  "target": "192.168.30.244",
+  "result": "passed",
+  "exitCode": 0,
+  "output": "f8e6994d6888c962404b8e60a46124b19d100fda8d0df8d6a5ab47c546432cab  /root/quickstart-package-candidates/home-0163-c78f62c-r2/backup/system-after-0163.tar.gz\ne04bc7f767d2e40ab17940820f3bb49a17b8e6727ea3b91dc38264a4022a7c62  /etc/quickstart/home-layout.json\nf00a438d3d5bcac2622ff20707e0a0eb8acf7ea62f78f303a1c6b17fe88b5f62  /etc/quickstart/home-layout.json.bak\n63a1fd18173e3ae50feaab89959da6f0efd18032859eb7247619b639b412a32d  /etc/quickstart/home-launcher.json\n648b6161d63c240280a4c18c371e51c734cb03689f512a14393d290e65f6d69f  /etc/quickstart/home-launcher.json.bak\nkeep_paths=8 existing_home_entries=4 engine_disabled=1\n",
+  "diagnostic": "",
+  "archiveStoredOnDevice": "/root/quickstart-package-candidates/home-0163-c78f62c-r2/backup/system-after-0163.tar.gz",
+  "scope": "Actual current-version system backup and per-home-entry byte comparison. No restore or reboot was performed; private archive is not copied into the repository."
+}

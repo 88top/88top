@@ -4,8 +4,8 @@
             <div class="action-header">
                 {{ title || $gettext("提示") }}
             </div>
-            <div class="action-body" v-html="content">
-
+            <div class="action-body">
+                {{ content }}
             </div>
             <div class="action-footer">
                 <div class="clear" @click="onClear" v-if="clear">{{ clearTitle || $gettext("返回") }}</div>

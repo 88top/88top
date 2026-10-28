@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/istoreos/quickstart/backend/models"
+	"github.com/istoreos/quickstart/backend/utils"
 )
 
 type Store interface {
@@ -38,6 +40,11 @@ func (svc *Service) Set(ctx context.Context, req models.SystemModuleSettingsRequ
 	if req.DiableDisplay == nil {
 		return nil, errors.New("invalid params")
 	}
+	for _, module := range req.DiableDisplay {
+		if strings.ContainsAny(module, "\x00\r\n") {
+			return nil, errors.New("invalid params")
+		}
+	}
 
 	commands := buildSetCommands(req.DiableDisplay, svc.store.HasDisabledDisplaySection(ctx))
 	if len(commands) > 0 {
@@ -60,7 +67,7 @@ func buildSetCommands(disabledModules []string, hasSection bool) []string {
 	if len(disabledModules) > 0 {
 		commands = append(commands, "set quickstart.modules=disabledisplay")
 		for _, module := range disabledModules {
-			commands = append(commands, fmt.Sprintf("add_list quickstart.modules.module='%s'", module))
+			commands = append(commands, fmt.Sprintf("add_list quickstart.modules.module=%s", utils.UCIQuote(module)))
 		}
 	}
 

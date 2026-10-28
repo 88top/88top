@@ -1,0 +1,17 @@
+{
+  "startedAt": "2026-10-17T15:39:41.374715+00:00",
+  "pid": 19908,
+  "command": [
+    "rtk",
+    "proxy",
+    "/var/cache/build-cache/run.sh",
+    "--",
+    "env",
+    "NODE_PATH=/config/playwright-runner/node_modules",
+    "QS_DESIGN_EVIDENCE_ROOT=/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/0153-device-lists-sho/quickstart/docs/evidence/m66/widget-body/75-review/final",
+    "node",
+    "/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/0153-device-lists-sho/quickstart/docs/product/ui-design/widget-body-final-runner.cjs"
+  ],
+  "cwd": "/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/0153-device-lists-sho/quickstart",
+  "reason": "Fresh complete run after interactive executor exit 143; same source and assets"
+}

@@ -66,9 +66,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import {useHomeSnapshot} from "/@/home/widgetContext"
 import flowIcon from "/@/components/svg/flow.vue"
 import * as echarts from 'echarts/core';
+import 'echarts/theme/v5';
 import {
     TitleComponent,
     GridComponent,
@@ -194,7 +196,7 @@ let onWindowResize: (() => void) | null = null   // 为了卸载时能移除
 // 基础面积图
 const NewBasic = (event: HTMLElement) => {
     const dark = isDark()
-    MyChart = echarts.init(event, dark ? 'dark' : "light");
+    MyChart = echarts.init(event, dark ? 'dark' : "v5");
     MyChart.setOption({
         animation: false,
         backgroundColor: dark ? "#2c2c2c" : "#fff",
@@ -362,103 +364,41 @@ const resizeChart = () => {
     })
 }
 
-onMounted(() => {
-    setTimeout(async () => {
-        if (el.value) {
-            await getData()
-            const myChart = NewBasic(el.value)
-            const element = el.value
 
-            // 初次渲染按父盒子来一遍
-            resizeChart()
-
-            onWindowResize = () => {
-                resizeChart()
-            }
-            window.addEventListener("resize", onWindowResize)
-
-            // 新增：监听外层容器和图表本身，flex/2:1/开关F12都会触发
-            if ('ResizeObserver' in window) {
-                resizeObserver = new ResizeObserver(() => {
-                    resizeChart()
-                })
-                if (containerRef.value) {
-                    resizeObserver.observe(containerRef.value)
-                }
-                resizeObserver.observe(element)
-            }
-
-            const tick = async () => {
-                if (MyChart == null) {
-                    return
-                }
-                if (!document.hidden) {
-                    await getData()
-                    if (MyChart == null) {
-                        return
-                    }
-                    myChart.setOption({
-                        series: [
-                            {
-
-                                name: $gettext("下载"),
-                                data: download.value,
-                                type: 'line',
-                                areaStyle: {},
-                                smooth: true,
-
-                                // label: {
-                                //     show: true,
-                                //     formatter: '{c}Mbs'
-
-                                // }
-                            },
-                            {
-                                name: $gettext("上传"),
-                                data: upload.value,
-                                type: 'line',
-                                areaStyle: {},
-                                smooth: true,
-
-                                // label: {
-                                //     show: true,
-                                //     formatter: '{c}Mbs'
-                                // },
-                            },
-                            // {
-                            //     name: "总量",
-                            //     data: stack.value,
-                            //     type: 'line',
-                            //     // stack: 'Total',
-                            //     smooth: true,
-                            //     areaStyle: {},
-                            // }
-                        ],
-                    });
-                    // 数据刷完也同步一下尺寸，避免轴变了撑出去
-                    resizeChart()
-                }
-                setTimeout(tick, 5000)
-            }
-            setTimeout(tick, 5000)
-        }
-    }, 900)
+let live=false,timer:number|undefined
+const homeOwned=useHomeSnapshot('traffic', value=>{
+ const slots=Math.max(1,Math.min(60,value.slots||10))
+ const items=value.items.slice(-slots)
+ statistics.value=[...Array.from({length:Math.max(0,slots-items.length)},()=>({downloadSpeed:0,uploadSpeed:0,startTime:0,endTime:0})),...items]
+})
+function updateChart(){
+ if(!MyChart)return
+ MyChart.setOption({xAxis:{data:statistics.value?.map((_,i)=>i)||[]},series:[{name:$gettext("下载"),data:download.value},{name:$gettext("上传"),data:upload.value}]})
+ resizeChart()
+}
+watch(statistics,updateChart)
+async function tick(){if(!live)return;try{if(!document.hidden)await getData();if(live)updateChart()}finally{if(live)timer=window.setTimeout(tick,5000)}}
+onMounted(()=>{
+ live=true
+ const start=async()=>{
+  if(!homeOwned)await getData()
+  if(!live||!el.value)return
+  NewBasic(el.value);resizeChart()
+  onWindowResize=resizeChart;window.addEventListener("resize",onWindowResize)
+  resizeObserver=new ResizeObserver(resizeChart)
+  if(containerRef.value)resizeObserver.observe(containerRef.value)
+  resizeObserver.observe(el.value)
+  if(!homeOwned)timer=window.setTimeout(tick,5000)
+ }
+ timer=window.setTimeout(()=>void start(),homeOwned?0:900)
+})
+onUnmounted(()=>{
+ live=false;window.clearTimeout(timer)
+ MyChart?.dispose();MyChart=null
+ if(onWindowResize)window.removeEventListener("resize",onWindowResize)
+ resizeObserver?.disconnect()
 })
 
-onUnmounted(() => {
-    if (MyChart != null) {
-        MyChart.dispose()
-        MyChart = null
-    }
-    if (onWindowResize) {
-        window.removeEventListener("resize", onWindowResize)
-        onWindowResize = null
-    }
-    if (resizeObserver) {
-        resizeObserver.disconnect()
-        resizeObserver = null
-    }
-})
 </script>
 
 <style lang="scss" scoped>

@@ -1,0 +1,25 @@
+{
+  "result": "passed",
+  "checks": [
+    {
+      "path": "web/src/pages/device/index.vue",
+      "protected": "script",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/pages/device/deviceCenterList.vue",
+      "protected": "full source",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/pages/device/deviceGroupsPanel.vue",
+      "protected": "full source",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/pages/device/lanSettingsPanel.vue",
+      "protected": "full source",
+      "unchanged": true
+    }
+  ]
+}

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/istoreos/quickstart/backend/models"
 )
@@ -37,26 +38,101 @@ func (svc *LanGlobalConfigService) GetGlobalConfigs(ctx context.Context) (*model
 		dhcpState = &LanDhcpState{}
 	}
 
-	floatState, err := svc.FloatIPReader.ReadFloatIPStatus(ctx)
-	if err != nil {
-		return nil, err
-	}
+	floatState, floatErr := svc.FloatIPReader.ReadFloatIPStatus(ctx)
 
-	speedState, err := svc.SpeedLimitReader.ReadSpeedLimitStatus(ctx)
-	if err != nil {
-		return nil, err
+	speedState, speedErr := svc.SpeedLimitReader.ReadSpeedLimitStatus(ctx)
+	selectedProvider := effectiveRateLimitProvider(defaultRateLimitProviderPath)
+	if selectedProvider == nativePolicyProviderName {
+		installed, available, reason := nativeProviderCapability(ctx)
+		speedState.Installed = installed
+		speedState.Enabled = available
+		if !available {
+			speedErr = errors.New(reason)
+		}
+	} else if selectedProvider == "bandix" {
+		installed, available, reason := bandixProviderAvailability(ctx)
+		speedState.Installed = installed
+		speedState.Enabled = available
+		if !available {
+			speedErr = errors.New(reason)
+		}
 	}
 
 	plan := BuildAutoDhcpPlan(lanStatus, dhcpState)
+	speedModel := toSpeedLimitModel(speedState)
+	capabilities := buildDeviceManagementCapabilities(floatState, floatErr, speedState, speedErr)
+	clarifySpeedPreparation(capabilities.SpeedLimit, speedModel)
 
 	return &models.LANCtrlGlobalConfigResponse{
 		Result: &models.LANCtrlGlobalConfig{
+			Capabilities: capabilities,
 			DhcpTags:     buildGlobalDhcpTags(lanStatus, dhcpState),
 			DhcpGlobal:   buildDhcpGlobalConfig(lanStatus, plan),
 			FloatGateway: toFloatGatewayModel(floatState),
-			SpeedLimit:   toSpeedLimitModel(speedState),
+			SpeedLimit:   speedModel,
 		},
 	}, nil
+}
+
+// Preparation must describe the selected provider without offering to install
+// an already installed alternative. Choosing another provider remains the
+// existing explicit settings transaction; reading capability never switches it.
+func clarifySpeedPreparation(capability *models.DeviceManagementCapability, speed *models.LANCtrlSpeedLimitModule) {
+	if capability == nil || speed == nil || capability.State == "available" || speed.Provider == nativePolicyProviderName {
+		return
+	}
+	for _, provider := range speed.Providers {
+		if provider != nil && provider.ID == nativePolicyProviderName && provider.Installed {
+			capability.State = "error"
+			capability.Reason = "selected_provider_unavailable"
+			capability.Actions = []*models.CapabilityAction{{Kind: "retry"}}
+			return
+		}
+	}
+}
+
+func buildDeviceManagementCapabilities(floatState FloatIPStatus, floatErr error, speedState SpeedLimitStatus, speedErr error) *models.DeviceManagementCapabilities {
+	access := &models.DeviceManagementCapability{State: "available"}
+	speed := buildDeviceManagementCapability(speedState.Installed, speedState.Enabled, speedErr)
+	decorateCapabilityActions(speed, "quickstart-netpolicy")
+	floating := buildDeviceManagementCapability(floatState.Installed, floatState.Enabled, floatErr)
+	decorateCapabilityActions(floating, "app-meta-floatip")
+	traffic := &models.DeviceManagementCapability{State: "available"}
+	items := map[string]*models.Capability{
+		"internet_access": access, "device_speed_limit": speed, "floating_gateway": floating, "traffic_insights": traffic,
+	}
+	return &models.DeviceManagementCapabilities{Items: items, InternetAccess: access, FloatGateway: floating, SpeedLimit: speed, TrafficInsights: traffic}
+}
+
+func buildDeviceManagementCapability(installed, enabled bool, err error) *models.DeviceManagementCapability {
+	capability := &models.DeviceManagementCapability{}
+	switch {
+	case err != nil:
+		capability.State = "error"
+		capability.Reason = "status_unavailable"
+	case !installed:
+		capability.State = "not_installed"
+		capability.Reason = "dependency_not_installed"
+	case !enabled:
+		capability.State = "disabled"
+	default:
+		capability.State = "available"
+	}
+	return capability
+}
+
+func decorateCapabilityActions(capability *models.DeviceManagementCapability, installTarget string) {
+	if capability == nil {
+		return
+	}
+	switch capability.State {
+	case "not_installed":
+		capability.Actions = []*models.CapabilityAction{{Kind: "install", Target: installTarget, RequiresConfirmation: true}}
+	case "disabled":
+		capability.Actions = []*models.CapabilityAction{{Kind: "enable", RequiresConfirmation: true}}
+	case "error":
+		capability.Actions = []*models.CapabilityAction{{Kind: "retry"}}
+	}
 }
 
 func buildGlobalDhcpTags(lanStatus LanStatusSnapshot, state *LanDhcpState) []*models.LANCtrlDhcpTagInfo {

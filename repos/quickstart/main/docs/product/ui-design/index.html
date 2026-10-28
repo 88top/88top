@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quickstart · 首页设计预览</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<div class="reviewbar"><strong>设计预览 · 示例数据</strong><label>场景 <select id="scenario" aria-label="场景"><option value="normal">正常</option><option value="many">大量设备 · 128 台</option><option value="empty">没有发现设备</option><option value="loading">首次加载</option><option value="error">设备 API 失败</option><option value="stale">刷新失败 · 保留快照</option><option value="old">旧后端 · 版本不兼容</option><option value="no-speed">流量与限速服务未安装</option><option value="disabled">统计服务未启用</option><option value="speed-error">统计服务异常</option><option value="unsupported">固件不支持统计</option><option value="permission">登录已过期</option></select></label><label>地址分配 <select id="authority" aria-label="地址分配"><option value="external">外部分配 · 旁路由</option><option value="local">本机分配 · 旁路由</option><option value="unknown">分配方不明确</option></select></label><button id="theme" aria-label="切换明暗主题">深色</button></div>
+<header class="appbar"><a href="/" class="brand"><span class="brandmark">Q</span>Quickstart <small>iStoreOS</small></a><nav aria-label="主导航"><a href="/" data-home>首页</a><a href="/devicemanagement" data-all>局域网设备</a><button data-entry="网络设置">网络</button><button data-entry="存储与服务">存储与服务</button></nav><span class="routername">家里的 iStoreOS</span></header>
+<main id="app"></main>
+<div class="switcher" aria-label="设计方案切换"><button id="prev" aria-label="上一个设计">←</button><div><small>首页布局方案</small><strong id="variant-label"></strong></div><button id="next" aria-label="下一个设计">→</button></div>
+<dialog id="entry-dialog"><button id="entry-close" class="close" aria-label="关闭">×</button><h2 id="entry-title"></h2><p>此入口保留现有功能职责。设计原型只演示导航，不连接设备、不执行配置。</p><button id="entry-ok" class="primary">返回概览</button></dialog>
+<script src="app.js"></script>
+</body></html>

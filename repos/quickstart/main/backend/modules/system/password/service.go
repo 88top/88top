@@ -2,8 +2,9 @@ package password
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
-	"fmt"
+	"strings"
 
 	"github.com/istoreos/quickstart/backend/models"
 )
@@ -21,6 +22,16 @@ func NewService(store Store) *Service {
 }
 
 func (svc *Service) SetRootPassword(ctx context.Context, req models.NasSystemSetPasswordRequest) (*models.SDKNormalResponse, error) {
+	// Missing/null JSON fields decode to an empty string. Never turn a bad
+	// request into passwordless root access. The system password helper also
+	// accepts C strings / line-delimited input, so reject terminators before
+	// handing the value to ubus.
+	if req.Password == "" {
+		return nil, errors.New("密码不能为空")
+	}
+	if strings.ContainsAny(req.Password, "\x00\r\n") {
+		return nil, errors.New("密码包含不支持的控制字符")
+	}
 	changed, err := svc.store.CallSetPassword(ctx, BuildSetRootPasswordCommand(req.Password))
 	if err != nil {
 		return nil, errors.New("设置密码错误")
@@ -39,5 +50,9 @@ func (svc *Service) SetRootPassword(ctx context.Context, req models.NasSystemSet
 }
 
 func BuildSetRootPasswordCommand(password string) string {
-	return fmt.Sprintf("luci setPassword {\"username\":\"root\",\"password\":\"%s\"}", password)
+	data, _ := json.Marshal(struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}{Username: "root", Password: password})
+	return "luci setPassword " + string(data)
 }

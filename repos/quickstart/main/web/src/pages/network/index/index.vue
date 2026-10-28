@@ -266,5 +266,5 @@ const advTips = $gettext("没找到想要的配置？请使用%{link}", {link:'<
 </style>
 
 <style lang="scss" scoped>
-@media screen and(max-width: 992px) {}
+@media screen and (max-width: 992px) {}
 </style>

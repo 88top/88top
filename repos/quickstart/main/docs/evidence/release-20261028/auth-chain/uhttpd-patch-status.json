@@ -1,0 +1,8 @@
+{
+  "source": "https://raw.githubusercontent.com/openwrt/uhttpd/34a8a74d/ubus.c",
+  "sourceSHA256": "02d1f475e5d1fc5ad300f98d4871546a24e903e7c79decaa44807f9e413281b6",
+  "patchAppliesToExactUpstreamRevision": true,
+  "compiled": false,
+  "deployed": false,
+  "scope": "Remediation proposal for firmware-owned uhttpd-mod-ubus, not Quickstart. No firmware binary changed."
+}

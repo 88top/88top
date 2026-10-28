@@ -1,0 +1,27 @@
+{
+  "startedAt": "2026-10-18T00:17:36.348Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "structure-resource-review",
+      "startedAt": "2026-10-18T00:17:36.354Z",
+      "endedAt": "2026-10-18T00:18:02.894Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/widget-composition/81-review/optimization-1/continuation/structure-resource-review/report.json"
+    },
+    {
+      "name": "row-sort-review",
+      "startedAt": "2026-10-18T00:17:36.348Z",
+      "endedAt": "2026-10-18T00:18:19.511Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/widget-composition/81-review/optimization-1/continuation/row-sort-review/report.json"
+    }
+  ],
+  "endedAt": "2026-10-18T00:18:19.511Z",
+  "result": "pass",
+  "groups": 12
+}

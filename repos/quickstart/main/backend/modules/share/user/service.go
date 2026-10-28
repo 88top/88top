@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"regexp"
+	"strings"
 	"unicode"
 
 	"github.com/istoreos/quickstart/backend/models"
@@ -124,6 +125,9 @@ func (svc *Service) Delete(ctx context.Context, input DeleteInput) error {
 }
 
 func validateCreateInput(input CreateInput) error {
+	if strings.ContainsAny(input.Password, "\x00\r\n") {
+		return errors.New("invalid password")
+	}
 	if len(input.UserName) == 0 || len(input.Password) == 0 {
 		return errors.New("param missing")
 	}
@@ -146,6 +150,9 @@ func validateCreateInput(input CreateInput) error {
 }
 
 func validateUpdateInput(input UpdateInput) error {
+	if strings.ContainsAny(input.Password, "\x00\r\n") {
+		return errors.New("invalid password")
+	}
 	if len(input.UserName) == 0 || len(input.Password) == 0 {
 		return errors.New("param missing")
 	}

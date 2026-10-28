@@ -1,0 +1,20 @@
+const assert=require('node:assert/strict');
+module.exports=async function checkNavigation(page,report,out){
+ const home=new URL(page.url());home.search='';const endpoint=home.origin+'/cgi-bin/luci/admin/store/installed',target=home.origin+'/qs-launcher-target';
+ const apps=Array.from({length:80},(_,i)=>({name:'navigation-'+i,title:'Entry '+i,title_en:'Entry '+i,entry:'/qs-launcher-target'}));
+ await page.route(endpoint,route=>route.fulfill({contentType:'application/json',json:apps}));await page.route(target,route=>route.fulfill({contentType:'text/html',body:'<p>Read-only navigation destination</p>'}));
+ const open=()=>page.locator('[data-layout-card=applications] [data-all-apps]').click();
+ await page.reload({waitUntil:'networkidle'});const initial=await page.evaluate(()=>history.state.position);await open();await page.waitForURL(u=>u.searchParams.get('panel')==='applications');assert.equal(await page.evaluate(()=>history.state.position),initial+1);
+ await page.locator('[data-category=apps]').click();await page.waitForURL(u=>u.searchParams.get('tab')==='apps');await page.locator('.application-search input').fill('Entry');
+ await page.locator('[data-library-next]').click();await page.waitForURL(u=>u.searchParams.get('page')==='2');assert.equal(await page.evaluate(()=>history.state.position),initial+1,'Filtering must replace the current entry');assert.ok(!page.url().includes('Entry'));
+ const last=page.locator('[data-open-app=navigation-79]');await last.scrollIntoViewIfNeeded();await last.focus();const scroll=await page.locator('.applications-browser-body').evaluate(n=>n.scrollTop);await last.click();await page.waitForURL(target);
+ await page.goBack({waitUntil:'domcontentloaded'});await page.locator('[data-open-app=navigation-79]').waitFor();await page.waitForFunction(()=>document.activeElement?.getAttribute('data-open-app')==='navigation-79');
+ assert.equal(new URL(page.url()).searchParams.get('page'),'2');assert.equal(await page.locator('.application-search input').inputValue(),'Entry');assert.ok(Math.abs(await page.locator('.applications-browser-body').evaluate(n=>n.scrollTop)-scroll)<3);
+ await page.screenshot({path:require('node:path').join(out,'navigation-return.png')});await page.reload({waitUntil:'networkidle'});await page.locator('[data-open-app=navigation-79]').waitFor();assert.equal(await page.locator('.application-search input').inputValue(),'Entry');
+ await page.locator('.applications-close').click();await page.waitForURL(u=>!u.searchParams.has('panel'));assert.equal(await page.locator('[data-applications-browser]').count(),0);
+ await page.goForward({waitUntil:'domcontentloaded'});await page.locator('[data-applications-browser]').waitFor();assert.equal(await page.locator('.application-search input').inputValue(),'Entry');
+ await page.goto(home.href+'?panel=applications&tab=tools&page=999',{waitUntil:'networkidle'});await page.locator('[data-category=tools][aria-pressed=true]').waitFor();await page.locator('.applications-close').click();await page.waitForURL(u=>!u.searchParams.has('panel'));assert.equal(new URL(page.url()).pathname,home.pathname,'Closing a direct URL must stay on the homepage');
+ await open();await page.locator('[data-manage-favorites]').click();await page.locator('[data-remove-shortcut]').first().click();page.once('dialog',d=>d.dismiss());await page.goBack();await page.waitForTimeout(200);assert.equal(await page.locator('.launchpad-editor').count(),1,'Cancelled Back retains an editing draft');
+ page.once('dialog',d=>d.accept());await page.goBack();await page.locator('[data-applications-browser]').waitFor({state:'hidden'});assert.equal(await page.locator('body[lock-scroll]').count(),0);
+ await page.unroute(endpoint);await page.unroute(target);await page.goto(home.href,{waitUntil:'networkidle'});report.checks.push('Launcher URL/replace, 80-item pagination, private search/scroll/focus, full reload, app Back, Forward, direct close and editing Back guards pass');
+};

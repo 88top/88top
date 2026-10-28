@@ -1,0 +1,1232 @@
+{
+  "checkedAt": "2026-10-15T10:50:16.715Z",
+  "base": "http://192.168.9.19:5180",
+  "cases": [
+    {
+      "width": 320,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "external",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 32,
+        "right": 288,
+        "width": 256,
+        "text": "本机不负责此局域网地址分配；固定地址与上网路线请到分配地址的主路由设置。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "local",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 32,
+        "right": 288,
+        "width": 256,
+        "text": "本机负责此局域网地址分配，可在设备详情设置固定地址与上网路线。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "unknown",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 32,
+        "right": 288,
+        "width": 256,
+        "text": "地址分配方尚不明确；固定地址与上网路线暂为只读。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "lang": "en",
+      "authority": "external",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 32,
+        "right": 288,
+        "width": 256,
+        "text": "This router does not allocate LAN addresses. Set reservations and paths on the allocating router.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "lang": "en",
+      "authority": "local",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 32,
+        "right": 288,
+        "width": 256,
+        "text": "This router allocates LAN addresses. Configure reservations and internet paths in device details.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "lang": "en",
+      "authority": "unknown",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 32,
+        "right": 288,
+        "width": 256,
+        "text": "Address allocator unconfirmed. Reservations and paths are read-only.",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 320,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "external",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 32,
+        "right": 288,
+        "width": 256,
+        "text": "本机不负责此局域网地址分配；固定地址与上网路线请到分配地址的主路由设置。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 320,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "local",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 32,
+        "right": 288,
+        "width": 256,
+        "text": "本机负责此局域网地址分配，可在设备详情设置固定地址与上网路线。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 320,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "unknown",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 32,
+        "right": 288,
+        "width": 256,
+        "text": "地址分配方尚不明确；固定地址与上网路线暂为只读。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 320,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "external",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 32,
+        "right": 288,
+        "width": 256,
+        "text": "This router does not allocate LAN addresses. Set reservations and paths on the allocating router.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 320,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "local",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 32,
+        "right": 288,
+        "width": 256,
+        "text": "This router allocates LAN addresses. Configure reservations and internet paths in device details.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 320,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "unknown",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 32,
+        "right": 288,
+        "width": 256,
+        "text": "Address allocator unconfirmed. Reservations and paths are read-only.",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "external",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 88,
+        "right": 358,
+        "width": 270,
+        "text": "本机不负责此局域网地址分配；固定地址与上网路线请到分配地址的主路由设置。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "local",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 88,
+        "right": 358,
+        "width": 270,
+        "text": "本机负责此局域网地址分配，可在设备详情设置固定地址与上网路线。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "unknown",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 88,
+        "right": 358,
+        "width": 270,
+        "text": "地址分配方尚不明确；固定地址与上网路线暂为只读。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "lang": "en",
+      "authority": "external",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 88,
+        "right": 358,
+        "width": 270,
+        "text": "This router does not allocate LAN addresses. Set reservations and paths on the allocating router.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "lang": "en",
+      "authority": "local",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 88,
+        "right": 358,
+        "width": 270,
+        "text": "This router allocates LAN addresses. Configure reservations and internet paths in device details.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "lang": "en",
+      "authority": "unknown",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 88,
+        "right": 358,
+        "width": 270,
+        "text": "Address allocator unconfirmed. Reservations and paths are read-only.",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "external",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 88,
+        "right": 358,
+        "width": 270,
+        "text": "本机不负责此局域网地址分配；固定地址与上网路线请到分配地址的主路由设置。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "local",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 88,
+        "right": 358,
+        "width": 270,
+        "text": "本机负责此局域网地址分配，可在设备详情设置固定地址与上网路线。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "unknown",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 88,
+        "right": 358,
+        "width": 270,
+        "text": "地址分配方尚不明确；固定地址与上网路线暂为只读。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "external",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 88,
+        "right": 358,
+        "width": 270,
+        "text": "This router does not allocate LAN addresses. Set reservations and paths on the allocating router.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "local",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 88,
+        "right": 358,
+        "width": 270,
+        "text": "This router allocates LAN addresses. Configure reservations and internet paths in device details.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "unknown",
+      "contentLeft": 0,
+      "bounds": {
+        "x": 88,
+        "right": 358,
+        "width": 270,
+        "text": "Address allocator unconfirmed. Reservations and paths are read-only.",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 452,
+        "right": 722,
+        "width": 270,
+        "text": "本机不负责此局域网地址分配；固定地址与上网路线请到分配地址的主路由设置。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 452,
+        "right": 722,
+        "width": 270,
+        "text": "本机负责此局域网地址分配，可在设备详情设置固定地址与上网路线。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 452,
+        "right": 722,
+        "width": 270,
+        "text": "地址分配方尚不明确；固定地址与上网路线暂为只读。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "lang": "en",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 452,
+        "right": 722,
+        "width": 270,
+        "text": "This router does not allocate LAN addresses. Set reservations and paths on the allocating router.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "lang": "en",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 452,
+        "right": 722,
+        "width": 270,
+        "text": "This router allocates LAN addresses. Configure reservations and internet paths in device details.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "lang": "en",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 452,
+        "right": 722,
+        "width": 270,
+        "text": "Address allocator unconfirmed. Reservations and paths are read-only.",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 452,
+        "right": 722,
+        "width": 270,
+        "text": "本机不负责此局域网地址分配；固定地址与上网路线请到分配地址的主路由设置。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 452,
+        "right": 722,
+        "width": 270,
+        "text": "本机负责此局域网地址分配，可在设备详情设置固定地址与上网路线。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 452,
+        "right": 722,
+        "width": 270,
+        "text": "地址分配方尚不明确；固定地址与上网路线暂为只读。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 452,
+        "right": 722,
+        "width": 270,
+        "text": "This router does not allocate LAN addresses. Set reservations and paths on the allocating router.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 452,
+        "right": 722,
+        "width": 270,
+        "text": "This router allocates LAN addresses. Configure reservations and internet paths in device details.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 452,
+        "right": 722,
+        "width": 270,
+        "text": "Address allocator unconfirmed. Reservations and paths are read-only.",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1024,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 424.6875,
+        "right": 694.6875,
+        "width": 270,
+        "text": "本机不负责此局域网地址分配；固定地址与上网路线请到分配地址的主路由设置。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1024,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 424.6875,
+        "right": 694.6875,
+        "width": 270,
+        "text": "本机负责此局域网地址分配，可在设备详情设置固定地址与上网路线。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1024,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 424.6875,
+        "right": 694.6875,
+        "width": 270,
+        "text": "地址分配方尚不明确；固定地址与上网路线暂为只读。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1024,
+      "theme": "light",
+      "lang": "en",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 424.6875,
+        "right": 694.6875,
+        "width": 270,
+        "text": "This router does not allocate LAN addresses. Set reservations and paths on the allocating router.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1024,
+      "theme": "light",
+      "lang": "en",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 424.6875,
+        "right": 694.6875,
+        "width": 270,
+        "text": "This router allocates LAN addresses. Configure reservations and internet paths in device details.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1024,
+      "theme": "light",
+      "lang": "en",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 424.6875,
+        "right": 694.6875,
+        "width": 270,
+        "text": "Address allocator unconfirmed. Reservations and paths are read-only.",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1024,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 424.6875,
+        "right": 694.6875,
+        "width": 270,
+        "text": "本机不负责此局域网地址分配；固定地址与上网路线请到分配地址的主路由设置。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1024,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 424.6875,
+        "right": 694.6875,
+        "width": 270,
+        "text": "本机负责此局域网地址分配，可在设备详情设置固定地址与上网路线。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1024,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 424.6875,
+        "right": 694.6875,
+        "width": 270,
+        "text": "地址分配方尚不明确；固定地址与上网路线暂为只读。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1024,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 424.6875,
+        "right": 694.6875,
+        "width": 270,
+        "text": "This router does not allocate LAN addresses. Set reservations and paths on the allocating router.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1024,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 424.6875,
+        "right": 694.6875,
+        "width": 270,
+        "text": "This router allocates LAN addresses. Configure reservations and internet paths in device details.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1024,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 424.6875,
+        "right": 694.6875,
+        "width": 270,
+        "text": "Address allocator unconfirmed. Reservations and paths are read-only.",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 692.6875,
+        "right": 962.6875,
+        "width": 270,
+        "text": "本机不负责此局域网地址分配；固定地址与上网路线请到分配地址的主路由设置。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 692.6875,
+        "right": 962.6875,
+        "width": 270,
+        "text": "本机负责此局域网地址分配，可在设备详情设置固定地址与上网路线。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 692.6875,
+        "right": 962.6875,
+        "width": 270,
+        "text": "地址分配方尚不明确；固定地址与上网路线暂为只读。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "theme": "light",
+      "lang": "en",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 692.6875,
+        "right": 962.6875,
+        "width": 270,
+        "text": "This router does not allocate LAN addresses. Set reservations and paths on the allocating router.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "theme": "light",
+      "lang": "en",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 692.6875,
+        "right": 962.6875,
+        "width": 270,
+        "text": "This router allocates LAN addresses. Configure reservations and internet paths in device details.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "theme": "light",
+      "lang": "en",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 692.6875,
+        "right": 962.6875,
+        "width": 270,
+        "text": "Address allocator unconfirmed. Reservations and paths are read-only.",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 692.6875,
+        "right": 962.6875,
+        "width": 270,
+        "text": "本机不负责此局域网地址分配；固定地址与上网路线请到分配地址的主路由设置。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 692.6875,
+        "right": 962.6875,
+        "width": 270,
+        "text": "本机负责此局域网地址分配，可在设备详情设置固定地址与上网路线。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 692.6875,
+        "right": 962.6875,
+        "width": 270,
+        "text": "地址分配方尚不明确；固定地址与上网路线暂为只读。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 692.6875,
+        "right": 962.6875,
+        "width": 270,
+        "text": "This router does not allocate LAN addresses. Set reservations and paths on the allocating router.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 692.6875,
+        "right": 962.6875,
+        "width": 270,
+        "text": "This router allocates LAN addresses. Configure reservations and internet paths in device details.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 692.6875,
+        "right": 962.6875,
+        "width": 270,
+        "text": "Address allocator unconfirmed. Reservations and paths are read-only.",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1920,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 1002.296875,
+        "right": 1272.296875,
+        "width": 270,
+        "text": "本机不负责此局域网地址分配；固定地址与上网路线请到分配地址的主路由设置。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1920,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 1002.296875,
+        "right": 1272.296875,
+        "width": 270,
+        "text": "本机负责此局域网地址分配，可在设备详情设置固定地址与上网路线。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1920,
+      "theme": "light",
+      "lang": "zh-cn",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 1002.296875,
+        "right": 1272.296875,
+        "width": 270,
+        "text": "地址分配方尚不明确；固定地址与上网路线暂为只读。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1920,
+      "theme": "light",
+      "lang": "en",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 1002.296875,
+        "right": 1272.296875,
+        "width": 270,
+        "text": "This router does not allocate LAN addresses. Set reservations and paths on the allocating router.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1920,
+      "theme": "light",
+      "lang": "en",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 1002.296875,
+        "right": 1272.296875,
+        "width": 270,
+        "text": "This router allocates LAN addresses. Configure reservations and internet paths in device details.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1920,
+      "theme": "light",
+      "lang": "en",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 1002.296875,
+        "right": 1272.296875,
+        "width": 270,
+        "text": "Address allocator unconfirmed. Reservations and paths are read-only.",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1920,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 1002.296875,
+        "right": 1272.296875,
+        "width": 270,
+        "text": "本机不负责此局域网地址分配；固定地址与上网路线请到分配地址的主路由设置。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1920,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 1002.296875,
+        "right": 1272.296875,
+        "width": 270,
+        "text": "本机负责此局域网地址分配，可在设备详情设置固定地址与上网路线。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1920,
+      "theme": "dark",
+      "lang": "zh-cn",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 1002.296875,
+        "right": 1272.296875,
+        "width": 270,
+        "text": "地址分配方尚不明确；固定地址与上网路线暂为只读。",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1920,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "external",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 1002.296875,
+        "right": 1272.296875,
+        "width": 270,
+        "text": "This router does not allocate LAN addresses. Set reservations and paths on the allocating router.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1920,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "local",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 1002.296875,
+        "right": 1272.296875,
+        "width": 270,
+        "text": "This router allocates LAN addresses. Configure reservations and internet paths in device details.",
+        "sh": 83,
+        "ch": 83
+      },
+      "height": 340,
+      "pass": true
+    },
+    {
+      "width": 1920,
+      "theme": "dark",
+      "lang": "en",
+      "authority": "unknown",
+      "contentLeft": 200,
+      "bounds": {
+        "x": 1002.296875,
+        "right": 1272.296875,
+        "width": 270,
+        "text": "Address allocator unconfirmed. Reservations and paths are read-only.",
+        "sh": 64,
+        "ch": 64
+      },
+      "height": 340,
+      "pass": true
+    }
+  ],
+  "errors": [],
+  "result": "pass"
+}

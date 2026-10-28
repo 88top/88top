@@ -1,0 +1,5 @@
+const fs=require('node:fs'),crypto=require('node:crypto'),assert=require('node:assert/strict');
+const root=process.env.QS_DESIGN_EVIDENCE_ROOT||'docs/archive/evidence/m66/launchpad/68-review/protection';fs.mkdirSync(root,{recursive:true});
+const files=JSON.parse(fs.readFileSync('docs/archive/evidence/m66/launchpad/63-contract/sources.json'));const sha=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const protectedFiles=files.filter(f=>!f.allowed);for(const f of protectedFiles)assert.equal(sha(f.file),f.sha256,f.file);
+const report={checkedAt:new Date().toISOString(),result:'pass',protected:protectedFiles.length,allowed:files.filter(f=>f.allowed).map(f=>f.file),checks:['All frozen non-launcher web sources unchanged','Default five rows, system menu, chart, other widgets and native actions unchanged','Design server and build configuration unchanged'],physicalRouters:'not accessed'};fs.writeFileSync(root+'/report.json',JSON.stringify(report,null,2)+'\n');console.log('PASS '+protectedFiles.length+' protected files');

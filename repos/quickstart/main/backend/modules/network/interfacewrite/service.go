@@ -2,6 +2,9 @@ package interfacewrite
 
 import (
 	"context"
+	"errors"
+	"regexp"
+	"strings"
 
 	"github.com/istoreos/quickstart/backend/models"
 )
@@ -29,6 +32,21 @@ func (svc *Service) ApplyConfigSet(ctx context.Context, input Input) (*models.SD
 	snapshot, err := svc.store.ReadSnapshot(ctx)
 	if err != nil {
 		return nil, err
+	}
+	if len(input.Configs) == 0 {
+		return nil, errors.New("missing interface configuration")
+	}
+	seen := make(map[string]bool)
+	for _, cfg := range input.Configs {
+		if cfg == nil || !interfaceName.MatchString(cfg.Name) || seen[cfg.Name] || !interfaceName.MatchString(cfg.Proto) {
+			return nil, errors.New("invalid interface configuration")
+		}
+		seen[cfg.Name] = true
+		for _, device := range cfg.Devices {
+			if device == "" || strings.ContainsAny(device, "\x00\r\n") {
+				return nil, errors.New("invalid network device")
+			}
+		}
 	}
 
 	plan := CommandPlan{
@@ -65,3 +83,5 @@ func (svc *Service) ApplyConfigSet(ctx context.Context, input Input) (*models.SD
 	success := models.ResponseSuccess(int64(0))
 	return &models.SDKNormalResponse{Success: &success}, nil
 }
+
+var interfaceName = regexp.MustCompile(`^[a-zA-Z0-9_]+$`)

@@ -126,6 +126,8 @@
     </action-component>
 </template>
 <script setup lang="ts">
+import {useOwnedTimeout} from "/@/home/useOwnedTimeout"
+const ownedTimeout=useOwnedTimeout()
 import { ref } from "vue";
 import { useGettext,formatNumber } from '/@/plugins/i18n'
 const { $gettext,$ngettext } = useGettext()
@@ -240,7 +242,7 @@ const onSumbit = () => {
             if (new Date().getTime() > end) {
                 setStage("timeout")
             } else {
-                window.setTimeout(check, 2000);
+                ownedTimeout(check, 2000);
             }
         }
         const resolveFn = () => {
@@ -248,10 +250,10 @@ const onSumbit = () => {
                 return
             locationUrl.value = newLocaltion + location.pathname
             setStage("success")
-            window.setTimeout(() => {
+            ownedTimeout(() => {
                 countdown.value = 1
             }, 1000)
-            window.setTimeout(() => {
+            ownedTimeout(() => {
                 location.href = locationUrl.value
             }, 2000);
         }
@@ -266,7 +268,7 @@ const onSumbit = () => {
 
             img.src = target
         }
-        window.setTimeout(check, 5000)
+        ownedTimeout(check, 5000)
     }
 
     request.Guide.LanIp.POST(lan0)
@@ -289,7 +291,7 @@ const onSumbit = () => {
         })
 
     checkOnline()
-    window.setTimeout(()=>{
+    ownedTimeout(()=>{
         if (stage != 0)
             return
         setStage("timeout")

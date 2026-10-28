@@ -1,0 +1,9 @@
+{
+  "result": "passed",
+  "focus": {
+    "visible": true,
+    "outline": "rgb(36, 89, 217) solid 2px",
+    "outlineWidth": "2px",
+    "outlineStyle": "solid"
+  }
+}

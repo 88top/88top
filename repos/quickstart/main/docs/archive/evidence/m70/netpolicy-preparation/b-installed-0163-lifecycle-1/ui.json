@@ -1,0 +1,717 @@
+{
+  "checkedAt": "2026-10-18T11:27:15.042Z",
+  "checks": [
+    "Unauthenticated config read denied",
+    "Installed package, running process and LuCI resource version match the frozen runtime",
+    "Real root session renders persisted homepage",
+    "Twenty real SPA device/home cycles clean up charts and traffic readers without accumulating pollers"
+  ],
+  "errors": [],
+  "consoleErrors": [],
+  "httpErrors": [],
+  "views": [
+    {
+      "name": "b-home-1440",
+      "overflow": false,
+      "input": {
+        "coarse": false,
+        "points": 0
+      },
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 666,
+          "h": 390.59375
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 444,
+          "h": 236.59375
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "w": 444,
+          "h": 136
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 555,
+          "h": 302.078125
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 555,
+          "h": 302.078125
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 555,
+          "h": 329
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 555,
+          "h": 329
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 371.265625,
+          "h": 335.171875
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 360.359375,
+          "h": 335.171875
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 360.375,
+          "h": 335.171875
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "w": 1128,
+          "h": 290
+        }
+      ]
+    },
+    {
+      "name": "b-home-after-20-navigation-cycles",
+      "overflow": false,
+      "input": {
+        "coarse": false,
+        "points": 0
+      },
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 666,
+          "h": 390.59375
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 444,
+          "h": 236.59375
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "w": 444,
+          "h": 136
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 555,
+          "h": 302.078125
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 555,
+          "h": 302.078125
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 555,
+          "h": 329
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 555,
+          "h": 329
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 371.265625,
+          "h": 335.171875
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 360.359375,
+          "h": 335.171875
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 360.375,
+          "h": 335.171875
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "w": 1128,
+          "h": 290
+        }
+      ]
+    }
+  ],
+  "restoration": [
+    "layout: unchanged",
+    "launcher: unchanged"
+  ],
+  "themeStyles": [
+    "http://192.168.30.244/luci-static/istorenas/css/cascade.css?v=2.2.11.5",
+    "http://192.168.30.244/luci-static/resources/easepi/easeicon.css?t=1649313193968",
+    "http://192.168.30.244/luci-static/quickstart/style.css?v=0.16.3-test20261018-release-a1548582564e"
+  ],
+  "systemCenters": [
+    {
+      "cls": "pie-chart-wrapper",
+      "text": "1%",
+      "display": "flex",
+      "position": "relative",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 346.484375,
+      "top": 1736.9375,
+      "width": 150,
+      "height": 150,
+      "transform": "none",
+      "zIndex": "auto"
+    },
+    {
+      "cls": "center-content",
+      "text": "1%",
+      "display": "block",
+      "position": "absolute",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 405.8203125,
+      "top": 1784.7421875,
+      "width": 31.328125,
+      "height": 54.390625,
+      "transform": "matrix(1, 0, 0, 1, -15.6641, -27.1953)",
+      "zIndex": "2"
+    },
+    {
+      "cls": "center-label",
+      "text": "1%",
+      "display": "block",
+      "position": "static",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 405.8203125,
+      "top": 1812.7421875,
+      "width": 31.328125,
+      "height": 26.390625,
+      "transform": "none",
+      "zIndex": "auto"
+    },
+    {
+      "cls": "pie-chart-wrapper",
+      "text": "0℃",
+      "display": "flex",
+      "position": "relative",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 508.484375,
+      "top": 1736.9375,
+      "width": 150,
+      "height": 150,
+      "transform": "none",
+      "zIndex": "auto"
+    },
+    {
+      "cls": "center-content",
+      "text": "0℃",
+      "display": "block",
+      "position": "absolute",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 566.1875,
+      "top": 1784.7421875,
+      "width": 34.59375,
+      "height": 54.390625,
+      "transform": "matrix(1, 0, 0, 1, -17.2969, -27.1953)",
+      "zIndex": "2"
+    },
+    {
+      "cls": "center-label",
+      "text": "0℃",
+      "display": "block",
+      "position": "static",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 566.1875,
+      "top": 1812.7421875,
+      "width": 34.59375,
+      "height": 26.390625,
+      "transform": "none",
+      "zIndex": "auto"
+    },
+    {
+      "cls": "pie-chart-wrapper",
+      "text": "64%",
+      "display": "flex",
+      "position": "relative",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 670.484375,
+      "top": 1736.9375,
+      "width": 150,
+      "height": 150,
+      "transform": "none",
+      "zIndex": "auto"
+    },
+    {
+      "cls": "center-content",
+      "text": "64%",
+      "display": "block",
+      "position": "absolute",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 723.5234375,
+      "top": 1784.7421875,
+      "width": 43.921875,
+      "height": 54.390625,
+      "transform": "matrix(1, 0, 0, 1, -21.9609, -27.1953)",
+      "zIndex": "2"
+    },
+    {
+      "cls": "center-label",
+      "text": "64%",
+      "display": "block",
+      "position": "static",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 723.5234375,
+      "top": 1812.7421875,
+      "width": 43.921875,
+      "height": 26.390625,
+      "transform": "none",
+      "zIndex": "auto"
+    }
+  ],
+  "density": [
+    {
+      "tag": "SECTION",
+      "cls": "network-business-card interface-business summary compact-ports",
+      "h": 136,
+      "margin": "0px",
+      "padding": "14px",
+      "minHeight": "136px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "HEADER",
+      "cls": "",
+      "h": 30,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "22px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "H2",
+      "cls": "",
+      "h": 20,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "17.5px",
+      "font": "600 14px / 17.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "svg",
+      "cls": {},
+      "h": 20,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "17.5px",
+      "font": "600 14px / 17.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "block"
+    },
+    {
+      "tag": "path",
+      "cls": {},
+      "h": 15,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "17.5px",
+      "font": "600 14px / 17.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "inline"
+    },
+    {
+      "tag": "DIV",
+      "cls": "network-header-actions widget-action-group",
+      "h": 30,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "30px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "BUTTON",
+      "cls": "widget-primary-action",
+      "h": 28,
+      "margin": "0px",
+      "padding": "6px 12px",
+      "minHeight": "28px",
+      "lineHeight": "13px",
+      "font": "13px / 13px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "SPAN",
+      "cls": "widget-action-icon",
+      "h": 16,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "0px",
+      "font": "13px / 0px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "svg",
+      "cls": {},
+      "h": 16,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "0px",
+      "font": "13px / 0px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "block"
+    },
+    {
+      "tag": "path",
+      "cls": {},
+      "h": 10.666656494140625,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "0px",
+      "font": "13px / 0px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "inline"
+    },
+    {
+      "tag": "SPAN",
+      "cls": "widget-action-label",
+      "h": 13,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "13px",
+      "font": "13px / 13px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "DIV",
+      "cls": "widget-menu",
+      "h": 28,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "BUTTON",
+      "cls": "widget-menu-trigger",
+      "h": 28,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "28px",
+      "lineHeight": "18px",
+      "font": "18px / 18px Arial",
+      "display": "grid"
+    },
+    {
+      "tag": "DIV",
+      "cls": "interface-list",
+      "h": 56.984375,
+      "margin": "12px 0px 0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "grid"
+    },
+    {
+      "tag": "BUTTON",
+      "cls": "",
+      "h": 56.984375,
+      "margin": "0px",
+      "padding": "8px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "grid"
+    },
+    {
+      "tag": "SPAN",
+      "cls": "interface-link-mark up",
+      "h": 16,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "grid"
+    },
+    {
+      "tag": "svg",
+      "cls": {},
+      "h": 16,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "block"
+    },
+    {
+      "tag": "path",
+      "cls": {},
+      "h": 12,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "inline"
+    },
+    {
+      "tag": "SPAN",
+      "cls": "interface-name",
+      "h": 0,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "contents"
+    },
+    {
+      "tag": "STRONG",
+      "cls": "",
+      "h": 18.1875,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "18.2px",
+      "font": "500 13px / 18.2px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "block"
+    },
+    {
+      "tag": "SMALL",
+      "cls": "",
+      "h": 16.796875,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "16.8px",
+      "font": "12px / 16.8px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "block"
+    },
+    {
+      "tag": "SPAN",
+      "cls": "interface-link-state",
+      "h": 0,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "",
+      "display": "contents"
+    },
+    {
+      "tag": "STRONG",
+      "cls": "",
+      "h": 16.796875,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "16.8px",
+      "font": "",
+      "display": "block"
+    },
+    {
+      "tag": "SMALL",
+      "cls": "",
+      "h": 16.796875,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "16.8px",
+      "font": "",
+      "display": "block"
+    },
+    {
+      "tag": "svg",
+      "cls": {},
+      "h": 0,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "none"
+    },
+    {
+      "tag": "path",
+      "cls": {},
+      "h": 0,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "inline"
+    },
+    {
+      "tag": "FOOTER",
+      "cls": "",
+      "h": 5,
+      "margin": "2.01562px 0px 0px",
+      "padding": "5px 0px 0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "SMALL",
+      "cls": "",
+      "h": 0,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "16.8px",
+      "font": "12px / 16.8px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "none"
+    },
+    {
+      "tag": "FOOTER",
+      "cls": "inventory-footer",
+      "h": 28.796875,
+      "margin": "0px",
+      "padding": "12px 0px 0px",
+      "minHeight": "auto",
+      "lineHeight": "16.8px",
+      "font": "12px / 16.8px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    }
+  ],
+  "lifecycle": [
+    {
+      "cycle": 1,
+      "trafficRequests": 1
+    },
+    {
+      "cycle": 2,
+      "trafficRequests": 2
+    },
+    {
+      "cycle": 3,
+      "trafficRequests": 3
+    },
+    {
+      "cycle": 4,
+      "trafficRequests": 4
+    },
+    {
+      "cycle": 5,
+      "trafficRequests": 5
+    },
+    {
+      "cycle": 6,
+      "trafficRequests": 6
+    },
+    {
+      "cycle": 7,
+      "trafficRequests": 7
+    },
+    {
+      "cycle": 8,
+      "trafficRequests": 8
+    },
+    {
+      "cycle": 9,
+      "trafficRequests": 9
+    },
+    {
+      "cycle": 10,
+      "trafficRequests": 10
+    },
+    {
+      "cycle": 11,
+      "trafficRequests": 11
+    },
+    {
+      "cycle": 12,
+      "trafficRequests": 12
+    },
+    {
+      "cycle": 13,
+      "trafficRequests": 13
+    },
+    {
+      "cycle": 14,
+      "trafficRequests": 14
+    },
+    {
+      "cycle": 15,
+      "trafficRequests": 15
+    },
+    {
+      "cycle": 16,
+      "trafficRequests": 16
+    },
+    {
+      "cycle": 17,
+      "trafficRequests": 17
+    },
+    {
+      "cycle": 18,
+      "trafficRequests": 18
+    },
+    {
+      "cycle": 19,
+      "trafficRequests": 19
+    },
+    {
+      "cycle": 20,
+      "trafficRequests": 20
+    }
+  ],
+  "lifecyclePollsIn5500ms": 1,
+  "result": "passed"
+}

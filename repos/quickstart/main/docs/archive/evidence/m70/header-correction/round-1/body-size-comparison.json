@@ -1,0 +1,15 @@
+{
+  "baseline": "home-shell/round-3/formal/report.json",
+  "candidate": "round-1/local-full/report.json",
+  "views": [
+    "formal-1024",
+    "formal-1440",
+    "formal-320",
+    "formal-320-dark",
+    "formal-390",
+    "formal-600",
+    "formal-768"
+  ],
+  "widgets": 77,
+  "result": "identical width, height and presentation for every widget"
+}

@@ -1,0 +1,106 @@
+{
+  "checkedAt": "2026-10-15T08:56:55.250Z",
+  "cases": [
+    {
+      "id": "authority-320",
+      "bounds": {
+        "x": -157.390625,
+        "y": 343.90625,
+        "width": 270,
+        "height": 65.59375,
+        "top": 343.90625,
+        "right": 112.609375,
+        "bottom": 409.5,
+        "left": -157.390625
+      },
+      "pass": false
+    },
+    {
+      "id": "full-page-curve",
+      "before": {
+        "rect": {
+          "x": 254,
+          "y": 298,
+          "width": 651,
+          "height": 177,
+          "top": 298,
+          "right": 905,
+          "bottom": 475,
+          "left": 254
+        },
+        "width": 651,
+        "height": 177,
+        "cyan": 23941,
+        "scrollY": 0,
+        "innerHeight": 1000
+      },
+      "after": {
+        "rect": {
+          "x": 254,
+          "y": 298,
+          "width": 651,
+          "height": 177,
+          "top": 298,
+          "right": 905,
+          "bottom": 475,
+          "left": 254
+        },
+        "width": 651,
+        "height": 177,
+        "cyan": 23941,
+        "scrollY": 0,
+        "innerHeight": 1000
+      },
+      "viewportPNG": {
+        "width": 1440,
+        "height": 1000,
+        "cyan": 23941
+      },
+      "fullPNG": {
+        "width": 1440,
+        "height": 1527,
+        "cyan": 0
+      },
+      "trace": [
+        {
+          "label": "canvas resize",
+          "width": 412,
+          "height": 187,
+          "innerHeight": 1,
+          "rect": {
+            "x": 28,
+            "y": 412,
+            "width": 412,
+            "height": 187,
+            "top": 412,
+            "right": 440,
+            "bottom": 599,
+            "left": 28
+          }
+        },
+        {
+          "label": "window resize",
+          "width": 412,
+          "height": 187,
+          "innerHeight": 1,
+          "rect": {
+            "x": 28,
+            "y": 412,
+            "width": 412,
+            "height": 187,
+            "top": 412,
+            "right": 440,
+            "bottom": 599,
+            "left": 28
+          }
+        },
+        {
+          "label": "window resize",
+          "innerHeight": 1000
+        }
+      ],
+      "pass": false
+    }
+  ],
+  "result": "fail"
+}

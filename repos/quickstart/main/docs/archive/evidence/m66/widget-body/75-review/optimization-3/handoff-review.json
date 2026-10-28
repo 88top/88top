@@ -1,0 +1,51 @@
+{
+  "at": "2026-10-17T23:57:14.953Z",
+  "result": "pass",
+  "suites": 31,
+  "groups": 380,
+  "protectedFiles": 347,
+  "originalBusinessFiles": 64,
+  "changedRuntimeFiles": [
+    "web/src/design/NetworkConnectionCard.vue",
+    "web/src/design/homeWidgetDetails.css"
+  ],
+  "typecheck": {
+    "command": "rtk proxy /var/cache/build-cache/run.sh -- node node_modules/vue-tsc/bin/vue-tsc.js --noEmit",
+    "cwd": "web",
+    "output": "",
+    "result": "pass"
+  },
+  "pid": 23053,
+  "assets": [
+    {
+      "path": "/assets/index.fcf6cffd.js",
+      "entry": true,
+      "sha256": "20506847988368b1b1a4e083f7bd2238f52d871d1c392a9339a9d99285e79b79",
+      "bytes": 50129,
+      "buildFile": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work/vue-preview/assets/index.fcf6cffd.js"
+    },
+    {
+      "path": "/assets/mount.05e96dee.css",
+      "entry": false,
+      "sha256": "e77946d6f74bdc3775d1bfc23e864e09bdf43e1eb13048933aec60eefa160fa2",
+      "bytes": 604886,
+      "buildFile": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work/vue-preview/assets/mount.05e96dee.css"
+    },
+    {
+      "path": "/assets/mount.427aedff.js",
+      "entry": false,
+      "sha256": "2fa6b402fc7740913e52352870b761cdfcb1a0e5aa5ccaec55300f8982212c98",
+      "bytes": 1405376,
+      "buildFile": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work/vue-preview/assets/mount.427aedff.js"
+    }
+  ],
+  "checks": [
+    "Current browser suites and original business protections pass",
+    "Runtime and test fingerprints match actual public assets",
+    "Only two approved presentation files differ in all of web; no untracked web sources",
+    "TypeScript and diff whitespace pass"
+  ],
+  "prototypeOnly": true,
+  "humanConfirmation": "pending",
+  "physicalRouters": "not accessed"
+}

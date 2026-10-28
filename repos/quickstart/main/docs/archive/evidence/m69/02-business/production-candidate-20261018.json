@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-10-18T07:19:54.065442+00:00",
+  "baseHead": "d1fa2a60cda531bdf7ebd03eb901ca878c3e989d",
+  "version": "0.16.0-test20261018",
+  "runtimeSourceCount": 1258,
+  "runtimeSourceTree": "5bb1b2627de2a95ad2986994431ee9dfbdafc83a21d15b07a11a6aaef166e16f",
+  "public": {
+    "web/dist/luci-static/quickstart/index.js": "75c20d8a7f0afbe8b0d655504b3e6f2f5ff95ba36b0d06f22447f3251aa719cf",
+    "web/dist/luci-static/quickstart/style.css": "5ce6c745e87ec9f3ebf29280cf5891623e13fc9a31c018223772842ba5eeedfe",
+    "web/dist/luci-static/quickstart/vendor.js": "80ff17f99caa1aa90cafe9a231c39ceabb2cdf1c543bf5dec3d44fcbcd184477",
+    "web/dist/luci-static/quickstart/i18n/en.json": "cc8101d122af5f9409c716fe74457f64547d1b3fdb37a7e6c23f2e565647f637"
+  },
+  "scope": "Production business components now intentionally change through typed snapshots, explicit buttons and action lifecycle; old unchanged-source protection does not apply.",
+  "deviceAcceptance": "pending B deployment"
+}

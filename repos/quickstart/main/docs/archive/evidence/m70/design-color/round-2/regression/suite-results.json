@@ -1,0 +1,36 @@
+{
+  "startedAt": "2026-10-19T14:58:59.192Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "launcher-home-review",
+      "startedAt": "2026-10-19T14:58:59.192Z",
+      "endedAt": "2026-10-19T14:59:06.749Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m70/design-color/round-2/regression/launcher-home-review/report.json"
+    },
+    {
+      "name": "boundary-interaction-review",
+      "startedAt": "2026-10-19T14:58:59.196Z",
+      "endedAt": "2026-10-19T14:59:06.914Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 10,
+      "report": "docs/evidence/m70/design-color/round-2/regression/boundary-interaction-review/report.json"
+    },
+    {
+      "name": "home-widget-header-review",
+      "startedAt": "2026-10-19T14:58:59.197Z",
+      "endedAt": "2026-10-19T14:59:11.984Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 14,
+      "report": "docs/evidence/m70/design-color/round-2/regression/home-widget-header-review/report.json"
+    }
+  ],
+  "endedAt": "2026-10-19T14:59:11.985Z",
+  "result": "pass",
+  "groups": 32
+}

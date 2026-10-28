@@ -1,0 +1,13 @@
+{
+  "fingerprints": [
+    "0d67a859adffacb04ff684acc3801f27b4412330f22e88a705445431430fc341  /usr/libexec/istoree/istoreenhance.sh",
+    "390d50ee985cf165378809edccea2aaecef2c526de410bda44df719221313f5b  /etc/config/istoreenhance"
+  ],
+  "instances": {
+    "instance1": {
+      "running": true,
+      "pid": 680369
+    }
+  },
+  "result": "passed"
+}

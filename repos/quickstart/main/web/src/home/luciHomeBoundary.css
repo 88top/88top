@@ -1,0 +1,29 @@
+/* LuCI owns the system shell. Its generic header decorations must not become
+ * overlays over semantic headers inside Quickstart's content and dialogs. */
+.ordered-home header::before,
+.ordered-home header::after,
+.network-dialog > header::before,
+.network-dialog > header::after{
+ content:none!important;display:none!important;pointer-events:none!important;
+}
+.ordered-home header,
+.network-dialog > header{
+ background:transparent!important;color:var(--c-text)!important;
+}
+/* Match the ordinary browser baseline used by the approved views. Component
+ * rules retain their explicit handle sizes, spacing and touch target minima. */
+.ordered-home :where(button),
+.network-dialog :where(button){
+ margin:0;padding:0;min-height:0;box-shadow:none;text-shadow:none;
+}
+.ordered-home .lab-intro h1{
+ padding:0!important;line-height:1.5;margin:0;text-align:left;
+}
+.ordered-home h2,
+.network-dialog h2{
+ padding:0!important;border:0;background:transparent;box-shadow:none;letter-spacing:normal;color:var(--c-text)!important;
+}
+.ordered-home :is(.canvas-module>header h2,.applications-heading h2,.network-business-card h2){line-height:1.25!important}
+.ordered-home :where(footer){
+ padding:0;text-align:initial;white-space:normal;overflow:visible;font-size:inherit;color:inherit;
+}

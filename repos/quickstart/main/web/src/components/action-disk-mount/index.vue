@@ -115,7 +115,7 @@
                         </svg>
                     </div>
                     <div class="action-body_msg">{{ $gettext("挂载成功") }}</div>
-                    <div class="action-body_info" v-if="resultMount" v-html="$gettext('已成功将分区 %{dev} 挂载到 <a>%{mount}</a>', {dev:resultMount.path||'', mount:resultMount.mountPoint||''}, true)">
+                    <div class="action-body_info" v-if="resultMount" v-html="$gettext('已成功将分区 %{dev} 挂载到 <a>%{mount}</a>', {dev:resultMount.path||'', mount:resultMount.mountPoint||''})">
                     </div>
                     <div class="btns">
                         <button class="cbi-button cbi-button-apply app-btn app-next" type="button" @click="onSuccess">{{

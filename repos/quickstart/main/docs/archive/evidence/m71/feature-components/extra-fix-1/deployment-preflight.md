@@ -1,0 +1,7 @@
+# 部署脚本预检反馈
+
+首次运行deploy-frontend.py在任何备份/写入前退出：KeyError web.i18n.zh-cn.json。旧9f31d4f的MANIFEST只登记4份公开核心资源，没有36份完整清单。
+
+调整为：待替换的4份必须匹配历史MANIFEST；其余32份必须直接匹配当前候选，证明确实不需替换；部署后36份全部匹配候选。没有删除完整指纹检查，没有修改追加产品候选，首次预检没有产生设备写入或重启。
+
+首次installed浏览器检查在任何业务交互前失败：预期所有资源都使用LuCI的asset_version，但Vite的index.js对vendor.js使用独立内容指纹de139c18。部署文件和4个公开响应哈希均匹配，非旧界面回退。保留installed失败报告；修正检查为index/CSS/i18n匹配LuCI模板版本，vendor匹配已核验SHA的冻结index.js内静态导入版本。没有放弃资源版本检查，也没有再修改产品代码。

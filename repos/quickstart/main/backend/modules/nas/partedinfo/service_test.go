@@ -126,6 +126,14 @@ func TestReadEnrichesMountedPartitionsAndSkipsRom(t *testing.T) {
 	}
 }
 
+func TestReadRejectsInvalidDiskNames(t *testing.T) {
+	for _, name := range []string{"", "../sda", "/dev/sda", "sda\n"} {
+		if _, err := NewService(&fakeStore{}).Read(context.Background(), name, false); err == nil {
+			t.Fatalf("invalid disk name accepted: %q", name)
+		}
+	}
+}
+
 func TestReadIncludesFreeSpaceWhenRequested(t *testing.T) {
 	t.Parallel()
 

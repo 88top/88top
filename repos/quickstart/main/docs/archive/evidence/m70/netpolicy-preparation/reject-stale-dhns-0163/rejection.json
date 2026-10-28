@@ -1,0 +1,7 @@
+{
+  "expectedRejection": true,
+  "exitCode": 1,
+  "diagnostic": "Traceback (most recent call last):\n  File \"/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/94c4-develop-quicksta/quickstart/scripts/ops/home-current-acceptance.py\", line 48, in <module>\n    assert report['processFingerprints'] and all(line.split()[0] == manifest['quickstart.x86_64']\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Running process differs from package\n",
+  "reason": "Both the serve process and the startdhns executable alias must match the frozen runtime; previous pidof-only check missed an old mapped helper.",
+  "result": "passed"
+}

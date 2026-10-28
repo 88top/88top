@@ -1,0 +1,712 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/dhns/connect/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/dhns_routers.go:15:3"
+  },
+  {
+    "method": "POST",
+    "path": "/api/dhns/dhcpValid/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/dhns_routers.go:19:3"
+  },
+  {
+    "method": "POST",
+    "path": "/api/dhns/dhnsChange/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/dhns_routers.go:18:3"
+  },
+  {
+    "method": "GET",
+    "path": "/api/dhns/forward/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/dhns_routers.go:17:3"
+  },
+  {
+    "method": "GET",
+    "path": "/api/dhns/proxy/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/dhns_routers.go:16:3"
+  },
+  {
+    "method": "GET",
+    "path": "/api/lcd/simple/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1106:2"
+  },
+  {
+    "method": "GET",
+    "path": "/api/lcd/st7789/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1097:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/app/check/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:283:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/app/install-list/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:301:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/app/install/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:292:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/aria2/init/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:411:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/client-mode/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:330:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/client-mode/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:339:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/ddns/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:601:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/ddns/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:612:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/ddnsto/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:615:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/ddnsto/address/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:624:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/ddnsto/config/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:633:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/dns-config/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:312:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/dns-config/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:321:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/docker/partition/list/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:456:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/docker/status/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:465:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/docker/switch/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:866:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/docker/transfer/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:474:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/download-service/status/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:438:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/download/partition/list/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:447:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/finish/setup/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:366:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/gateway-router/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:348:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/global-folders/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:875:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/global-folders/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:884:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/lan/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:402:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/lan/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:393:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/need/setup/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:357:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/pppoe/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:375:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/pppoe/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:384:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/qbittorrent/init/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:420:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/soft-source/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:483:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/soft-source/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:492:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/soft-source/list/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:501:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/transmission/init/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:429:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/dhcpGatewayConfig/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:39:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/dhcpTagsConfig/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:30:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/enableFloatGateway/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:66:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/enableSpeedLimit/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:57:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/globalConfigs/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:84:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/listDevices/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:93:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/listSpeedLimitedDevices/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:111:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/listStaticDevices/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:102:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/speedLimitConfig/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:48:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/speedsForDevices/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:13:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/speedsForOneDevice/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:21:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/staticDeviceConfig/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/lan_control_router.go:75:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/disk/init/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:199:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/disk/initrest/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:217:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/disk/mountpoint/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:208:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/disk/partition/format",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:226:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/disk/partition/mount",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:235:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/nas/disk/status/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:190:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/linkease/enable",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:279:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/samba/create",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:244:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/nas/sandbox/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:575:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/sandbox/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:528:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/sandbox/commit/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:545:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/nas/sandbox/disks/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:566:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/sandbox/exit/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:548:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/sandbox/reset/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:557:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/nas/service/status/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:187:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/webdav/create",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:253:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/nas/webdav/status/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:262:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/network/checkPublicNet/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:642:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/network/device/list/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:65:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/network/homebox/enable",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:74:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/network/interface/config/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:848:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/network/interface/config/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:857:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/network/interface/status/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:584:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/network/port/list/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:651:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/network/setup/finish/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:56:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/network/statistics/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:43:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/network/status/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:54:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/quickstart/delete/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:839:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/quickstart/get/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:825:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/quickstart/set/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:836:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/raid/add/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:678:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/raid/autofix/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:723:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/raid/create/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:660:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/raid/create/list/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:732:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/raid/delete/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:669:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/raid/detail/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:696:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/raid/list/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:714:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/raid/recover/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:705:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/raid/remove/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:687:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/share/protocol/samba/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:986:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/protocol/samba/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:995:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/share/protocol/webdav/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:968:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/protocol/webdav/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:977:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/service/create/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:940:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/service/delete/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:958:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/share/service/list/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:930:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/service/update/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:949:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/user/create/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:903:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/user/delete/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:921:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/share/user/list/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:894:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/user/update/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:912:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/smart/attribute/result/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:799:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/smart/config/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:761:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/smart/config/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:770:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/smart/extend/result/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:808:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/smart/list/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:749:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/smart/log/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:752:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/smart/test/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:787:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/smart/test/result/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:790:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/system/auto-check-update/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:104:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/check-update/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:95:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/cpu/status/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:142:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/cpu/temperature/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:151:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/getToken/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:124:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/memery/status/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:160:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/module-settings/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1061:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/system/module-settings/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1070:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/system/poweroff/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:519:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/system/reboot/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:510:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/system/setPassword/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:114:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/status/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:169:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/time/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:133:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/version/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:92:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/u/guide/ddns/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:602:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/u/guide/ddns/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:613:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/u/nas/linkease/enable",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:280:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/u/nas/sandbox/commit/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:546:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/u/nas/service/status/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:188:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/u/network/statistics/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:44:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/u/network/status/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:55:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/u/quickstart/get/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:826:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/u/quickstart/set/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:837:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/u/smart/list/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:750:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/u/smart/test/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:788:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/u/system/version/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:93:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/wireless/edit-iface/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1037:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/wireless/enable-iface/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1013:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/wireless/list-iface/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1004:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/wireless/set-device-power/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1025:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/wireless/setup/",
+    "source": "/projects/workspace-linkease-ubuntu/linkease-github/quick-start/istore-backend/server/routers.go:1049:2"
+  }
+]

@@ -56,7 +56,7 @@ import interfaceIcon from "/@/components/svg/interface.vue"
 import settingIcon from "/@/components/svg/setting.vue"
 import moreItem from "/@/components/svg/more.vue"
 
-import { reactive, ref, watch } from 'vue';
+import { reactive, ref, watch, onUnmounted } from 'vue';
 import request from '/@/request';
 import Toast from '/@/components/toast';
 import { useAppStore } from '/@/plugins/store';
@@ -100,9 +100,12 @@ const STORAGE_KEY = "checkedPorts"
 // 初始默认至少勾选一个，从本地读取
 const checkedList = ref<string[]>(loadChecked(STORAGE_KEY))
 const portList = ref<NetworkPort[]>([])
+let portPollingActive = true
+let portPollingTimer: ReturnType<typeof setTimeout> | undefined
 const getPortList = () => {
+    if (!portPollingActive) return
     (porter.load && document.hidden ? Promise.resolve() : request.Network.PortList.GET().then(res => {
-        if (res?.data) {
+        if (portPollingActive && res?.data) {
             const { result } = res?.data
             if (result) {
                 porter.portList = result.ports || []
@@ -121,11 +124,16 @@ const getPortList = () => {
             }
         }
     })).finally(() => {
+        if (!portPollingActive) return
         porter.load = true
-        setTimeout(getPortList, 10000)
+        portPollingTimer = setTimeout(getPortList, 10000)
     })
 }
 getPortList()
+onUnmounted(() => {
+    portPollingActive = false
+    if (portPollingTimer !== undefined) clearTimeout(portPollingTimer)
+})
 
 watch(checkedList, (newVal) => {
     portList.value = porter.portList.filter(item => newVal.includes(item.name))

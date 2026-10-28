@@ -1,0 +1,447 @@
+{
+  "host": "192.168.30.244",
+  "enableRestoreRequested": true,
+  "scope": "Current backend API; native enable then restore only if explicitly requested; no package install or provider/network writes",
+  "before": [
+    "5451bfc220578f2b3473b68c0353a4fa84513a37c44c3692d95ae229f28e6dbe  /etc/config/appfilter",
+    "59646bc9fc1c9515a31bf85f0ef83c54a79300bef194376a1492a827fa3c522f  /etc/config/argon",
+    "5148a2c99d31b26bdf95d1c9cd7cca9d62531c238562657d85fa0b0e731c9a3b  /etc/config/aria2",
+    "547bcecc57da0febfca07ba49adec15089ae957d5f9eeb40ce53a26b2500cbfe  /etc/config/cifs",
+    "a339128d57eb79d639ba5963b65aa97951c82cad2dadd1450c2c4f5eac443456  /etc/config/cpufreq",
+    "1ac88bf986580f2b3f0869ba58256c3e335f6f3734aaa09210b0add876ad56b8  /etc/config/ddns",
+    "2b05648fdbef4f44267b0eba1ba5b1dd986c138a5d8c3371850e8d62029f82e7  /etc/config/ddnsto",
+    "0bee30732af875effe4a81a11738c2e7a63e287a80d0a30647c0d80a3e7e26fa  /etc/config/dhcp",
+    "1693569d8ebf65a07b2b9a614f8d34fe986abdc0908f5e83b35ad31c97908a9f  /etc/config/dockerd",
+    "6e182b04053dbc77ec731e5c5a4b0b28fdd1e03895339c6b57509f7e4ed6f0a2  /etc/config/dockermanager",
+    "301360b0b6e0d281fe8b89e016eb68a3eee2f1f1a7491c6da19a39c71287549f  /etc/config/dockermanager-opkg",
+    "40976e6fb2699a0968b3f12d0794de7f191fb161472efe028d06257f8ac07091  /etc/config/dropbear",
+    "96ceb2e8389056a00013f49118ee2edbfc5b147c8a2b3fa886710df8c31f7ec0  /etc/config/etherwake",
+    "c760d7f5a36a71ee12228e849c387473eeef37a5f42b94346baa00d5f1c0a628  /etc/config/fastnet",
+    "bc8a9c25a87179c78d0a8f721cc46421c7e2aee62482602d7d0a8efd5518d6a0  /etc/config/fastnet-opkg",
+    "76408bedf1e35f3e0b5e0919e9af3b7485f8c78b404a9659430520421323a614  /etc/config/firewall",
+    "393ba10f4d0d7aa60ad62bc26fd923dc900a93d573a8dc0ed1ff147aeb23f918  /etc/config/fstab",
+    "5bca6a3a43c57c1db4932a7dc48e36faa4cd11ef073cc3ca5079a801095297d6  /etc/config/grub",
+    "4733fa40955720209aaba3fbd194b2b89cd845c36ada16f2c76f8efb138d7878  /etc/config/hd-idle",
+    "1dfdf272a9ee9fd2aa164fdd5ab1521562f3afe24cf86b659960bb11f93abe5a  /etc/config/istore",
+    "3691080d547169e3a69a880b68d938d343072173ca76091b1b1fdf1684c070f5  /etc/config/istoreenhance",
+    "220a0a67f7ca1130d7ff52ab884fc42a304576d6c7dc5b7358c001be4b3499cf  /etc/config/kmods",
+    "48c4811e9da2e5561668f0ee1ee7b7710e0e0fe1e9ce646a6c0bd9a7d3b194d4  /etc/config/linkease",
+    "1401745c5b42db38ce045cc3f8a560888d8917c472c0cc40d7fff0169059eb18  /etc/config/linkease_app_entry",
+    "3d9c797da54aa3754f642cd7defa9ffbad203b9b2eb1fe17a432691eb1658f3d  /etc/config/linkeasefull",
+    "bae562030b9fd99d91fe23358cb3715cb2e3c431fa489b18effd94e2ef3553aa  /etc/config/luci",
+    "37f7d20f4ef8e5e1695e43d35513d6e7b25739e2a30058e32814691ea9ec69cc  /etc/config/luci-fan",
+    "b1ff7f54de2e179fe6fa76116d6bc48be23ba6fe4e50ce26c35edb569413692c  /etc/config/mdadm",
+    "a7587da33f69f40ee59f9d819a0ce8a19bad0f4782396f7b8f96dba182bf33ca  /etc/config/network",
+    "c92584e35ff4e07e7215c9ab57bb55b25edc34f5462bba8485ca732ad3f4280c  /etc/config/nfs",
+    "ff55a338a433204837c76e6acad54e0c9d618b0d86f013b4e452c41cb18d2da7  /etc/config/openssl",
+    "617f0474775038d4998c30a8cdbf1d9e52da98701bfe6efcc8e738663e2e18c0  /etc/config/quickstart",
+    "80e0b2b3644b761021141488a9bca2a57236ffaec0f9f55e00a5061824c654bb  /etc/config/quickstart-netpolicy",
+    "ef08226efab11cde7a77b7f54075001bb7487ce1516923d15698f5bf50f83d47  /etc/config/quickstart-opkg",
+    "bef62a785544c390592e7626153135a5b7af0ce863e63c57c098cef75991d201  /etc/config/radius",
+    "1a40da0ebe45b1afd131dfc4650592913e38445e7fe42f96d3b95ad5151ac0e6  /etc/config/rpcd",
+    "a91fa62e27f0deecaca38eb7147a0b9bcfdec208a5f146c0cdeec8bcd3e3916b  /etc/config/samba4",
+    "3afe9b25ec9cb47e34cdaba895d4fb6d973abec793281323b5cb2eaea96ba4d4  /etc/config/sysstat",
+    "74208ab81bd329ed1d366c4d255460e6b1736324bfcc60860a1c87d74b947782  /etc/config/system",
+    "082122f9dd49945a69af3ec005d07a987363206b9cd0fe31f3a58b299a13673a  /etc/config/trelay",
+    "fafdaf1f7f7d521d1ee1ab41ade960f67e318920cb8b2b457b5378a9e6a45e60  /etc/config/ttyd",
+    "42903b2345ad9f38d5371507530b71e2b8844bc9393e192e0b6c0c2c0d4dabaa  /etc/config/tuning",
+    "3e4f469b78df926da9c36d72a10861dc621cdda30e673f790b9313a6b37ee9cd  /etc/config/tuning_boot",
+    "943f266255adb56ad526c7c4ee7f156dcb18cc492abf19ab95df19321c8a101d  /etc/config/tuning_net",
+    "088f3005c3acf87c412400cb21f4979d40647ae54aa6f9bee071a676287c4587  /etc/config/ucitrack",
+    "7046daf916e002c2920cad2968eb826812185ec878612e7e6c5ddb7e840b0a7a  /etc/config/uhttpd",
+    "6e5b25553ec9ae1888c4c416717177197adcbee1d7367e80354bd04d6d4c9859  /etc/config/unishare",
+    "f27e281fa7744d4b2adf9b93c575ab7f8f059bca70588a719092110ac8d721ef  /etc/config/upnpd",
+    "a5c693dbd2464970744f0245b31fb925b1e0013270e95f7ba1028c45338d185b  /etc/config/webdav2",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /etc/config/wireless",
+    "62df30a67d77713afe005ea6cd73cb580e80a79cdcd60d060a78cb61ede62a13  /etc/quickstart/home-launcher.json",
+    "037321d0f1134b3ced167689c9d0ff1aeb5f14b0585edc4471ece5a388d14aab  /etc/quickstart/home-layout.json",
+    "eeccf129cb674ad20b95faa1a58549b8bd7bf34c359519e1fbd03de4e92a79ea  /usr/lib/opkg/status",
+    "3a1c633f346f876d771b03f622aeff8215920683c5ed1945fca354bac77ba6c2  /usr/bin/quickstart-netpolicy",
+    "default via 192.168.30.1 dev br-lan proto static src 192.168.30.244 ",
+    "14546",
+    "/etc/rc.d/K15quickstart-netpolicy ../init.d/quickstart-netpolicy",
+    "/etc/rc.d/S91quickstart-netpolicy ../init.d/quickstart-netpolicy"
+  ],
+  "result": "passed",
+  "catalogBefore": {
+    "result": {
+      "schemaVersion": 1,
+      "currentProvider": "eqos",
+      "components": [
+        {
+          "id": "quickstart-native",
+          "capabilityKey": "device_speed_limit",
+          "package": "quickstart-netpolicy",
+          "provider": "quickstart-native",
+          "selected": false,
+          "status": {
+            "state": "disabled",
+            "reason": "service_stopped",
+            "actions": [
+              {
+                "kind": "enable",
+                "requiresConfirmation": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "eqos",
+          "capabilityKey": "compat_speed_limit",
+          "package": "luci-app-eqos",
+          "provider": "eqos",
+          "selected": true,
+          "status": {
+            "state": "not_installed",
+            "reason": "dependency_not_installed",
+            "actions": [
+              {
+                "kind": "install",
+                "target": "luci-app-eqos",
+                "requiresConfirmation": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "floatip",
+          "capabilityKey": "floating_gateway",
+          "package": "app-meta-floatip",
+          "selected": false,
+          "status": {
+            "state": "not_installed",
+            "reason": "dependency_not_installed",
+            "actions": [
+              {
+                "kind": "install",
+                "target": "app-meta-floatip",
+                "requiresConfirmation": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "unauthenticatedDenied": {
+    "http": 200,
+    "response": {
+      "success": -1001
+    }
+  },
+  "spoofedIdentityDenied": true,
+  "enablePreview": {
+    "result": {
+      "plan": {
+        "capabilityKey": "device_speed_limit",
+        "action": "enable",
+        "current": {
+          "state": "disabled",
+          "reason": "service_stopped",
+          "actions": [
+            {
+              "kind": "enable",
+              "requiresConfirmation": true
+            }
+          ]
+        },
+        "target": "device_speed_limit",
+        "draftToken": "m71-native-enable",
+        "requiresConfirmation": true,
+        "canApply": true
+      },
+      "changed": false,
+      "current": {
+        "state": "disabled",
+        "reason": "service_stopped",
+        "actions": [
+          {
+            "kind": "enable",
+            "requiresConfirmation": true
+          }
+        ]
+      }
+    }
+  },
+  "cancelledWithoutWrite": {
+    "result": {
+      "plan": {
+        "capabilityKey": "device_speed_limit",
+        "action": "enable",
+        "current": {
+          "state": "disabled",
+          "reason": "service_stopped",
+          "actions": [
+            {
+              "kind": "enable",
+              "requiresConfirmation": true
+            }
+          ]
+        },
+        "target": "device_speed_limit",
+        "draftToken": "m71-native-enable",
+        "requiresConfirmation": true,
+        "canApply": true
+      },
+      "changed": false,
+      "cancelled": true,
+      "current": {
+        "state": "disabled",
+        "reason": "service_stopped",
+        "actions": [
+          {
+            "kind": "enable",
+            "requiresConfirmation": true
+          }
+        ]
+      }
+    }
+  },
+  "enableApply": {
+    "http": 200,
+    "response": {
+      "result": {
+        "plan": {
+          "capabilityKey": "device_speed_limit",
+          "action": "enable",
+          "current": {
+            "state": "disabled",
+            "reason": "service_stopped",
+            "actions": [
+              {
+                "kind": "enable",
+                "requiresConfirmation": true
+              }
+            ]
+          },
+          "target": "device_speed_limit",
+          "draftToken": "m71-native-enable",
+          "requiresConfirmation": true,
+          "canApply": true
+        },
+        "changed": true,
+        "current": {
+          "state": "error",
+          "reason": "engine_unavailable",
+          "actions": [
+            {
+              "kind": "retry"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "startupObservations": [
+    {
+      "secondsRemaining": 60.0,
+      "http": 200,
+      "component": {
+        "id": "quickstart-native",
+        "capabilityKey": "device_speed_limit",
+        "package": "quickstart-netpolicy",
+        "provider": "quickstart-native",
+        "selected": false,
+        "status": {
+          "state": "error",
+          "reason": "engine_unavailable",
+          "actions": [
+            {
+              "kind": "retry"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "secondsRemaining": 56.9,
+      "http": 200,
+      "component": {
+        "id": "quickstart-native",
+        "capabilityKey": "device_speed_limit",
+        "package": "quickstart-netpolicy",
+        "provider": "quickstart-native",
+        "selected": false,
+        "status": {
+          "state": "available"
+        }
+      }
+    }
+  ],
+  "catalogEnabled": {
+    "result": {
+      "schemaVersion": 1,
+      "currentProvider": "eqos",
+      "components": [
+        {
+          "id": "quickstart-native",
+          "capabilityKey": "device_speed_limit",
+          "package": "quickstart-netpolicy",
+          "provider": "quickstart-native",
+          "selected": false,
+          "status": {
+            "state": "available"
+          }
+        },
+        {
+          "id": "eqos",
+          "capabilityKey": "compat_speed_limit",
+          "package": "luci-app-eqos",
+          "provider": "eqos",
+          "selected": true,
+          "status": {
+            "state": "not_installed",
+            "reason": "dependency_not_installed",
+            "actions": [
+              {
+                "kind": "install",
+                "target": "luci-app-eqos",
+                "requiresConfirmation": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "floatip",
+          "capabilityKey": "floating_gateway",
+          "package": "app-meta-floatip",
+          "selected": false,
+          "status": {
+            "state": "not_installed",
+            "reason": "dependency_not_installed",
+            "actions": [
+              {
+                "kind": "install",
+                "target": "app-meta-floatip",
+                "requiresConfirmation": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "nativeReadyVerified": true,
+  "nativeRestored": true,
+  "after": [
+    "5451bfc220578f2b3473b68c0353a4fa84513a37c44c3692d95ae229f28e6dbe  /etc/config/appfilter",
+    "59646bc9fc1c9515a31bf85f0ef83c54a79300bef194376a1492a827fa3c522f  /etc/config/argon",
+    "5148a2c99d31b26bdf95d1c9cd7cca9d62531c238562657d85fa0b0e731c9a3b  /etc/config/aria2",
+    "547bcecc57da0febfca07ba49adec15089ae957d5f9eeb40ce53a26b2500cbfe  /etc/config/cifs",
+    "a339128d57eb79d639ba5963b65aa97951c82cad2dadd1450c2c4f5eac443456  /etc/config/cpufreq",
+    "1ac88bf986580f2b3f0869ba58256c3e335f6f3734aaa09210b0add876ad56b8  /etc/config/ddns",
+    "2b05648fdbef4f44267b0eba1ba5b1dd986c138a5d8c3371850e8d62029f82e7  /etc/config/ddnsto",
+    "0bee30732af875effe4a81a11738c2e7a63e287a80d0a30647c0d80a3e7e26fa  /etc/config/dhcp",
+    "1693569d8ebf65a07b2b9a614f8d34fe986abdc0908f5e83b35ad31c97908a9f  /etc/config/dockerd",
+    "6e182b04053dbc77ec731e5c5a4b0b28fdd1e03895339c6b57509f7e4ed6f0a2  /etc/config/dockermanager",
+    "301360b0b6e0d281fe8b89e016eb68a3eee2f1f1a7491c6da19a39c71287549f  /etc/config/dockermanager-opkg",
+    "40976e6fb2699a0968b3f12d0794de7f191fb161472efe028d06257f8ac07091  /etc/config/dropbear",
+    "96ceb2e8389056a00013f49118ee2edbfc5b147c8a2b3fa886710df8c31f7ec0  /etc/config/etherwake",
+    "c760d7f5a36a71ee12228e849c387473eeef37a5f42b94346baa00d5f1c0a628  /etc/config/fastnet",
+    "bc8a9c25a87179c78d0a8f721cc46421c7e2aee62482602d7d0a8efd5518d6a0  /etc/config/fastnet-opkg",
+    "76408bedf1e35f3e0b5e0919e9af3b7485f8c78b404a9659430520421323a614  /etc/config/firewall",
+    "393ba10f4d0d7aa60ad62bc26fd923dc900a93d573a8dc0ed1ff147aeb23f918  /etc/config/fstab",
+    "5bca6a3a43c57c1db4932a7dc48e36faa4cd11ef073cc3ca5079a801095297d6  /etc/config/grub",
+    "4733fa40955720209aaba3fbd194b2b89cd845c36ada16f2c76f8efb138d7878  /etc/config/hd-idle",
+    "1dfdf272a9ee9fd2aa164fdd5ab1521562f3afe24cf86b659960bb11f93abe5a  /etc/config/istore",
+    "3691080d547169e3a69a880b68d938d343072173ca76091b1b1fdf1684c070f5  /etc/config/istoreenhance",
+    "220a0a67f7ca1130d7ff52ab884fc42a304576d6c7dc5b7358c001be4b3499cf  /etc/config/kmods",
+    "48c4811e9da2e5561668f0ee1ee7b7710e0e0fe1e9ce646a6c0bd9a7d3b194d4  /etc/config/linkease",
+    "1401745c5b42db38ce045cc3f8a560888d8917c472c0cc40d7fff0169059eb18  /etc/config/linkease_app_entry",
+    "3d9c797da54aa3754f642cd7defa9ffbad203b9b2eb1fe17a432691eb1658f3d  /etc/config/linkeasefull",
+    "bae562030b9fd99d91fe23358cb3715cb2e3c431fa489b18effd94e2ef3553aa  /etc/config/luci",
+    "37f7d20f4ef8e5e1695e43d35513d6e7b25739e2a30058e32814691ea9ec69cc  /etc/config/luci-fan",
+    "b1ff7f54de2e179fe6fa76116d6bc48be23ba6fe4e50ce26c35edb569413692c  /etc/config/mdadm",
+    "a7587da33f69f40ee59f9d819a0ce8a19bad0f4782396f7b8f96dba182bf33ca  /etc/config/network",
+    "c92584e35ff4e07e7215c9ab57bb55b25edc34f5462bba8485ca732ad3f4280c  /etc/config/nfs",
+    "ff55a338a433204837c76e6acad54e0c9d618b0d86f013b4e452c41cb18d2da7  /etc/config/openssl",
+    "617f0474775038d4998c30a8cdbf1d9e52da98701bfe6efcc8e738663e2e18c0  /etc/config/quickstart",
+    "80e0b2b3644b761021141488a9bca2a57236ffaec0f9f55e00a5061824c654bb  /etc/config/quickstart-netpolicy",
+    "ef08226efab11cde7a77b7f54075001bb7487ce1516923d15698f5bf50f83d47  /etc/config/quickstart-opkg",
+    "bef62a785544c390592e7626153135a5b7af0ce863e63c57c098cef75991d201  /etc/config/radius",
+    "1a40da0ebe45b1afd131dfc4650592913e38445e7fe42f96d3b95ad5151ac0e6  /etc/config/rpcd",
+    "a91fa62e27f0deecaca38eb7147a0b9bcfdec208a5f146c0cdeec8bcd3e3916b  /etc/config/samba4",
+    "3afe9b25ec9cb47e34cdaba895d4fb6d973abec793281323b5cb2eaea96ba4d4  /etc/config/sysstat",
+    "74208ab81bd329ed1d366c4d255460e6b1736324bfcc60860a1c87d74b947782  /etc/config/system",
+    "082122f9dd49945a69af3ec005d07a987363206b9cd0fe31f3a58b299a13673a  /etc/config/trelay",
+    "fafdaf1f7f7d521d1ee1ab41ade960f67e318920cb8b2b457b5378a9e6a45e60  /etc/config/ttyd",
+    "42903b2345ad9f38d5371507530b71e2b8844bc9393e192e0b6c0c2c0d4dabaa  /etc/config/tuning",
+    "3e4f469b78df926da9c36d72a10861dc621cdda30e673f790b9313a6b37ee9cd  /etc/config/tuning_boot",
+    "943f266255adb56ad526c7c4ee7f156dcb18cc492abf19ab95df19321c8a101d  /etc/config/tuning_net",
+    "088f3005c3acf87c412400cb21f4979d40647ae54aa6f9bee071a676287c4587  /etc/config/ucitrack",
+    "7046daf916e002c2920cad2968eb826812185ec878612e7e6c5ddb7e840b0a7a  /etc/config/uhttpd",
+    "6e5b25553ec9ae1888c4c416717177197adcbee1d7367e80354bd04d6d4c9859  /etc/config/unishare",
+    "f27e281fa7744d4b2adf9b93c575ab7f8f059bca70588a719092110ac8d721ef  /etc/config/upnpd",
+    "a5c693dbd2464970744f0245b31fb925b1e0013270e95f7ba1028c45338d185b  /etc/config/webdav2",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /etc/config/wireless",
+    "62df30a67d77713afe005ea6cd73cb580e80a79cdcd60d060a78cb61ede62a13  /etc/quickstart/home-launcher.json",
+    "037321d0f1134b3ced167689c9d0ff1aeb5f14b0585edc4471ece5a388d14aab  /etc/quickstart/home-layout.json",
+    "eeccf129cb674ad20b95faa1a58549b8bd7bf34c359519e1fbd03de4e92a79ea  /usr/lib/opkg/status",
+    "3a1c633f346f876d771b03f622aeff8215920683c5ed1945fca354bac77ba6c2  /usr/bin/quickstart-netpolicy",
+    "default via 192.168.30.1 dev br-lan proto static src 192.168.30.244 ",
+    "14546",
+    "/etc/rc.d/K15quickstart-netpolicy ../init.d/quickstart-netpolicy",
+    "/etc/rc.d/S91quickstart-netpolicy ../init.d/quickstart-netpolicy"
+  ],
+  "catalogAfter": {
+    "result": {
+      "schemaVersion": 1,
+      "currentProvider": "eqos",
+      "components": [
+        {
+          "id": "quickstart-native",
+          "capabilityKey": "device_speed_limit",
+          "package": "quickstart-netpolicy",
+          "provider": "quickstart-native",
+          "selected": false,
+          "status": {
+            "state": "disabled",
+            "reason": "service_stopped",
+            "actions": [
+              {
+                "kind": "enable",
+                "requiresConfirmation": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "eqos",
+          "capabilityKey": "compat_speed_limit",
+          "package": "luci-app-eqos",
+          "provider": "eqos",
+          "selected": true,
+          "status": {
+            "state": "not_installed",
+            "reason": "dependency_not_installed",
+            "actions": [
+              {
+                "kind": "install",
+                "target": "luci-app-eqos",
+                "requiresConfirmation": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "floatip",
+          "capabilityKey": "floating_gateway",
+          "package": "app-meta-floatip",
+          "selected": false,
+          "status": {
+            "state": "not_installed",
+            "reason": "dependency_not_installed",
+            "actions": [
+              {
+                "kind": "install",
+                "target": "app-meta-floatip",
+                "requiresConfirmation": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "sessionsDestroyed": 1
+}

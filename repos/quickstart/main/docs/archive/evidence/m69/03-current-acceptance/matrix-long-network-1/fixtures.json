@@ -1,0 +1,2352 @@
+{
+  "responses": {
+    "/u/network/status/": {
+      "status": 200,
+      "body": {
+        "result": {
+          "defaultInterface": "wan",
+          "networkInfo": "netSuccess",
+          "proto": "static",
+          "ipv4addr": "192.168.30.7",
+          "ipv6addr": "2001:db8:1234:5678:90ab:cdef:1234:5678",
+          "ipv4mask": 24,
+          "gateway": "192.168.30.1",
+          "dnsList": [
+            "2001:db8::1",
+            "2001:db8::2",
+            "2001:db8::3",
+            "2001:db8::4",
+            "2001:db8::5",
+            "2001:db8::6",
+            "2001:db8::7",
+            "2001:db8::8",
+            "2001:db8::9",
+            "2001:db8::a",
+            "2001:db8::b",
+            "2001:db8::c",
+            "2001:db8::d",
+            "2001:db8::e",
+            "2001:db8::f",
+            "2001:db8::10",
+            "2001:db8::11",
+            "2001:db8::12",
+            "2001:db8::13",
+            "2001:db8::14",
+            "2001:db8::15",
+            "2001:db8::16",
+            "2001:db8::17",
+            "2001:db8::18",
+            "2001:db8::19",
+            "2001:db8::1a",
+            "2001:db8::1b",
+            "2001:db8::1c",
+            "2001:db8::1d",
+            "2001:db8::1e",
+            "2001:db8::1f",
+            "2001:db8::20",
+            "2001:db8::21",
+            "2001:db8::22",
+            "2001:db8::23",
+            "2001:db8::24",
+            "2001:db8::25",
+            "2001:db8::26",
+            "2001:db8::27",
+            "2001:db8::28",
+            "2001:db8::29",
+            "2001:db8::2a",
+            "2001:db8::2b",
+            "2001:db8::2c",
+            "2001:db8::2d",
+            "2001:db8::2e",
+            "2001:db8::2f",
+            "2001:db8::30"
+          ],
+          "dnsProto": "manual",
+          "uptimeStamp": 109000
+        },
+        "success": 0,
+        "previewOnly": true
+      }
+    },
+    "/network/port/list/": {
+      "status": 200,
+      "body": {
+        "result": {
+          "ports": [
+            {
+              "name": "eth0",
+              "macAddress": "02:00:00:00:01:00",
+              "linkState": "UP",
+              "linkSpeed": "1000 Mbps",
+              "interfaceNames": [
+                "WAN",
+                "WAN6"
+              ],
+              "duplex": "full",
+              "rx_packets": "0",
+              "tx_packets": "40"
+            },
+            {
+              "name": "eth1",
+              "macAddress": "02:00:00:00:01:01",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "101",
+              "tx_packets": "41"
+            },
+            {
+              "name": "eth2",
+              "macAddress": "02:00:00:00:01:02",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "102",
+              "tx_packets": "42"
+            },
+            {
+              "name": "eth3",
+              "macAddress": "02:00:00:00:01:03",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "103",
+              "tx_packets": "43"
+            },
+            {
+              "name": "eth4",
+              "macAddress": "02:00:00:00:01:04",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "104",
+              "tx_packets": "44"
+            },
+            {
+              "name": "eth5",
+              "macAddress": "02:00:00:00:01:05",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "105",
+              "tx_packets": "45"
+            },
+            {
+              "name": "eth6",
+              "macAddress": "02:00:00:00:01:06",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "106",
+              "tx_packets": "46"
+            },
+            {
+              "name": "eth7",
+              "macAddress": "02:00:00:00:01:07",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "107",
+              "tx_packets": "47"
+            },
+            {
+              "name": "eth8",
+              "macAddress": "02:00:00:00:01:08",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "108",
+              "tx_packets": "48"
+            },
+            {
+              "name": "eth9",
+              "macAddress": "02:00:00:00:01:09",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "109",
+              "tx_packets": "49"
+            },
+            {
+              "name": "eth10",
+              "macAddress": "02:00:00:00:01:0a",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "110",
+              "tx_packets": "50"
+            },
+            {
+              "name": "eth11",
+              "macAddress": "02:00:00:00:01:0b",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "111",
+              "tx_packets": "51"
+            },
+            {
+              "name": "eth12",
+              "macAddress": "02:00:00:00:01:0c",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "112",
+              "tx_packets": "52"
+            },
+            {
+              "name": "eth13",
+              "macAddress": "02:00:00:00:01:0d",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "113",
+              "tx_packets": "53"
+            },
+            {
+              "name": "eth14",
+              "macAddress": "02:00:00:00:01:0e",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "114",
+              "tx_packets": "54"
+            },
+            {
+              "name": "eth15",
+              "macAddress": "02:00:00:00:01:0f",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "115",
+              "tx_packets": "55"
+            },
+            {
+              "name": "eth16",
+              "macAddress": "02:00:00:00:01:10",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "116",
+              "tx_packets": "56"
+            },
+            {
+              "name": "eth17",
+              "macAddress": "02:00:00:00:01:11",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "117",
+              "tx_packets": "57"
+            },
+            {
+              "name": "eth18",
+              "macAddress": "02:00:00:00:01:12",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "118",
+              "tx_packets": "58"
+            },
+            {
+              "name": "eth19",
+              "macAddress": "02:00:00:00:01:13",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "119",
+              "tx_packets": "59"
+            },
+            {
+              "name": "eth20",
+              "macAddress": "02:00:00:00:01:14",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "120",
+              "tx_packets": "60"
+            },
+            {
+              "name": "eth21",
+              "macAddress": "02:00:00:00:01:15",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "121",
+              "tx_packets": "61"
+            },
+            {
+              "name": "eth22",
+              "macAddress": "02:00:00:00:01:16",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "122",
+              "tx_packets": "62"
+            },
+            {
+              "name": "eth23",
+              "macAddress": "02:00:00:00:01:17",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "123",
+              "tx_packets": "63"
+            },
+            {
+              "name": "eth24",
+              "macAddress": "02:00:00:00:01:18",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "124",
+              "tx_packets": "64"
+            },
+            {
+              "name": "eth25",
+              "macAddress": "02:00:00:00:01:19",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "125",
+              "tx_packets": "65"
+            },
+            {
+              "name": "eth26",
+              "macAddress": "02:00:00:00:01:1a",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "126",
+              "tx_packets": "66"
+            },
+            {
+              "name": "eth27",
+              "macAddress": "02:00:00:00:01:1b",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "127",
+              "tx_packets": "67"
+            },
+            {
+              "name": "eth28",
+              "macAddress": "02:00:00:00:01:1c",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "128",
+              "tx_packets": "68"
+            },
+            {
+              "name": "eth29",
+              "macAddress": "02:00:00:00:01:1d",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "129",
+              "tx_packets": "69"
+            },
+            {
+              "name": "eth30",
+              "macAddress": "02:00:00:00:01:1e",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "130",
+              "tx_packets": "70"
+            },
+            {
+              "name": "eth31",
+              "macAddress": "02:00:00:00:01:1f",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "131",
+              "tx_packets": "71"
+            },
+            {
+              "name": "eth32",
+              "macAddress": "02:00:00:00:01:20",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "132",
+              "tx_packets": "72"
+            },
+            {
+              "name": "eth33",
+              "macAddress": "02:00:00:00:01:21",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "133",
+              "tx_packets": "73"
+            },
+            {
+              "name": "eth34",
+              "macAddress": "02:00:00:00:01:22",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "134",
+              "tx_packets": "74"
+            },
+            {
+              "name": "eth35",
+              "macAddress": "02:00:00:00:01:23",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "135",
+              "tx_packets": "75"
+            },
+            {
+              "name": "eth36",
+              "macAddress": "02:00:00:00:01:24",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "136",
+              "tx_packets": "76"
+            },
+            {
+              "name": "eth37",
+              "macAddress": "02:00:00:00:01:25",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "137",
+              "tx_packets": "77"
+            },
+            {
+              "name": "eth38",
+              "macAddress": "02:00:00:00:01:26",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "138",
+              "tx_packets": "78"
+            },
+            {
+              "name": "eth39",
+              "macAddress": "02:00:00:00:01:27",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "139",
+              "tx_packets": "79"
+            },
+            {
+              "name": "eth40",
+              "macAddress": "02:00:00:00:01:28",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "140",
+              "tx_packets": "80"
+            },
+            {
+              "name": "eth41",
+              "macAddress": "02:00:00:00:01:29",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "141",
+              "tx_packets": "81"
+            },
+            {
+              "name": "eth42",
+              "macAddress": "02:00:00:00:01:2a",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "142",
+              "tx_packets": "82"
+            },
+            {
+              "name": "eth43",
+              "macAddress": "02:00:00:00:01:2b",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "143",
+              "tx_packets": "83"
+            },
+            {
+              "name": "eth44",
+              "macAddress": "02:00:00:00:01:2c",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "144",
+              "tx_packets": "84"
+            },
+            {
+              "name": "eth45",
+              "macAddress": "02:00:00:00:01:2d",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "145",
+              "tx_packets": "85"
+            },
+            {
+              "name": "eth46",
+              "macAddress": "02:00:00:00:01:2e",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "146",
+              "tx_packets": "86"
+            },
+            {
+              "name": "eth47",
+              "macAddress": "02:00:00:00:01:2f",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "147",
+              "tx_packets": "87"
+            },
+            {
+              "name": "eth48",
+              "macAddress": "02:00:00:00:01:30",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "148",
+              "tx_packets": "88"
+            },
+            {
+              "name": "eth49",
+              "macAddress": "02:00:00:00:01:31",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "149",
+              "tx_packets": "89"
+            },
+            {
+              "name": "eth50",
+              "macAddress": "02:00:00:00:01:32",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "150",
+              "tx_packets": "90"
+            },
+            {
+              "name": "eth51",
+              "macAddress": "02:00:00:00:01:33",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "151",
+              "tx_packets": "91"
+            },
+            {
+              "name": "eth52",
+              "macAddress": "02:00:00:00:01:34",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "152",
+              "tx_packets": "92"
+            },
+            {
+              "name": "eth53",
+              "macAddress": "02:00:00:00:01:35",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "153",
+              "tx_packets": "93"
+            },
+            {
+              "name": "eth54",
+              "macAddress": "02:00:00:00:01:36",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "154",
+              "tx_packets": "94"
+            },
+            {
+              "name": "eth55",
+              "macAddress": "02:00:00:00:01:37",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "155",
+              "tx_packets": "95"
+            },
+            {
+              "name": "eth56",
+              "macAddress": "02:00:00:00:01:38",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "156",
+              "tx_packets": "96"
+            },
+            {
+              "name": "eth57",
+              "macAddress": "02:00:00:00:01:39",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "157",
+              "tx_packets": "97"
+            },
+            {
+              "name": "eth58",
+              "macAddress": "02:00:00:00:01:3a",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "158",
+              "tx_packets": "98"
+            },
+            {
+              "name": "eth59",
+              "macAddress": "02:00:00:00:01:3b",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "159",
+              "tx_packets": "99"
+            },
+            {
+              "name": "eth60",
+              "macAddress": "02:00:00:00:01:3c",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "160",
+              "tx_packets": "100"
+            },
+            {
+              "name": "eth61",
+              "macAddress": "02:00:00:00:01:3d",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "161",
+              "tx_packets": "101"
+            },
+            {
+              "name": "eth62",
+              "macAddress": "02:00:00:00:01:3e",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "162",
+              "tx_packets": "102"
+            },
+            {
+              "name": "eth63",
+              "macAddress": "02:00:00:00:01:3f",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "163",
+              "tx_packets": "103"
+            },
+            {
+              "name": "eth64",
+              "macAddress": "02:00:00:00:01:40",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "164",
+              "tx_packets": "104"
+            },
+            {
+              "name": "eth65",
+              "macAddress": "02:00:00:00:01:41",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "165",
+              "tx_packets": "105"
+            },
+            {
+              "name": "eth66",
+              "macAddress": "02:00:00:00:01:42",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "166",
+              "tx_packets": "106"
+            },
+            {
+              "name": "eth67",
+              "macAddress": "02:00:00:00:01:43",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "167",
+              "tx_packets": "107"
+            },
+            {
+              "name": "eth68",
+              "macAddress": "02:00:00:00:01:44",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "168",
+              "tx_packets": "108"
+            },
+            {
+              "name": "eth69",
+              "macAddress": "02:00:00:00:01:45",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "169",
+              "tx_packets": "109"
+            },
+            {
+              "name": "eth70",
+              "macAddress": "02:00:00:00:01:46",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "170",
+              "tx_packets": "110"
+            },
+            {
+              "name": "eth71",
+              "macAddress": "02:00:00:00:01:47",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "171",
+              "tx_packets": "111"
+            },
+            {
+              "name": "eth72",
+              "macAddress": "02:00:00:00:01:48",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "172",
+              "tx_packets": "112"
+            },
+            {
+              "name": "eth73",
+              "macAddress": "02:00:00:00:01:49",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "173",
+              "tx_packets": "113"
+            },
+            {
+              "name": "eth74",
+              "macAddress": "02:00:00:00:01:4a",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "174",
+              "tx_packets": "114"
+            },
+            {
+              "name": "eth75",
+              "macAddress": "02:00:00:00:01:4b",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "175",
+              "tx_packets": "115"
+            },
+            {
+              "name": "eth76",
+              "macAddress": "02:00:00:00:01:4c",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "176",
+              "tx_packets": "116"
+            },
+            {
+              "name": "eth77",
+              "macAddress": "02:00:00:00:01:4d",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "177",
+              "tx_packets": "117"
+            },
+            {
+              "name": "eth78",
+              "macAddress": "02:00:00:00:01:4e",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "178",
+              "tx_packets": "118"
+            },
+            {
+              "name": "eth79",
+              "macAddress": "02:00:00:00:01:4f",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "179",
+              "tx_packets": "119"
+            },
+            {
+              "name": "eth80",
+              "macAddress": "02:00:00:00:01:50",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "180",
+              "tx_packets": "120"
+            },
+            {
+              "name": "eth81",
+              "macAddress": "02:00:00:00:01:51",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "181",
+              "tx_packets": "121"
+            },
+            {
+              "name": "eth82",
+              "macAddress": "02:00:00:00:01:52",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "182",
+              "tx_packets": "122"
+            },
+            {
+              "name": "eth83",
+              "macAddress": "02:00:00:00:01:53",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "183",
+              "tx_packets": "123"
+            },
+            {
+              "name": "eth84",
+              "macAddress": "02:00:00:00:01:54",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "184",
+              "tx_packets": "124"
+            },
+            {
+              "name": "eth85",
+              "macAddress": "02:00:00:00:01:55",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "185",
+              "tx_packets": "125"
+            },
+            {
+              "name": "eth86",
+              "macAddress": "02:00:00:00:01:56",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "186",
+              "tx_packets": "126"
+            },
+            {
+              "name": "eth87",
+              "macAddress": "02:00:00:00:01:57",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "187",
+              "tx_packets": "127"
+            },
+            {
+              "name": "eth88",
+              "macAddress": "02:00:00:00:01:58",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "188",
+              "tx_packets": "128"
+            },
+            {
+              "name": "eth89",
+              "macAddress": "02:00:00:00:01:59",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "189",
+              "tx_packets": "129"
+            },
+            {
+              "name": "eth90",
+              "macAddress": "02:00:00:00:01:5a",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "190",
+              "tx_packets": "130"
+            },
+            {
+              "name": "eth91",
+              "macAddress": "02:00:00:00:01:5b",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "191",
+              "tx_packets": "131"
+            },
+            {
+              "name": "eth92",
+              "macAddress": "02:00:00:00:01:5c",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "192",
+              "tx_packets": "132"
+            },
+            {
+              "name": "eth93",
+              "macAddress": "02:00:00:00:01:5d",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "193",
+              "tx_packets": "133"
+            },
+            {
+              "name": "eth94",
+              "macAddress": "02:00:00:00:01:5e",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "194",
+              "tx_packets": "134"
+            },
+            {
+              "name": "eth95",
+              "macAddress": "02:00:00:00:01:5f",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "195",
+              "tx_packets": "135"
+            },
+            {
+              "name": "eth96",
+              "macAddress": "02:00:00:00:01:60",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "196",
+              "tx_packets": "136"
+            },
+            {
+              "name": "eth97",
+              "macAddress": "02:00:00:00:01:61",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "197",
+              "tx_packets": "137"
+            },
+            {
+              "name": "eth98",
+              "macAddress": "02:00:00:00:01:62",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "198",
+              "tx_packets": "138"
+            },
+            {
+              "name": "eth99",
+              "macAddress": "02:00:00:00:01:63",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "199",
+              "tx_packets": "139"
+            },
+            {
+              "name": "eth100",
+              "macAddress": "02:00:00:00:01:64",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "200",
+              "tx_packets": "140"
+            },
+            {
+              "name": "eth101",
+              "macAddress": "02:00:00:00:01:65",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "201",
+              "tx_packets": "141"
+            },
+            {
+              "name": "eth102",
+              "macAddress": "02:00:00:00:01:66",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "202",
+              "tx_packets": "142"
+            },
+            {
+              "name": "eth103",
+              "macAddress": "02:00:00:00:01:67",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "203",
+              "tx_packets": "143"
+            },
+            {
+              "name": "eth104",
+              "macAddress": "02:00:00:00:01:68",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "204",
+              "tx_packets": "144"
+            },
+            {
+              "name": "eth105",
+              "macAddress": "02:00:00:00:01:69",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "205",
+              "tx_packets": "145"
+            },
+            {
+              "name": "eth106",
+              "macAddress": "02:00:00:00:01:6a",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "206",
+              "tx_packets": "146"
+            },
+            {
+              "name": "eth107",
+              "macAddress": "02:00:00:00:01:6b",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "207",
+              "tx_packets": "147"
+            },
+            {
+              "name": "eth108",
+              "macAddress": "02:00:00:00:01:6c",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "208",
+              "tx_packets": "148"
+            },
+            {
+              "name": "eth109",
+              "macAddress": "02:00:00:00:01:6d",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "209",
+              "tx_packets": "149"
+            },
+            {
+              "name": "eth110",
+              "macAddress": "02:00:00:00:01:6e",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "210",
+              "tx_packets": "150"
+            },
+            {
+              "name": "eth111",
+              "macAddress": "02:00:00:00:01:6f",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "211",
+              "tx_packets": "151"
+            },
+            {
+              "name": "eth112",
+              "macAddress": "02:00:00:00:01:70",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "212",
+              "tx_packets": "152"
+            },
+            {
+              "name": "eth113",
+              "macAddress": "02:00:00:00:01:71",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "213",
+              "tx_packets": "153"
+            },
+            {
+              "name": "eth114",
+              "macAddress": "02:00:00:00:01:72",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "214",
+              "tx_packets": "154"
+            },
+            {
+              "name": "eth115",
+              "macAddress": "02:00:00:00:01:73",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "215",
+              "tx_packets": "155"
+            },
+            {
+              "name": "eth116",
+              "macAddress": "02:00:00:00:01:74",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "216",
+              "tx_packets": "156"
+            },
+            {
+              "name": "eth117",
+              "macAddress": "02:00:00:00:01:75",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "217",
+              "tx_packets": "157"
+            },
+            {
+              "name": "eth118",
+              "macAddress": "02:00:00:00:01:76",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "218",
+              "tx_packets": "158"
+            },
+            {
+              "name": "eth119",
+              "macAddress": "02:00:00:00:01:77",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "219",
+              "tx_packets": "159"
+            },
+            {
+              "name": "eth120",
+              "macAddress": "02:00:00:00:01:78",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "220",
+              "tx_packets": "160"
+            },
+            {
+              "name": "eth121",
+              "macAddress": "02:00:00:00:01:79",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "221",
+              "tx_packets": "161"
+            },
+            {
+              "name": "eth122",
+              "macAddress": "02:00:00:00:01:7a",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "222",
+              "tx_packets": "162"
+            },
+            {
+              "name": "eth123",
+              "macAddress": "02:00:00:00:01:7b",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "223",
+              "tx_packets": "163"
+            },
+            {
+              "name": "eth124",
+              "macAddress": "02:00:00:00:01:7c",
+              "linkState": "UP",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "224",
+              "tx_packets": "164"
+            },
+            {
+              "name": "eth125",
+              "macAddress": "02:00:00:00:01:7d",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "225",
+              "tx_packets": "165"
+            },
+            {
+              "name": "eth126",
+              "macAddress": "02:00:00:00:01:7e",
+              "linkState": "UNKNOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "226",
+              "tx_packets": "166"
+            },
+            {
+              "name": "eth127",
+              "macAddress": "02:00:00:00:01:7f",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "227",
+              "tx_packets": "167"
+            }
+          ]
+        },
+        "success": 0,
+        "previewOnly": true
+      }
+    },
+    "/u/network/statistics/": {
+      "status": 200,
+      "body": {
+        "result": {
+          "slots": 10,
+          "items": [
+            {
+              "startTime": 1791971940,
+              "endTime": 1791971946,
+              "downloadSpeed": 215040,
+              "uploadSpeed": 12800
+            },
+            {
+              "startTime": 1791971946,
+              "endTime": 1791971952,
+              "downloadSpeed": 419840,
+              "uploadSpeed": 23040
+            },
+            {
+              "startTime": 1791971952,
+              "endTime": 1791971958,
+              "downloadSpeed": 440320,
+              "uploadSpeed": 24064
+            },
+            {
+              "startTime": 1791971958,
+              "endTime": 1791971964,
+              "downloadSpeed": 143360,
+              "uploadSpeed": 9216
+            },
+            {
+              "startTime": 1791971964,
+              "endTime": 1791971970,
+              "downloadSpeed": 266240,
+              "uploadSpeed": 15360
+            },
+            {
+              "startTime": 1791971970,
+              "endTime": 1791971976,
+              "downloadSpeed": 389120,
+              "uploadSpeed": 21504
+            },
+            {
+              "startTime": 1791971976,
+              "endTime": 1791971982,
+              "downloadSpeed": 440320,
+              "uploadSpeed": 24064
+            },
+            {
+              "startTime": 1791971982,
+              "endTime": 1791971988,
+              "downloadSpeed": 430080,
+              "uploadSpeed": 23552
+            },
+            {
+              "startTime": 1791971988,
+              "endTime": 1791971994,
+              "downloadSpeed": 276480,
+              "uploadSpeed": 15872
+            },
+            {
+              "startTime": 1791971994,
+              "endTime": 1791972000,
+              "downloadSpeed": 368640,
+              "uploadSpeed": 20480
+            }
+          ]
+        }
+      }
+    },
+    "/lanctrl/v2/devices/": {
+      "status": 200,
+      "body": {
+        "result": {
+          "devices": [
+            {
+              "deviceId": "mac:02:00:00:00:00:01",
+              "mac": "02:00:00:00:00:01",
+              "displayName": "书房的 MacBook",
+              "hostname": "",
+              "online": true,
+              "presenceState": "online",
+              "lastSeenAt": "2026-10-14T03:59:00Z",
+              "vendor": "Apple",
+              "classification": {
+                "brand": "Apple",
+                "manufacturer": "Apple",
+                "category": "computer",
+                "source": "manual",
+                "confidence": "high"
+              },
+              "icon": {
+                "mode": "manual",
+                "resolvedKey": "laptop",
+                "assetKey": "laptop",
+                "label": "computer"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [
+                  {
+                    "family": 4,
+                    "address": "192.168.30.101",
+                    "primary": true
+                  }
+                ],
+                "historical": []
+              },
+              "connection": {
+                "kind": "wifi"
+              }
+            },
+            {
+              "deviceId": "mac:02:00:00:00:00:02",
+              "mac": "02:00:00:00:00:02",
+              "displayName": "客厅电视",
+              "hostname": "",
+              "online": true,
+              "presenceState": "online",
+              "lastSeenAt": "2026-10-14T03:58:00Z",
+              "vendor": "Xiaomi",
+              "classification": {
+                "brand": "Xiaomi",
+                "manufacturer": "Xiaomi",
+                "category": "tv",
+                "source": "manual",
+                "confidence": "high"
+              },
+              "icon": {
+                "mode": "auto",
+                "resolvedKey": "tv",
+                "assetKey": "tv",
+                "label": "tv"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [
+                  {
+                    "family": 4,
+                    "address": "192.168.30.102",
+                    "primary": true
+                  }
+                ],
+                "historical": []
+              },
+              "connection": {
+                "kind": "lan"
+              }
+            },
+            {
+              "deviceId": "mac:02:00:00:00:00:03",
+              "mac": "02:00:00:00:00:03",
+              "displayName": "小林的手机",
+              "hostname": "",
+              "online": true,
+              "presenceState": "online",
+              "lastSeenAt": "2026-10-14T03:57:00Z",
+              "vendor": "Apple",
+              "classification": {
+                "brand": "Apple",
+                "manufacturer": "Apple",
+                "category": "phone",
+                "source": "manual",
+                "confidence": "high"
+              },
+              "icon": {
+                "mode": "auto",
+                "resolvedKey": "phone",
+                "assetKey": "phone",
+                "label": "phone"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [
+                  {
+                    "family": 4,
+                    "address": "192.168.30.103",
+                    "primary": true
+                  }
+                ],
+                "historical": []
+              },
+              "connection": {
+                "kind": "wifi"
+              }
+            },
+            {
+              "deviceId": "mac:02:00:00:00:00:04",
+              "mac": "02:00:00:00:00:04",
+              "displayName": "家庭 NAS",
+              "hostname": "",
+              "online": true,
+              "presenceState": "online",
+              "lastSeenAt": "2026-10-14T03:56:00Z",
+              "vendor": "",
+              "classification": {
+                "brand": "",
+                "manufacturer": "",
+                "category": "storage",
+                "source": "manual",
+                "confidence": "high"
+              },
+              "icon": {
+                "mode": "auto",
+                "resolvedKey": "home-server",
+                "assetKey": "home-server",
+                "label": "storage"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [
+                  {
+                    "family": 4,
+                    "address": "192.168.30.104",
+                    "primary": true
+                  }
+                ],
+                "historical": []
+              },
+              "connection": {
+                "kind": "lan"
+              }
+            },
+            {
+              "deviceId": "mac:02:00:00:00:00:05",
+              "mac": "02:00:00:00:00:05",
+              "displayName": "",
+              "hostname": "",
+              "online": true,
+              "presenceState": "online",
+              "lastSeenAt": "2026-10-14T03:55:00Z",
+              "vendor": "",
+              "classification": {
+                "brand": "",
+                "manufacturer": "",
+                "category": "computer",
+                "source": "fallback",
+                "confidence": "low"
+              },
+              "icon": {
+                "mode": "auto",
+                "resolvedKey": "computer",
+                "assetKey": "computer",
+                "label": "computer"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [
+                  {
+                    "family": 4,
+                    "address": "192.168.30.105",
+                    "primary": true
+                  }
+                ],
+                "historical": []
+              },
+              "connection": {
+                "kind": "unknown"
+              }
+            },
+            {
+              "deviceId": "mac:02:00:00:00:00:06",
+              "mac": "02:00:00:00:00:06",
+              "displayName": "孩子的平板",
+              "hostname": "",
+              "online": true,
+              "presenceState": "online",
+              "lastSeenAt": "2026-10-14T03:54:00Z",
+              "vendor": "HUAWEI",
+              "classification": {
+                "brand": "HUAWEI",
+                "manufacturer": "HUAWEI",
+                "category": "tablet",
+                "source": "manual",
+                "confidence": "high"
+              },
+              "icon": {
+                "mode": "auto",
+                "resolvedKey": "tablet",
+                "assetKey": "tablet",
+                "label": "tablet"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [
+                  {
+                    "family": 4,
+                    "address": "192.168.30.106",
+                    "primary": true
+                  }
+                ],
+                "historical": []
+              },
+              "connection": {
+                "kind": "wifi"
+              }
+            },
+            {
+              "deviceId": "mac:02:00:00:00:00:07",
+              "mac": "02:00:00:00:00:07",
+              "displayName": "卧室音箱",
+              "hostname": "",
+              "online": false,
+              "presenceState": "offline",
+              "lastSeenAt": "2026-10-14T03:53:00Z",
+              "vendor": "Xiaomi",
+              "classification": {
+                "brand": "Xiaomi",
+                "manufacturer": "Xiaomi",
+                "category": "smart-home",
+                "source": "manual",
+                "confidence": "high"
+              },
+              "icon": {
+                "mode": "auto",
+                "resolvedKey": "smart-speaker",
+                "assetKey": "smart-speaker",
+                "label": "smart-home"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [],
+                "historical": [
+                  {
+                    "family": 4,
+                    "address": "192.168.30.107"
+                  }
+                ]
+              },
+              "connection": {
+                "kind": "wifi"
+              }
+            },
+            {
+              "deviceId": "mac:02:00:00:00:00:08",
+              "mac": "02:00:00:00:00:08",
+              "displayName": "访客电脑",
+              "hostname": "",
+              "online": false,
+              "presenceState": "never_seen",
+              "lastSeenAt": "2026-10-14T03:52:00Z",
+              "vendor": "",
+              "classification": {
+                "brand": "",
+                "manufacturer": "",
+                "category": "computer",
+                "source": "manual",
+                "confidence": "high"
+              },
+              "icon": {
+                "mode": "auto",
+                "resolvedKey": "computer",
+                "assetKey": "computer",
+                "label": "computer"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [],
+                "historical": []
+              },
+              "connection": {
+                "kind": "wifi"
+              }
+            }
+          ],
+          "health": {
+            "state": "ready",
+            "reasons": []
+          }
+        }
+      }
+    },
+    "/lanctrl/v2/router-context/": {
+      "status": 200,
+      "body": {
+        "result": {
+          "lan": "lan",
+          "topologyPosition": "lan_gateway_candidate",
+          "localAddress": "192.168.30.244",
+          "localDhcpConfigured": false,
+          "localDhcpHealthy": true,
+          "dhcpAuthority": "external_observed",
+          "routeEditability": {
+            "editable": false,
+            "reason": "external_dhcp_authority"
+          },
+          "upstreamGateways": [
+            "192.168.30.1"
+          ],
+          "externalDhcpServers": [],
+          "evidence": []
+        },
+        "previewOnly": true
+      }
+    },
+    "/nas/disk/status/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "disks": [
+            {
+              "name": "sda",
+              "path": "/dev/sda",
+              "size": "32 GiB",
+              "total": "32 GiB",
+              "used": "12 GiB",
+              "usage": 38,
+              "venderModel": "Preview disk",
+              "childrens": [
+                {
+                  "path": "/dev/sda1",
+                  "name": "sda1",
+                  "filesystem": "ext4",
+                  "mountPoint": "/",
+                  "isSystemRoot": true,
+                  "usage": 64
+                }
+              ],
+              "isSystemRoot": true,
+              "isDockerRoot": true
+            },
+            {
+              "name": "sdb",
+              "path": "/dev/sdb",
+              "size": "32 GiB",
+              "total": "32 GiB",
+              "used": "12 GiB",
+              "usage": 38,
+              "venderModel": "Preview disk",
+              "childrens": [
+                {
+                  "name": "sdb1",
+                  "path": "/dev/sdb1",
+                  "uuid": "preview-sdb",
+                  "filesystem": "ext4",
+                  "mountPoint": "/mnt/sdb1",
+                  "total": "32 GiB",
+                  "used": "12 GiB",
+                  "usage": 38
+                }
+              ]
+            },
+            {
+              "name": "sdc",
+              "path": "/dev/sdc",
+              "size": "32 GiB",
+              "total": "32 GiB",
+              "used": "12 GiB",
+              "usage": 38,
+              "venderModel": "Preview disk",
+              "childrens": [
+                {
+                  "name": "sdc1",
+                  "path": "/dev/sdc1",
+                  "uuid": "preview-sdc",
+                  "filesystem": "ext4",
+                  "mountPoint": "/mnt/sdc1",
+                  "total": "32 GiB",
+                  "used": "12 GiB",
+                  "usage": 38
+                }
+              ]
+            },
+            {
+              "name": "sdd",
+              "path": "/dev/sdd",
+              "size": "32 GiB",
+              "total": "32 GiB",
+              "used": "12 GiB",
+              "usage": 38,
+              "venderModel": "Preview disk",
+              "childrens": [
+                {
+                  "name": "sdd1",
+                  "path": "/dev/sdd1",
+                  "uuid": "preview-sdd",
+                  "filesystem": "ext4",
+                  "mountPoint": "/mnt/sdd1",
+                  "total": "32 GiB",
+                  "used": "12 GiB",
+                  "usage": 38
+                }
+              ]
+            }
+          ]
+        },
+        "previewOnly": true
+      }
+    },
+    "/raid/list/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "disks": []
+        },
+        "previewOnly": true
+      }
+    },
+    "/u/nas/service/status/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "linkease": {
+            "enabel": false
+          },
+          "sambas": [
+            {
+              "shareName": "test",
+              "path": "/mnt/sdb1"
+            }
+          ],
+          "webdav": {}
+        },
+        "previewOnly": true
+      }
+    },
+    "/guide/docker/status/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "status": "running",
+          "path": "/mnt/sdb1/docker",
+          "errorInfo": ""
+        },
+        "previewOnly": true
+      }
+    },
+    "/guide/download-service/status/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "aria2": {
+            "status": "stopped",
+            "rpcToken": "",
+            "rpcPort": 6800,
+            "webPath": "",
+            "configPath": "/mnt/sdb1/aria2",
+            "downloadPath": "/mnt/sdb1/downloads"
+          },
+          "qbittorrent": {
+            "status": "stopped",
+            "rpcToken": "",
+            "rpcPort": 6800,
+            "webPath": "",
+            "configPath": "/mnt/sdb1/qbittorrent",
+            "downloadPath": "/mnt/sdb1/downloads"
+          },
+          "transmission": {
+            "status": "stopped",
+            "rpcToken": "",
+            "rpcPort": 6800,
+            "webPath": "",
+            "configPath": "/mnt/sdb1/transmission",
+            "downloadPath": "/mnt/sdb1/downloads"
+          }
+        },
+        "previewOnly": true
+      }
+    },
+    "/u/guide/ddns/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "ipv4Domain": "Stopped",
+          "ipv6Domain": "Stopped",
+          "ddnstoDomain": "https://demo.example.invalid:443"
+        },
+        "previewOnly": true
+      }
+    },
+    "/system/status/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "cpuUsage": 1,
+          "cpuTemperature": 48,
+          "memAvailablePercentage": 73,
+          "memTotal": "4 GiB",
+          "memAvailable": "3 GiB",
+          "uptime": 109000,
+          "localtime": "2026-10-16 12:52:59"
+        },
+        "previewOnly": true
+      }
+    },
+    "/u/system/version/": {
+      "status": 200,
+      "body": {
+        "result": {
+          "model": "QEMU Standard PC (Q35 + ICH9, 2009)",
+          "kernelVersion": "6.6.86",
+          "firmwareVersion": "iStoreOS 24.10.1 2025011019"
+        }
+      }
+    },
+    "/app/install-list/": {
+      "status": 200,
+      "body": [
+        {
+          "name": "docker",
+          "title": "Docker",
+          "title_en": "Docker",
+          "description": "容器管理",
+          "description_en": "Containers",
+          "entry": "/docker"
+        },
+        {
+          "name": "qbittorrent",
+          "title": "qBittorrent",
+          "title_en": "qBittorrent",
+          "description": "下载管理",
+          "description_en": "Downloads",
+          "entry": "/download"
+        },
+        {
+          "name": "ddnsto",
+          "title": "DDNSTO",
+          "title_en": "DDNSTO",
+          "description": "远程访问",
+          "description_en": "Remote access",
+          "entry": "/ddns"
+        },
+        {
+          "name": "linkease",
+          "title": "易有云",
+          "title_en": "LinkEase",
+          "description": "文件与远程",
+          "description_en": "Files & remote access",
+          "entry": "/storage"
+        },
+        {
+          "name": "fastnet",
+          "title": "网络测速",
+          "title_en": "Speed test",
+          "description": "FastNet",
+          "description_en": "FastNet",
+          "entry": "/networkSpeedTest"
+        },
+        {
+          "name": "oaf",
+          "title": "家长控制",
+          "title_en": "Parental controls",
+          "description": "应用过滤",
+          "description_en": "App filtering",
+          "entry": "/parental"
+        }
+      ]
+    },
+    "/nas/sandbox/": {
+      "status": 200,
+      "body": {
+        "result": {
+          "status": "stopped"
+        },
+        "success": 0,
+        "previewOnly": true
+      }
+    },
+    "/guide/download/partition/list/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "partitionList": [
+            "/mnt/sdb1",
+            "/mnt/sdc1"
+          ]
+        },
+        "previewOnly": true
+      }
+    },
+    "/guide/docker/partition/list/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "partitionList": [
+            "/mnt/sdc1",
+            "/mnt/sdd1"
+          ]
+        },
+        "previewOnly": true
+      }
+    }
+  },
+  "lang": "zh-cn",
+  "features": [
+    "dockerd",
+    "sandbox",
+    "ota",
+    "ttyd"
+  ],
+  "configs": {
+    "update": {
+      "disable": true
+    },
+    "deviceInventoryV2": true,
+    "ttyd": {
+      "port": 7681,
+      "ssl": false
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "host": "192.168.30.93",
+  "views": [
+    {
+      "name": "desktop",
+      "homeLoaded": true,
+      "navigated": true,
+      "currentDeviceSurface": true,
+      "failureVisible": false,
+      "overflow": false,
+      "textSample": "局域网设备管理\n局域网设备管理\n\n认识每台设备，并用简单的方式安排它如何连接和上网。\n\n◉\n设备\n◫\n分组与计划\n⚙\n局域网设置\n设备\n\n查看当前在线和本次开机发现过的局域网设备\n\n搜索设备\n最近活跃\n按名称\n↻\n添加设备\n在线 0\n全部 1\n已设置 0\n更多筛选\n○\n部分设备信息暂不可用\n设备清单仍可使用，缺失的信息会在数据源恢复后自动补齐。\n○\n当前筛选下没有设备\n可以切换到“全部”查看本次开机发现过的设备。\nPowered by LuCI istoreos-24.10 branch (26.209.18626~2e45965) / ArgonTheme v2.2.12.3 / iStoreOS 24.10.8 2026073111"
+    },
+    {
+      "name": "tablet",
+      "homeLoaded": true,
+      "navigated": true,
+      "currentDeviceSurface": true,
+      "failureVisible": false,
+      "overflow": false,
+      "textSample": "局域网设备管理\n局域网设备管理\n\n认识每台设备，并用简单的方式安排它如何连接和上网。\n\n◉\n设备\n◫\n分组与计划\n⚙\n局域网设置\n设备\n\n查看当前在线和本次开机发现过的局域网设备\n\n搜索设备\n最近活跃\n按名称\n↻\n添加设备\n在线 0\n全部 1\n已设置 0\n更多筛选\n○\n部分设备信息暂不可用\n设备清单仍可使用，缺失的信息会在数据源恢复后自动补齐。\n○\n当前筛选下没有设备\n可以切换到“全部”查看本次开机发现过的设备。\nPowered by LuCI istoreos-24.10 branch (26.209.18626~2e45965) / ArgonTheme v2.2.12.3 / iStoreOS 24.10.8 2026073111"
+    },
+    {
+      "name": "mobile",
+      "homeLoaded": true,
+      "navigated": true,
+      "currentDeviceSurface": true,
+      "failureVisible": false,
+      "overflow": false,
+      "textSample": "局域网设备管理\n局域网设备管理\n\n认识每台设备，并用简单的方式安排它如何连接和上网。\n\n设备\n分组与计划\n局域网设置\n设备\n\n查看当前在线和本次开机发现过的局域网设备\n\n搜索设备\n最近活跃\n按名称\n↻\n添加设备\n在线 0\n全部 1\n已设置 0\n更多筛选\n○\n部分设备信息暂不可用\n设备清单仍可使用，缺失的信息会在数据源恢复后自动补齐。\n○\n当前筛选下没有设备\n可以切换到“全部”查看本次开机发现过的设备。"
+    }
+  ],
+  "consoleErrors": [],
+  "requestFailures": [],
+  "badResponses": []
+}

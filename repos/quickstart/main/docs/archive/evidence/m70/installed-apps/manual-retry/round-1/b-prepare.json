@@ -1,0 +1,13 @@
+{
+  "host": "192.168.30.244",
+  "stage": "/root/quickstart-package-candidates/home-0166-app-manual-retry-r1",
+  "result": "passed",
+  "exitCode": 0,
+  "privateBackupFingerprints": [
+    "d0a0d670c68666d2eb944c3a85dcb29e0b99fc0827e54c0aa1af0b6e1c98d060  /root/quickstart-package-candidates/home-0166-app-manual-retry-r1/backup/preinstall.tar.gz",
+    "c8e77265a5b90a6c1e3e61be69b4120675a6b9013ce694a94c2759c199941781  /root/quickstart-package-candidates/home-0166-app-manual-retry-r1/backup/package-records.tar.gz",
+    "ce86a957cc5702d312e8b5c80c2d2b6e54bcbab95012a9cf49158bb5fb429aa0  /root/quickstart-package-candidates/home-0166-app-manual-retry-r1/backup/network.before"
+  ],
+  "diagnostic": "",
+  "scope": "private backup only; no config or service changes"
+}

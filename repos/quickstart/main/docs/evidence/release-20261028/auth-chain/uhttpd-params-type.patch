@@ -1,0 +1,12 @@
+--- a/ubus.c
++++ b/ubus.c
+@@ -557,6 +557,9 @@
+ 	struct blob_attr *cur;
+ 	static struct blob_buf req;
+ 	int ret, rem;
++
++	if (args && blobmsg_type(args) != BLOBMSG_TYPE_TABLE)
++		return uh_ubus_json_rpc_error(cl, ERROR_PARAMS);
+ 
+ 	blob_buf_init(&req, 0);
+ 	blobmsg_for_each_attr(cur, args, rem) {

@@ -1,0 +1,8 @@
+{
+  "checkedAt": "2026-10-21T09:21:47.781700+00:00",
+  "before": "037321d0f1134b3ced167689c9d0ff1aeb5f14b0585edc4471ece5a388d14aab  /etc/quickstart/home-layout.json\n62df30a67d77713afe005ea6cd73cb580e80a79cdcd60d060a78cb61ede62a13  /etc/quickstart/home-launcher.json\n",
+  "uiExitCode": 0,
+  "after": "037321d0f1134b3ced167689c9d0ff1aeb5f14b0585edc4471ece5a388d14aab  /etc/quickstart/home-layout.json\n62df30a67d77713afe005ea6cd73cb580e80a79cdcd60d060a78cb61ede62a13  /etc/quickstart/home-launcher.json\n",
+  "configurationUnchanged": true,
+  "sessionsDestroyed": 1
+}

@@ -1,0 +1,12 @@
+{
+  "result": "passed",
+  "BFrontend": "67b6546",
+  "current": [
+    "0.16.6-test20261018 c9624a38ffe11b45f484b2858ddf16088ae7a6a7 .20261018.145918",
+    "0be3628c751076e6e89fd989b145901b85eb635a165df349c39eebaf0c25af62  /www/luci-static/quickstart/index.js",
+    "8ceca359d03a339a2171cfba5f5bca50f1272e7a3d4cb9b12f8dee58a66d4b15  /www/luci-static/quickstart/style.css",
+    "2d10df1751d0d3e778744c01f8edf8db96082b8d0939cf65ef38ea05eea39867  /www/luci-static/quickstart/vendor.js",
+    "2da3ec81c6d15ca52a574576486e534acf4a040d61adbc34cad360b91af76a4f  /www/luci-static/quickstart/i18n/en.json",
+    "zh_cn"
+  ]
+}

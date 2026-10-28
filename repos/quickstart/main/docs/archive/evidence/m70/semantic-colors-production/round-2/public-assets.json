@@ -1,0 +1,31 @@
+{
+  "result": "passed",
+  "assetVersion": "0.16.6-test20261018-preview-a57a297-f48f04cc82c7",
+  "frontendGitSha": "a57a2971b2d8c9e775ead7394c765bebcbbc454f",
+  "assets": [
+    {
+      "path": "/luci-static/quickstart/index.js",
+      "http": 200,
+      "bytes": 789243,
+      "sha256": "e38aac759d109d014c0c02d80194727a40ffb4042377c2bece8a7079e2a0579b"
+    },
+    {
+      "path": "/luci-static/quickstart/style.css",
+      "http": 200,
+      "bytes": 582358,
+      "sha256": "64065b866eb16d7eabbe696ff95bcf16aa398d27ad57a999d4d432d59f122c6a"
+    },
+    {
+      "path": "/luci-static/quickstart/vendor.js",
+      "http": 200,
+      "bytes": 631855,
+      "sha256": "2d10df1751d0d3e778744c01f8edf8db96082b8d0939cf65ef38ea05eea39867"
+    },
+    {
+      "path": "/luci-static/quickstart/i18n/en.json",
+      "http": 200,
+      "bytes": 88094,
+      "sha256": "2da3ec81c6d15ca52a574576486e534acf4a040d61adbc34cad360b91af76a4f"
+    }
+  ]
+}

@@ -1,0 +1,972 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/dhns/connect/",
+    "source": "backend/modules/dhns/routes.go:26:3"
+  },
+  {
+    "method": "POST",
+    "path": "/api/dhns/dhcpValid/",
+    "source": "backend/modules/dhns/routes.go:30:3"
+  },
+  {
+    "method": "POST",
+    "path": "/api/dhns/dhnsChange/",
+    "source": "backend/modules/dhns/routes.go:29:3"
+  },
+  {
+    "method": "GET",
+    "path": "/api/dhns/forward/",
+    "source": "backend/modules/dhns/routes.go:28:3"
+  },
+  {
+    "method": "GET",
+    "path": "/api/dhns/proxy/",
+    "source": "backend/modules/dhns/routes.go:27:3"
+  },
+  {
+    "method": "GET",
+    "path": "/api/lcd/simple/",
+    "source": "backend/modules/lcd/routes.go:21:2"
+  },
+  {
+    "method": "GET",
+    "path": "/api/lcd/st7789/",
+    "source": "backend/modules/lcd/routes.go:17:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/app/check/",
+    "source": "backend/modules/app/routes.go:20:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/app/install-list/",
+    "source": "backend/modules/app/routes.go:52:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/app/install/",
+    "source": "backend/modules/app/routes.go:28:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/app/v1/catalog/",
+    "source": "backend/modules/app/routes.go:36:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/aria2/init/",
+    "source": "backend/modules/guidestorage/routes.go:30:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/client-mode/",
+    "source": "backend/modules/guidecore/routes.go:35:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/client-mode/",
+    "source": "backend/modules/guidecore/routes.go:39:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/ddns/",
+    "source": "backend/modules/guideddns/routes.go:28:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/ddns/",
+    "source": "backend/modules/guideddns/routes.go:35:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/ddnsto/",
+    "source": "backend/modules/guideddns/routes.go:42:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/ddnsto/address/",
+    "source": "backend/modules/guideddns/routes.go:46:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/ddnsto/config/",
+    "source": "backend/modules/guideddns/routes.go:50:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/dns-config/",
+    "source": "backend/modules/guidecore/routes.go:27:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/dns-config/",
+    "source": "backend/modules/guidecore/routes.go:31:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/docker/partition/list/",
+    "source": "backend/modules/guidestorage/routes.go:50:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/docker/status/",
+    "source": "backend/modules/guidestorage/routes.go:54:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/docker/switch/",
+    "source": "backend/modules/guidestorage/routes.go:62:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/docker/transfer/",
+    "source": "backend/modules/guidestorage/routes.go:58:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/download-service/status/",
+    "source": "backend/modules/guidestorage/routes.go:42:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/download/partition/list/",
+    "source": "backend/modules/guidestorage/routes.go:46:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/finish/setup/",
+    "source": "backend/modules/guidecore/routes.go:51:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/gateway-router/",
+    "source": "backend/modules/guidecore/routes.go:43:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/global-folders/",
+    "source": "backend/modules/guidestorage/routes.go:78:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/global-folders/",
+    "source": "backend/modules/guidestorage/routes.go:82:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/lan/",
+    "source": "backend/modules/guidecore/routes.go:67:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/lan/",
+    "source": "backend/modules/guidecore/routes.go:63:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/need/setup/",
+    "source": "backend/modules/guidecore/routes.go:47:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/pppoe/",
+    "source": "backend/modules/guidecore/routes.go:55:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/pppoe/",
+    "source": "backend/modules/guidecore/routes.go:59:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/qbittorrent/init/",
+    "source": "backend/modules/guidestorage/routes.go:34:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/soft-source/",
+    "source": "backend/modules/guidestorage/routes.go:66:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/soft-source/",
+    "source": "backend/modules/guidestorage/routes.go:70:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/guide/soft-source/list/",
+    "source": "backend/modules/guidestorage/routes.go:74:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/guide/transmission/init/",
+    "source": "backend/modules/guidestorage/routes.go:38:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/dhcpGatewayConfig/",
+    "source": "backend/modules/lancontrol/routes.go:94:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/dhcpTagsConfig/",
+    "source": "backend/modules/lancontrol/routes.go:90:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/enableFloatGateway/",
+    "source": "backend/modules/lancontrol/routes.go:112:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/enableSpeedLimit/",
+    "source": "backend/modules/lancontrol/routes.go:102:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/globalConfigs/",
+    "source": "backend/modules/lancontrol/routes.go:120:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/listDevices/",
+    "source": "backend/modules/lancontrol/routes.go:124:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/listSpeedLimitedDevices/",
+    "source": "backend/modules/lancontrol/routes.go:291:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/listStaticDevices/",
+    "source": "backend/modules/lancontrol/routes.go:287:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/speedLimitConfig/",
+    "source": "backend/modules/lancontrol/routes.go:98:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/speedsForDevices/",
+    "source": "backend/modules/lancontrol/routes.go:82:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/speedsForOneDevice/",
+    "source": "backend/modules/lancontrol/routes.go:86:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/staticDeviceConfig/",
+    "source": "backend/modules/lancontrol/routes.go:116:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/advanced-network/",
+    "source": "backend/modules/lancontrol/routes.go:266:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/capability-action/apply/",
+    "source": "backend/modules/lancontrol/routes.go:239:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/capability-action/plan/",
+    "source": "backend/modules/lancontrol/routes.go:236:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-classification/",
+    "source": "backend/modules/lancontrol/routes.go:135:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-classification/",
+    "source": "backend/modules/lancontrol/routes.go:139:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-diagnostics/",
+    "source": "backend/modules/lancontrol/routes.go:155:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-groups/",
+    "source": "backend/modules/lancontrol/routes.go:254:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-groups/",
+    "source": "backend/modules/lancontrol/routes.go:257:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-network-policy/",
+    "source": "backend/modules/lancontrol/routes.go:181:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-network-policy/",
+    "source": "backend/modules/lancontrol/routes.go:185:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-network-policy/apply/",
+    "source": "backend/modules/lancontrol/routes.go:191:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-network-policy/plan/",
+    "source": "backend/modules/lancontrol/routes.go:188:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-policy/",
+    "source": "backend/modules/lancontrol/routes.go:275:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-policy/",
+    "source": "backend/modules/lancontrol/routes.go:279:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-policy/rules/",
+    "source": "backend/modules/lancontrol/routes.go:283:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-profile/",
+    "source": "backend/modules/lancontrol/routes.go:143:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-profile/",
+    "source": "backend/modules/lancontrol/routes.go:147:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-restrictions/apply/",
+    "source": "backend/modules/lancontrol/routes.go:197:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-restrictions/plan/",
+    "source": "backend/modules/lancontrol/routes.go:194:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/device-traffic/",
+    "source": "backend/modules/lancontrol/routes.go:151:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/devices/",
+    "source": "backend/modules/lancontrol/routes.go:128:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/devices/",
+    "source": "backend/modules/lancontrol/routes.go:131:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/feature-components/",
+    "source": "backend/modules/lancontrol/routes.go:233:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/floating-gateway/",
+    "source": "backend/modules/lancontrol/routes.go:201:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/floating-gateway/apply/",
+    "source": "backend/modules/lancontrol/routes.go:207:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/floating-gateway/drill-plan/",
+    "source": "backend/modules/lancontrol/routes.go:210:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/floating-gateway/plan/",
+    "source": "backend/modules/lancontrol/routes.go:204:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/gateway-assignment/apply/",
+    "source": "backend/modules/lancontrol/routes.go:167:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/gateway-assignment/plan/",
+    "source": "backend/modules/lancontrol/routes.go:163:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/gateway-target-references/",
+    "source": "backend/modules/lancontrol/routes.go:171:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/gateway-target/apply/",
+    "source": "backend/modules/lancontrol/routes.go:177:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/gateway-target/plan/",
+    "source": "backend/modules/lancontrol/routes.go:174:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/gateway-targets/",
+    "source": "backend/modules/lancontrol/routes.go:159:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/lan-dhcp-settings/",
+    "source": "backend/modules/lancontrol/routes.go:245:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/lan-dhcp-settings/apply/",
+    "source": "backend/modules/lancontrol/routes.go:251:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/lan-dhcp-settings/plan/",
+    "source": "backend/modules/lancontrol/routes.go:248:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/management-probe/",
+    "source": "backend/modules/lancontrol/routes.go:267:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/migration/apply/",
+    "source": "backend/modules/lancontrol/routes.go:221:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/migration/plan/",
+    "source": "backend/modules/lancontrol/routes.go:218:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/network-rules/",
+    "source": "backend/modules/lancontrol/routes.go:213:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/network-rules/apply/",
+    "source": "backend/modules/lancontrol/routes.go:215:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/network-rules/plan/",
+    "source": "backend/modules/lancontrol/routes.go:214:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/network-webhook/",
+    "source": "backend/modules/lancontrol/routes.go:268:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/policy-bundle/",
+    "source": "backend/modules/lancontrol/routes.go:269:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/policy-import/apply/",
+    "source": "backend/modules/lancontrol/routes.go:271:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/policy-import/plan/",
+    "source": "backend/modules/lancontrol/routes.go:270:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/rate-limit-migration/apply/",
+    "source": "backend/modules/lancontrol/routes.go:227:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/rate-limit-migration/plan/",
+    "source": "backend/modules/lancontrol/routes.go:224:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/rate-limit-migration/rollback/",
+    "source": "backend/modules/lancontrol/routes.go:230:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/rate-limit-settings/apply/",
+    "source": "backend/modules/lancontrol/routes.go:108:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/rate-limit-settings/plan/",
+    "source": "backend/modules/lancontrol/routes.go:105:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/router-context/",
+    "source": "backend/modules/lancontrol/routes.go:242:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/traffic-insights/",
+    "source": "backend/modules/lancontrol/routes.go:260:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/lanctrl/v2/traffic-quota/",
+    "source": "backend/modules/lancontrol/routes.go:263:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/disk/init/",
+    "source": "backend/modules/nas/routes.go:41:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/disk/initrest/",
+    "source": "backend/modules/nas/routes.go:49:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/disk/mountpoint/",
+    "source": "backend/modules/nas/routes.go:45:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/disk/partition/format",
+    "source": "backend/modules/nas/routes.go:53:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/disk/partition/mount",
+    "source": "backend/modules/nas/routes.go:57:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/nas/disk/status/",
+    "source": "backend/modules/nas/routes.go:37:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/linkease/enable",
+    "source": "backend/modules/nas/routes.go:61:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/nas/sandbox/",
+    "source": "backend/modules/nas/routes.go:91:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/sandbox/",
+    "source": "backend/modules/nas/routes.go:68:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/sandbox/commit/",
+    "source": "backend/modules/nas/routes.go:72:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/nas/sandbox/disks/",
+    "source": "backend/modules/nas/routes.go:87:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/sandbox/exit/",
+    "source": "backend/modules/nas/routes.go:79:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/nas/sandbox/reset/",
+    "source": "backend/modules/nas/routes.go:83:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/nas/service/status/",
+    "source": "backend/modules/nas/routes.go:30:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/network/checkPublicNet/",
+    "source": "backend/modules/network/routes.go:57:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/network/device/list/",
+    "source": "backend/modules/network/routes.go:45:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/network/homebox/enable",
+    "source": "backend/modules/network/routes.go:49:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/network/interface/config/",
+    "source": "backend/modules/network/routes.go:69:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/network/interface/config/",
+    "source": "backend/modules/network/routes.go:73:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/network/interface/status/",
+    "source": "backend/modules/network/routes.go:53:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/network/port/list/",
+    "source": "backend/modules/network/routes.go:65:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/network/setup/finish/",
+    "source": "backend/modules/network/routes.go:41:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/network/statistics/",
+    "source": "backend/modules/network/routes.go:27:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/network/status/",
+    "source": "backend/modules/network/routes.go:34:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/quickstart/delete/",
+    "source": "backend/modules/quickstart/routes.go:50:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/quickstart/get/",
+    "source": "backend/modules/quickstart/routes.go:28:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/quickstart/set/",
+    "source": "backend/modules/quickstart/routes.go:39:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/raid/add/",
+    "source": "backend/modules/raid/routes.go:33:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/raid/autofix/",
+    "source": "backend/modules/raid/routes.go:53:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/raid/create/",
+    "source": "backend/modules/raid/routes.go:25:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/raid/create/list/",
+    "source": "backend/modules/raid/routes.go:57:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/raid/delete/",
+    "source": "backend/modules/raid/routes.go:29:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/raid/detail/",
+    "source": "backend/modules/raid/routes.go:41:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/raid/list/",
+    "source": "backend/modules/raid/routes.go:49:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/raid/recover/",
+    "source": "backend/modules/raid/routes.go:45:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/raid/remove/",
+    "source": "backend/modules/raid/routes.go:37:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/share/protocol/samba/",
+    "source": "backend/modules/share/routes.go:68:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/protocol/samba/",
+    "source": "backend/modules/share/routes.go:72:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/share/protocol/webdav/",
+    "source": "backend/modules/share/routes.go:60:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/protocol/webdav/",
+    "source": "backend/modules/share/routes.go:64:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/service/create/",
+    "source": "backend/modules/share/routes.go:48:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/service/delete/",
+    "source": "backend/modules/share/routes.go:56:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/share/service/list/",
+    "source": "backend/modules/share/routes.go:44:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/service/update/",
+    "source": "backend/modules/share/routes.go:52:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/user/create/",
+    "source": "backend/modules/share/routes.go:32:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/user/delete/",
+    "source": "backend/modules/share/routes.go:40:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/share/user/list/",
+    "source": "backend/modules/share/routes.go:28:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/share/user/update/",
+    "source": "backend/modules/share/routes.go:36:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/smart/attribute/result/",
+    "source": "backend/modules/smart/routes.go:54:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/smart/config/",
+    "source": "backend/modules/smart/routes.go:35:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/smart/config/",
+    "source": "backend/modules/smart/routes.go:39:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/smart/extend/result/",
+    "source": "backend/modules/smart/routes.go:58:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/smart/list/",
+    "source": "backend/modules/smart/routes.go:24:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/smart/log/",
+    "source": "backend/modules/smart/routes.go:31:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/smart/test/",
+    "source": "backend/modules/smart/routes.go:43:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/smart/test/result/",
+    "source": "backend/modules/smart/routes.go:50:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/system/auto-check-update/",
+    "source": "backend/modules/system/routes.go:42:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/check-update/",
+    "source": "backend/modules/system/routes.go:38:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/cpu/status/",
+    "source": "backend/modules/system/routes.go:67:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/cpu/temperature/",
+    "source": "backend/modules/system/routes.go:71:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/getToken/",
+    "source": "backend/modules/system/routes.go:58:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/memery/status/",
+    "source": "backend/modules/system/routes.go:75:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/module-settings/",
+    "source": "backend/modules/system/routes.go:91:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/system/module-settings/",
+    "source": "backend/modules/system/routes.go:95:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/system/poweroff/",
+    "source": "backend/modules/system/routes.go:87:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/system/reboot/",
+    "source": "backend/modules/system/routes.go:83:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/system/setPassword/",
+    "source": "backend/modules/system/routes.go:50:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/status/",
+    "source": "backend/modules/system/routes.go:79:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/time/",
+    "source": "backend/modules/system/routes.go:63:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/system/version/",
+    "source": "backend/modules/system/routes.go:31:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/u/guide/ddns/",
+    "source": "backend/modules/guideddns/routes.go:28:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/u/guide/ddns/",
+    "source": "backend/modules/guideddns/routes.go:35:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/u/nas/linkease/enable",
+    "source": "backend/modules/nas/routes.go:61:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/u/nas/sandbox/commit/",
+    "source": "backend/modules/nas/routes.go:72:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/u/nas/service/status/",
+    "source": "backend/modules/nas/routes.go:30:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/u/network/statistics/",
+    "source": "backend/modules/network/routes.go:27:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/u/network/status/",
+    "source": "backend/modules/network/routes.go:34:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/u/quickstart/get/",
+    "source": "backend/modules/quickstart/routes.go:28:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/u/quickstart/set/",
+    "source": "backend/modules/quickstart/routes.go:39:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/u/smart/list/",
+    "source": "backend/modules/smart/routes.go:24:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/u/smart/test/",
+    "source": "backend/modules/smart/routes.go:43:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/u/system/version/",
+    "source": "backend/modules/system/routes.go:31:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/wireless/edit-iface/",
+    "source": "backend/modules/wireless/routes.go:34:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/wireless/enable-iface/",
+    "source": "backend/modules/wireless/routes.go:26:2"
+  },
+  {
+    "method": "GET",
+    "path": "/cgi-bin/luci/istore/wireless/list-iface/",
+    "source": "backend/modules/wireless/routes.go:22:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/wireless/set-device-power/",
+    "source": "backend/modules/wireless/routes.go:30:2"
+  },
+  {
+    "method": "POST",
+    "path": "/cgi-bin/luci/istore/wireless/setup/",
+    "source": "backend/modules/wireless/routes.go:38:2"
+  }
+]

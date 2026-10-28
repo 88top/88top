@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -28,6 +29,30 @@ type fakeStore struct {
 	activeDevices uint64
 
 	events []string
+}
+
+func TestCreatePreflightsAllMembersBeforeWrites(t *testing.T) {
+	for _, tc := range []struct {
+		level string
+		paths []string
+		disks map[string]*Disk
+	}{
+		{"raid1", []string{"/dev/sda", "/dev/sdb"}, map[string]*Disk{"sda": {Path: "/dev/sda"}}},
+		{"raid1", []string{"/dev/sda", "/dev/sda"}, map[string]*Disk{"sda": {Path: "/dev/sda"}}},
+		{"unsupported", []string{"/dev/sda", "/dev/sdb"}, nil},
+		{"raid6", []string{"/dev/sda", "/dev/sdb", "/dev/sdc"}, nil},
+		{"raid1", []string{"/dev/sda", "/dev/sdb"}, map[string]*Disk{"sda": {Path: "/dev/sda"}, "sdb": {Path: "/dev/sdb", Partitions: []Partition{{MountPoint: "Raid Member: md0"}}}}},
+	} {
+		store := &fakeStore{disks: tc.disks}
+		if _, err := NewService(store).Create(context.Background(), CreateInput{Level: tc.level, DevicePaths: tc.paths}); err == nil {
+			t.Fatal("invalid create accepted")
+		}
+		for _, event := range store.events {
+			if !strings.HasPrefix(event, "read:") {
+				t.Fatalf("preflight failure caused side effect: %s", event)
+			}
+		}
+	}
 }
 
 func (store *fakeStore) ReadDisk(ctx context.Context, name string) (*Disk, error) {
@@ -142,14 +167,14 @@ func TestCreatePreparesDisksCreatesArrayAndGeneratesConfig(t *testing.T) {
 
 	want := []string{
 		"read:sda",
+		"read:sdb",
+		"find-md",
 		"unmount:/mnt/a",
 		"erase:/dev/sda",
 		"make-part:/dev/sda",
-		"read:sdb",
 		"erase:/dev/sdb",
 		"make-part:/dev/sdb",
 		"wait-partition",
-		"find-md",
 		"create:mdadm -C /dev/md1 --run --quiet --assume-clean --homehost=any -n 2 -l 1 /dev/sda1 /dev/sdb1",
 		"gen-config",
 		"wait-create",
@@ -172,6 +197,26 @@ func TestCreateRejectsInsufficientMembers(t *testing.T) {
 	}
 	if len(store.events) != 0 {
 		t.Fatalf("did not expect store calls, got %#v", store.events)
+	}
+}
+
+func TestCreateDoesNotEraseWhenNoArraySlotOrLaterUnmountFails(t *testing.T) {
+	for _, tc := range []struct {
+		free       int
+		unmountErr error
+	}{{-1, nil}, {0, errors.New("busy filesystem")}} {
+		store := &fakeStore{freeMd: tc.free, unmountErr: tc.unmountErr, disks: map[string]*Disk{
+			"sda": {Path: "/dev/sda"},
+			"sdb": {Path: "/dev/sdb", Partitions: []Partition{{Path: "/dev/sdb1", MountPoint: "/mnt/busy"}}},
+		}}
+		if _, err := NewService(store).Create(context.Background(), CreateInput{Level: "raid1", DevicePaths: []string{"/dev/sda", "/dev/sdb"}}); err == nil {
+			t.Fatal("expected pre-write failure")
+		}
+		for _, event := range store.events {
+			if strings.HasPrefix(event, "erase:") || strings.HasPrefix(event, "make-part:") {
+				t.Fatalf("pre-write failure erased disk: %s", event)
+			}
+		}
 	}
 }
 

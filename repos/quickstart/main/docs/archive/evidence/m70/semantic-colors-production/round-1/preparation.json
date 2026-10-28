@@ -1,0 +1,13 @@
+{
+  "host": "192.168.30.244",
+  "stage": "/root/quickstart-package-candidates/home-0166-semantic-20261020-r1",
+  "result": "passed",
+  "exitCode": 0,
+  "privateBackupFingerprints": [
+    "1794db14dd77c882bbbc1a9c10251409f45de4598cf699d3e9d60d1636ef1b03  /root/quickstart-package-candidates/home-0166-semantic-20261020-r1/backup/preinstall.tar.gz",
+    "cb4d41b2d92641a03895913de6f3be9c485d875354f26a43c521e7cd43329c66  /root/quickstart-package-candidates/home-0166-semantic-20261020-r1/backup/package-records.tar.gz",
+    "a7587da33f69f40ee59f9d819a0ce8a19bad0f4782396f7b8f96dba182bf33ca  /root/quickstart-package-candidates/home-0166-semantic-20261020-r1/backup/network.before"
+  ],
+  "diagnostic": "",
+  "scope": "private backup only; no config or service changes"
+}

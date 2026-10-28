@@ -1,0 +1,272 @@
+{
+  "checkedAt": "2026-10-18T23:44:43.582Z",
+  "checks": [
+    "Unauthenticated config read denied",
+    "Direct candidate files, running processes and LuCI resource key match the frozen runtime; opkg records retained",
+    "Real root session renders persisted homepage",
+    "Full-width blue website/settings bar restored; legacy shortcuts and custom footer absent; keyboard editor and content spacing preserved",
+    "Each home device displays its own address without increasing height; keyboard opens the same stable deviceId"
+  ],
+  "errors": [],
+  "consoleErrors": [],
+  "httpErrors": [],
+  "views": [
+    {
+      "name": "b-home-1440",
+      "overflow": false,
+      "input": {
+        "coarse": false,
+        "points": 0
+      },
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 666,
+          "h": 403.578125
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 444,
+          "h": 236.59375
+        },
+        {
+          "id": "system",
+          "form": "summary",
+          "w": 444,
+          "h": 148.984375
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 555,
+          "h": 302.078125
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 555,
+          "h": 302.078125
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 555,
+          "h": 329
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 555,
+          "h": 329
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 371.265625,
+          "h": 335.171875
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 360.359375,
+          "h": 335.171875
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 360.375,
+          "h": 335.171875
+        }
+      ]
+    }
+  ],
+  "restoration": [
+    "layout: unchanged",
+    "launcher: unchanged"
+  ],
+  "themeStyles": [
+    "http://192.168.30.244/luci-static/istorenas/css/cascade.css?v=2.2.11.5",
+    "http://192.168.30.244/luci-static/resources/easepi/easeicon.css?t=1649313193968",
+    "http://192.168.30.244/luci-static/quickstart/style.css?v=0.16.6-test20261018-preview-31cc6e6-42c7b4144b3d"
+  ],
+  "systemCenters": [],
+  "density": [
+    {
+      "tag": "FOOTER",
+      "cls": "inventory-footer",
+      "h": 28.796875,
+      "margin": "0px",
+      "padding": "12px 0px 0px",
+      "minHeight": "auto",
+      "lineHeight": "16.8px",
+      "font": "12px / 16.8px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    }
+  ],
+  "headerMetrics": {
+    "height": 48,
+    "left": 208,
+    "right": 1440,
+    "parentLeft": 208,
+    "parentRight": 1440,
+    "background": "rgb(94, 114, 228)",
+    "expectedPrimary": "#5e72e4",
+    "text": "rgb(255, 255, 255)",
+    "icon": "rgb(255, 255, 255)",
+    "controlsInside": true
+  },
+  "shellMetrics": {
+    "topBottom": 105.59375,
+    "firstTop": 125.59375,
+    "visibleStatus": false,
+    "bottomGap": 24,
+    "paddingBottom": "24px",
+    "minHeight": "0px"
+  },
+  "deviceAddressViews": [
+    {
+      "width": 1440,
+      "height": 302.078125,
+      "previousHeight": 302.078125,
+      "tiles": [
+        61.390625,
+        61.390625,
+        61.390625,
+        61.390625
+      ],
+      "items": [
+        {
+          "id": "mac:00:e2:69:59:65:3e",
+          "kind": "current",
+          "text": "192.168.30.1"
+        },
+        {
+          "id": "mac:46:3f:63:36:d2:f4",
+          "kind": "current",
+          "text": "fe80::…fe36:d2f4"
+        },
+        {
+          "id": "mac:46:f1:f3:b9:9f:b9",
+          "kind": "current",
+          "text": "192.168.30.93"
+        },
+        {
+          "id": "mac:6e:ee:2a:95:e3:d8",
+          "kind": "current",
+          "text": "fe80::…fe95:e3d8"
+        }
+      ]
+    },
+    {
+      "width": 1024,
+      "height": 448,
+      "previousHeight": 448,
+      "tiles": [
+        59.984375,
+        59.984375,
+        59.984375
+      ],
+      "items": [
+        {
+          "id": "mac:00:e2:69:59:65:3e",
+          "kind": "current",
+          "text": "192.168.30.1"
+        },
+        {
+          "id": "mac:46:3f:63:36:d2:f4",
+          "kind": "current",
+          "text": "fe80::…fe36:d2f4"
+        },
+        {
+          "id": "mac:46:f1:f3:b9:9f:b9",
+          "kind": "current",
+          "text": "192.168.30.93"
+        }
+      ]
+    },
+    {
+      "width": 768,
+      "height": 428,
+      "previousHeight": 428,
+      "tiles": [
+        59.984375,
+        59.984375,
+        59.984375
+      ],
+      "items": [
+        {
+          "id": "mac:00:e2:69:59:65:3e",
+          "kind": "current",
+          "text": "192.168.30.1"
+        },
+        {
+          "id": "mac:46:3f:63:36:d2:f4",
+          "kind": "current",
+          "text": "fe80::…fe36:d2f4"
+        },
+        {
+          "id": "mac:46:f1:f3:b9:9f:b9",
+          "kind": "current",
+          "text": "192.168.30.93"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "height": 358.296875,
+      "previousHeight": 358.296875,
+      "tiles": [
+        63,
+        63,
+        63
+      ],
+      "items": [
+        {
+          "id": "mac:00:e2:69:59:65:3e",
+          "kind": "current",
+          "text": "192.168.30.1"
+        },
+        {
+          "id": "mac:46:3f:63:36:d2:f4",
+          "kind": "current",
+          "text": "fe80::…fe36:d2f4"
+        },
+        {
+          "id": "mac:46:f1:f3:b9:9f:b9",
+          "kind": "current",
+          "text": "192.168.30.93"
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "height": 358.296875,
+      "previousHeight": 358.296875,
+      "tiles": [
+        63,
+        63,
+        63
+      ],
+      "items": [
+        {
+          "id": "mac:00:e2:69:59:65:3e",
+          "kind": "current",
+          "text": "192.168.30.1"
+        },
+        {
+          "id": "mac:46:3f:63:36:d2:f4",
+          "kind": "current",
+          "text": "fe80::…fe36:d2f4"
+        },
+        {
+          "id": "mac:46:f1:f3:b9:9f:b9",
+          "kind": "current",
+          "text": "192.168.30.93"
+        }
+      ]
+    }
+  ],
+  "result": "passed"
+}

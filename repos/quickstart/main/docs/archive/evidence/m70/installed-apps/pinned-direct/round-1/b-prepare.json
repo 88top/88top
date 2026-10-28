@@ -1,0 +1,13 @@
+{
+  "host": "192.168.30.244",
+  "stage": "/root/quickstart-package-candidates/home-0166-pinned-direct-r1",
+  "result": "passed",
+  "exitCode": 0,
+  "privateBackupFingerprints": [
+    "0e67f6723f99bf0ebb676a0486e94f2b1adb031be7727d6f412dfbefe4754cb9  /root/quickstart-package-candidates/home-0166-pinned-direct-r1/backup/preinstall.tar.gz",
+    "c8e77265a5b90a6c1e3e61be69b4120675a6b9013ce694a94c2759c199941781  /root/quickstart-package-candidates/home-0166-pinned-direct-r1/backup/package-records.tar.gz",
+    "ce86a957cc5702d312e8b5c80c2d2b6e54bcbab95012a9cf49158bb5fb429aa0  /root/quickstart-package-candidates/home-0166-pinned-direct-r1/backup/network.before"
+  ],
+  "diagnostic": "",
+  "scope": "private backup only; no config or service changes"
+}

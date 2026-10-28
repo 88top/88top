@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/istoreos/quickstart/backend/utils"
 )
 
 type Runner interface {
@@ -32,8 +34,8 @@ func (svc *Service) Mount(ctx context.Context, devicePath string, mountPoint str
 	}
 
 	commands := []string{
-		fmt.Sprintf("test -d '%v' || mkdir -p '%v'", mountPoint, mountPoint),
-		fmt.Sprintf("busybox mount '%v' '%v'", devicePath, mountPoint),
+		fmt.Sprintf("test -d %v || mkdir -p %v", utils.ShellQuote(mountPoint), utils.ShellQuote(mountPoint)),
+		fmt.Sprintf("busybox mount %v %v", utils.ShellQuote(devicePath), utils.ShellQuote(mountPoint)),
 	}
 	_, errout, err := svc.runner.OutErr(ctx, commands)
 	if err != nil {
@@ -47,7 +49,7 @@ func (svc *Service) UnMount(ctx context.Context, devicePath string) error {
 		return errors.New("umount param missing," + "path:" + devicePath)
 	}
 
-	_, errout, err := svc.runner.OutErr(ctx, []string{fmt.Sprintf("umount '%v'", devicePath)})
+	_, errout, err := svc.runner.OutErr(ctx, []string{fmt.Sprintf("umount %v", utils.ShellQuote(devicePath))})
 	if err != nil {
 		return errors.New(fmt.Sprintf("umount '%v' failed: %v", devicePath, errout))
 	}
@@ -65,7 +67,7 @@ func (svc *Service) Unmount(ctx context.Context, mountPoint string) error {
 		return errors.New("cannot unmount overlay")
 	}
 
-	_, errout, err := svc.runner.OutErr(ctx, []string{fmt.Sprintf("umount '%v'", mountPoint)})
+	_, errout, err := svc.runner.OutErr(ctx, []string{fmt.Sprintf("umount %v", utils.ShellQuote(mountPoint))})
 	if err != nil {
 		return fmt.Errorf("umount '%v' failed: %v", mountPoint, errout)
 	}
@@ -78,8 +80,8 @@ func (svc *Service) Erase(ctx context.Context, device string) error {
 	}
 
 	commands := []string{
-		fmt.Sprintf("dd if=/dev/zero of=%v bs=4096 count=8192", device),
-		fmt.Sprintf("parted -a optimal -s %v mklabel gpt", device),
+		fmt.Sprintf("dd if=/dev/zero of=%v bs=4096 count=8192", utils.ShellQuote(device)),
+		fmt.Sprintf("parted -a optimal -s %v mklabel gpt", utils.ShellQuote(device)),
 	}
 	if err := svc.runner.Run(ctx, commands); err != nil {
 		return errors.New("erase disk failed " + device)
@@ -92,7 +94,7 @@ func (svc *Service) MakePart(ctx context.Context, device string) error {
 		return errors.New("param missing")
 	}
 
-	command := fmt.Sprintf("parted -a opt %v mkpart primary ext4 16M 100%%", device)
+	command := fmt.Sprintf("parted -a opt %v mkpart primary ext4 16M 100%%", utils.ShellQuote(device))
 	if _, err := svc.runner.Output(ctx, command); err != nil {
 		return errors.New("make partition failed " + command)
 	}
@@ -100,7 +102,7 @@ func (svc *Service) MakePart(ctx context.Context, device string) error {
 }
 
 func (svc *Service) Ext4Partition(ctx context.Context, path string) error {
-	command := fmt.Sprintf("mkfs.ext4 -F %v", path)
+	command := fmt.Sprintf("mkfs.ext4 -F %v", utils.ShellQuote(path))
 	if _, err := svc.runner.Output(ctx, command); err != nil {
 		return errors.New("格式化ext4失败" + path)
 	}
@@ -149,14 +151,14 @@ func buildAddFstabCommands(mount string, uuid string, path string) []string {
 	if mount == "" {
 		return []string{
 			"uci add fstab mount",
-			fmt.Sprintf("uci set fstab.@mount[-1].uuid=%v", uuid),
-			fmt.Sprintf("uci set 'fstab.@mount[-1].target=%v'", path),
+			fmt.Sprintf("uci set fstab.@mount[-1].uuid=%v", utils.ShellQuote(uuid)),
+			fmt.Sprintf("uci set fstab.@mount[-1].target=%v", utils.ShellQuote(path)),
 			"uci set fstab.@mount[-1].enabled=1",
 		}
 	}
 	return []string{
-		fmt.Sprintf("uci set fstab.%v.uuid=%v", mount, uuid),
-		fmt.Sprintf("uci set 'fstab.%v.target=%v'", mount, path),
+		fmt.Sprintf("uci set fstab.%v.uuid=%v", mount, utils.ShellQuote(uuid)),
+		fmt.Sprintf("uci set fstab.%v.target=%v", mount, utils.ShellQuote(path)),
 		fmt.Sprintf("uci set fstab.%v.enabled=1", mount),
 	}
 }

@@ -1,0 +1,37 @@
+{
+  "host": "192.168.30.244",
+  "views": [
+    {
+      "name": "desktop",
+      "homeLoaded": true,
+      "navigated": false,
+      "currentDeviceSurface": false,
+      "failureVisible": false,
+      "overflow": false,
+      "textSample": "Installed UI does not contain the current device-management surface."
+    },
+    {
+      "name": "tablet",
+      "homeLoaded": true,
+      "navigated": false,
+      "currentDeviceSurface": false,
+      "failureVisible": false,
+      "overflow": false,
+      "textSample": "Installed UI does not contain the current device-management surface."
+    }
+  ],
+  "consoleErrors": [
+    "XHR request timed out"
+  ],
+  "requestFailures": [
+    {
+      "path": "/ubus/",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/cgi-bin/luci/admin/quickstart/devicemanagement",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "badResponses": []
+}

@@ -67,6 +67,9 @@
 | POST | `/api/openbox/activation` | `activate` (api/clientApp.ts:331) | OpenboxActivation | (code: string, left: string, right: string) |
 | PUT | `/api/openbox/activation` | `updateActivationText` (api/clientApp.ts:338) | OpenboxActivation | (left: string, right: string) |
 
+实现约定(M5,DESIGN D9):四个方法都回同一份固定状态 `{ activated: true, left: "", right: "", defaults: { left: "Open-Box <后端版本>", right: "sing-box <内核版本>" } }`,不保存任何东西(POST 的激活码随便给、PUT 的文字不存),不会出现「激活码不对」。内核版本读不到时右边只显示 `sing-box`。
+另有 `GET /api/openbox/tutorial-videos`(前端没有调用,DESIGN 第 8 节规定):固定回 `{ "videos": [], "updatedAt": 0, "staleAfterMs": 86400000 }`。
+
 ## `/api/openbox/backup`
 
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
@@ -96,6 +99,10 @@
 | POST | `/api/openbox/client-app/share-codes` | `fetchShareCodeSeals` (api/clientApp.ts:215) | Record<string, OpenboxShareCodeSeal> | (links: Record<string, string>) |
 | POST | `/api/openbox/client-app/share-codes/{x}/rotate` | `rotateShareCode` (api/clientApp.ts:232) | OpenboxShareCodeRotated | (id: string) |
 
+实现约定(M2,只列已做的 `info`):`GET /client-app/info` 返回 `OpenboxClientAppInfo` 全部字段。`routerId` 第一次读时生成(32 位小写十六进制)并保存,之后不变,不提供更换;`lanAddresses` / `lanSubnets` 只含私有地址(跳过回环 / 隧道 / 容器网桥),IPv4 在前、LAN 口在前,`lanSubnets` 只有 IPv4;`panelPort` 是本后端监听的端口;`shareRegions` 没存或存了空数组 = 默认三组且 `shareRegionsCustomized` 为 false,`defaultShareRegions` 恒为默认三组;`serverInfo` 原样,`routerName` = `serverInfo.name`(去首尾空白)或「Open-Box」;`egressCountry` 是上一次 `POST egress-country` 判出的 `{ip, country, at}`,没判过或缓存不合格时为 `null`。`share-codes*`、`client-config/file` 的封包格式前端没有规定,未做,见 STATUS.md。
+
+`POST /client-app/egress-country`(M2):无请求体,返回 `{ip, country, at}`(`country` 两位大写国家代码,`at` 毫秒,是「最后确认的时刻」)。只在内核服务在运行时才判(复用 `dns/region-detect` 的三家 https IP 接口,顺序问、第一家给出合法 IP 和国家代码的为准,只查询不改设置);出口 IP 和上次相同就沿用上次的国家、只刷新 `at`(前端一天内不再重判,不刷新的话过一天每次打开页面都会重判),不同才换国家;结果存在 `client-app.json` 的 `egressCountry`。内核没在运行 / 没有 procd 或 systemd(面板不在路由器上)503,读不出服务状态 500,三家接口都问不到 502(带「主机: 原因」),请求被取消 / 超时 503。
+
 ## `/api/openbox/client-config`
 
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
@@ -105,7 +112,11 @@
 | POST | `/api/openbox/client-config/file` | `fetchClientConfigFile` (api/clientApp.ts:199) | OpenboxClientBundle | (lan: string, publicBase: string) |
 | POST | `/api/openbox/client-config/rotate` | `rotateClientConfig` (api/clientApp.ts:186) | OpenboxClientConfigIssue | () |
 
+实现约定(M2,只列已做的三条;`file` 未做):状态存在 `client-app.json`(与路由器 ID 同一文件)。`GET` 第一次读时生成配对码(8 个字符,取自去掉 I / O / 0 / 1 的 32 字符表,大写)和 nonce(16 位小写十六进制)并保存,**同步开关默认关**;其余字段 `routerId` / `routerName` / `lanAddresses` / `panelPort` 与 `client-app/info` 同源。`PUT enabled` 请求体必须是 `{"enabled": true|false}`(其它一律 400,上限 1 KiB),返回 `{enabled}`,不动配对码。`POST rotate` 换配对码和 nonce、`lastSyncAt` 清零、开关保持,返回换完的整份。三条响应都带 `Cache-Control: no-store`,配对码不写日志、错误响应里不出现。`lastSyncAt` 要等 App 用的公开同步接口(未做)来更新,现在恒为 0。`file` 和 App 用的公开接口的封包格式前端没有规定,见 STATUS.md。
+
 ## `/api/openbox/clients`
+
+实现约定(M2):只读。目前只有 DHCP 租约(dnsmasq 租约文件,只收 IPv4、不含已过期的)一路,按 IP 从小到大排;`name` 没有主机名时是空串,没有 MAC 时不带 `mac`;读不到租约回 `{ "clients": [] }`,不报错。前端说明里「今天流量里出现过的来源 IP」等 `traffic*` 做了再并进来。
 
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
 |---|---|---|---|---|
@@ -222,11 +233,15 @@
 | POST | `/api/openbox/latency-history/sync` | `syncLatencyHistory` (api/openbox.ts:1411) | { history: OpenboxLatencyHistory } | () |
 | GET | `/api/openbox/latency-history/version` | `fetchLatencyHistoryVersion` (api/openbox.ts:1406) | { updatedAt: number } | () |
 
+实现约定(M3):样本 `{time, delay, node?}` 的 `time` 是 RFC3339、`delay` 是毫秒(0 = 不通),节点组的样本带 `node`(当时选中的节点),节点自己的没有;每个名字只留最新 10 条(旧 → 新),同一时刻只留一条,最多记 5000 个名字。`samples` 一次最多 500 条,名字不能为空或超过 200 个字符、时间要合法、延迟 0 – 600000,**任何一条不合法整批 400、什么都不记**;请求体上限 256 KiB(413)。`sync` 读一次内核的 Clash API `GET /proxies`,把各代理的测速记录合进来(`delay` 为 0 的不记);内核读不到不是错误,照样回现有的历史。`updatedAt`(毫秒)只在内容真有变化时才更新,没变化也不写盘。
+
 ## `/api/openbox/node-info`
 
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
 |---|---|---|---|---|
 | GET | `/api/openbox/node-info/{x}` | `fetchNodeInfo` (api/openbox.ts:1873) | OpenboxNodeInfo | (tag: string) |
+
+实现约定(M3,仅 `GET node-info/{x}`):`x` 是节点的 tag(需 URL 编码);先在已启用订阅的节点里找,再找档案里启用的链式代理(名字就是 tag),都没有 404。`protocol` 是从外到内的协议层(类型、传输类型、`tls`、`reality`),`port` 为 0 时是 null,链式代理带 `detour`(= 它的 `upstream`)。入口地址:服务器是 IP 就直接用,是域名就用系统解析器解析(超时 5 秒),v4 / v6 分开并排序,sing-box 的 fake-ip 段(198.18.0.0/15)不算真实地址;解析不了是 200 加 `resolveError`、地址为空数组。`entryCountry` 目前恒为空串。
 | GET | `/api/openbox/node-info/{x}/entry-country` | `fetchNodeEntryCountry` (api/openbox.ts:1874) | { ip: string; country: string } | (tag: string) |
 | POST | `/api/openbox/node-info/{x}/exit` | `fetchNodeExit` (api/openbox.ts:1877) | OpenboxNodeExit | (tag: string, refresh = false) |
 
@@ -264,7 +279,11 @@
 | GET | `/api/openbox/profile/defaults?region={x}` | `fetchProfileDefaults` (api/openbox.ts:528) | { defaults: OpenboxProfileDefaults } | (region: string) |
 
 > 实现约定(M1):GET 返回「默认值 + 已保存内容」的完整档案。PUT 的请求体是**补丁**,深度合并(对象递归合并,数组和标量整体替换,`null` 删除该键,下次读取由默认值补上),合并后整体校验,失败 `400 { error }` 且不落盘;`rulesetDir` 由服务端决定,客户端传的忽略;`chainProxies[].node` 只读(link 没变沿用旧摘要)。请求体上限 1 MiB。未知键原样保留。
+>
+> **`shareRegions` / `serverInfo` 是例外**(客户端 App 页的地区分流与路由器标识,规则见 `internal/clientapp/regions_check.go`):补丁里带了才校验,校验不过 `400 { error }`,**原因是英文**(前端 `saveShareRegions` 的注释写明原样显示,例如 `region CN is in both cn and x`),整个补丁作废、不落盘;档案里已存着的旧数据不会拦住不带这两个键的保存。`shareRegions` 是整份覆盖的数组:`[]` = 恢复默认三组(存成空数组),`null` = 删键;最多 12 组、每组最多 200 条规则;`id` 形如 `^[a-z0-9_-]{1,32}$` 且不重复;名称必填且 ≤ 30 字、说明 ≤ 120 字;地区是两位大写国家码(组内重复静默去重);`regionMatch` 取 `inside`(缺省)/ `outside`,`outside` 至少列一个地区;「在这些地区」的组之间地区不可重复(`outside` 组不参与);至多一个 `default` 组;`catchAll` 与每条规则的 `action` 取 `direct` / `proxy`;规则值按类型校验(`geosite` / `geoip` 为 `^[a-z0-9!@._-]{1,80}$`,`ipcidr` 为 IP 或 CIDR,`ruleUrl` 为 http(s) 且 ≤ 2048 字符,其余为 `^[A-Za-z0-9*_.-]{1,253}$`);DNS 上游只收 IP 或 `wan`、备用每侧 ≤ 3 条,协议只收 `udp` / `tcp`,端口 1–65535,`wan` 固定 UDP 53;没给的 DNS 字段按地区补默认值(含中国大陆:代理侧 TCP 1.1.1.1,其余系统 DNS)。校验通过后**保存规整后的值**(字符串去首尾空白、组里不认识的键丢掉、缺的 `dns` 补全),所以 PUT 返回和之后 GET 读到的是规整后的样子;默认三组原样存回不变。`serverInfo` 在这里是**整份替换**而不是深度合并(没给的字段就是没有,`{}` = 全用默认,`null` = 删键):`name` ≤ 40 字,`icon` ≤ 64 字符且无控制字符,`iconSvg` 以 `<svg` 开头且 ≤ 64 KB,`region` 为两位大写国家码;空串等同没给;不认识的键保留。`iconSvg` 的内容只校验开头和大小,不做净化。
 
+> **`servers` 也是例外**(「共享网络」的服务器,规则见 `internal/shareservers`):补丁里带了才校验(没带不碰已存的旧数据),校验不过 `400 { error }`,**原因是中文**并指出第几台(例如 `第 2 台服务器「SS」: password 不能为空`),整个补丁作废、不落盘;`servers` 是整份数组,合并时整体替换(`[]` = 清空,`null` = 删键)。规则:最多 64 台;每台 `id` 为 1–64 位字母 / 数字 / `_` / `-` 且不重复,`name` 去空白后非空且 ≤ 80 字,`protocol` 取 `shadowsocks` / `vless` / `tuic` / `hysteria2` / `mixed`,`port` 是 1–65535 的整数且各台不重复(不论启用与否,与前端 `usedPorts` 一致),`enabled` 若给了必须是布尔;`address` 可选,只收单独的域名 / IP(IPv6 可带方括号,不带端口、路径、账号、空白),`outbound` 可选且 ≤ 128 字符,空串等同没给(去掉键);各协议:`shadowsocks` 的 `method` 取 `aes-128-gcm` / `aes-192-gcm` / `aes-256-gcm` / `chacha20-ietf-poly1305` / `xchacha20-ietf-poly1305` / `2022-blake3-aes-128-gcm` / `2022-blake3-aes-256-gcm` / `2022-blake3-chacha20-poly1305`、`password` 非空,2022 系列的密码必须是对应长度(16 / 32 字节)密钥的标准 base64;`vless` 与 `tuic` 的 `uuid` 必须是 8-4-4-4-12 或 32 位十六进制,`vless` 的 `tls` 若给了必须是布尔;`tuic` 与 `hysteria2` 的 `password` 非空,`hysteria2` 的 `obfs` 可选;`mixed` 的 `username` 与 `password` 要么都填要么都不填。字符串去首尾空白后保存,不认识的键原样保留;**不**检查 `outbound` 指的节点 / 组是否存在,也**不**检查端口是否被面板、内核或别的服务占用(那是 `servers/port-check` 的事,前端保存前会先调它)。
+>
 > 实现约定(M1):`region` 取 `cn` / `intl`(缺省 `cn`,其它 400)。响应同时带 `defaults` 和 `dnsRewriteDefaults`(两个前端函数共用同一路径)。
 
 ## `/api/openbox/route-test`
@@ -290,6 +309,8 @@
 |---|---|---|---|---|
 | GET | `/api/openbox/servers/port-check?port={x}&id={x}` | `checkServerPort` (api/openbox.ts:1706) | OpenboxPortCheck | (port: number, id: string) |
 
+实现约定(M2):`port-check` 回 `{ ok, reason?, name? }`;端口不是 1–65535 的整数不是 400,而是 `{ ok: false, reason: "invalid" }`。`reason` 依次判 `invalid` → `reserved`(面板监听端口、内核固定端口 7853 / 7855 / 7891 / 9095、已部署配置里的控制接口和非 `share-*` 入站)→ `server`(档案里另一台服务器占着,`name` 是它的名字;`id` 是正在编辑的那台,自己不算)→ `listening`(读 `/proc/net`;因为不知道协议,TCP / UDP 任一被占都算)。读不到端口占用情况回 500。服务器本身存在档案的 `servers` 里,走 `/api/openbox/profile` 读写。
+
 ## `/api/openbox/service`
 
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
@@ -307,6 +328,8 @@
 | GET | `/api/openbox/site-latency/history` | `fetchSiteLatencyHistory` (api/openbox.ts:1721) | Partial<OpenboxSiteLatencyHistory> | () |
 
 ## `/api/openbox/subscription-shares`
+
+实现约定(M2,管理部分):记录存 `subscription-shares.json`;列表 `{ shares }`,新建 / 修改 / 换 token `{ share }`,删除 `{ ok: true }`。新建带的 `token` 合格(32–128 位字母数字 `-` `_`)且没被占用才用,否则换新;PATCH 只改传了的字段,`regenerate: true` 才换 token,不收客户端指定的 token;新选的订阅必须存在,这条分享里已有的订阅 id 照旧保留。对外的 `/sub/<token>` 下发不在本分组,尚未实现(见 STATUS.md)。
 
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
 |---|---|---|---|---|
@@ -350,7 +373,13 @@
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
 |---|---|---|---|---|
 | GET | `/api/openbox/traffic/month?${month ? ` | `fetchTrafficMonth` (api/openbox.ts:1487) | OpenboxTrafficMonth | (month?: string, countDirect = true) |
+| GET | `/api/openbox/traffic/day?day=&limit=&hour=&direct=` | `fetchTrafficDay` (api/openbox.ts:1489) | OpenboxTrafficDay | (day: string, limit = 500, hour?: number \| null, countDirect = true) |
+| GET | `/api/openbox/traffic/drill?day=&kind=&key=&by=&limit=&hour=&direct=` | `fetchTrafficDrill` (api/openbox.ts:1506) | OpenboxTrafficDrill | (day, kind, key, by, limit = 200, hour?, countDirect = true) |
 | GET | `/api/openbox/traffic/usage` | `fetchTrafficUsage` (api/openbox.ts:1482) | OpenboxTrafficUsage | () |
+
+> 实现约定(M3):四个接口都只接受 GET、响应 no-store。参数不合法回 400 加 `error`:`month` 要 `YYYY-MM`(缺省本月);`day` 必填 `YYYY-MM-DD`;`limit` 缺省 500(drill 前端传 200),范围 1 到 5000;`hour` 0 到 23(不给是整天);drill 的 `kind` / `by` 取 `client` / `node` / `host` 且不能相同,`key` 必填;`direct=0` 表示不统计直连,其余都统计。没有数据的日子 / 月份回空榜单和 0,不是 404。
+> 数据来源:后台每 10 秒读一次内核的 `/connections`(sing-box 官方 Clash API),总量取累计总量的增量(含已关闭的短连接),终端 / 节点 / 访问目标来自各连接的增量,所以 `other` = 总量 − 各节点之和 = 没采样到的短连接;节点取出站链第一项(实际出口),访问目标取域名、没有则取目的 IP。启动后第一次、以及内核断开重连后的第一次只建基线,不记数。「走直连」指走 `direct` 类型出站的连接,`direct.tag` 是配置里第一个 direct 出站的名字。终端的 `name` 取 DHCP 租约主机名,没有就不带;`self`(路由器自己的地址)暂不带。
+> 存储:数据目录下 `traffic/`,每天一个 `YYYY-MM-DD.json`(24 小时合计加「终端 × 节点 × 访问目标」三维表)、最近 7 天另有 `YYYY-MM-DD.hours.json`(每小时各自的三维表,只看某个小时时用)、`index.json`(每天摘要与文件大小)。超过 30 天的日子只留访问量最大的 200 个访问目标,其余并入「其他」;超过档案 `traffic.keepMonths`(缺省 12,最多 36)个月的整天删除;只看某个小时、而那天的小时明细已过期时,榜单为空、小时合计仍在。`usage` 只读索引:`rows` 是三维表条数,`perDay` / `hourPerDay` / `oldPerDay` 取最近 14 天的平均文件大小。
 
 ## `/api/openbox/update`
 

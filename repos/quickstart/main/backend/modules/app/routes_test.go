@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/istoreos/quickstart/backend/internal/httpapi"
 	"github.com/istoreos/quickstart/backend/models"
+	"github.com/julienschmidt/httprouter"
 )
 
 type fakeAppBackend struct {
@@ -299,5 +299,34 @@ func requireNestedString(t *testing.T, resp map[string]any, path []string, want 
 	got, ok := current.(string)
 	if !ok || got != want {
 		t.Fatalf("expected %v to be %q, got %#v", path, want, current)
+	}
+}
+
+func (backend *fakeAppBackend) ListInstalledAppsStrict(ctx context.Context) (models.AppInstalledListResponse, error) {
+	return backend.ListInstalledApps(ctx)
+}
+func TestVersionedCatalogueDoesNotTurnFailureIntoEmpty(t *testing.T) {
+	for _, failed := range []bool{false, true} {
+		backend := &fakeAppBackend{}
+		if failed {
+			backend.err = errors.New("private internal error")
+		}
+		router := httprouter.New()
+		RegisterRoutes(router, backend)
+		body := requestAppRoute(t, router, "GET", "/cgi-bin/luci/istore/app/v1/catalog/", "", true)
+		response := decodeAppObject(t, body)
+		if failed {
+			if response["error"] == nil || response["result"] != nil {
+				t.Fatal("failure became empty", string(body))
+			}
+			if strings.Contains(string(body), "private internal") {
+				t.Fatal("private error exposed")
+			}
+		} else {
+			requireEnvelopeCode(t, response, 0)
+			if response["result"] == nil {
+				t.Fatal("missing catalogue")
+			}
+		}
 	}
 }

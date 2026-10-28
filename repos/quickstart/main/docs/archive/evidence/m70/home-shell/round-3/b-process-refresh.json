@@ -1,0 +1,35 @@
+{
+  "host": "root@192.168.30.244",
+  "before": [
+    {
+      "pid": 512168,
+      "sha256": "91a92aed90db464e247d0dae90467af9b5859daf67463b9b81ec181421c1489d",
+      "namespace": "net:[4026532500]",
+      "command": "/usr/sbin/startdhns dhns"
+    },
+    {
+      "pid": 535176,
+      "sha256": "564422a99fba64a993085adaa3aad55af76dd95f0992e071cd479ab16732e6d9",
+      "namespace": "net:[4026531840]",
+      "command": "/usr/sbin/quickstart serve --unix /var/run/quickstart/local.sock"
+    }
+  ],
+  "operations": [
+    "TERM exactly verified old helper and launch current helper in the same existing namespace; no UCI, interface or route command"
+  ],
+  "after": [
+    {
+      "pid": 535176,
+      "sha256": "564422a99fba64a993085adaa3aad55af76dd95f0992e071cd479ab16732e6d9",
+      "namespace": "net:[4026531840]",
+      "command": "/usr/sbin/quickstart serve --unix /var/run/quickstart/local.sock"
+    },
+    {
+      "pid": 535313,
+      "sha256": "564422a99fba64a993085adaa3aad55af76dd95f0992e071cd479ab16732e6d9",
+      "namespace": "net:[4026532500]",
+      "command": "/usr/sbin/startdhns dhns"
+    }
+  ],
+  "result": "passed"
+}

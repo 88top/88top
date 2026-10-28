@@ -39,7 +39,7 @@ func newDefaultGuideDDNSWriter() *defaultGuideDDNSWriter {
 func (writer *defaultGuideDDNSWriter) EnableDdnsto(ctx context.Context, input GuideDdnstoEnableInput) (string, error) {
 	cmds := []string{
 		"uci set ddnsto.@ddnsto[0].enabled=1",
-		fmt.Sprintf("uci set ddnsto.@ddnsto[0].token=%v", input.Token),
+		fmt.Sprintf("uci set ddnsto.@ddnsto[0].token=%v", utils.ShellQuote(input.Token)),
 		"uci commit ddnsto",
 		"/etc/init.d/ddnsto restart",
 	}
@@ -49,7 +49,7 @@ func (writer *defaultGuideDDNSWriter) EnableDdnsto(ctx context.Context, input Gu
 
 func (writer *defaultGuideDDNSWriter) UpdateDdnstoAddress(ctx context.Context, input GuideDdnstoAddressInput) (string, error) {
 	cmds := []string{
-		fmt.Sprintf("uci set ddnsto.@ddnsto[0].address=%v", input.Address),
+		fmt.Sprintf("uci set ddnsto.@ddnsto[0].address=%v", utils.ShellQuote(input.Address)),
 		"uci commit ddnsto",
 	}
 	_, stderr, err := writeGuideDDNSBatchOutErr(ctx, cmds, 0)

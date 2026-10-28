@@ -1,0 +1,36 @@
+{
+  "startedAt": "2026-10-18T00:11:07.327Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "widget-body-network-disk-review",
+      "startedAt": "2026-10-18T00:11:07.328Z",
+      "endedAt": "2026-10-18T00:11:19.500Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 6,
+      "report": "docs/evidence/m66/widget-composition/80-network-disk/functional/widget-body-network-disk-review/report.json"
+    },
+    {
+      "name": "widget-body-warning-review",
+      "startedAt": "2026-10-18T00:11:07.333Z",
+      "endedAt": "2026-10-18T00:11:28.896Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/widget-composition/80-network-disk/functional/widget-body-warning-review/report.json"
+    },
+    {
+      "name": "network-interaction-review",
+      "startedAt": "2026-10-18T00:11:07.332Z",
+      "endedAt": "2026-10-18T00:11:46.222Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 14,
+      "report": "docs/evidence/m66/widget-composition/80-network-disk/functional/network-interaction-review/report.json"
+    }
+  ],
+  "endedAt": "2026-10-18T00:11:46.223Z",
+  "result": "pass",
+  "groups": 28
+}

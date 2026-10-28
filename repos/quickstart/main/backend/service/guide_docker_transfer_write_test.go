@@ -133,7 +133,7 @@ func TestDefaultGuideDockerTransferWriterUpdatesDockerRootPath(t *testing.T) {
 	}
 
 	expected := []string{
-		"uci set dockerd.globals.data_root='/mnt/data/docker'",
+		"uci set dockerd.globals.data_root=/mnt/data/docker",
 		"uci commit dockerd",
 		"/etc/init.d/dockerd restart",
 	}

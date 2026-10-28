@@ -1,0 +1,6 @@
+{
+  "foreignPortStartRefused": true,
+  "foreignListenerPreservedAfterStop": true,
+  "startMessage": "Port 5180 is occupied; no process was stopped.",
+  "stopMessage": "Not running."
+}

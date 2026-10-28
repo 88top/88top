@@ -1,0 +1,24 @@
+{
+  "title": "Network Guide",
+  "titleColor": "rgb(51, 51, 51)",
+  "cardBackground": "rgba(136, 136, 136, 0.133)",
+  "bodyBackground": "rgb(23, 25, 29)",
+  "systemElements": [],
+  "overflowContainers": [
+    {
+      "class": "chart_box",
+      "overflowX": "auto",
+      "client": 340,
+      "scroll": 450
+    }
+  ],
+  "compositedCardBackground": [
+    38,
+    40,
+    43
+  ],
+  "measuredTitleContrast": 1.17,
+  "visualResult": "fail_low_readability",
+  "scope": "mobile dark real QuickActions component",
+  "optimizationLimitReached": true
+}

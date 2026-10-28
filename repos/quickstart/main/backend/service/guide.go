@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -216,15 +217,15 @@ func checkNeedSetupFromShadow() (bool, error) {
 
 func mkDlDir(ctx context.Context, path string) error {
 	cmdList := []string{
-		fmt.Sprintf("if [ ! -d '%v' ]; then mkdir -p '%v'; fi", path, path),
-		fmt.Sprintf("chmod 777 '%v'", path),
+		fmt.Sprintf("if [ ! -d %v ]; then mkdir -p %v; fi", utils.ShellQuote(path), utils.ShellQuote(path)),
+		fmt.Sprintf("chmod 777 %v", utils.ShellQuote(path)),
 	}
 
 	return utils.BatchRun(ctx, cmdList, 0)
 }
 
 func uciGet(ctx context.Context, location string) (string, error) {
-	value, err := utils.BatchOutputCmd(ctx, "uci get '"+location+"'", 0)
+	value, err := utils.BatchOutputCmd(ctx, "uci get "+utils.ShellQuote(location), 0)
 	if err != nil {
 		return "", err
 	}
@@ -397,6 +398,9 @@ func uciSetInterfaceWithoutCommit(ctx context.Context, it string, proto string, 
 		IP:            ip,
 		Gateway:       gateway,
 	})
+	if buildErr != nil {
+		return buildErr
+	}
 	for _, cmdList := range batches {
 		if err := runGuideNetworkBasicsUCICommands(ctx, cmdList); err != nil {
 			l.Warnln(err)
@@ -407,6 +411,9 @@ func uciSetInterfaceWithoutCommit(ctx context.Context, it string, proto string, 
 }
 
 func checkDockerPath(ctx context.Context, path string, orginPath string) error {
+	if !filepath.IsAbs(path) || !filepath.IsAbs(orginPath) || filepath.Clean(path) == "/" || strings.ContainsAny(path+orginPath, "\x00\r\n") {
+		return errors.New("路径不合法")
+	}
 
 	if path == orginPath {
 		return dockertransfer.ValidatePathSnapshot(dockertransfer.PathSnapshot{
@@ -417,13 +424,13 @@ func checkDockerPath(ctx context.Context, path string, orginPath string) error {
 	}
 
 	//目标路径不存在的时候，必须先创建文件夹，不然后面无法获取到目标文件系统信息
-	cmdStr := fmt.Sprintf("[ -d '%v' ] || mkdir -p '%v'", path, path)
+	cmdStr := fmt.Sprintf("[ -d %v ] || mkdir -p %v", utils.ShellQuote(path), utils.ShellQuote(path))
 	_, err := runGuideDockerTransferPathOutput(ctx, cmdStr)
 	if err != nil {
 		return err
 	}
 
-	cmdStr = fmt.Sprintf("findmnt -T '%v' -o SOURCE,FSTYPE --json", path)
+	cmdStr = fmt.Sprintf("findmnt -T %v -o SOURCE,FSTYPE --json", utils.ShellQuote(path))
 	ret, err := runGuideDockerTransferPathOutput(ctx, cmdStr)
 	if err != nil {
 		l.Debugln(cmdStr, err.Error())
@@ -450,7 +457,7 @@ func checkDockerPath(ctx context.Context, path string, orginPath string) error {
 	}
 	rootPathStr := strings.Replace(string(rootPath), "\n", "", -1)
 
-	cmdStr = fmt.Sprintf("findmnt -T '%v' -o SOURCE|sed -n 2p", orginPath)
+	cmdStr = fmt.Sprintf("findmnt -T %v -o SOURCE|sed -n 2p", utils.ShellQuote(orginPath))
 	rootPath, err = runGuideDockerTransferPathOutput(ctx, cmdStr)
 	if err != nil {
 		l.Debugln(err.Error())
@@ -475,7 +482,7 @@ func checkDockerPath(ctx context.Context, path string, orginPath string) error {
 func transferDockerPath(ctx context.Context, targetPath string, force bool, overwriteDir bool, orginPath string) (*models.GuideDockerTransferResponseResult, error) {
 	//要判断目标空间，是否还是原来的根分区，或者是无效的分区
 	//目标文件夹是否存在
-	cmdStr := fmt.Sprintf("[ -d '%v' ] && echo true || echo false", targetPath)
+	cmdStr := fmt.Sprintf("[ -d %v ] && echo true || echo false", utils.ShellQuote(targetPath))
 	pathResult, err := utils.BatchOutputCmd(ctx, cmdStr, 0)
 	if err != nil {
 		return nil, err
@@ -485,7 +492,7 @@ func transferDockerPath(ctx context.Context, targetPath string, force bool, over
 
 	if pathResultStr == "true" {
 		//文件夹存在，如果里面还有多余的文件，也不能直接覆盖，提示用户
-		cmdStr := fmt.Sprintf("ls -A '%v' | wc -l", targetPath)
+		cmdStr := fmt.Sprintf("ls -A %v | wc -l", utils.ShellQuote(targetPath))
 		l.Debugln("文件夹判断", cmdStr)
 		dirResult, err := utils.BatchOutputCmd(ctx, cmdStr, 0)
 		if err != nil {
@@ -499,7 +506,7 @@ func transferDockerPath(ctx context.Context, targetPath string, force bool, over
 				if overwriteDir {
 					l.Debugln("覆盖迁移", overwriteDir)
 					cmdList := []string{
-						fmt.Sprintf("rm -r '%v'", targetPath),
+						fmt.Sprintf("rm -r %v", utils.ShellQuote(targetPath)),
 					}
 					l.Debugln("删除文件夹")
 					err = utils.BatchRun(ctx, cmdList, 0)
@@ -508,7 +515,7 @@ func transferDockerPath(ctx context.Context, targetPath string, force bool, over
 					}
 					l.Debugln("创建文件夹")
 					cmdList = []string{
-						fmt.Sprintf("mkdir -p '%v'", targetPath),
+						fmt.Sprintf("mkdir -p %v", utils.ShellQuote(targetPath)),
 					}
 					err = utils.BatchRun(ctx, cmdList, 0)
 					if err != nil {
@@ -516,7 +523,7 @@ func transferDockerPath(ctx context.Context, targetPath string, force bool, over
 					}
 					l.Debugln("复制文件", orginPath, targetPath)
 					cmdList = []string{
-						fmt.Sprintf("cp -a '%v/.' '%v/'", orginPath, targetPath),
+						fmt.Sprintf("cp -a %v %v", utils.ShellQuote(orginPath+"/."), utils.ShellQuote(targetPath+"/")),
 					}
 					err = utils.BatchRun(ctx, cmdList, 0)
 					if err != nil {
@@ -536,7 +543,7 @@ func transferDockerPath(ctx context.Context, targetPath string, force bool, over
 			l.Debugln("文件夹为空，复制文件")
 
 			cmdList := []string{
-				fmt.Sprintf("cp -a '%v/.' '%v/'", orginPath, targetPath),
+				fmt.Sprintf("cp -a %v %v", utils.ShellQuote(orginPath+"/."), utils.ShellQuote(targetPath+"/")),
 			}
 			err = utils.BatchRun(ctx, cmdList, 0)
 			if err != nil {
@@ -548,8 +555,8 @@ func transferDockerPath(ctx context.Context, targetPath string, force bool, over
 		l.Debugln("文件夹不存在，复制文件")
 
 		cmdList := []string{
-			fmt.Sprintf("mkdir -p '%v'", targetPath),
-			fmt.Sprintf("cp -a '%v/.' '%v/'", orginPath, targetPath),
+			fmt.Sprintf("mkdir -p %v", utils.ShellQuote(targetPath)),
+			fmt.Sprintf("cp -a %v %v", utils.ShellQuote(orginPath+"/."), utils.ShellQuote(targetPath+"/")),
 		}
 		err = utils.BatchRun(ctx, cmdList, 0)
 		if err != nil {

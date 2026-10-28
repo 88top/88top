@@ -31,6 +31,8 @@
     </action-component>
 </template>
 <script setup lang="ts">
+import {useOwnedTimeout} from "/@/home/useOwnedTimeout"
+const ownedTimeout=useOwnedTimeout()
 import { ref } from "vue";
 import { useGettext,formatNumber } from '/@/plugins/i18n'
 const { $gettext,$ngettext } = useGettext()
@@ -52,7 +54,7 @@ const waitReboot = () => {
     new Promise((resolve, reject) => {
         const target = "/luci-static/resources/icons/loading.gif"
         const rejectFn = () => {
-            window.setTimeout(check, 2000);
+            ownedTimeout(check, 2000);
         }
         const check = () => {
             const img = new Image()
@@ -62,9 +64,9 @@ const waitReboot = () => {
 
             img.src = target
         }
-        window.setTimeout(check, 10000)
+        ownedTimeout(check, 10000)
     }).then(() => {
-        window.setTimeout(() => {
+        ownedTimeout(() => {
             location.reload()
         }, 2000);
     })

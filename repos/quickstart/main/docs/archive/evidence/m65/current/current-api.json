@@ -1,0 +1,100 @@
+{
+  "checkedAt": "2026-10-14T03:50:34.421472+00:00",
+  "hosts": {
+    "192.168.30.244": {
+      "version": "0.9.9",
+      "apis": {
+        "devices": {
+          "http": 0,
+          "businessResult": false,
+          "error": "request_failed_or_timed_out"
+        },
+        "network-rules": {
+          "http": 0,
+          "businessResult": false,
+          "error": "request_failed_or_timed_out"
+        },
+        "device-traffic": {
+          "http": 404,
+          "businessResult": false,
+          "error": "404 page not found\n"
+        },
+        "router-context": {
+          "http": 404,
+          "businessResult": false,
+          "error": "404 page not found\n"
+        }
+      },
+      "uiExitCode": 1,
+      "sessionDestroyed": true
+    },
+    "192.168.30.93": {
+      "version": "0.15.0-test20260928",
+      "apis": {
+        "devices": {
+          "http": 200,
+          "businessResult": true,
+          "success": null,
+          "deviceCount": 1,
+          "onlineCount": 0,
+          "health": {
+            "state": "partial",
+            "reasons": [
+              "arp_unavailable"
+            ]
+          }
+        },
+        "network-rules": {
+          "http": 200,
+          "businessResult": true,
+          "success": null,
+          "ruleCount": 0
+        },
+        "device-traffic": {
+          "http": 200,
+          "businessResult": true,
+          "success": null,
+          "health": {
+            "state": "ready"
+          },
+          "itemCount": 1
+        },
+        "router-context": {
+          "http": 200,
+          "businessResult": true,
+          "success": null,
+          "context": {
+            "lan": "lan",
+            "topologyPosition": "lan_gateway_candidate",
+            "localAddress": "192.168.100.1",
+            "upstreamGateways": [],
+            "localDhcpConfigured": true,
+            "localDhcpHealthy": true,
+            "dhcpAuthority": "local",
+            "externalDhcpServers": [],
+            "routeEditability": {
+              "editable": true,
+              "reason": "local_dhcp_authority"
+            },
+            "evidence": [
+              {
+                "kind": "lan_address",
+                "source": "network_runtime",
+                "value": "192.168.100.1",
+                "confidence": "observed"
+              },
+              {
+                "kind": "local_dhcp_config",
+                "source": "dhcp_config",
+                "value": "configured=true",
+                "confidence": "configured"
+              }
+            ]
+          }
+        }
+      },
+      "uiExitCode": 0,
+      "sessionDestroyed": true
+    }
+  }
+}

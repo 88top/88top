@@ -1,0 +1,5 @@
+{
+  "result": "passed",
+  "expectedRejection": "candidate bytes match, but old opkg metadata is rejected before root-session creation",
+  "exitCode": 1
+}

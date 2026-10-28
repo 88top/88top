@@ -1,0 +1,6 @@
+{
+  "result": "passed",
+  "baseline": "23161ff",
+  "wholeSfcIdenticalExcept": "one root width/max-width/margin rule",
+  "templateScriptAndAllOtherStylesIdentical": true
+}

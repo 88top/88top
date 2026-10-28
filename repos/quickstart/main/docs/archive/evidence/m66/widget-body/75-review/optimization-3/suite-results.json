@@ -1,0 +1,288 @@
+{
+  "startedAt": "2026-10-17T15:45:18.971Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "widget-body-network-disk-review",
+      "startedAt": "2026-10-17T15:45:18.976Z",
+      "endedAt": "2026-10-17T15:45:30.555Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 6,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/widget-body-network-disk-review/report.json"
+    },
+    {
+      "name": "widget-body-storage-review",
+      "startedAt": "2026-10-17T15:45:18.972Z",
+      "endedAt": "2026-10-17T15:45:35.958Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 25,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/widget-body-storage-review/report.json"
+    },
+    {
+      "name": "widget-body-services-review",
+      "startedAt": "2026-10-17T15:45:18.975Z",
+      "endedAt": "2026-10-17T15:45:39.939Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 10,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/widget-body-services-review/report.json"
+    },
+    {
+      "name": "widget-body-touch-review",
+      "startedAt": "2026-10-17T15:45:35.958Z",
+      "endedAt": "2026-10-17T15:45:42.251Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/widget-body-touch-review/report.json"
+    },
+    {
+      "name": "widget-body-system-review",
+      "startedAt": "2026-10-17T15:45:30.555Z",
+      "endedAt": "2026-10-17T15:45:50.680Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/widget-body-system-review/report.json"
+    },
+    {
+      "name": "widget-body-contrast-review",
+      "startedAt": "2026-10-17T15:45:50.681Z",
+      "endedAt": "2026-10-17T15:45:54.446Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 6,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/widget-body-contrast-review/report.json"
+    },
+    {
+      "name": "widget-body-resource-review",
+      "startedAt": "2026-10-17T15:45:39.939Z",
+      "endedAt": "2026-10-17T15:45:59.371Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/widget-body-resource-review/report.json"
+    },
+    {
+      "name": "widget-body-warning-review",
+      "startedAt": "2026-10-17T15:45:54.447Z",
+      "endedAt": "2026-10-17T15:46:15.571Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/widget-body-warning-review/report.json"
+    },
+    {
+      "name": "visual-refinement-content-review",
+      "startedAt": "2026-10-17T15:46:15.571Z",
+      "endedAt": "2026-10-17T15:46:31.097Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/visual-refinement-content-review/report.json"
+    },
+    {
+      "name": "widget-body-matrix-review",
+      "startedAt": "2026-10-17T15:45:42.252Z",
+      "endedAt": "2026-10-17T15:46:31.815Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 42,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/widget-body-matrix-review/report.json"
+    },
+    {
+      "name": "header-action-interaction-review",
+      "startedAt": "2026-10-17T15:46:31.816Z",
+      "endedAt": "2026-10-17T15:46:38.633Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 6,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/header-action-interaction-review/report.json"
+    },
+    {
+      "name": "widget-actions-review",
+      "startedAt": "2026-10-17T15:46:38.634Z",
+      "endedAt": "2026-10-17T15:46:57.615Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/widget-actions-review/report.json"
+    },
+    {
+      "name": "visual-refinement-matrix-review",
+      "startedAt": "2026-10-17T15:45:59.371Z",
+      "endedAt": "2026-10-17T15:47:02.620Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 41,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/visual-refinement-matrix-review/report.json"
+    },
+    {
+      "name": "home-widget-header-review",
+      "startedAt": "2026-10-17T15:46:57.615Z",
+      "endedAt": "2026-10-17T15:47:10.454Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 14,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/home-widget-header-review/report.json"
+    },
+    {
+      "name": "header-action-matrix-review",
+      "startedAt": "2026-10-17T15:46:31.097Z",
+      "endedAt": "2026-10-17T15:47:18.357Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 27,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/header-action-matrix-review/report.json"
+    },
+    {
+      "name": "home-widget-standard-review",
+      "startedAt": "2026-10-17T15:47:02.621Z",
+      "endedAt": "2026-10-17T15:47:21.305Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/home-widget-standard-review/report.json"
+    },
+    {
+      "name": "network-interaction-review",
+      "startedAt": "2026-10-17T15:47:10.454Z",
+      "endedAt": "2026-10-17T15:47:50.020Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 14,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/network-interaction-review/report.json"
+    },
+    {
+      "name": "business-actions-review",
+      "startedAt": "2026-10-17T15:47:21.305Z",
+      "endedAt": "2026-10-17T15:47:58.147Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/business-actions-review/report.json"
+    },
+    {
+      "name": "launcher-actions-review",
+      "startedAt": "2026-10-17T15:47:50.020Z",
+      "endedAt": "2026-10-17T15:48:01.886Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/launcher-actions-review/report.json"
+    },
+    {
+      "name": "business-widgets-review",
+      "startedAt": "2026-10-17T15:47:18.357Z",
+      "endedAt": "2026-10-17T15:48:04.344Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 19,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/business-widgets-review/report.json"
+    },
+    {
+      "name": "launcher-home-review",
+      "startedAt": "2026-10-17T15:47:58.147Z",
+      "endedAt": "2026-10-17T15:48:05.693Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/launcher-home-review/report.json"
+    },
+    {
+      "name": "launchpad-browser-review",
+      "startedAt": "2026-10-17T15:48:04.345Z",
+      "endedAt": "2026-10-17T15:48:11.398Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 11,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/launchpad-browser-review/report.json"
+    },
+    {
+      "name": "launcher-editor-review",
+      "startedAt": "2026-10-17T15:48:01.886Z",
+      "endedAt": "2026-10-17T15:48:12.957Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/launcher-editor-review/report.json"
+    },
+    {
+      "name": "launchpad-links-review",
+      "startedAt": "2026-10-17T15:48:05.694Z",
+      "endedAt": "2026-10-17T15:48:13.500Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 7,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/launchpad-links-review/report.json"
+    },
+    {
+      "name": "launchpad-capacity-review",
+      "startedAt": "2026-10-17T15:48:11.398Z",
+      "endedAt": "2026-10-17T15:48:21.736Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 5,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/launchpad-capacity-review/report.json"
+    },
+    {
+      "name": "launchpad-resource-review",
+      "startedAt": "2026-10-17T15:48:12.958Z",
+      "endedAt": "2026-10-17T15:48:25.956Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/launchpad-resource-review/report.json"
+    },
+    {
+      "name": "boundary-interaction-review",
+      "startedAt": "2026-10-17T15:48:21.736Z",
+      "endedAt": "2026-10-17T15:48:29.442Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 10,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/boundary-interaction-review/report.json"
+    },
+    {
+      "name": "home-widget-chart-review",
+      "startedAt": "2026-10-17T15:48:13.500Z",
+      "endedAt": "2026-10-17T15:48:43.385Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 18,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/home-widget-chart-review/report.json"
+    },
+    {
+      "name": "structure-interaction-review",
+      "startedAt": "2026-10-17T15:48:29.442Z",
+      "endedAt": "2026-10-17T15:48:47.593Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/structure-interaction-review/report.json"
+    },
+    {
+      "name": "row-sort-review",
+      "startedAt": "2026-10-17T15:48:25.957Z",
+      "endedAt": "2026-10-17T15:49:09.437Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/row-sort-review/report.json"
+    },
+    {
+      "name": "structure-resource-review",
+      "startedAt": "2026-10-17T15:48:43.386Z",
+      "endedAt": "2026-10-17T15:49:09.669Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/widget-body/75-review/optimization-3/structure-resource-review/report.json"
+    }
+  ],
+  "endedAt": "2026-10-17T15:49:09.670Z",
+  "result": "pass",
+  "groups": 380
+}

@@ -91,7 +91,7 @@ func buildTrafficStatSnapshot(upload, download int64) TrafficStatSnapshot {
 func buildHostHintHostname(name string) string {
 	match := matchStringOnce(name, `^(.+)\.`)
 	if match == nil {
-		return ""
+		return name
 	}
 	return match[1]
 }

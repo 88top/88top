@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/istoreos/quickstart/backend/models"
+	"github.com/istoreos/quickstart/backend/utils"
 )
 
 type Input struct {
@@ -98,7 +99,7 @@ func BuildBridgePlan(cfg *models.NetworkInterfaceConfig, devices []string, secti
 			fmt.Sprintf("uci set network.@device[-1].name=%v", deviceName),
 		}
 		for _, device := range devices {
-			cmds = append(cmds, fmt.Sprintf("uci add_list network.@device[-1].ports=%v", device))
+			cmds = append(cmds, fmt.Sprintf("uci add_list network.@device[-1].ports=%v", utils.ShellQuote(device)))
 		}
 		return cmds
 	}
@@ -108,7 +109,7 @@ func BuildBridgePlan(cfg *models.NetworkInterfaceConfig, devices []string, secti
 		fmt.Sprintf("uci del network.%v.ports", brSection),
 	}
 	for _, device := range devices {
-		cmds = append(cmds, fmt.Sprintf("uci add_list network.%v.ports=%v", brSection, device))
+		cmds = append(cmds, fmt.Sprintf("uci add_list network.%v.ports=%v", brSection, utils.ShellQuote(device)))
 	}
 	return cmds
 }
@@ -119,12 +120,12 @@ func BuildInterfacePlan(cfg *models.NetworkInterfaceConfig, deviceName string, b
 		fmt.Sprintf("uci set network.%v.proto=%v", cfg.Name, cfg.Proto),
 	}
 	if bridged {
-		cmds = append(cmds, fmt.Sprintf("uci set network.%v.device=%v", cfg.Name, deviceName))
+		cmds = append(cmds, fmt.Sprintf("uci set network.%v.device=%v", cfg.Name, utils.ShellQuote(deviceName)))
 		return cmds
 	}
 	cmds = append(cmds, fmt.Sprintf("uci del network.%v.device", cfg.Name))
 	if deviceName != "" {
-		cmds = append(cmds, fmt.Sprintf("uci set network.%v.device=%v", cfg.Name, deviceName))
+		cmds = append(cmds, fmt.Sprintf("uci set network.%v.device=%v", cfg.Name, utils.ShellQuote(deviceName)))
 	}
 	return cmds
 }

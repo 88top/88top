@@ -1,0 +1,14 @@
+{
+  "result": "passed",
+  "baseline": "980a8e1",
+  "scriptIdenticalExcept": "one pure HomeGlyph import",
+  "chartsTemplateIdentical": true,
+  "bindingsPreserved": [
+    "version?.model || '\u2014'",
+    "version?.firmwareVersion || '\u2014'",
+    "version?.kernelVersion || '\u2014'",
+    "systemStatus?.localtime || '\u2014'",
+    "systemStatus?stamp(systemStatus.uptime):'\u2014'"
+  ],
+  "noNewReaderOrTimer": true
+}

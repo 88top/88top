@@ -1,0 +1,9 @@
+{
+  "failedBuild": "quickstart-home-x64-ipk-0163-20261018-1",
+  "failedBuilder": "d4048e929e67",
+  "failedPatchSha256": "3cf7e96f16896ee7a244550e2e992bb39df9f93f81e58bae3fbc7052941d4769",
+  "cause": "Missing feeds/nas and feeds/nas_luci prefixes in generated patch. Original reverse fixture copied the wrong directory structure. Failure occurred before compilation.",
+  "correctedPatchSha256": "ccf15b74ac0e8cf3ac24128c43c82ce68dbba42877fdcbfa36aa0172cb3d4e79",
+  "correctedFixture": "patch-check-0163-sdk with actual SDK feeds/nas and feeds/nas_luci paths; reverse dry-run passed",
+  "status": "corrected_input_not_build_success"
+}

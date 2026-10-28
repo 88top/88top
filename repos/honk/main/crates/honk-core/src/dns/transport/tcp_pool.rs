@@ -1,0 +1,69 @@
+//! Idle pool for plain DNS-over-TCP (RFC 7766).
+
+use std::sync::Arc;
+
+use super::{DialContext, IdlePoolState, close_idle_pool, exchange_with_retry, idle_pool_exchange};
+use parking_lot::Mutex;
+
+/// Direct or proxied pooled TCP stream.
+type PooledStream = Box<dyn crate::proxy::AsyncReadWrite>;
+
+/// Idle-pool plain-TCP DNS client for one upstream.
+pub struct TcpPool {
+    dial: DialContext,
+    lifecycle: tokio::sync::RwLock<IdlePoolState>,
+    idle: Mutex<Vec<PooledStream>>,
+}
+
+impl TcpPool {
+    pub fn new(dial: DialContext) -> Arc<Self> {
+        Arc::new(Self {
+            dial,
+            lifecycle: tokio::sync::RwLock::new(IdlePoolState::Open),
+            idle: Mutex::new(Vec::new()),
+        })
+    }
+
+    pub async fn exchange(
+        self: &Arc<Self>,
+        raw_query: &[u8],
+        feedback: Option<honk_outbound::group::ScoreBusinessGuard>,
+    ) -> anyhow::Result<Vec<u8>> {
+        exchange_with_retry(
+            "TCP DNS",
+            raw_query,
+            |reporter| async move { self.exchange_once(raw_query, reporter.as_ref()).await },
+            |_| async {},
+            feedback,
+        )
+        .await
+    }
+
+    async fn exchange_once(
+        &self,
+        raw_query: &[u8],
+        reporter: Option<&honk_outbound::group::ScoreReporter>,
+    ) -> anyhow::Result<Vec<u8>> {
+        idle_pool_exchange(
+            &self.lifecycle,
+            &self.idle,
+            || self.dial_new(),
+            raw_query,
+            self.dial.query_timeout,
+            reporter,
+        )
+        .await
+    }
+
+    async fn dial_new(&self) -> anyhow::Result<PooledStream> {
+        if self.dial.proxy.is_some() {
+            self.dial.dial_tcp_boxed().await
+        } else {
+            Ok(Box::new(self.dial.dial_tcp().await?))
+        }
+    }
+
+    pub(crate) async fn close(&self) {
+        close_idle_pool(&self.lifecycle, &self.idle, self.dial.query_timeout).await;
+    }
+}

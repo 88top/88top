@@ -1,0 +1,122 @@
+[
+  {
+    "host": "192.168.30.244",
+    "manager": "opkg",
+    "assets": [
+      {
+        "id": "baidudrive",
+        "path": "/luci-static/resources/app-icons/baidudrive.png",
+        "status": 200,
+        "width": 256,
+        "height": 256,
+        "bytes": 14547,
+        "sha256": "d5e4df37e495f68c9ac5cb0d0d46fa5d17547f177d9c83c1244f9f8b20aeb05b"
+      },
+      {
+        "id": "dockermanager",
+        "path": "/luci-static/resources/app-icons/dockermanager.png",
+        "status": 200,
+        "width": 256,
+        "height": 256,
+        "bytes": 8331,
+        "sha256": "633720edcc1290648fbbafc32eb19d07483e77a568219807404a4555735d1447"
+      },
+      {
+        "id": "istoreenhance",
+        "path": "/luci-static/resources/app-icons/istoreenhance.png",
+        "status": 200,
+        "width": 256,
+        "height": 256,
+        "bytes": 18649,
+        "sha256": "057f48164bd021c0e58f0933c172fd4ece659b141b20d588a7dc7998a31cd844"
+      },
+      {
+        "id": "istorex",
+        "path": "/luci-static/resources/app-icons/istorex.png",
+        "status": 200,
+        "width": 512,
+        "height": 512,
+        "bytes": 76683,
+        "sha256": "5942c258649633c19a68a1082756a9bf567e3e0e3a8a1798e5adff9266e92b14"
+      },
+      {
+        "id": "kai",
+        "path": "/luci-static/resources/app-icons/kai.png",
+        "status": 200,
+        "width": 128,
+        "height": 128,
+        "bytes": 20731,
+        "sha256": "836714600bc2a8987d471a56c5196e322d5acf3bde1bf19a35c04a383ace49d5"
+      },
+      {
+        "id": "linkeasefull",
+        "path": "/luci-static/resources/app-icons/linkeasefull.png",
+        "status": 200,
+        "width": 256,
+        "height": 256,
+        "bytes": 4302,
+        "sha256": "1426b361b7f1348ee21025e615a5216d89753ad781458d120e892c0f425aa94a"
+      }
+    ]
+  },
+  {
+    "host": "192.168.9.140",
+    "manager": "apk",
+    "assets": [
+      {
+        "id": "baidudrive",
+        "path": "/luci-static/resources/app-icons/baidudrive.png",
+        "status": 200,
+        "width": 256,
+        "height": 256,
+        "bytes": 14547,
+        "sha256": "d5e4df37e495f68c9ac5cb0d0d46fa5d17547f177d9c83c1244f9f8b20aeb05b"
+      },
+      {
+        "id": "dockermanager",
+        "path": "/luci-static/resources/app-icons/dockermanager.png",
+        "status": 200,
+        "width": 256,
+        "height": 256,
+        "bytes": 8331,
+        "sha256": "633720edcc1290648fbbafc32eb19d07483e77a568219807404a4555735d1447"
+      },
+      {
+        "id": "istoreenhance",
+        "path": "/luci-static/resources/app-icons/istoreenhance.png",
+        "status": 200,
+        "width": 256,
+        "height": 256,
+        "bytes": 18649,
+        "sha256": "057f48164bd021c0e58f0933c172fd4ece659b141b20d588a7dc7998a31cd844"
+      },
+      {
+        "id": "istorex",
+        "path": "/luci-static/resources/app-icons/istorex.png",
+        "status": 200,
+        "width": 512,
+        "height": 512,
+        "bytes": 76683,
+        "sha256": "5942c258649633c19a68a1082756a9bf567e3e0e3a8a1798e5adff9266e92b14"
+      },
+      {
+        "id": "kai",
+        "path": "/luci-static/resources/app-icons/kai.png",
+        "status": 200,
+        "width": 128,
+        "height": 128,
+        "bytes": 20731,
+        "sha256": "836714600bc2a8987d471a56c5196e322d5acf3bde1bf19a35c04a383ace49d5"
+      },
+      {
+        "id": "linkeasefull",
+        "path": "/luci-static/resources/app-icons/linkeasefull.png",
+        "status": 200,
+        "width": 256,
+        "height": 256,
+        "bytes": 4302,
+        "sha256": "1426b361b7f1348ee21025e615a5216d89753ad781458d120e892c0f425aa94a"
+      }
+    ]
+  }
+]

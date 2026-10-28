@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/istoreos/quickstart/backend/models"
+	"github.com/istoreos/quickstart/backend/utils"
 )
 
 var ErrEmptyTargetDirectory = errors.New("目标路径不为空")
@@ -19,7 +20,7 @@ type PartitionCandidate struct {
 
 func BuildUpdateCommands(path string) []string {
 	return []string{
-		fmt.Sprintf("uci set dockerd.globals.data_root='%v'", path),
+		fmt.Sprintf("uci set dockerd.globals.data_root=%v", utils.ShellQuote(path)),
 		"uci commit dockerd",
 		"/etc/init.d/dockerd restart",
 	}

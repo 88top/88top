@@ -1,0 +1,24 @@
+{
+  "result": "passed",
+  "owner": {
+    "owner": "/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/94c4-develop-quicksta/quickstart/docs/product/ui-design",
+    "pid": 16245,
+    "mode": "vue-design-built"
+  },
+  "publicAssetsMatchSSD": true,
+  "assets": [
+    {
+      "path": "/assets/mount.d84bd4de.js",
+      "sha256": "5030722b949cce537262a27d84de81c6097f4977663d391033d7715e0c6bc06a"
+    },
+    {
+      "path": "/assets/index.13b7529b.js",
+      "sha256": "651822d193a18b834873a5ce422a526cf2fee4e451029394175e30b53b10bc46"
+    },
+    {
+      "path": "/assets/mount.40bd9266.css",
+      "sha256": "a0796bb899633660170f086a9b37ec1806624897d18806c0a28a73a073942379"
+    }
+  ],
+  "sharedContractSha256": "e4840f4fd6ecc61bb8c0ae3f90dcea008993d1d782ee470a5fc8e680846ba652"
+}

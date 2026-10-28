@@ -1,0 +1,101 @@
+[
+  {
+    "id": "traffic",
+    "x": 232,
+    "y": 177,
+    "width": 694.796875,
+    "height": 513.171875,
+    "scrollWidth": 695,
+    "clientWidth": 695
+  },
+  {
+    "id": "connection",
+    "x": 944.796875,
+    "y": 177,
+    "width": 463.203125,
+    "height": 333.984375,
+    "scrollWidth": 463,
+    "clientWidth": 463
+  },
+  {
+    "id": "networkInterface",
+    "x": 944.796875,
+    "y": 528.984375,
+    "width": 463.203125,
+    "height": 161.1875,
+    "scrollWidth": 463,
+    "clientWidth": 463
+  },
+  {
+    "id": "devices",
+    "x": 232,
+    "y": 708.171875,
+    "width": 579,
+    "height": 302.078125,
+    "scrollWidth": 579,
+    "clientWidth": 579
+  },
+  {
+    "id": "applications",
+    "x": 829,
+    "y": 708.171875,
+    "width": 579,
+    "height": 302.078125,
+    "scrollWidth": 579,
+    "clientWidth": 579
+  },
+  {
+    "id": "storage",
+    "x": 232,
+    "y": 1028.25,
+    "width": 579,
+    "height": 411,
+    "scrollWidth": 579,
+    "clientWidth": 579
+  },
+  {
+    "id": "sharing",
+    "x": 829,
+    "y": 1028.25,
+    "width": 579,
+    "height": 411,
+    "scrollWidth": 579,
+    "clientWidth": 579
+  },
+  {
+    "id": "docker",
+    "x": 232,
+    "y": 1457.25,
+    "width": 387.59375,
+    "height": 433.296875,
+    "scrollWidth": 388,
+    "clientWidth": 388
+  },
+  {
+    "id": "downloads",
+    "x": 637.59375,
+    "y": 1457.25,
+    "width": 376.203125,
+    "height": 433.296875,
+    "scrollWidth": 376,
+    "clientWidth": 376
+  },
+  {
+    "id": "remote",
+    "x": 1031.796875,
+    "y": 1457.25,
+    "width": 376.1875,
+    "height": 433.296875,
+    "scrollWidth": 376,
+    "clientWidth": 376
+  },
+  {
+    "id": "system",
+    "x": 232,
+    "y": 1908.546875,
+    "width": 1176,
+    "height": 290,
+    "scrollWidth": 1176,
+    "clientWidth": 1176
+  }
+]

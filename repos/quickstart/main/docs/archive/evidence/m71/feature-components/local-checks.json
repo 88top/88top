@@ -1,0 +1,9 @@
+{
+  "goFull": {"command":"rtk proxy /var/cache/build-cache/run.sh -- make test","exitCode":0},
+  "frontend": {"command":"rtk proxy /var/cache/build-cache/run.sh -- node --test --test-reporter=dot web/test/*.test.mjs","exitCode":0,"tests":147},
+  "typecheck": {"command":"rtk proxy /var/cache/build-cache/run.sh -- npm --prefix web run tsc","exitCode":0},
+  "webBuild": {"command":"rtk proxy /var/cache/build-cache/run.sh -- make build-web","exitCode":0,"actualOutput":"web/dist/quickstart_web.zip","nodeModules":"/var/cache/build-cache/users/911/projects/quickstart-6fd8ef14aa05/work/web-deps/node_modules"},
+  "businessProtection":{"baseline":"5389297","unchangedFunctions":21,"settings":["requestDhcpPlan","planDhcp","confirmDhcpDisable","applyDhcp","speedSettingsPayload","planSpeed","applySpeed","scanRateMigration","applyRateMigration","rollbackRateMigration","startCreateRoute","startEditRoute","planRouteSave","planRouteDelete","applyRoutePlan","applyMigration"],"devicePolicy":["planRestriction","saveNetworkPolicy","applyPlannedChange","saveSpeed","toggleAccess"]},
+  "browser":{"round1":"failed; no configure action due to absent optional boolean default","round2":"12 interaction groups passed; screenshot review found theme/translation issues","round3":"12 interaction/contrast groups passed; screenshot review still finds native mobile menu overlapping heading","visualAcceptance":false},
+  "notes":"Backend abfe06f is deployed and checked on B, including bounded enable/readiness/restore. New frontend remains undeployed. Three product review rounds retained; additional visual correction awaits the user's decision. No package acceptance."
+}

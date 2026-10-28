@@ -1,11 +1,18 @@
-# quickstart
+# Quickstart
 
-QuickStart is under active refactoring and is not stable yet. Do not use this
-repository as a formal release source.
+Quickstart is the iStoreOS dashboard and setup interface, with a Go backend and
+a Vue 3 frontend. It provides system information, network setup, LAN device
+management, and access to installed applications.
 
-## Project Layout
+This repository is under active development. For installation, use the packages
+provided by your iStoreOS firmware or software center.
 
-- API swagger sources: `backend/yamls`
-- Frontend source: `web`
-- Final iStoreOS LuCI plugin source:
-  https://github.com/linkease/nas-packages-luci/tree/main/luci/luci-app-quickstart
+## Development
+
+- [Development guide](docs/development.md): setup, build, and local checks.
+- [Documentation](docs/README.md): architecture and contributor references.
+- Backend: `backend/`; frontend: `web/`; build commands: `make help`.
+- LuCI integration and packaging live in
+  [nas-packages-luci](https://github.com/linkease/nas-packages-luci/tree/main/luci/luci-app-quickstart).
+
+Licensed under [MIT](LICENSE). See [NOTICE.md](NOTICE.md) for asset provenance.

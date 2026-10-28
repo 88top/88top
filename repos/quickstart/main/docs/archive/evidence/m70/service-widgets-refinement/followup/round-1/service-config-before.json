@@ -1,0 +1,8 @@
+{
+  "host": "192.168.30.244",
+  "fingerprints": [
+    "1693569d8ebf65a07b2b9a614f8d34fe986abdc0908f5e83b35ad31c97908a9f  /etc/config/dockerd",
+    "2b05648fdbef4f44267b0eba1ba5b1dd986c138a5d8c3371850e8d62029f82e7  /etc/config/ddnsto",
+    "1ac88bf986580f2b3f0869ba58256c3e335f6f3734aaa09210b0add876ad56b8  /etc/config/ddns"
+  ]
+}

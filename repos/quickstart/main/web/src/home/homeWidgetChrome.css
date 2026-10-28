@@ -1,0 +1,49 @@
+/* One visual contract, consumed by current widget implementations and the
+ * legacy Card adapter. Only the isolated ordered homepage adopts these tokens. */
+.natural-home{
+ --home-widget-radius:10px;
+ --home-widget-padding-block:20px;
+ --home-widget-padding-inline:14px;
+ --home-widget-icon-size:20px;
+ --home-widget-header-gap:12px;
+}
+.natural-home .layout-widget[data-presentation=summary]{--home-widget-padding-block:14px}
+.natural-home .layout-widget :is(.network-business-card,.canvas-module,.home-applications,.native-summary,.compact-preview,.network_container,.native-read-state,.native-business-surface>.reusable-card){
+ border:1px solid var(--c-line);border-radius:var(--home-widget-radius);
+ padding:var(--home-widget-padding-block) var(--home-widget-padding-inline)!important;
+ background:var(--c-panel);box-sizing:border-box;color:var(--c-text);
+}
+.natural-home .layout-widget.widget-traffic{border-radius:var(--home-widget-radius)}
+.natural-home .layout-widget :is(.card-header,.network-business-card>header,.canvas-module>header,.applications-heading,.native-summary>header,.compact-preview>header){gap:10px;align-items:center}
+.natural-home .layout-widget :is(.card-header .left,.canvas-module>header>div:first-child,.applications-heading>div:first-child,.native-summary h2,.compact-preview h2){display:flex;align-items:center;gap:8px;min-width:0}
+.natural-home .layout-widget :is(.card-header .title,.network-business-card h2,.canvas-module>header h2,.applications-heading h2,.native-summary h2,.compact-preview h2){
+ font-family:var(--home-font-family);font-size:var(--home-title-size)!important;font-weight:600;line-height:1.25;margin:0;min-width:0;overflow-wrap:anywhere;
+}
+.natural-home .layout-widget[data-presentation=summary] :is(.card-header .title,.network-business-card h2,.native-summary h2,.compact-preview h2){font-size:var(--home-summary-title-size)!important}
+.natural-home .layout-widget :is(.card-header .left>svg,.network-business-card h2>svg,.canvas-module>header>div:first-child>svg,.applications-heading>div:first-child>svg,.native-summary h2>svg,.compact-preview h2>svg,.network_container .title_box>.display_flex>svg){width:var(--home-widget-icon-size);height:var(--home-widget-icon-size);flex:none}
+.natural-home .layout-widget :is(.canvas-module>header,.applications-heading){margin-bottom:var(--home-widget-header-gap)!important}
+.natural-home .layout-widget .connection-status{margin-top:var(--home-widget-header-gap)}
+.natural-home .layout-widget .native-summary>p:first-of-type{margin-top:var(--home-widget-header-gap)}
+.natural-home .layout-widget .native-summary>header{flex-wrap:wrap}
+
+/* Preserve the original chart, legend, sampling and plotting baseline. Only
+ * its existing speed-test entry adopts the shared single-action outline. */
+.natural-home .traffic-header-actions{position:absolute;top:20px;right:14px}
+.natural-home .traffic-header-actions>.layout-speed{position:static;height:auto;min-height:28px;border:0!important;font-size:var(--home-body-size)!important;padding:6px 12px!important;color:var(--c-text)!important}
+.natural-home .layout-widget.widget-traffic .network_tag{margin-right:90px}
+.natural-home .layout-widget .applications-actions.widget-action-group{align-items:stretch}
+.natural-home .layout-widget .applications-actions.widget-action-group>button{min-height:28px}
+.natural-home .layout-widget .applications-actions.widget-action-group .widget-menu-trigger{min-width:var(--widget-more-width);min-height:var(--widget-more-height)}
+.natural-home .layout-widget .applications-heading{min-height:30px}
+@media(max-width:768px){
+ .natural-home{--home-widget-radius:6px;--home-widget-padding-block:10px;--home-widget-padding-inline:10px}
+ .natural-home .layout-widget[data-presentation=summary]{--home-widget-padding-block:10px}
+ .natural-home .traffic-header-actions{top:14px;right:10px}
+}
+@media(pointer:coarse){
+ .natural-home .traffic-header-actions>.layout-speed,.natural-home .layout-widget .applications-actions.widget-action-group>button{min-height:44px}
+ /* The absolute action shares the title row. Reserve its full touch height
+  * before the rate labels, preserving the plotting area on narrow cards. */
+ .natural-home .layout-widget.widget-traffic .network_container .title_box{min-height:46px;box-sizing:border-box;align-items:center}
+ .natural-home .layout-widget.widget-traffic .network_container{min-height:330px}
+}

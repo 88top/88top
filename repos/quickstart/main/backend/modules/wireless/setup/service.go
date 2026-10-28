@@ -2,6 +2,7 @@ package setup
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/istoreos/quickstart/backend/models"
 )
@@ -33,6 +34,9 @@ func ValidateQuickSetupRequest(req *models.WirelessQuickSetupRequest) error {
 
 	if req.Wifi5g.Key != "" && (len(req.Wifi5g.Key) < 8 || len(req.Wifi5g.Key) > 20) {
 		return errors.New("Invalid 5g password")
+	}
+	if strings.ContainsAny(req.Wifi2g.Ssid+req.Wifi2g.Key+req.Wifi5g.Ssid+req.Wifi5g.Key, "\x00\r\n") {
+		return errors.New("Invalid wireless parameters")
 	}
 
 	return nil

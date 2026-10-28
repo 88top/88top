@@ -1,0 +1,237 @@
+{
+  "checkedAt": "2026-10-14T07:49:59.177Z",
+  "layouts": [
+    {
+      "variant": "canvas",
+      "viewport": "desktop",
+      "theme": "light",
+      "graphic": {
+        "width": 866,
+        "height": 419,
+        "cyan": 52
+      },
+      "deviceRows": 6
+    },
+    {
+      "variant": "canvas",
+      "viewport": "desktop",
+      "theme": "dark",
+      "graphic": {
+        "width": 866,
+        "height": 419,
+        "cyan": 84
+      },
+      "deviceRows": 6
+    },
+    {
+      "variant": "sidebar",
+      "viewport": "desktop",
+      "theme": "light",
+      "graphic": {
+        "width": 1070,
+        "height": 394,
+        "cyan": 52
+      },
+      "deviceRows": 6
+    },
+    {
+      "variant": "sidebar",
+      "viewport": "desktop",
+      "theme": "dark",
+      "graphic": {
+        "width": 1070,
+        "height": 394,
+        "cyan": 84
+      },
+      "deviceRows": 6
+    },
+    {
+      "variant": "stage",
+      "viewport": "desktop",
+      "theme": "light",
+      "graphic": {
+        "width": 970,
+        "height": 394,
+        "cyan": 52
+      },
+      "deviceRows": 6
+    },
+    {
+      "variant": "stage",
+      "viewport": "desktop",
+      "theme": "dark",
+      "graphic": {
+        "width": 970,
+        "height": 394,
+        "cyan": 84
+      },
+      "deviceRows": 6
+    },
+    {
+      "variant": "canvas",
+      "viewport": "tablet",
+      "theme": "light",
+      "graphic": {
+        "width": 828,
+        "height": 334,
+        "cyan": 52
+      },
+      "deviceRows": 6
+    },
+    {
+      "variant": "canvas",
+      "viewport": "tablet",
+      "theme": "dark",
+      "graphic": {
+        "width": 828,
+        "height": 334,
+        "cyan": 84
+      },
+      "deviceRows": 6
+    },
+    {
+      "variant": "sidebar",
+      "viewport": "tablet",
+      "theme": "light",
+      "graphic": {
+        "width": 719,
+        "height": 334,
+        "cyan": 52
+      },
+      "deviceRows": 6
+    },
+    {
+      "variant": "sidebar",
+      "viewport": "tablet",
+      "theme": "dark",
+      "graphic": {
+        "width": 719,
+        "height": 334,
+        "cyan": 84
+      },
+      "deviceRows": 6
+    },
+    {
+      "variant": "stage",
+      "viewport": "tablet",
+      "theme": "light",
+      "graphic": {
+        "width": 926,
+        "height": 334,
+        "cyan": 52
+      },
+      "deviceRows": 6
+    },
+    {
+      "variant": "stage",
+      "viewport": "tablet",
+      "theme": "dark",
+      "graphic": {
+        "width": 926,
+        "height": 334,
+        "cyan": 84
+      },
+      "deviceRows": 6
+    },
+    {
+      "variant": "canvas",
+      "viewport": "phone",
+      "theme": "light",
+      "graphic": {
+        "width": 334,
+        "height": 221,
+        "cyan": 56
+      },
+      "deviceRows": 3
+    },
+    {
+      "variant": "canvas",
+      "viewport": "phone",
+      "theme": "dark",
+      "graphic": {
+        "width": 334,
+        "height": 221,
+        "cyan": 89
+      },
+      "deviceRows": 3
+    },
+    {
+      "variant": "sidebar",
+      "viewport": "phone",
+      "theme": "light",
+      "graphic": {
+        "width": 334,
+        "height": 221,
+        "cyan": 56
+      },
+      "deviceRows": 3
+    },
+    {
+      "variant": "sidebar",
+      "viewport": "phone",
+      "theme": "dark",
+      "graphic": {
+        "width": 334,
+        "height": 221,
+        "cyan": 89
+      },
+      "deviceRows": 3
+    },
+    {
+      "variant": "stage",
+      "viewport": "phone",
+      "theme": "light",
+      "graphic": {
+        "width": 334,
+        "height": 221,
+        "cyan": 56
+      },
+      "deviceRows": 3
+    },
+    {
+      "variant": "stage",
+      "viewport": "phone",
+      "theme": "dark",
+      "graphic": {
+        "width": 334,
+        "height": 221,
+        "cyan": 89
+      },
+      "deviceRows": 3
+    }
+  ],
+  "states": [
+    "many",
+    "empty",
+    "loading",
+    "error",
+    "stale",
+    "old",
+    "permission",
+    "no-speed",
+    "disabled",
+    "speed-error",
+    "unsupported",
+    "network-error",
+    "storage-error",
+    "services-error"
+  ],
+  "interactions": [
+    "320px English layout and tools",
+    "inventory retry",
+    "canvas: configuration position stable with 128 devices",
+    "sidebar: configuration position stable with 128 devices",
+    "stage: configuration position stable with 128 devices",
+    "independent service toggles, reorder, full width, live draft, apply/cancel",
+    "same identity, real detail/profile, DHCP authority, return retains layout, view all",
+    "local DHCP authority editable",
+    "drag, restore preset, cancel variant",
+    "four non-device quick entries and eight configuration destinations"
+  ],
+  "sampling": [],
+  "errors": [],
+  "outside": [],
+  "visualStatus": "requires_human_screenshot_review",
+  "result": "fail",
+  "failure": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: '自定义首页', exact: true })\u001b[22m\n\n    at /config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/0153-device-lists-sho/quickstart/docs/product/ui-design/canvas-review.cjs:86:60"
+}

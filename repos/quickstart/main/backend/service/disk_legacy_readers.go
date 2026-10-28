@@ -58,14 +58,14 @@ func get_docker_part(ctx context.Context) string {
 	dockerRootPath, err := utils.BatchOutputCmd(ctx, "uci get dockerd.globals.data_root", 0)
 	if err == nil && len(dockerRootPath) > 0 {
 		dockerRootStr := strings.Replace(string(dockerRootPath), "\n", "", -1)
-		cmdStr := fmt.Sprintf("findmnt -T %v -v -o SOURCE|sed -n 2p", dockerRootStr)
+		cmdStr := fmt.Sprintf("findmnt -T %v -v -o SOURCE|sed -n 2p", utils.ShellQuote(dockerRootStr))
 		dockerDevicePath, err := utils.BatchOutputCmd(ctx, cmdStr, 0)
 		if err == nil && len(dockerDevicePath) > 0 {
 			dockerDevicePathStr = strings.Replace(string(dockerDevicePath), "\n", "", -1)
 		}
 		if strings.HasPrefix(dockerDevicePathStr, "overlayfs:") {
 			dockerRootStr = strings.TrimPrefix(dockerDevicePathStr, "overlayfs:")
-			cmdStr := fmt.Sprintf("findmnt -T %v -v -o SOURCE|sed -n 2p", dockerRootStr)
+			cmdStr := fmt.Sprintf("findmnt -T %v -v -o SOURCE|sed -n 2p", utils.ShellQuote(dockerRootStr))
 			dockerDevicePath, err := utils.BatchOutputCmd(ctx, cmdStr, 0)
 			if err == nil && len(dockerDevicePath) > 0 {
 				dockerDevicePathStr = strings.Replace(string(dockerDevicePath), "\n", "", -1)
@@ -77,19 +77,21 @@ func get_docker_part(ctx context.Context) string {
 
 func fill_part_status(ctx context.Context, disk *models.NasDiskInfo, partition *models.PartitionInfo, rootPaths []string, dockerDevicePathStr string) {
 	//isReadOnly,isSystemRoot,isDockerRoot
-	cmdList := []string{
-		fmt.Sprintf("touch '%v/.readonly_test'", partition.MountPoint),
-	}
-	testReadonly := utils.BatchRun(ctx, cmdList, 0)
-	if testReadonly != nil {
-		partition.IsReadOnly = true
-	} else {
-		cmdStr := fmt.Sprintf("rm -f '%v/.readonly_test'", partition.MountPoint)
-		utils.BatchOutputCmd(ctx, cmdStr, 0)
-		partition.IsReadOnly = false
-	}
+	partition.IsReadOnly = !directoryWritable(partition.MountPoint)
 
 	diskstatus.MarkSystemAndDocker(disk, partition, rootPaths, dockerDevicePathStr)
+}
+
+func directoryWritable(path string) bool {
+	if path == "" {
+		return false
+	}
+	f, err := os.CreateTemp(path, ".quickstart-readonly-*")
+	if err != nil {
+		return false
+	}
+	defer os.Remove(f.Name())
+	return f.Close() == nil
 }
 
 // https://github.com/lisaac/luci-app-diskman/blob/6ba3005ebdf1faabc7e0c4889c95caa3c153cafb/applications/luci-app-diskman/luasrc/model/diskman.lua#L147
@@ -106,7 +108,7 @@ func (store partedInfoStore) DockerDevicePath(ctx context.Context) string {
 }
 
 func (store partedInfoStore) Parted(ctx context.Context, device string) string {
-	cmdStr := fmt.Sprintf("parted -s -m /dev/%v unit s print free", device)
+	cmdStr := fmt.Sprintf("parted -s -m %v unit s print free", utils.ShellQuote("/dev/"+device))
 	stdout, _, _ := utils.BatchOutErr(ctx, []string{cmdStr}, 0)
 	return stdout
 }
@@ -116,7 +118,7 @@ func (store partedInfoStore) MountPoint(ctx context.Context, partitionName strin
 }
 
 func (store partedInfoStore) UUID(ctx context.Context, partitionPath string) string {
-	cmdStr := fmt.Sprintf(`block info %s | grep -m1 '^%s:' | sed -nE 's/^.* UUID="([^"]+)".*$/\1/p'`, partitionPath, partitionPath)
+	cmdStr := fmt.Sprintf(`block info %s | grep -F -m1 -- %s | sed -nE 's/^.* UUID="([^"]+)".*$/\1/p'`, utils.ShellQuote(partitionPath), utils.ShellQuote(partitionPath+":"))
 	uuid, _, _ := utils.BatchOutErr(ctx, []string{cmdStr}, 0)
 	if len(uuid) > 0 {
 		return uuid
@@ -134,7 +136,7 @@ func (store partedInfoStore) MarkMountedPartition(ctx context.Context, disk *mod
 }
 
 func get_partition_usage(partition string) (string, string, string) {
-	out, _ := utils.BatchOutputCmd(context.Background(), "df /dev/"+partition+" | grep -m1 '^/dev/'", 0)
+	out, _ := utils.BatchOutputCmd(context.Background(), "df "+utils.ShellQuote("/dev/"+partition)+" | grep -m1 '^/dev/'", 0)
 	return inventory.ParsePartitionUsage(string(out))
 }
 

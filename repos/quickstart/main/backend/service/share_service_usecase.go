@@ -70,7 +70,7 @@ func (store defaultShareServiceStore) CreateShare(ctx context.Context, index int
 		"add unishare share ",
 		"set unishare.@global[0].enabled=1",
 		fmt.Sprintf("set unishare.%v=%v", target, "share"),
-		fmt.Sprintf("set unishare.%v.path=%v", target, input.Path),
+		fmt.Sprintf("set unishare.%v.path=%v", target, utils.UCIQuote(input.Path)),
 		fmt.Sprintf("set unishare.%v.name=%v", target, input.Name),
 	}
 	ucicmdList = append(ucicmdList, shareServiceListCommands(target, input)...)
@@ -83,7 +83,7 @@ func (store defaultShareServiceStore) UpdateShare(ctx context.Context, index int
 	target := fmt.Sprintf("@share[%v]", index)
 	ucicmdList := []string{
 		fmt.Sprintf("set unishare.%v=%v", target, "share"),
-		fmt.Sprintf("set unishare.%v.path=%v", target, input.Path),
+		fmt.Sprintf("set unishare.%v.path=%v", target, utils.UCIQuote(input.Path)),
 		fmt.Sprintf("set unishare.%v.name=%v", target, input.Name),
 		fmt.Sprintf("del unishare.%v.ro", target),
 		fmt.Sprintf("del unishare.%v.rw", target),
@@ -127,10 +127,10 @@ func shareServiceListCommands(target string, input shareservice.CreateInput) []s
 
 	commands := make([]string, 0, len(ro)+len(rw)+len(proto))
 	for _, value := range ro {
-		commands = append(commands, fmt.Sprintf("add_list unishare.%v.ro=%v", target, value))
+		commands = append(commands, fmt.Sprintf("add_list unishare.%v.ro=%v", target, utils.UCIQuote(value)))
 	}
 	for _, value := range rw {
-		commands = append(commands, fmt.Sprintf("add_list unishare.%v.rw=%v", target, value))
+		commands = append(commands, fmt.Sprintf("add_list unishare.%v.rw=%v", target, utils.UCIQuote(value)))
 	}
 	for _, value := range proto {
 		commands = append(commands, fmt.Sprintf("add_list unishare.%v.proto=%v", target, value))

@@ -1,0 +1,814 @@
+{
+  "responses": {
+    "/u/network/status/": {
+      "status": 200,
+      "body": {
+        "result": {
+          "defaultInterface": "wan",
+          "networkInfo": "netSuccess",
+          "proto": "static",
+          "ipv4addr": "192.168.30.7",
+          "ipv6addr": "2001:db8:1234:5678:90ab:cdef:1234:5678",
+          "ipv4mask": 24,
+          "gateway": "192.168.30.1",
+          "dnsList": [
+            "192.168.30.1"
+          ],
+          "dnsProto": "manual",
+          "uptimeStamp": 109000
+        },
+        "success": 0,
+        "previewOnly": true
+      }
+    },
+    "/network/port/list/": {
+      "status": 200,
+      "body": {
+        "result": {
+          "ports": [
+            {
+              "name": "eth0",
+              "macAddress": "02:00:00:00:01:00",
+              "linkState": "UP",
+              "linkSpeed": "1000 Mbps",
+              "interfaceNames": [
+                "WAN",
+                "WAN6"
+              ],
+              "duplex": "full",
+              "rx_packets": "0",
+              "tx_packets": "40"
+            },
+            {
+              "name": "eth1",
+              "macAddress": "02:00:00:00:01:01",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "101",
+              "tx_packets": "41"
+            },
+            {
+              "name": "eth2",
+              "macAddress": "02:00:00:00:01:02",
+              "linkState": "DOWN",
+              "linkSpeed": "",
+              "interfaceNames": [
+                "LAN"
+              ],
+              "duplex": "half",
+              "rx_packets": "102",
+              "tx_packets": "42"
+            }
+          ]
+        },
+        "success": 0,
+        "previewOnly": true
+      }
+    },
+    "/u/network/statistics/": {
+      "status": 200,
+      "body": {
+        "result": {
+          "slots": 10,
+          "items": [
+            {
+              "startTime": 1791971940,
+              "endTime": 1791971946,
+              "downloadSpeed": 215040,
+              "uploadSpeed": 12800
+            },
+            {
+              "startTime": 1791971946,
+              "endTime": 1791971952,
+              "downloadSpeed": 419840,
+              "uploadSpeed": 23040
+            },
+            {
+              "startTime": 1791971952,
+              "endTime": 1791971958,
+              "downloadSpeed": 440320,
+              "uploadSpeed": 24064
+            },
+            {
+              "startTime": 1791971958,
+              "endTime": 1791971964,
+              "downloadSpeed": 143360,
+              "uploadSpeed": 9216
+            },
+            {
+              "startTime": 1791971964,
+              "endTime": 1791971970,
+              "downloadSpeed": 266240,
+              "uploadSpeed": 15360
+            },
+            {
+              "startTime": 1791971970,
+              "endTime": 1791971976,
+              "downloadSpeed": 389120,
+              "uploadSpeed": 21504
+            },
+            {
+              "startTime": 1791971976,
+              "endTime": 1791971982,
+              "downloadSpeed": 440320,
+              "uploadSpeed": 24064
+            },
+            {
+              "startTime": 1791971982,
+              "endTime": 1791971988,
+              "downloadSpeed": 430080,
+              "uploadSpeed": 23552
+            },
+            {
+              "startTime": 1791971988,
+              "endTime": 1791971994,
+              "downloadSpeed": 276480,
+              "uploadSpeed": 15872
+            },
+            {
+              "startTime": 1791971994,
+              "endTime": 1791972000,
+              "downloadSpeed": 368640,
+              "uploadSpeed": 20480
+            }
+          ]
+        }
+      }
+    },
+    "/lanctrl/v2/devices/": {
+      "status": 200,
+      "body": {
+        "result": {
+          "devices": [
+            {
+              "deviceId": "mac:02:00:00:00:00:01",
+              "mac": "02:00:00:00:00:01",
+              "displayName": "书房的 MacBook",
+              "hostname": "",
+              "online": true,
+              "presenceState": "online",
+              "lastSeenAt": "2026-10-14T03:59:00Z",
+              "vendor": "Apple",
+              "classification": {
+                "brand": "Apple",
+                "manufacturer": "Apple",
+                "category": "computer",
+                "source": "manual",
+                "confidence": "high"
+              },
+              "icon": {
+                "mode": "manual",
+                "resolvedKey": "laptop",
+                "assetKey": "laptop",
+                "label": "computer"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [
+                  {
+                    "family": 4,
+                    "address": "192.168.30.101",
+                    "primary": true
+                  }
+                ],
+                "historical": []
+              },
+              "connection": {
+                "kind": "wifi"
+              }
+            },
+            {
+              "deviceId": "mac:02:00:00:00:00:02",
+              "mac": "02:00:00:00:00:02",
+              "displayName": "客厅电视",
+              "hostname": "",
+              "online": true,
+              "presenceState": "online",
+              "lastSeenAt": "2026-10-14T03:58:00Z",
+              "vendor": "Xiaomi",
+              "classification": {
+                "brand": "Xiaomi",
+                "manufacturer": "Xiaomi",
+                "category": "tv",
+                "source": "manual",
+                "confidence": "high"
+              },
+              "icon": {
+                "mode": "auto",
+                "resolvedKey": "tv",
+                "assetKey": "tv",
+                "label": "tv"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [
+                  {
+                    "family": 4,
+                    "address": "192.168.30.102",
+                    "primary": true
+                  }
+                ],
+                "historical": []
+              },
+              "connection": {
+                "kind": "lan"
+              }
+            },
+            {
+              "deviceId": "mac:02:00:00:00:00:03",
+              "mac": "02:00:00:00:00:03",
+              "displayName": "小林的手机",
+              "hostname": "",
+              "online": true,
+              "presenceState": "online",
+              "lastSeenAt": "2026-10-14T03:57:00Z",
+              "vendor": "Apple",
+              "classification": {
+                "brand": "Apple",
+                "manufacturer": "Apple",
+                "category": "phone",
+                "source": "manual",
+                "confidence": "high"
+              },
+              "icon": {
+                "mode": "auto",
+                "resolvedKey": "phone",
+                "assetKey": "phone",
+                "label": "phone"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [
+                  {
+                    "family": 4,
+                    "address": "192.168.30.103",
+                    "primary": true
+                  }
+                ],
+                "historical": []
+              },
+              "connection": {
+                "kind": "wifi"
+              }
+            },
+            {
+              "deviceId": "mac:02:00:00:00:00:04",
+              "mac": "02:00:00:00:00:04",
+              "displayName": "家庭 NAS",
+              "hostname": "",
+              "online": true,
+              "presenceState": "online",
+              "lastSeenAt": "2026-10-14T03:56:00Z",
+              "vendor": "",
+              "classification": {
+                "brand": "",
+                "manufacturer": "",
+                "category": "storage",
+                "source": "manual",
+                "confidence": "high"
+              },
+              "icon": {
+                "mode": "auto",
+                "resolvedKey": "home-server",
+                "assetKey": "home-server",
+                "label": "storage"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [
+                  {
+                    "family": 4,
+                    "address": "192.168.30.104",
+                    "primary": true
+                  }
+                ],
+                "historical": []
+              },
+              "connection": {
+                "kind": "lan"
+              }
+            },
+            {
+              "deviceId": "mac:02:00:00:00:00:05",
+              "mac": "02:00:00:00:00:05",
+              "displayName": "",
+              "hostname": "",
+              "online": true,
+              "presenceState": "online",
+              "lastSeenAt": "2026-10-14T03:55:00Z",
+              "vendor": "",
+              "classification": {
+                "brand": "",
+                "manufacturer": "",
+                "category": "computer",
+                "source": "fallback",
+                "confidence": "low"
+              },
+              "icon": {
+                "mode": "auto",
+                "resolvedKey": "computer",
+                "assetKey": "computer",
+                "label": "computer"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [
+                  {
+                    "family": 4,
+                    "address": "192.168.30.105",
+                    "primary": true
+                  }
+                ],
+                "historical": []
+              },
+              "connection": {
+                "kind": "unknown"
+              }
+            },
+            {
+              "deviceId": "mac:02:00:00:00:00:06",
+              "mac": "02:00:00:00:00:06",
+              "displayName": "孩子的平板",
+              "hostname": "",
+              "online": true,
+              "presenceState": "online",
+              "lastSeenAt": "2026-10-14T03:54:00Z",
+              "vendor": "HUAWEI",
+              "classification": {
+                "brand": "HUAWEI",
+                "manufacturer": "HUAWEI",
+                "category": "tablet",
+                "source": "manual",
+                "confidence": "high"
+              },
+              "icon": {
+                "mode": "auto",
+                "resolvedKey": "tablet",
+                "assetKey": "tablet",
+                "label": "tablet"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [
+                  {
+                    "family": 4,
+                    "address": "192.168.30.106",
+                    "primary": true
+                  }
+                ],
+                "historical": []
+              },
+              "connection": {
+                "kind": "wifi"
+              }
+            },
+            {
+              "deviceId": "mac:02:00:00:00:00:07",
+              "mac": "02:00:00:00:00:07",
+              "displayName": "卧室音箱",
+              "hostname": "",
+              "online": false,
+              "presenceState": "offline",
+              "lastSeenAt": "2026-10-14T03:53:00Z",
+              "vendor": "Xiaomi",
+              "classification": {
+                "brand": "Xiaomi",
+                "manufacturer": "Xiaomi",
+                "category": "smart-home",
+                "source": "manual",
+                "confidence": "high"
+              },
+              "icon": {
+                "mode": "auto",
+                "resolvedKey": "smart-speaker",
+                "assetKey": "smart-speaker",
+                "label": "smart-home"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [],
+                "historical": [
+                  {
+                    "family": 4,
+                    "address": "192.168.30.107"
+                  }
+                ]
+              },
+              "connection": {
+                "kind": "wifi"
+              }
+            },
+            {
+              "deviceId": "mac:02:00:00:00:00:08",
+              "mac": "02:00:00:00:00:08",
+              "displayName": "访客电脑",
+              "hostname": "",
+              "online": false,
+              "presenceState": "never_seen",
+              "lastSeenAt": "2026-10-14T03:52:00Z",
+              "vendor": "",
+              "classification": {
+                "brand": "",
+                "manufacturer": "",
+                "category": "computer",
+                "source": "manual",
+                "confidence": "high"
+              },
+              "icon": {
+                "mode": "auto",
+                "resolvedKey": "computer",
+                "assetKey": "computer",
+                "label": "computer"
+              },
+              "identity": {
+                "kind": "mac",
+                "scope": "persistent"
+              },
+              "addresses": {
+                "current": [],
+                "historical": []
+              },
+              "connection": {
+                "kind": "wifi"
+              }
+            }
+          ],
+          "health": {
+            "state": "ready",
+            "reasons": []
+          }
+        }
+      }
+    },
+    "/lanctrl/v2/router-context/": {
+      "status": 200,
+      "body": {
+        "result": {
+          "lan": "lan",
+          "topologyPosition": "lan_gateway_candidate",
+          "localAddress": "192.168.30.244",
+          "localDhcpConfigured": false,
+          "localDhcpHealthy": true,
+          "dhcpAuthority": "external_observed",
+          "routeEditability": {
+            "editable": false,
+            "reason": "external_dhcp_authority"
+          },
+          "upstreamGateways": [
+            "192.168.30.1"
+          ],
+          "externalDhcpServers": [],
+          "evidence": []
+        },
+        "previewOnly": true
+      }
+    },
+    "/nas/disk/status/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "disks": [
+            {
+              "name": "sda",
+              "path": "/dev/sda",
+              "size": "32 GiB",
+              "total": "32 GiB",
+              "used": "12 GiB",
+              "usage": 38,
+              "venderModel": "Preview disk",
+              "childrens": [
+                {
+                  "path": "/dev/sda1",
+                  "name": "sda1",
+                  "filesystem": "ext4",
+                  "mountPoint": "/",
+                  "isSystemRoot": true,
+                  "usage": 64
+                }
+              ],
+              "isSystemRoot": true,
+              "isDockerRoot": true
+            },
+            {
+              "name": "sdb",
+              "path": "/dev/sdb",
+              "size": "32 GiB",
+              "total": "32 GiB",
+              "used": "12 GiB",
+              "usage": 38,
+              "venderModel": "Preview disk",
+              "childrens": [
+                {
+                  "name": "sdb1",
+                  "path": "/dev/sdb1",
+                  "uuid": "preview-sdb",
+                  "filesystem": "ext4",
+                  "mountPoint": "/mnt/sdb1",
+                  "total": "32 GiB",
+                  "used": "12 GiB",
+                  "usage": 38
+                }
+              ]
+            },
+            {
+              "name": "sdc",
+              "path": "/dev/sdc",
+              "size": "32 GiB",
+              "total": "32 GiB",
+              "used": "12 GiB",
+              "usage": 38,
+              "venderModel": "Preview disk",
+              "childrens": [
+                {
+                  "name": "sdc1",
+                  "path": "/dev/sdc1",
+                  "uuid": "preview-sdc",
+                  "filesystem": "ext4",
+                  "mountPoint": "/mnt/sdc1",
+                  "total": "32 GiB",
+                  "used": "12 GiB",
+                  "usage": 38
+                }
+              ]
+            },
+            {
+              "name": "sdd",
+              "path": "/dev/sdd",
+              "size": "32 GiB",
+              "total": "32 GiB",
+              "used": "12 GiB",
+              "usage": 38,
+              "venderModel": "Preview disk",
+              "childrens": [
+                {
+                  "name": "sdd1",
+                  "path": "/dev/sdd1",
+                  "uuid": "preview-sdd",
+                  "filesystem": "ext4",
+                  "mountPoint": "/mnt/sdd1",
+                  "total": "32 GiB",
+                  "used": "12 GiB",
+                  "usage": 38
+                }
+              ]
+            }
+          ]
+        },
+        "previewOnly": true
+      }
+    },
+    "/raid/list/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "disks": []
+        },
+        "previewOnly": true
+      }
+    },
+    "/u/nas/service/status/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "linkease": {
+            "enabel": true,
+            "port": 8897
+          },
+          "sambas": [
+            {
+              "shareName": "photos",
+              "path": "/mnt/sdb1/photos"
+            },
+            {
+              "shareName": "media",
+              "path": "/mnt/sdc1/media"
+            }
+          ],
+          "webdav": {
+            "enable": false,
+            "path": "/mnt/sdd1/public",
+            "port": 8080
+          }
+        },
+        "previewOnly": true
+      }
+    },
+    "/guide/docker/status/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "status": "running",
+          "path": "/mnt/sdb1/docker",
+          "errorInfo": ""
+        },
+        "previewOnly": true
+      }
+    },
+    "/guide/download-service/status/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "aria2": {
+            "status": "running",
+            "rpcToken": "preview-token",
+            "rpcPort": 6800,
+            "webPath": "/aria2",
+            "configPath": "/mnt/sdb1/aria2",
+            "downloadPath": "/mnt/sdb1/downloads"
+          },
+          "qbittorrent": {
+            "status": "running",
+            "rpcToken": "",
+            "rpcPort": 6800,
+            "webPath": ":8081",
+            "configPath": "/mnt/sdb1/qbittorrent",
+            "downloadPath": "/mnt/sdb1/downloads"
+          },
+          "transmission": {
+            "status": "running",
+            "rpcToken": "",
+            "rpcPort": 6800,
+            "webPath": ":9091",
+            "configPath": "/mnt/sdb1/transmission",
+            "downloadPath": "/mnt/sdb1/downloads"
+          }
+        },
+        "previewOnly": true
+      }
+    },
+    "/u/guide/ddns/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "ddnstoDomain": "https://demo.example.invalid",
+          "ipv4Domain": "v4.example.invalid",
+          "ipv6Domain": "https://v6.example.invalid"
+        },
+        "previewOnly": true
+      }
+    },
+    "/system/status/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "cpuUsage": 1,
+          "cpuTemperature": 48,
+          "memAvailablePercentage": 73,
+          "memTotal": "4 GiB",
+          "memAvailable": "3 GiB",
+          "uptime": 109000,
+          "localtime": "2026-10-16 12:52:59"
+        },
+        "previewOnly": true
+      }
+    },
+    "/u/system/version/": {
+      "status": 200,
+      "body": {
+        "result": {
+          "model": "QEMU Standard PC (Q35 + ICH9, 2009)",
+          "kernelVersion": "6.6.86",
+          "firmwareVersion": "iStoreOS 24.10.1 2025011019"
+        }
+      }
+    },
+    "/app/install-list/": {
+      "status": 200,
+      "body": [
+        {
+          "name": "docker",
+          "title": "Docker",
+          "title_en": "Docker",
+          "description": "容器管理",
+          "description_en": "Containers",
+          "entry": "/docker"
+        },
+        {
+          "name": "qbittorrent",
+          "title": "qBittorrent",
+          "title_en": "qBittorrent",
+          "description": "下载管理",
+          "description_en": "Downloads",
+          "entry": "/download"
+        },
+        {
+          "name": "ddnsto",
+          "title": "DDNSTO",
+          "title_en": "DDNSTO",
+          "description": "远程访问",
+          "description_en": "Remote access",
+          "entry": "/ddns"
+        },
+        {
+          "name": "linkease",
+          "title": "易有云",
+          "title_en": "LinkEase",
+          "description": "文件与远程",
+          "description_en": "Files & remote access",
+          "entry": "/storage"
+        },
+        {
+          "name": "fastnet",
+          "title": "网络测速",
+          "title_en": "Speed test",
+          "description": "FastNet",
+          "description_en": "FastNet",
+          "entry": "/networkSpeedTest"
+        },
+        {
+          "name": "oaf",
+          "title": "家长控制",
+          "title_en": "Parental controls",
+          "description": "应用过滤",
+          "description_en": "App filtering",
+          "entry": "/parental"
+        }
+      ]
+    },
+    "/nas/sandbox/": {
+      "status": 200,
+      "body": {
+        "result": {
+          "status": "stopped"
+        },
+        "success": 0,
+        "previewOnly": true
+      }
+    },
+    "/guide/download/partition/list/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "partitionList": [
+            "/mnt/sdb1",
+            "/mnt/sdc1"
+          ]
+        },
+        "previewOnly": true
+      }
+    },
+    "/guide/docker/partition/list/": {
+      "status": 200,
+      "body": {
+        "success": 0,
+        "result": {
+          "partitionList": [
+            "/mnt/sdc1",
+            "/mnt/sdd1"
+          ]
+        },
+        "previewOnly": true
+      }
+    }
+  },
+  "lang": "zh-cn",
+  "features": [
+    "dockerd",
+    "sandbox",
+    "ota",
+    "ttyd"
+  ],
+  "configs": {
+    "update": {
+      "disable": true
+    },
+    "deviceInventoryV2": true,
+    "ttyd": {
+      "port": 7681,
+      "ssl": false
+    }
+  }
+}

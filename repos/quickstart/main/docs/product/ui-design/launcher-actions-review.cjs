@@ -1,0 +1,13 @@
+const {run}=require('./direct-test-utils.cjs');
+run('launcher-actions',async({page,visit,assert,report})=>{
+ const open=async(id)=>{await page.locator('[data-applications-hub] [data-all-apps]').click();await page.locator('[data-category=tools]').click();await page.locator(`[data-browser-tool="tool-${id}"]`).click();await page.locator('[data-launcher-action]').waitFor()};
+ const close=()=>page.locator('[data-network-dialog-close]').click();
+ await visit();
+ for(const [id,text]of [['lan','IPv4'],['dns','DNS'],['source','软件源'],['sandbox','沙箱']]){await open(id);assert.ok((await page.locator('.launcher-tool-action').innerText()).includes(text));await close();report.checks.push(id+' original Vue form mounted')}
+ for(const [id,target]of [['terminal',':7681/'],['firmware','/admin/system/ota'],['logs','/admin/status/logs'],['maintenance','/admin/store/pages/maintance']]){await open(id);assert.ok((await page.locator('[data-tool-destination]').innerText()).includes(target));if(id==='firmware'){await page.locator('.launcher-firmware-options input').check();await page.waitForTimeout(200);assert.equal(await page.locator('.launcher-firmware-options input').isChecked(),true);assert.ok(await page.evaluate(()=>window.__quickstartDesign.requests.some(r=>r.path==='/system/auto-check-update/'&&r.method==='POST')))}await close();report.checks.push(id+' exact target/options')}
+ await visit('&scenario=sandbox-running');await open('sandbox');assert.ok((await page.locator('.launcher-tool-action').innerText()).includes('当前处于沙箱环境'));await close();report.checks.push('running sandbox original environment form');
+ await visit('&scenario=sandbox-unsupported');await open('sandbox');assert.ok((await page.locator('.launcher-tool-action').innerText()).includes('不支持'));await close();report.checks.push('unsupported sandbox explains capability');
+ await visit('&scenario=apps-error');await open('logs');await close();report.checks.push('catalogue error leaves tools available');
+ await page.evaluate(()=>{window.quickstart_configs.ttyd={ssl:true,port:8443}});await open('terminal');assert.match(await page.locator('[data-tool-destination]').innerText(),/^https:\/\/[^/]+:8443\/$/);await close();report.checks.push('configured terminal TLS and port');
+ await visit();await page.locator('[data-applications-hub] [data-all-apps]').click();assert.equal(await page.locator('.browser-fallback').count(),0);await page.locator('[data-browser-software-center]').click();assert.equal(new URL(page.url()).pathname,'/cgi-bin/luci/admin/store/pages/store');report.checks.push('one software-center gateway preserves the original home quick-entry destination');
+}).catch(e=>{console.error(e);process.exitCode=1});

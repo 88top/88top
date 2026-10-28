@@ -1,0 +1,9 @@
+{
+  "checkedAt": "2026-10-21T09:14:15.723533+00:00",
+  "result": "passed",
+  "wrapperExitCode": 143,
+  "uiReport": "report.json completed all 11 cases and assertions before wrapper interruption",
+  "sessionsDestroyed": 2,
+  "identification": "Only two root sessions with timeout900, data keys token/username, matching this harness; all previous runs had recorded destruction. Native timeout3600 session retained.",
+  "retainedSessions": 2
+}

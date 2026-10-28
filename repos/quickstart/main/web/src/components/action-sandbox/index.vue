@@ -101,6 +101,8 @@
     </action-component>
 </template>
 <script setup lang="ts">
+import {useOwnedTimeout} from "/@/home/useOwnedTimeout"
+const ownedTimeout=useOwnedTimeout()
 import { ref } from "vue";
 import { useGettext,formatNumber } from '/@/plugins/i18n'
 const { $gettext,$ngettext } = useGettext()
@@ -169,7 +171,7 @@ const onDiskChange = (e: Event) => {
 const updateTime = () => {
     if (time.value > 0) {
         time.value -= 1
-        window.setTimeout(updateTime, 1000)
+        ownedTimeout(updateTime, 1000)
     }
 }
 
@@ -187,7 +189,7 @@ const waitReboot = () => {
         const target = "/luci-static/resources/icons/loading.gif"
         //定时调用图像
         const rejectFn = () => {
-            window.setTimeout(check, 2000)
+            ownedTimeout(check, 2000)
         }
         const check = () => {
             //创建一个图像
@@ -200,11 +202,11 @@ const waitReboot = () => {
             img.src = target
         }
         //定时调用图像
-        window.setTimeout(check, 10000)
+        ownedTimeout(check, 10000)
 
     }).then(() => {
         //刷新页面
-        window.setTimeout(() => {
+        ownedTimeout(() => {
             location.reload()
         }, 2000)
     })
@@ -217,7 +219,7 @@ const onSumbit = (e: Event) => {
             if (res?.data) {
                 if ((res.data.success || 0) == 0) {
                     setup.value = 2
-                    window.setTimeout(updateTime, 1000)
+                    ownedTimeout(updateTime, 1000)
                     return RebootSystem()
                 } else if (res.data?.error) {
                     throw res.data.error

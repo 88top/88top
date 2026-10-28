@@ -1,0 +1,564 @@
+{
+  "checkedAt": "2026-10-18T04:23:13.635Z",
+  "base": "http://192.168.9.19:5180",
+  "views": [
+    {
+      "name": "desktop-home",
+      "width": 1440,
+      "overflow": false,
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "width": 694.796875,
+          "height": 392
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "width": 463.203125,
+          "height": 238
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "width": 463.203125,
+          "height": 136
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "width": 579,
+          "height": 302.078125
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "width": 579,
+          "height": 302.078125
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "width": 579,
+          "height": 411
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "width": 579,
+          "height": 411
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "width": 387.59375,
+          "height": 322.078125
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "width": 376.203125,
+          "height": 322.078125
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "width": 376.1875,
+          "height": 322.078125
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "width": 1176,
+          "height": 290
+        }
+      ]
+    },
+    {
+      "name": "desktop-layout-overview",
+      "width": 1440,
+      "overflow": false,
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "width": 694.796875,
+          "height": 392
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "width": 463.203125,
+          "height": 238
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "width": 463.203125,
+          "height": 136
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "width": 579,
+          "height": 302.078125
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "width": 579,
+          "height": 302.078125
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "width": 579,
+          "height": 411
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "width": 579,
+          "height": 411
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "width": 387.59375,
+          "height": 322.078125
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "width": 376.203125,
+          "height": 322.078125
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "width": 376.1875,
+          "height": 322.078125
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "width": 1176,
+          "height": 290
+        }
+      ]
+    },
+    {
+      "name": "desktop-launchpad",
+      "width": 1440,
+      "overflow": false,
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "width": 694.796875,
+          "height": 392
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "width": 463.203125,
+          "height": 238
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "width": 463.203125,
+          "height": 136
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "width": 579,
+          "height": 302.078125
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "width": 579,
+          "height": 302.078125
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "width": 579,
+          "height": 411
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "width": 579,
+          "height": 411
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "width": 387.59375,
+          "height": 322.078125
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "width": 376.203125,
+          "height": 322.078125
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "width": 376.1875,
+          "height": 322.078125
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "width": 1176,
+          "height": 290
+        }
+      ]
+    },
+    {
+      "name": "desktop-link-form",
+      "width": 1440,
+      "overflow": false,
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "width": 694.796875,
+          "height": 391.796875
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "width": 463.203125,
+          "height": 237.796875
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "width": 463.203125,
+          "height": 136
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "width": 579,
+          "height": 302.078125
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "width": 579,
+          "height": 302.078125
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "width": 579,
+          "height": 411
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "width": 579,
+          "height": 411
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "width": 387.59375,
+          "height": 322.078125
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "width": 376.203125,
+          "height": 322.078125
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "width": 376.1875,
+          "height": 322.078125
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "width": 1176,
+          "height": 290
+        }
+      ]
+    },
+    {
+      "name": "mobile-home",
+      "width": 390,
+      "overflow": false,
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "width": 362,
+          "height": 300
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "width": 362,
+          "height": 220
+        },
+        {
+          "id": "networkInterface",
+          "form": "standard",
+          "width": 362,
+          "height": 230.5625
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "width": 362,
+          "height": 358.296875
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "width": 362,
+          "height": 428
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "width": 362,
+          "height": 398
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "width": 362,
+          "height": 316.484375
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "width": 362,
+          "height": 235.796875
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "width": 362,
+          "height": 239.984375
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "width": 362,
+          "height": 302.078125
+        },
+        {
+          "id": "system",
+          "form": "summary",
+          "width": 362,
+          "height": 148
+        }
+      ]
+    },
+    {
+      "name": "mobile-dark-home",
+      "width": 390,
+      "overflow": false,
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "width": 362,
+          "height": 300
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "width": 362,
+          "height": 220
+        },
+        {
+          "id": "networkInterface",
+          "form": "standard",
+          "width": 362,
+          "height": 230.5625
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "width": 362,
+          "height": 358.296875
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "width": 362,
+          "height": 428
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "width": 362,
+          "height": 398
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "width": 362,
+          "height": 316.484375
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "width": 362,
+          "height": 235.796875
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "width": 362,
+          "height": 239.984375
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "width": 362,
+          "height": 302.078125
+        },
+        {
+          "id": "system",
+          "form": "summary",
+          "width": 362,
+          "height": 148
+        }
+      ]
+    }
+  ],
+  "checks": [
+    "Default five rows / 11 stable widgets; layout overview and cancel preserve applied layout",
+    "Unified launchpad and custom link form inspected; exited without saving",
+    "Narrow screen and dark theme preserve saved layout intent"
+  ],
+  "errors": [],
+  "layout": [
+    {
+      "id": "network",
+      "template": "left-big",
+      "height": 320,
+      "columns": [
+        {
+          "weight": 60,
+          "split": 50,
+          "cards": [
+            "traffic"
+          ]
+        },
+        {
+          "weight": 40,
+          "split": 50,
+          "cards": [
+            "connection",
+            "networkInterface"
+          ]
+        }
+      ],
+      "heightMode": "chart"
+    },
+    {
+      "id": "devices",
+      "template": "pair",
+      "height": 340,
+      "columns": [
+        {
+          "weight": 50,
+          "cards": [
+            "devices"
+          ],
+          "split": 50
+        },
+        {
+          "weight": 50,
+          "cards": [
+            "applications"
+          ],
+          "split": 50
+        }
+      ],
+      "heightMode": "content"
+    },
+    {
+      "id": "storage",
+      "template": "pair",
+      "height": 330,
+      "columns": [
+        {
+          "weight": 50,
+          "cards": [
+            "storage"
+          ],
+          "split": 50
+        },
+        {
+          "weight": 50,
+          "cards": [
+            "sharing"
+          ],
+          "split": 50
+        }
+      ],
+      "heightMode": "content"
+    },
+    {
+      "id": "services",
+      "template": "triple",
+      "height": 280,
+      "columns": [
+        {
+          "weight": 34,
+          "split": 50,
+          "cards": [
+            "docker"
+          ]
+        },
+        {
+          "weight": 33,
+          "split": 50,
+          "cards": [
+            "downloads"
+          ]
+        },
+        {
+          "weight": 33,
+          "split": 50,
+          "cards": [
+            "remote"
+          ]
+        }
+      ],
+      "heightMode": "content"
+    },
+    {
+      "id": "system",
+      "template": "single",
+      "height": 280,
+      "columns": [
+        {
+          "weight": 100,
+          "split": 50,
+          "cards": [
+            "system"
+          ]
+        }
+      ],
+      "heightMode": "content"
+    }
+  ],
+  "result": "inspected"
+}

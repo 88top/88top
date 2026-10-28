@@ -1,0 +1,19 @@
+{
+  "result": "passed",
+  "scope": "Read-only post-UI comparison to script deployment baseline",
+  "protectedFingerprints": [
+    "ce86a957cc5702d312e8b5c80c2d2b6e54bcbab95012a9cf49158bb5fb429aa0  /etc/config/network",
+    "0bee30732af875effe4a81a11738c2e7a63e287a80d0a30647c0d80a3e7e26fa  /etc/config/dhcp",
+    "40de5cd84af2448ca5c351a78272979a91cad04cddf343896eb64cd00bc5aa41  /etc/config/firewall",
+    "a264ce894fcc364f0b9fd7dd758d2b62d91d7e472b8d78f243666de844b3e767  /etc/config/quickstart",
+    "390d50ee985cf165378809edccea2aaecef2c526de410bda44df719221313f5b  /etc/config/istoreenhance",
+    "30b58b5eea23243f8a6acfcd056d4c9d1a412e41a5f36811314ad1bec12f89b3  /etc/quickstart/home-layout.json",
+    "30282f1dd87fa2f5adbfeab170441e5fbe6dcc128b9e03b3ec73f2726c804d9e  /etc/quickstart/home-launcher.json"
+  ],
+  "serviceInstances": {
+    "instance1": {
+      "running": true,
+      "pid": 680369
+    }
+  }
+}

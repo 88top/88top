@@ -1,0 +1,55 @@
+{
+  "checkedAt": "2026-10-21T15:05:41.053113+00:00",
+  "host": "192.168.30.244",
+  "scope": "homepage-config-only",
+  "board": {
+    "kernel": "6.6.86",
+    "hostname": "iStoreOS",
+    "system": "Intel(R) N100",
+    "model": "QEMU Standard PC (Q35 + ICH9, 2009)",
+    "board_name": "qemu-standard-pc-q35-ich9-2009",
+    "rootfs_type": "squashfs",
+    "release": {
+      "distribution": "iStoreOS",
+      "version": "24.10.1",
+      "revision": "2025052311",
+      "target": "x86/64",
+      "description": "iStoreOS 24.10.1 2025052311",
+      "builddate": "1747907388"
+    }
+  },
+  "version": "0.16.6-test20261018 c9624a38ffe11b45f484b2858ddf16088ae7a6a7 .20261018.145918",
+  "fingerprints": [
+    "983a1c8b819e29a5ac7e053898afa66ccdc8653e535219482c92052b3a90ba11  /usr/sbin/quickstart",
+    "c6c73c2f173ba5a91a0997ecb1bb35062ca93c038ec809691d5df45a364e742d  /www/luci-static/quickstart/index.js",
+    "d915eea2e0603d24fe16d6d06709864e2e484e36c7648611de65160bf977dd99  /www/luci-static/quickstart/style.css",
+    "2d10df1751d0d3e778744c01f8edf8db96082b8d0939cf65ef38ea05eea39867  /www/luci-static/quickstart/vendor.js",
+    "2da3ec81c6d15ca52a574576486e534acf4a040d61adbc34cad360b91af76a4f  /www/luci-static/quickstart/i18n/en.json"
+  ],
+  "processFingerprints": [
+    "983a1c8b819e29a5ac7e053898afa66ccdc8653e535219482c92052b3a90ba11  /proc/14546/exe",
+    "983a1c8b819e29a5ac7e053898afa66ccdc8653e535219482c92052b3a90ba11  /proc/9386/exe"
+  ],
+  "packages": [
+    "luci-app-quickstart - 0.16.5-test20261018-r2",
+    "quickstart - 0.16.5-test20261018-2",
+    "quickstart-netpolicy - 0.2.0-test20260928-2"
+  ],
+  "installation": "Direct runtime candidate; original opkg package records retained, not a package-install acceptance",
+  "netpolicy": {
+    "binarySha256": "3a1c633f346f876d771b03f622aeff8215920683c5ed1945fca354bac77ba6c2",
+    "manifest": {
+      "product": "quickstart-netpolicy",
+      "version": "0.2.0-test20260928",
+      "target": "x86_64-unknown-linux-musl",
+      "policyInterfaceVersion": "1",
+      "gitSha": "597e82f2de08185837c70966be4370775b781561",
+      "binarySha256": "3a1c633f346f876d771b03f622aeff8215920683c5ed1945fca354bac77ba6c2"
+    },
+    "enabled": "0",
+    "running": false
+  },
+  "matchedManifest": "c9624a38ffe11b45f484b2858ddf16088ae7a6a7",
+  "uiExitCode": 1,
+  "sessionsDestroyed": 2
+}

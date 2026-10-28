@@ -1,4 +1,4 @@
-import { defineConfig, splitVendorChunkPlugin } from 'vite'
+import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from "path";
 
@@ -42,14 +42,13 @@ export default defineConfig({
 	},
 	plugins: [
 		vue(),
-		splitVendorChunkPlugin(),
 	],
 	css: {
 		preprocessorOptions: {
 			scss: {
 				charset: false,
 				additionalData: `
-					@import "./src/style/theme.scss";
+					@import ${JSON.stringify(path.resolve(__dirname, 'src/style/theme.scss'))};
 				`,
 			}
 		}
@@ -63,6 +62,7 @@ export default defineConfig({
 		chunkSizeWarningLimit: 4096,
 		rollupOptions: {
 			output: {
+				manualChunks: (id) => id.includes('/node_modules/') ? 'vendor' : undefined,
 				entryFileNames: `luci-static/quickstart/[name].js`,
 				chunkFileNames: `luci-static/quickstart/[name].js?v=[hash]`,
 				assetFileNames: `luci-static/quickstart/[name].[ext]`

@@ -1,0 +1,288 @@
+{
+  "startedAt": "2026-10-17T15:39:41.457Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "widget-body-network-disk-review",
+      "startedAt": "2026-10-17T15:39:41.461Z",
+      "endedAt": "2026-10-17T15:39:53.061Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 6,
+      "report": "docs/evidence/m66/widget-body/75-review/final/widget-body-network-disk-review/report.json"
+    },
+    {
+      "name": "widget-body-storage-review",
+      "startedAt": "2026-10-17T15:39:41.457Z",
+      "endedAt": "2026-10-17T15:39:58.526Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 25,
+      "report": "docs/evidence/m66/widget-body/75-review/final/widget-body-storage-review/report.json"
+    },
+    {
+      "name": "widget-body-services-review",
+      "startedAt": "2026-10-17T15:39:41.460Z",
+      "endedAt": "2026-10-17T15:40:02.580Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 10,
+      "report": "docs/evidence/m66/widget-body/75-review/final/widget-body-services-review/report.json"
+    },
+    {
+      "name": "widget-body-touch-review",
+      "startedAt": "2026-10-17T15:39:58.526Z",
+      "endedAt": "2026-10-17T15:40:04.904Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/widget-body/75-review/final/widget-body-touch-review/report.json"
+    },
+    {
+      "name": "widget-body-system-review",
+      "startedAt": "2026-10-17T15:39:53.062Z",
+      "endedAt": "2026-10-17T15:40:13.514Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/widget-body/75-review/final/widget-body-system-review/report.json"
+    },
+    {
+      "name": "widget-body-contrast-review",
+      "startedAt": "2026-10-17T15:40:13.514Z",
+      "endedAt": "2026-10-17T15:40:17.042Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 6,
+      "report": "docs/evidence/m66/widget-body/75-review/final/widget-body-contrast-review/report.json"
+    },
+    {
+      "name": "widget-body-resource-review",
+      "startedAt": "2026-10-17T15:40:02.580Z",
+      "endedAt": "2026-10-17T15:40:22.286Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/widget-body/75-review/final/widget-body-resource-review/report.json"
+    },
+    {
+      "name": "widget-body-warning-review",
+      "startedAt": "2026-10-17T15:40:17.043Z",
+      "endedAt": "2026-10-17T15:40:38.156Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/widget-body/75-review/final/widget-body-warning-review/report.json"
+    },
+    {
+      "name": "visual-refinement-content-review",
+      "startedAt": "2026-10-17T15:40:38.156Z",
+      "endedAt": "2026-10-17T15:40:53.643Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/widget-body/75-review/final/visual-refinement-content-review/report.json"
+    },
+    {
+      "name": "widget-body-matrix-review",
+      "startedAt": "2026-10-17T15:40:04.905Z",
+      "endedAt": "2026-10-17T15:40:55.411Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 42,
+      "report": "docs/evidence/m66/widget-body/75-review/final/widget-body-matrix-review/report.json"
+    },
+    {
+      "name": "header-action-interaction-review",
+      "startedAt": "2026-10-17T15:40:55.411Z",
+      "endedAt": "2026-10-17T15:41:02.372Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 6,
+      "report": "docs/evidence/m66/widget-body/75-review/final/header-action-interaction-review/report.json"
+    },
+    {
+      "name": "widget-actions-review",
+      "startedAt": "2026-10-17T15:41:02.372Z",
+      "endedAt": "2026-10-17T15:41:21.598Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/widget-body/75-review/final/widget-actions-review/report.json"
+    },
+    {
+      "name": "visual-refinement-matrix-review",
+      "startedAt": "2026-10-17T15:40:22.286Z",
+      "endedAt": "2026-10-17T15:41:25.958Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 41,
+      "report": "docs/evidence/m66/widget-body/75-review/final/visual-refinement-matrix-review/report.json"
+    },
+    {
+      "name": "home-widget-header-review",
+      "startedAt": "2026-10-17T15:41:21.598Z",
+      "endedAt": "2026-10-17T15:41:34.039Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 14,
+      "report": "docs/evidence/m66/widget-body/75-review/final/home-widget-header-review/report.json"
+    },
+    {
+      "name": "header-action-matrix-review",
+      "startedAt": "2026-10-17T15:40:53.644Z",
+      "endedAt": "2026-10-17T15:41:40.736Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 27,
+      "report": "docs/evidence/m66/widget-body/75-review/final/header-action-matrix-review/report.json"
+    },
+    {
+      "name": "home-widget-standard-review",
+      "startedAt": "2026-10-17T15:41:25.958Z",
+      "endedAt": "2026-10-17T15:41:44.532Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/widget-body/75-review/final/home-widget-standard-review/report.json"
+    },
+    {
+      "name": "network-interaction-review",
+      "startedAt": "2026-10-17T15:41:34.040Z",
+      "endedAt": "2026-10-17T15:42:13.247Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 14,
+      "report": "docs/evidence/m66/widget-body/75-review/final/network-interaction-review/report.json"
+    },
+    {
+      "name": "business-actions-review",
+      "startedAt": "2026-10-17T15:41:44.532Z",
+      "endedAt": "2026-10-17T15:42:21.044Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/widget-body/75-review/final/business-actions-review/report.json"
+    },
+    {
+      "name": "launcher-actions-review",
+      "startedAt": "2026-10-17T15:42:13.247Z",
+      "endedAt": "2026-10-17T15:42:24.871Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/widget-body/75-review/final/launcher-actions-review/report.json"
+    },
+    {
+      "name": "business-widgets-review",
+      "startedAt": "2026-10-17T15:41:40.736Z",
+      "endedAt": "2026-10-17T15:42:26.639Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 19,
+      "report": "docs/evidence/m66/widget-body/75-review/final/business-widgets-review/report.json"
+    },
+    {
+      "name": "launcher-home-review",
+      "startedAt": "2026-10-17T15:42:21.044Z",
+      "endedAt": "2026-10-17T15:42:28.497Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/widget-body/75-review/final/launcher-home-review/report.json"
+    },
+    {
+      "name": "launchpad-browser-review",
+      "startedAt": "2026-10-17T15:42:26.639Z",
+      "endedAt": "2026-10-17T15:42:33.630Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 11,
+      "report": "docs/evidence/m66/widget-body/75-review/final/launchpad-browser-review/report.json"
+    },
+    {
+      "name": "launcher-editor-review",
+      "startedAt": "2026-10-17T15:42:24.871Z",
+      "endedAt": "2026-10-17T15:42:36.042Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/widget-body/75-review/final/launcher-editor-review/report.json"
+    },
+    {
+      "name": "launchpad-links-review",
+      "startedAt": "2026-10-17T15:42:28.497Z",
+      "endedAt": "2026-10-17T15:42:36.525Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 7,
+      "report": "docs/evidence/m66/widget-body/75-review/final/launchpad-links-review/report.json"
+    },
+    {
+      "name": "launchpad-capacity-review",
+      "startedAt": "2026-10-17T15:42:33.630Z",
+      "endedAt": "2026-10-17T15:42:44.471Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 5,
+      "report": "docs/evidence/m66/widget-body/75-review/final/launchpad-capacity-review/report.json"
+    },
+    {
+      "name": "launchpad-resource-review",
+      "startedAt": "2026-10-17T15:42:36.042Z",
+      "endedAt": "2026-10-17T15:42:49.030Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/widget-body/75-review/final/launchpad-resource-review/report.json"
+    },
+    {
+      "name": "boundary-interaction-review",
+      "startedAt": "2026-10-17T15:42:44.471Z",
+      "endedAt": "2026-10-17T15:42:52.227Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 10,
+      "report": "docs/evidence/m66/widget-body/75-review/final/boundary-interaction-review/report.json"
+    },
+    {
+      "name": "home-widget-chart-review",
+      "startedAt": "2026-10-17T15:42:36.525Z",
+      "endedAt": "2026-10-17T15:43:06.449Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 18,
+      "report": "docs/evidence/m66/widget-body/75-review/final/home-widget-chart-review/report.json"
+    },
+    {
+      "name": "structure-interaction-review",
+      "startedAt": "2026-10-17T15:42:52.228Z",
+      "endedAt": "2026-10-17T15:43:10.377Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/widget-body/75-review/final/structure-interaction-review/report.json"
+    },
+    {
+      "name": "row-sort-review",
+      "startedAt": "2026-10-17T15:42:49.031Z",
+      "endedAt": "2026-10-17T15:43:32.305Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/widget-body/75-review/final/row-sort-review/report.json"
+    },
+    {
+      "name": "structure-resource-review",
+      "startedAt": "2026-10-17T15:43:06.449Z",
+      "endedAt": "2026-10-17T15:43:32.705Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/widget-body/75-review/final/structure-resource-review/report.json"
+    }
+  ],
+  "endedAt": "2026-10-17T15:43:32.705Z",
+  "result": "pass",
+  "groups": 380
+}

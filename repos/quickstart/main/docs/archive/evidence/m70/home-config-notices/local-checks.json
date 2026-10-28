@@ -1,0 +1,11 @@
+{
+  "result": "passed",
+  "commands": [
+    {"command": "rtk proxy /var/cache/build-cache/run.sh -- node --test web/test/homeConfig.test.mjs web/test/homeConfigClient.test.mjs", "exitCode": 0, "tests": 38, "passed": 38},
+    {"command": "rtk proxy /var/cache/build-cache/run.sh -- npm --prefix web run tsc", "exitCode": 0},
+    {"command": "rtk proxy /var/cache/build-cache/run.sh -- make build-web", "exitCode": 0}
+  ],
+  "nodeModules": "/var/cache/build-cache/users/911/projects/quickstart-6fd8ef14aa05/work/web-deps/node_modules",
+  "actualOutput": "web/dist/quickstart_web.zip",
+  "notes": "Existing ::v-deep deprecation warnings retained. No backend/package build. Source matched tested working tree; candidate frozen after commit."
+}

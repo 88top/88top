@@ -1,0 +1,19 @@
+{
+  "existing": [
+    "web/src/design/HomeApplications.vue",
+    "web/src/design/homeApplications.ts",
+    "web/src/design/homeApplications.css",
+    "web/src/design/widgetPresentation.ts",
+    "web/src/design/NativeBusinessHost.vue",
+    "web/src/design/fixtures.ts",
+    "web/src/design/main.ts",
+    "web/vite.design.config.ts"
+  ],
+  "new": "Launcher-specific design adapters, fixtures, editor and verification only",
+  "presentation": "Only applications count and grid packing may change; all non-application calculations protected",
+  "bindingException": {
+    "path": "web/src/design/LayoutPreviewCard.vue",
+    "allowedExactly": ":network=\"data.network\" on HomeApplications",
+    "reason": "M66.58 optimization 2 passes the existing root snapshot to original DNS actions; protection compares all remaining content exactly to HEAD"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "result": "passed",
+  "frontendTests": 133,
+  "typecheck": "npm --prefix web run tsc",
+  "productionBuild": "make build-web",
+  "wrapper": "/var/cache/build-cache/run.sh",
+  "cacheBacking": "/dev/nvme0n1p4",
+  "explicitOutput": "web/dist",
+  "buildNote": "Vite output stays at the project explicit path; caches use SSD. Existing v-deep deprecation warnings retained.",
+  "sha256": {
+    "web/dist/luci-static/quickstart/vendor.js": "2d10df1751d0d3e778744c01f8edf8db96082b8d0939cf65ef38ea05eea39867",
+    "web/dist/luci-static/quickstart/index.js": "e38aac759d109d014c0c02d80194727a40ffb4042377c2bece8a7079e2a0579b",
+    "web/dist/luci-static/quickstart/style.css": "64065b866eb16d7eabbe696ff95bcf16aa398d27ad57a999d4d432d59f122c6a"
+  }
+}

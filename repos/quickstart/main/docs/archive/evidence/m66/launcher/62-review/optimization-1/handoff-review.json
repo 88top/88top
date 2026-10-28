@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-10-17T08:00:40.041Z",
+  "result": "pass",
+  "scriptSha256": "3626d2302b0bed05eaef27c9207355a024069824d2c5e946e08bc32bdaae88ff",
+  "checks": [
+    "22 current-candidate suites passed",
+    "source and tested verification fingerprints unchanged",
+    "public PID/owner/mode and all assets match",
+    "254 protected files and 64 original-source checks pass",
+    "git diff whitespace check passes"
+  ],
+  "groups": 263,
+  "pid": 23613,
+  "entry": {
+    "path": "/assets/index.5b76ba87.js",
+    "entry": true,
+    "sha256": "a283048e8311f424e2d8a9d54edbf9825553c83611e61bd399a001cbaf9cebd7",
+    "bytes": 49863,
+    "buildFile": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work/vue-preview/assets/index.5b76ba87.js"
+  },
+  "prototypeOnly": true,
+  "installedApps": "synthetic",
+  "persistence": "memory only; reload resets sample",
+  "humanConfirmation": "pending"
+}

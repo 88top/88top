@@ -1,0 +1,187 @@
+
+[workspace]
+resolver = "2"
+members = [
+    "crates/honk-config",
+    "crates/honk-ebpf-common",
+    "crates/honk-nfqueue",
+    "crates/honk-outbound",
+    "crates/honk-core",
+    "crates/honk-tool",
+]
+exclude = ["crates/honk-ebpf", "fuzz"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-only"
+repository = "https://github.com/Glassyiris/honk"
+authors = ["glassyiris <honk@catmint.cc> and honk contributors"]
+
+[workspace.dependencies]
+# Internal
+honk-config = { path = "crates/honk-config" }
+honk-ebpf-common = { path = "crates/honk-ebpf-common" }
+honk-nfqueue = { path = "crates/honk-nfqueue" }
+honk-outbound = { path = "crates/honk-outbound" }
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+async-trait = "0.1"
+futures = "0.3"
+futures-util = "0.3"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+serde_path_to_error = "0.1"
+toml = "1"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Error handling
+thiserror = "2"
+anyhow = "1"
+
+# HTTP (clash-api in honk-core, h2 probes in honk-outbound)
+axum = { version = "0.8", features = ["macros"] }
+tower = "0.5"
+tower-http = { version = "0.7", features = ["cors", "fs", "trace"] }
+reqwest = { version = "0.13", features = [
+    "json",
+    "rustls",
+], default-features = false }
+h2 = "0.4"
+http = "1"
+hyper = { version = "1", features = ["client", "server", "http1"] }
+hyper-util = { version = "0.1", features = [
+    "tokio",
+    "service",
+    "client-proxy",
+] }
+
+# eBPF / Aya
+aya = "0.14"
+aya-obj = "0.3"
+aya-log = "0.3"
+aya-ebpf = "0.2"
+aya-ebpf-bindings = "0.2"
+network-types = "0.2"
+
+# CLI
+clap = { version = "4", features = ["derive", "env"] }
+
+# TLS / crypto
+# REALITY hooks are carried by the 5.2.0 boring-sys fork below.
+boring = { version = "=5.2.0", features = ["mlkem"] }
+boring-sys = "=5.2.0"
+tokio-boring = "=5.2.0"
+brotli = "9"
+webpki-root-certs = "1"
+foreign-types = "0.5"
+tokio-rustls = "0.26"
+rustls-platform-verifier = "0.7"
+rustls-pemfile = "2.2"
+webpki-roots = "1"
+aes-gcm = "0.11"
+aes = "0.9"
+chacha20 = "0.10"
+chacha20poly1305 = "0.11"
+sha1 = "0.11"
+sha2 = "0.11"
+sha3 = "0.12"
+shake = "0.1"
+hmac = "0.13"
+hkdf = "0.13"
+md-5 = "0.11"
+blake3 = "1"
+subtle = "2.6.1"
+
+# Networking
+socket2 = { version = "0.6", features = ["all"] }
+quinn = "0.11"
+quinn-proto = "0.11"
+h3 = "0.0.8"
+h3-quinn = "0.0.10"
+tokio-tungstenite = { version = "0.30", default-features = false, features = [
+    "connect",
+] }
+ipnet = "2"
+url = "2"
+percent-encoding = "2"
+aho-corasick = "1"
+
+# Persistence (state database)
+rusqlite = { version = "0.40", features = ["bundled", "blob"] }
+
+# Misc
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4", "v5", "serde"] }
+regex = "1"
+glob = "0.3"
+base64 = "0.23"
+bytes = "1"
+rand = "0.10"
+lru = "0.19"
+libc = "0.2"
+parking_lot = "0.13"
+dashmap = "6"
+libsystemd = "0.7"
+nix = { version = "0.31", features = [
+    "time",
+    "fs",
+    "net",
+    "sched",
+    "mount",
+    "resource",
+    "zerocopy",
+] }
+pin-project-lite = "0.2"
+zip = { version = "9.0.5", default-features = false, features = ["deflate"] }
+flate2 = "1.1"
+
+# Dev/test utilities
+tempfile = "3"
+rcgen = "0.14"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+
+# Keep the shipping profile size-oriented; opt-in profiles isolate LTO effects
+# for controlled benchmarks.
+[profile.release-size]
+inherits = "release"
+opt-level = "s"
+lto = "fat"
+codegen-units = 1
+strip = true
+
+[profile.release-size-thin]
+inherits = "release"
+opt-level = "s"
+lto = "thin"
+codegen-units = 1
+strip = true
+
+# Static musl build for portable deployment (VyOS/Debian/etc.)
+[profile.release-musl]
+inherits = "release"
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+
+[patch.crates-io]
+# honk rprx fork: preset X25519 keyshare + ClientHello fixup hooks (REALITY)
+boring-sys = { git = "https://github.com/Glassyiris/boring-sys", rev = "3beb573b65ecaa69b7eefe3c2fecd074b97facd2" }
+# honk fork (branch `honk-0.11` = upstream 0.11.x + patches, auto-merged): bound receive fragmentation, expose delivery and flow-control state,
+# allow runtime flow-control window tuning, auto-tune the connection receive window, report per-packet events to congestion controllers,
+# let a controller pace by rate, and provide BBRv3 (Glassyiris/quinn#12).
+quinn = { git = "https://github.com/Glassyiris/quinn", rev = "11f1de84c28305a3c98ace6d681c35219a8d1e6c" }
+quinn-proto = { git = "https://github.com/Glassyiris/quinn", rev = "11f1de84c28305a3c98ace6d681c35219a8d1e6c" }

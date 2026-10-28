@@ -1,0 +1,79 @@
+# Rust
+/target/
+**/*.rs.bk
+*.pdb
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+dist/
+*.o
+*.so
+
+# eBPF
+*.o
+/sys/fs/bpf/
+crates/honk-ebpf/target/
+crates/honk-ebpf/log/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+log/
+
+# External/outbound repo (not a submodule)
+/outbound/
+
+# Local artifacts
+cache.db
+sing-box/
+.sub/
+
+honk/
+
+*.dat
+AGENT.*
+
+.pi
+test.dae
+cache.db
+cache.db-shm
+cache.db-wal
+yacd/
+.omo
+AGENTS.md
+
+docs
+.zed
+results
+.sisyphus
+.expect
+.codex
+.agents/*
+!.agents/rules/
+!.agents/skills/
+!.agents/tools/
+bench
+.task*
+.qa*
+
+# Local design drafts (not tracked for now)
+doc/zh/design/af-xdp-dataplane-proposal.md
+doc/zh/design/outbound-vs-dae.md
+af-xdp-dataplane-proposal.md
+doc/en/design/owned-udp-nat-xdp-proposal.md
+doc/zh/design/owned-udp-nat-xdp-proposal.md
+target-armbench

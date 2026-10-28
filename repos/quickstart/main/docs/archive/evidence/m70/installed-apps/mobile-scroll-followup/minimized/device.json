@@ -1,0 +1,56 @@
+{
+  "checkedAt": "2026-10-19T04:47:12.634942+00:00",
+  "host": "192.168.30.244",
+  "scope": "homepage-config-only",
+  "board": {
+    "kernel": "6.6.86",
+    "hostname": "iStoreOS",
+    "system": "Intel(R) N100",
+    "model": "QEMU Standard PC (Q35 + ICH9, 2009)",
+    "board_name": "qemu-standard-pc-q35-ich9-2009",
+    "rootfs_type": "squashfs",
+    "release": {
+      "distribution": "iStoreOS",
+      "version": "24.10.1",
+      "revision": "2025052311",
+      "target": "x86/64",
+      "description": "iStoreOS 24.10.1 2025052311",
+      "builddate": "1747907388"
+    }
+  },
+  "version": "0.16.6-test20261018 c9624a38ffe11b45f484b2858ddf16088ae7a6a7 .20261018.145918",
+  "fingerprints": [
+    "983a1c8b819e29a5ac7e053898afa66ccdc8653e535219482c92052b3a90ba11  /usr/sbin/quickstart",
+    "721060548e209fd4abe6d27f4ba8a1a0d056ff272bca6b1ec695ca4669783145  /www/luci-static/quickstart/index.js",
+    "ca27cf1c756388818e6481d52b9c99d8987046dfa4687659d67d67e683d53925  /www/luci-static/quickstart/style.css",
+    "7992a0ec88bbb57194072248703d3c1e63ecf6ccf3c7e19b88dac1e306ab753f  /www/luci-static/quickstart/vendor.js",
+    "2da3ec81c6d15ca52a574576486e534acf4a040d61adbc34cad360b91af76a4f  /www/luci-static/quickstart/i18n/en.json"
+  ],
+  "processFingerprints": [
+    "983a1c8b819e29a5ac7e053898afa66ccdc8653e535219482c92052b3a90ba11  /proc/568345/exe",
+    "983a1c8b819e29a5ac7e053898afa66ccdc8653e535219482c92052b3a90ba11  /proc/728331/exe"
+  ],
+  "packages": [
+    "luci-app-quickstart - 0.16.5-test20261018-r2",
+    "quickstart - 0.16.5-test20261018-2",
+    "quickstart-netpolicy - 0.2.0-test20260928-2"
+  ],
+  "entryScriptSha256": "0d67a859adffacb04ff684acc3801f27b4412330f22e88a705445431430fc341",
+  "installation": "Direct runtime candidate; original opkg package records retained, not a package-install acceptance",
+  "netpolicy": {
+    "binarySha256": "3a1c633f346f876d771b03f622aeff8215920683c5ed1945fca354bac77ba6c2",
+    "manifest": {
+      "product": "quickstart-netpolicy",
+      "version": "0.2.0-test20260928",
+      "target": "x86_64-unknown-linux-musl",
+      "policyInterfaceVersion": "1",
+      "gitSha": "597e82f2de08185837c70966be4370775b781561",
+      "binarySha256": "3a1c633f346f876d771b03f622aeff8215920683c5ed1945fca354bac77ba6c2"
+    },
+    "enabled": "0",
+    "running": false
+  },
+  "matchedManifest": "c9624a38ffe11b45f484b2858ddf16088ae7a6a7",
+  "uiExitCode": 1,
+  "sessionsDestroyed": 2
+}

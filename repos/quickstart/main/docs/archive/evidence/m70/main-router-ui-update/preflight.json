@@ -1,0 +1,145 @@
+{
+  "checkedAt": "2026-10-22T01:47:57.055375+00:00",
+  "host": "192.168.30.1",
+  "scope": "Read-only compatibility; no deployment, configuration or service changes",
+  "apis": [
+    {
+      "path": "/home/v1/layout/",
+      "http": 404,
+      "bodyExcerpt": "404 page not found\n"
+    },
+    {
+      "path": "/home/v1/launcher/",
+      "http": 404,
+      "bodyExcerpt": "404 page not found\n"
+    },
+    {
+      "path": "/lanctrl/v2/router-context/",
+      "http": 200,
+      "contentType": "application/json",
+      "success": null,
+      "error": null,
+      "resultKeys": [
+        "lan",
+        "topologyPosition",
+        "localAddress",
+        "upstreamGateways",
+        "localDhcpConfigured",
+        "localDhcpHealthy",
+        "dhcpAuthority",
+        "externalDhcpServers",
+        "routeEditability",
+        "evidence"
+      ],
+      "role": {
+        "dhcpAuthority": "local",
+        "topologyPosition": "lan_gateway_candidate",
+        "routeEditability": {
+          "editable": true,
+          "reason": "local_dhcp_authority"
+        }
+      }
+    },
+    {
+      "path": "/lanctrl/v2/lan-dhcp-settings/",
+      "http": 200,
+      "contentType": "application/json",
+      "success": null,
+      "error": null,
+      "resultKeys": [
+        "settings",
+        "version",
+        "editable",
+        "affectedDevices",
+        "conflicts",
+        "reloadServices",
+        "canApply",
+        "changed"
+      ],
+      "editable": true
+    },
+    {
+      "path": "/lanctrl/globalConfigs/",
+      "http": 200,
+      "contentType": "application/json",
+      "success": null,
+      "error": null,
+      "resultKeys": [
+        "capabilities",
+        "dhcpGlobal",
+        "dhcpTags",
+        "floatGateway",
+        "speedLimit"
+      ]
+    },
+    {
+      "path": "/lanctrl/v2/devices/",
+      "http": 200,
+      "contentType": "application/json",
+      "success": null,
+      "error": null,
+      "resultKeys": [
+        "devices",
+        "health"
+      ]
+    },
+    {
+      "path": "/lanctrl/v2/gateway-targets/",
+      "http": 200,
+      "contentType": "application/json",
+      "success": null,
+      "error": null,
+      "resultKeys": [
+        "targets",
+        "version",
+        "health"
+      ]
+    }
+  ],
+  "board": {
+    "kernel": "6.6.93",
+    "hostname": "Maintenance",
+    "system": "Intel(R) Celeron(R) J4125 CPU @ 2.00GHz",
+    "model": "Default string Default string",
+    "board_name": "default-string-default-string",
+    "rootfs_type": "squashfs",
+    "release": {
+      "distribution": "iStoreOS",
+      "version": "24.10.2",
+      "revision": "2025090517",
+      "target": "x86/64",
+      "description": "iStoreOS 24.10.2 2025090517",
+      "builddate": "1757056709"
+    }
+  },
+  "runtime": "0.14.0 b60f6e53dd6af27c213a31d38a815943bf62d0e0 .20260926.080256",
+  "before": [
+    "ff301c5ad570bc662a5218a43a0da649fae3ebdbf10c5e00f1d3bbf45026f11a  /usr/sbin/quickstart",
+    "b4d5787370690cdc7ec86419c098dd75d3f4370fe7035da0d34f8cc9e450af0d  /etc/config/network",
+    "1b0a3fca5ee7e2d729f72b2cef2b46cb1b92dc4c1f4e0afe25c95c33f40b73e4  /etc/config/dhcp",
+    "fcd000d2f55b3b9b5a9ca0950e5fb8e65796bdc549afcc8a89f57637ece6465f  /etc/config/firewall",
+    "ef08226efab11cde7a77b7f54075001bb7487ce1516923d15698f5bf50f83d47  /etc/config/quickstart",
+    "7998ef9394e6a92d91068ef7b4f7113434826ce1a59675a3ac4295c9c3f38e9d  /usr/lib/opkg/status",
+    "11725",
+    "default via 192.168.9.1 dev eth0 proto static"
+  ],
+  "templateFeatures": {
+    "asset_version": true,
+    "vue_base": true,
+    "vue_lang": true,
+    "quickstart_features": true,
+    "quickstart_configs": true
+  },
+  "after": [
+    "ff301c5ad570bc662a5218a43a0da649fae3ebdbf10c5e00f1d3bbf45026f11a  /usr/sbin/quickstart",
+    "b4d5787370690cdc7ec86419c098dd75d3f4370fe7035da0d34f8cc9e450af0d  /etc/config/network",
+    "1b0a3fca5ee7e2d729f72b2cef2b46cb1b92dc4c1f4e0afe25c95c33f40b73e4  /etc/config/dhcp",
+    "fcd000d2f55b3b9b5a9ca0950e5fb8e65796bdc549afcc8a89f57637ece6465f  /etc/config/firewall",
+    "ef08226efab11cde7a77b7f54075001bb7487ce1516923d15698f5bf50f83d47  /etc/config/quickstart",
+    "7998ef9394e6a92d91068ef7b4f7113434826ce1a59675a3ac4295c9c3f38e9d  /usr/lib/opkg/status",
+    "11725",
+    "default via 192.168.9.1 dev eth0 proto static"
+  ],
+  "compatible": false,
+  "sessionsDestroyed": 1
+}

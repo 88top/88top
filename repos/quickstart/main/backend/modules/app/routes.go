@@ -5,9 +5,9 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/istoreos/quickstart/backend/internal/httpapi"
 	"github.com/istoreos/quickstart/backend/models"
+	"github.com/julienschmidt/httprouter"
 )
 
 type Backend interface {
@@ -33,6 +33,22 @@ func RegisterRoutes(router *httprouter.Router, backend Backend) {
 		return backend.InstallAppPackage(ctx, req)
 	})
 
+	router.GET("/cgi-bin/luci/istore/app/v1/catalog/", httpapi.AuthenticatedJSON(func(ctx context.Context, r *http.Request) (any, error) {
+		strict, ok := backend.(interface {
+			ListInstalledAppsStrict(context.Context) (models.AppInstalledListResponse, error)
+		})
+		if !ok {
+			return nil, errors.New("application catalogue unavailable")
+		}
+		apps, err := strict.ListInstalledAppsStrict(ctx)
+		if err != nil {
+			return nil, errors.New("application catalogue unavailable")
+		}
+		return struct {
+			Success int                             `json:"success"`
+			Result  models.AppInstalledListResponse `json:"result"`
+		}{Result: apps}, nil
+	}))
 	router.GET("/cgi-bin/luci/istore/app/install-list/", httpapi.AuthenticatedJSON(func(ctx context.Context, r *http.Request) (any, error) {
 		resp, err := backend.ListInstalledApps(ctx)
 		if err != nil {

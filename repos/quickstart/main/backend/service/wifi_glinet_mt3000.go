@@ -418,11 +418,11 @@ func (wifi *GLinetMT3000) EditOneIface(ctx context.Context, req *models.Wireless
 		channel = strconv.Itoa(int(req.Channel))
 	}
 	cmdList := []string{
-		fmt.Sprintf(`uci set wireless.%s.ssid="%s"`, req.IfaceName, req.Ssid),
+		fmt.Sprintf(`uci set wireless.%s.ssid=%s`, req.IfaceName, utils.ShellQuote(req.Ssid)),
 		fmt.Sprintf(`uci set wireless.%s.encryption="%s"`,
 			req.IfaceName,
 			wifi.encryptTitle2Value(req.Encryption)),
-		fmt.Sprintf(`uci set wireless.%s.key="%s"`, req.IfaceName, req.Key),
+		fmt.Sprintf(`uci set wireless.%s.key=%s`, req.IfaceName, utils.ShellQuote(req.Key)),
 		fmt.Sprintf(`uci set wireless.%s.channel="%s"`, device, channel),
 	}
 	//l.Debugln("edit cmdList=", "\n"+strings.Join(cmdList, "\n"))
@@ -477,9 +477,9 @@ func (wifi *GLinetMT3000) WirelessEditIface(ctx context.Context, req *models.Wir
 			return errors.New("Enable guest wifi first")
 		}
 		cmdList := []string{
-			fmt.Sprintf(`uci set wireless.%s.ssid="%s"`, req.IfaceName, req.Ssid),
+			fmt.Sprintf(`uci set wireless.%s.ssid=%s`, req.IfaceName, utils.ShellQuote(req.Ssid)),
 			fmt.Sprintf(`uci set wireless.%s.encryption="%s"`, req.IfaceName, encVal),
-			fmt.Sprintf(`uci set wireless.%s.key="%s"`, req.IfaceName, req.Key),
+			fmt.Sprintf(`uci set wireless.%s.key=%s`, req.IfaceName, utils.ShellQuote(req.Key)),
 		}
 		if req.Hidden {
 			cmdList = append(cmdList, fmt.Sprintf(`uci set wireless.%s.hidden=1`, req.IfaceName))

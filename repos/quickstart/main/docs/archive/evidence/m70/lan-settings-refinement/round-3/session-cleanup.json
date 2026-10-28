@@ -1,0 +1,62 @@
+{
+  "runs": [
+    {
+      "report": "baseline-b/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 0
+    },
+    {
+      "report": "round-1/browser-rehearsal/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 1
+    },
+    {
+      "report": "round-1/contract-diagnosis/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 1
+    },
+    {
+      "report": "round-2/browser-rehearsal/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 1
+    },
+    {
+      "report": "round-2/browser-rehearsal-fixed/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 1
+    },
+    {
+      "report": "round-2/state-rehearsal/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 1
+    },
+    {
+      "report": "round-3/browser-rehearsal/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 0
+    },
+    {
+      "report": "round-3/current-b/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 0
+    },
+    {
+      "report": "round-3/current-b-states/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 0
+    },
+    {
+      "report": "round-3/state-rehearsal/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 1
+    },
+    {
+      "report": "round-3/state-rehearsal-fixed/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 0
+    }
+  ],
+  "sessionsDestroyed": 22,
+  "result": "passed",
+  "note": "Per-run finally cleanup; no session IDs or credentials saved"
+}

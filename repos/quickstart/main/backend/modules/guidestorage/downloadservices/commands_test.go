@@ -21,10 +21,10 @@ func TestBuildAria2Commands(t *testing.T) {
 	})
 	wantConfig := []string{
 		"uci set aria2.main.rpc_auth_method='token'",
-		"uci set aria2.main.config_dir='/etc/aria2'",
-		"uci set aria2.main.dir='/mnt/download'",
+		"uci set aria2.main.config_dir=/etc/aria2",
+		"uci set aria2.main.dir=/mnt/download",
 		"uci set aria2.main.enabled='1'",
-		"uci set aria2.main.rpc_secret='secret'",
+		"uci set aria2.main.rpc_secret=secret",
 	}
 	if !reflect.DeepEqual(config, wantConfig) {
 		t.Fatalf("unexpected aria2 config commands: %#v", config)
@@ -33,8 +33,8 @@ func TestBuildAria2Commands(t *testing.T) {
 	trackerCalls := BuildAria2TrackerCommandBatches([]string{"udp://a", "udp://b"})
 	wantTrackerCalls := [][]string{
 		{"uci delete aria2.main.bt_tracker"},
-		{"uci add_list aria2.main.bt_tracker='udp://a'"},
-		{"uci add_list aria2.main.bt_tracker='udp://b'"},
+		{"uci add_list aria2.main.bt_tracker=udp://a"},
+		{"uci add_list aria2.main.bt_tracker=udp://b"},
 	}
 	if !reflect.DeepEqual(trackerCalls, wantTrackerCalls) {
 		t.Fatalf("unexpected tracker commands: %#v", trackerCalls)
@@ -54,8 +54,8 @@ func TestBuildQbittorrentAndTransmissionCommands(t *testing.T) {
 		DownloadPath: "/mnt/qbit",
 	})
 	wantQbitConfig := []string{
-		"uci set qbittorrent.main.profile='/etc/qbit'",
-		"uci set qbittorrent.main.SavePath='/mnt/qbit'",
+		"uci set qbittorrent.main.profile=/etc/qbit",
+		"uci set qbittorrent.main.SavePath=/mnt/qbit",
 		"uci set qbittorrent.main.enabled=1",
 	}
 	if !reflect.DeepEqual(qbitConfig, wantQbitConfig) {
@@ -70,8 +70,8 @@ func TestBuildQbittorrentAndTransmissionCommands(t *testing.T) {
 		DownloadPath: "/mnt/transmission",
 	})
 	wantTransmissionConfig := []string{
-		"uci set transmission.@transmission[0].config_dir='/etc/transmission'",
-		"uci set transmission.@transmission[0].download_dir='/mnt/transmission'",
+		"uci set transmission.@transmission[0].config_dir=/etc/transmission",
+		"uci set transmission.@transmission[0].download_dir=/mnt/transmission",
 		"uci set transmission.@transmission[0].enabled=1",
 	}
 	if !reflect.DeepEqual(transmissionConfig, wantTransmissionConfig) {

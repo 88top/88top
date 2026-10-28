@@ -1,16 +1,14 @@
 <template>
-    <Card :title="$gettext('磁盘信息')" style="width: 100%; display: block;" :is-settings-menu-open="isSettingsMenuOpen" @update:isSettingsMenuOpen="(val: boolean) => isSettingsMenuOpen = val">
+    <Card :home-menu="[{label:$gettext('RAID管理'),href:'/cgi-bin/luci/admin/nas/raid'},{label:'S.M.A.R.T.',href:'/cgi-bin/luci/admin/nas/smart'},{label:$gettext('磁盘管理'),href:'/cgi-bin/luci/admin/system/diskman'},{label:$gettext('挂载点'),href:'/cgi-bin/luci/admin/system/mounts'}]" :title="$gettext('磁盘信息')" style="width: 100%; display: block;" :is-settings-menu-open="isSettingsMenuOpen" @update:isSettingsMenuOpen="(val: boolean) => isSettingsMenuOpen = val">
         <template #icon>
             <diskIcon color="#45556c" class="icon" />
         </template>
         <template #settings>
-            <div class="btn_settings" @click="onHandleOpenFile">
+            <button type="button" class="btn_settings" @click="onHandleOpenFile">
                 <folderIcon color="#0a0a0a" class="icon1 interfaceIcon" style="margin-right: 6px;" />
                 <span>{{ $gettext('文件管理') }}</span>
-                <div class="rotation" @click.stop="isSettingsMenuOpen = !isSettingsMenuOpen">
-                    <moreItem class="moreIcon" />
-                </div>
-            </div>
+
+            </button>
         </template>
         <template #settings-menu>
             <div><a href="/cgi-bin/luci/admin/nas/raid">{{ $gettext("RAID管理") }}</a></div>
@@ -81,6 +79,7 @@
 </template>
 
 <script lang="ts" setup>
+import {useHomeSnapshot,useHomeProjection} from "/@/home/widgetContext";
 import Card from "../components/Card.vue"
 import diskIcon from "/@/components/svg/disk1.vue"
 import folderIcon from "/@/components/svg/folder.vue"
@@ -128,8 +127,9 @@ const getRaidList = async () => {
     }
 
 }
-getRaidList()
-getData()
+const projection=useHomeProjection()
+if (!useHomeSnapshot('raid', value => disk.raidList = projection?.bounded()?(value.disks||[]).slice(0,Math.max(0,3-(projection.data.disks?.disks?.length||0))):value.disks||[])) getRaidList()
+if (!useHomeSnapshot('disks', value => disk.disks = projection?.bounded()?(value.disks||[]).slice(0,3):value.disks||[])) getData()
 
 const onHandleOpenFile = () => {
     appUtils.installAndGo("luci-app-linkease", $gettext("易有云"), "/cgi-bin/luci/admin/services/linkease/file/", "app-meta-linkease")

@@ -1,0 +1,32 @@
+{
+  "checkedAt": "2026-10-17T12:37:21.755Z",
+  "result": "pass",
+  "suites": 19,
+  "groups": 210,
+  "protectedFiles": 341,
+  "unchangedBusinessScripts": 6,
+  "originalBusinessFiles": 64,
+  "pid": 11810,
+  "assets": [
+    {
+      "path": "/assets/index.13e3f2ff.js",
+      "sha256": "389e2334f355a621da9db9b49f1769d562c2b6dde1d867882c06e7ba7ab2ef39"
+    },
+    {
+      "path": "/assets/mount.44578e6e.js",
+      "sha256": "c3f717c27a9c44f26c1928112152940de6b71c98ac7de356b1ebcf119e8e5f52"
+    },
+    {
+      "path": "/assets/mount.52cc0934.css",
+      "sha256": "75f6985a89761552fefc4fb1dbd39099fb6565895516f0bf5dd77e35c42e4e19"
+    }
+  ],
+  "checks": [
+    "Current browser suites and source protections pass",
+    "Runtime source, scripts and actual public assets match",
+    "Same owned 5180 candidate still running",
+    "Diff whitespace check passes"
+  ],
+  "prototypeOnly": true,
+  "humanConfirmation": "pending"
+}

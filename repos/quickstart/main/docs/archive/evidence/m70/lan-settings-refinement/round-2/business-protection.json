@@ -1,0 +1,24 @@
+{
+  "result": "passed",
+  "baseline": "7a704c791dc6fdf7483a60eeec55d389ee8492b1",
+  "unchangedTransactionFunctions": {
+    "requestDhcpPlan": "853616ee18c60e3d847299ab20e0824501762d23ba3f400f69f0b1ac8a0c8831",
+    "planDhcp": "27648b58230b6ed26745e2e07874bac2944ea5d3bb465b1543a302c1627047d4",
+    "confirmDhcpDisable": "6b6a2f7cf01e64bda1d31f66b2fb6fb1a00d77e8714b882d7b8c6c92ccb9f7d3",
+    "applyDhcp": "e8724ebcc3b34cc8995a1ff1f6fe6138289c7e9eb8477399f50e73e6816126a9",
+    "speedSettingsPayload": "3f3b138053b23f33e9c3de539999e254cf60eaac5de4a3f19daff7752c781766",
+    "planSpeed": "f244cdf9f7de75a796a624625eac89d6a223a43452b5a9b64980e7939e243ee6",
+    "applySpeed": "11dd718ebec92f32e8939bdc265151b45ec5d93647c4eb1c5934a360cfe0e0bd",
+    "scanRateMigration": "387542ade519ccfc7b082f8157a8342645b4a36a67a578a1e56d2315c547e86e",
+    "applyRateMigration": "6c5d3defeb6954886732f4c8e251ccf011b6da440d4e0b2779fc683b28eb56ab",
+    "rollbackRateMigration": "5ec2ea294561450863172e20135341090ad3929cba148ad85ab951025d0ab1a3",
+    "planRoute": "88dca12f2c045dda36a06baf23d051bd19d0da960001f5ef8e106c3058a8688d",
+    "planRouteSave": "b45b731cc5eeff78fef66384103d048833235e756377d662250e5524de54536e",
+    "planRouteDelete": "7ed3e142293e1167e6ff2101bddd9243540f5b628af28b9d0db5ff3354caeca9",
+    "replanRouteDelete": "c5b2b1dfeea18703fa05e213adb3aa7267d79e6233a14f88738f6a351b01e2b0",
+    "applyRoutePlan": "e967943db91c311c294676504896d4d8d84d3a89a6facd4fdf9836156248ef0b",
+    "applyMigration": "4bc9fa8e0b573ce0d8f7d4c93a1322e1e2aba0ef162bfc95b177fd855a037208",
+    "installCapability": "b4bd55138f24483ed41b88a01473441b3804b71114ced55e473d28f47e370776"
+  },
+  "otherDeviceBusinessAndBackendUnchanged": true
+}

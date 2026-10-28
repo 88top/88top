@@ -1,0 +1,77 @@
+{
+  "result": "passed",
+  "rows": [
+    {
+      "lang": "zh",
+      "width": 1440,
+      "surface": "home",
+      "oldExtraGaps": [
+        8.0,
+        8.0
+      ],
+      "newExtraGaps": [
+        0.0,
+        0.0
+      ],
+      "oldValueStartDifference": 14.0,
+      "newValueStartDifference": 0.0,
+      "oldHeight": 290,
+      "newHeight": 290,
+      "factsColoursUnchanged": true
+    },
+    {
+      "lang": "zh",
+      "width": 1440,
+      "surface": "dialog",
+      "oldExtraGaps": [
+        -110.59375,
+        6.0
+      ],
+      "newExtraGaps": [
+        0,
+        0
+      ],
+      "oldValueStartDifference": -285.125,
+      "newValueStartDifference": 0,
+      "oldHeight": 868.578125,
+      "newHeight": 876.578125,
+      "factsColoursUnchanged": true
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "surface": "home",
+      "oldExtraGaps": [
+        8,
+        8
+      ],
+      "newExtraGaps": [
+        0,
+        0
+      ],
+      "oldValueStartDifference": 13,
+      "newValueStartDifference": 0,
+      "oldHeight": 862.5,
+      "newHeight": 862.5,
+      "factsColoursUnchanged": true
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "surface": "dialog",
+      "oldExtraGaps": [
+        -108.09375,
+        6.0
+      ],
+      "newExtraGaps": [
+        0,
+        0
+      ],
+      "oldValueStartDifference": -45.125,
+      "newValueStartDifference": 0,
+      "oldHeight": 968,
+      "newHeight": 968,
+      "factsColoursUnchanged": true
+    }
+  ]
+}

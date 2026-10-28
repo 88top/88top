@@ -1,0 +1,38 @@
+{
+  "checkedAt": "2026-10-18T09:09:08.435658+00:00",
+  "host": "192.168.30.244",
+  "scope": "homepage-config-only",
+  "board": {
+    "kernel": "6.6.86",
+    "hostname": "iStoreOS",
+    "system": "Intel(R) N100",
+    "model": "QEMU Standard PC (Q35 + ICH9, 2009)",
+    "board_name": "qemu-standard-pc-q35-ich9-2009",
+    "rootfs_type": "squashfs",
+    "release": {
+      "distribution": "iStoreOS",
+      "version": "24.10.1",
+      "revision": "2025052311",
+      "target": "x86/64",
+      "description": "iStoreOS 24.10.1 2025052311",
+      "builddate": "1747907388"
+    }
+  },
+  "version": "0.16.2-test20261018 eda99c4f5fcb03395024e09b8540a8da5464c6c9 .20261018.084746",
+  "fingerprints": [
+    "d50b179e10c4610fc6c293ae0c095826a160f950a05f82926ca304b73702106d  /usr/sbin/quickstart",
+    "f9851e075168debd17798ec0d2eaf78fbe06f0387219220a6a3fdf70ab747b86  /www/luci-static/quickstart/index.js",
+    "3e2e8b1fb3a4b2552aab30efbbd37f6eafa49ad43b0813975a718e55a9a112eb  /www/luci-static/quickstart/style.css",
+    "80ff17f99caa1aa90cafe9a231c39ceabb2cdf1c543bf5dec3d44fcbcd184477  /www/luci-static/quickstart/vendor.js",
+    "cc8101d122af5f9409c716fe74457f64547d1b3fdb37a7e6c23f2e565647f637  /www/luci-static/quickstart/i18n/en.json"
+  ],
+  "processFingerprints": [
+    "d50b179e10c4610fc6c293ae0c095826a160f950a05f82926ca304b73702106d  /proc/471579/exe"
+  ],
+  "packages": [
+    "luci-app-quickstart - 0.8.17-r1",
+    "quickstart - 0.9.9-r1"
+  ],
+  "uiExitCode": 0,
+  "sessionsDestroyed": 2
+}

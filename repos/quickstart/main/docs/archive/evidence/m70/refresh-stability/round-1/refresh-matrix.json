@@ -1,0 +1,56 @@
+[
+  {
+    "case": "b-desktop-slow",
+    "exitCode": 0,
+    "result": "passed",
+    "failure": null
+  },
+  {
+    "case": "b-390-en-reload",
+    "exitCode": 0,
+    "result": "passed",
+    "failure": null
+  },
+  {
+    "case": "b-320-dark-slow",
+    "exitCode": 0,
+    "result": "passed",
+    "failure": null
+  },
+  {
+    "case": "b-empty",
+    "exitCode": 0,
+    "result": "passed",
+    "failure": null
+  },
+  {
+    "case": "b-unavailable",
+    "exitCode": 0,
+    "result": "passed",
+    "failure": null
+  },
+  {
+    "case": "b-forbidden",
+    "exitCode": 0,
+    "result": "passed",
+    "failure": null
+  },
+  {
+    "case": "b-damaged",
+    "exitCode": 0,
+    "result": "passed",
+    "failure": null
+  },
+  {
+    "case": "b-future",
+    "exitCode": 0,
+    "result": "passed",
+    "failure": null
+  },
+  {
+    "case": "b-timeout",
+    "exitCode": 1,
+    "result": "failed",
+    "failure": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert.ok(painted.length)\n\n    at /config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/94c4-develop-quicksta/quickstart/docs/product/ui-design/home-refresh-review.cjs:34:9"
+  }
+]

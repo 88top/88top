@@ -1,0 +1,48 @@
+{
+  "result": "passed",
+  "matchedComparisons": [
+    {
+      "lang": "zh",
+      "width": 1440,
+      "surface": "home",
+      "oldGaps": [
+        8.0,
+        8.0
+      ],
+      "newGaps": [
+        0.0,
+        0.0
+      ],
+      "oldValueOffset": 14.0,
+      "newValueOffset": 0.0,
+      "oldHeight": 290,
+      "newHeight": 290
+    },
+    {
+      "lang": "zh",
+      "width": 1440,
+      "surface": "dialog",
+      "oldGaps": [
+        -110.59375,
+        6.0
+      ],
+      "newGaps": [
+        0,
+        0
+      ],
+      "oldValueOffset": -285.125,
+      "newValueOffset": 0,
+      "oldHeight": 868.578125,
+      "newHeight": 876.578125
+    }
+  ],
+  "skipped": [
+    {
+      "requestedLang": "en",
+      "width": 320,
+      "actualBaselineLabel": "\u7cfb\u7edf\u65f6\u95f4\uff1a",
+      "reason": "Baseline rendered Chinese despite browser English preference; no same-language comparison"
+    }
+  ],
+  "allFinalLanguagesVerified": true
+}

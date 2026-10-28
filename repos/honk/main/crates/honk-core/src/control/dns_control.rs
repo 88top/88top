@@ -1,0 +1,393 @@
+//! Generation-pinned DNS query orchestration shared by transparent port-53
+//! interception and the optional standalone listener.
+//!
+//! Transport adapters own admission and reply I/O. Successful outcomes are
+//! submitted to the generation-aware routing projection; no adapter writes
+//! domain routes directly.
+
+#[cfg(test)]
+use crate::dns::forwarder::DnsForwarder;
+use crate::ebpf::EbpfBackend;
+#[cfg(test)]
+use crate::routing::Router;
+use std::future::Future;
+#[cfg(test)]
+use std::net::SocketAddr;
+use std::sync::Arc;
+use std::time::Duration;
+use tokio::sync::{OwnedSemaphorePermit, RwLock, TryAcquireError};
+use tracing::warn;
+
+mod transport;
+
+#[cfg(test)]
+mod tests;
+
+use crate::dns::query::{DnsRequestMeta, IngressProfile};
+use crate::dns::response::{build_dns_refused, build_dns_servfail};
+
+#[cfg(test)]
+struct NoopRuntimeTransport;
+
+#[cfg(test)]
+#[async_trait::async_trait]
+impl crate::dns::runtime::RuntimeTransport for NoopRuntimeTransport {
+    async fn close(&self) {}
+}
+
+/// DNS Controller — resolves admitted queries and publishes domain routes.
+/// Transport adapters own socket admission and replies.
+pub struct DnsController {
+    dns_service: crate::dns::DnsService,
+    routing_projection: Arc<crate::dns::projection::RoutingProjection>,
+}
+
+pub(crate) struct DnsClientAnswer(Result<crate::dns::outcome::DnsOutcome, Vec<u8>>);
+
+impl DnsClientAnswer {
+    pub(crate) fn wire(&self) -> &[u8] {
+        match &self.0 {
+            Ok(outcome) => outcome.rendered(),
+            Err(response) => response,
+        }
+    }
+
+    #[cfg(feature = "native-api")]
+    pub(crate) fn outcome(&self) -> Option<&crate::dns::outcome::DnsOutcome> {
+        self.0.as_ref().ok()
+    }
+
+    #[cfg(test)]
+    fn into_wire(self) -> Vec<u8> {
+        match self.0 {
+            Ok(outcome) => outcome.into_rendered(),
+            Err(response) => response,
+        }
+    }
+}
+
+/// Admission for one DNS request. The runtime lease and both runtime-owned
+/// permits are held by the transport owner through response I/O.
+pub(crate) struct AdmittedDnsQuery {
+    runtime: crate::dns::runtime::RuntimeLease,
+    _query_permit: OwnedSemaphorePermit,
+    _udp_permit: Option<OwnedSemaphorePermit>,
+}
+
+pub(crate) struct DnsAdmissionError {
+    error: TryAcquireError,
+    pub(super) udp_reply: Option<(crate::dns::runtime::RuntimeLease, OwnedSemaphorePermit)>,
+}
+
+impl std::fmt::Debug for DnsAdmissionError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Debug::fmt(&self.error, f)
+    }
+}
+
+impl DnsAdmissionError {
+    pub(crate) async fn run_reply<T>(
+        &self,
+        operation: impl Future<Output = T>,
+    ) -> Result<T, crate::dns::runtime::RuntimeCancelled> {
+        match &self.udp_reply {
+            Some((runtime, _)) => runtime.run_reply(operation).await,
+            None => Ok(operation.await),
+        }
+    }
+}
+
+impl AdmittedDnsQuery {
+    pub(crate) async fn run_reply<T>(
+        &self,
+        operation: impl Future<Output = T>,
+    ) -> Result<T, crate::dns::runtime::RuntimeCancelled> {
+        self.runtime.run_reply(operation).await
+    }
+}
+
+impl DnsController {
+    #[cfg(test)]
+    pub fn new(
+        forwarder: Arc<DnsForwarder>,
+        ebpf: Arc<RwLock<Box<dyn EbpfBackend>>>,
+        _router: Arc<RwLock<Router>>,
+        udp_query_limit: usize,
+    ) -> Self {
+        let config = honk_config::Config::default();
+        let runtime_router = Arc::new(
+            Router::from_config(&config.routing)
+                .unwrap_or_else(|_| Router::new(&[], "direct").unwrap()),
+        );
+        let runtime = crate::dns::runtime::DnsRuntime::new(crate::dns::runtime::DnsRuntimeParts {
+            generation: crate::dns::runtime::RuntimeGeneration::new(0),
+            forwarder: Arc::clone(&forwarder),
+            routing_projection: Arc::new(crate::dns::runtime::RoutingProjectionSnapshot::new(
+                0,
+                runtime_router,
+            )),
+            outbound_runtime: None,
+            transport: Arc::new(NoopRuntimeTransport),
+            udp_query_limit,
+        });
+        Self::new_with_runtime(
+            Arc::new(crate::dns::runtime::DnsServiceProvider::new(runtime)),
+            ebpf,
+        )
+    }
+
+    #[cfg(test)]
+    pub(crate) fn new_with_runtime(
+        runtime_provider: Arc<crate::dns::runtime::DnsServiceProvider>,
+        ebpf: Arc<RwLock<Box<dyn EbpfBackend>>>,
+    ) -> Self {
+        Self::new_with_service(
+            crate::dns::DnsService::with_provider(runtime_provider),
+            ebpf,
+        )
+    }
+
+    pub(crate) fn new_with_service(
+        dns_service: crate::dns::DnsService,
+        ebpf: Arc<RwLock<Box<dyn EbpfBackend>>>,
+    ) -> Self {
+        let snapshot = {
+            let runtime = dns_service
+                .provider()
+                .unwrap_or_else(|| unreachable!("controller requires runtime DNS service"))
+                .current();
+            Arc::clone(runtime.routing_projection())
+        };
+        let routing_projection =
+            crate::dns::projection::RoutingProjection::spawn(Arc::clone(&ebpf), snapshot);
+        Self {
+            dns_service,
+            routing_projection,
+        }
+    }
+
+    /// Resolve a domain (A + AAAA) through the *currently installed*
+    /// forwarder — reload-safe, unlike holding a resolver from startup.
+    /// Used by the health-check resolver hook.
+    pub async fn resolve_domain(&self, domain: &str) -> anyhow::Result<Vec<std::net::IpAddr>> {
+        let resolved = self.dns_service.resolve_name(domain).await?;
+        Ok(resolved.ipv4.into_iter().chain(resolved.ipv6).collect())
+    }
+
+    pub(crate) fn runtime_provider(&self) -> Arc<crate::dns::runtime::DnsServiceProvider> {
+        self.dns_service
+            .provider()
+            .unwrap_or_else(|| unreachable!("controller always uses runtime DNS service"))
+    }
+
+    pub(crate) fn dns_service(&self) -> crate::dns::DnsService {
+        self.dns_service.clone()
+    }
+
+    pub(crate) async fn shutdown(&self, timeout: Duration) {
+        self.routing_projection.shutdown(timeout).await;
+        // The provider's pause JoinSet, not this wait, owns every close task,
+        // so abandoning the wait on timeout detaches nothing.
+        let provider = self.runtime_provider();
+        if tokio::time::timeout(timeout, provider.shutdown())
+            .await
+            .is_err()
+        {
+            warn!(
+                "DNS runtime provider shutdown exceeded {:?}; continuing",
+                timeout
+            );
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn project_routes(
+        &self,
+        snapshot: &crate::dns::projection::RoutingProjectionSnapshot,
+    ) -> Vec<(std::net::IpAddr, honk_ebpf_common::DomainRouting)> {
+        self.routing_projection.project(snapshot)
+    }
+
+    pub(crate) fn forwarder(&self) -> Arc<crate::dns::forwarder::DnsForwarder> {
+        self.dns_service.forwarder()
+    }
+
+    pub(crate) fn prepare_projection_publication(
+        &self,
+    ) -> crate::dns::projection::PreparedProjectionPublication<'_> {
+        self.routing_projection.prepare_snapshot_publication()
+    }
+
+    pub async fn cache(&self) -> Arc<tokio::sync::Mutex<crate::dns::cache::DnsCache>> {
+        self.dns_service.cache()
+    }
+
+    /// Acquire a generation-pinned query admission. The runtime lease and
+    /// permits remain owned by the caller through response I/O.
+    pub(crate) fn try_admit_query(&self, udp: bool) -> Result<AdmittedDnsQuery, DnsAdmissionError> {
+        let runtime = self
+            .runtime_provider()
+            .try_acquire()
+            .map_err(|_| DnsAdmissionError {
+                error: TryAcquireError::Closed,
+                udp_reply: None,
+            })?;
+        let udp_permit =
+            if udp {
+                Some(runtime.runtime().try_acquire_udp_query().map_err(|error| {
+                    DnsAdmissionError {
+                        error,
+                        udp_reply: None,
+                    }
+                })?)
+            } else {
+                None
+            };
+        let query_permit = match runtime.runtime().try_acquire_query() {
+            Ok(permit) => permit,
+            Err(error) => {
+                return Err(DnsAdmissionError {
+                    error,
+                    udp_reply: udp_permit.map(|permit| (runtime, permit)),
+                });
+            }
+        };
+        Ok(AdmittedDnsQuery {
+            runtime,
+            _query_permit: query_permit,
+            _udp_permit: udp_permit,
+        })
+    }
+
+    /// Resolve and project one generation-pinned DNS query.
+    pub(crate) async fn answer_query(
+        &self,
+        admission: &AdmittedDnsQuery,
+        data: &[u8],
+        metadata: DnsRequestMeta,
+        ingress: IngressProfile,
+    ) -> DnsClientAnswer {
+        #[cfg(feature = "native-api")]
+        let mut observed_route = self
+            .dns_service
+            .observation_enabled()
+            .then(crate::dns::outcome::RouteSource::default);
+        #[cfg(feature = "native-api")]
+        let evidence = observed_route.as_mut();
+        #[cfg(not(feature = "native-api"))]
+        let evidence = None;
+        let answer = match self
+            .dns_service
+            .resolve_client_outcome_with_runtime(
+                &admission.runtime,
+                data,
+                metadata,
+                ingress,
+                evidence,
+            )
+            .await
+        {
+            Ok(outcome) => {
+                self.submit_projection(admission.runtime.runtime(), &outcome);
+                DnsClientAnswer(Ok(outcome))
+            }
+            Err(error)
+                if error
+                    .downcast_ref::<crate::dns::forwarder::DnsForwardError>()
+                    .is_some_and(|error| {
+                        matches!(
+                            error.unshared(),
+                            crate::dns::forwarder::DnsForwardError::Overloaded
+                        )
+                    }) =>
+            {
+                crate::stats::record_dns_event(crate::stats::DnsStatEvent::OutcomeRejected);
+                DnsClientAnswer(Err(build_dns_refused(data)))
+            }
+            Err(error) => {
+                crate::logging::warn_throttled!(
+                    error = %error,
+                    "DNS controller forward failed; sending SERVFAIL"
+                );
+                DnsClientAnswer(Err(build_dns_servfail(data)))
+            }
+        };
+        #[cfg(feature = "native-api")]
+        let answer = match (answer.0, observed_route) {
+            (Err(response), Some(source)) => DnsClientAnswer(
+                crate::dns::outcome::DnsOutcome::client_error(data, ingress, response, source),
+            ),
+            (result, _) => DnsClientAnswer(result),
+        };
+        answer
+    }
+
+    #[cfg(test)]
+    pub(crate) async fn answer_query_for_test(
+        &self,
+        data: &[u8],
+        metadata: DnsRequestMeta,
+        ingress: IngressProfile,
+    ) -> Vec<u8> {
+        let admission = self
+            .try_admit_query(false)
+            .expect("test DNS query admission");
+        self.answer_query(&admission, data, metadata, ingress)
+            .await
+            .into_wire()
+    }
+
+    fn submit_projection(
+        &self,
+        runtime: &crate::dns::runtime::DnsRuntime,
+        outcome: &crate::dns::outcome::DnsOutcome,
+    ) {
+        use crate::dns::outcome::{OutcomeStatus, ResponseClass};
+        use crate::dns::projection::ProjectionObservation;
+        use honk_outbound::alive::IpVersion;
+
+        let domain = outcome.domain();
+        let family = match outcome.qtype() {
+            1 => Some(IpVersion::V4),
+            28 => Some(IpVersion::V6),
+            _ => None,
+        };
+        let observation = if crate::dns::response::is_truncated(outcome.reusable()) {
+            ProjectionObservation::Retain
+        } else {
+            match (outcome.status(), outcome.response_class(), family) {
+                (OutcomeStatus::Accepted, ResponseClass::Positive, Some(family)) => {
+                    ProjectionObservation::Positive {
+                        domain,
+                        family,
+                        ips: outcome.answer_ips(),
+                        // Uncacheable does not mean the accepted address has no routing lifetime.
+                        advertised_ttl: if outcome.expiry().is_cacheable() {
+                            outcome.expiry().ttl()
+                        } else {
+                            Duration::from_secs(u64::from(crate::dns::forwarder::extract_min_ttl(
+                                outcome.reusable(),
+                            )))
+                        },
+                    }
+                }
+                (OutcomeStatus::Accepted, ResponseClass::Nodata, Some(family)) => {
+                    ProjectionObservation::Clear { domain, family }
+                }
+                (OutcomeStatus::Accepted, ResponseClass::Nxdomain, _) => {
+                    ProjectionObservation::ClearName { domain }
+                }
+                // Other QTYPEs say nothing about the name's addresses.
+                (
+                    OutcomeStatus::Accepted,
+                    ResponseClass::Positive | ResponseClass::Nodata,
+                    None,
+                )
+                | (OutcomeStatus::Accepted, ResponseClass::Servfail, _)
+                | (OutcomeStatus::Rejected, _, _) => ProjectionObservation::Retain,
+            }
+        };
+        self.routing_projection
+            .submit(Arc::clone(runtime.routing_projection()), observation);
+    }
+}

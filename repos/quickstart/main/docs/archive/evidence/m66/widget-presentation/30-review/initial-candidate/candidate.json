@@ -1,0 +1,238 @@
+{
+  "checkedAt": "2026-10-16T02:47:16.181Z",
+  "base": "http://192.168.9.19:5180",
+  "health": {
+    "owner": "/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/0153-device-lists-sho/quickstart/docs/product/ui-design",
+    "pid": 13147,
+    "mode": "vue-design-built"
+  },
+  "assets": [
+    {
+      "path": "/assets/index.c3921ffc.js",
+      "entry": true,
+      "sha256": "625cd12afd84745b260d69ae783d58eabbd4e8d6439ed117e9d434f1751255d4",
+      "bytes": 31450,
+      "buildFile": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work/vue-preview/assets/index.c3921ffc.js"
+    },
+    {
+      "path": "/assets/mount.15302ad2.css",
+      "entry": false,
+      "sha256": "6f2981900048e44b1d99e797bf56f56eada77b434b4da1cf80d5781e00dd26b9",
+      "bytes": 499435,
+      "buildFile": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work/vue-preview/assets/mount.15302ad2.css"
+    },
+    {
+      "path": "/assets/mount.ff957719.js",
+      "entry": false,
+      "sha256": "9186bd6657d323121fab6cc212f38b406bb8682890718fd880ba74ce8dd090ec",
+      "bytes": 1322626,
+      "buildFile": "/var/cache/build-cache/users/911/projects/quickstart-df92025bd880/work/vue-preview/assets/mount.ff957719.js"
+    }
+  ],
+  "sources": [
+    {
+      "path": "web/src/design/CanvasCommonTools.vue",
+      "sha256": "6359b47d4d72603ed12da44509c71fbd3fc3e53fb5a8377468a5da5b5c28e71d"
+    },
+    {
+      "path": "web/src/design/CanvasHome.vue",
+      "sha256": "36aa8e27803945749e68901849a205d360d4ec729c17a000cfabb653afb71afe"
+    },
+    {
+      "path": "web/src/design/CanvasModule.vue",
+      "sha256": "d0799528095aabcfa15783b2d3ef7f26a186a52fed2c479bb5a50e85e70f2193"
+    },
+    {
+      "path": "web/src/design/CanvasTools.vue",
+      "sha256": "c9c532f1e2aedc8204ec3aca8f583852b0654a4fe9571b964a661b471664453e"
+    },
+    {
+      "path": "web/src/design/CompactPreviewCard.vue",
+      "sha256": "f26ad36ea3888e1b627917af13d322f733226c0ecf84cda47b6c52192c1e7a19"
+    },
+    {
+      "path": "web/src/design/DesignApp.vue",
+      "sha256": "5f621f36988280b846861d2b9cb064504990272809753ce39d0c1d354b38ddc7"
+    },
+    {
+      "path": "web/src/design/DestinationPreview.vue",
+      "sha256": "d0d8aaac1e7d3e11eef74ceb155102d7e55e49bd5bf567d3980e2904fab26780"
+    },
+    {
+      "path": "web/src/design/DevicePreview.vue",
+      "sha256": "fadab9614cb9653ef23581a6236cf6bce95bb1c759d03203af277aba606ec594"
+    },
+    {
+      "path": "web/src/design/DeviceSummary.vue",
+      "sha256": "3bbc4ebe191753041b4f75beaaaef7726bd35c657f124c3276a9ebd62be595b2"
+    },
+    {
+      "path": "web/src/design/DirectEditPanel.vue",
+      "sha256": "c9da84aeab1e9688a55d08eab98c9a2aded86bba3ccbd5cb2cf20ca64a323360"
+    },
+    {
+      "path": "web/src/design/HomeApplications.vue",
+      "sha256": "09eae9a7e618c4ee004f93d162f119888c9204154caf706e7d1f58c1ca3139f1"
+    },
+    {
+      "path": "web/src/design/HomePreview.vue",
+      "sha256": "21331e7b8069f74f761fab38e47eccfc5b8cc0d84d581a01afb412dfe465a03e"
+    },
+    {
+      "path": "web/src/design/LayoutDesignHome.vue",
+      "sha256": "293e983bccf85c75d778523ccd036cf9337ca3999a57e6327a641f31ffe13be6"
+    },
+    {
+      "path": "web/src/design/LayoutPreviewCard.vue",
+      "sha256": "ea6f9179e28aa65693bb49b2bcd6925cf28c71d2880b6b508b2ff2465cf6310d"
+    },
+    {
+      "path": "web/src/design/OrderedHome.vue",
+      "sha256": "8b9c1f93aac3133cdb5d3851a305096228f93a9a4f7c96b548d93af7fcc9a3bc"
+    },
+    {
+      "path": "web/src/design/PresentationSettings.vue",
+      "sha256": "8b21f824a8cfd58ae92835822dae4f5f251834279242cdd380b737cdd5117b16"
+    },
+    {
+      "path": "web/src/design/StudioGlyph.vue",
+      "sha256": "4db1eb78d4faf9bea177d5a509f873ee020a6a9fc8e422bc985ac6e014083400"
+    },
+    {
+      "path": "web/src/design/StudioHome.vue",
+      "sha256": "b9c083c435617025cc6fbb19c908fabd8c745a4bb00abf4b6cc0754462ec3e08"
+    },
+    {
+      "path": "web/src/design/canvas.css",
+      "sha256": "88d0b79d5185a03cba4dce1a0b1839570474073998e55b2fae5f7f55662582d1"
+    },
+    {
+      "path": "web/src/design/canvasLayout.ts",
+      "sha256": "4273bd635637586b3a4d9b2fc13d902230ba67ebdb6ccaaf0db500f571bed970"
+    },
+    {
+      "path": "web/src/design/canvasModules.css",
+      "sha256": "987e0e79a9cf0bda49e5898435b09fa8607c4f6d41d3f9e56ff9cb3b5faba80a"
+    },
+    {
+      "path": "web/src/design/deviceFixtures.ts",
+      "sha256": "e8ee14160c34ba421015d6c845aa7308a62b581a1bcccc68a7daac99979c3acd"
+    },
+    {
+      "path": "web/src/design/devices.ts",
+      "sha256": "63328f15e04773312ae1e3425d241a0c8984aec5e7fb0582548d7fcbc371d83f"
+    },
+    {
+      "path": "web/src/design/directEdit.css",
+      "sha256": "6d2c425bbbbafdc09e75d48267d0d19465c7e273eb0ee17ec49b48b49115ea4e"
+    },
+    {
+      "path": "web/src/design/directLayout.ts",
+      "sha256": "58330200baf7570b088837c7437f53b9a606241c5c326645b67fe2f8c055792d"
+    },
+    {
+      "path": "web/src/design/fixtures.ts",
+      "sha256": "0abe31beb7ea20ed9ade7f3dbbf384e7ce18c8ed5e4d8201e006eaef52903662"
+    },
+    {
+      "path": "web/src/design/homeApplications.css",
+      "sha256": "48655df5e9f3108e78b8a81de9de93711c00d01a08436b4a3c4d0a2d438aee70"
+    },
+    {
+      "path": "web/src/design/homeApplications.ts",
+      "sha256": "f6ba9a369844553c9a839eb70447b2fe82e5b49ae17582f5f99995be9c93684b"
+    },
+    {
+      "path": "web/src/design/homeDocument.ts",
+      "sha256": "e10a9e7a160e3297a21f8e363655079a021c335265f216c5fac8d24d5a2a474b"
+    },
+    {
+      "path": "web/src/design/layoutDesignHome.css",
+      "sha256": "490cb2070b0e9e041943a7b43a1aa83b5c1eade1ee5cc3c51344bdc2d68ea21c"
+    },
+    {
+      "path": "web/src/design/layoutPreviewCard.css",
+      "sha256": "a82dc9bc87f10a7ef96b474d36807b0704904dd3461187b4ec677746707e1ce4"
+    },
+    {
+      "path": "web/src/design/main.ts",
+      "sha256": "d8506946638552b5a0604b8ac68b8777170640ffbc42aa180f5e04191b5b9485"
+    },
+    {
+      "path": "web/src/design/moduleCapability.ts",
+      "sha256": "2a8843e06dc0f319a673c5914f1b2503696ee0671c37152713162c08dc1c2082"
+    },
+    {
+      "path": "web/src/design/mount.ts",
+      "sha256": "75791043a72e2801d74520f34d489347b09204814bf03f8b194726d4cb596eb3"
+    },
+    {
+      "path": "web/src/design/orderedHome.css",
+      "sha256": "c06ac5b93effff415a8b33845b268255a767351e7cb0bf3b258478e8411de6d8"
+    },
+    {
+      "path": "web/src/design/orderedLayout.ts",
+      "sha256": "5d7fb19180378da2d74f676e8c0e13a75f747a6efa61c19eb01c73233f4bd144"
+    },
+    {
+      "path": "web/src/design/overviewPlacement.ts",
+      "sha256": "333a9ca7812b0923d27b1fbf873f1db417cf3fe1fbcb75675c982d70081758d5"
+    },
+    {
+      "path": "web/src/design/presentationEdit.css",
+      "sha256": "5b5d3b4b35f06cf201ed8464ade6e094bf903c4faf2df4f87beb7a51f322bfdc"
+    },
+    {
+      "path": "web/src/design/rowLayout.ts",
+      "sha256": "28cb515f09111bcece80cab907fab01c0f31ff2fe735892352ebe455d79eb944"
+    },
+    {
+      "path": "web/src/design/shell.css",
+      "sha256": "25495ae87ed5f6b044377268b71bd8c91f8b3b24278e423f76d4a420cf12dd33"
+    },
+    {
+      "path": "web/src/design/slotEdit.css",
+      "sha256": "bd535c90c86a0dda6dac193bf5bbb4ebd0bff5e746c4fe6c1ade2f8b18d19476"
+    },
+    {
+      "path": "web/src/design/slotLayout.ts",
+      "sha256": "4469905f5978168af87589f963ac40d95ea43c355a61fb08a587c02fdadf5fda"
+    },
+    {
+      "path": "web/src/design/studio.css",
+      "sha256": "1751e46d79488a1ab4d1195bdc115ce61ca1cc7cd3fcc6c67293ef3b707c2904"
+    },
+    {
+      "path": "web/src/design/studioModel.ts",
+      "sha256": "c6b26d4b578b961d2f1ebc88ee4052c4f4dccd3ed0c10e4d1d450fc58d8f0d6b"
+    },
+    {
+      "path": "web/src/design/useRowSorting.ts",
+      "sha256": "3442195f2463b5cd0e917a5bdc22c3f392ecfab86aafff5aabda25d7e6b1ec44"
+    },
+    {
+      "path": "web/src/design/widgetPresentation.ts",
+      "sha256": "51f4ad3cbe9e08dba958f47e927083f9d670258749d81752cbe939cf950356f3"
+    },
+    {
+      "path": "web/vite.design.config.ts",
+      "sha256": "2990dcedd1e3310c71229683db853d7d74f7c14adfd7d7679c4101a5176df4ba"
+    },
+    {
+      "path": "scripts/ui-design.sh",
+      "sha256": "613658662cc2fed46b605be939d97ce543631ff72f770bf761912484c195e027"
+    },
+    {
+      "path": "scripts/ui-design-server.cjs",
+      "sha256": "9c682bf39cd6b7ea2d02483831161d4aba9245bb6189af99a24a8038a59e7782"
+    },
+    {
+      "path": "web/src/pages/index/network/NetworkFlow.vue",
+      "sha256": "3186030e26a58f53c1ed6417e2a530c9c57fa73dc9467bcd12fae374465269c5"
+    }
+  ],
+  "sourceState": "working-tree candidate; hashes identify actual source, not a release",
+  "persistence": "memory only; reload resets sample",
+  "physicalRouters": "not accessed",
+  "userExperience": "awaiting human confirmation"
+}

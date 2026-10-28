@@ -1,0 +1,8 @@
+{
+  "result": "timed_out",
+  "timeoutSeconds": 15,
+  "url": "http://192.168.100.1/cgi-bin/luci/",
+  "fixtureIssue": "wget -T limits each retry, not total time; initial wrapper timeout was not caught. No pass conclusion.",
+  "cleanup": "cleaned_owned_wget=523361\n",
+  "cleanupExitCode": 0
+}

@@ -1,0 +1,720 @@
+{
+  "checkedAt": "2026-10-18T08:42:52.915Z",
+  "checks": [
+    "Unauthenticated config read denied",
+    "Real root session renders persisted homepage"
+  ],
+  "errors": [],
+  "consoleErrors": [],
+  "httpErrors": [],
+  "views": [
+    {
+      "name": "b-home-1440",
+      "overflow": false,
+      "input": {
+        "coarse": true,
+        "points": 1
+      },
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 666,
+          "h": 439.578125
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 444,
+          "h": 271.59375
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "w": 444,
+          "h": 149.984375
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 555,
+          "h": 318.078125
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 555,
+          "h": 318.078125
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 555,
+          "h": 385
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 555,
+          "h": 385
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 371.265625,
+          "h": 351.171875
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 360.359375,
+          "h": 351.171875
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 360.375,
+          "h": 351.171875
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "w": 1128,
+          "h": 306
+        }
+      ]
+    },
+    {
+      "name": "b-home-1024",
+      "overflow": false,
+      "input": {
+        "coarse": true,
+        "points": 1
+      },
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 728,
+          "h": 320
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 728,
+          "h": 272.796875
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "w": 728,
+          "h": 151.390625
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 400,
+          "h": 464
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 310,
+          "h": 464
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 380,
+          "h": 383
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 330,
+          "h": 383
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 360.296875,
+          "h": 300.484375
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 349.703125,
+          "h": 300.484375
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 728,
+          "h": 331.390625
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "w": 728,
+          "h": 509
+        }
+      ]
+    },
+    {
+      "name": "b-home-768",
+      "overflow": false,
+      "input": {
+        "coarse": true,
+        "points": 1
+      },
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 680,
+          "h": 320
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 680,
+          "h": 251.59375
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "w": 680,
+          "h": 141.984375
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 400,
+          "h": 444
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 262,
+          "h": 444
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 380,
+          "h": 373
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 282,
+          "h": 373
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 335.9375,
+          "h": 280.484375
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 326.0625,
+          "h": 280.484375
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 680,
+          "h": 311.390625
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "w": 680,
+          "h": 487
+        }
+      ]
+    },
+    {
+      "name": "b-home-390",
+      "overflow": false,
+      "input": {
+        "coarse": true,
+        "points": 1
+      },
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 330,
+          "h": 300
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 330,
+          "h": 249.59375
+        },
+        {
+          "id": "networkInterface",
+          "form": "standard",
+          "w": 330,
+          "h": 191.578125
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 330,
+          "h": 374.296875
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 330,
+          "h": 444
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 330,
+          "h": 373
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 330,
+          "h": 300.984375
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 330,
+          "h": 271
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 330,
+          "h": 280.484375
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 330,
+          "h": 331.171875
+        },
+        {
+          "id": "system",
+          "form": "summary",
+          "w": 330,
+          "h": 153.984375
+        }
+      ]
+    }
+  ],
+  "restoration": [
+    "layout: unchanged",
+    "launcher: unchanged"
+  ],
+  "themeStyles": [
+    "http://192.168.30.244/luci-static/istorenas/css/cascade.css?v=2.2.11.5",
+    "http://192.168.30.244/luci-static/resources/easepi/easeicon.css?t=1649313193968",
+    "http://192.168.30.244/luci-static/quickstart/style.css?v=0.16.1-test20261018-candidate-2332b07136c2"
+  ],
+  "density": [
+    {
+      "tag": "SECTION",
+      "cls": "network-business-card interface-business summary compact-ports",
+      "h": 149.984375,
+      "margin": "0px",
+      "padding": "14px",
+      "minHeight": "136px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "HEADER",
+      "cls": "",
+      "h": 46,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "22px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "H2",
+      "cls": "",
+      "h": 20,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "17.5px",
+      "font": "600 14px / 17.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "svg",
+      "cls": {},
+      "h": 20,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "17.5px",
+      "font": "600 14px / 17.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "block"
+    },
+    {
+      "tag": "path",
+      "cls": {},
+      "h": 15,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "17.5px",
+      "font": "600 14px / 17.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "inline"
+    },
+    {
+      "tag": "DIV",
+      "cls": "network-header-actions widget-action-group",
+      "h": 46,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "46px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "BUTTON",
+      "cls": "widget-primary-action",
+      "h": 44,
+      "margin": "0px",
+      "padding": "6px 12px",
+      "minHeight": "44px",
+      "lineHeight": "13px",
+      "font": "13px / 13px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "SPAN",
+      "cls": "widget-action-icon",
+      "h": 16,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "0px",
+      "font": "13px / 0px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "svg",
+      "cls": {},
+      "h": 16,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "0px",
+      "font": "13px / 0px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "block"
+    },
+    {
+      "tag": "path",
+      "cls": {},
+      "h": 10.6666259765625,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "0px",
+      "font": "13px / 0px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "inline"
+    },
+    {
+      "tag": "SPAN",
+      "cls": "widget-action-label",
+      "h": 13,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "13px",
+      "font": "13px / 13px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "DIV",
+      "cls": "widget-menu",
+      "h": 44,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "BUTTON",
+      "cls": "widget-menu-trigger",
+      "h": 44,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "44px",
+      "lineHeight": "18px",
+      "font": "18px / 18px Arial",
+      "display": "grid"
+    },
+    {
+      "tag": "DIV",
+      "cls": "interface-list",
+      "h": 56.984375,
+      "margin": "12px 0px 0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "grid"
+    },
+    {
+      "tag": "BUTTON",
+      "cls": "",
+      "h": 56.984375,
+      "margin": "0px",
+      "padding": "8px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "grid"
+    },
+    {
+      "tag": "SPAN",
+      "cls": "interface-link-mark up",
+      "h": 16,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "grid"
+    },
+    {
+      "tag": "svg",
+      "cls": {},
+      "h": 16,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "block"
+    },
+    {
+      "tag": "path",
+      "cls": {},
+      "h": 12,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "inline"
+    },
+    {
+      "tag": "SPAN",
+      "cls": "interface-name",
+      "h": 0,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "contents"
+    },
+    {
+      "tag": "STRONG",
+      "cls": "",
+      "h": 18.1875,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "18.2px",
+      "font": "500 13px / 18.2px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "block"
+    },
+    {
+      "tag": "SMALL",
+      "cls": "",
+      "h": 16.796875,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "16.8px",
+      "font": "12px / 16.8px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "block"
+    },
+    {
+      "tag": "SPAN",
+      "cls": "interface-link-state",
+      "h": 0,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "",
+      "display": "contents"
+    },
+    {
+      "tag": "STRONG",
+      "cls": "",
+      "h": 16.796875,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "16.8px",
+      "font": "",
+      "display": "block"
+    },
+    {
+      "tag": "SMALL",
+      "cls": "",
+      "h": 16.796875,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "16.8px",
+      "font": "",
+      "display": "block"
+    },
+    {
+      "tag": "svg",
+      "cls": {},
+      "h": 0,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "none"
+    },
+    {
+      "tag": "path",
+      "cls": {},
+      "h": 0,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "inline"
+    },
+    {
+      "tag": "FOOTER",
+      "cls": "",
+      "h": 5,
+      "margin": "0px",
+      "padding": "5px 0px 0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "SMALL",
+      "cls": "",
+      "h": 0,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "16.8px",
+      "font": "12px / 16.8px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "none"
+    },
+    {
+      "tag": "FOOTER",
+      "cls": "inventory-footer",
+      "h": 28.796875,
+      "margin": "0px",
+      "padding": "12px 0px 0px",
+      "minHeight": "auto",
+      "lineHeight": "16.8px",
+      "font": "12px / 16.8px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    }
+  ],
+  "trafficTouchBounds": [
+    {
+      "width": 1024,
+      "action": {
+        "left": 890,
+        "right": 966,
+        "top": 245.59375,
+        "bottom": 291.59375
+      },
+      "labels": [
+        {
+          "left": 417.5,
+          "right": 465.5,
+          "top": 284.59375,
+          "bottom": 302.59375
+        },
+        {
+          "left": 766.5,
+          "right": 814.5,
+          "top": 284.59375,
+          "bottom": 302.59375
+        }
+      ]
+    },
+    {
+      "width": 768,
+      "action": {
+        "left": 640,
+        "right": 714,
+        "top": 239.59375,
+        "bottom": 285.59375
+      },
+      "labels": [
+        {
+          "left": 195.5,
+          "right": 243.5,
+          "top": 274.59375,
+          "bottom": 292.59375
+        },
+        {
+          "left": 524.5,
+          "right": 572.5,
+          "top": 274.59375,
+          "bottom": 292.59375
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "action": {
+        "left": 276,
+        "right": 350,
+        "top": 221.890625,
+        "bottom": 267.890625
+      },
+      "labels": [
+        {
+          "left": 94,
+          "right": 142,
+          "top": 256.890625,
+          "bottom": 274.890625
+        },
+        {
+          "left": 248,
+          "right": 296,
+          "top": 256.890625,
+          "bottom": 274.890625
+        }
+      ]
+    }
+  ],
+  "result": "failed",
+  "failure": "AssertionError [ERR_ASSERTION]: Touch speed-test action overlaps traffic rate labels\n    at trafficTouch (/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/94c4-develop-quicksta/quickstart/scripts/ops/home-current-acceptance.cjs:22:417)\n    at async /config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/94c4-develop-quicksta/quickstart/scripts/ops/home-current-acceptance.cjs:32:286",
+  "language": "zh-cn"
+}

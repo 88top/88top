@@ -2,11 +2,24 @@ package password
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/istoreos/quickstart/backend/models"
 )
+
+func TestPasswordCommandPreservesSpecialCharacters(t *testing.T) {
+	password := "spaces ' quotes \" slash \\ newline\n中文"
+	var value struct{ Username, Password string }
+	if err := json.Unmarshal([]byte(strings.TrimPrefix(BuildSetRootPasswordCommand(password), "luci setPassword ")), &value); err != nil {
+		t.Fatal(err)
+	}
+	if value.Username != "root" || value.Password != password {
+		t.Fatalf("password was altered: %#v", value)
+	}
+}
 
 type fakeStore struct {
 	command string
@@ -17,6 +30,30 @@ type fakeStore struct {
 func (store *fakeStore) CallSetPassword(ctx context.Context, command string) (bool, error) {
 	store.command = command
 	return store.changed, store.err
+}
+
+func TestInvalidPasswordDoesNotReachSystemHelper(t *testing.T) {
+	for _, value := range []string{"", "\x00", "\x00secret", "secret\x00suffix", "secret\nroot:other", "secret\r"} {
+		t.Run(value, func(t *testing.T) {
+			store := &fakeStore{changed: true}
+			resp, err := NewService(store).SetRootPassword(context.Background(), models.NasSystemSetPasswordRequest{Password: value})
+			if err == nil || resp != nil || store.command != "" {
+				t.Fatalf("invalid password reached system helper: response=%#v error=%v called=%t", resp, err, store.command != "")
+			}
+		})
+	}
+}
+
+func TestValidSpecialPasswordIsNotAltered(t *testing.T) {
+	value := "spaces ' quotes \" slash \\ 中文"
+	store := &fakeStore{changed: true}
+	if _, err := NewService(store).SetRootPassword(context.Background(), models.NasSystemSetPasswordRequest{Password: value}); err != nil {
+		t.Fatal(err)
+	}
+	var decoded struct{ Password string }
+	if err := json.Unmarshal([]byte(strings.TrimPrefix(store.command, "luci setPassword ")), &decoded); err != nil || decoded.Password != value {
+		t.Fatalf("valid password changed: error=%v", err)
+	}
 }
 
 func TestSetRootPasswordBuildsCommandAndReturnsSuccess(t *testing.T) {

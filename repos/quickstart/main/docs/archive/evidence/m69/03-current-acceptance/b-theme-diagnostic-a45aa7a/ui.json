@@ -1,0 +1,439 @@
+{
+  "checkedAt": "2026-10-18T07:28:30.701Z",
+  "checks": [
+    "Unauthenticated config read denied",
+    "Real root session renders persisted homepage"
+  ],
+  "errors": [],
+  "views": [
+    {
+      "name": "b-home-1440",
+      "overflow": false,
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 666,
+          "h": 440.578125
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 444,
+          "h": 250.59375
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "w": 444,
+          "h": 171.984375
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 555,
+          "h": 353.671875
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 555,
+          "h": 353.671875
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 555,
+          "h": 343
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 555,
+          "h": 343
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 371.265625,
+          "h": 357.171875
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 360.359375,
+          "h": 357.171875
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 360.375,
+          "h": 357.171875
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "w": 1128,
+          "h": 304
+        }
+      ]
+    }
+  ],
+  "restoration": [
+    "layout: unchanged",
+    "launcher: unchanged"
+  ],
+  "metrics": [
+    {
+      "tag": "HEADER",
+      "cls": "lab-header",
+      "display": "flex",
+      "height": "78px",
+      "padding": "0px",
+      "margin": "0px",
+      "lineHeight": "21px",
+      "font": "14px / 21px Arial, \"Microsoft YaHei\", sans-serif",
+      "position": "relative",
+      "background": "rgba(0, 0, 0, 0)",
+      "before": {
+        "content": "none",
+        "display": "block",
+        "position": "static",
+        "width": "auto",
+        "height": "auto",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "after": {
+        "content": "\"\"",
+        "display": "block",
+        "position": "absolute"
+      }
+    },
+    {
+      "tag": "H1",
+      "cls": "",
+      "display": "block",
+      "height": "38.5px",
+      "padding": "0px 0px 10px",
+      "margin": "0px",
+      "lineHeight": "27.5px",
+      "font": "600 25px / 27.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "position": "static",
+      "background": "rgba(0, 0, 0, 0)",
+      "before": {
+        "content": "none",
+        "display": "inline",
+        "position": "static",
+        "width": "auto",
+        "height": "auto",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "after": {
+        "content": "none",
+        "display": "inline",
+        "position": "static"
+      }
+    },
+    {
+      "tag": "SECTION",
+      "cls": "network-business-card connection-business",
+      "display": "flex",
+      "height": "250.594px",
+      "padding": "20px 14px",
+      "margin": "0px",
+      "lineHeight": "21px",
+      "font": "14px / 21px Arial, \"Microsoft YaHei\", sans-serif",
+      "position": "static",
+      "background": "rgb(255, 255, 255)",
+      "before": {
+        "content": "none",
+        "display": "block",
+        "position": "static",
+        "width": "auto",
+        "height": "auto",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "after": {
+        "content": "none",
+        "display": "block",
+        "position": "static"
+      }
+    },
+    {
+      "tag": "HEADER",
+      "cls": "",
+      "display": "flex",
+      "height": "44px",
+      "padding": "0px",
+      "margin": "0px",
+      "lineHeight": "21px",
+      "font": "14px / 21px Arial, \"Microsoft YaHei\", sans-serif",
+      "position": "relative",
+      "background": "rgba(0, 0, 0, 0)",
+      "before": {
+        "content": "none",
+        "display": "block",
+        "position": "static",
+        "width": "auto",
+        "height": "auto",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "after": {
+        "content": "\"\"",
+        "display": "block",
+        "position": "absolute"
+      }
+    },
+    {
+      "tag": "SECTION",
+      "cls": "network-business-card interface-business summary compact-ports",
+      "display": "flex",
+      "height": "171.984px",
+      "padding": "14px",
+      "margin": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "position": "static",
+      "background": "rgb(255, 255, 255)",
+      "before": {
+        "content": "none",
+        "display": "block",
+        "position": "static",
+        "width": "auto",
+        "height": "auto",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "after": {
+        "content": "none",
+        "display": "block",
+        "position": "static"
+      }
+    },
+    {
+      "tag": "HEADER",
+      "cls": "",
+      "display": "flex",
+      "height": "44px",
+      "padding": "0px",
+      "margin": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "position": "relative",
+      "background": "rgba(0, 0, 0, 0)",
+      "before": {
+        "content": "none",
+        "display": "block",
+        "position": "static",
+        "width": "auto",
+        "height": "auto",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "after": {
+        "content": "\"\"",
+        "display": "block",
+        "position": "absolute"
+      }
+    },
+    {
+      "tag": "HEADER",
+      "cls": "",
+      "display": "flex",
+      "height": "49.5938px",
+      "padding": "0px",
+      "margin": "0px 0px 12px",
+      "lineHeight": "21px",
+      "font": "14px / 21px Arial, \"Microsoft YaHei\", sans-serif",
+      "position": "relative",
+      "background": "rgba(0, 0, 0, 0)",
+      "before": {
+        "content": "none",
+        "display": "block",
+        "position": "static",
+        "width": "auto",
+        "height": "auto",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "after": {
+        "content": "\"\"",
+        "display": "block",
+        "position": "absolute"
+      }
+    },
+    {
+      "tag": "HEADER",
+      "cls": "applications-heading",
+      "display": "flex",
+      "height": "49.5938px",
+      "padding": "0px",
+      "margin": "0px 0px 12px",
+      "lineHeight": "21px",
+      "font": "14px / 21px Arial, \"Microsoft YaHei\", sans-serif",
+      "position": "relative",
+      "background": "rgba(0, 0, 0, 0)",
+      "before": {
+        "content": "none",
+        "display": "block",
+        "position": "static",
+        "width": "auto",
+        "height": "auto",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "after": {
+        "content": "\"\"",
+        "display": "block",
+        "position": "absolute"
+      }
+    },
+    {
+      "tag": "DIV",
+      "cls": "card-header",
+      "display": "flex",
+      "height": "44px",
+      "padding": "0px",
+      "margin": "0px",
+      "lineHeight": "normal",
+      "font": "14px Arial, \"Microsoft YaHei\", sans-serif",
+      "position": "static",
+      "background": "rgba(0, 0, 0, 0)",
+      "before": {
+        "content": "none",
+        "display": "block",
+        "position": "static",
+        "width": "auto",
+        "height": "auto",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "after": {
+        "content": "none",
+        "display": "block",
+        "position": "static"
+      }
+    },
+    {
+      "tag": "DIV",
+      "cls": "card-header",
+      "display": "flex",
+      "height": "44px",
+      "padding": "0px",
+      "margin": "0px",
+      "lineHeight": "normal",
+      "font": "14px Arial, \"Microsoft YaHei\", sans-serif",
+      "position": "static",
+      "background": "rgba(0, 0, 0, 0)",
+      "before": {
+        "content": "none",
+        "display": "block",
+        "position": "static",
+        "width": "auto",
+        "height": "auto",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "after": {
+        "content": "none",
+        "display": "block",
+        "position": "static"
+      }
+    },
+    {
+      "tag": "DIV",
+      "cls": "card-header",
+      "display": "flex",
+      "height": "44px",
+      "padding": "0px",
+      "margin": "0px",
+      "lineHeight": "normal",
+      "font": "14px Arial, \"Microsoft YaHei\", sans-serif",
+      "position": "static",
+      "background": "rgba(0, 0, 0, 0)",
+      "before": {
+        "content": "none",
+        "display": "block",
+        "position": "static",
+        "width": "auto",
+        "height": "auto",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "after": {
+        "content": "none",
+        "display": "block",
+        "position": "static"
+      }
+    },
+    {
+      "tag": "DIV",
+      "cls": "card-header",
+      "display": "flex",
+      "height": "44px",
+      "padding": "0px",
+      "margin": "0px",
+      "lineHeight": "normal",
+      "font": "14px Arial, \"Microsoft YaHei\", sans-serif",
+      "position": "static",
+      "background": "rgba(0, 0, 0, 0)",
+      "before": {
+        "content": "none",
+        "display": "block",
+        "position": "static",
+        "width": "auto",
+        "height": "auto",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "after": {
+        "content": "none",
+        "display": "block",
+        "position": "static"
+      }
+    },
+    {
+      "tag": "DIV",
+      "cls": "card-header",
+      "display": "flex",
+      "height": "44px",
+      "padding": "0px",
+      "margin": "0px",
+      "lineHeight": "normal",
+      "font": "14px Arial, \"Microsoft YaHei\", sans-serif",
+      "position": "static",
+      "background": "rgba(0, 0, 0, 0)",
+      "before": {
+        "content": "none",
+        "display": "block",
+        "position": "static",
+        "width": "auto",
+        "height": "auto",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "after": {
+        "content": "none",
+        "display": "block",
+        "position": "static"
+      }
+    },
+    {
+      "tag": "DIV",
+      "cls": "card-header",
+      "display": "flex",
+      "height": "44px",
+      "padding": "0px",
+      "margin": "0px",
+      "lineHeight": "normal",
+      "font": "14px Arial, \"Microsoft YaHei\", sans-serif",
+      "position": "static",
+      "background": "rgba(0, 0, 0, 0)",
+      "before": {
+        "content": "none",
+        "display": "block",
+        "position": "static",
+        "width": "auto",
+        "height": "auto",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "after": {
+        "content": "none",
+        "display": "block",
+        "position": "static"
+      }
+    }
+  ],
+  "result": "diagnostic"
+}

@@ -1,14 +1,5 @@
 <template>
     <ul class="app-container_qbittorrent">
-        <li class="qbittorrent-item">
-            <div class="qbittorrent-item_name">
-                <span>{{ $gettext("当前状态:") }}</span>
-            </div>
-            <div class="qbittorrent-item_value">
-                <span class="configure" v-if="qbittorrent?.status == 'running'">{{ $gettext("已启动") }}</span>
-                <span class="configure enabel" v-else>{{ $gettext("未启动") }}</span>
-            </div>
-        </li>
         <template v-if="qbittorrent?.status == 'running'">
             <li class="qbittorrent-item">
                 <div class="qbittorrent-item_name">

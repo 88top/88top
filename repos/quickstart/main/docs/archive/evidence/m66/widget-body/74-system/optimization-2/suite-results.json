@@ -1,0 +1,54 @@
+{
+  "startedAt": "2026-10-17T15:24:39.178Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "widget-body-touch-review",
+      "startedAt": "2026-10-17T15:24:39.182Z",
+      "endedAt": "2026-10-17T15:24:45.531Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/widget-body/74-system/optimization-2/widget-body-touch-review/report.json"
+    },
+    {
+      "name": "widget-body-resource-review",
+      "startedAt": "2026-10-17T15:24:39.183Z",
+      "endedAt": "2026-10-17T15:24:58.731Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/widget-body/74-system/optimization-2/widget-body-resource-review/report.json"
+    },
+    {
+      "name": "widget-body-system-review",
+      "startedAt": "2026-10-17T15:24:39.178Z",
+      "endedAt": "2026-10-17T15:24:59.612Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/widget-body/74-system/optimization-2/widget-body-system-review/report.json"
+    },
+    {
+      "name": "structure-interaction-review",
+      "startedAt": "2026-10-17T15:24:58.731Z",
+      "endedAt": "2026-10-17T15:25:16.692Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/widget-body/74-system/optimization-2/structure-interaction-review/report.json"
+    },
+    {
+      "name": "widget-body-matrix-review",
+      "startedAt": "2026-10-17T15:24:45.532Z",
+      "endedAt": "2026-10-17T15:25:21.453Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 42,
+      "report": "docs/evidence/m66/widget-body/74-system/optimization-2/widget-body-matrix-review/report.json"
+    }
+  ],
+  "endedAt": "2026-10-17T15:25:21.454Z",
+  "result": "pass",
+  "groups": 65
+}

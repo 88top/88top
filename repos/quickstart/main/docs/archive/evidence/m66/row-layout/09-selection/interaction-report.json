@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-15T06:56:42.862Z",
+  "base": "http://192.168.9.19:5180",
+  "checks": [
+    "R presets, real pointer splitter, keyboard, shared row height",
+    "R ordered wrapping and restoration over three width round trips without overwriting preferences",
+    "G columns and density controls, automatic column reduction",
+    "F real move and resize, reset, narrow ordered fallback; no collision engine claim",
+    "same ten modules can be shown in all variants",
+    "mobile alternative controls remain usable"
+  ],
+  "errors": [],
+  "outside": [],
+  "productDecision": "pending",
+  "technicalResult": "pass"
+}

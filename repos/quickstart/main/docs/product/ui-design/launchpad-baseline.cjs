@@ -1,0 +1,10 @@
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const {run}=require('./direct-test-utils.cjs');
+const root='docs/archive/evidence/m66/launchpad/63-contract';
+const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(d,e.name)):[path.join(d,e.name)]);
+const allowed=new Set(['web/src/design/HomeApplications.vue','web/src/design/homeApplications.ts','web/src/design/homeApplications.css','web/src/design/launcherCatalog.ts','web/src/design/launcherFixtures.ts']);
+fs.mkdirSync(root,{recursive:true});
+const files=[...walk('web/src').filter(p=>/\.(vue|css|ts)$/.test(p)), 'scripts/ui-design.sh','scripts/ui-design-server.cjs','web/vite.design.config.ts'];
+fs.writeFileSync(root+'/sources.json',JSON.stringify(files.map(file=>({file,allowed:allowed.has(file),sha256:crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')})),null,2)+'\n');
+process.env.QS_DESIGN_EVIDENCE_ROOT=root+'/baseline';
+run('launchpad-baseline',async({page,visit,report,root})=>{await visit();await page.screenshot({path:path.join(root,'desktop.png')});await page.locator('[data-applications-hub] [data-all-apps]').click();await page.screenshot({path:path.join(root,'old-all.png')});await page.keyboard.press('Escape');await page.setViewportSize({width:390,height:844});await page.waitForTimeout(1000);await page.screenshot({path:path.join(root,'phone.png')});report.checks.push('Current ca6718d baseline, homepage / old All / phone viewport captured; source boundaries frozen');}).catch(e=>{console.error(e);process.exitCode=1});

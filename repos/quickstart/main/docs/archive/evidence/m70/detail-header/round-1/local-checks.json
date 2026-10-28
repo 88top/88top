@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-10-19",
+  "candidate": 1,
+  "checks": [
+    {"command": "rtk proxy /var/cache/build-cache/run.sh -- npm --prefix web run tsc", "exitCode": 0},
+    {"command": "rtk proxy /var/cache/build-cache/run.sh -- make build-web", "exitCode": 0, "warnings": "Existing Vue combinator v-deep deprecations"},
+    {"command": "rtk proxy git diff --check", "exitCode": 0}
+  ],
+  "ssd": {"backingDevice": "/dev/nvme0n1p4", "freeGiB": 127.7},
+  "outputs": "web/dist/luci-static/quickstart and web/dist/quickstart_web.zip (explicit project output, not relocated by cache wrapper)",
+  "scope": "Shared action stylesheet only; original business logic/components unchanged. Browser style-probe-final passes 72 actual B detail views before frozen deployment."
+}

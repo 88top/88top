@@ -3,7 +3,9 @@ package service
 import (
 	"context"
 	"errors"
+	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/istoreos/quickstart/backend/models"
 )
@@ -72,7 +74,7 @@ func (svc *Service) List(ctx context.Context) ([]*models.ShareServiceInfo, error
 }
 
 func (svc *Service) Create(ctx context.Context, input CreateInput) error {
-	if err := validateShareInput(input.Name, input.Path); err != nil {
+	if err := validateShareInput(input); err != nil {
 		return err
 	}
 
@@ -89,7 +91,7 @@ func (svc *Service) Create(ctx context.Context, input CreateInput) error {
 }
 
 func (svc *Service) Ensure(ctx context.Context, input CreateInput) error {
-	if err := validateShareInput(input.Name, input.Path); err != nil {
+	if err := validateShareInput(input); err != nil {
 		return err
 	}
 
@@ -105,7 +107,7 @@ func (svc *Service) Ensure(ctx context.Context, input CreateInput) error {
 }
 
 func (svc *Service) Update(ctx context.Context, input UpdateInput) error {
-	if err := validateShareInput(input.Name, input.Path); err != nil {
+	if err := validateShareInput(input); err != nil {
 		return err
 	}
 
@@ -151,7 +153,8 @@ func buildUserPermissions(users []*models.ShareUserInfo, share *ShareRecord) []*
 	return perms
 }
 
-func validateShareInput(name, path string) error {
+func validateShareInput(input CreateInput) error {
+	name, path := input.Name, input.Path
 	if name == "" || path == "" {
 		return errors.New("param missing")
 	}
@@ -160,6 +163,14 @@ func validateShareInput(name, path string) error {
 	}
 	if !IsNameValid(name) {
 		return errors.New("invalid name ")
+	}
+	if !filepath.IsAbs(path) || strings.ContainsAny(path, "\x00\r\n") {
+		return errors.New("invalid share path")
+	}
+	for _, user := range input.Users {
+		if user == nil || strings.ContainsAny(user.UserName, "\x00\r\n") || !IsNameValid(user.UserName) {
+			return errors.New("invalid share user")
+		}
 	}
 	return nil
 }

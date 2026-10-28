@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-19",
+  "checks": [
+    {"command": "rtk proxy /var/cache/build-cache/run.sh -- node --test web/test/*.test.mjs", "result": "passed", "tests": 133},
+    {"command": "rtk proxy /var/cache/build-cache/run.sh -- npm --prefix web run tsc", "result": "passed"},
+    {"command": "rtk proxy /var/cache/build-cache/run.sh -- make build-web", "result": "passed", "output": "web/dist/luci-static/quickstart and quickstart_web.zip", "warnings": "Existing v-deep deprecations"},
+    {"command": "rtk proxy python3 -m unittest discover -s apps/fastnet/tests -v (app-hub)", "result": "passed", "tests": 3}
+  ],
+  "script": {"fixtureCases": 14, "result": "passed", "report": "../script-fixtures-2.json", "retainedFailure": "../script-fixtures-1.json", "reason": "jshn missing-object warning wrote to stdout; suppressed warnings and validated raw JSON before json_load, whose eval can return success for invalid input"},
+  "scope": "No real install/remove/start/stop/speed-test. Real target jshn fixture runs in private temporary directories; all cleaned."
+}

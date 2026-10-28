@@ -1,0 +1,7 @@
+{
+  "target": "192.168.30.244",
+  "tool": "plain opkg for update and subsequent install",
+  "exitCode": 0,
+  "summary": "f8dd108f824c76bb3089a6f764c0cdfb63d73f3338d3731c2c301a610c8e69eb  /root/quickstart-package-candidates/home-0162-eda99c4-r2/opkg-update.log\n8\n",
+  "logRetainedOnDevice": "/root/quickstart-package-candidates/home-0162-eda99c4-r2/opkg-update.log"
+}

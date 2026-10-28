@@ -1,0 +1,16 @@
+{
+  "host": "192.168.30.244",
+  "checks": [
+    "/etc/quickstart/home-layout.json",
+    "/etc/quickstart/home-layout.json.bak",
+    "/etc/quickstart/home-layout.json.damaged",
+    "/etc/quickstart/home-layout.json.bak.damaged",
+    "/etc/quickstart/home-launcher.json",
+    "/etc/quickstart/home-launcher.json.bak",
+    "/etc/quickstart/home-launcher.json.damaged",
+    "/etc/quickstart/home-launcher.json.bak.damaged"
+  ],
+  "normalizations": [],
+  "result": "failed",
+  "failure": "Configuration changed: /etc/config/network"
+}

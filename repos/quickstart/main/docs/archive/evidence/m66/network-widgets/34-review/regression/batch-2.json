@@ -1,0 +1,55 @@
+{
+  "attempt": 2,
+  "checkedAt": "2026-10-16T04:14:48.843Z",
+  "suites": [
+    {
+      "name": "presentation-applications",
+      "exitCode": 0
+    },
+    {
+      "name": "presentation-devices",
+      "exitCode": 0
+    },
+    {
+      "name": "presentation-negotiation",
+      "exitCode": 0
+    },
+    {
+      "name": "slot-primary",
+      "exitCode": 0
+    },
+    {
+      "name": "slot-normalization",
+      "exitCode": 0
+    },
+    {
+      "name": "slot-overview",
+      "exitCode": 0
+    },
+    {
+      "name": "slot-input",
+      "exitCode": 0
+    },
+    {
+      "name": "row-sort",
+      "exitCode": 0
+    },
+    {
+      "name": "row-sort-lifecycle",
+      "exitCode": 0
+    },
+    {
+      "name": "slot-navigation",
+      "exitCode": 0
+    },
+    {
+      "name": "slot-resource",
+      "exitCode": 0
+    },
+    {
+      "name": "presentation-resource",
+      "exitCode": 0
+    }
+  ],
+  "result": "pass"
+}

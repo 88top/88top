@@ -1,0 +1,9 @@
+{
+  "result": "failed",
+  "reason": "Original formal tab active/name selectors outrank the extracted theme",
+  "sha256": {
+    "web/src/home/homeSemanticColors.css": "184c7b2fe27c07ccb28fc565cc65b514a803aeefe60a28c05e943b2b2b5edf0a",
+    "web/dist/luci-static/quickstart/index.js": "e38aac759d109d014c0c02d80194727a40ffb4042377c2bece8a7079e2a0579b",
+    "web/dist/luci-static/quickstart/style.css": "888a7647ab741a028df434f3827d2aa66901cd2f26d5a06364fdaf9fd8c32e64"
+  }
+}

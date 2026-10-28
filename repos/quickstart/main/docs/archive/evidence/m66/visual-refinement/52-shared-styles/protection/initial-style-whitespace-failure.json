@@ -1,0 +1,298 @@
+{
+  "checkedAt": "2026-10-17T06:15:07.867Z",
+  "base": "fc9df267130330eafe7d8e250f3477432283a98e",
+  "files": [
+    {
+      "path": "web/src/components/action-confirm/index.ts",
+      "sha256": "3a11bad427761c5250779de563bc7dfa8a60acc4879b0f026746bea1826b8d01",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-confirm/index.vue",
+      "sha256": "31b07cee05806a748a491e26b50653c2cca1449e7113ce9d757564a3d517fe47",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-ddnsto/index.ts",
+      "sha256": "2b736bc0bb928d8dec2f6fa59e7027af3a270ae32102431334e0709ce4a2b1c5",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-ddnsto/index.vue",
+      "sha256": "7a1880abfd22e75065951c7b5ae92045989bbdae1dbc6e34f879185255e5c57f",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-ddnsto/setup-ddnsto-bind.vue",
+      "sha256": "772564ee0bb27ab7df831699a9ea0548d00b36d653e8a422777cd57eba17b863",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-ddnsto/setup-ddnsto-install.vue",
+      "sha256": "93ab6400647c438260b7fbf9fb1f59d5c62968347c1df93c3dc35dde857e0c35",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-ddnsto/setup-ddnsto-login.vue",
+      "sha256": "a56014ebb2a161266ba981a6714f54080af6e1d66bd480ed49a2d963b3d8dbcc",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-ddnsto/setup-ddnsto-run.vue",
+      "sha256": "59a81e466a1ce06fb9450d0d9438df676451466acbf620689c39948b46679dbb",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-ddnsto/setup-ddnsto-save.vue",
+      "sha256": "8c446161b075cab880768b6e5518009292a0f294e59e206549870b7af826ae74",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-disk-format/index.ts",
+      "sha256": "5649ff3d1292d2cb22aa04493e1fe593bf6547b19dd85c1332dc1fe79317f4e3",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-disk-format/index.vue",
+      "sha256": "4dd8fc1e1a1ae7893ed4aa0fb41ddf4f53983fd08f0429d364f3742f4f4e5a36",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-disk-mount/index.ts",
+      "sha256": "49c6ce3fd3560e55ac0d5fae8f379b8488124cecb80381e6b49a05806937a6bc",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-disk-mount/index.vue",
+      "sha256": "795f36c422befb990e8f8e9587225317b1d97790ee6635ec564b4aea72f551e3",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-disk-part/index.ts",
+      "sha256": "7288de2947198fb7397b329832823a6082203354930a95e3bffe538b57289cda",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-disk-part/index.vue",
+      "sha256": "65150b88709203b1158adbb06d7d0b816b0ae2e4acadc4377b7a964927bd6611",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-disk-part/item.vue",
+      "sha256": "334d598fb27ad785225488508659019435ee4f4b40a5861f780bb083d5207a1e",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-disk/index.ts",
+      "sha256": "fbf8472ef0ffb83b8efa2bc51c2773ca815077b180a5e7da71b8eb68b6f9a779",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-disk/index.vue",
+      "sha256": "1fb98351a036584b95c8e4e51e9eb5aac18db4be6b2409abc5d27148db26245f",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-disk/item.vue",
+      "sha256": "7e41a6ec6bca55a0d4ad505b45bb864b1911a92f8a41645e40de17a81b89ab2a",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-docker/index.ts",
+      "sha256": "50f11acf2a80bbe453357edf4dc3caaf1eef224ea2b554a1cd6b4217efcebb42",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-docker/index.vue",
+      "sha256": "014dad476344316562c95353514ecbc4b0dec5710480bef918fdaae106c92b9c",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-domain/index.ts",
+      "sha256": "a2bb1585827bc156439e62f65e648b241b73d320cace08b937c68e805fc57c3f",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-domain/index.vue",
+      "sha256": "ff8afec58ae57dd288eedbf6f9eae398fc976b720f0a47470dc8909ecc3c8e68",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-domain/setup-ddns-success.vue",
+      "sha256": "0189f5f6291d5930af73616819fb6e183ce7dcbd1b35cf6dc967162a8472bc62",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-domain/setup-ddns.vue",
+      "sha256": "ecfa237fbe9969b5ceb3003f36afb838d02999cc676f31a0abc5615d7c04e8db",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-domain/setup-index.vue",
+      "sha256": "5c27f1b40e6dba3798452eec06589e7d4b000322e1903b711e07c12518520e84",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-download/index.ts",
+      "sha256": "2ee64b4741993001324e13a93525ac4089a7ec3ee243ac5c311e1b0639aeb47c",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-download/index.vue",
+      "sha256": "9ed1f21a78dcd4409c20611cab48aace9fd0a59e0b4a5bf9af15dd1518f1e515",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-nas/index.ts",
+      "sha256": "ecec61a3af60ada9c1ba249ab0abb0d88b372931b0a0598ac1832498954efc83",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-nas/index.vue",
+      "sha256": "b3d10d51eb70506e173fd224b8d65731f0b28d477185c0f894359a22415bc44c",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-nas/linkease/index.ts",
+      "sha256": "c59ef33fd93a96a0db80676784655d6259b5a7cdd35e8fecf63178120d35d15d",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-nas/linkease/index.vue",
+      "sha256": "18f35b0c12250f13674e46a425457374b5eff68ec2bc8bbb3b91061caeb18e77",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-nas/unishare/index.ts",
+      "sha256": "e942a8ff9cf40c472ed4265ef44c5212e801656184b2604254d4cd9f0e879ac9",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/components/action-nas/unishare/index.vue",
+      "sha256": "8f1ae5a7797df5e46d14f06af595280ad6a5f79dacd72974a29fa1c1608b9896",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/CanvasCommonTools.vue",
+      "sha256": "218a195aff9093411d7c1c0670c0183e02428ac44fb098f393b502859638a077",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/CanvasHome.vue",
+      "sha256": "97c98b179a84ef7d43d5327f06673434522e9835a55b866830aae12b3924aa35",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/CanvasModule.vue",
+      "sha256": "46c1f0a03a51ff69da7cb4948c1e42952ee2c9f161d80a376f8a89a58fb7b641",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/CanvasTools.vue",
+      "sha256": "e281e514a28457679da05c80c237f29ed9d5b4290d00832f02c3996621f69dc4",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/CompactPreviewCard.vue",
+      "sha256": "a71b11b78a885c3f21a73b2135328f8d4ed61f4e03836ac02a63801c001564b3",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/DesignApp.vue",
+      "sha256": "5f621f36988280b846861d2b9cb064504990272809753ce39d0c1d354b38ddc7",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/DestinationPreview.vue",
+      "sha256": "61afd595e52c574d9326729cd351c8acda691b193ea0ff9f89262c1205f4b5e4",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/DevicePreview.vue",
+      "sha256": "11631e6a99b061b8a52dcd0b020346136619dd7b3d84cbbf9e248940135f108b",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/DeviceSummary.vue",
+      "sha256": "caa370dda01561df3c5cd0ee315594a5d665635e691742745d6f91767cb55d8e",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/DirectEditPanel.vue",
+      "sha256": "c9da84aeab1e9688a55d08eab98c9a2aded86bba3ccbd5cb2cf20ca64a323360",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/HomeApplications.vue",
+      "sha256": "dc6457681fee7eebf7309e3b8bef1732037cc1450ce6e7947787909a522fe519",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/HomePreview.vue",
+      "sha256": "21331e7b8069f74f761fab38e47eccfc5b8cc0d84d581a01afb412dfe465a03e",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/LayoutDesignHome.vue",
+      "sha256": "b8a618da05fbe52e33dfa6e075827add89b35972ef294e0f0c62adc0d7371dcf",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/LayoutPreviewCard.vue",
+      "sha256": "b998e36217c7801e39e82c5801db6311fa96d17150b7befc5040c268fb3d00a3",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/NativeBusinessCard.vue",
+      "sha256": "d0c994b16fa0c6251f486cc7e663fdca2ff4fcb497c9321a7e09691e1308f0de",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/NativeBusinessHost.vue",
+      "sha256": "587e990a8266e33c3503920404b3ad9684f360ab1c40e5dadbdc394089e7bd22",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/NativeBusinessSurface.vue",
+      "sha256": "8af5687d01358ff5296ffeec0865b3d9711c163ebf0a1fdc13a1e3e52e541a86",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/NativeCardMenu.vue",
+      "sha256": "367536f953f56b1b0d55f664dda1ea3f8e771a42853d2dbb81db4833455d49b0",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/NativeRemoteFrame.vue",
+      "sha256": "2673edfeb72c14045d71bff1eb9b25d73bbb7cb55401208c203b4daa4840972b",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/NetworkBusinessAction.vue",
+      "sha256": "f3f9b36f3a1eb856942cd7877095dd26cd4880006a68caf562553c055787382c",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/NetworkConnectionCard.vue",
+      "sha256": "7192e7b23bc250d3f23d00968beeb2fb130ba03591560440989e94c4cc9f4d0e",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/NetworkInterfaceCard.vue",
+      "sha256": "13b04fdb85b54f3ecbc93e1584bb2fc3dcfcce84203747785ca312d5555480cb",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/NetworkWidgetDialog.vue",
+      "sha256": "ac99eaf8e2fc39939ced2f94156e226783abb6e4461c62beeb6535dd008dddb7",
+      "unchanged": true
+    },
+    {
+      "path": "web/src/design/OrderedHome.vue",
+      "sha256": "8d2ecbd8b71cdd880636c27ae21b5704e7c64ed6e84595d46bdb7c339d1ba36f",
+      "unchanged": false
+    }
+  ],
+  "result": "fail",
+  "failure": "AssertionError [ERR_ASSERTION]: web/src/design/OrderedHome.vue\n    at Object.<anonymous> (/config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/0153-device-lists-sho/quickstart/docs/product/ui-design/visual-refinement-protection.cjs:14:133)\n    at Module._compile (node:internal/modules/cjs/loader:1830:14)\n    at Object..js (node:internal/modules/cjs/loader:1961:10)\n    at Module.load (node:internal/modules/cjs/loader:1553:32)\n    at Module._load (node:internal/modules/cjs/loader:1355:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47"
+}

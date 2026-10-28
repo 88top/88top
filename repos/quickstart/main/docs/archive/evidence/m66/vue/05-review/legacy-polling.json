@@ -1,0 +1,6 @@
+{
+  "method": "real 11-second wait after navigating away from home",
+  "leaving": 2,
+  "after": 4,
+  "leaked": true
+}

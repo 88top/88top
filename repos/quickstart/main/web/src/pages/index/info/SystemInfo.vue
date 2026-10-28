@@ -1,71 +1,59 @@
 <template>
-    <Card :title='$gettext("系统信息")' :showFooter="false" style="width: 100%;height: 100%; display: block;">
+    <Card class="system-read-card" :class="{'system-read-pending':loading}" :aria-busy="loading||undefined" :data-system-loading="loading||undefined" :home-menu="[{label:$gettext('系统监控'),action:onClickSystem},{label:$gettext('备份升级'),href:'/cgi-bin/luci/admin/system/flash'},{label:$gettext('插件备份'),href:'/cgi-bin/luci/admin/store/pages/maintance'}]" :title='$gettext("系统信息")' :showFooter="false" style="width: 100%;height: 100%; display: block;">
         <template #icon>
             <computerIcon class="icon computerIcon" />
         </template>
         <template #settings>
-            <div class="btn_settings" @click="openInfo">
+            <button type="button" class="btn_settings" @click="openInfo">
                 <computerIcon color="#0a0a0a" class="icon2 computerIcon" style="margin-right: 6px;" />
                 <span>{{ $gettext('信息概览') }}</span>
-            </div>
+            </button>
         </template>
         <template #settings-menu>
             <div><a @click="onClickSystem">{{ $gettext("系统监控") }}</a></div>
             <div><a href="/cgi-bin/luci/admin/system/flash">{{ $gettext("备份升级") }}</a></div>
             <div><a href="/cgi-bin/luci/admin/store/pages/maintance">{{ $gettext("插件备份") }}</a></div>
         </template>
-        <div class="content">
+        <div class="content system-composition" :aria-hidden="loading||undefined" :inert="loading">
             <div class="chart_box">
                 <div class="chart">
-                    <PieChart :value="getCpuUsage" :color="getCpuUsageColor" icon="chip" :label="`${getCpuUsage}%`" width="150px"
+                    <PieChart :value="getCpuUsage" :color="getCpuUsageColor" icon="chip" :label="systemStatus?`${getCpuUsage}%`:'—'" width="150px"
                         height="150px" />
                     <div>{{ $gettext("CPU使用率") }}</div>
                 </div>
                 <div class="chart">
                     <PieChart :value="getTemperature / 1.5" :color="getTemperatureColor" icon="temperature"
-                        :label="`${getTemperature}℃`" width="150px" height="150px" />
+                        :label="systemStatus?`${getTemperature}℃`:'—'" width="150px" height="150px" />
                     <div>{{ $gettext("CPU温度") }}</div>
                 </div>
                 <div class="chart">
-                    <PieChart :value="getMemUsage" :color="getMemUsageColor" icon="lightning" :label="`${getMemUsage}%`"
+                    <PieChart :value="getMemUsage" :color="getMemUsageColor" icon="lightning" :label="systemStatus?`${getMemUsage}%`:'—'"
                         width="150px" height="150px" />
                     <div>{{ $gettext("内存使用率") }}</div>
                 </div>
             </div>
-            <div class="info">
-                <div class="item1 bgcolor1">
-                    <div>
-                        <chipIcon color="#155dfc" class="icon1" style="margin-bottom: 0;" />
-                        <span>{{ $gettext("设备型号") }}</span>
+            <div class="system-facts" data-system-facts>
+                <dl class="system-fact-list">
+                    <div class="system-fact system-fact--wide system-fact--model" data-system-fact="model">
+                        <dt class="system-fact-label"><chipIcon color="currentColor" aria-hidden="true"/><span>{{ $gettext("设备型号") }}</span></dt>
+                        <dd class="system-fact-value">{{ version?.model || '—' }}</dd>
                     </div>
-                    <span style="font-weight: bold;margin-top: 2px;">{{ version?.model }}</span>
-                </div>
-                <div class="item1 bgcolor2">
-                    <div>
-                        <systemIcon color="#00a63e" class="icon1" style="margin-bottom: 0;" />
-                        <span>{{ $gettext("固件版本") }}</span>
+                    <div class="system-fact system-fact--wide system-fact--firmware" data-system-fact="firmware">
+                        <dt class="system-fact-label"><systemIcon color="currentColor" aria-hidden="true"/><span>{{ $gettext("固件版本") }}</span></dt>
+                        <dd class="system-fact-value">{{ version?.firmwareVersion || '—' }}<small class="system-kernel">{{ $gettext("内核") }} {{ version?.kernelVersion || '—' }}</small></dd>
                     </div>
-                    <span style="font-weight: bold;margin-top: 2px;">{{ version?.firmwareVersion }}（{{ $gettext("内核")}}：{{ version?.kernelVersion }}）</span>
-                </div>
-
-                <!-- <div class="item">
-                    <div>{{ $gettext("内核版本") }}：</div>
-                    <span>{{ version?.kernelVersion }}</span>
-                </div> -->
-                <div class="item">
-                    <div>{{ $gettext("系统时间") }}：</div>
-                    <span>{{ systemStatus?.localtime }}</span>
-                </div>
-                <div class="item">
-                    <div>{{ $gettext("已启动") }}：</div>
-                    <span>{{ stamp(systemStatus?.uptime) }}</span>
-                </div>
-
-                <!-- 占位标签 -->
-                <!-- <div></div> -->
-
+                    <div class="system-fact" data-system-fact="time">
+                        <dt class="system-fact-label"><HomeGlyph name="clock"/><span>{{ $gettext("系统时间") }}</span></dt>
+                        <dd class="system-fact-value">{{ systemStatus?.localtime || '—' }}</dd>
+                    </div>
+                    <div class="system-fact" data-system-fact="uptime">
+                        <dt class="system-fact-label"><HomeGlyph name="power"/><span>{{ $gettext("已启动") }}</span></dt>
+                        <dd class="system-fact-value">{{ systemStatus?stamp(systemStatus.uptime):'—' }}</dd>
+                    </div>
+                </dl>
             </div>
         </div>
+        <SystemReadState :loading="loading" :error="readError" @retry="$emit('retry')"/>
     </Card>
 </template>
 
@@ -75,17 +63,24 @@ import PieChart from "../components/PieChart.vue"
 import computerIcon from "/@/components/svg/computer.vue"
 import chipIcon from "/@/components/svg/chip.vue"
 import systemIcon from "/@/components/svg/system1.vue"
+import HomeGlyph from '/@/home/HomeGlyph.vue'
 
 import { computed, onMounted, ref } from "vue"
 import { useGettext } from '/@/plugins/i18n'
 import { useSystemStore } from "/@/plugins/store"
 import utils from "/@/utils"
 import appUtils from "/@/utils/app";
+import SystemReadState from '/@/home/SystemReadState.vue'
+import {useHomeProjection} from '/@/home/widgetContext'
+
+defineProps<{loading?:boolean;readError?:string}>()
+defineEmits<{(e:'retry'):void}>()
 
 const { $gettext } = useGettext()
 const systemStore = useSystemStore()
-const version = computed(() => systemStore.version)
-const systemStatus = computed(() => systemStore.systemStatus)
+const home = useHomeProjection()
+const version = computed(() => home ? home.data.version : systemStore.version)
+const systemStatus = computed(() => home ? home.data.system : systemStore.systemStatus)
 const showBlockMenu = ref(false)
 const getCpuUsage = computed(() => {
     return systemStatus.value?.cpuUsage || 0
@@ -146,11 +141,6 @@ const onClickSystem = () => {
     height: 1.3rem;
 }
 
-.icon1 {
-    width: 2rem;
-    height: 2rem;
-    margin-bottom: 8px;
-}
 .icon2 {
     width: 1rem;
     height: 1rem;
@@ -197,60 +187,19 @@ a {
         }
     }
 
-    .info {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-
-        .item {
-            display: flex;
-            justify-content: center;
-
-            >div {
-                color: var(--app-container_title-color);
-            }
-
-            >span {
-                color: var(--app-container_status-label_block);
-                font-size: 16px;
-                line-height: 1;
-            }
-        }
-
-        .item1 {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin-top: 20px;
-            padding: 30px;
-
-            >div {
-                display: flex;
-                align-items: center;
-                margin-bottom: 8px;
-
-                >span {
-                    margin-left: 8px;
-                }
-            }
-        }
-
-        .bgcolor1 {
-            background: #e9f2ff;
-            border-radius: 10px;
-            border: 1px solid #bedbff;
-            color: #155dfc;
-        }
-
-        .bgcolor2 {
-            background: #ebfdf1;
-            border-radius: 10px;
-            border: 1px solid #b9f8cf;
-            color: #008236;
-        }
-    }
 }
+.system-facts{min-width:0;container:system-facts / inline-size}
+.system-fact-list{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin:0;padding:0}
+.system-fact{min-width:0;text-align:left}
+.system-fact--wide{grid-column:1 / -1}
+.system-fact-label{display:flex;align-items:center;gap:8px;margin:0;color:var(--c-muted,#5b687a);font-size:12px;font-weight:400;line-height:18px}
+.system-fact-label>svg{width:16px;height:16px;flex:none;color:var(--color-icon-slate,#526078)}
+.system-fact-value{margin:4px 0 0;color:var(--c-text,#253247);font-size:14px;font-weight:400;line-height:21px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.system-fact--model>.system-fact-value,.system-fact--model>.system-fact-label>svg{color:var(--home-icon-blue,#155dfc)}
+.system-fact--firmware>.system-fact-value,.system-fact--firmware>.system-fact-label>svg{color:var(--color-icon-green,#007e34)}
+.system-fact--wide>.system-fact-value{font-weight:500}
+.system-kernel{display:block;margin-top:4px;color:var(--c-muted,#5b687a);font-size:12px;font-weight:400;line-height:18px}
+@container system-facts (min-width:296px){.system-fact-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .btn_settings {
     position: relative;
     padding: 6px 18px;
@@ -283,29 +232,6 @@ a {
             scrollbar-width: none;
         }
 
-        .info {
-            grid-template-columns: repeat(1, 1fr);
-            gap: 6px;
-
-            .item1 {
-                margin-top: 6px;
-                padding: 10px;
-            }
-
-            .bgcolor1 {
-                background: #e9f2ff;
-                border-radius: 10px;
-                border: 1px solid #bedbff;
-                color: #155dfc;
-            }
-
-            .bgcolor2 {
-                background: #ebfdf1;
-                border-radius: 10px;
-                border: 1px solid #b9f8cf;
-                color: #008236;
-            }
-        }
     }
 }
 </style>

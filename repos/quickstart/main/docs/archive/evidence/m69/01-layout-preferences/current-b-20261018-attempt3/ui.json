@@ -1,0 +1,38 @@
+{
+  "views": [
+    {
+      "name": "home",
+      "width": 1440,
+      "sessionExpired": false,
+      "loggedIn": true,
+      "currentDeviceSurface": false,
+      "overflow": false
+    },
+    {
+      "name": "devices",
+      "width": 1440,
+      "sessionExpired": false,
+      "loggedIn": true,
+      "currentDeviceSurface": false,
+      "overflow": false
+    },
+    {
+      "name": "home",
+      "width": 390,
+      "sessionExpired": false,
+      "loggedIn": true,
+      "currentDeviceSurface": false,
+      "overflow": false
+    },
+    {
+      "name": "devices",
+      "width": 390,
+      "sessionExpired": false,
+      "loggedIn": true,
+      "currentDeviceSurface": false,
+      "overflow": false
+    }
+  ],
+  "errors": [],
+  "badResponses": []
+}

@@ -1,0 +1,959 @@
+{
+  "checkedAt": "2026-10-15T06:54:24.104Z",
+  "base": "http://192.168.9.19:5180",
+  "layouts": [
+    {
+      "variant": "rows",
+      "viewport": "desktop",
+      "theme": "light",
+      "stats": [
+        {
+          "id": "traffic",
+          "x": 232,
+          "right": 926.796875,
+          "w": 694.796875,
+          "h": 320,
+          "scroll": 320,
+          "client": 320
+        },
+        {
+          "id": "connection",
+          "x": 944.796875,
+          "right": 1408,
+          "w": 463.203125,
+          "h": 320,
+          "scroll": 320,
+          "client": 320
+        },
+        {
+          "id": "applications",
+          "x": 232,
+          "right": 1408,
+          "w": 1176,
+          "h": 152,
+          "scroll": 152,
+          "client": 152
+        },
+        {
+          "id": "devices",
+          "x": 232,
+          "right": 984.6875,
+          "w": 752.6875,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "system",
+          "x": 1002.6875,
+          "right": 1408,
+          "w": 405.3125,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "storage",
+          "x": 232,
+          "right": 926.796875,
+          "w": 694.796875,
+          "h": 310,
+          "scroll": 310,
+          "client": 310
+        },
+        {
+          "id": "sharing",
+          "x": 944.796875,
+          "right": 1408,
+          "w": 463.203125,
+          "h": 310,
+          "scroll": 310,
+          "client": 310
+        }
+      ],
+      "graphic": {
+        "width": 651,
+        "height": 177,
+        "cyan": 42
+      },
+      "palette": {
+        "ink": "#1c253b",
+        "panel": "#fff"
+      }
+    },
+    {
+      "variant": "rows",
+      "viewport": "desktop",
+      "theme": "dark",
+      "stats": [
+        {
+          "id": "traffic",
+          "x": 232,
+          "right": 926.796875,
+          "w": 694.796875,
+          "h": 320,
+          "scroll": 320,
+          "client": 320
+        },
+        {
+          "id": "connection",
+          "x": 944.796875,
+          "right": 1408,
+          "w": 463.203125,
+          "h": 320,
+          "scroll": 320,
+          "client": 320
+        },
+        {
+          "id": "applications",
+          "x": 232,
+          "right": 1408,
+          "w": 1176,
+          "h": 152,
+          "scroll": 152,
+          "client": 152
+        },
+        {
+          "id": "devices",
+          "x": 232,
+          "right": 984.6875,
+          "w": 752.6875,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "system",
+          "x": 1002.6875,
+          "right": 1408,
+          "w": 405.3125,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "storage",
+          "x": 232,
+          "right": 926.796875,
+          "w": 694.796875,
+          "h": 310,
+          "scroll": 310,
+          "client": 310
+        },
+        {
+          "id": "sharing",
+          "x": 944.796875,
+          "right": 1408,
+          "w": 463.203125,
+          "h": 310,
+          "scroll": 310,
+          "client": 310
+        }
+      ],
+      "graphic": {
+        "width": 651,
+        "height": 177,
+        "cyan": 78
+      },
+      "palette": {
+        "ink": "#edf0f7",
+        "panel": "#2c2c2c"
+      }
+    },
+    {
+      "variant": "grid",
+      "viewport": "desktop",
+      "theme": "light",
+      "stats": [
+        {
+          "id": "traffic",
+          "x": 232,
+          "right": 811,
+          "w": 579,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "connection",
+          "x": 829,
+          "right": 1408,
+          "w": 579,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "applications",
+          "x": 232,
+          "right": 811,
+          "w": 579,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "devices",
+          "x": 829,
+          "right": 1408,
+          "w": 579,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "system",
+          "x": 232,
+          "right": 811,
+          "w": 579,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "storage",
+          "x": 829,
+          "right": 1408,
+          "w": 579,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "sharing",
+          "x": 232,
+          "right": 811,
+          "w": 579,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        }
+      ],
+      "graphic": {
+        "width": 535,
+        "height": 197,
+        "cyan": 49
+      },
+      "palette": {
+        "ink": "#1c253b",
+        "panel": "#fff"
+      }
+    },
+    {
+      "variant": "grid",
+      "viewport": "desktop",
+      "theme": "dark",
+      "stats": [
+        {
+          "id": "traffic",
+          "x": 232,
+          "right": 811,
+          "w": 579,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "connection",
+          "x": 829,
+          "right": 1408,
+          "w": 579,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "applications",
+          "x": 232,
+          "right": 811,
+          "w": 579,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "devices",
+          "x": 829,
+          "right": 1408,
+          "w": 579,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "system",
+          "x": 232,
+          "right": 811,
+          "w": 579,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "storage",
+          "x": 829,
+          "right": 1408,
+          "w": 579,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "sharing",
+          "x": 232,
+          "right": 811,
+          "w": 579,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        }
+      ],
+      "graphic": {
+        "width": 535,
+        "height": 197,
+        "cyan": 89
+      },
+      "palette": {
+        "ink": "#edf0f7",
+        "panel": "#2c2c2c"
+      }
+    },
+    {
+      "variant": "free",
+      "viewport": "desktop",
+      "theme": "light",
+      "stats": [
+        {
+          "id": "traffic",
+          "x": 232,
+          "right": 996.390625,
+          "w": 764.390625,
+          "h": 320,
+          "scroll": 320,
+          "client": 320
+        },
+        {
+          "id": "connection",
+          "x": 1019.90625,
+          "right": 1407.984375,
+          "w": 388.078125,
+          "h": 300,
+          "scroll": 300,
+          "client": 300
+        },
+        {
+          "id": "applications",
+          "x": 232,
+          "right": 678.875,
+          "w": 446.875,
+          "h": 250,
+          "scroll": 250,
+          "client": 250
+        },
+        {
+          "id": "devices",
+          "x": 702.390625,
+          "right": 1407.984375,
+          "w": 705.59375,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "system",
+          "x": 232,
+          "right": 678.875,
+          "w": 446.875,
+          "h": 270,
+          "scroll": 270,
+          "client": 270
+        },
+        {
+          "id": "storage",
+          "x": 702.390625,
+          "right": 1407.984375,
+          "w": 705.59375,
+          "h": 330,
+          "scroll": 330,
+          "client": 330
+        },
+        {
+          "id": "sharing",
+          "x": 232,
+          "right": 678.875,
+          "w": 446.875,
+          "h": 310,
+          "scroll": 310,
+          "client": 310
+        }
+      ],
+      "graphic": {
+        "width": 720,
+        "height": 177,
+        "cyan": 42
+      },
+      "palette": {
+        "ink": "#1c253b",
+        "panel": "#fff"
+      }
+    },
+    {
+      "variant": "free",
+      "viewport": "desktop",
+      "theme": "dark",
+      "stats": [
+        {
+          "id": "traffic",
+          "x": 232,
+          "right": 996.390625,
+          "w": 764.390625,
+          "h": 320,
+          "scroll": 320,
+          "client": 320
+        },
+        {
+          "id": "connection",
+          "x": 1019.90625,
+          "right": 1407.984375,
+          "w": 388.078125,
+          "h": 300,
+          "scroll": 300,
+          "client": 300
+        },
+        {
+          "id": "applications",
+          "x": 232,
+          "right": 678.875,
+          "w": 446.875,
+          "h": 250,
+          "scroll": 250,
+          "client": 250
+        },
+        {
+          "id": "devices",
+          "x": 702.390625,
+          "right": 1407.984375,
+          "w": 705.59375,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "system",
+          "x": 232,
+          "right": 678.875,
+          "w": 446.875,
+          "h": 270,
+          "scroll": 270,
+          "client": 270
+        },
+        {
+          "id": "storage",
+          "x": 702.390625,
+          "right": 1407.984375,
+          "w": 705.59375,
+          "h": 330,
+          "scroll": 330,
+          "client": 330
+        },
+        {
+          "id": "sharing",
+          "x": 232,
+          "right": 678.875,
+          "w": 446.875,
+          "h": 310,
+          "scroll": 310,
+          "client": 310
+        }
+      ],
+      "graphic": {
+        "width": 720,
+        "height": 177,
+        "cyan": 73
+      },
+      "palette": {
+        "ink": "#edf0f7",
+        "panel": "#2c2c2c"
+      }
+    },
+    {
+      "variant": "rows",
+      "viewport": "tablet",
+      "theme": "light",
+      "stats": [
+        {
+          "id": "traffic",
+          "x": 224,
+          "right": 678.796875,
+          "w": 454.796875,
+          "h": 320,
+          "scroll": 320,
+          "client": 320
+        },
+        {
+          "id": "connection",
+          "x": 696.796875,
+          "right": 1000,
+          "w": 303.203125,
+          "h": 320,
+          "scroll": 320,
+          "client": 320
+        },
+        {
+          "id": "applications",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 152,
+          "scroll": 152,
+          "client": 152
+        },
+        {
+          "id": "devices",
+          "x": 224,
+          "right": 716.6875,
+          "w": 492.6875,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "system",
+          "x": 734.6875,
+          "right": 999.984375,
+          "w": 265.296875,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "storage",
+          "x": 224,
+          "right": 678.796875,
+          "w": 454.796875,
+          "h": 310,
+          "scroll": 310,
+          "client": 310
+        },
+        {
+          "id": "sharing",
+          "x": 696.796875,
+          "right": 1000,
+          "w": 303.203125,
+          "h": 310,
+          "scroll": 310,
+          "client": 310
+        }
+      ],
+      "graphic": {
+        "width": 411,
+        "height": 177,
+        "cyan": 42
+      },
+      "palette": {
+        "ink": "#1c253b",
+        "panel": "#fff"
+      }
+    },
+    {
+      "variant": "rows",
+      "viewport": "tablet",
+      "theme": "dark",
+      "stats": [
+        {
+          "id": "traffic",
+          "x": 224,
+          "right": 678.796875,
+          "w": 454.796875,
+          "h": 320,
+          "scroll": 320,
+          "client": 320
+        },
+        {
+          "id": "connection",
+          "x": 696.796875,
+          "right": 1000,
+          "w": 303.203125,
+          "h": 320,
+          "scroll": 320,
+          "client": 320
+        },
+        {
+          "id": "applications",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 152,
+          "scroll": 152,
+          "client": 152
+        },
+        {
+          "id": "devices",
+          "x": 224,
+          "right": 716.6875,
+          "w": 492.6875,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "system",
+          "x": 734.6875,
+          "right": 999.984375,
+          "w": 265.296875,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "storage",
+          "x": 224,
+          "right": 678.796875,
+          "w": 454.796875,
+          "h": 310,
+          "scroll": 310,
+          "client": 310
+        },
+        {
+          "id": "sharing",
+          "x": 696.796875,
+          "right": 1000,
+          "w": 303.203125,
+          "h": 310,
+          "scroll": 310,
+          "client": 310
+        }
+      ],
+      "graphic": {
+        "width": 411,
+        "height": 177,
+        "cyan": 78
+      },
+      "palette": {
+        "ink": "#edf0f7",
+        "panel": "#2c2c2c"
+      }
+    },
+    {
+      "variant": "grid",
+      "viewport": "tablet",
+      "theme": "light",
+      "stats": [
+        {
+          "id": "traffic",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "connection",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "applications",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "devices",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "system",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "storage",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "sharing",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        }
+      ],
+      "graphic": {
+        "width": 732,
+        "height": 197,
+        "cyan": 49
+      },
+      "palette": {
+        "ink": "#1c253b",
+        "panel": "#fff"
+      }
+    },
+    {
+      "variant": "grid",
+      "viewport": "tablet",
+      "theme": "dark",
+      "stats": [
+        {
+          "id": "traffic",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "connection",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "applications",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "devices",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "system",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "storage",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "sharing",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        }
+      ],
+      "graphic": {
+        "width": 732,
+        "height": 197,
+        "cyan": 89
+      },
+      "palette": {
+        "ink": "#edf0f7",
+        "panel": "#2c2c2c"
+      }
+    },
+    {
+      "variant": "free",
+      "viewport": "tablet",
+      "theme": "light",
+      "stats": [
+        {
+          "id": "traffic",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 300,
+          "scroll": 300,
+          "client": 300
+        },
+        {
+          "id": "connection",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 280,
+          "scroll": 280,
+          "client": 280
+        },
+        {
+          "id": "applications",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 240,
+          "scroll": 240,
+          "client": 240
+        },
+        {
+          "id": "devices",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "system",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 280,
+          "scroll": 280,
+          "client": 280
+        },
+        {
+          "id": "storage",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 330,
+          "scroll": 330,
+          "client": 330
+        },
+        {
+          "id": "sharing",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 300,
+          "scroll": 300,
+          "client": 300
+        }
+      ],
+      "graphic": {
+        "width": 732,
+        "height": 157,
+        "cyan": 42
+      },
+      "palette": {
+        "ink": "#1c253b",
+        "panel": "#fff"
+      }
+    },
+    {
+      "variant": "free",
+      "viewport": "tablet",
+      "theme": "dark",
+      "stats": [
+        {
+          "id": "traffic",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 300,
+          "scroll": 300,
+          "client": 300
+        },
+        {
+          "id": "connection",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 280,
+          "scroll": 280,
+          "client": 280
+        },
+        {
+          "id": "applications",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 240,
+          "scroll": 240,
+          "client": 240
+        },
+        {
+          "id": "devices",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 340,
+          "scroll": 340,
+          "client": 340
+        },
+        {
+          "id": "system",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 280,
+          "scroll": 280,
+          "client": 280
+        },
+        {
+          "id": "storage",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 330,
+          "scroll": 330,
+          "client": 330
+        },
+        {
+          "id": "sharing",
+          "x": 224,
+          "right": 1000,
+          "w": 776,
+          "h": 300,
+          "scroll": 300,
+          "client": 300
+        }
+      ],
+      "graphic": {
+        "width": 732,
+        "height": 157,
+        "cyan": 73
+      },
+      "palette": {
+        "ink": "#edf0f7",
+        "panel": "#2c2c2c"
+      }
+    }
+  ],
+  "errors": [],
+  "outside": [],
+  "visualStatus": "requires_product_selection",
+  "result": "fail",
+  "failure": "AssertionError [ERR_ASSERTION]: rows/phone/devices content overflows 348/340\n    at /config/.agentflow-workspaces/.agentflow-workspaces/quickstart-onu/0153-device-lists-sho/quickstart/docs/product/ui-design/row-layout-visual-review.cjs:18:134"
+}

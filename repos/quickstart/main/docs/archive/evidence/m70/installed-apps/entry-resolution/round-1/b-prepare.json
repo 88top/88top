@@ -1,0 +1,13 @@
+{
+  "host": "192.168.30.244",
+  "stage": "/root/quickstart-package-candidates/home-0166-launcher-entry-r1",
+  "result": "passed",
+  "exitCode": 0,
+  "privateBackupFingerprints": [
+    "d95015227d14db5668200832e79234c2f13a3666a5d529e8d989e9a980c2c8c7  /root/quickstart-package-candidates/home-0166-launcher-entry-r1/backup/preinstall.tar.gz",
+    "c8e77265a5b90a6c1e3e61be69b4120675a6b9013ce694a94c2759c199941781  /root/quickstart-package-candidates/home-0166-launcher-entry-r1/backup/package-records.tar.gz",
+    "ce86a957cc5702d312e8b5c80c2d2b6e54bcbab95012a9cf49158bb5fb429aa0  /root/quickstart-package-candidates/home-0166-launcher-entry-r1/backup/network.before"
+  ],
+  "diagnostic": "",
+  "scope": "private backup only; no config or service changes"
+}

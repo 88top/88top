@@ -1,0 +1,58 @@
+{
+  "result": "failed",
+  "scriptSha256": "e625c58d04ca27c63877f6d3e86df08e090930eb49976f2b729302c22daeee3f",
+  "cases": [
+    {
+      "name": "running-default",
+      "result": "passed",
+      "exitCode": 0
+    },
+    {
+      "name": "effective-custom-port",
+      "result": "passed",
+      "exitCode": 0
+    },
+    {
+      "name": "ipv6-wildcard",
+      "result": "passed",
+      "exitCode": 0
+    },
+    {
+      "name": "stopped-binary-still-present",
+      "result": "passed",
+      "exitCode": 0
+    },
+    {
+      "name": "loopback-only",
+      "result": "passed",
+      "exitCode": 0
+    },
+    {
+      "name": "port-zero",
+      "result": "passed",
+      "exitCode": 1
+    },
+    {
+      "name": "port-overflow",
+      "result": "passed",
+      "exitCode": 1
+    },
+    {
+      "name": "port-invalid",
+      "result": "passed",
+      "exitCode": 1
+    },
+    {
+      "name": "wrong-command",
+      "result": "passed",
+      "exitCode": 1
+    }
+  ],
+  "parseFailure": {
+    "name": "absent-service",
+    "stdout": "WARNING: Variable 'fastnet' does not exist or is not an array/object\n{ \"app\": \"fastnet\", \"docker\": false, \"deployed\": true, \"running\": false, \"href\": \"\\/cgi-bin\\/luci\\/admin\\/services\\/fastnet\" }\n",
+    "stderr": ""
+  },
+  "failure": "Expecting value: line 1 column 1 (char 0)",
+  "temporaryFilesCleaned": true
+}

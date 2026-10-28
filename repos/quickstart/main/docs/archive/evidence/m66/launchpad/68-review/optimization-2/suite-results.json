@@ -1,0 +1,261 @@
+{
+  "startedAt": "2026-10-17T09:19:03.229Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "launchpad-states-review",
+      "startedAt": "2026-10-17T09:19:03.234Z",
+      "endedAt": "2026-10-17T09:19:06.405Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 5,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/launchpad-states-review/report.json"
+    },
+    {
+      "name": "launchpad-browser-review",
+      "startedAt": "2026-10-17T09:19:03.229Z",
+      "endedAt": "2026-10-17T09:19:10.545Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 11,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/launchpad-browser-review/report.json"
+    },
+    {
+      "name": "launchpad-links-review",
+      "startedAt": "2026-10-17T09:19:03.233Z",
+      "endedAt": "2026-10-17T09:19:11.214Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 7,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/launchpad-links-review/report.json"
+    },
+    {
+      "name": "launchpad-resource-review",
+      "startedAt": "2026-10-17T09:19:06.405Z",
+      "endedAt": "2026-10-17T09:19:19.350Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/launchpad-resource-review/report.json"
+    },
+    {
+      "name": "launchpad-capacity-review",
+      "startedAt": "2026-10-17T09:19:11.214Z",
+      "endedAt": "2026-10-17T09:19:21.600Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 5,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/launchpad-capacity-review/report.json"
+    },
+    {
+      "name": "launcher-home-review",
+      "startedAt": "2026-10-17T09:19:21.600Z",
+      "endedAt": "2026-10-17T09:19:29.205Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/launcher-home-review/report.json"
+    },
+    {
+      "name": "launcher-actions-review",
+      "startedAt": "2026-10-17T09:19:19.350Z",
+      "endedAt": "2026-10-17T09:19:30.624Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/launcher-actions-review/report.json"
+    },
+    {
+      "name": "launcher-editor-review",
+      "startedAt": "2026-10-17T09:19:29.205Z",
+      "endedAt": "2026-10-17T09:19:40.228Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/launcher-editor-review/report.json"
+    },
+    {
+      "name": "launcher-states-review",
+      "startedAt": "2026-10-17T09:19:30.624Z",
+      "endedAt": "2026-10-17T09:19:56.441Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 17,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/launcher-states-review/report.json"
+    },
+    {
+      "name": "launchpad-matrix-review",
+      "startedAt": "2026-10-17T09:19:10.545Z",
+      "endedAt": "2026-10-17T09:19:57.002Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 24,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/launchpad-matrix-review/report.json"
+    },
+    {
+      "name": "launcher-resource-review",
+      "startedAt": "2026-10-17T09:19:40.229Z",
+      "endedAt": "2026-10-17T09:20:00.298Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 5,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/launcher-resource-review/report.json"
+    },
+    {
+      "name": "launcher-overflow-state-review",
+      "startedAt": "2026-10-17T09:19:57.002Z",
+      "endedAt": "2026-10-17T09:20:01.524Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 2,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/launcher-overflow-state-review/report.json"
+    },
+    {
+      "name": "home-widget-chart-review",
+      "startedAt": "2026-10-17T09:20:01.525Z",
+      "endedAt": "2026-10-17T09:20:31.608Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 18,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/home-widget-chart-review/report.json"
+    },
+    {
+      "name": "launcher-matrix-review",
+      "startedAt": "2026-10-17T09:19:56.442Z",
+      "endedAt": "2026-10-17T09:20:44.575Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 24,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/launcher-matrix-review/report.json"
+    },
+    {
+      "name": "visual-refinement-matrix-review",
+      "startedAt": "2026-10-17T09:20:00.298Z",
+      "endedAt": "2026-10-17T09:21:03.369Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 41,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/visual-refinement-matrix-review/report.json"
+    },
+    {
+      "name": "network-interaction-review",
+      "startedAt": "2026-10-17T09:20:31.608Z",
+      "endedAt": "2026-10-17T09:21:10.597Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 14,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/network-interaction-review/report.json"
+    },
+    {
+      "name": "widget-actions-review",
+      "startedAt": "2026-10-17T09:21:10.598Z",
+      "endedAt": "2026-10-17T09:21:29.697Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/widget-actions-review/report.json"
+    },
+    {
+      "name": "business-widgets-review",
+      "startedAt": "2026-10-17T09:20:44.575Z",
+      "endedAt": "2026-10-17T09:21:30.469Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 19,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/business-widgets-review/report.json"
+    },
+    {
+      "name": "business-actions-review",
+      "startedAt": "2026-10-17T09:21:03.370Z",
+      "endedAt": "2026-10-17T09:21:40.161Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/business-actions-review/report.json"
+    },
+    {
+      "name": "home-widget-header-review",
+      "startedAt": "2026-10-17T09:21:29.697Z",
+      "endedAt": "2026-10-17T09:21:42.083Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 14,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/home-widget-header-review/report.json"
+    },
+    {
+      "name": "boundary-interaction-review",
+      "startedAt": "2026-10-17T09:21:40.161Z",
+      "endedAt": "2026-10-17T09:21:47.806Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 10,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/boundary-interaction-review/report.json"
+    },
+    {
+      "name": "home-widget-standard-review",
+      "startedAt": "2026-10-17T09:21:30.469Z",
+      "endedAt": "2026-10-17T09:21:49.204Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 13,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/home-widget-standard-review/report.json"
+    },
+    {
+      "name": "structure-interaction-review",
+      "startedAt": "2026-10-17T09:21:47.806Z",
+      "endedAt": "2026-10-17T09:22:05.729Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/structure-interaction-review/report.json"
+    },
+    {
+      "name": "structure-resource-review",
+      "startedAt": "2026-10-17T09:21:49.204Z",
+      "endedAt": "2026-10-17T09:22:15.514Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 3,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/structure-resource-review/report.json"
+    },
+    {
+      "name": "visual-refinement-apps-review",
+      "startedAt": "2026-10-17T09:22:15.515Z",
+      "endedAt": "2026-10-17T09:22:19.693Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 4,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/visual-refinement-apps-review/report.json"
+    },
+    {
+      "name": "row-sort-review",
+      "startedAt": "2026-10-17T09:21:42.083Z",
+      "endedAt": "2026-10-17T09:22:25.088Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/row-sort-review/report.json"
+    },
+    {
+      "name": "presentation-devices-review",
+      "startedAt": "2026-10-17T09:22:05.729Z",
+      "endedAt": "2026-10-17T09:22:30.602Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 5,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/presentation-devices-review/report.json"
+    },
+    {
+      "name": "visual-refinement-review",
+      "startedAt": "2026-10-17T09:22:19.693Z",
+      "endedAt": "2026-10-17T09:22:31.330Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 5,
+      "report": "docs/evidence/m66/launchpad/68-review/optimization-2/visual-refinement-review/report.json"
+    }
+  ],
+  "endedAt": "2026-10-17T09:22:31.331Z",
+  "result": "pass",
+  "groups": 318
+}

@@ -119,7 +119,7 @@ func (u *Ubus) SessionGet(sid string) error {
 	}
 
 	data, _ := json.MarshalIndent(resp, "", "\t")
-	fmt.Printf(string(data))
+	fmt.Print(string(data))
 	return nil
 }
 

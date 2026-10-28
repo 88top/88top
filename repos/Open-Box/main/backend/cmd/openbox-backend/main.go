@@ -3,6 +3,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net"
@@ -12,35 +13,51 @@ import (
 	"syscall"
 	"time"
 
+	activationapi "github.com/timeflysoon/Open-Box/backend/internal/api/activation"
 	authapi "github.com/timeflysoon/Open-Box/backend/internal/api/auth"
+	clientappapi "github.com/timeflysoon/Open-Box/backend/internal/api/clientapp"
+	clientsapi "github.com/timeflysoon/Open-Box/backend/internal/api/clients"
 	configpreviewapi "github.com/timeflysoon/Open-Box/backend/internal/api/configpreview"
 	dnsapi "github.com/timeflysoon/Open-Box/backend/internal/api/dns"
 	dnsfilterapi "github.com/timeflysoon/Open-Box/backend/internal/api/dnsfilter"
 	groupsapi "github.com/timeflysoon/Open-Box/backend/internal/api/groups"
 	latencyapi "github.com/timeflysoon/Open-Box/backend/internal/api/latency"
+	latencyhistoryapi "github.com/timeflysoon/Open-Box/backend/internal/api/latencyhistory"
+	nodeinfoapi "github.com/timeflysoon/Open-Box/backend/internal/api/nodeinfo"
 	policiesapi "github.com/timeflysoon/Open-Box/backend/internal/api/policies"
 	profileapi "github.com/timeflysoon/Open-Box/backend/internal/api/profile"
 	rulesetsapi "github.com/timeflysoon/Open-Box/backend/internal/api/rulesets"
+	serversapi "github.com/timeflysoon/Open-Box/backend/internal/api/servers"
 	serviceapi "github.com/timeflysoon/Open-Box/backend/internal/api/service"
+	sitelatencyapi "github.com/timeflysoon/Open-Box/backend/internal/api/sitelatency"
 	storageapi "github.com/timeflysoon/Open-Box/backend/internal/api/storage"
 	subsapi "github.com/timeflysoon/Open-Box/backend/internal/api/subscriptions"
+	subsharesapi "github.com/timeflysoon/Open-Box/backend/internal/api/subshares"
+	trafficapi "github.com/timeflysoon/Open-Box/backend/internal/api/traffic"
 	"github.com/timeflysoon/Open-Box/backend/internal/auth"
+	"github.com/timeflysoon/Open-Box/backend/internal/clientapp"
 	"github.com/timeflysoon/Open-Box/backend/internal/core"
 	"github.com/timeflysoon/Open-Box/backend/internal/dnscache"
 	"github.com/timeflysoon/Open-Box/backend/internal/dnsfilter"
 	"github.com/timeflysoon/Open-Box/backend/internal/dnstest"
 	"github.com/timeflysoon/Open-Box/backend/internal/geodata"
+	"github.com/timeflysoon/Open-Box/backend/internal/latencyhistory"
 	"github.com/timeflysoon/Open-Box/backend/internal/nodegroups"
+	"github.com/timeflysoon/Open-Box/backend/internal/nodeinfo"
 	"github.com/timeflysoon/Open-Box/backend/internal/policyentries"
+	"github.com/timeflysoon/Open-Box/backend/internal/portcheck"
 	"github.com/timeflysoon/Open-Box/backend/internal/probe"
 	"github.com/timeflysoon/Open-Box/backend/internal/profile"
 	"github.com/timeflysoon/Open-Box/backend/internal/regiondetect"
 	"github.com/timeflysoon/Open-Box/backend/internal/rulelist"
 	"github.com/timeflysoon/Open-Box/backend/internal/server"
 	"github.com/timeflysoon/Open-Box/backend/internal/singbox"
+	"github.com/timeflysoon/Open-Box/backend/internal/sitelatency"
 	"github.com/timeflysoon/Open-Box/backend/internal/store"
 	"github.com/timeflysoon/Open-Box/backend/internal/subs"
+	"github.com/timeflysoon/Open-Box/backend/internal/subshare"
 	"github.com/timeflysoon/Open-Box/backend/internal/system"
+	"github.com/timeflysoon/Open-Box/backend/internal/traffic"
 )
 
 // version 由编译时 -ldflags "-X main.version=..." 注入。
@@ -65,7 +82,7 @@ func run(args []string) int {
 		return 1
 	}
 
-	srv, err := newApp(cfg, log)
+	srv, background, err := newApp(cfg, log)
 	if err != nil {
 		log.Error("初始化失败", "err", err)
 		return 1
@@ -82,23 +99,31 @@ func run(args []string) int {
 	defer stop()
 
 	log.Info("openbox-backend 启动", "version", version, "listen", ln.Addr().String(), "data", cfg.DataDir, "web", cfg.WebDir)
+	waitBackground := func() {}
+	if background != nil {
+		waitBackground = background(ctx)
+	}
 	if err := srv.Serve(ctx, ln); err != nil {
 		log.Error("服务异常退出", "err", err)
+		stop()
+		waitBackground()
 		return 1
 	}
+	waitBackground() // ctx 已结束:等后台任务写完盘再退出
 	log.Info("已退出")
 	return 0
 }
 
-// newApp 组装存储、各接口分组和中间件。
-func newApp(cfg system.Config, log *slog.Logger) (*server.Server, error) {
+// newApp 组装存储、各接口分组和中间件。返回的 background 在进程启动后调用(传入随退出信号结束的 ctx),
+// 启动后台任务(现在只有每日流量的采样)并返回等它们收尾的函数;没有后台任务时为 nil。
+func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx context.Context) (wait func()), error) {
 	st, err := store.Open(cfg.StateDir())
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	authMgr, err := auth.NewManager(st)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if !authMgr.PasswordSet() {
 		log.Warn("尚未设置访问密码:任何能访问本端口的人都可以设置,请尽快在面板里设置")
@@ -206,6 +231,11 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, error) {
 	})
 
 	latencyapi.Register(srv.Mux(), latencyapi.Deps{Gen: gen, Subs: subsSvc, Profiles: profileSvc, Runner: probeRunner})
+	// 节点信息:类型 / 协议层 / 服务器 / 链式上游 / 入口地址解析(入口国家和出口归属是后续条目)
+	nodeinfoapi.Register(srv.Mux(), nodeinfoapi.Deps{Service: &nodeinfo.Service{
+		Pool:    subsSvc.PoolNodes,
+		Profile: profileSvc.Get,
+	}})
 
 	// 规则集链接服务共用一份(含 60 秒内存缓存):规则集预览和「域名穿透」都会拉同一批链接
 	lists := rulelist.NewService(nil)
@@ -260,9 +290,149 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, error) {
 		Preview:  dnsfilter.NewPreviewer(fetchList).Preview,
 	})
 
+	// 延迟历史:每个节点 / 组最近 10 次测速,后端记、各浏览器共享;sync 读一次内核的 /proxies 把成功的结果记下来
+	latencyhistoryapi.Register(srv.Mux(), latencyhistoryapi.Deps{Service: &latencyhistory.Service{
+		Store: st,
+		Kernel: func(ctx context.Context) ([]singbox.KernelProxy, error) {
+			return singbox.KernelProxies(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
+		},
+	}})
+
+	// 站点延迟(概览页):请求经内核的面板入站走一遍路由,从内核连接列表认出线路;历史单独存 site-latency-history,不和节点历史混
+	sitelatencyapi.Register(srv.Mux(), sitelatencyapi.Deps{Service: &sitelatency.Service{
+		Hist: &latencyhistory.Service{Store: st, File: "site-latency-history"},
+		Snapshot: func(ctx context.Context) (singbox.KernelSnapshot, error) {
+			return singbox.KernelConnections(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
+		},
+	}})
+
+	// 每日流量:后台每 10 秒读一次内核的连接快照(/connections),按天、按小时、按终端 / 节点 / 访问目标记进数据目录下的 traffic/;
+	// 这里只读。终端名取 DHCP 租约;保留月数取档案的 traffic.keepMonths
+	var background func(ctx context.Context) func()
+	var trafficSource trafficapi.Source
+	if ts, err := traffic.Open(filepath.Join(cfg.DataDir, "traffic"), nil); err != nil {
+		log.Warn("创建流量统计目录失败,每日流量不可用", "error", err)
+	} else {
+		trafficSource = ts
+		configFile := filepath.Join(cfg.ConfigDir, "config.json")
+		lastErr := ""
+		collector := &traffic.Collector{
+			Store: ts,
+			Source: func(ctx context.Context) (singbox.KernelSnapshot, error) {
+				snap, err := singbox.KernelConnections(ctx, configFile)
+				if err == nil {
+					lastErr = ""
+				}
+				return snap, err
+			},
+			KeepMonths: func() int {
+				p, err := profileSvc.Get(context.Background())
+				if err != nil {
+					return 0
+				}
+				t, _ := p["traffic"].(map[string]any)
+				switch v := t["keepMonths"].(type) {
+				case float64:
+					return int(v)
+				case int:
+					return v
+				}
+				return 0
+			},
+			OnError: func(err error) { // 内核没在跑是常态:同一条错误只记一次,恢复后再出错才再记
+				if msg := err.Error(); msg != lastErr {
+					lastErr = msg
+					log.Warn("每日流量采样失败", "error", msg)
+				}
+			},
+		}
+		background = func(ctx context.Context) func() {
+			done := make(chan struct{})
+			go func() { defer close(done); collector.Run(ctx, traffic.DefaultInterval) }()
+			return func() { <-done }
+		}
+	}
+	trafficapi.Register(srv.Mux(), trafficapi.Deps{
+		Source: trafficSource,
+		Names: func() map[string]string {
+			names := map[string]string{}
+			for _, c := range system.ReadDHCPLeases(system.DHCPLeaseFiles, time.Now()) {
+				if c.Name != "" {
+					names[c.IP] = c.Name
+				}
+			}
+			return names
+		},
+	})
+
+	// 激活和教程视频:没有对应概念,只回固定内容(DESIGN D9 和第 8 节),不保存任何东西
+	activationapi.Register(srv.Mux(), activationapi.Deps{
+		Version: version,
+		KernelVersion: func(ctx context.Context) string {
+			return singbox.ReadKernelVersion(ctx, cfg.SingBox).Version
+		},
+	})
+
+	// 已知终端(只读):DHCP 租约里的设备,给「终端分流」选来源;流量里出现过的来源 IP 等 traffic* 做了再并进来
+	// 共享网络:保存服务器前的端口检测(只读;自用端口 = 面板监听端口 + 内核固定端口 + 已部署配置里的非共享入站)
+	serversapi.Register(srv.Mux(), serversapi.Deps{Ports: &portcheck.Checker{
+		Servers: func(ctx context.Context) ([]portcheck.Server, error) {
+			p, err := profileSvc.Get(ctx)
+			if err != nil {
+				return nil, err
+			}
+			return portcheck.ServersFromProfile(p), nil
+		},
+		Reserved:   []int{clientapp.PortOf(cfg.Listen)},
+		ConfigPath: filepath.Join(cfg.ConfigDir, "config.json"),
+	}})
+
+	clientsapi.Register(srv.Mux(), clientsapi.Deps{
+		List: func() []system.Client { return system.ReadDHCPLeases(system.DHCPLeaseFiles, time.Now()) },
+	})
+
+	// 客户端 App 页的信息:路由器标识、局域网地址与网段、地区分流、路由器名称。只读网卡和档案,
+	// 路由器 ID 第一次读时生成并存进状态目录。本地分流的同步状态(client-config:开关、配对码、换码)也在这里;封包、App 用的公开同步接口等私有约定另列条目,还没做
+	egressDetector := &regiondetect.Detector{} // 与 dns/region-detect 各用各的:互不占用「判断中」状态
+	clientAppSvc := &clientapp.Service{
+		Store: st, Profile: profileSvc.Get, LAN: system.LAN, PanelPort: clientapp.PortOf(cfg.Listen),
+		// 出口国家:内核在运行时才判(只查询,不改任何设置),结果缓存在状态目录里
+		DetectEgress: func(ctx context.Context) (string, string, error) {
+			r := egressDetector.Detect(ctx)
+			if r.Region == nil {
+				return "", "", errors.New(r.Error)
+			}
+			return r.IP, r.Country, nil
+		},
+		Running: func(ctx context.Context) (bool, error) {
+			info, err := svcCtl.Status(ctx, cfg.CoreService)
+			if errors.Is(err, system.ErrNoInit) { // 面板不在路由器上(没有 procd / systemd):判断不可用,不是出错
+				return false, clientapp.ErrUnavailable
+			}
+			return info.Running, err
+		},
+	}
+	clientappapi.Register(srv.Mux(), clientappapi.Deps{Service: clientAppSvc, Config: clientAppSvc, Egress: clientAppSvc})
+
+	// 订阅分享(只管记录和 token;对外的 /sub/<token> 下发内容是另一条,还没做):新选的订阅必须存在
+	subsharesapi.Register(srv.Mux(), subsharesapi.Deps{Service: &subshare.Service{
+		Store: st,
+		SubscriptionIDs: func(ctx context.Context) ([]string, error) {
+			recs, err := subsSvc.List(ctx)
+			if err != nil {
+				return nil, err
+			}
+			ids := make([]string, 0, len(recs))
+			for _, r := range recs {
+				ids = append(ids, r.ID)
+			}
+			return ids, nil
+		},
+	}})
+
 	// 前端静态文件与前端路由回落;最后挂,/api 下的路径由各接口分组优先处理
 	srv.Mux().Handle("/", server.StaticHandler(cfg.WebDir))
-	return srv, nil
+	return srv, background, nil
 }
 
 // checkCore 启动时握手一次,只记日志:核心不可用时面板的其它功能(登录、设置)仍可用,

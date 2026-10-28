@@ -117,3 +117,25 @@ func requireCommands(t *testing.T, got []string, want []string) {
 		t.Fatalf("unexpected commands\nwant: %#v\n got: %#v", want, got)
 	}
 }
+
+func TestInvalidDeviceNeverReachesSmartctl(t *testing.T) {
+	for _, path := range []string{"", "--help", "/etc/passwd", "/dev/../etc/file", "/dev/sda\n"} {
+		store := &fakeStore{}
+		svc := NewService(store)
+		if _, err := svc.StartTest(context.Background(), models.SmartTestRequest{DevicePath: path, Type: "short"}); err == nil {
+			t.Fatal("start accepted invalid path")
+		}
+		if _, err := svc.TestResult(context.Background(), models.SmartTestResultRequest{DevicePath: path, Type: "selftest"}); err == nil {
+			t.Fatal("log accepted invalid path")
+		}
+		if _, err := svc.AttributeResult(context.Background(), models.SmartAttributeResultRequest{DevicePath: path}); err == nil {
+			t.Fatal("attribute accepted invalid path")
+		}
+		if _, err := svc.ExtendResult(context.Background(), models.SmartExtendResultRequest{DevicePath: path}); err == nil {
+			t.Fatal("extend accepted invalid path")
+		}
+		if len(store.outErrCommands)+len(store.outputCommands) != 0 {
+			t.Fatal("invalid device reached command runner")
+		}
+	}
+}

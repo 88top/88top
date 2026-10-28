@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-14T08:06:25.355Z",
+  "result": "pass",
+  "cases": [
+    {
+      "variant": "canvas",
+      "url": "http://192.168.9.19:5180/?variant=canvas",
+      "switcher": "‹\nA\n流量画布\nB\n侧栏工作台\nC\n底部操作台\n›"
+    },
+    {
+      "variant": "sidebar",
+      "url": "http://192.168.9.19:5180/?variant=sidebar",
+      "switcher": "‹\nA\n流量画布\nB\n侧栏工作台\nC\n底部操作台\n›"
+    },
+    {
+      "variant": "stage",
+      "url": "http://192.168.9.19:5180/?variant=stage",
+      "switcher": "‹\nA\n流量画布\nB\n侧栏工作台\nC\n底部操作台\n›"
+    }
+  ],
+  "errors": []
+}

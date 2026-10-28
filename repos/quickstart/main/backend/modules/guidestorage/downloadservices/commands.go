@@ -3,6 +3,8 @@ package downloadservices
 import (
 	"fmt"
 	"strings"
+
+	"github.com/istoreos/quickstart/backend/utils"
 )
 
 func ParseTrackers(trackers string) []string {
@@ -27,10 +29,10 @@ func ParseTrackers(trackers string) []string {
 func BuildAria2ConfigCommands(input Aria2InitInput) []string {
 	return []string{
 		"uci set aria2.main.rpc_auth_method='token'",
-		fmt.Sprintf("uci set aria2.main.config_dir='%v'", input.ConfigPath),
-		fmt.Sprintf("uci set aria2.main.dir='%v'", input.DownloadPath),
+		fmt.Sprintf("uci set aria2.main.config_dir=%v", utils.ShellQuote(input.ConfigPath)),
+		fmt.Sprintf("uci set aria2.main.dir=%v", utils.ShellQuote(input.DownloadPath)),
 		"uci set aria2.main.enabled='1'",
-		fmt.Sprintf("uci set aria2.main.rpc_secret='%v'", input.RPCToken),
+		fmt.Sprintf("uci set aria2.main.rpc_secret=%v", utils.ShellQuote(input.RPCToken)),
 	}
 }
 
@@ -40,7 +42,7 @@ func BuildAria2TrackerCommandBatches(trackers []string) [][]string {
 	}
 	cmds := [][]string{{"uci delete aria2.main.bt_tracker"}}
 	for _, tracker := range trackers {
-		cmds = append(cmds, []string{fmt.Sprintf("uci add_list aria2.main.bt_tracker='%v'", tracker)})
+		cmds = append(cmds, []string{fmt.Sprintf("uci add_list aria2.main.bt_tracker=%v", utils.ShellQuote(tracker))})
 	}
 	return cmds
 }
@@ -51,8 +53,8 @@ func BuildAria2RestartCommands() []string {
 
 func BuildQbittorrentConfigCommands(input QbittorrentInitInput) []string {
 	return []string{
-		fmt.Sprintf("uci set qbittorrent.main.profile='%v'", input.ConfigPath),
-		fmt.Sprintf("uci set qbittorrent.main.SavePath='%v'", input.DownloadPath),
+		fmt.Sprintf("uci set qbittorrent.main.profile=%v", utils.ShellQuote(input.ConfigPath)),
+		fmt.Sprintf("uci set qbittorrent.main.SavePath=%v", utils.ShellQuote(input.DownloadPath)),
 		"uci set qbittorrent.main.enabled=1",
 	}
 }
@@ -63,8 +65,8 @@ func BuildQbittorrentRestartCommands() []string {
 
 func BuildTransmissionConfigCommands(input TransmissionInitInput) []string {
 	return []string{
-		fmt.Sprintf("uci set transmission.@transmission[0].config_dir='%v'", input.ConfigPath),
-		fmt.Sprintf("uci set transmission.@transmission[0].download_dir='%v'", input.DownloadPath),
+		fmt.Sprintf("uci set transmission.@transmission[0].config_dir=%v", utils.ShellQuote(input.ConfigPath)),
+		fmt.Sprintf("uci set transmission.@transmission[0].download_dir=%v", utils.ShellQuote(input.DownloadPath)),
 		"uci set transmission.@transmission[0].enabled=1",
 	}
 }

@@ -1,0 +1,54 @@
+{
+  "startedAt": "2026-10-17T09:07:36.008Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "launchpad-states-review",
+      "startedAt": "2026-10-17T09:07:36.009Z",
+      "endedAt": "2026-10-17T09:07:39.014Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 5,
+      "report": "docs/evidence/m66/launchpad/67-states-resources/launchpad-states-review/report.json"
+    },
+    {
+      "name": "launcher-editor-review",
+      "startedAt": "2026-10-17T09:07:39.015Z",
+      "endedAt": "2026-10-17T09:07:49.997Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 9,
+      "report": "docs/evidence/m66/launchpad/67-states-resources/launcher-editor-review/report.json"
+    },
+    {
+      "name": "launcher-overflow-state-review",
+      "startedAt": "2026-10-17T09:07:49.998Z",
+      "endedAt": "2026-10-17T09:07:54.387Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 2,
+      "report": "docs/evidence/m66/launchpad/67-states-resources/launcher-overflow-state-review/report.json"
+    },
+    {
+      "name": "launcher-resource-review",
+      "startedAt": "2026-10-17T09:07:36.013Z",
+      "endedAt": "2026-10-17T09:07:56.155Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 5,
+      "report": "docs/evidence/m66/launchpad/67-states-resources/launcher-resource-review/report.json"
+    },
+    {
+      "name": "launcher-states-review",
+      "startedAt": "2026-10-17T09:07:36.012Z",
+      "endedAt": "2026-10-17T09:08:01.411Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 17,
+      "report": "docs/evidence/m66/launchpad/67-states-resources/launcher-states-review/report.json"
+    }
+  ],
+  "endedAt": "2026-10-17T09:08:01.411Z",
+  "result": "pass",
+  "groups": 38
+}

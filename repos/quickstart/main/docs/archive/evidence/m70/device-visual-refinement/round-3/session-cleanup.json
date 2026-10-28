@@ -1,0 +1,42 @@
+{
+  "result": "passed",
+  "runs": [
+    {
+      "report": "baseline-b/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 0
+    },
+    {
+      "report": "round-1/browser-rehearsal/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 1
+    },
+    {
+      "report": "round-2/browser-rehearsal/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 1
+    },
+    {
+      "report": "round-3/browser-rehearsal/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 0
+    },
+    {
+      "report": "round-3/current-b/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 0
+    },
+    {
+      "report": "round-3/current-b-states/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 0
+    },
+    {
+      "report": "round-3/state-rehearsal/device.json",
+      "sessionsDestroyed": 2,
+      "uiExitCode": 1
+    }
+  ],
+  "sessionsDestroyed": 14,
+  "note": "Per-run finally cleanup; no session identifiers or tokens saved"
+}

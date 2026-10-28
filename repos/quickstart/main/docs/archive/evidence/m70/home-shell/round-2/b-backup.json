@@ -1,0 +1,13 @@
+{
+  "host": "192.168.30.244",
+  "stage": "/root/quickstart-package-candidates/home-0164-shell-r2",
+  "result": "passed",
+  "exitCode": 0,
+  "privateBackupFingerprints": [
+    "bf9e474b370453305221c765b92d27b47ba5be3521e3c97d23b5d054f3609f1f  /root/quickstart-package-candidates/home-0164-shell-r2/backup/preinstall.tar.gz",
+    "2b96298f2d2e75cdf73d13ae51732079af286387800237a53dc06cbb07c62d0a  /root/quickstart-package-candidates/home-0164-shell-r2/backup/package-records.tar.gz",
+    "ce86a957cc5702d312e8b5c80c2d2b6e54bcbab95012a9cf49158bb5fb429aa0  /root/quickstart-package-candidates/home-0164-shell-r2/backup/network.before"
+  ],
+  "diagnostic": "",
+  "scope": "private backup only; no config or service changes"
+}

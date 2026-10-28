@@ -1,0 +1,39 @@
+/* Shared reading rhythm for the three explicit service components, including
+ * teleported complete-information dialogs. No layout or data ownership here. */
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface :is(.service-docker,.service-downloads,.service-remote){font-size:14px;line-height:1.5;color:var(--c-text);text-align:left}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface ul.service-docker{margin:0;padding:0;list-style:none}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .service-docker>li.docker-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0;margin:0 0 16px;border:0;background:none;border-radius:0}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .service-docker>li.docker-item>.docker-item_name{flex:1;max-width:none;padding:0;color:var(--c-muted);font-size:12px;white-space:normal}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .service-docker>li.docker-item>.docker-item_value{flex:0 1 auto;max-width:none;padding:0;display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .service-docker .status-icon{margin:0;padding:0;background:none!important;color:var(--c-good);font-size:12px;white-space:nowrap}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .service-docker .status-icon[style]{color:var(--c-muted)!important}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .service-docker>.service-root{margin:0;padding:0}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .service-root>.docker-item_name{font-size:12px;color:var(--c-muted);line-height:18px}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .service-root>.docker_box{display:flex;align-items:center;gap:8px;margin:4px 0 0;padding:0;min-width:0}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .service-root .docker_box>.path{flex:1;min-width:0;margin:0;padding:0;border:0;background:none;border-radius:0;font-size:14px;line-height:21px;overflow-wrap:anywhere;color:var(--c-text)}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .content.service-downloads>ul{list-style:none;margin:0;padding:0}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .content.service-downloads>ul>li{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;padding:0;margin:0 0 16px;border:0}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .content.service-downloads>ul>li>:is(.aria2-item_name,.qbittorrent-item_name,.transmission-item_name){width:auto;max-width:none;padding:0;font-size:12px;line-height:18px;color:var(--c-muted);white-space:normal;overflow:visible}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .content.service-downloads>ul>li>[class$="-item_value"]{width:auto;max-width:none;min-width:0;padding:0;font-size:14px;line-height:21px;color:var(--c-text);white-space:normal;overflow:visible;overflow-wrap:anywhere}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .content.service-downloads>ul>li a{display:block;font-size:14px;line-height:21px;color:var(--c-accent);overflow-wrap:anywhere}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .content.service-downloads .use-url_app{margin:16px 0 0;padding:0;border:0;font-size:12px;line-height:18px}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .content.service-downloads .use-url_app>a{font-size:12px;color:var(--c-muted);text-decoration:underline;text-underline-offset:3px;line-height:18px}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .service-idle{margin:0;padding:0;color:var(--c-muted);font-size:14px;line-height:21px;overflow-wrap:anywhere}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .service-remote{padding:0}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .remote-details{margin:0;padding:0;min-width:0}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .remote-address-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;min-width:0;margin:0 0 4px;color:var(--c-muted);font-size:12px;line-height:18px}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .remote-address-heading>.remote-console{display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:18px;color:var(--c-accent);text-decoration:none;white-space:nowrap}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .remote-address-heading .icon3{width:14px;height:14px}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .remote-details>.remote-address{display:block;min-width:0;width:100%;box-sizing:border-box;font-size:14px;font-weight:500;line-height:21px;overflow-wrap:anywhere;white-space:normal;color:var(--c-accent);text-decoration:none}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .remote-description{font-size:12px;line-height:18px;color:var(--c-muted);margin:8px 0 0}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .content:is(.service-downloads,.service-remote) .tab{display:flex;gap:4px;margin:0 0 16px;align-items:stretch}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .content:is(.service-downloads,.service-remote) .tab>button.item{flex:1;appearance:none;font:inherit;cursor:pointer;min-width:0;min-height:76px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 4px!important;border:1px solid transparent;border-radius:6px;text-align:center}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .content:is(.service-downloads,.service-remote) .tab>button.item.active{border-color:var(--home-option-border)}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .content:is(.service-downloads,.service-remote) .tab>button.item>svg{width:18px;height:18px;margin:0;flex:none}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .content:is(.service-downloads,.service-remote) .tab>button.item>.title{font-size:12px;font-weight:500;line-height:17px;margin:0;max-width:100%;overflow-wrap:anywhere}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .content:is(.service-downloads,.service-remote) .tab>button.item>span{font-size:12px;line-height:17px}
+:is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .content:is(.service-downloads,.service-remote) .tab>button.item>[data-service-state=running]{color:var(--color-icon-green)}
+@media(pointer:coarse){
+ :is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .service-docker .input-switch{min-width:50px;min-height:44px;display:inline-flex;align-items:center}
+ :is(.ordered-home,.network-dialog).home-semantic-colors .native-business-surface .content:is(.service-downloads,.service-remote) a{min-height:44px;min-width:44px;display:flex;align-items:center}
+}

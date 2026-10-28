@@ -1,0 +1,140 @@
+/* Current ordered-home typography. Historical comparison pages retain their
+ * own styling. Explicit size overrides retire their inherited 9–11px rules
+ * without changing original business components or the system menu. */
+.ordered-home,
+.network-dialog{
+ --home-font-family:Arial,'Microsoft YaHei',sans-serif;
+ --home-title-size:16px;
+ --home-body-size:14px;
+ --home-caption-size:12px;
+ --home-summary-title-size:14px;
+}
+.ordered-home.canvas-home,
+.network-dialog{font-family:var(--home-font-family);font-size:var(--home-body-size)}
+.ordered-home :is(button,input,select,textarea),
+.network-dialog :is(button,input,select,textarea){font-family:var(--home-font-family)!important}
+.ordered-home .layout-widget.narrow{--home-title-size:14px;--home-body-size:13px}
+
+/* Same information role, same scale across all eleven widget identities. */
+.ordered-home :is(.canvas-module>header h2,.applications-heading h2,.network-business-card h2),
+.ordered-home .layout-widget .network_container .title_box .display_flex>span{
+ font-size:var(--home-title-size)!important;font-weight:600;line-height:1.25;
+}
+.ordered-home :is(.compact-preview h2,.network-business-card.summary h2){font-size:var(--home-summary-title-size)!important}
+.ordered-home .layout-widget .fluid-applications .applications-heading h2{font-size:var(--home-title-size)!important}
+.ordered-home :is(.canvas-module,.home-applications,.compact-preview,.network-business-card){font-family:var(--home-font-family);font-size:var(--home-body-size)}
+.ordered-home :is(.canvas-module,.home-applications,.compact-preview,.network-business-card) :is(strong,b){font-weight:600}
+
+/* Regular labels and values. Numeric overview figures keep their existing
+ * larger scale; they are metrics, rather than a second body-text size. */
+.ordered-home :is(
+ .canvas-devices strong,.system-line,.system-line strong,
+ .disk-grid strong,.sharing-list>button>span:nth-child(2),.sharing-path strong,
+ .app-overview strong,.app-detail strong,.download-list>button>span:nth-child(2),
+ .remote-domain,.module-state strong,.module-state>span,
+ .compact-service,.compact-connection strong,
+ .interface-name strong,.network-widget-message strong,
+ .connection-status-text strong,.connection-addresses dt,.connection-addresses dd,.connection-dns>span
+){font-size:var(--home-body-size)!important;line-height:1.4}
+.ordered-home .system-line strong{font-weight:400}
+.ordered-home .connection-business:not(.summary) .connection-status-text strong{font-weight:400}
+.ordered-home .connection-uptime-badge{font-size:var(--home-body-size)!important}
+
+/* Captions, units, tags and secondary actions have a readable 12px floor. */
+.ordered-home :is(
+ .module-more,.inventory-heading>strong>span,.inventory-heading>small,
+ .canvas-devices small,.device-online,.inventory-footer,.inventory-footer>small,
+ .inventory-footer summary,.inventory-footer details>p,.device-parental-action,
+ .resource-meters>div>span,.resource-meters strong>small,.firmware-line,.firmware-line p,
+ .storage-summary>span,.storage-summary>small,.disk-grid small,
+ .disk-grid>div>div:first-child>span:last-child,.disk-overflow-note,.module-bottom-link,
+ .sharing-list small,.service-state,.sharing-path small,.app-detail small,
+ .remote-protocols,.remote-protocols small,.module-state p,.module-state>button,.module-notice,
+ .compact-meters span,.compact-meters small,.compact-service>span,.compact-subtext,
+ .compact-message,.compact-message small,.compact-message button,
+ .network-business-card header>button,.network-business-card footer>button,
+ .network-business-card footer small,.network-business-card footer b,
+ .connection-status-text small,.connection-remedy,.connection-ip-tag,
+ .network-snapshot-note,.interface-totals>span,.interface-totals>small,.interface-totals>strong small,
+ .interface-name small,.interface-link-state strong,.interface-link-state small,
+ .interface-business footer>small,.network-widget-message small,.network-widget-empty,
+ .applications-overflow,.applications-actions>button,.applications-state,.applications-state button,
+ .applications-fallback>span,.applications-fallback>button,.applications-favorites small,
+ .layout-speed,.layout-data-notice
+){font-size:var(--home-caption-size)!important;line-height:1.4}
+.ordered-home :is(.network-business-card footer b,.compact-service strong){font-weight:600}
+.ordered-home :is(.network_tag .tag_item,.speed_item>span){font-size:var(--home-caption-size)!important}
+
+/* Grid tiles keep the declared 82px pitch: 36px icon + 2px gap + two 18px
+ * text lines + 8px padding. Font changes never rewrite favorite capacity. */
+.ordered-home .fluid-applications .applications-favorites strong{
+ font-size:var(--home-body-size)!important;line-height:18px;max-height:36px;font-weight:600;
+}
+.ordered-home .fluid-applications:not(.applications-strip) .applications-favorites>button{gap:2px!important}
+.ordered-home .applications-strip .applications-favorites>button{gap:8px!important}
+.ordered-home .applications-system-tools .canvas-tools-grid span{font-size:var(--home-body-size)!important}
+
+/* All-apps panel belongs to the same product surface. */
+.ordered-home .applications-browser h2{font-size:var(--home-title-size)!important;line-height:1.4}
+.ordered-home .applications-browser :is(
+ .application-search input,.browser-category-tabs button,.application-catalogue strong,
+ .browser-tool-list button,.browser-fallback button,footer button
+){font-size:var(--home-body-size)!important;line-height:1.4}
+.ordered-home .applications-browser :is(
+ header span,.applications-hint,.browser-category-tabs small,.application-catalogue small,
+ .favorite-order,.favorite-order button,.browser-fallback h3,.application-limit,footer>span
+){font-size:var(--home-caption-size)!important;line-height:1.5}
+
+/* Port rows and device entries gain type size by using their existing space. */
+.ordered-home .interface-business:not(.summary) .interface-list>button{padding:5px 0}
+.ordered-home .interface-business:not(.summary) .interface-totals{margin:11px 0 8px}
+.ordered-home .interface-name small{line-height:1.3}
+.ordered-home .interface-business footer>small{line-height:1.3}
+.ordered-home .canvas-module>header h2{white-space:normal;overflow-wrap:anywhere}
+.ordered-home .canvas-devices strong{line-height:20px}
+.ordered-home .canvas-devices small{line-height:16px}
+.ordered-home .inventory-footer{gap:8px;flex-wrap:wrap}
+.ordered-home .inventory-heading{gap:10px;flex-wrap:wrap}
+.ordered-home .inventory-heading>small{line-height:1.4}
+.ordered-home .compact-preview{gap:12px}
+.ordered-home .compact-subtext{line-height:1.4}
+.ordered-home .sharing-path strong,.ordered-home .app-detail strong{line-height:1.4}
+
+/* Teleported connection/port details use the same font stack and scale. */
+.network-dialog h2{font-size:var(--home-title-size)!important;font-weight:600}
+.network-dialog .network-dialog-body{font-size:var(--home-body-size)}
+.network-dialog :is(.connection-full-details dd,.interface-full-details dd,.interface-detail-list strong,.network-detail-status,.network-detail-actions){font-size:var(--home-body-size)!important;line-height:1.5}
+.network-dialog :is(.connection-full-details dt,.interface-full-details dt,.interface-detail-list span,.interface-detail-list small,.network-privacy-note,.network-snapshot-note,.network-dialog>header small){font-size:var(--home-caption-size)!important;line-height:1.5}
+.network-dialog :is(.connection-full-details dd>button,.connection-full-details dd>small,.connection-full-details nav,.interface-full-details nav,.network-back,.network-action-notice){font-size:var(--home-caption-size)!important;line-height:1.5}
+.network-dialog :is(.network-business-action input,.network-business-action select,.actioner-dns_footer,.config-message,.successed){font-size:var(--home-body-size)!important}
+
+/* Match the original responsive card hierarchy. Small slots share the same
+ * title/body rules rather than inventing individual 9–11px mobile sizes. */
+@media(max-width:768px){
+ .ordered-home,.network-dialog{--home-title-size:14px;--home-body-size:13px}
+ /* Preserve both device rows and the complete capability message in a short
+  * phone card by reclaiming spacing, rather than shrinking text or capacity. */
+ .ordered-home .layout-widget .module-devices:has(.module-notice)>header{margin-bottom:10px}
+ .ordered-home .layout-widget .module-devices:has(.module-notice) .inventory-heading{margin-bottom:8px}
+ .ordered-home .layout-widget .module-devices:has(.module-notice) .inventory-heading>strong{line-height:1}
+ .ordered-home .layout-widget .module-devices:has(.module-notice) .canvas-devices{gap:8px}
+ .ordered-home .layout-widget .module-devices:has(.module-notice) .canvas-devices>button{padding-top:6px;padding-bottom:6px}
+ .ordered-home .layout-widget .module-devices:has(.module-notice) .module-notice{padding:5px 9px;margin:4px 0!important}
+ .ordered-home .layout-widget .module-devices:has(.module-notice) .inventory-footer{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding-top:6px}
+ .ordered-home .layout-widget .module-devices:has(.module-notice) .inventory-footer>small{grid-column:1/-1}
+ .ordered-home .layout-widget .module-devices:has(.module-notice) .inventory-footer :is(summary,.device-parental-action){white-space:normal;text-align:left;align-self:start}
+ .ordered-home .layout-widget .module-storage>header{margin-bottom:10px}
+ .ordered-home .layout-widget .module-storage .storage-summary{margin-bottom:12px}
+ .ordered-home .layout-widget .module-storage .disk-grid{gap:12px 18px}
+ .ordered-home .layout-widget .module-storage .disk-overflow-note{margin-top:6px}
+ .ordered-home .layout-widget .module-storage .module-bottom-link{margin-top:8px;padding-top:8px}
+}
+@container(max-width:340px){
+ .ordered-home .network-business-card h2{font-size:14px!important}
+ .ordered-home .connection-business :is(.connection-addresses dt,.connection-addresses dd,.connection-dns>span,.connection-status-text strong,.connection-uptime-badge){font-size:13px!important}
+}
+@container(max-height:260px){
+ .ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses{gap:3px}
+ .ordered-home .layout-widget .connection-business:not(.summary) .connection-addresses dd{margin-top:3px}
+ .ordered-home .layout-widget .connection-business:not(.summary) footer{padding-top:2px}
+}

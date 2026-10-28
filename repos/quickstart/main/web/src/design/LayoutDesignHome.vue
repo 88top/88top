@@ -1,0 +1,71 @@
+<template>
+  <main class="canvas-home layout-design-home" :class="{'lab-editing':editing}" data-layout-design>
+    <header class="lab-header"><router-link class="lab-brand" :to="target('/')"><span class="canvas-logo">Q<i></i></span><span>Quickstart<small>iStoreOS</small></span></router-link><span class="lab-header-context">{{t('我的网络空间','My network space')}}</span><div class="lab-header-actions"><button @click="toggleTheme" :aria-label="t('切换主题','Toggle theme')">{{theme==='dark'?'☼':'◐'}}</button><details class="lab-scenes"><summary>{{t('示例场景','Scenarios')}}</summary><div><small>{{t('设计预览 · 合成数据','Design preview · Synthetic data')}}</small><label>{{t('数据场景','Scenario')}}<select aria-label="数据场景" :value="demo.scenario" @change="changeScene"><option v-for="scene in scenes" :key="scene[0]" :value="scene[0]">{{t(scene[1],scene[2])}}</option></select></label><button @click="toggleLanguage">中文 / English</button></div></details><button class="lab-edit-button" @click="editing=!editing" :aria-pressed="editing" :aria-label="editing?t('完成体验','Done'):t('体验布局调整','Try layout controls')"><StudioGlyph name="tune"/><span>{{editing?t('完成体验','Done'):t('体验布局调整','Try layout controls')}}</span></button></div></header>
+    <div class="lab-intro"><div><span class="lab-eyebrow">{{t('首页概览','HOME OVERVIEW')}}</span><h1>{{t('连接、设备与生活','Your connected home')}}</h1></div><span class="lab-intro-status"><i :class="{ready:data.network?.internetConnected&&!errors.network}"></i>{{errors.network?t('连接状态待确认','Connection unconfirmed'):t('我的网络','My network')}}<small>{{t('设计示例','Design sample')}}</small></span></div>
+
+    <section v-if="editing" class="lab-adjustments" aria-label="布局体验工具">
+      <div class="lab-adjustment-description"><strong>{{current.key}} · {{t(current.zh,current.en)}}</strong><span>{{english?variant==='rows'?'Adjust proportions. Rows share a height and wrap when needed.':variant==='grid'?'Equal-width panels. Columns respond to available space.':'Move and resize using handles. Collision handling is not included.':current.description}}</span></div>
+      <div class="lab-control-row"><label v-if="variant==='rows'">{{t('网络宽度偏好','Network proportions')}}<input type="range" min="30" max="75" step="5" :value="rows[0].weights[0]" @input="setRatio(Number(($event.target as HTMLInputElement).value))" aria-label="网络流量宽度比例"/><output>{{rows[0].weights[0]}} / {{100-rows[0].weights[0]}}</output></label><template v-if="variant==='rows'"><button v-for="ratio in [50,60,65]" :key="ratio" @click="setRatio(ratio)">{{ratio}} / {{100-ratio}}</button><label>{{t('网络行高','Network row height')}}<select aria-label="网络行高" v-model.number="rows[0].height"><option :value="320">{{t('标准','Standard')}} · 320</option><option :value="400">{{t('宽松','Tall')}} · 400</option></select></label></template>
+        <template v-if="variant==='grid'"><label>{{t('最多列数','Maximum columns')}}<select aria-label="网格列数" v-model.number="columns"><option v-for="n in [1,2,3]" :key="n" :value="n">{{n}}</option></select></label><label>{{t('密度','Density')}}<select aria-label="网格密度" v-model.number="gridHeight"><option :value="320">{{t('紧凑','Compact')}}</option><option :value="370">{{t('标准','Standard')}}</option></select></label></template>
+        <button v-if="variant==='free'" @click="resetFree">{{t('恢复自由示例','Reset positions')}}</button>
+        <label class="lab-width-control">{{t('内容预览宽度','Content width')}}<input type="range" min="292" :max="Math.max(292,availableWidth)" step="1" :value="Math.min(previewWidth||availableWidth,availableWidth)" @input="previewWidth=Number(($event.target as HTMLInputElement).value)" aria-label="内容预览宽度"/><output>{{Math.round(contentWidth)}}px</output></label><button @click="previewWidth=0">{{t('自动宽度','Auto width')}}</button><label class="lab-extra-control"><input type="checkbox" v-model="extras"/>{{t('展示三个扩展服务','Show three extra services')}}</label>
+      </div>
+      <p class="lab-adjustment-note">{{t('R/G/F使用同一份数据与卡片。仅体验布局，刷新恢复示例；尚未进行最终产品确认。','All variants use the same data and cards. Layout preview only; reload resets it. Product selection is pending.')}}</p>
+    </section>
+
+    <div class="lab-available" ref="availableElement"><div class="lab-content" ref="contentElement" :style="{maxWidth:previewWidth?previewWidth+'px':undefined}" :data-layout-variant="variant">
+      <template v-if="variant==='rows'"><section v-for="row in actualRows" :key="row.id" class="lab-row" :class="{'has-ratio-handle':editing&&row.cards.length===2}" :style="rowStyle(row)" :data-preview-row="row.id"><div v-for="id in row.cards" :key="id" class="lab-card-slot"><LayoutPreviewCard :id="id" :data="data" :errors="errors" :devices="devices" :theme="theme" @navigate="go" @device="openDevice" @retry="retry"/></div><button v-if="editing&&row.cards.length===2&&row.cards.includes('traffic')" class="lab-ratio-handle" :style="{left:networkDivider+'px'}" @pointerdown="startRatio($event)" @keydown.left.prevent="setRatio(rows[0].weights[0]-5)" @keydown.right.prevent="setRatio(rows[0].weights[0]+5)" aria-label="拖动调整网络比例" title="拖动调整网络比例"><span>⋮</span></button></section></template>
+      <section v-else-if="variant==='grid'" class="lab-auto-grid" :style="{gridTemplateColumns:'repeat('+actualColumns+',minmax(0,1fr))',gridAutoRows:gridHeight+'px'}" data-auto-grid><LayoutPreviewCard v-for="id in visible" :key="id" :id="id" :data="data" :errors="errors" :devices="devices" :theme="theme" @navigate="go" @device="openDevice" @retry="retry"/></section>
+      <section v-else class="lab-free-canvas" :class="{stacked:contentWidth<820}" :style="{height:freeHeight+'px'}" data-free-canvas><div v-for="id in visible" :key="id" class="lab-free-slot" :data-free-card="id" :style="freeStyle(id)"><LayoutPreviewCard :id="id" :data="data" :errors="errors" :devices="devices" :theme="theme" @navigate="go" @device="openDevice" @retry="retry"/><template v-if="editing&&contentWidth>=820"><button class="lab-free-move" @pointerdown="startFree($event,id,false)" :aria-label="t('移动','Move ')+t(widget(id).zh,widget(id).en)">⠿</button><button class="lab-free-resize" @pointerdown="startFree($event,id,true)" :aria-label="t('缩放','Resize ')+t(widget(id).zh,widget(id).en)">⌟</button></template></div></section>
+    </div></div>
+    <footer class="lab-footer"><span>Quickstart <i>/</i> {{t('布局设计预览','Layout design preview')}}</span><span>{{t('合成示例 · 操作只影响本次预览','Synthetic examples · Preview-only changes')}}</span></footer>
+    <nav v-if="route.query.tools!=='0'" class="lab-variant-switcher" aria-label="布局方案对比"><button @click="cycle(-1)" aria-label="上一个方案">‹</button><button v-for="v in layoutVariants" :key="v.id" :class="{selected:variant===v.id}" @click="choose(v.id)" :data-layout-choice="v.id"><b>{{v.key}}</b><span>{{t(v.zh,v.en)}}</span></button><button @click="cycle(1)" aria-label="下一个方案">›</button></nav>
+  </main>
+</template>
+<script setup lang="ts">
+import {computed,nextTick,onMounted,onUnmounted,ref,watch} from 'vue'
+import {useRoute,useRouter} from 'vue-router'
+import StudioGlyph from './StudioGlyph.vue'
+import LayoutPreviewCard from './LayoutPreviewCard.vue'
+import {useStudioModel} from './studioModel'
+import {demo} from './fixtures'
+import {getTheme} from '../utils/theme'
+import {layoutVariants,previewRows,splitPreviewRows,widgetDefinitions,widget,freeDefaults,type LayoutVariant,type WidgetId,type PreviewRow,type FreePosition} from './rowLayout'
+const route=useRoute(),router=useRouter(),english=window.vue_lang==='en',t=(zh:string,en:string)=>english?en:zh
+const variant=computed<LayoutVariant>(()=>layoutVariants.some(v=>v.id===route.query.variant)?route.query.variant as LayoutVariant:'rows')
+const current=computed(()=>layoutVariants.find(v=>v.id===variant.value)!)
+const editing=ref(false),extras=ref(false),rows=ref(previewRows()),theme=ref(getTheme()),columns=ref(2),gridHeight=ref(340),previewWidth=ref(0)
+const availableElement=ref<HTMLElement|null>(null),contentElement=ref<HTMLElement|null>(null),availableWidth=ref(1160),contentWidth=ref(1160)
+const visible=computed(()=>widgetDefinitions.filter(item=>!item.extra||extras.value).map(item=>item.id))
+const readerLayout=computed(()=>visible.value.map(id=>({id,enabled:true})))
+const {data,errors,devices,retry}=useStudioModel(readerLayout,['traffic'])
+const actualRows=computed(()=>splitPreviewRows(rows.value,contentWidth.value,visible.value))
+const actualColumns=computed(()=>Math.max(1,Math.min(columns.value,Math.floor((contentWidth.value+18)/398))))
+const positions=ref<Record<WidgetId,FreePosition>>(JSON.parse(JSON.stringify(freeDefaults)))
+const freeHeight=computed(()=>contentWidth.value<820?visible.value.reduce((sum,id)=>sum+widget(id).singleHeight+18,0):Math.max(...visible.value.map(id=>positions.value[id].y+positions.value[id].height))+18)
+const networkDivider=ref(0)
+function rowStyle(row:PreviewRow){return {gridTemplateColumns:row.cards.map((id,index)=>row.cards.length===1?'minmax(0,1fr)':'minmax('+widget(id).minWidth+'px,'+row.weights[index]+'fr)').join(' '),height:row.height+'px'}}
+function freeStyle(id:WidgetId){const p=positions.value[id];return contentWidth.value<820?{height:widget(id).singleHeight+'px'}:{left:p.x+'%',top:p.y+'px',width:p.width+'%',height:p.height+'px'}}
+function resetFree(){positions.value=JSON.parse(JSON.stringify(freeDefaults))}
+function setRatio(value:number){const ratio=Math.max(30,Math.min(75,Math.round(value/5)*5));rows.value[0].weights=[ratio,100-ratio];void updateDivider()}
+async function updateDivider(){await nextTick();const first=contentElement.value?.querySelector<HTMLElement>('[data-preview-row^=network] .lab-card-slot');networkDivider.value=first?first.getBoundingClientRect().width+9:0}
+let finishGesture:(()=>void)|undefined
+function gesture(event:PointerEvent,move:(dx:number,dy:number)=>void){event.preventDefault();finishGesture?.();const startX=event.clientX,startY=event.clientY;const onMove=(e:PointerEvent)=>move(e.clientX-startX,e.clientY-startY);const finish=()=>{window.removeEventListener('pointermove',onMove);window.removeEventListener('pointerup',finish);window.removeEventListener('pointercancel',finish);finishGesture=undefined};finishGesture=finish;window.addEventListener('pointermove',onMove);window.addEventListener('pointerup',finish);window.addEventListener('pointercancel',finish)}
+function startRatio(event:PointerEvent){const start=rows.value[0].weights[0],width=contentWidth.value-18;gesture(event,dx=>{const minimum=Math.ceil(widget('traffic').minWidth/width*20)*5,maximum=Math.floor((1-widget('connection').minWidth/width)*20)*5;setRatio(Math.max(minimum,Math.min(maximum,start+dx/width*100)))})}
+function startFree(event:PointerEvent,id:WidgetId,resize:boolean){const start={...positions.value[id]},width=contentWidth.value;gesture(event,(dx,dy)=>{const p=positions.value[id];if(resize){p.width=Math.max(widget(id).minWidth/width*100,Math.min(100-p.x,start.width+dx/width*100));p.height=Math.max(widget(id).minHeight,Math.min(600,start.height+dy))}else{p.x=Math.max(0,Math.min(100-p.width,start.x+dx/width*100));p.y=Math.max(0,Math.min(1600,start.y+dy))}})}
+const target=(path:string,device?:string)=>({path,query:{...route.query,layout:'layout-lab',variant:variant.value,device,filter:path==='/devicemanagement'?'all':undefined}})
+const go=(path:string)=>void router.push(target(path)),openDevice=(id:string)=>void router.push(target('/devicemanagement',id))
+function choose(id:LayoutVariant){void router.replace({query:{...route.query,layout:'layout-lab',variant:id}})}
+function cycle(direction:number){const index=layoutVariants.findIndex(v=>v.id===variant.value);choose(layoutVariants[(index+direction+3)%3].id)}
+function toggleTheme(){const value=theme.value==='dark'?'light':'dark';document.body.setAttribute('theme',value);void router.replace({query:{...route.query,theme:value}})}
+function toggleLanguage(){location.href=router.resolve({path:'/',query:{...route.query,layout:'layout-lab',variant:variant.value,lang:english?'zh-cn':'en'}}).href}
+function changeScene(event:Event){demo.recovered=false;void router.replace({query:{...route.query,layout:'layout-lab',variant:variant.value,scenario:(event.target as HTMLSelectElement).value}})}
+function keyboard(event:KeyboardEvent){if(document.querySelector('.applications-browser')||event.ctrlKey||event.altKey||event.metaKey||!(event.target instanceof HTMLElement)||event.target.closest('input,select,textarea,button,a,summary,[contenteditable]'))return;if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();cycle(event.key==='ArrowLeft'?-1:1)}}
+watch(()=>route.query.theme,()=>theme.value=getTheme());watch([contentWidth,actualRows],()=>void updateDivider())
+let observer:ResizeObserver|undefined
+onMounted(()=>{observer=new ResizeObserver(entries=>{for(const entry of entries){if(entry.target===availableElement.value)availableWidth.value=entry.contentRect.width;if(entry.target===contentElement.value)contentWidth.value=entry.contentRect.width}void updateDivider()});if(availableElement.value)observer.observe(availableElement.value);if(contentElement.value)observer.observe(contentElement.value);document.addEventListener('keydown',keyboard);Object.defineProperty(window,'__quickstartLayout',{configurable:true,get:()=>({variant:variant.value,width:contentWidth.value,rows:rows.value,visible:visible.value})})})
+onUnmounted(()=>{observer?.disconnect();finishGesture?.();document.removeEventListener('keydown',keyboard);delete (window as any).__quickstartLayout})
+const scenes=[['normal','正常','Normal'],['many','128台设备','128 devices'],['empty','没有设备','Empty'],['loading','加载中','Loading'],['error','设备API失败','Inventory error'],['stale','旧快照','Stale snapshot'],['old','旧后端','Old backend'],['permission','权限失败','Access denied'],['no-speed','服务未安装','Service missing'],['disabled','服务未启用','Service disabled'],['speed-error','服务异常','Service error'],['unsupported','固件不支持','Unsupported'],['network-error','网络模块失败','Network unavailable'],['storage-error','存储失败','Storage unavailable'],['services-error','服务失败','Services unavailable'],['apps-empty','没有扩展应用','No extra apps'],['apps-error','应用清单失败','Apps unavailable'],['apps-loading','应用加载','Apps loading'],['apps-many','大量应用','Many apps']]
+</script>
+<style src="./canvas.css" scoped></style>
+<style src="./layoutDesignHome.css" scoped></style>

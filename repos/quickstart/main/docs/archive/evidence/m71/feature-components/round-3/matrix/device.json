@@ -1,0 +1,37 @@
+{
+  "host": "192.168.30.244",
+  "before": [
+    "a7587da33f69f40ee59f9d819a0ce8a19bad0f4782396f7b8f96dba182bf33ca  /etc/config/network",
+    "0bee30732af875effe4a81a11738c2e7a63e287a80d0a30647c0d80a3e7e26fa  /etc/config/dhcp",
+    "76408bedf1e35f3e0b5e0919e9af3b7485f8c78b404a9659430520421323a614  /etc/config/firewall",
+    "617f0474775038d4998c30a8cdbf1d9e52da98701bfe6efcc8e738663e2e18c0  /etc/config/quickstart",
+    "80e0b2b3644b761021141488a9bca2a57236ffaec0f9f55e00a5061824c654bb  /etc/config/quickstart-netpolicy",
+    "037321d0f1134b3ced167689c9d0ff1aeb5f14b0585edc4471ece5a388d14aab  /etc/quickstart/home-layout.json",
+    "62df30a67d77713afe005ea6cd73cb580e80a79cdcd60d060a78cb61ede62a13  /etc/quickstart/home-launcher.json",
+    "983a1c8b819e29a5ac7e053898afa66ccdc8653e535219482c92052b3a90ba11  /usr/sbin/quickstart",
+    "3a1c633f346f876d771b03f622aeff8215920683c5ed1945fca354bac77ba6c2  /usr/bin/quickstart-netpolicy",
+    "eeccf129cb674ad20b95faa1a58549b8bd7bf34c359519e1fbd03de4e92a79ea  /usr/lib/opkg/status",
+    "default via 192.168.30.1 dev br-lan proto static src 192.168.30.244 ",
+    "14546 9386",
+    "14546"
+  ],
+  "scope": "Installed B or explicit browser-only candidate/projection; no real writes",
+  "exitCode": 0,
+  "after": [
+    "a7587da33f69f40ee59f9d819a0ce8a19bad0f4782396f7b8f96dba182bf33ca  /etc/config/network",
+    "0bee30732af875effe4a81a11738c2e7a63e287a80d0a30647c0d80a3e7e26fa  /etc/config/dhcp",
+    "76408bedf1e35f3e0b5e0919e9af3b7485f8c78b404a9659430520421323a614  /etc/config/firewall",
+    "617f0474775038d4998c30a8cdbf1d9e52da98701bfe6efcc8e738663e2e18c0  /etc/config/quickstart",
+    "80e0b2b3644b761021141488a9bca2a57236ffaec0f9f55e00a5061824c654bb  /etc/config/quickstart-netpolicy",
+    "037321d0f1134b3ced167689c9d0ff1aeb5f14b0585edc4471ece5a388d14aab  /etc/quickstart/home-layout.json",
+    "62df30a67d77713afe005ea6cd73cb580e80a79cdcd60d060a78cb61ede62a13  /etc/quickstart/home-launcher.json",
+    "983a1c8b819e29a5ac7e053898afa66ccdc8653e535219482c92052b3a90ba11  /usr/sbin/quickstart",
+    "3a1c633f346f876d771b03f622aeff8215920683c5ed1945fca354bac77ba6c2  /usr/bin/quickstart-netpolicy",
+    "eeccf129cb674ad20b95faa1a58549b8bd7bf34c359519e1fbd03de4e92a79ea  /usr/lib/opkg/status",
+    "default via 192.168.30.1 dev br-lan proto static src 192.168.30.244 ",
+    "14546 9386",
+    "14546"
+  ],
+  "result": "passed",
+  "sessionsDestroyed": 1
+}

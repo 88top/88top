@@ -1,0 +1,1075 @@
+{
+  "checkedAt": "2026-10-18T10:50:51.812Z",
+  "checks": [
+    "Unauthenticated config read denied",
+    "Installed package, running process and LuCI resource version match the frozen runtime",
+    "Real root session renders persisted homepage",
+    "Real LuCI touch primary actions retain 44px target",
+    "Real LuCI touch responsive surface"
+  ],
+  "errors": [],
+  "consoleErrors": [],
+  "httpErrors": [],
+  "views": [
+    {
+      "name": "b-home-1440",
+      "overflow": false,
+      "input": {
+        "coarse": true,
+        "points": 1
+      },
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 666,
+          "h": 439.578125
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 444,
+          "h": 271.59375
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "w": 444,
+          "h": 149.984375
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 555,
+          "h": 318.078125
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 555,
+          "h": 318.078125
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 555,
+          "h": 385
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 555,
+          "h": 385
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 371.265625,
+          "h": 351.171875
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 360.359375,
+          "h": 351.171875
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 360.375,
+          "h": 351.171875
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "w": 1128,
+          "h": 306
+        }
+      ]
+    },
+    {
+      "name": "b-home-1024",
+      "overflow": false,
+      "input": {
+        "coarse": true,
+        "points": 1
+      },
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 728,
+          "h": 330
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 728,
+          "h": 272.796875
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "w": 728,
+          "h": 151.390625
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 400,
+          "h": 464
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 310,
+          "h": 464
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 380,
+          "h": 383
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 330,
+          "h": 383
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 360.296875,
+          "h": 300.484375
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 349.703125,
+          "h": 300.484375
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 728,
+          "h": 331.390625
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "w": 728,
+          "h": 509
+        }
+      ]
+    },
+    {
+      "name": "b-home-768",
+      "overflow": false,
+      "input": {
+        "coarse": true,
+        "points": 1
+      },
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 680,
+          "h": 330
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 680,
+          "h": 251.59375
+        },
+        {
+          "id": "networkInterface",
+          "form": "summary",
+          "w": 680,
+          "h": 141.984375
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 400,
+          "h": 444
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 262,
+          "h": 444
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 380,
+          "h": 373
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 282,
+          "h": 373
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 335.9375,
+          "h": 280.484375
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 326.0625,
+          "h": 280.484375
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 680,
+          "h": 311.390625
+        },
+        {
+          "id": "system",
+          "form": "standard",
+          "w": 680,
+          "h": 487
+        }
+      ]
+    },
+    {
+      "name": "b-home-390",
+      "overflow": false,
+      "input": {
+        "coarse": true,
+        "points": 1
+      },
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 330,
+          "h": 330
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 330,
+          "h": 249.59375
+        },
+        {
+          "id": "networkInterface",
+          "form": "standard",
+          "w": 330,
+          "h": 191.578125
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 330,
+          "h": 374.296875
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 330,
+          "h": 444
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 330,
+          "h": 373
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 330,
+          "h": 300.984375
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 330,
+          "h": 271
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 330,
+          "h": 280.484375
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 330,
+          "h": 331.171875
+        },
+        {
+          "id": "system",
+          "form": "summary",
+          "w": 330,
+          "h": 153.984375
+        }
+      ]
+    },
+    {
+      "name": "b-home-320",
+      "overflow": false,
+      "input": {
+        "coarse": true,
+        "points": 1
+      },
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 260,
+          "h": 330
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 260,
+          "h": 249.59375
+        },
+        {
+          "id": "networkInterface",
+          "form": "standard",
+          "w": 260,
+          "h": 191.578125
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 260,
+          "h": 374.296875
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 260,
+          "h": 444
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 260,
+          "h": 403
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 260,
+          "h": 330.984375
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 260,
+          "h": 271
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 260,
+          "h": 328.671875
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 260,
+          "h": 384.265625
+        },
+        {
+          "id": "system",
+          "form": "summary",
+          "w": 260,
+          "h": 183.984375
+        }
+      ]
+    },
+    {
+      "name": "b-home-320-dark",
+      "overflow": false,
+      "input": {
+        "coarse": true,
+        "points": 1
+      },
+      "cards": [
+        {
+          "id": "traffic",
+          "form": "standard",
+          "w": 260,
+          "h": 330
+        },
+        {
+          "id": "connection",
+          "form": "standard",
+          "w": 260,
+          "h": 249.59375
+        },
+        {
+          "id": "networkInterface",
+          "form": "standard",
+          "w": 260,
+          "h": 191.578125
+        },
+        {
+          "id": "devices",
+          "form": "standard",
+          "w": 260,
+          "h": 374.296875
+        },
+        {
+          "id": "applications",
+          "form": "grid",
+          "w": 260,
+          "h": 444
+        },
+        {
+          "id": "storage",
+          "form": "standard",
+          "w": 260,
+          "h": 403
+        },
+        {
+          "id": "sharing",
+          "form": "standard",
+          "w": 260,
+          "h": 330.984375
+        },
+        {
+          "id": "docker",
+          "form": "standard",
+          "w": 260,
+          "h": 271
+        },
+        {
+          "id": "downloads",
+          "form": "standard",
+          "w": 260,
+          "h": 328.671875
+        },
+        {
+          "id": "remote",
+          "form": "standard",
+          "w": 260,
+          "h": 384.265625
+        },
+        {
+          "id": "system",
+          "form": "summary",
+          "w": 260,
+          "h": 183.984375
+        }
+      ]
+    }
+  ],
+  "restoration": [
+    "layout: unchanged",
+    "launcher: unchanged"
+  ],
+  "themeStyles": [
+    "http://192.168.30.244/luci-static/istorenas/css/cascade.css?v=2.2.11.5",
+    "http://192.168.30.244/luci-static/resources/easepi/easeicon.css?t=1649313193968",
+    "http://192.168.30.244/luci-static/quickstart/style.css?v=0.16.2-test20261018-release-a2b747a25e6e"
+  ],
+  "systemCenters": [
+    {
+      "cls": "pie-chart-wrapper",
+      "text": "1%",
+      "display": "flex",
+      "position": "relative",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 346.484375,
+      "top": 1889.921875,
+      "width": 150,
+      "height": 150,
+      "transform": "none",
+      "zIndex": "auto"
+    },
+    {
+      "cls": "center-content",
+      "text": "1%",
+      "display": "block",
+      "position": "absolute",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 405.8203125,
+      "top": 1937.7265625,
+      "width": 31.328125,
+      "height": 54.390625,
+      "transform": "matrix(1, 0, 0, 1, -15.6641, -27.1953)",
+      "zIndex": "2"
+    },
+    {
+      "cls": "center-label",
+      "text": "1%",
+      "display": "block",
+      "position": "static",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 405.8203125,
+      "top": 1965.7265625,
+      "width": 31.328125,
+      "height": 26.390625,
+      "transform": "none",
+      "zIndex": "auto"
+    },
+    {
+      "cls": "pie-chart-wrapper",
+      "text": "0℃",
+      "display": "flex",
+      "position": "relative",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 508.484375,
+      "top": 1889.921875,
+      "width": 150,
+      "height": 150,
+      "transform": "none",
+      "zIndex": "auto"
+    },
+    {
+      "cls": "center-content",
+      "text": "0℃",
+      "display": "block",
+      "position": "absolute",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 566.1875,
+      "top": 1937.7265625,
+      "width": 34.59375,
+      "height": 54.390625,
+      "transform": "matrix(1, 0, 0, 1, -17.2969, -27.1953)",
+      "zIndex": "2"
+    },
+    {
+      "cls": "center-label",
+      "text": "0℃",
+      "display": "block",
+      "position": "static",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 566.1875,
+      "top": 1965.7265625,
+      "width": 34.59375,
+      "height": 26.390625,
+      "transform": "none",
+      "zIndex": "auto"
+    },
+    {
+      "cls": "pie-chart-wrapper",
+      "text": "64%",
+      "display": "flex",
+      "position": "relative",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 670.484375,
+      "top": 1889.921875,
+      "width": 150,
+      "height": 150,
+      "transform": "none",
+      "zIndex": "auto"
+    },
+    {
+      "cls": "center-content",
+      "text": "64%",
+      "display": "block",
+      "position": "absolute",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 723.5234375,
+      "top": 1937.7265625,
+      "width": 43.921875,
+      "height": 54.390625,
+      "transform": "matrix(1, 0, 0, 1, -21.9609, -27.1953)",
+      "zIndex": "2"
+    },
+    {
+      "cls": "center-label",
+      "text": "64%",
+      "display": "block",
+      "position": "static",
+      "visibility": "visible",
+      "opacity": "1",
+      "color": "rgb(37, 50, 71)",
+      "left": 723.5234375,
+      "top": 1965.7265625,
+      "width": 43.921875,
+      "height": 26.390625,
+      "transform": "none",
+      "zIndex": "auto"
+    }
+  ],
+  "density": [
+    {
+      "tag": "SECTION",
+      "cls": "network-business-card interface-business summary compact-ports",
+      "h": 149.984375,
+      "margin": "0px",
+      "padding": "14px",
+      "minHeight": "136px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "HEADER",
+      "cls": "",
+      "h": 46,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "22px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "H2",
+      "cls": "",
+      "h": 20,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "17.5px",
+      "font": "600 14px / 17.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "svg",
+      "cls": {},
+      "h": 20,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "17.5px",
+      "font": "600 14px / 17.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "block"
+    },
+    {
+      "tag": "path",
+      "cls": {},
+      "h": 15,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "17.5px",
+      "font": "600 14px / 17.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "inline"
+    },
+    {
+      "tag": "DIV",
+      "cls": "network-header-actions widget-action-group",
+      "h": 46,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "46px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "BUTTON",
+      "cls": "widget-primary-action",
+      "h": 44,
+      "margin": "0px",
+      "padding": "6px 12px",
+      "minHeight": "44px",
+      "lineHeight": "13px",
+      "font": "13px / 13px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "SPAN",
+      "cls": "widget-action-icon",
+      "h": 16,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "0px",
+      "font": "13px / 0px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "svg",
+      "cls": {},
+      "h": 16,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "0px",
+      "font": "13px / 0px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "block"
+    },
+    {
+      "tag": "path",
+      "cls": {},
+      "h": 10.6666259765625,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "0px",
+      "font": "13px / 0px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "inline"
+    },
+    {
+      "tag": "SPAN",
+      "cls": "widget-action-label",
+      "h": 13,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "13px",
+      "font": "13px / 13px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "DIV",
+      "cls": "widget-menu",
+      "h": 44,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "BUTTON",
+      "cls": "widget-menu-trigger",
+      "h": 44,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "44px",
+      "lineHeight": "18px",
+      "font": "18px / 18px Arial",
+      "display": "grid"
+    },
+    {
+      "tag": "DIV",
+      "cls": "interface-list",
+      "h": 56.984375,
+      "margin": "12px 0px 0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "grid"
+    },
+    {
+      "tag": "BUTTON",
+      "cls": "",
+      "h": 56.984375,
+      "margin": "0px",
+      "padding": "8px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "grid"
+    },
+    {
+      "tag": "SPAN",
+      "cls": "interface-link-mark up",
+      "h": 16,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "grid"
+    },
+    {
+      "tag": "svg",
+      "cls": {},
+      "h": 16,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "block"
+    },
+    {
+      "tag": "path",
+      "cls": {},
+      "h": 12,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "inline"
+    },
+    {
+      "tag": "SPAN",
+      "cls": "interface-name",
+      "h": 0,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "contents"
+    },
+    {
+      "tag": "STRONG",
+      "cls": "",
+      "h": 18.1875,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "18.2px",
+      "font": "500 13px / 18.2px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "block"
+    },
+    {
+      "tag": "SMALL",
+      "cls": "",
+      "h": 16.796875,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "16.8px",
+      "font": "12px / 16.8px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "block"
+    },
+    {
+      "tag": "SPAN",
+      "cls": "interface-link-state",
+      "h": 0,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "",
+      "display": "contents"
+    },
+    {
+      "tag": "STRONG",
+      "cls": "",
+      "h": 16.796875,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "16.8px",
+      "font": "",
+      "display": "block"
+    },
+    {
+      "tag": "SMALL",
+      "cls": "",
+      "h": 16.796875,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "auto",
+      "lineHeight": "16.8px",
+      "font": "",
+      "display": "block"
+    },
+    {
+      "tag": "svg",
+      "cls": {},
+      "h": 0,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "none"
+    },
+    {
+      "tag": "path",
+      "cls": {},
+      "h": 0,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "inline"
+    },
+    {
+      "tag": "FOOTER",
+      "cls": "",
+      "h": 5,
+      "margin": "0px",
+      "padding": "5px 0px 0px",
+      "minHeight": "0px",
+      "lineHeight": "19.5px",
+      "font": "13px / 19.5px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    },
+    {
+      "tag": "SMALL",
+      "cls": "",
+      "h": 0,
+      "margin": "0px",
+      "padding": "0px",
+      "minHeight": "0px",
+      "lineHeight": "16.8px",
+      "font": "12px / 16.8px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "none"
+    },
+    {
+      "tag": "FOOTER",
+      "cls": "inventory-footer",
+      "h": 28.796875,
+      "margin": "0px",
+      "padding": "12px 0px 0px",
+      "minHeight": "auto",
+      "lineHeight": "16.8px",
+      "font": "12px / 16.8px Arial, \"Microsoft YaHei\", sans-serif",
+      "display": "flex"
+    }
+  ],
+  "trafficTouchBounds": [
+    {
+      "width": 1024,
+      "action": {
+        "left": 890,
+        "right": 966,
+        "top": 245.59375,
+        "bottom": 291.59375
+      },
+      "labels": [
+        {
+          "left": 417.5,
+          "right": 465.5,
+          "top": 310.59375,
+          "bottom": 328.59375
+        },
+        {
+          "left": 766.5,
+          "right": 814.5,
+          "top": 310.59375,
+          "bottom": 328.59375
+        }
+      ]
+    },
+    {
+      "width": 768,
+      "action": {
+        "left": 640,
+        "right": 714,
+        "top": 239.59375,
+        "bottom": 285.59375
+      },
+      "labels": [
+        {
+          "left": 195.5,
+          "right": 243.5,
+          "top": 300.59375,
+          "bottom": 318.59375
+        },
+        {
+          "left": 524.5,
+          "right": 572.5,
+          "top": 300.59375,
+          "bottom": 318.59375
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "action": {
+        "left": 276,
+        "right": 350,
+        "top": 221.890625,
+        "bottom": 267.890625
+      },
+      "labels": [
+        {
+          "left": 94,
+          "right": 142,
+          "top": 282.890625,
+          "bottom": 300.890625
+        },
+        {
+          "left": 248,
+          "right": 296,
+          "top": 282.890625,
+          "bottom": 300.890625
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "action": {
+        "left": 206,
+        "right": 280,
+        "top": 221.890625,
+        "bottom": 267.890625
+      },
+      "labels": [
+        {
+          "left": 76.5,
+          "right": 124.5,
+          "top": 282.890625,
+          "bottom": 300.890625
+        },
+        {
+          "left": 195.5,
+          "right": 243.5,
+          "top": 282.890625,
+          "bottom": 300.890625
+        }
+      ]
+    }
+  ],
+  "touchInput": {
+    "coarse": true,
+    "points": 1
+  },
+  "touchTargets": [
+    {
+      "widget": "traffic",
+      "text": "测速",
+      "height": 44,
+      "minHeight": "44px"
+    },
+    {
+      "widget": "connection",
+      "text": "设备管理",
+      "height": 44,
+      "minHeight": "44px"
+    },
+    {
+      "widget": "networkInterface",
+      "text": "接口配置",
+      "height": 44,
+      "minHeight": "44px"
+    },
+    {
+      "widget": "devices",
+      "text": "查看全部",
+      "height": 44,
+      "minHeight": "44px"
+    },
+    {
+      "widget": "applications",
+      "text": "查看全部",
+      "height": 44,
+      "minHeight": "44px"
+    },
+    {
+      "widget": "system",
+      "text": "信息概览",
+      "height": 44,
+      "minHeight": "44px"
+    }
+  ],
+  "result": "passed"
+}

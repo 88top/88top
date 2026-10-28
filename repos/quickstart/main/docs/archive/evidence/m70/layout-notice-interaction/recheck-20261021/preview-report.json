@@ -1,0 +1,20 @@
+{
+  "views": [
+    {
+      "width": 1440,
+      "legacyNoticeAbsent": true,
+      "closePassed": true,
+      "autoDismissPassed": true,
+      "rowsUnchangedByUndo": true
+    },
+    {
+      "width": 390,
+      "legacyNoticeAbsent": true,
+      "closePassed": true,
+      "autoDismissPassed": true,
+      "rowsUnchangedByUndo": true
+    }
+  ],
+  "errors": [],
+  "result": "passed"
+}

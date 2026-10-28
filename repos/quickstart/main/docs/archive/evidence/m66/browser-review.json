@@ -1,0 +1,776 @@
+{
+  "checkedAt": "2026-10-14T03:51:08.372Z",
+  "views": [
+    {
+      "variant": "A",
+      "viewport": "desktop",
+      "scenario": "normal",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "desktop",
+      "scenario": "many",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "desktop",
+      "scenario": "empty",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "desktop",
+      "scenario": "loading",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "desktop",
+      "scenario": "error",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "desktop",
+      "scenario": "stale",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "desktop",
+      "scenario": "old",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "desktop",
+      "scenario": "no-speed",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "desktop",
+      "scenario": "disabled",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "desktop",
+      "scenario": "speed-error",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "desktop",
+      "scenario": "unsupported",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "desktop",
+      "scenario": "permission",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "tablet",
+      "scenario": "normal",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "tablet",
+      "scenario": "many",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "tablet",
+      "scenario": "empty",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "tablet",
+      "scenario": "loading",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "tablet",
+      "scenario": "error",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "tablet",
+      "scenario": "stale",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "tablet",
+      "scenario": "old",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "tablet",
+      "scenario": "no-speed",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "tablet",
+      "scenario": "disabled",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "tablet",
+      "scenario": "speed-error",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "tablet",
+      "scenario": "unsupported",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "tablet",
+      "scenario": "permission",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "mobile",
+      "scenario": "normal",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "mobile",
+      "scenario": "many",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "mobile",
+      "scenario": "empty",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "mobile",
+      "scenario": "loading",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "mobile",
+      "scenario": "error",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "mobile",
+      "scenario": "stale",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "mobile",
+      "scenario": "old",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "mobile",
+      "scenario": "no-speed",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "mobile",
+      "scenario": "disabled",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "mobile",
+      "scenario": "speed-error",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "mobile",
+      "scenario": "unsupported",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "A",
+      "viewport": "mobile",
+      "scenario": "permission",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "desktop",
+      "scenario": "normal",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "desktop",
+      "scenario": "many",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "desktop",
+      "scenario": "empty",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "desktop",
+      "scenario": "loading",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "desktop",
+      "scenario": "error",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "desktop",
+      "scenario": "stale",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "desktop",
+      "scenario": "old",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "desktop",
+      "scenario": "no-speed",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "desktop",
+      "scenario": "disabled",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "desktop",
+      "scenario": "speed-error",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "desktop",
+      "scenario": "unsupported",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "desktop",
+      "scenario": "permission",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "tablet",
+      "scenario": "normal",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "tablet",
+      "scenario": "many",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "tablet",
+      "scenario": "empty",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "tablet",
+      "scenario": "loading",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "tablet",
+      "scenario": "error",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "tablet",
+      "scenario": "stale",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "tablet",
+      "scenario": "old",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "tablet",
+      "scenario": "no-speed",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "tablet",
+      "scenario": "disabled",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "tablet",
+      "scenario": "speed-error",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "tablet",
+      "scenario": "unsupported",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "tablet",
+      "scenario": "permission",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "mobile",
+      "scenario": "normal",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "mobile",
+      "scenario": "many",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "mobile",
+      "scenario": "empty",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "mobile",
+      "scenario": "loading",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "mobile",
+      "scenario": "error",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "mobile",
+      "scenario": "stale",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "mobile",
+      "scenario": "old",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "mobile",
+      "scenario": "no-speed",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "mobile",
+      "scenario": "disabled",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "mobile",
+      "scenario": "speed-error",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "mobile",
+      "scenario": "unsupported",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "B",
+      "viewport": "mobile",
+      "scenario": "permission",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "desktop",
+      "scenario": "normal",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "desktop",
+      "scenario": "many",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "desktop",
+      "scenario": "empty",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "desktop",
+      "scenario": "loading",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "desktop",
+      "scenario": "error",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "desktop",
+      "scenario": "stale",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "desktop",
+      "scenario": "old",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "desktop",
+      "scenario": "no-speed",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "desktop",
+      "scenario": "disabled",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "desktop",
+      "scenario": "speed-error",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "desktop",
+      "scenario": "unsupported",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "desktop",
+      "scenario": "permission",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "tablet",
+      "scenario": "normal",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "tablet",
+      "scenario": "many",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "tablet",
+      "scenario": "empty",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "tablet",
+      "scenario": "loading",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "tablet",
+      "scenario": "error",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "tablet",
+      "scenario": "stale",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "tablet",
+      "scenario": "old",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "tablet",
+      "scenario": "no-speed",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "tablet",
+      "scenario": "disabled",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "tablet",
+      "scenario": "speed-error",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "tablet",
+      "scenario": "unsupported",
+      "count": 6,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "tablet",
+      "scenario": "permission",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "mobile",
+      "scenario": "normal",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "mobile",
+      "scenario": "many",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "mobile",
+      "scenario": "empty",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "mobile",
+      "scenario": "loading",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "mobile",
+      "scenario": "error",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "mobile",
+      "scenario": "stale",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "mobile",
+      "scenario": "old",
+      "count": 0,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "mobile",
+      "scenario": "no-speed",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "mobile",
+      "scenario": "disabled",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "mobile",
+      "scenario": "speed-error",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "mobile",
+      "scenario": "unsupported",
+      "count": 3,
+      "overflow": false
+    },
+    {
+      "variant": "C",
+      "viewport": "mobile",
+      "scenario": "permission",
+      "count": 0,
+      "overflow": false
+    }
+  ],
+  "interactions": [
+    "device identity navigation",
+    "all navigation",
+    "detail tabs",
+    "external/local authority",
+    "search",
+    "browser back",
+    "retry recovery",
+    "theme",
+    "keyboard variant",
+    "reload URL"
+  ],
+  "consoleErrors": [],
+  "requestFailures": [],
+  "result": "pass"
+}

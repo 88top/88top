@@ -1,0 +1,52 @@
+{
+  "result": "passed",
+  "BFrontendStill": "67b6546",
+  "assetVersion": "0.16.6-test20261018-preview-67b6546-05afdb6a42d7",
+  "additionalProtectedConfigs": [
+    "/etc/config/dockerd",
+    "/etc/config/ddnsto",
+    "/etc/config/ddns"
+  ],
+  "publicResources": [
+    {
+      "path": "index.js",
+      "sha256": "0be3628c751076e6e89fd989b145901b85eb635a165df349c39eebaf0c25af62"
+    },
+    {
+      "path": "style.css",
+      "sha256": "8ceca359d03a339a2171cfba5f5bca50f1272e7a3d4cb9b12f8dee58a66d4b15"
+    },
+    {
+      "path": "vendor.js",
+      "sha256": "2d10df1751d0d3e778744c01f8edf8db96082b8d0939cf65ef38ea05eea39867"
+    },
+    {
+      "path": "i18n/en.json",
+      "sha256": "2da3ec81c6d15ca52a574576486e534acf4a040d61adbc34cad360b91af76a4f"
+    }
+  ],
+  "runtimeUnchanged": {
+    "quickstartPIDs": [
+      "14546",
+      "9386"
+    ],
+    "startdhnsPIDs": [
+      "14546"
+    ],
+    "fastnetPIDs": [
+      10304
+    ],
+    "protected": [
+      "983a1c8b819e29a5ac7e053898afa66ccdc8653e535219482c92052b3a90ba11  /usr/sbin/quickstart",
+      "3a1c633f346f876d771b03f622aeff8215920683c5ed1945fca354bac77ba6c2  /usr/bin/quickstart-netpolicy",
+      "f3be309f97d8e1cede74d6ba8283e864ccba2c6558fdbaef44d9e6645e66df80  /usr/sbin/FastNet",
+      "c760d7f5a36a71ee12228e849c387473eeef37a5f42b94346baa00d5f1c0a628  /etc/config/fastnet",
+      "2cfb7147822538802930074838feb68b14d730c170c4663fa6050a5aa40ab8a1  /usr/libexec/istoree/fastnet.sh",
+      "eeccf129cb674ad20b95faa1a58549b8bd7bf34c359519e1fbd03de4e92a79ea  /usr/lib/opkg/status"
+    ],
+    "defaultRoute": "default via 192.168.30.1 dev br-lan proto static src 192.168.30.244",
+    "policyEnabled": "0",
+    "policyPIDs": []
+  },
+  "sessionsDestroyed": 2
+}

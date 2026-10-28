@@ -1,0 +1,9 @@
+{
+  "host": "root@192.168.30.244",
+  "expectedRuntime": "c9624a3",
+  "guardedPreviousHelperPid": 535313,
+  "exitCode": 0,
+  "output": "pid=568106 /usr/sbin/quickstart serve --unix /var/run/quickstart/local.sock \n983a1c8b819e29a5ac7e053898afa66ccdc8653e535219482c92052b3a90ba11  /proc/568106/exe\nnet:[4026531840]\npid=568345 /usr/sbin/startdhns dhns \n983a1c8b819e29a5ac7e053898afa66ccdc8653e535219482c92052b3a90ba11  /proc/568345/exe\nnet:[4026532500]\n",
+  "diagnostic": "",
+  "scope": "Only serve/runtime replacement and exact old dhns helper refresh in existing namespace; no interface, route, DHCP or policy writes"
+}

@@ -1,0 +1,27 @@
+{
+  "startedAt": "2026-10-19T14:56:32.792Z",
+  "candidate": "current 5180 static build; no rebuilding while suites run",
+  "suites": [
+    {
+      "name": "boundary-interaction-review",
+      "startedAt": "2026-10-19T14:56:32.796Z",
+      "endedAt": "2026-10-19T14:56:40.446Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 10,
+      "report": "docs/evidence/m70/design-color/round-1/regression/boundary-interaction-review/report.json"
+    },
+    {
+      "name": "launcher-home-review",
+      "startedAt": "2026-10-19T14:56:32.792Z",
+      "endedAt": "2026-10-19T14:56:40.556Z",
+      "code": 0,
+      "result": "pass",
+      "groups": 8,
+      "report": "docs/evidence/m70/design-color/round-1/regression/launcher-home-review/report.json"
+    }
+  ],
+  "endedAt": "2026-10-19T14:56:40.556Z",
+  "result": "pass",
+  "groups": 18
+}

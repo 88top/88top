@@ -23,6 +23,22 @@ type fakeServiceStore struct {
 	installNames   []string
 }
 
+func TestRejectsPackagePathsAndOptionsBeforeStore(t *testing.T) {
+	for _, name := range []string{"../other", "--help", "/tmp/package", "two packages", "pkg'", "pkg\n"} {
+		store := &fakeServiceStore{installed: true}
+		svc := NewService(store)
+		if _, err := svc.Check(context.Background(), models.AppCheckRequest{Name: name, CheckRunning: true}); err == nil {
+			t.Errorf("check accepted %q", name)
+		}
+		if _, err := svc.Install(context.Background(), models.AppInstallRequest{Name: name}); err == nil {
+			t.Errorf("install accepted %q", name)
+		}
+		if len(store.installedNames)+len(store.runningNames)+len(store.installNames) != 0 {
+			t.Fatal("invalid package reached store")
+		}
+	}
+}
+
 func (store *fakeServiceStore) IsInstalled(ctx context.Context, name string) (bool, error) {
 	store.installedNames = append(store.installedNames, name)
 	return store.installed, store.installedErr

@@ -1,0 +1,10 @@
+{
+  "target": "192.168.30.244",
+  "scope": "Read-only HTTP through the DHNS helper namespace forwarder to the real B LuCI login page; no session or credentials",
+  "exitCode": 4,
+  "responseBytes": 0,
+  "responseSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "loginFormMarkers": [],
+  "diagnostic": "",
+  "result": "failed"
+}

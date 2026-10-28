@@ -82,7 +82,7 @@ func TestServiceSetPreservesLegacyErrors(t *testing.T) {
 	}
 
 	service = NewService(&fakeStore{runErr: errors.New("run failed")})
-	if _, err := service.Set(context.Background(), models.QuickstartConfigRequest{}); err == nil || err.Error() != "设置失败" {
+	if _, err := service.Set(context.Background(), models.QuickstartConfigRequest{Key: "dockerdir"}); err == nil || err.Error() != "设置失败" {
 		t.Fatalf("expected set failure, got %v", err)
 	}
 }
@@ -179,7 +179,7 @@ func TestServiceGlobalFoldersMapsLegacyUCIKeys(t *testing.T) {
 	}
 }
 
-func TestServiceSetGlobalFoldersBuildsLegacyBatch(t *testing.T) {
+func TestServiceSetGlobalFoldersBuildsQuotedCommands(t *testing.T) {
 	store := &fakeStore{}
 	service := NewService(store)
 
@@ -197,15 +197,12 @@ func TestServiceSetGlobalFoldersBuildsLegacyBatch(t *testing.T) {
 		t.Fatalf("expected success 0, got %#v", resp.Success)
 	}
 	requireCommands(t, store.runs[0], []string{
-		"uci -q batch <<-EOF >/dev/null",
-		"set quickstart.main.main_dir=\"/mnt/main\"",
-		"set quickstart.main.conf_dir=\"/mnt/configs\"",
-		"set quickstart.main.pub_dir=\"/mnt/public\"",
-		"set quickstart.main.dl_dir=\"/mnt/downloads\"",
-		"set quickstart.main.tmp_dir=\"/mnt/cache\"",
-		"commit quickstart",
-		"EOF",
-		"",
+		"uci set quickstart.main.main_dir=/mnt/main",
+		"uci set quickstart.main.conf_dir=/mnt/configs",
+		"uci set quickstart.main.pub_dir=/mnt/public",
+		"uci set quickstart.main.dl_dir=/mnt/downloads",
+		"uci set quickstart.main.tmp_dir=/mnt/cache",
+		"uci commit quickstart",
 	})
 	if store.ensures != 1 {
 		t.Fatalf("expected config check before global folders set, got %d", store.ensures)
@@ -217,6 +214,60 @@ func requireCommands(t *testing.T, got []string, want []string) {
 
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("unexpected commands\nwant: %#v\n got: %#v", want, got)
+	}
+}
+
+func TestRejectsInvalidParametersBeforeCommands(t *testing.T) {
+	for _, key := range []string{"", "main.value", "../key", "two keys", "key;", "key\n"} {
+		store := &fakeStore{}
+		svc := NewService(store)
+		if _, err := svc.Set(context.Background(), models.QuickstartConfigRequest{Key: key, Values: []string{"data"}}); err == nil {
+			t.Errorf("set accepted %q", key)
+		}
+		if _, err := svc.Get(context.Background(), models.QuickstartGetConfigRequest{Key: key}); err == nil {
+			t.Errorf("get accepted %q", key)
+		}
+		if _, err := svc.Delete(context.Background(), models.QuickstartDeleteConfigRequest{Key: key}); err == nil {
+			t.Errorf("delete accepted %q", key)
+		}
+		if len(store.runs) != 0 || len(store.outputs) != 0 {
+			t.Fatal("invalid key reached commands")
+		}
+	}
+	for _, req := range []models.QuickstartConfigRequest{{Key: "valid", Type: "other"}, {Key: "valid", Values: []string{"line\nbreak"}}, {Key: "valid", Values: []string{"nul\x00value"}}} {
+		store := &fakeStore{}
+		if _, err := NewService(store).Set(context.Background(), req); err == nil || len(store.runs) != 0 {
+			t.Fatal("invalid value/type reached commands")
+		}
+	}
+}
+
+func TestGetPreservesQuotedAndEmptyValues(t *testing.T) {
+	for _, tc := range []struct {
+		raw    string
+		values []string
+	}{
+		{"quickstart.main.paths='/mnt/My Files' '/mnt/O'\\''Brien' '$literal' ''\n", []string{"/mnt/My Files", "/mnt/O'Brien", "$literal", ""}},
+		{"quickstart.main.paths=''\n", []string{""}},
+		{"quickstart.main.paths='C:\\data'\n", []string{`C:\data`}},
+	} {
+		result, err := ParseGetOutput("paths", tc.raw)
+		if err != nil || !reflect.DeepEqual(result.Values, tc.values) {
+			t.Fatalf("parse %q: %#v, %v", tc.raw, result, err)
+		}
+	}
+	result, err := ParseGlobalFoldersOutput("main_dir='/mnt/My Files'\nconf_dir='/mnt/O'\\''Brien'\nplugins='a' 'b'\n")
+	if err != nil || result.Home != "/mnt/My Files" || result.Configs != "/mnt/O'Brien" {
+		t.Fatalf("folders: %#v, %v", result, err)
+	}
+}
+
+func TestGlobalFoldersRejectsInvalidPathsBeforeCommands(t *testing.T) {
+	for _, path := range []string{"relative", "/mnt/line\nbreak", "/mnt/nul\x00"} {
+		store := &fakeStore{}
+		if _, err := NewService(store).SetGlobalFolders(context.Background(), models.GlobalFolders{Home: path}); err == nil || len(store.runs) != 0 {
+			t.Fatalf("accepted %q", path)
+		}
 	}
 }
 

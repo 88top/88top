@@ -91,7 +91,7 @@ func (store *defaultNasDiskCommandStore) MakePart(devicePath string) error {
 }
 
 func (store *defaultNasDiskCommandStore) FixGPTTable(devicePath string) error {
-	cmdStr := fmt.Sprintf(`printf "ok\nfix\n" | parted ---pretend-input-tty %v print`, devicePath)
+	cmdStr := fmt.Sprintf(`printf "ok\nfix\n" | parted ---pretend-input-tty %v print`, utils.ShellQuote(devicePath))
 	err := utils.BatchRun(context.Background(), []string{cmdStr}, 0)
 	if err != nil {
 		return errors.New("fix gpt table 报错" + cmdStr)
@@ -100,7 +100,7 @@ func (store *defaultNasDiskCommandStore) FixGPTTable(devicePath string) error {
 }
 
 func (store *defaultNasDiskCommandStore) MakePartRange(devicePath string, typeOrName string, alignedStart uint64, alignedEnd uint64) error {
-	cmdStr := fmt.Sprintf("parted -a optimal %v mkpart \"%v\" ext4 %vs %vs", devicePath, typeOrName, alignedStart, alignedEnd)
+	cmdStr := fmt.Sprintf("parted -a optimal %v mkpart %v ext4 %vs %vs", utils.ShellQuote(devicePath), utils.ShellQuote(typeOrName), alignedStart, alignedEnd)
 	stdout, stderr, err := utils.BatchOutErr(context.Background(), []string{cmdStr}, 0)
 	if err != nil {
 		return errors.New(stderr + stdout + "创建分区失败 " + cmdStr)

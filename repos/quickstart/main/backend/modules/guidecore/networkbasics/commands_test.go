@@ -9,8 +9,8 @@ func TestBuildPPPoECommands(t *testing.T) {
 	got := BuildPPPoECommands("user", "pass")
 	want := []string{
 		"uci set network.wan.proto='pppoe'",
-		"uci set network.wan.username='user'",
-		"uci set network.wan.password='pass'",
+		"uci set network.wan.username=user",
+		"uci set network.wan.password=pass",
 		"uci del network.wan.dns",
 		"uci del network.wan.peerdns",
 		"uci del network.wan.defaultroute",
@@ -126,8 +126,8 @@ func TestBuildDNSCommandBatchesForManualSkipsEmptyIPs(t *testing.T) {
 		{
 			"uci del network.wan.dns",
 			"uci set network.wan.peerdns=0",
-			"uci add_list network.wan.dns='1.1.1.1'",
-			"uci add_list network.wan.dns='8.8.8.8'",
+			"uci add_list network.wan.dns=1.1.1.1",
+			"uci add_list network.wan.dns=8.8.8.8",
 		},
 	}
 	if !reflect.DeepEqual(got, want) {

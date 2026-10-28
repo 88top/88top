@@ -35,7 +35,7 @@ func TestValidateMemberCount(t *testing.T) {
 		{level: "0", count: 2},
 		{level: "1", count: 2},
 		{level: "5", count: 3},
-		{level: "6", count: 3},
+		{level: "6", count: 4},
 		{level: "10", count: 4},
 	}
 	for _, tc := range valid {
@@ -48,6 +48,7 @@ func TestValidateMemberCount(t *testing.T) {
 		level string
 		count int
 	}{
+		{level: "6", count: 3},
 		{level: "linear", count: 1},
 		{level: "5", count: 2},
 		{level: "6", count: 2},
@@ -57,6 +58,9 @@ func TestValidateMemberCount(t *testing.T) {
 		if err := ValidateMemberCount(tc.level, tc.count); err == nil || err.Error() != "没有足够的成员设备" {
 			t.Fatalf("ValidateMemberCount(%q, %d) error=%v, want member error", tc.level, tc.count, err)
 		}
+	}
+	if err := ValidateMemberCount("", 2); err == nil {
+		t.Fatal("unknown RAID level accepted")
 	}
 }
 
