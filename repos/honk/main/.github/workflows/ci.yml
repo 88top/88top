@@ -5,7 +5,7 @@ on:
     branches: [main, dev]
   pull_request:
     branches: [main, dev]
-    types: [opened, synchronize, reopened, labeled]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   workflow_dispatch:
     inputs:
       ebpf:
@@ -42,6 +42,21 @@ jobs:
       full: ${{ contains(github.event.pull_request.labels.*.name, 'ci:full') }}
       ebpf_label: ${{ contains(github.event.pull_request.labels.*.name, 'ci:ebpf') }}
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Test changelog scripts
+        run: bash .github/ci/test-changelog.sh
+      - name: Test release scripts
+        run: for t in artifacts prune assets version notes; do bash .github/ci/test-release-$t.sh; done
+      - name: Check PR changelog fragments
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          NO_CHANGELOG: ${{ contains(github.event.pull_request.labels.*.name, 'no-changelog') }}
+        run: bash .github/ci/check-changelog.sh
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         if: github.event_name == 'pull_request'
         id: filter
@@ -57,7 +72,7 @@ jobs:
               - 'config.min.dae'
               - 'example.dae'
               - 'ci/**'
-              - '.github/ci/**'
+              - '.github/ci/pins.env'
               - '.github/workflows/**'
               - 'Justfile'
               - '.config/**'
@@ -67,6 +82,7 @@ jobs:
               - '*.md'
               - '.agents/**'
               - 'doc/**'
+              - 'changes/**'
             parser:
               - 'crates/honk-config/**'
               - 'tools/dae-parse/**'
@@ -102,7 +118,11 @@ jobs:
               - 'Cargo.toml'
               - 'Cargo.lock'
               - 'Justfile'
-              - '.github/ci/**'
+              - '.github/ci/pins.env'
+              - '.github/ci/run-vm-gate.sh'
+              - '.github/ci/ebpf-vm-tests.sh'
+              - 'rust-toolchain.toml'
+              - '.cargo/**'
               - '.github/workflows/ci.yml'
       - name: Record lane selection
         if: always()
@@ -165,7 +185,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
           toolchain: ${{ steps.toolchain.outputs.stable }}
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: parser
           cache-on-failure: true
@@ -262,7 +282,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
-          args: --offline --include-fragments --hidden '*.md' '.agents/**/*.md' 'doc/**/*.md'
+          args: --offline --include-fragments --hidden '*.md' '.agents/**/*.md' 'doc/**/*.md' 'changes/*.md'
           fail: true
 
   lint:
@@ -280,7 +300,7 @@ jobs:
         with:
           toolchain: ${{ steps.toolchain.outputs.stable }}
           components: rustfmt, clippy
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         id: rust-cache
         with:
           cache-on-failure: true
@@ -354,7 +374,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
           toolchain: ${{ steps.toolchain.outputs.stable }}
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         id: rust-cache
         with:
           cache-on-failure: true
@@ -536,7 +556,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
           toolchain: ${{ steps.toolchain.outputs.stable }}
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         id: rust-cache
         with:
           cache-on-failure: true
@@ -677,7 +697,7 @@ jobs:
         with:
           toolchain: ${{ steps.toolchain.outputs.ebpf }}
           components: rust-src, llvm-tools
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         id: rust-cache
         with:
           cache-on-failure: true
@@ -878,7 +898,7 @@ jobs:
         with:
           toolchain: ${{ steps.toolchain.outputs.ebpf }}
           components: rust-src, llvm-tools
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         id: rust-cache
         with:
           key: ${{ github.job }}-${{ steps.toolchain.outputs.stable }}-${{ steps.toolchain.outputs.ebpf }}
@@ -980,7 +1000,7 @@ jobs:
         with:
           toolchain: ${{ steps.toolchain.outputs.ebpf }}
           components: rust-src, llvm-tools
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         id: rust-cache
         with:
           key: ${{ github.job }}-${{ steps.toolchain.outputs.stable }}-${{ steps.toolchain.outputs.ebpf }}
@@ -1189,7 +1209,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
           toolchain: ${{ steps.toolchain.outputs.stable }}
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         id: rust-cache
         with:
           key: ${{ github.job }}-${{ steps.toolchain.outputs.stable }}
@@ -1302,7 +1322,7 @@ jobs:
         with:
           toolchain: ${{ steps.toolchain.outputs.ebpf }}
           components: rust-src, llvm-tools
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         id: rust-cache
         with:
           key: ${{ github.job }}-${{ steps.toolchain.outputs.stable }}-${{ steps.toolchain.outputs.ebpf }}
@@ -1448,7 +1468,7 @@ jobs:
         with:
           toolchain: ${{ steps.toolchain.outputs.ebpf }}
           components: rust-src, llvm-tools
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         id: rust-cache
         with:
           key: ${{ github.job }}-${{ steps.toolchain.outputs.stable }}-${{ steps.toolchain.outputs.ebpf }}

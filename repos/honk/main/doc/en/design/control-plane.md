@@ -11,23 +11,23 @@ The main implementation is `crates/honk-core/src/control/`. It consumes `EbpfBac
 Module map:
 
 - `src/control/`:
-    - `mod.rs` — `ControlPlane` [startup and shutdown](#startup-and-shutdown).
-    - `connection/` — canonical [flow initializer](#sniffing-and-flow-initialization).
-    - `nfqueue/` — `PendingUdpVerdicts` correlator; [held-packet protocol](./nfqueue.md).
-    - `sockets.rs` — [transparent ingress](#transparent-ingress), anyfrom replies; `udp_ingress.rs` owns `udp_fast_path`.
-    - `dns_control.rs` — `DnsController`; [query admission and projection](./dns.md#resolution-pipeline).
-    - `dns_listener.rs` — `DnsListener`; [standalone ingress lifecycle](./dns.md#ingress-paths).
-    - `reload/` — `apply_runtime_config`; [runtime publication](#reload-and-runtime-generations).
-    - `routing_matcher.rs` — [atomic routing publication](./routing.md#synchronous-slots-and-atomic-publication) and [kernel rule lowering](./routing.md#restricted-native-backend).
-    - `quic.rs`, `packet_sniffer.rs`, `tcp_sniff.rs` — QUIC decryption/reassembly, per-flow sniff sessions, and TCP negative cache, respectively.
-    - `udp_endpoint/mod.rs` — `UdpEndpointPool`; [endpoint transactions](#udp-endpoint-pipeline).
-    - `probers.rs` — `ProxyUdpProber`; `probers/http.rs` — `ProxyHttpProber`; [health probes](./groups.md#health-state-and-probes).
-    - `janitor.rs` — `BpfJanitor` scheduling and pressure policy; `janitor/sweep.rs` owns bounded scans and fenced retirement for [map maintenance](./datapath.md#userspace-maintenance-and-accounting); `janitor/health.rs` owns map-pressure and BPF failure-counter warnings.
-    - `retirement_worker.rs` — joined TCP/UDP/hint retirement ownership; `drain.rs` owns `DrainTracker` and [accepted-flow drain](#reload-and-runtime-generations).
+    - `mod.rs`: `ControlPlane` [startup and shutdown](#startup-and-shutdown).
+    - `connection/`: canonical [flow initializer](#sniffing-and-flow-initialization).
+    - `nfqueue/`: `PendingUdpVerdicts` correlator; [held-packet protocol](./nfqueue.md).
+    - `sockets.rs`: [transparent ingress](#transparent-ingress), anyfrom replies; `udp_ingress.rs` owns `udp_fast_path`.
+    - `dns_control.rs`: `DnsController`; [query admission and projection](./dns.md#resolution-pipeline).
+    - `dns_listener.rs`: `DnsListener`; [standalone ingress lifecycle](./dns.md#ingress-paths).
+    - `reload/`: `apply_runtime_config`; [runtime publication](#reload-and-runtime-generations).
+    - `routing_matcher.rs`: [atomic routing publication](./routing.md#synchronous-slots-and-atomic-publication) and [kernel rule lowering](./routing.md#restricted-native-backend).
+    - `quic.rs`, `packet_sniffer.rs`, `tcp_sniff.rs`: QUIC decryption/reassembly, per-flow sniff sessions, and TCP negative cache, respectively.
+    - `udp_endpoint/mod.rs`: `UdpEndpointPool`; [endpoint transactions](#udp-endpoint-pipeline).
+    - `probers.rs`: `ProxyUdpProber`; `probers/http.rs`: `ProxyHttpProber`; [health probes](./groups.md#health-state-and-probes).
+    - `janitor.rs`: `BpfJanitor` scheduling and pressure policy; `janitor/sweep.rs` owns bounded scans and fenced retirement for [map maintenance](./datapath.md#userspace-maintenance-and-accounting); `janitor/health.rs` owns map-pressure and BPF failure-counter warnings.
+    - `retirement_worker.rs`: joined TCP/UDP/hint retirement ownership; `drain.rs` owns `DrainTracker` and [accepted-flow drain](#reload-and-runtime-generations).
 
 ## Startup and shutdown
 
-- `src/lib.rs` — `run()`, `Cli`/`ClashCommand`, resource limits, backend selection, fixed-queue startup preflight ([Configuration](../configuration.md)). Real instances hold `/run/honk-core.lock` and publish the `reload` PID. `src/daens.rs` owns FD-owned `daens`/`dae0` setup and scoped namespace switches; `src/sysctl.rs` owns sysctl writes and hardening verification. Load/reuse the persistent allocator pin, then start NFQUEUE before datapath admission.
+- `src/lib.rs`: `run()`, `Cli`/`ClashCommand`, resource limits, backend selection, fixed-queue startup preflight ([Configuration](../configuration.md)). Real instances hold `/run/honk-core.lock` and publish the `reload` PID. `src/daens.rs` owns FD-owned `daens`/`dae0` setup and scoped namespace switches; `src/sysctl.rs` owns sysctl writes and hardening verification. Load/reuse the persistent allocator pin, then start NFQUEUE before datapath admission.
 
 Configuration diagnostics are collected before tracing setup. An early load or operator-validation failure writes prior nonterminal diagnostics to stderr once, then lets the binary return the redacted terminal cause once. Successful loading defers diagnostics to the configured tracing subscriber. Later runtime fatal errors retain their existing log-file mirror.
 
@@ -88,7 +88,7 @@ The sniffers feed the canonical initializer and may resolve a staged decision, b
 
 An authoritative URLTest setup failure retains one retry round over its latency-ordered top three. A Score-owned failure can try one different permitted leaf sequentially, excluding the failed identity before ranking even if its ordinary score remains highest. Score attempts share one absolute deadline; request-local recovery preserves the pinned generation, Selector choices and actual primary final-edge provenance. Typed refusal, local admission-capacity exhaustion, cancellation and shutdown remain terminal, including completed refusals found while draining a race. Application writes and established relays are never replayed.
 
-- `src/sniffing.rs` — **TCP only**: TLS SNI + HTTP Host (≤4096 bytes; buffered bytes returned for forwarding); `parse_client_hello_body` shared with the QUIC sniffer in `control/quic.rs`.
+- `src/sniffing.rs`: **TCP only**: TLS SNI + HTTP Host (≤4096 bytes; buffered bytes returned for forwarding); `parse_client_hello_body` shared with the QUIC sniffer in `control/quic.rs`.
 
 ## UDP endpoint pipeline
 
@@ -169,10 +169,10 @@ For NFQUEUE ingress, `PendingUdpVerdicts` owns token/generation, phase, FIFO ver
 Each UDP flow retains at most 64 datagrams including its first packet. All flows share an exact 8 MiB payload-permit budget. Admission obtains per-flow slots and global byte permits before copying; FIFO saturation drops the newest datagram. NFQUEUE has a separate ingest actor bounded to 256 entries and 8 MiB of queued payload.
 
 At startup, `honk-core` tries to raise the soft `RLIMIT_NOFILE`, snapshots the
-active value once, and caps the budgeting input at 1,048,576. VLESS carrier
-capacity is carved out as `min(after_dials / 8, 8192)` before the remaining
-descriptor budget determines UDP endpoint count. At the cap the fixed partition
-is:
+active value once, and caps the budgeting input at 1,048,576. DNS sockets receive
+a separate `min(transient_dials, 256)` partition, also bounded by the remaining
+descriptors. VLESS capacity then uses `min(after_dns / 8, 8192)` before the
+remaining budget determines UDP endpoint count. At the cap the fixed partition is:
 
 | Owner | Capacity | Descriptor accounting |
 | --- | ---: | ---: |
@@ -180,9 +180,10 @@ is:
 | Accepted TCP flows | 16,384 | 6 each = 98,304 |
 | Retained TCP pool | 2048 | 1 each = 2048 |
 | Transient outbound dials | 1024 | 1 each = 1024 |
+| DNS-owned sockets | 256 | 1 credit per socket; network bootstrap reserves 2 |
 | VLESS physical carriers | 8192 | 1 each = 8192 |
 | UDP endpoints | 32,768 | 10 each = 327,680 |
-| **Total** |  | **437,504** |
+| **Total** |  | **437,760** |
 
 One UDP endpoint budgets a relay socket, a possible SOCKS5 control stream, and
 its eager anyfrom reply socket plus a share of the process-wide foreign pool,
@@ -215,10 +216,15 @@ Admission ceilings are distinct:
 | Admission | Ceiling |
 | --- | ---: |
 | TCP flow permits | Descriptor-derived floor plus bounded borrowing of observed idle non-TCP headroom |
-| VLESS physical carriers | Startup `min(after_dials / 8, 8192)` process gate |
+| VLESS physical carriers | Startup `min(after_dns / 8, 8192)` process gate |
 | Cold non-DNS UDP slow path | `min(udp_endpoints, 256)` |
-| Port-53 ingress slow path | `min(transient_dials, 256)` |
+| UDP DNS client lifecycles | `min(1536, MemTotal / 4 / 256 KiB)` per generation |
+| All controller DNS query lifecycles | 2,048 per generation, shared by TCP and UDP |
+| DNS-owned sockets / endpoint network bootstrap | Separately backed process gate, at most 256 credits, shared across reload |
+| DNS proxy stream / non-raw packet preparation | Conservative process-wide logical leases, at most the DNS socket limit; not an aggregate proxy FD bound |
 | NFQUEUE ingest actor | 256 entries and 8 MiB |
+
+Proxy carrier ownership remains separate; see [DNS admission](./dns.md#resolution-pipeline) for the query and socket admission contracts.
 
 TCP accepts use the descriptor-derived flow budget, not a separate 256-entry ceiling. The [joined removal worker](./datapath.md#userspace-maintenance-and-accounting) serves TCP, UDP and expiry hints; UDP retains its 1024-message channel and deduplicating `removal_dirty` compensation. Exact tombstones are acknowledged only after owned I/O and backend retirement finish.
 
@@ -237,7 +243,7 @@ new input, and flush pending writes whenever input becomes idle. Each direction
 starts with an 8 KiB buffer; the first read that fills it marks a bulk flow, and that direction then uses a 65,535-byte buffer, so saturated reads fit one maximum AnyTLS frame rather than fragmenting into 8 KiB writes or leaving a one-byte tail (only the first frame is small). Idle and chatty flows never grow, so a held connection costs 16 KiB of copy buffers instead of 128 KiB. Buffering never
 requires the application to send another request or close before its current request leaves.
 
-After the first EOF, both relay paths bound only idle drain time: `DRAIN_DEADLINE` is 30 seconds without a byte of progress. An active survivor may run longer than 30 seconds; a silent survivor cannot pin accepted sockets indefinitely.
+Both relay paths half-close the peer at first EOF and bound only idle drain time: `DRAIN_DEADLINE` is 30 seconds without a byte of progress. An active survivor may run longer than 30 seconds; a silent survivor cannot pin accepted sockets indefinitely.
 
 A client that disappears without FIN or RST is bounded separately: the TPROXY TCP listeners enable TCP keepalive (3600 s idle, 15 s interval, 4 probes) and accepted sockets inherit it. A silent client ends its relay after about an hour; a live idle client answers the probes, so long idle connections stay open. Its error is a client-side `TimedOut`, or `HostUnreachable`/`NetworkUnreachable` when the kernel had a pending ICMP/ARP soft error; all settle Score as cancellation.
 
@@ -253,7 +259,9 @@ Cold NFQUEUE cell reconstruction retains its conn-state snapshot and invokes bac
 
 After a real relay completes, the TCP owner settles its actual Score outcome and relay-error statistics once before propagating any retirement failure. Successful relay evidence is not changed to cancellation by failed retirement. TCP pool replenishment still requires both relay success and confirmed retirement; intentional cancellation retains its separate neutral path.
 
-`splice.rs`: `relay_splice` uses bidirectional zero-copy `splice(2)` and half-close propagation between plain `TcpStream`s. First splice per direction probes capability: EINVAL/ENOSYS/EXDEV/EPERM before any bytes are staged ⇒ lossless copy fallback and process-wide latch; pipe creation failure ⇒ copy fallback without the latch. **Never restore unidirectional splice** (caused timeouts). `relay_auto` uses the same select-based copy loop for TLS/protocol-wrapped streams. `vision.rs` lends a Direct Vision carrier's socket to the same bidirectional engine. Both paths half-close the peer at first EOF and bound remaining drain by **idle** `DRAIN_DEADLINE`: 30s without byte progress, never cutting an active survivor. This prevents silent peers pinning tasks/sockets in CLOSE-WAIT. UDP uses `UdpEndpointPool`.
+`splice.rs`: `relay_splice` uses bidirectional zero-copy `splice(2)` and half-close propagation between plain `TcpStream`s. The first splice in each direction probes capability. EINVAL/ENOSYS/EXDEV/EPERM before any bytes are staged trigger lossless copy fallback and set the process-wide latch. Pipe creation failure falls back to copying without setting the latch. **Never restore unidirectional splice** (caused timeouts).
+
+`relay_auto` uses the same select-based copy loop for TLS/protocol-wrapped streams. `vision.rs` lends a Direct Vision carrier's socket to the same bidirectional engine. Both paths half-close the peer at first EOF and bound remaining drain by **idle** `DRAIN_DEADLINE`: 30s without byte progress, never cutting an active survivor. This prevents silent peers pinning tasks/sockets in CLOSE-WAIT. UDP uses `UdpEndpointPool`.
 
 ## Reload and runtime generations
 
@@ -269,7 +277,7 @@ SIGHUP uses an attempt-local diagnostic list. Load and operator-validation warni
    Stopping a warm coordinator cancels retention-reconciliation waits that could depend on the other coordinator; dispatched child work is still aborted and joined before the coordinator exits. QUIC warm release and terminal close serialize on the client slot, including with native task ownership disabled; cancellation leaves the client available to terminal close.
 5. Reopen pending admission and NFQUEUE last. Rule-derived feature bits live in the policy descriptor, not a separately published static-flags map.
 
-`control/reload/transaction.rs` holds `reload_lock` around candidate preparation and commit. The changed-generation publication takes `router` → `config` → `datapath_flags.publication()` (native explicit source activation only) → `ebpf`, then the DNS projection-publication guard → `group_manager` → `outbound_id_map` → `active_routing_plan` → `runtime_registry`. The provider's DNS publication guard is prepared within those guards. Native no-op activation takes `config` → flags publication → `ebpf`, without a router replacement. `mode.rs` standalone mode/fence updates take the flags mutex → `ebpf`; `reset_for_activation` takes neither again and performs no await. NFQUEUE fence/reopen runs outside the router/config publication guards. This records existing lock edges, not permission to add new ones; changes remain subject to CONTRIBUTING §2/§11 and human review.
+`control/reload/transaction.rs` holds `reload_lock` around candidate preparation and commit. The changed-generation publication takes `router` → `config` → `datapath_flags.publication()` (native explicit source activation only) → `ebpf`, then the DNS projection-publication guard → `group_manager` → `outbound_id_map` → `active_routing_plan` → `runtime_registry`. Within those guards, the provider's DNS publication guard is acquired after backend staging and immediately before registry authority replacement, and remains held through the existing DNS pointer commit. Backend staging therefore does not hold provider admission, while registry transfer, callback installation and Score authority publication remain fenced from new old-generation DNS admissions. Native no-op activation takes `config` → flags publication → `ebpf`, without a router replacement. `mode.rs` standalone mode/fence updates take the flags mutex → `ebpf`; `reset_for_activation` takes neither again and performs no await. NFQUEUE fence/reopen runs outside the router/config publication guards. This records existing lock edges, not permission to add new ones; changes remain subject to CONTRIBUTING §2/§11 and human review.
 
 `RoutingPushPlan::compile` is the only userspace lowering path; there is no caller-selected slot or separate domain-publication handshake. The `routing_policy.rs` ABI is `RoutingInput` 128 bytes, `RoutingDecision` 24 bytes, and `RoutingPolicyDescriptor` 24 bytes. Real eBPF requires Linux 6.12+; generated process-name matching checks `pname_len` before fixed-offset reads for the 6.12 verifier. Loaded routing slots must expose the current output layout in BTF.
 
@@ -287,7 +295,7 @@ Selector and UDP warm ownership stay generation-bound; see [warm-up ownership](.
 
 `DrainTracker` is the process-wide accepted-flow gate. Reload and shutdown set reject-new before a drain and wait up to five seconds; shutdown then continues teardown with the remaining count.
 
-- `src/mode.rs` — `DatapathFlagsHandle` serializes `ModeState` and `DATAPATH_FLAGS_MAP` under one async mutex. Initialize/mode/GLOBAL/static updates compose with NFQUEUE fence/reopen/disable so an API update cannot republish ready during reload. Fence completion follows READY=false, successful synchronous kernel grace, and fenced removal of undelivered Preparing/Pending/Aborted state.
+- `src/mode.rs`: `DatapathFlagsHandle` serializes `ModeState` and `DATAPATH_FLAGS_MAP` under one async mutex. Initialize/mode/GLOBAL/static updates compose with NFQUEUE fence/reopen/disable so an API update cannot republish ready during reload. Fence completion follows READY=false, successful synchronous kernel grace, and fenced removal of undelivered Preparing/Pending/Aborted state.
 
 ### Restart-required changes
 
@@ -382,8 +390,8 @@ When native is enabled, the engine and Clash share one transient mode/target/ori
 
 The optional Clash-compatible axum server is a userspace view and mutation surface over shared engine handles; endpoint details are in the [API reference](../reference/api.md). Connection tracking starts when an API binds or any group enables `interrupt_connections`; exact transport closure also works without a dashboard. Selector writes serialize with accepted manager replacement, write both networks from Clash and display TCP. Runtime cache tables live in the fixed state db `<data_dir>/state/honk.db`; old `cache_file.path` and `cache_id` only select a one-time legacy `cache.db` import, not the live database location. On upgrade, omitting `cache_file.enabled` retains Selector choices and delay samples by default; `true` additionally enables mode/GLOBAL and, with `store_dns`, DNS answers, while `false` disables that cache persistence. Mode persists only with native disabled. The directory lock remains held for the lifetime of every owned SQLite connection, including the cache writer's connection through thread exit. See the [experimental reference](../reference/experimental.md).
 
-- `src/stats.rs` — `StatsManager` owns the fixed allocation-free `GET /stats` UDP schema. `udp.nfqueue` includes listener/correlator counts, actor depth/queued bytes/oldest age, current queue depth, process-lifetime kernel drops accumulated across hard rebinds, explicit latest-read availability and cumulative read errors, held/peak guard gauges, effective receive-buffer size, terminal verdicts, token exhaustion/rotation, verdict errors, and `receiptToVerdict`. The latency is listener receipt-to-successful-verdict, not kernel queue residence. Top-level `warm.sessions` reports retained `anytls` and `vless` pool sessions plus per-protocol QUIC clients.
-- `src/clash_api.rs` + `clash_api/{logs,doh,ui}.rs` — Clash REST/WS API and external UI. Missing/empty UI directories trigger background downloads; URL/detour precedence is in [Configuration](../configuration.md). `GET /stats` returns userspace, not eBPF `OUTBOUND_STATS`, including authenticated `/stats.score.groups[]` entries with `name`, TCP/UDP reason counters, `verification`, and `budget`. Mode/GLOBAL mutations use `DatapathFlagsHandle`, atomically composing reload fencing with latest mode/static bits; Selector mutations use the group manager. Score groups retain `type: "url_test"`, show the current aggregate TCP winner in `now`, and reject `PUT /proxies/{name}`. Never return score cells/private target data.
+- `src/stats.rs`: `StatsManager` owns the fixed allocation-free `GET /stats` UDP schema. `udp.nfqueue` includes listener/correlator counts, actor depth/queued bytes/oldest age, current queue depth, process-lifetime kernel drops accumulated across hard rebinds, explicit latest-read availability and cumulative read errors, held/peak guard gauges, effective receive-buffer size, terminal verdicts, token exhaustion/rotation, verdict errors, and `receiptToVerdict`. The latency is listener receipt-to-successful-verdict, not kernel queue residence. Top-level `warm.sessions` reports retained `anytls` and `vless` pool sessions plus per-protocol QUIC clients.
+- `src/clash_api.rs` + `clash_api/{logs,doh,ui}.rs`: Clash REST/WS API and external UI. Missing/empty UI directories trigger background downloads; URL/detour precedence is in [Configuration](../configuration.md). `GET /stats` returns userspace, not eBPF `OUTBOUND_STATS`, including authenticated `/stats.score.groups[]` entries with `name`, TCP/UDP reason counters, `verification`, and `budget`. Mode/GLOBAL mutations use `DatapathFlagsHandle`, atomically composing reload fencing with latest mode/static bits; Selector mutations use the group manager. Score groups retain `type: "url_test"`, show the current aggregate TCP winner in `now`, and reject `PUT /proxies/{name}`. Never return score cells/private target data.
 - Lazy connection metadata tracking starts on successful Clash API bind or any `interrupt_connections` group. API shutdown removes only its consumer; group-driven interruption continues.
 
 

@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use tracing::debug;
 
 use super::super::effective_expiry;
@@ -8,6 +10,14 @@ use crate::dns::forwarder::{
     extract_soa_negative_ttl, rewrite_answer_ttls,
 };
 use crate::dns::outcome::{DnsOutcome, EffectiveExpiry, OutcomeStatus, Provenance, ResponseClass};
+#[cfg(feature = "native-api")]
+use crate::dns::query::IngressProfile;
+
+#[cfg(feature = "native-api")]
+pub(super) fn entry_id_demanded(context: &ExecutionContext<'_>) -> bool {
+    matches!(context.prepared.query().ingress(), IngressProfile::Api)
+        || crate::observe::flows::dns::cache_entry_demanded()
+}
 
 pub(super) async fn lookup(
     context: &ExecutionContext<'_>,
@@ -28,7 +38,11 @@ pub(super) async fn lookup(
         } => {
             crate::observe::flows::dns::cache_state("hit");
             #[cfg(feature = "native-api")]
-            let entry_id = cache.entry_id_for_revision(&context.cache_key, _revision);
+            let entry_id = if entry_id_demanded(context) {
+                cache.entry_id_for_revision(&context.cache_key, _revision)
+            } else {
+                None
+            };
             #[cfg(feature = "native-api")]
             crate::observe::flows::dns::cache_entry(entry_id.as_deref());
             let response =
@@ -73,10 +87,15 @@ pub(super) async fn lookup(
         ExactLookup::Miss => return Ok(None),
     };
     #[cfg(feature = "native-api")]
-    let entry_id = cache.entry_id_for_revision(&context.cache_key, revision);
+    let entry_id = if entry_id_demanded(context) {
+        cache.entry_id_for_revision(&context.cache_key, revision)
+    } else {
+        None
+    };
     #[cfg(feature = "native-api")]
     crate::observe::flows::dns::cache_entry(entry_id.as_deref());
     let remaining = entry.remaining_ttl_secs();
+    let expires_at = entry.expires_at;
     debug!(remaining, "DNS forwarder: positive cache hit");
     let refresh_after = (entry.min_ttl as u64 / 10).max(1);
     if allow_refresh && remaining <= refresh_after {
@@ -113,7 +132,8 @@ pub(super) async fn lookup(
             None,
             OutcomeStatus::Accepted,
             Provenance::Cache,
-            EffectiveExpiry::cacheable(std::time::Duration::from_secs(remaining)),
+            // Preferred-family probes must not extend the entry's expiry.
+            EffectiveExpiry::cacheable(expires_at.saturating_duration_since(Instant::now())),
             None,
             None,
             Vec::new(),

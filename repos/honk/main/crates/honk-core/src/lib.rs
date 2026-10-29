@@ -38,6 +38,34 @@ pub mod stats;
 pub mod subscription;
 mod sysctl;
 
+#[cfg(test)]
+pub(crate) mod test_support {
+    pub(crate) fn run_exact_in_child(env: &str, name: &str) -> bool {
+        if std::env::var(env).as_deref() == Ok(name) {
+            return false;
+        }
+        let executable = std::env::current_exe().unwrap();
+        let listed = std::process::Command::new(&executable)
+            .args(["--exact", name, "--list", "--format", "terse"])
+            .output()
+            .unwrap();
+        assert!(listed.status.success());
+        assert_eq!(
+            String::from_utf8(listed.stdout).unwrap().trim(),
+            format!("{name}: test")
+        );
+        assert!(
+            std::process::Command::new(executable)
+                .args(["--exact", name, "--test-threads=1", "--nocapture"])
+                .env(env, name)
+                .status()
+                .unwrap()
+                .success()
+        );
+        true
+    }
+}
+
 pub use honk_outbound::alive as outbound;
 pub use honk_outbound::group;
 pub use honk_outbound::proxy;
@@ -942,8 +970,11 @@ pub async fn run(cli: Cli) -> anyhow::Result<()> {
     let mut resource_budget = control::ResourceBudget::for_nofile(effective_nofile);
     match total_memory_bytes() {
         Some(memory) => resource_budget = resource_budget.with_memory(memory),
-        None => warn!("Failed to read MemTotal; UDP endpoints are sized by descriptors only"),
+        None => warn!(
+            "Failed to read MemTotal; using descriptor-only UDP endpoints and the default DNS query ceiling"
+        ),
     }
+    let dns_socket_budget = dns::transport::DnsSocketBudget::new(resource_budget.dns_sockets);
     let tcp_flow_max = resource_budget.active_tcp_flows.saturating_mul(2);
     if tcp_flow_max < 256 {
         warn!(
@@ -1196,6 +1227,7 @@ pub async fn run(cli: Cli) -> anyhow::Result<()> {
             honk_outbound::bootstrap::BootstrapResolver::parse(&config.global.bootstrap_resolver),
             config.dns.strategy,
         )?
+        .with_socket_budget(dns_socket_budget.clone())
         .with_client_subnet(dns_client_subnet)
         .with_timeouts(
             std::time::Duration::from_millis(config.global.dns_resolve_timeout_ms),
@@ -1221,6 +1253,7 @@ pub async fn run(cli: Cli) -> anyhow::Result<()> {
             dns_cache,
             dns_router,
         )
+        .with_socket_budget(dns_socket_budget)
         .with_configured_upstreams(&config.dns)
         .with_timeouts(
             std::time::Duration::from_millis(config.global.dns_resolve_timeout_ms),

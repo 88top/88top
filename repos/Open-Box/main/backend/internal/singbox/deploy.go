@@ -6,7 +6,7 @@ package singbox
 //
 // 自己的设计。阶段名沿用前端 OpenboxDeployResult.stage:
 //   validate = 生成 / 规则集 / 校验没过(还没碰正式配置); start = 重启命令失败; verify = 重启了但健康检查没过;
-//   running = 成功; error = 其它(已有部署在进行、读不到服务状态等)。conflict(与其它代理服务冲突)暂未实现。
+//   running = 成功; error = 其它(已有部署在进行、读不到服务状态等); conflict = 内核没在运行、而别的代理服务正在运行(见 Conflicts)。
 
 import (
 	"context"
@@ -31,6 +31,7 @@ import (
 // 阶段。
 const (
 	StageRunning  = "running"
+	StageConflict = "conflict"
 	StageValidate = "validate"
 	StageStart    = "start"
 	StageVerify   = "verify"
@@ -45,6 +46,8 @@ type DeployResult struct {
 	BadTags []string `json:"badTags"`
 	// RolledBack:新配置没能跑起来,已经换回旧配置。Message 里写着回滚后的状态。
 	RolledBack bool `json:"rolledBack,omitempty"`
+	// Busy:已有一次部署在进行,这次什么都没做(不进响应;HTTP 层据此回 409,也不记成「最近一次部署」)。
+	Busy bool `json:"-"`
 }
 
 // Builder 生成配置(*Generator 满足)。
@@ -71,6 +74,22 @@ type Deployer struct {
 	Service     ServiceControl
 	ServiceName string
 	Health      Health
+	// Conflicts 返回此刻正在运行的其它代理服务的名字(OpenClash、PassWall 等)。只在内核当前没在运行、
+	// 这次部署要把它从停止状态启动时才问:有冲突就不动手(同时跑会抢端口、DNS 和防火墙,可能弄断联网),
+	// 返回 conflict 阶段。内核已经在运行时的重启不拦(本来就并存着,重启不会更糟)。nil 或返回 error = 当作没有
+	// (与服务状态里的 conflicts 一样,检测失败不拦路)。
+	Conflicts func(ctx context.Context) ([]string, error)
+	// Track 非 nil:生成配置之前取一份输入指纹,部署成功后存下来,服务状态的 pendingRestart 靠它判断
+	// 「配置改了、内核还没用上」(见 pending.go)。回滚和校验失败不更新记录。
+	Track Tracker
+	// BeforeApply 在校验通过、替换正式配置(也就是要重启内核)之前调用,用来撤销 DNS 接管:内核重启的这几秒里
+	// dnsmasq 不能还指着它。返回 error = 没撤销成功,为安全起见不动手(StageError,正式配置和服务都没碰)。
+	// 校验没过的部署到不了这一步,所以不会白白撤销。nil = 不处理 DNS。
+	BeforeApply func(ctx context.Context) error
+	// AfterRunning 在内核起来并通过健康检查之后调用(部署成功;或失败回滚后旧配置又健康了),用来按 dns.mode
+	// 重新对齐 DNS 接管。返回的一句话附在 Message 后面(空串不附)。它的失败不改变 OK:内核是好的,
+	// 接管那边出错时已自动恢复到接管之前的状态,并在这句话里说明。nil = 不处理 DNS。
+	AfterRunning func(ctx context.Context) string
 
 	HealthTimeout time.Duration
 	StableFor     time.Duration
@@ -103,7 +122,9 @@ func fail(stage, msg string, bad []string) DeployResult {
 // 替换正式配置之后的所有步骤(重启、检查、回滚)不受 ctx 取消影响:请求断开不能把系统留在半截状态。
 func (d *Deployer) Deploy(ctx context.Context) DeployResult {
 	if !d.mu.TryLock() {
-		return fail(StageError, "已有一次部署正在进行,请稍后再试", nil)
+		r := fail(StageError, "已有一次部署正在进行,请稍后再试", nil)
+		r.Busy = true
+		return r
 	}
 	defer d.mu.Unlock()
 
@@ -116,6 +137,11 @@ func (d *Deployer) Deploy(ctx context.Context) DeployResult {
 	if err != nil {
 		return fail(StageError, "读不到内核服务的状态,为安全起见没有改动:"+err.Error(), nil)
 	}
+	if !before.Running && d.Conflicts != nil {
+		if names, err := d.Conflicts(ctx); err == nil && len(names) > 0 {
+			return fail(StageConflict, "检测到其它代理服务正在运行:"+strings.Join(names, "、")+"。同时运行会抢占端口、DNS 和防火墙,为安全起见没有启动内核,请先停掉它们", nil)
+		}
+	}
 	prev, err := os.ReadFile(d.configPath())
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return fail(StageError, "读不到当前的配置文件,为安全起见没有改动:"+err.Error(), nil)
@@ -123,6 +149,8 @@ func (d *Deployer) Deploy(ctx context.Context) DeployResult {
 	hadPrev := err == nil
 
 	// 2. 生成、落盘规则集、校验。到这里为止都没碰正式配置
+	// 输入指纹必须在生成之前取:取完之后用户又改了东西,记录就比实际部署的旧,最多多报一次「待重启」,不会漏报
+	fp := d.snapshot(ctx)
 	built, err := d.Build.Build(ctx)
 	if err != nil {
 		return fail(StageValidate, "生成配置失败:"+err.Error(), nil)
@@ -163,6 +191,11 @@ func (d *Deployer) Deploy(ctx context.Context) DeployResult {
 	actx, cancel := context.WithTimeout(context.WithoutCancel(ctx), d.applyBudget())
 	defer cancel()
 
+	if d.BeforeApply != nil {
+		if err := d.BeforeApply(actx); err != nil {
+			return fail(StageError, "为安全起见没有改动内核和配置:"+err.Error(), nil)
+		}
+	}
 	if hadPrev {
 		if err := store.WriteFileAtomic(d.PrevPath(), prev, 0o600); err != nil {
 			return fail(StageError, "备份旧配置失败,未应用:"+err.Error(), nil)
@@ -183,7 +216,22 @@ func (d *Deployer) Deploy(ctx context.Context) DeployResult {
 	if err := d.waitHealthy(actx, built.Config); err != nil {
 		return d.rollback(actx, StageVerify, "内核已"+actionName(action)+",但健康检查没通过:"+err.Error(), before.Running, hadPrev, prev)
 	}
-	return DeployResult{OK: true, Stage: StageRunning, Message: "已应用并正常运行", BadTags: []string{}}
+	d.recordApplied(fp)
+	return DeployResult{OK: true, Stage: StageRunning, Message: joinNote("已应用并正常运行", d.afterRunning(actx)), BadTags: []string{}}
+}
+
+func (d *Deployer) afterRunning(ctx context.Context) string {
+	if d.AfterRunning == nil {
+		return ""
+	}
+	return d.AfterRunning(ctx)
+}
+
+func joinNote(msg, note string) string {
+	if note == "" {
+		return msg
+	}
+	return msg + ";" + note
 }
 
 func actionName(a string) string {
@@ -323,7 +371,12 @@ func (d *Deployer) rollback(ctx context.Context, stage, reason string, wasRunnin
 		return DeployResult{Stage: stage, BadTags: []string{}, RolledBack: true,
 			Message: reason + ";" + restored + ",但" + strings.Join(problems, ";") + ",请检查内核服务"}
 	}
-	return DeployResult{Stage: stage, BadTags: []string{}, RolledBack: true, Message: reason + ";" + restored + "," + tail}
+	msg := reason + ";" + restored + "," + tail
+	if wasRunning && hadPrev {
+		// 旧配置的内核又健康了:BeforeApply 撤销过的 DNS 接管要接回去(没接回去也只是说明,不改回滚结果)
+		msg = joinNote(msg, d.afterRunning(ctx))
+	}
+	return DeployResult{Stage: stage, BadTags: []string{}, RolledBack: true, Message: msg}
 }
 
 // waitHealthyPrev 用旧配置的内容做健康检查(旧配置是原样的 JSON 字节,解析一下取控制接口和入站)。

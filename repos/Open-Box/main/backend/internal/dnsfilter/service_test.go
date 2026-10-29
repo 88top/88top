@@ -2,6 +2,7 @@ package dnsfilter
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -350,4 +351,64 @@ func TestPendingAndCoreArtifactReadiness(t *testing.T) {
 	if st, _ := h.sv.Status(ctx); st.Lists["a"].Count != 0 {
 		t.Errorf("地址变了,旧地址的统计不该显示: %+v", st.Lists["a"])
 	}
+}
+
+func TestStatusConnectedFollowsQueryLog(t *testing.T) {
+	h := newHarness(t, Settings{Enabled: true})
+	if st, err := h.sv.Status(context.Background()); err != nil || st.Connected {
+		t.Fatalf("没接查询日志时 connected 应为假: %v %v", st.Connected, err)
+	}
+	on := false
+	h.sv.Connected = func() bool { return on }
+	if st, _ := h.sv.Status(context.Background()); st.Connected {
+		t.Error("日志没在读时 connected 应为假")
+	}
+	on = true
+	if st, _ := h.sv.Status(context.Background()); !st.Connected {
+		t.Error("日志在读时 connected 应为真")
+	}
+}
+
+func TestStatusQueryLogReason(t *testing.T) {
+	h := newHarness(t, Settings{Enabled: true})
+	ctx := context.Background()
+	if st, err := h.sv.Status(ctx); err != nil || st.QueryLog != nil {
+		t.Fatalf("没接时不该有 queryLog: %+v %v", st.QueryLog, err)
+	}
+	reason := ""
+	h.sv.QueryLogReason = func() string { return reason }
+	if st, _ := h.sv.Status(ctx); st.QueryLog != nil {
+		t.Fatalf("没有原因不该有 queryLog: %+v", st.QueryLog)
+	}
+	for _, r := range []string{"user", "failed"} {
+		reason = r
+		st, _ := h.sv.Status(ctx)
+		if st.QueryLog == nil || st.QueryLog.Reason != r || st.QueryLog.Syslog {
+			t.Fatalf("reason=%s: %+v", r, st.QueryLog)
+		}
+		b, _ := json.Marshal(st)
+		var m map[string]any
+		if err := json.Unmarshal(b, &m); err != nil {
+			t.Fatal(err)
+		}
+		ql, _ := m["queryLog"].(map[string]any)
+		if len(ql) != 1 || ql["reason"] != r {
+			t.Fatalf("JSON 里的 queryLog 应只有 reason: %v", m["queryLog"])
+		}
+	}
+	// 没有原因时整个字段不出现(前端把它当 undefined)
+	reason = ""
+	b, _ := json.Marshal(mustStatus(t, h))
+	if strings.Contains(string(b), "queryLog") {
+		t.Fatalf("不该带 queryLog: %s", b)
+	}
+}
+
+func mustStatus(t *testing.T, h *harness) Status {
+	t.Helper()
+	st, err := h.sv.Status(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return st
 }

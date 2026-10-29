@@ -158,11 +158,15 @@
 | POST | `/api/openbox/deploy` | `deployNow` (api/openbox.ts:926) | — | () |
 | GET | `/api/openbox/deploy/state` | `fetchDeployState` (api/openbox.ts:942) | { state: OpenboxDeployState } | () |
 
+实现约定(M5):`POST /deploy` 做一次完整部署(生成配置 → 落盘本地规则集 → `sing-box check` → 备份并原子替换 → 重启 / 启动 → 健康检查 → 失败回滚,详见 `internal/singbox/deploy.go`),同一时刻只允许一次。响应体恒为 `{ok, stage, message, badTags}`(回滚过另带 `rolledBack: true`),`stage` 取 `running` / `conflict` / `validate` / `start` / `verify` / `error`;状态码:成功 200,`conflict`(内核没在运行、而别的代理服务正在运行,所以没启动)和「已有部署在进行」409,`validate` 422,`start` / `verify` 502,其它 500——前端 `deployNow` 不看状态码,只读响应体。`GET /deploy/state` 回 `{state: {stage, message, at, badTags}}`,是最近一次部署的结果(毫秒时间戳 `at`),存在数据目录的 `deploy-state.json`、重启后仍在,从没部署过是 `stage:"idle"`、`at:0`;「已有部署在进行」的拒绝不记。面板的「部署」和 DNS 过滤的应用都会记。**DNS 接管**(档案 `dns.mode = dnsmasq` 时 dnsmasq 把查询转给内核,见 `internal/system/dnstakeover.go`):校验通过后、替换配置并重启内核**之前**先撤销接管(内核重启的几秒里 dnsmasq 不能还指着它),撤销不成功就不动手(`stage:"error"`,配置和内核都没碰);内核健康之后(含回滚后旧配置又健康)按 `dns.mode` 对齐,等内核的 DNS 入站应答最多 20 秒。对齐的结果附在 `message` 后面(例如「dnsmasq 已改为把查询转发给内核」),对齐失败**不改变** `ok`——内核是好的,接管那边出错时已自动恢复原状,`message` 里说明「DNS 保持原样」。校验没过的部署不会碰接管。
+
 ## `/api/openbox/diagnostics`
 
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
 |---|---|---|---|---|
 | GET | `/api/openbox/diagnostics` | `fetchDiagnostics` (api/openbox.ts:1556) | Record<string, unknown> | () |
+
+实现约定(M5):响应是一份自由格式的 JSON(前端只是把它存成文件),顶层有 `generatedAt`、`redacted`、`note`、`backend`、`firmware`、`kernel`、`services`、`config`、`profile`、`logs`。只读;每块独立,读不到只在那一块写 `error`。`config` 是正在使用的内核配置(脱敏后的 `content`),不是合法 JSON 就不放内容;`profile` 是脱敏后的档案;`logs.core` / `logs.panel` 是两个服务最近 200 行日志(数组,或 `{error}`)。凭据、节点地址、订阅链接、SNI、传输路径都会被抹掉,脱敏规则见 `internal/diagnostics/redact.go`;日志里可能留有访问过的域名,所以包里提醒用户发出去之前自己再看一遍。
 
 ## `/api/openbox/dns`
 
@@ -194,6 +198,8 @@
 | GET | `/api/openbox/dns-filter/summary` | `fetchDnsFilterSummary` (api/openbox.ts:171) | DnsFilterSummary | () |
 
 实现约定(M2):`apply` 请求体可空,`{ update?: bool, listId?: string }`:`update` 为真重新下载启用的名单(带 `listId` 只重下那一份),否则只下载没有缓存的;之后编成规则集并走一次完整部署,成功返回新的状态。关闭过滤时也走 `apply`(把规则撤下来),不下载名单。错误码:409 = 已有应用在进行,或内核没在运行(名单已更新保存但没应用,不会替用户启动内核);400 = 没有这份名单 / 一份能用的名单都没有;500 = 部署失败(`error` 里写着回滚情况);503 = 没接应用服务。GET 返回的 `lists[id].error` 是上次下载 / 解析失败的原因(失败时沿用上次的缓存),`pending` 表示设置与已应用的不一致。
+
+实现约定(M2,`records` / `summary`):数据来自 dnsmasq 的查询日志文件(启动参数 `-dns-query-log` / 环境变量 `OPENBOX_DNS_QUERY_LOG`,默认空 = 不读;后端只读这个文件,不改 dnsmasq 配置)。没有日志来源时两个接口照常回 200:`records` 是空页,`summary` 的各项数字为 0、`averageMs` 为 `null`、`hourly` 仍是 24 项、`connected` 为假;`DnsFilterStatus.connected` 同样取自日志是否在读。`records`:新的在前,`result` 为空是全部、`dnsmasq` 是 dnsmasq 自己答的(`cached` + `local`)、其余按 `blocked` / `allowed` / `error` / `unknown` / `cached` / `local` 精确匹配,`search` 在域名、来源地址、名单名里找子串(不分大小写),每页最多 100 条(默认 20),页码超出时收回到最后一页;`via` 恒为 `dnsmasq`,`elapsed` 只有上游应答的才有(毫秒,按后端读到 query 行和 reply 行的时间差算,没有就是 `null`),`list` 只有 `blocked` 的有。`blocked` 的判断:dnsmasq 日志里被拦的域名和真不存在的域名一样是 NXDOMAIN,所以应答是 NXDOMAIN 时再拿域名对一遍已应用的名单(规则与 core 的 `dnsFilter` 一致),对上才标 `blocked`;过滤没启用、没应用过、读不到名单缓存时一律不标。`summary`:最近 24 个整点小时(含当前这一小时,旧的在前),`hourly[].hour` 是该小时开始的毫秒时间戳,`elapsed` 是耗时总和(毫秒)、`timed` 是有耗时的条数,`topDomains` 取前 10。记录在内存里最近 2000 条,统计保留 48 小时,每 30 秒有变化就落盘到数据目录的 `dns-query-log.json`。
 
 ## `/api/openbox/factory-reset`
 
@@ -241,9 +247,13 @@
 |---|---|---|---|---|
 | GET | `/api/openbox/node-info/{x}` | `fetchNodeInfo` (api/openbox.ts:1873) | OpenboxNodeInfo | (tag: string) |
 
-实现约定(M3,仅 `GET node-info/{x}`):`x` 是节点的 tag(需 URL 编码);先在已启用订阅的节点里找,再找档案里启用的链式代理(名字就是 tag),都没有 404。`protocol` 是从外到内的协议层(类型、传输类型、`tls`、`reality`),`port` 为 0 时是 null,链式代理带 `detour`(= 它的 `upstream`)。入口地址:服务器是 IP 就直接用,是域名就用系统解析器解析(超时 5 秒),v4 / v6 分开并排序,sing-box 的 fake-ip 段(198.18.0.0/15)不算真实地址;解析不了是 200 加 `resolveError`、地址为空数组。`entryCountry` 目前恒为空串。
+实现约定(M3,仅 `GET node-info/{x}`):`x` 是节点的 tag(需 URL 编码);先在已启用订阅的节点里找,再找档案里启用的链式代理(名字就是 tag),都没有 404。`protocol` 是从外到内的协议层(类型、传输类型、`tls`、`reality`),`port` 为 0 时是 null,链式代理带 `detour`(= 它的 `upstream`)。入口地址:服务器是 IP 就直接用,是域名就用系统解析器解析(超时 5 秒),v4 / v6 分开并排序,sing-box 的 fake-ip 段(198.18.0.0/15)不算真实地址;解析不了是 200 加 `resolveError`、地址为空数组。`entryCountry` 只带缓存里已有的(查过 entry-country 之后才有),没有就是空串。
+
+实现约定(M3,`GET node-info/{x}/entry-country`):取这个节点入口地址里第一个公网 IPv4(已排序,没有再取第一个公网 IPv6;内网、回环、链路本地、CGNAT、fake-ip 段都不查,也不会发给第三方),按顺序问 api.ip.sb、ipwho.is、api.ipapi.is 三家的「按 IP 查询」接口(只认答的是同一个 IP 的),回 `{ip, country}`,`country` 是两位大写国家代码。成功缓存一天,失败缓存一分钟(调用方取消不缓存),最多 512 个 IP。节点没有 404;没有可查的公网入口地址(解析不了、全是内网 / 假 IP)或三家都查不到是 502 加中文原因(前端遇到错误只是不显示国旗)。
 | GET | `/api/openbox/node-info/{x}/entry-country` | `fetchNodeEntryCountry` (api/openbox.ts:1874) | { ip: string; country: string } | (tag: string) |
 | POST | `/api/openbox/node-info/{x}/exit` | `fetchNodeExit` (api/openbox.ts:1877) | OpenboxNodeExit | (tag: string, refresh = false) |
+
+实现约定(M3,`POST node-info/{x}/exit`):请求体可以没有,`{"refresh":true}` 跳过缓存重查,但 15 秒内刚查过的仍按缓存答;缓存 6 小时(按节点 tag,最多 256 个),响应带 `cached:true` 表示来自缓存。先经这个节点(起临时 sing-box,和节点测速同一套)问 api.ip.sb / ipwho.is / api.ipapi.is,得到出口 IP 和国家(`country`);再由本进程直接(不经节点)并行问 proxycheck.io 的 v3 接口(`network.type` → `ipType`:residential / mobile(Wireless)/ business / hosting;`detections` 里的 TOR / VPN / Proxy / Scraper / Compromised → `proxyType`;`detections.risk` → `risk`;`device_estimate.subnet` → `devices`;`network.asn` / `organisation` → `asn` / `asnOwner`;`location` 的城市、地区、国家 → `location`,用「, 」连接)和 RDAP(rdap.org 跳转到各大洲的 RIR,只认顶层两位 `country` → `registeredCountry`)。`native` = 登记国家和 `country` 一致,任何一边不知道是 null。两路各自成败:没查到的那一路在 `errors`(`proxycheck` / `rdap`)里写原因,对应项为空串或 null,另一路照常给;出口不是公网地址时不问第三方,两路都记「出口不是公网地址,不查归属」。`ipv6` 只在出口本身是 IPv6 时有值(另一个协议族的出口地址不单独查)。节点在当前配置里没有可探测的出站(没启用、是节点组)404;openbox-core 或 sing-box 不可用 503;经节点连不上或三家接口都没答 502;其余 500。同时最多 2 个经节点的探测,同一个节点的并发请求合并成一次。
 
 ## `/api/openbox/nodes`
 
@@ -252,6 +262,9 @@
 | POST | `/api/openbox/nodes/latency` | `testNodeLatency` (api/openbox.ts:666) | { results: OpenboxLatencyResult[] } | (payload: { url?: string urls?: string[] content?: string userAgent?: string log |
 | POST | `/api/openbox/nodes/latency` | `testStoredLatency` (api/openbox.ts:1793) | OpenboxStoredLatencyResponse | (jobs: OpenboxStoredLatencyJob[], timeoutMs?: number) |
 | POST | `/api/openbox/nodes/latency` | `testStoredLatencyStream` (api/openbox.ts:1805) | — | ( jobs: OpenboxStoredLatencyJob[], onDone: (indices: number[]) |
+
+实现约定(M3,延迟历史):已保存节点的测速(请求体带 `jobs`,含 `progress` 的 NDJSON)测完后按每个 job 的 `record`(不传按默认记,`false` 只测不记)写进延迟历史,响应(NDJSON 是最后一行)带回**整份** `history`;全都不记时不带 `history`。通了记耗时(至少 1),超时 / 被拒 / 失败记 0,`invalid` / `not-found`(根本没测)不记;预览(带 `url` / `urls` / `content` / `loginId`)和链式代理测速不记。记历史失败不影响测速本身。节点组经临时实例测出的样本不带 `node`。
+
 
 > 实现约定(M1):请求体有 `url` / `urls` / `content` / `loginId` 之一 = 预览(拉取、解析、改名后按 `tags` 测,不落盘,测速地址取档案 `testUrl`;`loginId` 返回 501),否则按 `jobs` 测已保存节点(`url` 缺省取档案 `testUrl`)。`results` 与 `tags` / `jobs` 一一对应。`reason`:`not-found`(是组或已不在订阅里)、`invalid`(地址不合法或 sing-box 起不来,`error` 带原因)、`timeout`、`failed`。`timeoutMs` 默认 5000,上限 30000;一次最多 500 个,同时测 16 个。`progress:true`(仅 jobs)回 NDJSON:每测完一个 `{"done":[下标]}`,最后 `{"results":[...]}`,出错 `{"error":"..."}`。找不到 sing-box 返回 503。**未做**:延迟历史(`record` 忽略,响应没有 `history`)。
 
@@ -292,6 +305,12 @@
 |---|---|---|---|---|
 | POST | `/api/openbox/route-test` | `testRoute` (api/openbox.ts:1295) | OpenboxRouteTest | (target: string, port?: number, method: OpenboxProbeMethod = 'GET') |
 
+实现约定(M3,`POST route-test` 的**真实访问部分**;`dns` 判定和还没做的字段见下面):请求体 `{target, port?, method?}`;`target` 只认字母 / 数字 / `. _ : -` 且不以 `-` 开头(与前端 `isValidPenetrationTarget` 一致,≤ 253 字符),`port` 缺省或 1–65535,`method` 缺省 `GET`,取 `GET` / `HEAD` / `TCP` / `TLS`(大小写不分);不合法回 400 + 中文原因。探测前先让内核丢掉 DNS 缓存(只是让缓存失效,清不掉也照常测),再经内核的面板入站(127.0.0.1:7891)向 `CONNECT` 建一条隧道,连接开着时读一次 `/connections`,按「来源 127.0.0.1 + 本地端口」认出自己那条。`exit.url`:没指定端口按 `https://<目标>/`,端口 80 用 `http`,其它端口一律 `https`(IPv6 字面量带方括号);`GET` / `HEAD` 不跟随跳转,拿到什么状态码报什么(`ok:true` + `status`;`cf-mitigated: challenge` 响应头标成 `challenge:"cloudflare"`,请求本身算通);`TLS` 是建隧道加握手(`ms` 含两者,没有 `status`;目标是 IP 时不校验证书,域名照常校验);失败时 `ok:false` + 中文 `error`(超时 / 证书校验失败 / 连接被中断 / 内核没在运行等,不带网址)。认出连接后给 `chains`(路由选中的站点集 / 组在前、实际出口在后,与 Clash API 的顺序相反)、`rule` / `rulePayload`(内核报的命中规则)、`destinationIP`、`viaProxy`(出口不是 direct 出站);连接表读不到只写 `connectionsError`、探测本身仍算成功,表里找不到自己那条写 `notSeen:true`。整次探测超时 8 秒。
+
+**`dns` 判定**(`internal/dnsdecide`、`internal/routetest/dns.go`):IP 目标回 `{skipped:true}`;域名目标读**已部署的 `config.json`**,按它 `dns.rules` 的顺序预测这个域名的 A 查询命中哪条规则,没命中走 `dns.final`(没写 final 用第一台服务器)。能判断的条件:`domain` / `domain_suffix` / `domain_keyword` / `domain_regex`(同一条规则里这四个是同一组,任意一个命中即可;后缀 `example.com` 匹配它自己和子域,`.example.com` 只匹配子域)、`rule_set`(读 `route.rule_set` 登记的本地规则集文件:source 直接读、binary 靠 `sing-box rule-set decompile`,inline 直接用;remote 不联网取)、`query_type`、`ip_version`,以及 `logical`(and / or)和 `invert`;一条规则里不同条件是「且」,同一条件的多个值是「或」。响应:`ruleIndex`(没命中规则是 `null`,键一直有)、`rejected`(`reject` 动作,或 `predefined` 回非 NOERROR 且没给答案)、`server`(`tag` / `type` / `server` / `detour`)、`viaProxy`(服务器有 `detour` 且它不是 `direct` 出站)、`fakeIpRule`(命中了 fakeip 类型服务器的规则:A / AAAA 拿占位地址,`server` / `ruleIndex` 是继续往下找到的真解析器)、`runtimeChain` / `runtimeLeaf`(服务器走代理时,读内核 `/proxies` 沿「当前选中」从 `detour` 走到末尾,最多 8 层;末尾是直连出站时 `viaProxy` 改为 false;内核读不到就不带这两个字段)。**判断不了的不猜**:一条规则其余条件都满足、只差判断不了的条件时,记进 `assumed`(`needs` 写缺什么,如 `source_ip_cidr` / `clash_mode` / `rule_set:<tag>` / `action:<不认识的动作>`,按名字排序;`sourceIpCidr` / `sourceMac` 是规则里写的来源;`sameOutcome` 表示它的服务器 / 动作和最终预测相同、对这次查询没有影响),预测时按「没命中」往下走。规则集读不出来(文件没有、解码失败、没有 sing-box)、或含有只看域名判断不了的规则(带 IP / 端口等条件、逻辑规则、取反规则,例如 `geoip-*`)而又没有别的规则命中时,同样记成前提;已部署的配置读不到 / 不是 JSON / 没有 `dns` 段时回 `{error}`。
+
+**还没做、如实标出的**:`dns.rewrite`(DNS 重写命中)、`dns.stale`(前端没写明含义)、`resolve.cached` / `fakeIpFrom`、`context`、`exit.connectTo` / `noDomain` / `debug` 没有;`method:"TCP"` 回 `exit.ok:false` + 「暂不支持 TCP 方式」(面板入站对 CONNECT 先回 200 再去连目标,单凭隧道无法确认已连上)。`resolve` 已做,见 STATUS 的 route-test 的 resolve 条。**`exit6`**(`internal/routetest/exit6.go`)已做:`resolve.answers6` 有答案时,按第一个 v6 地址再访问一次,响应多一个 `exit6: {connectTo, ok, status?, ms?, error?}`;隧道连的是这个 v6 地址,请求的 Host、TLS 的 SNI 和证书校验仍用域名(像终端拿到 AAAA 后直接连那个地址),方式与主探测一致(GET / HEAD / TLS),只有探测结果、不读连接表。不适用时整个字段不出现(不是 null):目标是 IP、没有 AAAA 答案(档案没开 IPv6、查不到、查失败)、第一个 AAAA 答案落在内核 fake-ip 池(占位地址不是真实服务器)、方式是 TCP;主探测失败不影响 exit6(v4 不通时 v6 的结果恰恰是要看的),exit6 失败也不影响主探测;独立计时,各用一份超时。
+
 ## `/api/openbox/rulesets`
 
 实现约定(M1):`preview` / `import` 已实现,只收文本名单(Clash 经典 `.list`、YAML `payload`、一行一条的域名 / IP);条目 `type` 为 `domain` / `domain_suffix` / `domain_keyword` / `domain_regex` / `ip_cidr`,去重保序。`preview` 的 `q` 按值做不区分大小写的子串过滤,`total` 是名单总条数、`matched` 是命中数,`limit` 默认 50、最大 500;同一链接 60 秒内走内存缓存(搜索框边打边搜)。`import` 一次返回全部,超过 5 万条返回 400。二进制名单(.mrs / .srs)返回 400 并说明不支持;拉取失败 502。`entries`(按随包规则库的分类名查)已实现:`tag` 必填(缺少 400;不是 `geosite-` / `geoip-` 开头加字母数字和 `. _ ! @ -` 的名字 400;规则库里没有这个分类 404),`q` / `offset` / `limit` 与 `preview` 一致(`limit` 默认 50、最大 500),返回 `tag`、`total`(分类总条数)、`matched`(命中 `q` 的条数)、`offset`、`limit`、`entries`(空分类是 `[]`);分类条目超过 30 万时只列前面的并多一个 `truncated:true`。后端不自己解析 .srs,而是对 `<规则库目录>/<tag>.srs` 运行 `sing-box rule-set decompile`,所以看到的就是内核会匹配的那份;规则库目录由 `-geo-dir`(环境变量 `OPENBOX_GEO_DIR`)指定,只读、不下载,本地没有的分类如实 404;目录不存在或没有 `sing-box` 返回 503,解码失败返回 500 并带 `sing-box` 的原因。同一分类的解码结果在内存里缓存(按文件大小和修改时间失效,最多 2 个分类),同一时刻只解一个。`refresh` 已实现:POST `{ url }`(只收 http / https),对这一个链接跳过缓存重新联网拉取,拆成域名 / IP 两份编成 `<规则集目录>/list-<hash>.srs` / `list-<hash>-ip.srs`,只改规则集文件,不重启、不部署、不清理别的文件。响应 `{ url, tag, total, counts, needsRestart, changed, dropped, referenced }`:`total` 与 `preview` 同口径;`counts` 是按条目类型的条数(`domain` / `domain_suffix` / `domain_keyword` / `domain_regex` / `ip_cidr`,只含有的类型);`needsRestart` 仅当档案里正在用这个链接、且「有域名份 / 有 IP 份」的组合变了才为 `true`;`changed` 是有文件被改写或删除;`dropped` 是被丢掉的非法正则条数;`referenced` 是链接当前是否被站点集 / 前置自定义分流引用。失败时旧文件不动:链接不合格 400、二进制或空名单 400、对端拉取失败 502、没有 `sing-box` 503、编译失败 500(带 `sing-box` 的原因)。`/rulesets/check` 与 `/rulesets/refresh/status` 前端不调用,不实现。
@@ -318,7 +337,7 @@
 | POST | `/api/openbox/service/core/{x}` | `runServiceAction` (api/openbox.ts:1030) | OpenboxServiceActionResult | (action: OpenboxServiceAction) |
 | GET | `/api/openbox/service/status` | `fetchServiceStatus` (api/openbox.ts:1022) | OpenboxServiceStatus | () |
 
-实现约定(M1):`status` 的 `conflicts` 是正在运行的其它代理服务 `[{ id, label, running: true }]`,只读检测(OpenWrt 查 `/etc/init.d/<名> running`,systemd 用 `systemctl is-active`),名单见 `internal/system/conflicts.go` 的 `KnownConflicts`,自己的 sing-box 和后端服务名不算;检测失败当作没有,接口不报错。`pendingRestart` 暂恒为「没有」(随部署接 HTTP 再做),没有 `container` / `conflictAutoStopped`(后端不自动停别的服务)。
+实现约定(M1):`status` 的 `conflicts` 是正在运行的其它代理服务 `[{ id, label, running: true }]`,只读检测(OpenWrt 查 `/etc/init.d/<名> running`,systemd 用 `systemctl is-active`),名单见 `internal/system/conflicts.go` 的 `KnownConflicts`,自己的 sing-box 和后端服务名不算;检测失败当作没有,接口不报错。`pendingRestart` 是 `{pending, reasons}`:**内核在运行**、且生成配置用到的输入和**上次成功部署**时不一样才为真,`reasons` 取 `nodes` / `dns` / `route` / `inbounds` / `system`(按这个顺序,永远是数组)。做法见 `internal/singbox/pending.go`:每次部署成功(`POST /deploy`、DNS 过滤的应用)在生成配置之前取一份按原因分组的输入指纹存进数据目录的 `applied-config.json`,状态接口现算一份来比;只读已存的数据,不调 core、不联网。从没通过本后端部署成功过(没有记录)时不判断,恒为「没有」;内核没在运行、算不出指纹时也是「没有」,接口不报错。不进指纹的:订阅的用量 / 更新时间 / 节点数、档案里的 `updates` / `traffic` / `shareRegions` / `serverInfo`、`dns.filter` 里的名单名字和自动更新计划(过滤是否按当前设置应用过才算)、本机的 resolv.conf 和局域网网段、规则集链接的远端内容。清掉它要再**部署**一次;`POST /service/core/restart` 只是让内核重读磁盘上的旧配置,不会清。没有 `container` / `conflictAutoStopped`(后端不自动停别的服务)。 `POST /service/core/{x}` 与 DNS 接管的配合:`stop` / `restart` 之前先撤销接管,撤销不成功回 500 且不动内核;`start` / `restart` 命令成功后按 `dns.mode` 对齐(等内核的 DNS 入站应答最多 20 秒),响应在原有的 `{ok, code, stderr, durationMs}` 之外,有话要说时多一个 `dnsNote`(例如对齐失败、DNS 保持原样),前端不认识这个字段时忽略即可;命令本身失败时不去对齐。后端进程启动时会先清上次异常退出遗留的接管(内核正常就保留,内核不在了就撤销)。
 
 ## `/api/openbox/site-latency`
 
@@ -360,6 +379,8 @@
 |---|---|---|---|---|
 | GET | `/api/openbox/system/timezone` | `fetchTimezone` (api/openbox.ts:1680) | OpenboxTimezoneState | () |
 | PUT | `/api/openbox/system/timezone` | `saveTimezone` (api/openbox.ts:1683) | OpenboxTimezoneState | (zone: string) |
+
+实现约定(M5,仅时区):`zones` / `countries` 来自内置的 IANA 时区表(419 个时区,国家代码取自 `zone.tab`,UTC 没有);`zone` 读不到(没有服务管理器、命令失败)是空串,名单照给,不报错;`offset`(+08:00)和 `local`(路由器本地时间)问系统的 `date`,读不到也是空串;`platform` 是 `openwrt` / `systemd` / `none`。`PUT` 请求体 `{ zone }`:别名先换成名单里的名字(如 `Asia/Chongqing` → `Asia/Shanghai`,`Etc/UTC` / `GMT` → `UTC`),不认识 400;OpenWrt 上 system 配置里有别人暂存的修改时拒绝(500,说明原因),改失败会恢复原值;没有受支持的服务管理器 501;改完读回来与请求不一致 500。
 
 ## `/api/openbox/terminal-test`
 

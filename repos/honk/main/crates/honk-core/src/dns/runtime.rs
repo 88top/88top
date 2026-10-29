@@ -9,6 +9,7 @@ use super::forwarder::DnsForwarder;
 pub(crate) const RETIREMENT_DEADLINE: Duration = Duration::from_secs(30);
 pub(crate) const MAX_RETIRED_RUNTIMES: usize = 4;
 const MAX_CONCURRENT_QUERIES: usize = 2048;
+pub(crate) const MAX_UDP_CLIENT_QUERIES: usize = 1536;
 
 #[derive(Debug, Clone, Copy, thiserror::Error)]
 #[error("DNS network admission is unavailable")]
@@ -135,7 +136,9 @@ impl DnsRuntime {
     pub(crate) fn new(parts: DnsRuntimeParts) -> Arc<Self> {
         Arc::new(Self {
             query_limit: Arc::new(Semaphore::new(MAX_CONCURRENT_QUERIES)),
-            udp_query_limit: Arc::new(Semaphore::new(parts.udp_query_limit)),
+            udp_query_limit: Arc::new(Semaphore::new(
+                parts.udp_query_limit.min(MAX_UDP_CLIENT_QUERIES),
+            )),
             parts,
             state: AtomicU8::new(RuntimeState::Active as u8),
             leases: AtomicUsize::new(0),
@@ -370,6 +373,11 @@ impl RuntimeLease {
         &self,
         operation: std::pin::Pin<&mut impl Future<Output = T>>,
     ) -> Result<T, RuntimeCancelled> {
+        // A retired runtime never polls new work; checking the flag first keeps
+        // that contract while the select below polls the operation first.
+        if self.runtime.cancellation_requested.load(Ordering::Acquire) {
+            return Err(self.cancelled().await);
+        }
         #[cfg(feature = "native-api")]
         let observer = honk_outbound::runtime::flow_observation::current().map(|observer| {
             let mut context = observer.context();
@@ -403,17 +411,18 @@ impl RuntimeLease {
                 operation.await
             }
         };
+        // Ready cache hits must not register a cancellation waiter; the
+        // post-result check keeps cancellation winning a completion race.
         tokio::select! {
             biased;
-            error = self.cancelled() => Err(error),
             result = operation => {
-                // Cancellation can be published after select polls its first branch.
                 if self.runtime.cancellation_requested.load(Ordering::Acquire) {
                     Err(self.cancelled().await)
                 } else {
                     Ok(result)
                 }
             },
+            error = self.cancelled() => Err(error),
         }
     }
 
