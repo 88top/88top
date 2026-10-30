@@ -1135,8 +1135,8 @@ Both directories must contain `index.html`. `HONK_DOONA_DIR` is the only require
 
 | Pin in `.github/ci/pins.env` | Value |
 | --- | --- |
-| doona release | `0.1.0-rc.3` |
-| Commit | `931be7f19c481c8d2ce01509faa0f9050ce175bb` |
+| doona release | `0.1.0-rc.4` |
+| Commit | `58dfe2e2d1bccb1c0363895adb27eb4bfa1e932d` |
 | Archive checksums | `DOONA_SHA256`, `DOONA_LITE_SHA256` |
 
 From the repository root, run `export HONK_DOONA_DIR=$(ci/fetch-doona.sh)`. The script:
@@ -1153,9 +1153,9 @@ Full release builds include the embedded UI. The lean `-clash-api` and `-native-
 
 Lite uses system fonts. The Noto Sans TC and SC fonts are not embedded. Doona's CSS declares those fonts with `font-display: optional`, so the browser falls back to system fonts when the font requests return 404.
 
-To use Noto Sans, extract `doona-<version>.tar.gz` and `doona-fonts-<version>.tar.gz` from the [doona release](https://github.com/Zakkaus/doona/releases) into one directory and point `ui` at it, or install the `doona` and `doona-fonts` packages and set `ui: /usr/share/doona`. Both editions share the corresponding GPL-3.0-only source at the doona tag [`v0.1.0-rc.3`](https://github.com/Zakkaus/doona/tree/v0.1.0-rc.3).
+To use Noto Sans, extract `doona-<version>.tar.gz` and `doona-fonts-<version>.tar.gz` from the [doona release](https://github.com/Zakkaus/doona/releases) into one directory and point `ui` at it, or install the `doona` and `doona-fonts` packages and set `ui: /usr/share/doona`. Both editions share the corresponding GPL-3.0-only source at the doona tag [`v0.1.0-rc.4`](https://github.com/Zakkaus/doona/tree/v0.1.0-rc.4).
 
-The release workflow attaches `doona-source-0.1.0-rc.3.tar.gz` to the tag release and to the rolling Debug release. `ci/fetch-doona.sh --source` checks that the tag still points at the pinned commit and generates it with `git archive --format=tar --prefix=doona/ v0.1.0-rc.3 | gzip -n` (GNU gzip). Redistributors of a `native-ui` binary must preserve the notices and provide corresponding source through a method permitted by GPL-3.0 section 6.
+The release workflow attaches `doona-source-0.1.0-rc.4.tar.gz` to the tag release and to the rolling Debug release. `ci/fetch-doona.sh --source` checks that the tag still points at the pinned commit and generates it with `git archive --format=tar --prefix=doona/ v0.1.0-rc.4 | gzip -n` (GNU gzip). Redistributors of a `native-ui` binary must preserve the notices and provide corresponding source through a method permitted by GPL-3.0 section 6.
 
 To reproduce the assets, extract the source archive into its own directory, use Node matching `^22.13.0 || ^24.0.0 || >=26.0.0` and `pnpm@11.15.1`. From the extracted source directory:
 
@@ -1431,12 +1431,17 @@ Download or extraction failures are logged and do not stop the engine.
 
 ## `GET /stats`
 
-`GET /stats` is a userspace snapshot. It is not the eBPF `OUTBOUND_STATS` map and does not expose its packet counters. The fixed TCP, UDP, and NFQUEUE schemas create no dynamic per-node labels.
+`GET /stats` is a userspace snapshot. It is not the eBPF `OUTBOUND_STATS` map and does not expose its packet counters. The fixed DNS, TCP, UDP, and NFQUEUE schemas create no dynamic per-node labels.
 
 ```text
 {
   outbounds: [{ name, totalConns, activeConns, upload, download, errors }],
   pool: { readyHits, readyMisses, entries },
+  dns: {
+    socketAdmission: { refused, timeouts },
+    proxyAdmission: { timeouts },
+    pressure: { retiredUdpPools, retiredTransports }
+  },
   quic: {
     activeConnections, srttUs, cwndBytes, flowReceivedBytes, flowSentBytes,
     receiveWindowBytes, receiveWindowAvailableBytes, streamReceiveWindowBytes,
@@ -1499,6 +1504,20 @@ B = { businessStarts, sources: { cold, periodic, recovery }, trialStarts,
       trialSuccess, trialFailure, trialCancelled, trialSetupHistogram,
       trialSetupMillis, trialElapsedMillis }
 ```
+
+### DNS fields
+
+All `dns` fields are process-lifetime `u64` event counters shared across active and retired generations; reload does not reset them. Fields are sampled independently, so one snapshot does not imply cross-counter coherence. These totals are exposed by Clash `/stats`, not the native DNS diagnostic or history APIs.
+
+| Field | Meaning |
+| --- | --- |
+| `socketAdmission.refused` | Endpoint network bootstrap refused because it needs two credits and the whole DNS socket partition is smaller than that. |
+| `socketAdmission.timeouts` | Mandatory physical socket admission calls that return because their admission deadline expires. |
+| `proxyAdmission.timeouts` | Mandatory proxy stream or non-raw packet preparation admission calls that return because their admission deadline expires. |
+| `pressure.retiredUdpPools` | Idle UDP socket pools selected for pressure retirement, once per detached pool. |
+| `pressure.retiredTransports` | Idle TCP/TLS/H2/QUIC transport pools first selected for pressure retirement; resuming retained teardown does not count again. |
+
+`socketAdmission.refused` and `socketAdmission.timeouts` are disjoint. Initial contention, optional UDP shard-growth misses, and caller cancellation do not count as admission failures. Counters advance at admission, not once per singleflight follower or client reply. Pressure counters describe selected resources, not queries, drops, or descriptors already released; one transport pool may own multiple sockets. DNS admission failure may render as `SERVFAIL`, independently of singleflight `REFUSED`. Existing throttled failure logging is unchanged.
 
 ### TCP fields
 

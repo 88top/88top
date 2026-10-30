@@ -5,12 +5,12 @@
 // 以及 sing-box 官方 Clash API 的 GET /connections,没有参照上游。
 //
 // dns(按已部署配置里的 DNS 规则预测这个域名会问哪台服务器)见 dns.go。这一部分没有做、响应里如实标出的:
-//   - context(按终端预测),以及 exit.connectTo / noDomain / debug
-//     (resolve 做了:见 resolve.go 和 dns.go 的 annotateResolve;exit6 做了:见 exit6.go)
-//   - TCP 探测方式:面板入站回 200 只说明内核接了请求,不说明它连上了目标,单凭隧道没法确认,所以如实报「暂不支持」
+//   - context(按终端预测)和 debug
+//     (resolve 做了:见 resolve.go 和 dns.go 的 annotateResolve;exit6 做了:见 exit6.go;connectTo / noDomain 也做了)
 //
-// 做法与 sitelatency 相同(复用它的 DialTunnel):先向面板入站发 CONNECT 建隧道,连接开着的时候读一次 /connections,
-// 按「来源 127.0.0.1:本地端口」找到自己那条。探测前先让内核丢掉 DNS 缓存(只是让缓存失效,不改配置),
+// GET / HEAD / TLS 的做法与 sitelatency 相同(复用它的 DialTunnel):先向面板入站发 HTTP CONNECT 建隧道,连接开着的时候读一次
+// /connections,按「来源 127.0.0.1:本地端口」找到自己那条。HTTP CONNECT 不能用来判断「内核连上目标没有」(见 tcp.go),
+// 所以 TCP 方式改走 SOCKS5。探测前先让内核丢掉 DNS 缓存(只是让缓存失效,不改配置),
 // 这样看到的是此刻线路真的问出来的结果;清不掉也照常测。
 package routetest
 
@@ -68,7 +68,9 @@ type Exit struct {
 	Rule             string   `json:"rule,omitempty"`
 	RulePayload      string   `json:"rulePayload,omitempty"`
 	DestinationIP    string   `json:"destinationIP,omitempty"`
+	ConnectTo        string   `json:"connectTo,omitempty"` // 像终端一样按解析出的第一个真实 IPv4 去连时,这个 IP;目标是 IP / 没有可用答案时没有
 	ViaProxy         *bool    `json:"viaProxy,omitempty"`
+	NoDomain         bool     `json:"noDomain,omitempty"` // 命中的是只管没有域名的连接的 IP 规则,见 noDomainRule
 	Method           string   `json:"method,omitempty"`
 	Challenge        string   `json:"challenge,omitempty"`
 	NotSeen          bool     `json:"notSeen,omitempty"`
@@ -190,8 +192,7 @@ func (s *Service) Run(ctx context.Context, in Input) (*Result, error) {
 	res.Exit = Exit{URL: ProbeURL(in.Target, in.Port), Method: in.Method}
 
 	if in.Method == MethodTCP {
-		res.Exit.Error = "暂不支持 TCP 方式(只建隧道无法确认内核已连上目标),请改用 TLS 或 GET / HEAD"
-		return res, nil
+		res.Exit.URL = tcpAddr(in) // 没有网址,显示「主机:端口」
 	}
 
 	if s.FlushDNS != nil {
@@ -212,11 +213,21 @@ func (s *Service) Run(ctx context.Context, in Input) (*Result, error) {
 
 	pctx, cancel := context.WithTimeout(ctx, s.timeout())
 	defer cancel()
+	// 像终端那样:DNS 给了真实的 IPv4 就按第一个去连(Host / SNI / 证书校验仍用域名),
+	// 没有可用答案(查不到、第一个是内核的占位地址)才让内核按域名去连
+	connectTo := ""
+	if ad, ok := firstV4(res.Resolve); ok {
+		connectTo = ad.String()
+	}
+	res.Exit.ConnectTo = connectTo
 	var probed *probed
-	if in.Method == MethodTLS {
-		probed = s.probeTLS(pctx, in, "")
-	} else {
-		probed = s.probeHTTP(pctx, in, "")
+	switch in.Method {
+	case MethodTLS:
+		probed = s.probeTLS(pctx, in, connectTo)
+	case MethodTCP:
+		probed = s.probeTCP(pctx, in, connectTo)
+	default:
+		probed = s.probeHTTP(pctx, in, connectTo)
 	}
 	defer probed.close()
 	if ctx.Err() != nil {
@@ -225,7 +236,7 @@ func (s *Service) Run(ctx context.Context, in Input) (*Result, error) {
 
 	res.Exit.OK, res.Exit.Status, res.Exit.MS, res.Exit.Challenge = probed.ok, probed.status, probed.ms, probed.challenge
 	if probed.err != nil {
-		res.Exit.Error = sitelatency.DescribeError(probed.err, s.timeout())
+		res.Exit.Error = s.describeErr(probed.err)
 	} else {
 		s.fillRoute(ctx, &res.Exit, probed.port)
 	}
@@ -382,6 +393,7 @@ func (s *Service) fillRoute(ctx context.Context, ex *Exit, port string) {
 		chains = append(chains, found.Chains[i])
 	}
 	ex.Chains, ex.Rule, ex.RulePayload, ex.DestinationIP = chains, found.Rule, found.RulePayload, found.DestIP
+	ex.NoDomain = noDomainRule(found.Rule, found.Host)
 	leaf := chains[len(chains)-1]
 	via := !contains(snap.DirectTags, leaf)
 	ex.ViaProxy = &via

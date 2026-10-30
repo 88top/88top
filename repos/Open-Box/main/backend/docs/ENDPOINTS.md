@@ -58,6 +58,11 @@
 |---|---|---|---|---|
 | GET | `/api/controller-ws/{x}` | `createWebSocket` (api/index.ts:257) | — | t |
 
+实现约定(M3):前端对内核控制接口的约定共两个前缀,**接口表只收字面路径,所以 REST 那一半没列在表里**:
+- `/api/controller/<路径>`:axios 的 `baseURL`(api/index.ts:13),代理、规则、连接、配置、提供者、延迟测试、重启 / 升级等几十个调用都走这里,后端原样转给内核的 Clash API(`GET /proxies`、`PUT /proxies/{组}`、`GET /proxies/{x}/delay`、`GET /connections`、`DELETE /connections/{id}`、`PATCH /configs`……),方法、路径(含转义)、查询、请求体和响应都不改;
+- `/api/controller-ws/<名字>`:`connections` / `logs` / `memory` / `traffic` 的 WebSocket,握手和帧原样转发,查询参数(如 `level`)保留。
+两个前缀都在登录保护之内;内核的 secret 由后端从正式配置里读出来加在发给内核的请求上,浏览器的 Cookie / Authorization / 自带的 `token` 参数不转;WebSocket 只接受同源;内核连不上返回 502 加 `{ message }`。
+
 ## `/api/openbox/activation`
 
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
@@ -215,6 +220,8 @@
 | POST | `/api/openbox/failover/refresh` | `refreshFailover` (api/openbox.ts:811) | { ok: boolean } | () |
 | GET | `/api/openbox/failover/status` | `fetchFailoverStatus` (api/openbox.ts:809) | OpenboxFailoverStatus | (signal?: AbortSignal) |
 
+实现约定(M4,第一部分):部署成功后后端把故障转移计划存成配置目录里的 `failover.json`,`GET /status` 用这份计划加内核此刻的选择(`GET /proxies`)算出每个组的 `status`(主用 `ok` / 备用 `backup` / 拒绝 `reject` / 读不到或对不上 `unknown`)、`currentLaneId`、`kernelNow` 和各页签的状态;检测管理器还没做,所以 `running` 恒为 `false`、页签 `health` 恒为 `unknown`、节点检测结果为 `null`、`lastSwitch` 等为 `null`。`POST /refresh` 与 `POST /recheck` 现在回 501(`recheck` 对不存在的组先回 404)。
+
 ## `/api/openbox/groups`
 
 实现约定(M1):组存 `groups.json`(经 core `normalizeGroups` 补全,含内置直连 / 拒绝),没存过时 GET 返回默认节点组(不落盘)。PUT 整份覆盖:名字留空由核心补「分组-N」;组与组重名、与节点(含启用的链式代理)重名返回 400;按 id 对比旧档,改名的组在 `renamed` 里返回,其它组(含故障转移页签)对它的引用自动迁移;`dangling` 是既不是节点也不是组的成员;`dropped` 是核心 `emitGroups` 判定要丢弃的组(成环,`reason: "cycle"`)。`availableNodes` = 已启用订阅的节点(带订阅名 / id、改名识别出的地区名)+ 启用的链式代理(`chain: true`、`upstream`);`subscriptions` 含停用的订阅;`availableGroups` = 已启用的组名(含内置直连 / 拒绝)。核心不可用返回 503。
@@ -240,6 +247,8 @@
 | GET | `/api/openbox/latency-history/version` | `fetchLatencyHistoryVersion` (api/openbox.ts:1406) | { updatedAt: number } | () |
 
 实现约定(M3):样本 `{time, delay, node?}` 的 `time` 是 RFC3339、`delay` 是毫秒(0 = 不通),节点组的样本带 `node`(当时选中的节点),节点自己的没有;每个名字只留最新 10 条(旧 → 新),同一时刻只留一条,最多记 5000 个名字。`samples` 一次最多 500 条,名字不能为空或超过 200 个字符、时间要合法、延迟 0 – 600000,**任何一条不合法整批 400、什么都不记**;请求体上限 256 KiB(413)。`sync` 读一次内核的 Clash API `GET /proxies`,把各代理的测速记录合进来(`delay` 为 0 的不记);内核读不到不是错误,照样回现有的历史。`updatedAt`(毫秒)只在内容真有变化时才更新,没变化也不写盘。
+
+实现约定(M4,定时采集):后端每 30 秒自己读一次内核,把自动择优组测出的新结果合进历史(与 `POST /sync` 是同一段逻辑),浏览器没开着也不丢样本;内核没起来时不记、不报错;没有新结果时不写盘、`updatedAt` 不变。
 
 ## `/api/openbox/node-info`
 
@@ -273,6 +282,8 @@
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
 |---|---|---|---|---|
 | POST | `/api/openbox/penetration` | `queryPenetration` (api/openbox.ts:1174) | OpenboxPenetrationResult | (target: string) |
+
+> 实现约定(M3,第一部分):请求 `{"target":"域名或 IP"}`,目标不合法 400,读不到已部署配置 500。按已部署 `config.json` 的 `route.rules` 推算(`internal/routedecide`)。已给:`matched`(`index` / `rule` / `outbound` / `action`)、`owner`(只认得出的)、`assumed`(`needs` / `leaf` / `sameOutcome`)、`preResolve`、`dns`、`chain`(永远是数组,reject 时为空)、`finalOutbound`(拿不到为 null)、`chainError`、`matchError`(规则集没能检查:`matched` 为 null、不给线路)、`routingStale`。`matched.entries`(最多 20 条,来源是规则集名或 `custom`)/ `entriesTotal` 已做。`resolved` 和 `matched.viaIp` 已做:域名目标先经内核的 DNS 入站解析(档案开了 IPv6 才再问 AAAA),响应里 `resolved` 是 `{fakeIp?, addresses, error?}`(`addresses` 永远是数组;解析失败不算接口错误,原因写在 `error`;IP 目标不解析、没有这个字段)。推算时把「第一个真实 IPv4(没有就第一个 IPv6)」当终端会连的目的 IP:终端自己解析后按真实地址连进内核、内核再嗅探出域名,连接同时带域名和目的 IP,所以 `ip_is_private`、`ip_cidr`、`ip_version` 和规则集里的 IP 条目按这个地址判;core 给「看 IP 的规则」带了「连接没有域名」的前提(`domain_regex` 取反),有域名的连接不会被它们命中,这一点推算里照样成立。靠地址命中的规则,`matched.viaIp` 是那个地址,`entries` 也把规则集里命中它的 IP 条目列出来。解析到的是占位地址(`fakeIp: true`,连接进内核后按域名找回目标)或解析失败时没有目的 IP,IP 条件仍记成 `assumed` 的前提(与原来一致)。**未做**:`preMatch`、`firstLayer`、前置自定义分流的 `ownerName`。
 
 ## `/api/openbox/policies`
 
@@ -309,7 +320,9 @@
 
 **`dns` 判定**(`internal/dnsdecide`、`internal/routetest/dns.go`):IP 目标回 `{skipped:true}`;域名目标读**已部署的 `config.json`**,按它 `dns.rules` 的顺序预测这个域名的 A 查询命中哪条规则,没命中走 `dns.final`(没写 final 用第一台服务器)。能判断的条件:`domain` / `domain_suffix` / `domain_keyword` / `domain_regex`(同一条规则里这四个是同一组,任意一个命中即可;后缀 `example.com` 匹配它自己和子域,`.example.com` 只匹配子域)、`rule_set`(读 `route.rule_set` 登记的本地规则集文件:source 直接读、binary 靠 `sing-box rule-set decompile`,inline 直接用;remote 不联网取)、`query_type`、`ip_version`,以及 `logical`(and / or)和 `invert`;一条规则里不同条件是「且」,同一条件的多个值是「或」。响应:`ruleIndex`(没命中规则是 `null`,键一直有)、`rejected`(`reject` 动作,或 `predefined` 回非 NOERROR 且没给答案)、`server`(`tag` / `type` / `server` / `detour`)、`viaProxy`(服务器有 `detour` 且它不是 `direct` 出站)、`fakeIpRule`(命中了 fakeip 类型服务器的规则:A / AAAA 拿占位地址,`server` / `ruleIndex` 是继续往下找到的真解析器)、`runtimeChain` / `runtimeLeaf`(服务器走代理时,读内核 `/proxies` 沿「当前选中」从 `detour` 走到末尾,最多 8 层;末尾是直连出站时 `viaProxy` 改为 false;内核读不到就不带这两个字段)。**判断不了的不猜**:一条规则其余条件都满足、只差判断不了的条件时,记进 `assumed`(`needs` 写缺什么,如 `source_ip_cidr` / `clash_mode` / `rule_set:<tag>` / `action:<不认识的动作>`,按名字排序;`sourceIpCidr` / `sourceMac` 是规则里写的来源;`sameOutcome` 表示它的服务器 / 动作和最终预测相同、对这次查询没有影响),预测时按「没命中」往下走。规则集读不出来(文件没有、解码失败、没有 sing-box)、或含有只看域名判断不了的规则(带 IP / 端口等条件、逻辑规则、取反规则,例如 `geoip-*`)而又没有别的规则命中时,同样记成前提;已部署的配置读不到 / 不是 JSON / 没有 `dns` 段时回 `{error}`。
 
-**还没做、如实标出的**:`dns.rewrite`(DNS 重写命中)、`dns.stale`(前端没写明含义)、`resolve.cached` / `fakeIpFrom`、`context`、`exit.connectTo` / `noDomain` / `debug` 没有;`method:"TCP"` 回 `exit.ok:false` + 「暂不支持 TCP 方式」(面板入站对 CONNECT 先回 200 再去连目标,单凭隧道无法确认已连上)。`resolve` 已做,见 STATUS 的 route-test 的 resolve 条。**`exit6`**(`internal/routetest/exit6.go`)已做:`resolve.answers6` 有答案时,按第一个 v6 地址再访问一次,响应多一个 `exit6: {connectTo, ok, status?, ms?, error?}`;隧道连的是这个 v6 地址,请求的 Host、TLS 的 SNI 和证书校验仍用域名(像终端拿到 AAAA 后直接连那个地址),方式与主探测一致(GET / HEAD / TLS),只有探测结果、不读连接表。不适用时整个字段不出现(不是 null):目标是 IP、没有 AAAA 答案(档案没开 IPv6、查不到、查失败)、第一个 AAAA 答案落在内核 fake-ip 池(占位地址不是真实服务器)、方式是 TCP;主探测失败不影响 exit6(v4 不通时 v6 的结果恰恰是要看的),exit6 失败也不影响主探测;独立计时,各用一份超时。
+**还没做、如实标出的**:`dns.stale`(前端没写明含义)、`context`(只在带终端来源时出现,留给 `terminal-test`)、`debug` 没有。`resolve` 已做,见 STATUS 的 route-test 的 resolve 条;`exit.noDomain` 已做,见 STATUS 的 route-test 的 noDomain 条。
+
+**`method:"TCP"`**(`internal/routetest/tcp.go`)已做:不走上面的 HTTP CONNECT,改对同一个面板入站(`mixed` 类型,两种协议共用一个端口)做无认证的 SOCKS5 CONNECT(RFC 1928)。原因是 2026-10-30 在沙箱里用真实 sing-box 1.14.4 实测:HTTP CONNECT 对关着的端口也先回 200(内核之后才在日志里报 connection refused),确认不了「连上了」;SOCKS5 则是出站连完之后才应答——开着的端口回成功码 0x00,关着的端口回 0x05。目标是域名时用域名地址类型交给内核解析并路由,有 `connectTo` 时连那个 IP(IPv4 / IPv6 各用对应的地址类型);端口缺省 443;成功只表示内核按路由把一条 TCP 连接连到了目标,不发任何数据,不保证上面跑的是什么服务。`exit.url` 是 `主机:端口`(IPv6 带方括号),不是网址;`ms` 是「连到面板入口 + 内核连上目标」;没有 `status`;成功后同样按本地端口在连接表里认线路(`chains` / `rule` / `destinationIP`)。失败时 `ok:false` + 中文 `error`:内核回的应答码按 RFC 1928 转述(`内核报告目标拒绝了连接`、`内核报告网络不可达`、`内核报告目标主机不可达`、`内核连目标超时` 等,没有对应说明的码带十六进制代码),内核一直没应答按超时报,入口连不上 / 对方不是按 SOCKS5 应答如实说。**`exit.connectTo`**(`internal/routetest/exit6.go` 的 `firstV4`、`routetest.go` 的 `Run`)已做:目标是域名、`resolve` 成功、第一个 IPv4 答案不在内核 fake-ip 池(198.18.0.0/15 的占位段)时,主探测像终端一样按这个 IP 去连(隧道 CONNECT 的是 `IP:端口`;请求的 Host、TLS 的 SNI 和证书校验仍用域名),并把这个 IP 写进 `exit.connectTo`;连接表仍按本地端口认线路,所以 `chains` / `rule` / `destinationIP` 照常给。目标本身是 IP、没有 A 答案、查失败、第一个答案是占位地址时,仍让内核按域名去连,响应里没有 `connectTo` 字段。注意这会让命中的规则变成「按 IP 连」的结果:内核靠首包嗅探(核心配置里 `sniff` 排在路由规则前)还原域名,嗅探不到(例如非 TLS / HTTP 的端口)时只有 IP 规则能管它——这正是前端 `exit.noDomain` 要标的情形(已做,见上)。**`exit6`**(`internal/routetest/exit6.go`)已做:`resolve.answers6` 有答案时,按第一个 v6 地址再访问一次,响应多一个 `exit6: {connectTo, ok, status?, ms?, error?}`;隧道连的是这个 v6 地址,请求的 Host、TLS 的 SNI 和证书校验仍用域名(像终端拿到 AAAA 后直接连那个地址),方式与主探测一致(GET / HEAD / TLS / TCP),只有探测结果、不读连接表。不适用时整个字段不出现(不是 null):目标是 IP、没有 AAAA 答案(档案没开 IPv6、查不到、查失败)、第一个 AAAA 答案落在内核 fake-ip 池(占位地址不是真实服务器);主探测失败不影响 exit6(v4 不通时 v6 的结果恰恰是要看的),exit6 失败也不影响主探测;独立计时,各用一份超时。
 
 ## `/api/openbox/rulesets`
 
@@ -372,6 +385,8 @@
 | DELETE | `/api/openbox/subscriptions/{x}` | `deleteSubscription` (api/openbox.ts:904) | — | (id: string) |
 | PATCH | `/api/openbox/subscriptions/{x}` | `updateSubscription` (api/openbox.ts:637) | — | ( id: string, payload: { name?: string; url?: string; urls?: string[]; content?: |
 | POST | `/api/openbox/subscriptions/{x}/refresh` | `refreshSubscription` (api/openbox.ts:915) | — | ( id: string, renameOptions?: OpenboxRenameOptions, ) |
+
+实现约定(M4,订阅定时更新):订阅的 `autoUpdate` 由后端调度器执行(没有对应的 HTTP 接口)。`mode` 为 `hours` 时是上次更新后每隔 `hours` 小时;否则是上次更新那天起每隔 `days` 天的 `hour` 点(进程本地时区)。只更新订阅里的节点,不自动部署、不重启内核;节点变了以后 `service/status` 的 `pendingRestart`(原因 `nodes`)会提示。停用的订阅、没开定时的订阅、只有粘贴内容没有地址的订阅不更新。失败后 10 分钟 / 30 分钟 / 1 小时退避重试。
 
 ## `/api/openbox/system`
 

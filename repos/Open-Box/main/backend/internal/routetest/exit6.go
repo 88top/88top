@@ -3,8 +3,6 @@ package routetest
 import (
 	"context"
 	"net/netip"
-
-	"github.com/timeflysoon/Open-Box/backend/internal/sitelatency"
 )
 
 // 响应里的 exit6:域名有 AAAA 答案时,按第一个 v6 地址再访问一次。
@@ -49,11 +47,27 @@ func firstV6(r *Resolve) (netip.Addr, bool) {
 	return netip.Addr{}, false
 }
 
+// firstV4 取 resolve 里第一个 IPv4 答案;它落在内核 fake-ip 池里(占位地址)就不算,返回 false。
+// 与 firstV6 对应,给主探测的 exit.connectTo 用:终端拿到真实地址就直接连它。
+func firstV4(r *Resolve) (netip.Addr, bool) {
+	if r == nil || !r.OK {
+		return netip.Addr{}, false
+	}
+	for _, a := range r.Answers {
+		ad, err := netip.ParseAddr(a)
+		if err != nil || !ad.Is4() {
+			continue
+		}
+		if inFakePool(ad) {
+			return netip.Addr{}, false
+		}
+		return ad, true
+	}
+	return netip.Addr{}, false
+}
+
 // probeExit6 做 exit6;不适用时返回 nil。探测用独立的超时,不挤占主探测的时间。
 func (s *Service) probeExit6(ctx context.Context, in Input, rs *Resolve) *Exit6 {
-	if in.Method == MethodTCP {
-		return nil
-	}
 	ad, ok := firstV6(rs)
 	if !ok {
 		return nil
@@ -61,9 +75,12 @@ func (s *Service) probeExit6(ctx context.Context, in Input, rs *Resolve) *Exit6 
 	pctx, cancel := context.WithTimeout(ctx, s.timeout())
 	defer cancel()
 	var p *probed
-	if in.Method == MethodTLS {
+	switch in.Method {
+	case MethodTLS:
 		p = s.probeTLS(pctx, in, ad.String())
-	} else {
+	case MethodTCP:
+		p = s.probeTCP(pctx, in, ad.String())
+	default:
 		p = s.probeHTTP(pctx, in, ad.String())
 	}
 	defer p.close()
@@ -73,7 +90,7 @@ func (s *Service) probeExit6(ctx context.Context, in Input, rs *Resolve) *Exit6 
 	}
 	out.OK, out.Status, out.MS = p.ok, p.status, p.ms
 	if p.err != nil {
-		out.Error = sitelatency.DescribeError(p.err, s.timeout())
+		out.Error = s.describeErr(p.err)
 	}
 	return out
 }

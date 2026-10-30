@@ -49,7 +49,7 @@ Currently it has only been verified against the 2025-11-20 x86 snapshot of OpenW
 
 ## About
 
-The `luci-app-turboacc` in this repository is derived from lede's [luci-app-turboacc](https://github.com/coolsnowwolf/luci/tree/openwrt-25.12/applications/luci-app-turboacc) and chenmozhijin's [turboacc](https://github.com/chenmozhijin/turboacc), keeping all features of the lede version.
+The `luci-app-turboacc` in this repository is derived from lede's [luci-app-turboacc](https://github.com/coolsnowwolf/luci/tree/d27cdc8ce2513e2caebda0fb60d8fddcd82eca01/applications/luci-app-turboacc) and chenmozhijin's [turboacc](https://github.com/chenmozhijin/turboacc), keeping all features of the lede version. Upstream removed `luci-app-turboacc` from the openwrt-25.12 branch of coolsnowwolf/luci on 2026-10-29; this repository keeps its last upstream version.
 
 ## Acknowledgements
 

@@ -31,7 +31,7 @@ In scope:
 - `add_turboacc.sh` and everything under `custom/`: this project's own patches and Makefiles, and its customised `luci-app-turboacc` including the rpcd ucode backend
 - the way this repository applies and combines the vendored code in an OpenWrt source tree
 
-Code under `lede/` is synced from [coolsnowwolf/lede](https://github.com/coolsnowwolf/lede) and [coolsnowwolf/luci](https://github.com/coolsnowwolf/luci) by an automated workflow. If a vulnerability is in that code, please report it upstream too; reporting it here as well lets the copy in this repository be fixed.
+Code under `lede/` is synced from [coolsnowwolf/lede](https://github.com/coolsnowwolf/lede) by an automated workflow. If a vulnerability is in that code, please report it upstream too; reporting it here as well lets the copy in this repository be fixed. `lede/luci-app-turboacc` is the exception: it was removed from the openwrt-25.12 branch of [coolsnowwolf/luci](https://github.com/coolsnowwolf/luci) on 2026-10-29, so the copy here is no longer synced.
 
 Not vulnerabilities:
 
@@ -67,7 +67,7 @@ Not vulnerabilities:
 - `add_turboacc.sh` 以及 `custom/` 下的全部内容：本项目自己的补丁、Makefile，以及定制过的 `luci-app-turboacc`（包括 rpcd ucode 后端）
 - 本仓库把这些代码应用、组合到 OpenWrt 源码树中的方式
 
-`lede/` 下的代码由自动化工作流从 [coolsnowwolf/lede](https://github.com/coolsnowwolf/lede) 和 [coolsnowwolf/luci](https://github.com/coolsnowwolf/luci) 同步而来。如果漏洞出在这部分代码，请同时向上游报告；在这里也报告一份，本仓库中的副本就能一并修复。
+`lede/` 下的代码由自动化工作流从 [coolsnowwolf/lede](https://github.com/coolsnowwolf/lede) 同步而来。如果漏洞出在这部分代码，请同时向上游报告；在这里也报告一份，本仓库中的副本就能一并修复。`lede/luci-app-turboacc` 例外：它已于 2026-10-29 从 [coolsnowwolf/luci](https://github.com/coolsnowwolf/luci) 的 openwrt-25.12 分支中移除，这里的副本不再同步。
 
 不属于漏洞：
 

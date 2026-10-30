@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/timeflysoon/Open-Box/backend/internal/dnsdecide"
+	"github.com/timeflysoon/Open-Box/backend/internal/dnsrewrite"
 	"github.com/timeflysoon/Open-Box/backend/internal/singbox"
 )
 
@@ -23,15 +24,18 @@ type DNSPredictor struct {
 	// Proxies 读内核的代理列表(节点组当前选中的节点);nil 或返回 error = 不补运行时线路。
 	Proxies func(ctx context.Context) ([]singbox.KernelProxy, error)
 
+	// Rewrites 读档案里已启用的 DNS 重写规则,预测命中重写服务器时补上 rewrite;nil = 不补。
+	Rewrites func(ctx context.Context) ([]dnsrewrite.Rule, error)
+
 	sets dnsdecide.FileSets // 只用它的解码缓存
 }
 
 // maxChain 是跟着「当前选中」往下走的最大层数,防止配置写出环。
 const maxChain = 8
 
-// Predict 返回 domain 的预测。读不到或解不开当前配置时返回 error(调用方写进 dns.error)。
-func (p *DNSPredictor) Predict(ctx context.Context, domain string) (*dnsdecide.Decision, error) {
-	f, err := os.Open(p.ConfigFile)
+// ReadConfig 读已部署的 config.json 并解成 map。读不到、太大、不是 JSON 都返回面向用户的 error。
+func ReadConfig(file string) (map[string]any, error) {
+	f, err := os.Open(file)
 	if err != nil {
 		return nil, errors.New("读不到当前配置(还没有部署过?)")
 	}
@@ -44,12 +48,22 @@ func (p *DNSPredictor) Predict(ctx context.Context, domain string) (*dnsdecide.D
 	if err := json.Unmarshal(b, &cfg); err != nil {
 		return nil, errors.New("当前配置不是合法 JSON")
 	}
+	return cfg, nil
+}
+
+// Predict 返回 domain 的预测。读不到或解不开当前配置时返回 error(调用方写进 dns.error)。
+func (p *DNSPredictor) Predict(ctx context.Context, domain string) (*dnsdecide.Decision, error) {
+	cfg, err := ReadConfig(p.ConfigFile)
+	if err != nil {
+		return nil, err
+	}
 	v, err := dnsdecide.FromConfig(cfg)
 	if err != nil {
 		return nil, err
 	}
 	p.sets.SingBox, p.sets.TmpDir = p.SingBox, p.TmpDir
 	d := dnsdecide.Decide(ctx, v, p.sets.Bind(dnsdecide.SetDefsFromConfig(cfg)), domain, "A")
+	p.annotateRewrite(ctx, d, domain)
 	if d.Server != nil && d.Server.Detour != "" && p.Proxies != nil {
 		if proxies, err := p.Proxies(ctx); err == nil {
 			p.fillRuntime(d, v, proxies)

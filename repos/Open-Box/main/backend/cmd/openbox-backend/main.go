@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"net/netip"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -18,14 +19,17 @@ import (
 	clientappapi "github.com/timeflysoon/Open-Box/backend/internal/api/clientapp"
 	clientsapi "github.com/timeflysoon/Open-Box/backend/internal/api/clients"
 	configpreviewapi "github.com/timeflysoon/Open-Box/backend/internal/api/configpreview"
+	controllerapi "github.com/timeflysoon/Open-Box/backend/internal/api/controller"
 	deployapi "github.com/timeflysoon/Open-Box/backend/internal/api/deploy"
 	diagnosticsapi "github.com/timeflysoon/Open-Box/backend/internal/api/diagnostics"
 	dnsapi "github.com/timeflysoon/Open-Box/backend/internal/api/dns"
 	dnsfilterapi "github.com/timeflysoon/Open-Box/backend/internal/api/dnsfilter"
+	failoverapi "github.com/timeflysoon/Open-Box/backend/internal/api/failover"
 	groupsapi "github.com/timeflysoon/Open-Box/backend/internal/api/groups"
 	latencyapi "github.com/timeflysoon/Open-Box/backend/internal/api/latency"
 	latencyhistoryapi "github.com/timeflysoon/Open-Box/backend/internal/api/latencyhistory"
 	nodeinfoapi "github.com/timeflysoon/Open-Box/backend/internal/api/nodeinfo"
+	penetrationapi "github.com/timeflysoon/Open-Box/backend/internal/api/penetration"
 	policiesapi "github.com/timeflysoon/Open-Box/backend/internal/api/policies"
 	profileapi "github.com/timeflysoon/Open-Box/backend/internal/api/profile"
 	routetestapi "github.com/timeflysoon/Open-Box/backend/internal/api/routetest"
@@ -40,24 +44,30 @@ import (
 	trafficapi "github.com/timeflysoon/Open-Box/backend/internal/api/traffic"
 	"github.com/timeflysoon/Open-Box/backend/internal/auth"
 	"github.com/timeflysoon/Open-Box/backend/internal/clientapp"
+	"github.com/timeflysoon/Open-Box/backend/internal/controllerproxy"
 	"github.com/timeflysoon/Open-Box/backend/internal/core"
 	"github.com/timeflysoon/Open-Box/backend/internal/deploystate"
 	"github.com/timeflysoon/Open-Box/backend/internal/diagnostics"
 	"github.com/timeflysoon/Open-Box/backend/internal/dnscache"
+	"github.com/timeflysoon/Open-Box/backend/internal/dnsdecide"
 	"github.com/timeflysoon/Open-Box/backend/internal/dnsfilter"
 	"github.com/timeflysoon/Open-Box/backend/internal/dnsqlog"
+	"github.com/timeflysoon/Open-Box/backend/internal/dnsrewrite"
 	"github.com/timeflysoon/Open-Box/backend/internal/dnssync"
 	"github.com/timeflysoon/Open-Box/backend/internal/dnstest"
+	"github.com/timeflysoon/Open-Box/backend/internal/failover"
 	"github.com/timeflysoon/Open-Box/backend/internal/geodata"
 	"github.com/timeflysoon/Open-Box/backend/internal/latencyhistory"
 	"github.com/timeflysoon/Open-Box/backend/internal/nodeexit"
 	"github.com/timeflysoon/Open-Box/backend/internal/nodegroups"
 	"github.com/timeflysoon/Open-Box/backend/internal/nodeinfo"
+	"github.com/timeflysoon/Open-Box/backend/internal/penetration"
 	"github.com/timeflysoon/Open-Box/backend/internal/policyentries"
 	"github.com/timeflysoon/Open-Box/backend/internal/portcheck"
 	"github.com/timeflysoon/Open-Box/backend/internal/probe"
 	"github.com/timeflysoon/Open-Box/backend/internal/profile"
 	"github.com/timeflysoon/Open-Box/backend/internal/regiondetect"
+	"github.com/timeflysoon/Open-Box/backend/internal/routedecide"
 	"github.com/timeflysoon/Open-Box/backend/internal/routetest"
 	"github.com/timeflysoon/Open-Box/backend/internal/rulelist"
 	"github.com/timeflysoon/Open-Box/backend/internal/server"
@@ -295,12 +305,21 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	// 内核没在运行时只更新名单、不部署,不会为了应用名单把代理启动起来。
 	rulesDir := filepath.Join(cfg.DataDir, "rules")
 	fetchList := func(ctx context.Context, u string) ([]byte, error) { return rulelist.Fetch(ctx, nil, u) }
+	failoverPlanPath := filepath.Join(cfg.ConfigDir, failover.PlanFileName)
 	deployer := &singbox.Deployer{
 		Build:   singbox.ListedBuilder{Gen: gen, Lists: singbox.ListFiles{Rules: lists, SingBox: cfg.SingBox, Dir: rulesDir}},
 		Files:   singbox.Files{SingBox: cfg.SingBox, GeoDir: cfg.GeoDir},
 		SingBox: cfg.SingBox, ConfigDir: cfg.ConfigDir,
 		Service: svcCtl, ServiceName: cfg.CoreService,
 		Track: applied,
+		// 部署成功后把故障转移计划存到配置目录,状态接口按已部署的那份说话
+		SavePlan: func(v any) error {
+			p, err := failover.ParsePlan(v)
+			if err != nil {
+				return err
+			}
+			return failover.SavePlan(failoverPlanPath, p)
+		},
 		// 替换配置、重启内核之前撤销 DNS 接管;内核健康之后(含回滚后旧配置又健康)按 dns.mode 对齐
 		BeforeApply: dnsSync.BeforeKernelStop,
 		AfterRunning: func(ctx context.Context) string {
@@ -359,6 +378,12 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 
 	// 延迟历史:每个节点 / 组最近 10 次测速,后端记、各浏览器共享;sync 读一次内核的 /proxies 把成功的结果记下来
 	latencyhistoryapi.Register(srv.Mux(), latencyhistoryapi.Deps{Service: nodeHistory})
+	failoverapi.Register(srv.Mux(), failoverapi.Deps{
+		Plan: func() (failover.Plan, error) { return failover.LoadPlan(failoverPlanPath) },
+		Kernel: func(ctx context.Context) ([]singbox.KernelProxy, error) {
+			return singbox.KernelProxies(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
+		},
+	})
 
 	// 站点延迟(概览页):请求经内核的面板入站走一遍路由,从内核连接列表认出线路;历史单独存 site-latency-history,不和节点历史混
 	sitelatencyapi.Register(srv.Mux(), sitelatencyapi.Deps{Service: &sitelatency.Service{
@@ -370,7 +395,21 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 
 	// 真实路由测试(做了 DNS 判定、经内核 DNS 入站的解析、真实访问和线路;还没做的见 STATUS.md):经内核的面板入站访问一次,从连接列表认出命中的规则和线路;
 	// 探测前让内核丢掉 DNS 缓存(只是让缓存失效)
-	routetestapi.Register(srv.Mux(), routetestapi.Deps{Service: &routetest.Service{
+	dnsPredictor := &routetest.DNSPredictor{
+		// 命中 DNS 重写时,从档案里找出是哪条规则
+		Rewrites: func(ctx context.Context) ([]dnsrewrite.Rule, error) {
+			p, err := profileSvc.Get(ctx)
+			if err != nil {
+				return nil, err
+			}
+			return dnsrewrite.RulesFromProfile(p), nil
+		},
+		ConfigFile: filepath.Join(cfg.ConfigDir, "config.json"), SingBox: cfg.SingBox, TmpDir: probeDir,
+		Proxies: func(ctx context.Context) ([]singbox.KernelProxy, error) {
+			return singbox.KernelProxies(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
+		},
+	}
+	routeSvc := &routetest.Service{
 		Snapshot: func(ctx context.Context) (singbox.KernelSnapshot, error) {
 			return singbox.KernelConnections(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
 		},
@@ -385,11 +424,31 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 		},
 		// DNS 判定:读已部署的 config.json,按它的 DNS 规则预测这个域名问哪台服务器;规则集文件读不到、
 		// 二进制规则集需要 sing-box 解码,判断不了的如实记成前提;代理侧的实际线路读内核的代理列表补上
-		DNS: &routetest.DNSPredictor{
-			ConfigFile: filepath.Join(cfg.ConfigDir, "config.json"), SingBox: cfg.SingBox, TmpDir: probeDir,
-			Proxies: func(ctx context.Context) ([]singbox.KernelProxy, error) {
-				return singbox.KernelProxies(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
-			},
+		DNS: dnsPredictor,
+	}
+	routetestapi.Register(srv.Mux(), routetestapi.Deps{Service: routeSvc})
+
+	// 域名穿透:按已部署配置里的路由规则推算一个域名 / IP 会命中哪条规则、走哪条线路(DNS 判定和真实路由测试共用一个预测器)
+	penetrationSets := &dnsdecide.FileSets{SingBox: cfg.SingBox, TmpDir: probeDir}
+	penetrationapi.Register(srv.Mux(), penetrationapi.Deps{Service: &penetration.Service{
+		Config: func() (map[string]any, error) {
+			return routetest.ReadConfig(filepath.Join(cfg.ConfigDir, "config.json"))
+		},
+		Sets: func(c map[string]any) routedecide.Sets { return penetrationSets.Bind(dnsdecide.SetDefsFromConfig(c)) },
+		DNS:  dnsPredictor,
+		// 域名目标先经内核的 DNS 入站解析:给 resolved 字段用,真实地址当作终端会连的目的 IP 去比 IP 规则
+		Resolver: routeSvc,
+		Proxies: func(ctx context.Context) ([]singbox.KernelProxy, error) {
+			return singbox.KernelProxies(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
+		},
+		// 配置改了、内核还没重启:界面上「规则路由」和「真实路由」对不上是正常的
+		Stale: func(ctx context.Context) bool {
+			info, err := svcCtl.Status(ctx, cfg.CoreService)
+			if err != nil || !info.Running {
+				return false
+			}
+			p, err := applied.Pending(ctx)
+			return err == nil && p.Pending
 		},
 	}})
 
@@ -452,6 +511,10 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 		},
 	})
 
+	// 内核控制接口(Clash API)的转发:/api/controller/ 是 REST,/api/controller-ws/ 是 WebSocket;
+	// 前端的代理、规则、连接、配置页和实时流量 / 日志都走这里。登录保护由全站的 Require 中间件统一管。
+	controllerapi.Register(srv.Mux(), controllerproxy.New(controllerproxy.FileResolver(filepath.Join(cfg.ConfigDir, "config.json"))))
+
 	// 诊断包:版本 / 固件 / 服务状态 / 脱敏的运行配置和档案 / 最近日志,只读
 	diagnosticsapi.Register(srv.Mux(), diagnosticsapi.Deps{Service: &diagnostics.Service{
 		Version: version, CoreService: cfg.CoreService, PanelService: cfg.PanelService,
@@ -482,7 +545,7 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 			}
 			return portcheck.ServersFromProfile(p), nil
 		},
-		Reserved:   []int{clientapp.PortOf(cfg.Listen)},
+		Reserved:   []int{clientapp.PortOf(cfg.Listen), 7854}, // 7854 是面板自己的 DNS 重写服务
 		ConfigPath: filepath.Join(cfg.ConfigDir, "config.json"),
 	}})
 
@@ -550,6 +613,44 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 		return func() { wait(); <-done }
 	}
 
+	// 再加一项:DNS 重写服务(配置里 dns-rewrite 服务器 127.0.0.1:7854 指向的就是它)。规则现取自档案;
+	// 域名型规则的目标域名经内核的 DNS 入站(127.0.0.1:7853)解析,这样目标域名也走完整的 DNS 规则。端口被占用只记警告,不影响面板
+	withRewrite := background
+	background = func(ctx context.Context) func() {
+		wait := func() {}
+		if withRewrite != nil {
+			wait = withRewrite(ctx)
+		}
+		kernelDNS := &net.Resolver{PreferGo: true, Dial: func(ctx context.Context, _, _ string) (net.Conn, error) {
+			return (&net.Dialer{}).DialContext(ctx, "udp", system.DefaultKernelDNSAddr)
+		}}
+		rw := &dnsrewrite.Server{
+			Log: log,
+			Rules: func(ctx context.Context) ([]dnsrewrite.Rule, error) {
+				p, err := profileSvc.Get(ctx)
+				if err != nil {
+					return nil, err
+				}
+				return dnsrewrite.RulesFromProfile(p), nil
+			},
+			Resolve: func(ctx context.Context, host string, ipv6 bool) ([]netip.Addr, error) {
+				network := "ip4"
+				if ipv6 {
+					network = "ip6"
+				}
+				return kernelDNS.LookupNetIP(ctx, network, host)
+			},
+		}
+		done := make(chan struct{})
+		go func() {
+			defer close(done)
+			if err := rw.Run(ctx); err != nil {
+				log.Warn("DNS 重写服务没能监听,配置里有重写规则时这些域名会解析失败", "addr", dnsrewrite.DefaultAddr, "error", err)
+			}
+		}()
+		return func() { wait(); <-done }
+	}
+
 	// 再加一项:跟读 dnsmasq 查询日志,并定期把记录和统计落盘(退出时等它写完)
 	withLog := background
 	background = func(ctx context.Context) func() {
@@ -559,6 +660,30 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 		}
 		done := make(chan struct{})
 		go func() { defer close(done); dnsqlog.Run(ctx, qlog, cfg.DNSQueryLog, st, 0, nil) }()
+		return func() { wait(); <-done }
+	}
+
+	// 再加一项:订阅定时更新(只更新节点,不自动部署、不重启内核;退出时等它停下)
+	withLogged := background
+	background = func(ctx context.Context) func() {
+		wait := func() {}
+		if withLogged != nil {
+			wait = withLogged(ctx)
+		}
+		done := make(chan struct{})
+		go func() { defer close(done); subs.NewScheduler(subsSvc).Run(ctx) }()
+		return func() { wait(); <-done }
+	}
+
+	// 再加一项:定时读内核把自动择优组测出的新结果记进延迟历史(只读内核、只在有新结果时写盘)
+	withSubs := background
+	background = func(ctx context.Context) func() {
+		wait := func() {}
+		if withSubs != nil {
+			wait = withSubs(ctx)
+		}
+		done := make(chan struct{})
+		go func() { defer close(done); nodeHistory.Collect(ctx, 0) }()
 		return func() { wait(); <-done }
 	}
 	return srv, background, nil

@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -181,7 +182,7 @@ func TestApplyHappyPathAndIdempotent(t *testing.T) {
 	if string(b) != want {
 		t.Fatalf("内容不对:\n%s\n期望:\n%s", b, want)
 	}
-	if fi, _ := os.Stat(e.file); fi.Mode().Perm() != 0o644 {
+	if fi, _ := os.Stat(e.file); runtime.GOOS != "windows" && fi.Mode().Perm() != 0o644 { // Windows 没有 Unix 权限位
 		t.Errorf("权限 %v", fi.Mode().Perm())
 	}
 	if st, ok := e.tk.loadState(); !ok || st.Phase != phaseApplied || len(st.Files) != 1 || st.Files[0] != e.file {
@@ -524,6 +525,9 @@ func TestSync(t *testing.T) {
 // ---- 找配置目录 ----
 
 func TestParseConfDirsAndFilters(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("dnsmasq 配置里写的是 Unix 绝对路径,filepath.IsAbs 在 Windows 上不认")
+	}
 	got := parseConfDirs("# conf-dir=/ignored\nconf-dir=/tmp/dnsmasq.d\n conf-dir = /etc/dnsmasq.d/,*.conf\nconf-dir=relative/dir\nconf-dir=/x,.bak,~\nport=53\n")
 	want := []confDir{
 		{Dir: "/tmp/dnsmasq.d"},
@@ -702,9 +706,7 @@ func TestTakeoverWithRealDnsmasq(t *testing.T) {
 	// 模拟 OpenWrt 的布局:上游来自 resolv-file(「运营商 DNS」在 127.0.0.2:53),dnsmasq 监听另一个端口
 	isp := startFakeDNSAt(t, "127.0.0.2:53") // 绑不了(没有 root)就跳过
 	kernel := startFakeDNS(t)
-	probe := startFakeDNS(t) // 只为拿一个空闲的 UDP 端口号
-	dmAddr := probe.addr
-	probe.conn.Close()
+	dmAddr := freeDualAddr(t)
 
 	dir := t.TempDir()
 	conf := filepath.Join(dir, "dnsmasq.d")
