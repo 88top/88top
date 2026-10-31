@@ -44,20 +44,21 @@ namespace Stratum.Core
             var auth = new Authenticator
             {
                 Type = AuthenticatorType.MobileOtp,
-                Issuer = issuer,
+                Issuer = issuer.Trim().Truncate(Authenticator.IssuerMaxLength),
+                Username = match.Groups[2].Value.Trim().Truncate(Authenticator.UsernameMaxLength),
                 Icon = icon,
-                Username = match.Groups[2].Value,
-                Secret = match.Groups[3].Value,
+                Secret = SecretUtil.Normalise(match.Groups[3].Value, AuthenticatorType.MobileOtp),
                 Digits = MobileOtp.Digits,
                 Period = AuthenticatorType.MobileOtp.GetDefaultPeriod()
             };
 
+            auth.Validate();
             return new UriParseResult { Authenticator = auth, PinLength = MobileOtp.PinLength };
         }
 
         private static UriParseResult ParseOtpAuthUri(string uri, IIconResolver iconResolver)
         {
-            var uriMatch = OtpAuthUriRegex().Match(Uri.UnescapeDataString(uri));
+            var uriMatch = OtpAuthUriRegex().Match(uri);
 
             if (!uriMatch.Success)
             {
@@ -71,11 +72,11 @@ namespace Stratum.Core
 
             foreach (var groups in argMatches.Select(m => m.Groups))
             {
-                args.TryAdd(groups[1].Value, groups[3].Value);
+                args.TryAdd(groups[1].Value, Uri.UnescapeDataString(groups[3].Value));
             }
 
             // Get the issuer and username if possible
-            var issuerUsername = uriMatch.Groups[2].Value;
+            var issuerUsername = Uri.UnescapeDataString(uriMatch.Groups[2].Value.TrimEnd("/"));
             var issuerUsernameMatch = UsernameIssuerRegex().Match(issuerUsername);
 
             string issuer;
@@ -102,11 +103,11 @@ namespace Stratum.Core
                 if (args.TryGetValue("issuer", out var issuerParam))
                 {
                     issuer = issuerParam;
-                    username = issuerUsername;
+                    username = !string.IsNullOrEmpty(issuerUsername) ? issuerUsername : null;
                 }
                 else
                 {
-                    issuer = uriMatch.Groups[2].Value;
+                    issuer = issuerUsername;
                     username = null;
                 }
             }
@@ -132,7 +133,7 @@ namespace Stratum.Core
 
             if (args.TryGetValue("algorithm", out var algorithmParam) && type.HasVariableAlgorithm())
             {
-                algorithm = algorithmParam.ToUpper() switch
+                algorithm = algorithmParam.ToUpperInvariant() switch
                 {
                     "SHA1" => HashAlgorithm.Sha1,
                     "SHA256" => HashAlgorithm.Sha256,
@@ -180,10 +181,17 @@ namespace Stratum.Core
 
             var pinLength = 0;
 
-            if (type == AuthenticatorType.YandexOtp && args.TryGetValue("pin_length", out var pinLengthParam) &&
-                !int.TryParse(pinLengthParam, out pinLength))
+            if (type == AuthenticatorType.YandexOtp)
             {
-                throw new ArgumentException("Pin length parameter cannot be parsed");
+                if (!args.TryGetValue("pin_length", out var pinLengthParam))
+                {
+                    throw new ArgumentException("The pin length parameter is required");
+                }
+
+                if (!int.TryParse(pinLengthParam, out pinLength))
+                {
+                    throw new ArgumentException("Pin length parameter cannot be parsed");
+                }
             }
 
             var auth = new Authenticator

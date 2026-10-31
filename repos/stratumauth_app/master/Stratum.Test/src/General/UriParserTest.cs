@@ -36,7 +36,9 @@ namespace Stratum.Test.General
         [InlineData("otpauth://hotp/issuer:username?secret=ABCDEFG&counter=test")] // Invalid counter 1/2
         [InlineData("otpauth://hotp/issuer:username?secret=ABCDEFG&counter=-1")] // Invalid counter 2/2
         [InlineData("motp://fail")] // Invalid mOTP
-        [InlineData("otpauth://yaotp/issuer:username?secret=ABCDEFG&pin_length=test")] // Invalid Yandex pin length
+        [InlineData("otpauth://yaotp/issuer:username?secret=ABCDEFG")] // Missing Yandex pin length
+        [InlineData("otpauth://yaotp/issuer:username?secret=ABCDEFG&pin_length=0")] // Invalid Yandex pin length 1/2
+        [InlineData("otpauth://yaotp/issuer:username?secret=ABCDEFG&pin_length=test")] // Invalid Yandex pin length 2/2
         public void ParseStandardUri_invalid(string uri)
         {
             Assert.Throws<ArgumentException>(delegate { _ = UriParser.ParseStandardUri(uri, _iconResolver.Object); });
@@ -77,6 +79,7 @@ namespace Stratum.Test.General
         [InlineData("otpauth://totp/issuer%3Ausername?secret=ABCDEFG&issuer=issuer")] // Standard TOTP
         [InlineData(
             "otpauth://totp/Big%20Company%3AMy%20User?secret=ABCDEFG&issuer=Big%20Company")] // Encoded username issuer pair
+        [InlineData("otpauth://totp/AT%26T%3Ausername?secret=ABCDEFG&issuer=AT%26T")] // Encoded &
         [InlineData("otpauth://hotp/issuer%3Ausername?secret=ABCDEFG&issuer=issuer&counter=10")] // Standard HOTP
         [InlineData("otpauth://totp/issuer%3Ausername?secret=ABCDEFG&issuer=issuer&digits=7")] // Digits parameter
         [InlineData("otpauth://totp/issuer%3Ausername?secret=ABCDEFG&issuer=issuer&period=60")] // Period parameter

@@ -129,6 +129,20 @@ honk-core --version
 
 发布二进制已内嵌 eBPF 目标文件，不需要单独安装 `honk-ebpf`。运行时也不会调用 `ip`、`nft`、`iptables` 或 `nsenter` 子进程。
 
+### 发行版软件包
+
+正式版本还附带 `x86_64` 与 `aarch64` 静态 musl full 构建的软件包：Debian 和 Ubuntu 用 `.deb`，Fedora 和 RHEL 用 `.rpm`，Arch Linux 用 `.pkg.tar.zst`。软件包会安装 `/usr/bin/honk-core`、`honk-core.service` 和 `/etc/honk/example.dae`，因此不需要再按[使用 systemd 运行](#使用-systemd-运行)操作。
+
+```shell
+sudo apt install ./honk-core-<version>-x86_64.deb       # Debian、Ubuntu
+sudo dnf install ./honk-core-<version>-x86_64.rpm       # Fedora、RHEL
+sudo pacman -U ./honk-core-<version>-x86_64.pkg.tar.zst # Arch Linux
+sudo cp /etc/honk/example.dae /etc/honk/config.dae      # 然后按需修改
+sudo systemctl enable --now honk-core
+```
+
+升级软件包会重启正在运行的 `honk-core.service`，卸载软件包会停止并禁用该服务。honk 与 dae 挂载在同一批网卡上，不能同时运行：该服务声明了 `Conflicts=dae.service`，启动其中一个就会停止另一个。从 dae 切换过来时，还要执行 `sudo systemctl disable dae`，避免 dae 开机自启。
+
 ### 从源码构建
 
 下述包含真实 eBPF 的源码构建使用：
@@ -254,6 +268,8 @@ bootstrap_resolver: '1.1.1.1:53'
 
 ### 旁路由
 
+这种部署不提供技术支持，与之相关的提问和问题报告不予答复。
+
 旁路由也称单臂网关，其 `lan_interface` 与 WAN 是同一个接口或网桥：客户端把 honk 所在主机设为网关，主机再从该接口把流量转发给上游路由器。这类主机需要设置下面三个内核参数。honk 不设置这三项，`auto_config_kernel_parameter` 也不改变这一点（见[全局配置参考](reference/global.md)）。
 
 - 开启 `send_redirects` 时，内核会向客户端发送 ICMP 重定向，让客户端直接把流量发给上游路由器，流量因此绕过 honk。`all` 与接口任一取值为 `1` 时内核就会发送重定向，因此两者都要设为 `0`。
@@ -365,6 +381,7 @@ sudo curl -fL --retry 3 -o /var/lib/honk/geoip.dat \
 Description=honk transparent proxy engine
 Wants=network-online.target
 After=network-online.target
+Conflicts=dae.service
 
 [Service]
 Type=notify

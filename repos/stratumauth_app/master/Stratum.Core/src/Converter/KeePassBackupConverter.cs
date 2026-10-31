@@ -278,7 +278,7 @@ namespace Stratum.Core.Converter
                 var authHashMaterial = Concat(BitConverter.GetBytes(blockId), blockSizeBytes, block);
                 var authHash = hmac.ComputeHash(authHashMaterial);
 
-                if (!Arrays.ConstantTimeAreEqual(authHash, expectedAuthHash))
+                if (!Arrays.FixedTimeEquals(authHash, expectedAuthHash))
                 {
                     throw new InvalidOperationException($"Block {blockId} MAC does not match");
                 }
@@ -308,7 +308,7 @@ namespace Stratum.Core.Converter
 
             var authHash = hmacSha256.ComputeHash(header.Bytes);
 
-            if (!Arrays.ConstantTimeAreEqual(authHash, header.AuthenticityHash))
+            if (!Arrays.FixedTimeEquals(authHash, header.AuthenticityHash))
             {
                 throw new BackupPasswordException("Header authenticity check failed");
             }
@@ -389,7 +389,7 @@ namespace Stratum.Core.Converter
             var signature1 = reader.ReadUInt32();
             var signature2 = reader.ReadUInt32();
 
-            if (signature1 != HeaderSignature1 && signature2 != HeaderSignature2)
+            if (signature1 != HeaderSignature1 || signature2 != HeaderSignature2)
             {
                 throw new ArgumentException("Not a KeePass file");
             }

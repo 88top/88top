@@ -16,7 +16,7 @@ REPO = "https://github.com/stratumauth/app.git"
 
 CONFIGURATION = "Release"
 
-PROJECT_FRAMEWORKS = {"android": "net10.0-android", "wearos": "net10.0-android"}
+PROJECT_FRAMEWORKS = {"android": "net11.0-android37.0", "wearos": "net11.0-android37.0"}
 
 PROJECT_NAMES = {
     "android": "Stratum.Droid",
@@ -27,6 +27,11 @@ RUNTIME_IDENTIFIERS = {
     "android-arm": "armeabi-v7a",
     "android-arm64": "arm64-v8a",
     "android-x64": "x86_64",
+}
+
+RUNTIMES_PER_PROJECT = {
+    "android": ["android-arm64", "android-x64"],
+    "wearos": ["android-arm", "android-arm64"],
 }
 
 
@@ -62,7 +67,7 @@ def adjust_csproj(build_dir: str, args: argparse.Namespace):
         element.text = (
             args.runtime
             if args.runtime is not None
-            else ";".join(RUNTIME_IDENTIFIERS.keys())
+            else ";".join(RUNTIMES_PER_PROJECT[args.project])
         )
 
     if args.fdroid:
@@ -220,7 +225,7 @@ def main():
         print(f"Building {args.project} as {args.package}")
 
     print(
-        f"With runtimes {args.runtime if args.runtime is not None else ', '.join(RUNTIME_IDENTIFIERS.keys())}"
+        f"With runtimes {args.runtime if args.runtime is not None else ', '.join(RUNTIMES_PER_PROJECT[args.project])}"
     )
 
     with get_build_dir_path(args.output) as build_dir:

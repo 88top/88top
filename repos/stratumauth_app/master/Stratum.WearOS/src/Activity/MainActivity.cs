@@ -19,22 +19,26 @@ using Stratum.Droid.Shared.Util;
 using Stratum.Droid.Shared.Wear;
 using Stratum.WearOS.Cache;
 using Stratum.WearOS.Cache.View;
+using Stratum.WearOS.Callback;
 using Stratum.WearOS.Comparer;
 using Stratum.WearOS.Fragment;
 using Stratum.WearOS.Interface;
 using Stratum.WearOS.Util;
+using FragmentManager = AndroidX.Fragment.App.FragmentManager;
 
 namespace Stratum.WearOS.Activity
 {
     [Activity(Label = "@string/displayName", MainLauncher = true, Icon = "@mipmap/ic_launcher", LaunchMode = LaunchMode.SingleInstance)]
-    public class MainActivity : AsyncActivity, IFragmentResultListener
+    public class MainActivity : AsyncActivity, IFragmentResultListener, FragmentManager.IOnBackStackChangedListener
     {
         // Query Paths
         private const string ProtocolVersion = "protocol_v4.0";
         private const string GetSyncBundlePath = "get_sync_bundle";
+        private static readonly TimeSpan SyncTimeout = TimeSpan.FromSeconds(60);
         
         // Result Keys
-        public const string ResultItemClicked = "clicked"; 
+        public const string ResultItemClicked = "clicked";
+        public const string ResultSwipedBack = "swipedBack";
         
         // Data
         private AuthenticatorView _authView;
@@ -51,9 +55,9 @@ namespace Stratum.WearOS.Activity
         private WearableNavigationDrawerView _categoryList;
 
         private PreferenceWrapper _preferences;
-        private bool _preventCategorySelectEvent;
 
         private CategoryListAdapter _categoryListAdapter;
+        private BackPressCallback _backPressCallback;
 
         // Connection Status
         private INode _serverNode;
@@ -75,29 +79,30 @@ namespace Stratum.WearOS.Activity
 
             await Task.WhenAll(_authCache.InitAsync(), _categoryCache.InitAsync(), _customIconCache.InitAsync());
 
-            _isFastStartup = _authCache.GetItems().Any();
-            
-            var defaultCategory = _preferences.DefaultCategory;
-            _authView.CategoryId = defaultCategory;
-            _authView.SortMode = _preferences.SortMode;
-            
             _categoryView.Update();
-            
+            _authView.SortMode = _preferences.SortMode;
+            _isFastStartup = _authCache.GetItems().Any();
+
             SupportFragmentManager.SetFragmentResultListener(ResultItemClicked, this, this);
+            SupportFragmentManager.SetFragmentResultListener(ResultSwipedBack, this, this);
+            SupportFragmentManager.AddOnBackStackChangedListener(this);
 
             RunOnUiThreadForLaunch(delegate
             {
                 InitViews();
-                
+                SwitchCategory(GetDefaultCategoryId());
+
                 SupportFragmentManager.BeginTransaction()
                     .SetReorderingAllowed(true)
                     .Replace(Resource.Id.viewFragment, new AuthListFragment())
                     .CommitNowAllowingStateLoss();
 
+                UpdateCategoryBackNavigation();
+
                 if (_isFastStartup)
                 {
                     AnimUtil.FadeOutView(_circularProgressLayout, AnimUtil.LengthShort);
-                    AnimUtil.FadeInView(_fragmentView, AnimUtil.LengthShort);
+                    AnimUtil.FadeInView(_fragmentView, AnimUtil.LengthShort, false, PeekCategoryListIfEmpty);
                 }
             });
         }
@@ -130,20 +135,48 @@ namespace Stratum.WearOS.Activity
                 RunOnUiThreadForLaunch(delegate
                 {
                     AnimUtil.FadeOutView(_circularProgressLayout, AnimUtil.LengthShort, false, CheckOfflineState);
-                    AnimUtil.FadeInView(_fragmentView, AnimUtil.LengthShort);
+                    AnimUtil.FadeInView(_fragmentView, AnimUtil.LengthShort, false, PeekCategoryListIfEmpty);
                 });
             }
         }
         
         public void OnFragmentResult(string requestKey, Bundle bundle)
         {
-            if (requestKey != ResultItemClicked)
+            switch (requestKey)
             {
-                return;
-            }
+                case ResultItemClicked:
+                    var position = bundle.GetInt("position");
+                    OnItemClicked(position);
+                    break;
 
-            var position = bundle.GetInt("position");
-            OnItemClicked(position);
+                case ResultSwipedBack:
+                    SwitchCategory(GetDefaultCategoryId());
+                    break;
+            }
+        }
+
+        public void OnBackStackChanged()
+        {
+            UpdateCategoryBackNavigation();
+        }
+
+        private string GetDefaultCategoryId()
+        {
+            var defaultCategory = _preferences.DefaultCategory;
+            return _categoryView.FirstOrDefault(c => c.Id == defaultCategory)?.Id;
+        }
+
+        private void SwitchCategory(string categoryId)
+        {
+            var categoryPosition = _categoryView.FindIndex(c => c.Id == categoryId);
+            _categoryList.SetCurrentItem(categoryPosition + 1, false);
+        }
+
+        private void UpdateCategoryBackNavigation()
+        {
+            var isDefaultCategory = _authView.CategoryId == GetDefaultCategoryId();
+            _backPressCallback.Enabled = !isDefaultCategory && SupportFragmentManager.BackStackEntryCount == 0;
+            GetListFragment()?.SetSwipeBackEnabled(!isDefaultCategory);
         }
 
         private void InitViews()
@@ -157,36 +190,33 @@ namespace Stratum.WearOS.Activity
             _categoryList.SetAdapter(_categoryListAdapter);
             _categoryList.ItemSelected += OnCategorySelected;
 
-            if (_authView.CategoryId != null)
-            {
-                var categoryPosition = _categoryView.FindIndex(c => c.Id == _authView.CategoryId);
+            _backPressCallback = new BackPressCallback(false);
+            _backPressCallback.BackPressed += delegate { SwitchCategory(GetDefaultCategoryId()); };
+            OnBackPressedDispatcher.AddCallback(_backPressCallback);
+        }
 
-                if (categoryPosition > -1)
-                {
-                    _preventCategorySelectEvent = true;
-                    _categoryList.SetCurrentItem(categoryPosition + 1, false);
-                }
-            }
-            else
+        private void PeekCategoryListIfEmpty()
+        {
+            if (!_authView.Any() && _categoryView.Any() && !_categoryList.IsOpened)
             {
-                _categoryList.SetCurrentItem(0, false);
+                _categoryList.Controller.PeekDrawer();
             }
+        }
+
+        private AuthListFragment GetListFragment()
+        {
+            return (AuthListFragment) SupportFragmentManager.Fragments.FirstOrDefault(f => f is AuthListFragment);
         }
 
         private void NotifyListChanged()
         {
-            var listFragment = (AuthListFragment) SupportFragmentManager.Fragments.FirstOrDefault(f => f is AuthListFragment);
-            listFragment?.NotifyChanged();
+            GetListFragment()?.NotifyChanged();
         }
 
         private void OnCategorySelected(object sender, WearableNavigationDrawerView.ItemSelectedEventArgs e)
         {
-            if (_preventCategorySelectEvent)
-            {
-                _preventCategorySelectEvent = false;
-                return;
-            }
-
+            string newCategoryId = null;
+            
             if (e.Pos > 0)
             {
                 var category = _categoryView.ElementAtOrDefault(e.Pos - 1);
@@ -196,14 +226,17 @@ namespace Stratum.WearOS.Activity
                     return;
                 }
 
-                _authView.CategoryId = category.Id;
-            }
-            else
-            {
-                _authView.CategoryId = null;
+                newCategoryId = category.Id;
             }
 
+            if (newCategoryId == _authView.CategoryId)
+            {
+                return;
+            }
+
+            _authView.CategoryId = newCategoryId;
             NotifyListChanged();
+            UpdateCategoryBackNavigation();
 
             if (SupportFragmentManager.BackStackEntryCount > 0)
             {
@@ -286,21 +319,30 @@ namespace Stratum.WearOS.Activity
             }
 
             var client = WearableClass.GetChannelClient(this);
-            var channel = await client.OpenChannelAsync(_serverNode.Id, GetSyncBundlePath);
             
+            ChannelClient.IChannel channel = null;
             WearSyncBundle bundle;
-            
+
             try
             {
-                using var stream = await client.GetInputStreamAsync(channel);
-                bundle = await JsonSerializer.DeserializeAsync<WearSyncBundle>(new InputStreamAdapter(stream));
+                channel = await client.OpenChannelAsync(_serverNode.Id, GetSyncBundlePath);
+                bundle = await ReadSyncBundleAsync(client, channel).WaitAsync(SyncTimeout);
             }
             finally
             {
-                await client.CloseAsync(channel);
+                if (channel != null)
+                {
+                    await client.CloseAsync(channel);
+                }
             }
             
             await OnSyncBundleReceived(bundle);
+        }
+
+        private static async Task<WearSyncBundle> ReadSyncBundleAsync(ChannelClient client, ChannelClient.IChannel channel)
+        {
+            using var stream = await client.GetInputStreamAsync(channel);
+            return await JsonSerializer.DeserializeAsync<WearSyncBundle>(new InputStreamAdapter(stream));
         }
 
         private async Task OnSyncBundleReceived(WearSyncBundle bundle)
@@ -334,6 +376,8 @@ namespace Stratum.WearOS.Activity
                 _categoryView.Update();
                 RunOnUiThread(_categoryListAdapter.NotifyDataSetChanged);
             }
+
+            RunOnUiThread(UpdateCategoryBackNavigation);
 
             var inCache = _customIconCache.GetIcons();
             var inBundle = bundle.CustomIcons.Select(i => i.Id).ToList();

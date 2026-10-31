@@ -8,7 +8,7 @@ namespace Stratum.Droid.Shared
     // GENERATED CLASS, SHOULD NOT BE EDITED DIRECTLY
     public static class IconMap
     {
-        public static readonly IReadOnlyDictionary<string, int> Service = new Dictionary<string, int>(788)
+        public static readonly IReadOnlyDictionary<string, int> Service = new Dictionary<string, int>(793)
         {
             ["123formbuilder"] = Resource.Drawable.auth_123formbuilder,
             ["15five"] = Resource.Drawable.auth_15five,
@@ -76,6 +76,7 @@ namespace Stratum.Droid.Shared
             ["backblaze"] = Resource.Drawable.auth_backblaze,
             ["backerkit"] = Resource.Drawable.auth_backerkit,
             ["bahamut"] = Resource.Drawable.auth_bahamut,
+            ["baiduaicloud"] = Resource.Drawable.auth_baiduaicloud,
             ["bake"] = Resource.Drawable.auth_bake,
             ["balena"] = Resource.Drawable.auth_balena,
             ["bamboohr"] = Resource.Drawable.auth_bamboohr,
@@ -264,6 +265,7 @@ namespace Stratum.Droid.Shared
             ["filescom"] = Resource.Drawable.auth_filescom,
             ["fimfiction"] = Resource.Drawable.auth_fimfiction,
             ["finnair"] = Resource.Drawable.auth_finnair,
+            ["firecrawl"] = Resource.Drawable.auth_firecrawl,
             ["firefish"] = Resource.Drawable.auth_firefish,
             ["firefox"] = Resource.Drawable.auth_firefox,
             ["floatplane"] = Resource.Drawable.auth_floatplane,
@@ -425,6 +427,7 @@ namespace Stratum.Droid.Shared
             ["mathworks"] = Resource.Drawable.auth_mathworks,
             ["matomo"] = Resource.Drawable.auth_matomo,
             ["mattermost"] = Resource.Drawable.auth_mattermost,
+            ["mcpedl"] = Resource.Drawable.auth_mcpedl,
             ["mega"] = Resource.Drawable.auth_mega,
             ["meistertask"] = Resource.Drawable.auth_meistertask,
             ["mercadolivre"] = Resource.Drawable.auth_mercadolivre,
@@ -435,6 +438,7 @@ namespace Stratum.Droid.Shared
             ["migadu"] = Resource.Drawable.auth_migadu,
             ["migros"] = Resource.Drawable.auth_migros,
             ["mimecast"] = Resource.Drawable.auth_mimecast,
+            ["minecraftwiki"] = Resource.Drawable.auth_minecraftwiki,
             ["mintmobile"] = Resource.Drawable.auth_mintmobile,
             ["mintos"] = Resource.Drawable.auth_mintos,
             ["miro"] = Resource.Drawable.auth_miro,
@@ -492,6 +496,7 @@ namespace Stratum.Droid.Shared
             ["notion"] = Resource.Drawable.auth_notion,
             ["nozbe"] = Resource.Drawable.auth_nozbe,
             ["npm"] = Resource.Drawable.auth_npm,
+            ["ns10be"] = Resource.Drawable.auth_ns10be,
             ["nuget"] = Resource.Drawable.auth_nuget,
             ["nulab"] = Resource.Drawable.auth_nulab,
             ["nvidia"] = Resource.Drawable.auth_nvidia,
@@ -566,6 +571,7 @@ namespace Stratum.Droid.Shared
             ["pypi"] = Resource.Drawable.auth_pypi,
             ["pythonanywhere"] = Resource.Drawable.auth_pythonanywhere,
             ["qantas"] = Resource.Drawable.auth_qantas,
+            ["qiniu"] = Resource.Drawable.auth_qiniu,
             ["qnap"] = Resource.Drawable.auth_qnap,
             ["rackspace"] = Resource.Drawable.auth_rackspace,
             ["raindrop"] = Resource.Drawable.auth_raindrop,
@@ -709,6 +715,7 @@ namespace Stratum.Droid.Shared
             ["tweakers"] = Resource.Drawable.auth_tweakers,
             ["twilio"] = Resource.Drawable.auth_twilio,
             ["twitch"] = Resource.Drawable.auth_twitch,
+            ["typst"] = Resource.Drawable.auth_typst,
             ["uber"] = Resource.Drawable.auth_uber,
             ["ubiquiti"] = Resource.Drawable.auth_ubiquiti,
             ["ubisoft"] = Resource.Drawable.auth_ubisoft,
@@ -763,7 +770,6 @@ namespace Stratum.Droid.Shared
             ["whimsical"] = Resource.Drawable.auth_whimsical,
             ["whitebit"] = Resource.Drawable.auth_whitebit,
             ["whois"] = Resource.Drawable.auth_whois,
-            ["wiggle"] = Resource.Drawable.auth_wiggle,
             ["wikipedia"] = Resource.Drawable.auth_wikipedia,
             ["windscribe"] = Resource.Drawable.auth_windscribe,
             ["wireguard"] = Resource.Drawable.auth_wireguard,
@@ -795,7 +801,6 @@ namespace Stratum.Droid.Shared
             ["zerodha"] = Resource.Drawable.auth_zerodha,
             ["zimbra"] = Resource.Drawable.auth_zimbra,
             ["zoho"] = Resource.Drawable.auth_zoho,
-            ["zondacrypto"] = Resource.Drawable.auth_zondacrypto,
             ["zoom"] = Resource.Drawable.auth_zoom,
             ["zyxel"] = Resource.Drawable.auth_zyxel,
         }.AsReadOnly();
@@ -829,6 +834,7 @@ namespace Stratum.Droid.Shared
             ["backerkit"] = Resource.Drawable.auth_backerkit_dark,
             ["bahamut"] = Resource.Drawable.auth_bahamut_dark,
             ["bandbbs"] = Resource.Drawable.auth_bandbbs_dark,
+            ["basecamp"] = Resource.Drawable.auth_basecamp_dark,
             ["beammp"] = Resource.Drawable.auth_beammp_dark,
             ["bethesda"] = Resource.Drawable.auth_bethesda_dark,
             ["betvictor"] = Resource.Drawable.auth_betvictor_dark,
@@ -1038,7 +1044,6 @@ namespace Stratum.Droid.Shared
             ["workplace"] = Resource.Drawable.auth_workplace_dark,
             ["x"] = Resource.Drawable.auth_x_dark,
             ["zendesk"] = Resource.Drawable.auth_zendesk_dark,
-            ["zondacrypto"] = Resource.Drawable.auth_zondacrypto_dark,
         }.AsReadOnly();
     }
 }

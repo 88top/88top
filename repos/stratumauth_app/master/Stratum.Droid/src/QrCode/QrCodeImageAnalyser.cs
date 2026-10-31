@@ -22,6 +22,7 @@ namespace Stratum.Droid.QrCode
         {
             TryHarder = true,
             TryInvert = true,
+            TryDownscale = true,
             Binarizer = Binarizer.GlobalHistogram
         });
 
@@ -31,6 +32,7 @@ namespace Stratum.Droid.QrCode
         {
             if (imageProxy.Image == null)
             {
+                imageProxy.Close();
                 return;
             }
 

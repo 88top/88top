@@ -96,7 +96,7 @@ namespace Stratum.Droid.Activity
 
         // Data
         private readonly ILogger _log = Log.ForContext<MainActivity>();
-        private readonly Database _database;
+        private readonly DatabaseSession _session;
         private readonly IEnumerable<IBackupEncryption> _backupEncryptions;
 
         private readonly IAuthenticatorService _authenticatorService;
@@ -139,7 +139,7 @@ namespace Stratum.Droid.Activity
 
         public MainActivity() : base(Resource.Layout.activityMain)
         {
-            _database = Dependencies.Resolve<Database>();
+            _session = Dependencies.Resolve<DatabaseSession>();
 
             _iconResolver = Dependencies.Resolve<IIconResolver>();
             _customIconDecoder = Dependencies.Resolve<ICustomIconDecoder>();
@@ -223,13 +223,9 @@ namespace Stratum.Droid.Activity
 
         protected override async Task OnResumeAsync()
         {
-            RunOnUiThread(delegate
-            {
-                // Perhaps the animation in onpause was cancelled
-                _authenticatorList.Visibility = ViewStates.Invisible;
-            });
+            HideAuthenticatorList();
 
-            switch (await _database.IsOpenAsync(Database.Origin.Activity))
+            switch (_session.IsUnlocked)
             {
                 // Unlocked, no need to do anything
                 case true:
@@ -243,11 +239,11 @@ namespace Stratum.Droid.Activity
 
                     var fragment = new UnlockBottomSheet();
                     fragment.UnlockAttempted += OnUnlockAttempted;
-                    fragment.Cancelled += async delegate
+                    fragment.Cancelled += delegate
                     {
                         _unlockFragmentOpen = false;
 
-                        if (!await _database.IsOpenAsync(Database.Origin.Activity))
+                        if (!_session.IsUnlocked)
                         {
                             Finish();
                         }
@@ -262,7 +258,7 @@ namespace Stratum.Droid.Activity
                 // Locked but no password, unlock now
                 case false:
                 {
-                    await _database.OpenAsync(null, Database.Origin.Activity);
+                    await _session.UnlockAsync(null, Database.Origin.Activity);
                     await OnDatabaseOpened();
                     break;
                 }
@@ -296,12 +292,21 @@ namespace Stratum.Droid.Activity
                 RunOnUiThread(delegate { searchItem.CollapseActionView(); });
             }
 
+            HideAuthenticatorList();
+        }
+
+        private void HideAuthenticatorList()
+        {
             RunOnUiThread(delegate
             {
-                if (_authenticatorList != null)
+                if (_authenticatorList == null)
                 {
-                    AnimUtil.FadeOutView(_authenticatorList, AnimUtil.LengthLong);
+                    return;
                 }
+
+                _authenticatorList.Animation?.Cancel();
+                _authenticatorList.ClearAnimation();
+                _authenticatorList.Visibility = ViewStates.Invisible;
             });
         }
 
@@ -654,7 +659,7 @@ namespace Stratum.Droid.Activity
 
             try
             {
-                await _database.OpenAsync(password, Database.Origin.Activity);
+                await _session.UnlockAsync(password, Database.Origin.Activity);
             }
             catch (Exception e)
             {
@@ -974,7 +979,8 @@ namespace Stratum.Droid.Activity
                 categoryName = metaCategory switch
                 {
                     MetaCategory.All => GetString(Resource.String.categoryAll),
-                    MetaCategory.Uncategorised => GetString(Resource.String.categoryUncategorised)
+                    MetaCategory.Uncategorised => GetString(Resource.String.categoryUncategorised),
+                    _ => throw new ArgumentOutOfRangeException(nameof(metaCategory))
                 };
             }
             else if (selector.IsCategory(out var categoryId))
@@ -1916,7 +1922,6 @@ namespace Stratum.Droid.Activity
             }
 
             var dialog = (EditAuthenticatorBottomSheet) sender;
-            var position = _authenticatorView.IndexOf(auth);
 
             auth.Type = args.Authenticator.Type;
             auth.Issuer = args.Authenticator.Issuer;
@@ -1949,14 +1954,17 @@ namespace Stratum.Droid.Activity
                 ShowSnackbar(Resource.String.genericError, Snackbar.LengthShort);
                 return;
             }
-
-            await _authenticatorView.LoadFromPersistenceAsync();
+            finally
+            {
+                await _authenticatorView.LoadFromPersistenceAsync();
+            }
 
             if (args.Authenticator.Type.GetGenerationMethod() == GenerationMethod.Time)
             {
                 ShowAutoTimeWarning();
             }
 
+            var position = _authenticatorView.IndexOf(auth);
             RunOnUiThread(delegate { _authenticatorListAdapter.NotifyItemChanged(position); });
             Preferences.BackupRequired = BackupRequirement.Urgent;
 

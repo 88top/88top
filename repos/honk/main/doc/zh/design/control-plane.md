@@ -49,7 +49,7 @@
 
 真实 backend 在 pin map 后启动失败时，启动 guard 只删除本次成功创建的临时 pin。未能替换的已有 pin 与无关的已有 pin 不归本次所有。`UDP_DECISION_SEQUENCE` 和 `ROUTING_GENERATION_SEQUENCE` 在启动失败和普通清理后都会保留；启动成功时，临时 pin 的所有权转交 backend 清理。
 
-关闭时在资源消失前逆序释放所有权：fence NFQUEUE、关闭数据路径准入、拒绝新的用户态工作、取消并排空持有的 verdict 和 UDP initializer、停止 UDP driver 和 removal 处理、停止接口 watcher（等待进行中的批次完成）、卸载 BPF hook、最多用五秒排空已接受流、退役出站运行时、停止 NFQUEUE、停止 DNS controller 和 persistence，并清理 generation 持有的 BPF 状态。普通清理保留固定分配器。随后 listener 和 `daens`/link-pair 所有权离开作用域。
+关闭时在资源消失前逆序释放所有权：fence NFQUEUE、关闭数据路径准入、拒绝新的用户态工作、取消并排空持有的 verdict 和 UDP initializer、停止 UDP driver 和 removal 处理、停止接口 watcher（等待进行中的批次完成）、卸载 BPF hook，按[业务连接宽限等待](../reference/global.md#关闭)规则执行可选等待，再关闭剩余连接、退役出站运行时、停止 NFQUEUE、停止 DNS controller 和 persistence，并清理 generation 持有的 BPF 状态。普通清理保留固定分配器。随后 listener 和 `daens`/link-pair 所有权离开作用域。
 
 UDP receive-priority 辅助元数据不可用时，真实 backend 持有 receive-trace fallback 的 link 与 map。每个地址族都必须具备完整的 enter/exit 对：失败时卸载该对，不会禁用另一个地址族。两个地址族都依赖 `__skb_recv_udp` 上共享的 hook；它失败时两者都不可用。注册会检查 socket 地址族，因此缺少对应 hook 对的 listener 会报告不可用，而不是无证据地静默注册。每个 backend 只尝试一次 fallback，失败或部分成功也不例外。Listener 重载会重新检查原生辅助元数据支持和注册结果，但不会重试挂载；修改内核/BTF 支持后需重启。追踪缺失只影响已记录的内核路由证据，不改变路由或 UDP 交付。`cleanup()` 先卸载 ingress hook，join ring consumer，再于 BPF 对象释放前 drop `receive_trace`；即使 backend 自身仍存活，也会释放这些资源，不等到其 Drop。普通清理仍保留两个持久化 sequence pin。
 
@@ -276,7 +276,7 @@ SIGHUP 为每次尝试单独收集诊断。无论加载和配置校验成功与�
 
 编译路由发布有独立于 DNS runtime generation 的[进程生命周期上限](./routing.md#同步槽与原子发布)。发布后，排队中的 UDP53 与原始 `must` TCP53 元数据可能按上述准入规则被拒绝；已准入 DNS 查询仍按固定代际排空。
 
-`DrainTracker` 是进程全局的 accepted-flow gate。Reload 和关闭在 drain 前设置 reject-new；关闭最多等待五秒，然后带着剩余计数继续拆除。
+`DrainTracker` 是进程全局的 accepted-flow gate。Reload 和关闭都会设置 reject-new；仅用于关闭的[业务连接宽限等待](../reference/global.md#关闭)不改变 reload 退役语义。
 
 Selector 与 UDP warm 所有权仍绑定 generation，见[预热所有权](./groups.md#预热与所有权)。
 
@@ -315,7 +315,7 @@ UI 与 geodata 的生效设置包含从 `assets.route` 继承的值；该默认�
 
 当 `global.store_subscribe` 启用时，通过校验的原始响应存放在固定状态数据库 `<data_dir>/state/honk.db` 的 `subscription_body` 表，key 由请求 URL、配置的 user-agent 覆盖值与有序 headers 决定。完整正文在一个 SQLite 事务中替换，单份最多 8 MiB、总量最多 32 MiB。启动从 `<data_dir>`、`/var/share/honk`、CWD 下找到的第一个私有旧 `.sub` 目录一次导入已启用订阅正文；已有行优先，已复制文件与临时文件被删除，未导入正文保留供后续符合条件的启动处理。迁移与失败细节见[订阅参考](../reference/subscription.md#拉取持久化与恢复)。
 
-- `src/subscription.rs` 负责拉取与解析；`subscription/store.rs` 持有 SQLite 正文存储与 FD 相对的旧存储导入。`subscription/supervisor.rs` 将当前授权及 deferred/可刷新调度状态放在同一 provider record；`supervisor/startup.rs` 恢复缓存正文并执行仅限 direct 的共用五秒启动宽限。启动与稳态使用同一 supervisor state；在途工作独立保留捕获的 revision 与发布确认，关闭等待其结束，reconcile 不丢弃可能已提交的确认。
+- `src/subscription.rs` 负责拉取与解析；`subscription/store.rs` 持有 SQLite 正文存储与 FD 相对的旧存储导入。`subscription/supervisor.rs` 持有授权与在途工作；`supervisor/schedule.rs` 管理 provider 的刷新期限，`supervisor/startup.rs` 恢复缓存正文并执行仅限 direct 的共用五秒启动宽限。启动与稳态使用同一 supervisor state；在途工作独立保留捕获的 revision 与发布确认，关闭等待其结束，reconcile 不丢弃可能已提交的确认。
 - 守护进程的拉取/恢复路径与 `honk-tool sub` 的本地文件共用正文格式检测。`Simple`/`Custom` 接受 BOM、可换行的标准/URL-safe Base64、原始分享链接、Clash YAML/JSON、SIP008、sing-box JSON，以及 Surge/Surfboard/Loon/Quantumult X 记录。`src/subscription/json.rs` 与 `records.rs` 规范化外部记录，`clash.rs` 构造并校验类型化节点。
   只导入节点，不导入完整配置中的路由、DNS 或组。原生 JSON 保留以 Unicode 代理项对编码的名称。跳过不支持的节点，身份重复时保留首个可用节点，空结果不替换活动订阅。导入的 Trojan/AnyTLS/QUIC 节点必须使用 TLS，不会静默降级为明文。
   Clash 与 sing-box 的 TCP ALPN 归入共享 TLS 模型，而不是 TUIC 的 QUIC 字段。共享构造器的跳过告警只包含从 1 开始的代理序号和静态拒绝原因，不包含原始节点记录或凭据。
@@ -376,7 +376,7 @@ Native cold/warm HTTP probe 与 URLTest 共用 dial/TLS/ALPN 和 H1/H2 exchange�
 
 网络维护任务属于 `RuntimeEpoch`。延迟缓存 writer 属于进程，仅在终止关闭时 join。
 
-已开始的阻塞工作无法靠取消 async waiter 停止，持有它的 owner 必须等待实际 join。通用清理/join 阶段使用十秒 `STAGE_TIMEOUT`，超时的 async task 会被 abort，teardown 报告失败。`control/cache.rs::StateTick` 是例外：十秒后告警并继续 join 实际维护任务及在途阻塞 SQLite 写入，不 abort。取消这次等待时，handle 仍留在 owner 中，可再次等待；owner 被 Drop 时只发出停止信号，外层 task 继续持有阻塞写入。因此总关闭时间没有严格十秒上限。TCP 连接任务 panic 时记录日志并回收，不停止引擎。正常退出保留既有的 accepted-flow 五秒 drain grace，故障退出可跳过；原生 HTTP 另有五秒 graceful drain。
+已开始的阻塞工作无法靠取消 async waiter 停止，持有它的 owner 必须等待实际 join。通用清理/join 阶段使用十秒 `STAGE_TIMEOUT`，超时的 async task 会被 abort，teardown 报告失败。`control/cache.rs::StateTick` 是例外：十秒后告警并继续 join 实际维护任务及在途阻塞 SQLite 写入，不 abort。取消这次等待时，handle 仍留在 owner 中，可再次等待；owner 被 Drop 时只发出停止信号，外层 task 继续持有阻塞写入。因此总关闭时间没有严格十秒上限。TCP 连接任务 panic 时记录日志并回收，不停止引擎。关闭时可选的[业务连接宽限等待](../reference/global.md#关闭)在 joined teardown 之前执行。
 
 健康检查 owner 也会在五秒 drain deadline 后继续等待实际 drain（包括其阻塞解析任务），再返回 deadline 错误。若后续清理发现子任务失败，该失败优先于 deadline 错误。
 

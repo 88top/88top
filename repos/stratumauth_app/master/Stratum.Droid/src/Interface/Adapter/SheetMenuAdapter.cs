@@ -35,12 +35,6 @@ namespace Stratum.Droid.Interface.Adapter
             }
 
             var holder = (SheetMenuItemViewHolder) viewHolder;
-            holder.ItemView.Click += (sender, args) =>
-            {
-                item.Handler?.Invoke(sender, args);
-                ItemClicked?.Invoke(sender, args);
-            };
-
             holder.Icon.SetImageResource(item.Icon);
             holder.Title.SetText(item.Title);
 
@@ -53,8 +47,8 @@ namespace Stratum.Droid.Interface.Adapter
             if (item.IsSensitive)
             {
                 var colourValue = MaterialColors.GetColor(viewHolder.ItemView, Resource.Attribute.colorError);
-                var colour = Color.Rgb(Color.GetRedComponent(colourValue), Color.GetBlueComponent(colourValue),
-                    Color.GetGreenComponent(colourValue));
+                var colour = Color.Rgb(Color.GetRedComponent(colourValue), Color.GetGreenComponent(colourValue),
+                    Color.GetBlueComponent(colourValue));
 
                 holder.Icon.SetColorFilter(colour);
                 holder.Title.SetTextColor(colour);
@@ -64,7 +58,22 @@ namespace Stratum.Droid.Interface.Adapter
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
         {
             var itemView = LayoutInflater.From(parent.Context).Inflate(Resource.Layout.listItemMenu, parent, false);
-            return new SheetMenuItemViewHolder(itemView);
+            var holder = new SheetMenuItemViewHolder(itemView);
+
+            holder.ItemView.Click += (sender, args) =>
+            {
+                var item = _items.ElementAtOrDefault(holder.BindingAdapterPosition);
+
+                if (item == null)
+                {
+                    return;
+                }
+                
+                item.Handler?.Invoke(sender, args);
+                ItemClicked?.Invoke(sender, args);
+            };
+
+            return holder;
         }
     }
 }
