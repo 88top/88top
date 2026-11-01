@@ -798,6 +798,7 @@ const zhTW: LANG_MESSAGE = {
   groupAutoSuffixUrltest: '自動',
   groupAutoSuffixSelector: '手動',
   groupAutoSuffixFailover: '主備',
+  groupAutoSuffixLoadBalance: '均衡',
   groupAutoAddCountry: '新增國家/地區',
   groupAutoEmpty: '還沒有選國家/地區,用右上角的下拉框新增。',
   groupAutoCreate: '產生 {count} 個分組',
@@ -856,6 +857,10 @@ const zhTW: LANG_MESSAGE = {
   groupUnitMinute: '分鐘',
   groupType_failover: '故障轉移（failover）',
   groupType_failover_short: '故障轉移',
+  groupType_loadbalance: '負載均衡（load balance）',
+  loadBalanceHint:
+    '按連線分配至可用節點，優先選擇連線較少的節點，同等負載時輪替。多條並行連線可疊加總頻寬；已建立的連線維持原出口。',
+  loadBalanceNodesOnly: '負載均衡最多可選擇 64 個真實節點，請移除節點群組或失效成員。',
   groupUnitSecond: '秒',
   failoverSummary: '故障轉移 · {lanes} 個頁籤 · {count} 個節點',
   failoverStaticHint:

@@ -79,6 +79,13 @@ func TestAppWiring(t *testing.T) {
 	}
 
 	// 清 DNS 缓存已装配:POST 才有;测试机上没有可清的层时是 503 + error,而不是 404 / 405
+	// 组件更新(只读部分):没联网也能回状态;升级(run)依赖打包,回 501
+	if code, body := get(c, ts.URL+"/api/openbox/update/status"); code != 200 || !strings.Contains(body, `"version":"dev"`) || !strings.Contains(body, `"stage":"idle"`) {
+		t.Errorf("update/status: %d %s", code, body)
+	}
+	if resp, err := c.Post(ts.URL+"/api/openbox/update/run", "application/json", strings.NewReader(`{"channel":"auto"}`)); err != nil || resp.StatusCode != 501 {
+		t.Errorf("update/run 应回 501: %v %v", err, resp)
+	}
 	if code, _ := get(c, ts.URL+"/api/openbox/dns/flush-cache"); code != 405 {
 		t.Fatalf("dns/flush-cache GET: %d", code)
 	}
@@ -106,6 +113,22 @@ func TestAppWiring(t *testing.T) {
 	}
 	if resp, err := c.Post(ts.URL+"/api/openbox/client-app/info", "application/json", strings.NewReader("{}")); err != nil || resp.StatusCode != 405 {
 		t.Fatalf("client-app/info POST: %v %v", err, resp)
+	}
+
+	// 备份导出 / 导入已装配。测试机上没有 openbox-core,节点组没法读 / 规范化:导出回 500、导入在「先整份校验」
+	// 这一步回 503,都带 openbox-core 的说明(而不是 404 / 501),导入什么都没写。
+	if code, body := get(c, ts.URL+"/api/openbox/backup?subscriptions=1"); code != 500 || !strings.Contains(body, "openbox-core") {
+		t.Fatalf("backup 导出: %d %s", code, body)
+	}
+	resp, err = c.Post(ts.URL+"/api/openbox/backup/import?subscriptions=replace", "application/json",
+		strings.NewReader(`{"format":"open-box-backup","version":1,"profile":{},"groups":[]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	imported, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if resp.StatusCode != 503 || !strings.Contains(string(imported), "openbox-core") {
+		t.Fatalf("backup 导入应装配好并因没有核心回 503: %d %s", resp.StatusCode, imported)
 	}
 
 	// 重启:密码保留,旧 Cookie 仍有效

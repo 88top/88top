@@ -797,6 +797,7 @@ const zh: LANG_MESSAGE = {
   groupAutoSuffixUrltest: '自动',
   groupAutoSuffixSelector: '手动',
   groupAutoSuffixFailover: '主备',
+  groupAutoSuffixLoadBalance: '均衡',
   groupAutoAddCountry: '添加国家/地区',
   groupAutoEmpty: '还没有选国家/地区,用右上角的下拉框添加。',
   groupAutoCreate: '生成 {count} 个分组',
@@ -855,6 +856,10 @@ const zh: LANG_MESSAGE = {
   groupUnitMinute: '分钟',
   groupType_failover: '故障转移（failover）',
   groupType_failover_short: '故障转移',
+  groupType_loadbalance: '负载均衡（load balance）',
+  loadBalanceHint:
+    '按连接分配到可用节点，优先选择连接较少的节点，同等负载时轮换。多个并发连接可叠加总带宽；已建立的连接保持原出口。',
+  loadBalanceNodesOnly: '负载均衡最多可选择 64 个真实节点，请移除节点组或失效成员。',
   groupUnitSecond: '秒',
   failoverSummary: '故障转移 · {lanes} 个页签 · {count} 个节点',
   failoverStaticHint:

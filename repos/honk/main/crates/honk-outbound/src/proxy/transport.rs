@@ -143,7 +143,11 @@ pub(crate) async fn maybe_tls_wrap_concrete(
     connect_timeout: std::time::Duration,
 ) -> anyhow::Result<MaybeTls> {
     let tls = node.tls().unwrap();
-    if !tls.alpn.is_empty() {
+    if !tls.alpn.is_empty()
+        || node
+            .transport()
+            .is_some_and(|transport| !transport.ws_headers.is_empty())
+    {
         node.validate_protocol()?;
     }
     let cold = tcp.is_none();
@@ -299,6 +303,15 @@ async fn wrap_ws(
             .parse()
             .map_err(|e| anyhow::anyhow!("invalid WebSocket host header: {}", e))?,
     );
+    for (name, value) in &transport.ws_headers {
+        request.headers_mut().insert(
+            name.parse::<tokio_tungstenite::tungstenite::http::HeaderName>()
+                .map_err(|e| anyhow::anyhow!("invalid WebSocket header name: {}", e))?,
+            value
+                .parse::<tokio_tungstenite::tungstenite::http::HeaderValue>()
+                .map_err(|e| anyhow::anyhow!("invalid WebSocket header value: {}", e))?,
+        );
+    }
 
     let (ws_stream, _response) = tokio_tungstenite::client_async(request, stream)
         .await

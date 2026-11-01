@@ -61,8 +61,8 @@
             </template>
             <template v-else>
               {{ memberSummary(group) }}
-              <template v-if="group.type === 'urltest' || group.type === 'failover'">
-                · {{ $t('groupInterval') }} {{ group.interval }} · {{ $t('groupTolerance') }} {{ group.tolerance }}ms
+              <template v-if="group.type === 'urltest' || group.type === 'failover' || group.type === 'loadbalance'">
+                · {{ $t('groupInterval') }} {{ group.interval }}<template v-if="group.type !== 'loadbalance'"> · {{ $t('groupTolerance') }} {{ group.tolerance }}ms</template>
               </template>
             </template>
           </div>
@@ -219,6 +219,7 @@
                 <option value="urltest">{{ $t('groupType_urltest') }}</option>
                 <option value="selector">{{ $t('groupType_selector') }}</option>
                 <option value="failover">{{ $t('groupType_failover') }}</option>
+                <option value="loadbalance">{{ $t('groupType_loadbalance') }}</option>
               </select>
             </div>
             <!-- 故障转移:检测间隔按秒填(按设定间隔进行健康检查,不是分钟级的择优测速);容差只给多节点页签里的
@@ -327,8 +328,8 @@
                 </div>
               </div>
             </template>
-            <!-- 检测间隔/容差只对 urltest 有意义:selector 是手动选,不会自己去测 -->
-            <template v-else-if="draft.type === 'urltest'">
+            <!-- 检测间隔/容差只对 urltest 有意义:selector 是手动选,不会自己去测;负载均衡会测速但没有容差 -->
+            <template v-else-if="draft.type === 'urltest' || isLoadBalance">
               <div class="flex flex-col gap-1">
                 <label class="text-xs font-medium">{{ $t('groupInterval') }}</label>
                 <div class="flex items-center gap-1">
@@ -343,7 +344,10 @@
                   <span class="text-base-content/60 text-xs">{{ $t('groupUnitSecond') }}</span>
                 </div>
               </div>
-              <div class="flex flex-col gap-1">
+              <div
+                v-if="draft.type === 'urltest'"
+                class="flex flex-col gap-1"
+              >
                 <label class="text-xs font-medium">{{ $t('groupTolerance') }}</label>
                 <div class="flex items-center gap-1">
                   <input
@@ -381,6 +385,10 @@
               </div>
             </template>
           </div>
+          <p
+            v-if="isLoadBalance"
+            class="text-base-content/60 text-xs"
+          >{{ $t('loadBalanceHint') }}</p>
           <!-- 从普通组切成故障转移时,原来引用了组的成员进不了页签(页签只放真实节点):列出来、拦住保存,
                由用户决定是移除它们还是切回原类型;不悄悄展开也不悄悄丢 -->
           <div
@@ -431,27 +439,12 @@
               class="ml-auto flex min-w-0 items-center gap-2"
             >
               <!-- 订阅范围:只在这条订阅的节点里按关键词匹配;存的订阅已被删掉时仍保留原值并提示 -->
-              <select
-                v-model="draft.subscriptionId"
-                :aria-label="$t('subscriptions')"
-                :title="$t('subscriptions')"
-                class="select select-xs w-32 min-w-0"
-              >
-                <option value="">{{ $t('groupFilterAllSubscriptions') }}</option>
-                <option
-                  v-if="draft.subscriptionId && !groupSubscriptions.some((sub) => sub.id === draft?.subscriptionId)"
-                  :value="draft.subscriptionId"
-                >
-                  {{ $t('groupSubscriptionMissing') }}
-                </option>
-                <option
-                  v-for="sub in groupSubscriptions"
-                  :key="sub.id"
-                  :value="sub.id"
-                >
-                  {{ sub.name }}
-                </option>
-              </select>
+              <SubscriptionFilter
+                class="w-32"
+                :model-value="draft.subscriptionIds ?? []"
+                :options="subscriptionScopeOptions"
+                @update:model-value="draft.subscriptionIds = $event"
+              />
               <div
                 role="tablist"
                 :aria-label="$t('groupKeywordsMode')"
@@ -531,7 +524,7 @@
               <BulkPick
                 v-model:subscription="memberSub"
                 :subscriptions="subscriptionOptions"
-                :nodes-only="isFailover"
+                :nodes-only="isFailover || isLoadBalance"
                 @select-all="tickAll('available')"
                 @invert="tickInvert('available')"
                 @clear="tickNone('available')"
@@ -693,8 +686,9 @@
                 </div>
                 <BulkPick
                   v-model:subscription="selectedSub"
-                  :subscriptions="subscriptionOptions"
-                  :nodes-only="isFailover"
+                  :subscriptions="selectedSubscriptionOptions"
+                  :nodes-only="isFailover || isLoadBalance"
+                  :kinds="selectedKinds"
                   @select-all="tickAll('selected')"
                   @invert="tickInvert('selected')"
                   @clear="tickNone('selected')"
@@ -1004,6 +998,7 @@ import type {
 } from '@/api/openbox'
 import { fetchDefaultNodeGroups, fetchNodeGroups, saveNodeGroups } from '@/api/openbox'
 import BulkPick from '@/components/subscription/BulkPick.vue'
+import SubscriptionFilter from '@/components/subscription/SubscriptionFilter.vue'
 import CountryFlag from '@/components/common/CountryFlag.vue'
 import CountrySelect from '@/components/common/CountrySelect.vue'
 import { kernelTestUrl } from '@/helper/testUrl'
@@ -1023,7 +1018,7 @@ import {
   TrashIcon,
   XMarkIcon,
 } from '@heroicons/vue/24/outline'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import Draggable from 'vuedraggable'
 import { useI18n } from 'vue-i18n'
@@ -1088,11 +1083,29 @@ const matchableNodes = computed(() =>
     })),
 )
 
+// 订阅范围:新字段 subscriptionIds(可多选);老记录只有单个 subscriptionId,折成数组
+const scopeIdsOf = (group: OpenboxUserGroup) => [
+  ...new Set(
+    (group.subscriptionIds ?? (group.subscriptionId ? [group.subscriptionId] : []))
+      .map((id) => id.trim())
+      .filter(Boolean),
+  ),
+]
+
+// 订阅范围筛选的选项;存的订阅已被删掉时仍保留原值并提示
+const subscriptionScopeOptions = computed(() => [
+  ...groupSubscriptions.value.map((sub) => ({ value: sub.id, label: sub.name })),
+  ...(draft.value ? scopeIdsOf(draft.value) : [])
+    .filter((id) => !groupSubscriptions.value.some((sub) => sub.id === id))
+    .map((id) => ({ value: id, label: t('groupSubscriptionMissing') })),
+])
+
 const matchedNodes = (group: OpenboxUserGroup) => {
   const keywords = group.keywords || []
-  // 选了订阅范围就只在那条订阅的节点里匹配;留空 = 全部订阅
-  const scoped = group.subscriptionId
-    ? matchableNodes.value.filter((n) => n.subscriptionId === group.subscriptionId)
+  // 选了订阅范围就只在这些订阅的节点里匹配;留空 = 全部订阅
+  const scopeIds = scopeIdsOf(group)
+  const scoped = scopeIds.length
+    ? matchableNodes.value.filter((n) => n.subscriptionId && scopeIds.includes(n.subscriptionId))
     : matchableNodes.value
   if (!keywords.length) return scoped.map((n) => n.name)
   return scoped
@@ -1120,9 +1133,9 @@ const editing = ref<OpenboxUserGroup | null>(null)
 const draft = ref<OpenboxUserGroup | null>(null)
 const memberFilter = ref('')
 const selectedFilter = ref('')
-// 两栏各自的订阅下拉框,'' = 全部
-const memberSub = ref('')
-const selectedSub = ref('')
+// 两栏各自的订阅筛选(可多选),空数组 = 全部
+const memberSub = ref<string[]>([])
+const selectedSub = ref<string[]>([])
 // 两栏各自的勾选状态(按名字记)。勾选 ≠ 成员:勾只表示"这条要不要被箭头搬走"。
 const checkedAvailable = ref<string[]>([])
 const checkedSelected = ref<string[]>([])
@@ -1152,7 +1165,8 @@ const openEditor = (group: OpenboxUserGroup | null) => {
   if (draft.value) {
     if (!draft.value.mode) draft.value.mode = 'static'
     if (!draft.value.keywords) draft.value.keywords = []
-    if (!draft.value.subscriptionId) draft.value.subscriptionId = ''
+    draft.value.subscriptionIds = scopeIdsOf(draft.value)
+    delete draft.value.subscriptionId
     if (draft.value.icon === undefined) draft.value.icon = ''
     if (draft.value.expectedStatus === undefined) draft.value.expectedStatus = ''
     if (draft.value.type === 'failover') ensureFailoverFields(draft.value)
@@ -1164,8 +1178,8 @@ const openEditor = (group: OpenboxUserGroup | null) => {
   activeLaneId.value = draft.value?.lanes?.[0]?.id ?? ''
   memberFilter.value = ''
   selectedFilter.value = ''
-  memberSub.value = ''
-  selectedSub.value = ''
+  memberSub.value = []
+  selectedSub.value = []
   checkedAvailable.value = []
   checkedSelected.value = []
   showEditor.value = true
@@ -1173,6 +1187,9 @@ const openEditor = (group: OpenboxUserGroup | null) => {
 
 // ---------- 故障转移(主备页签) ----------
 const isFailover = computed(() => draft.value?.type === 'failover')
+// 负载均衡:只接真实节点(不能放组),最多 64 个;检测间隔 + 测速地址 + 可接受状态码,没有容差
+const isLoadBalance = computed(() => draft.value?.type === 'loadbalance')
+const LOADBALANCE_MAX_NODES = 64
 const FAILOVER_DEFAULTS: OpenboxFailoverSettings = { timeoutMs: 5000, failureThreshold: 2, restorePrimary: true, recoveryHoldMs: 60000 }
 // 主备页签上限,和服务端 engine/user-groups.mjs 的 FAILOVER_MAX_LANES 同一个数
 const FAILOVER_MAX_LANES = 3
@@ -1324,6 +1341,8 @@ const onTypeChange = () => {
     d.interval = normalBackup?.interval && /^(\d+)(s|m|h)$/.test(normalBackup.interval) ? normalBackup.interval : '300s'
     if (typeof d.tolerance !== 'number') d.tolerance = 100
   }
+  // 负载均衡:检测间隔默认 120s(与上游 v0.1.387 一致)
+  if (next === 'loadbalance') d.interval = '120s'
   checkedAvailable.value = []
   checkedSelected.value = []
 }
@@ -1346,7 +1365,7 @@ const candidates = computed(() => {
   const nodeItems = availableNodes.value.map((n) => ({
     kind: 'node' as const, name: n.name, subscription: n.subscription,
   }))
-  if (isFailover.value) return nodeItems
+  if (isFailover.value || isLoadBalance.value) return nodeItems
   const groupItems = groups.value
     .filter((g) => g.name !== draft.value?.name)
     .map((g) => ({ kind: 'group' as const, name: g.name, subscription: '' }))
@@ -1363,20 +1382,34 @@ const subscriptionOptions = computed(() => {
   return seen
 })
 
+// 右栏(已选)的下拉框只列已选成员涉及的订阅和类别:左边没移过来的组、订阅不出现,
+// 移过来之后才出现;已选为空时只剩「全部」。
+const selectedSubscriptionOptions = computed(() => {
+  const subOf = new Map(candidates.value.map((c) => [c.name, c.subscription]))
+  const used = new Set(members.value.map((m) => subOf.get(m)).filter(Boolean))
+  return subscriptionOptions.value.filter((sub) => used.has(sub))
+})
+const selectedKinds = computed(() => {
+  const kindOf = new Map(candidates.value.map((c) => [c.name, c.kind]))
+  return [...new Set(members.value.map((m) => kindOf.get(m)).filter(Boolean))] as ('group' | 'node')[]
+})
+// 已选里不再有的订阅 / 类别,从右栏已选中的筛选值里去掉,免得留着一个看不见的筛选把列表筛空
+watch([selectedSubscriptionOptions, selectedKinds], ([subs, kinds]) => {
+  selectedSub.value = selectedSub.value.filter((v) =>
+    v.startsWith('sub:') ? subs.includes(v.slice(4)) : v === 'kind:group' ? kinds.includes('group') : v === 'kind:node' && kinds.includes('node'),
+  )
+})
+
 // 一栏的"作用范围" = 该栏下拉框 + 过滤框共同框定的候选集。三个批量按钮就按这个
 // 范围来:下拉框选中某条订阅、再按「全选」,勾中的正好是那条订阅的节点——这也是
 // 加这个下拉框的用处。两个都不设时,范围就是整份候选集。
-// 下拉框的值:'' 全部 / 'kind:group' 全部节点组 / 'kind:node' 全部节点 /
-// 'sub:<订阅名>' 单条订阅(前缀见 BulkPick.vue 里的说明)。
-const scopeOf = (sel: string, keyword: string) => {
+// 筛选的值(多选,命中任意一项即算):[] 全部 / 'kind:group' 全部节点组 /
+// 'kind:node' 全部节点 / 'sub:<订阅名>' 单条订阅(前缀见 BulkPick.vue 里的说明)。
+const scopeOf = (sel: string[], keyword: string) => {
   const kw = keyword.trim().toLowerCase()
-  const matchKind = (item: { kind: string; subscription: string }) => {
-    if (!sel) return true
-    if (sel === 'kind:group') return item.kind === 'group'
-    if (sel === 'kind:node') return item.kind === 'node'
-    if (sel.startsWith('sub:')) return item.subscription === sel.slice(4)
-    return true
-  }
+  const matchKind = (item: { kind: string; subscription: string }) =>
+    !sel.length ||
+    sel.some((v) => v === `kind:${item.kind}` || v === `sub:${item.subscription}`)
   return candidates.value.filter(
     (item) => matchKind(item) && (!kw || item.name.toLowerCase().includes(kw)),
   )
@@ -1438,7 +1471,7 @@ const filteredSelected = computed(() => {
   const list = members.value
   const inScope = new Set(scopeOf(selectedSub.value, selectedFilter.value).map((c) => c.name))
   // 故障转移里已经失效的引用(订阅更新删掉的节点)不在候选表里,过滤 / 订阅筛选为空时照样列出来给用户看
-  if (isFailover.value && !selectedSub.value && !selectedFilter.value.trim()) return list
+  if (isFailover.value && !selectedSub.value.length && !selectedFilter.value.trim()) return list
   return list.filter((name) => inScope.has(name))
 })
 
@@ -1548,6 +1581,7 @@ const AUTO_SUFFIX_KEY: Record<OpenboxGroupType, string> = {
   urltest: 'groupAutoSuffixUrltest',
   selector: 'groupAutoSuffixSelector',
   failover: 'groupAutoSuffixFailover',
+  loadbalance: 'groupAutoSuffixLoadBalance',
 }
 
 // 同一个国家的组要挨在一起,自动排在手动前面。分两次生成(先建一批自动,过几天
@@ -1687,7 +1721,7 @@ const showTypeChangeConfirm = ref(false)
 const saveDraft = async (typeChangeConfirmed = false) => {
   if (!draft.value || saving.value) return
   // 保存时再做一次范围校正,避免输入框尚未触发 blur 时把临时值写进配置。
-  if (draft.value.type === 'urltest' || draft.value.type === 'failover') normalizeIntervalSeconds()
+  if (draft.value.type === 'urltest' || draft.value.type === 'failover' || draft.value.type === 'loadbalance') normalizeIntervalSeconds()
   const name = draft.value.name.trim()
   if (!name) {
     showNotification({ content: 'groupNameRequired', type: 'alert-error' })
@@ -1717,9 +1751,18 @@ const saveDraft = async (typeChangeConfirmed = false) => {
     showNotification({ content: 'groupMembersRequired', type: 'alert-error' })
     return
   }
-  // 可接受状态码只对会自己测速的组(自动择优 / 故障转移)有意义,写法不对就拦住
+  // 负载均衡只接真实节点、最多 64 个:成员里有分组 / 已失效的名字,或数量超了,都拦住
+  if (isLoadBalance.value) {
+    const dynamic = draft.value.mode === 'dynamic'
+    const picked = dynamic ? matchedNodes(draft.value) : draft.value.members
+    if (picked.length > LOADBALANCE_MAX_NODES || (!dynamic && picked.some((m) => !nodeNameSet.value.has(m)))) {
+      showNotification({ content: 'loadBalanceNodesOnly', type: 'alert-error' })
+      return
+    }
+  }
+  // 可接受状态码只对会自己测速的组(自动择优 / 故障转移 / 负载均衡)有意义,写法不对就拦住
   const expectedStatus = normalizeExpectedStatus(draft.value.expectedStatus)
-  if (expectedStatus === null && (draft.value.type === 'urltest' || draft.value.type === 'failover')) {
+  if (expectedStatus === null && (draft.value.type === 'urltest' || draft.value.type === 'failover' || draft.value.type === 'loadbalance')) {
     showNotification({ content: 'expectedStatusInvalid', type: 'alert-error' })
     return
   }

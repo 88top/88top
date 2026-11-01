@@ -87,7 +87,11 @@
 |---|---|---|---|---|
 | GET | `/api/openbox/backup?subscriptions={x}&chainProxies={x}&clientRoutes={x}&servers={x}` | `fetchBackup` (api/openbox.ts:1560) | OpenboxBackup | (opts: OpenboxBackupOptions) |
 
-实现约定(M5,导出部分):文件格式 `{format:"open-box-backup", version:1, exportedAt, openboxVersion, includes, profile, groups, subscriptions?, nodes?, panelSettings, backgroundImage}`;没勾的可选部分整个键不在文件里(档案的 `chainProxies` / `clientRoutes` / `servers`,以及 `subscriptions` / `nodes`),「没有这个键」表示导入时保持现状;`nodes` 是各订阅的节点摊平成一个数组、每项带 `subscription`(订阅 id);面板设置只含 `config/` 开头且名字不带 password 的键。没传的参数:`chainProxies` 按 1,其它按 0。`POST /backup/import` 现在回 501。
+实现约定(M5,导出部分):文件格式 `{format:"open-box-backup", version:1, exportedAt, openboxVersion, includes, profile, groups, subscriptions?, nodes?, panelSettings, backgroundImage}`;没勾的可选部分整个键不在文件里(档案的 `chainProxies` / `clientRoutes` / `servers`,以及 `subscriptions` / `nodes`),「没有这个键」表示导入时保持现状;`nodes` 是各订阅的节点摊平成一个数组、每项带 `subscription`(订阅 id);面板设置只含 `config/` 开头且名字不带 password 的键。没传的参数:`chainProxies` 按 1,其它按 0。实现约定(M5,导入部分):`POST /backup/import?subscriptions=replace|append`(不传 = `replace`,别的值 400),请求体是备份文件原样(上限 32 MiB,超出 413)。**先把整份文件全部校验一遍,任何一项不过就一个字都不写**:格式必须是 `open-box-backup`、`version` 是 ≥1 且不超过后端能读的版本(更新的文件 400 并提示升级后端)、必须有 `profile` 和 `groups`、有 `subscriptions` 就必须有 `nodes`(没有节点写 `[]`)、有 `nodes` 就必须有 `subscriptions`;档案走和 `PUT /profile` 同一套规整与校验;订阅 id 只能是 1–64 位字母数字 `_` `-` 且不重复、名称 / 来源 / 自动更新 / 节点 DNS / 改名规则按订阅接口同样的规则、节点必须属于文件里的订阅且节点名不重复(端口 0–65535、类型非空);节点组按 `PUT /groups` 同样的规则(含不能与节点或启用的链式代理重名;这一步要 core,没有 core 回 503);面板设置只收 `config/` 开头、值是字符串、名字不带 password 的键(不合规的丢弃);背景图必须是 `data:image/` 开头且不超过 12 MiB。通过之后按 档案 → 订阅和节点 → 节点组 → 面板设置 → 背景图 的顺序写;写的中途失败(磁盘问题等)回 500,信息里写明「哪一步出错、此前已写入哪些」,已写的**不自动撤销**。同一时刻只做一次导入(第二个 409)。
+
+文件里没有的部分保持现状:档案的 `chainProxies` / `clientRoutes` / `servers` 没有这个键 = 不动;没有 `subscriptions` / `nodes` = 不动现有订阅和节点(`imported.subscriptionsMode` 为 `null`);没有 `panelSettings` = 不动;`backgroundImage` 没有或是空串 = 不动(不会因为备份里没背景图就删掉现有的)。档案其余的键是**整体替换**:文件里没有的回到默认值,`null` 当作没有,`rulesetDir` 忽略,链式代理的只读摘要按链接沿用服务端自己的。面板设置是整体替换(文件里的 `panelSettings` 空对象 = 清空),但已保存的名字带 password 的键原样保留(备份里本来就没有它们)。订阅 `replace` = 清空现有订阅和节点后按文件里的 id 写入;`append` = 现有的不动,文件里的加在后面,id 冲突的换新 id、节点名与现有节点重名的在名字后面加序号(`originalTag` 不变)。订阅的节点数以文件里实际的节点为准;不联网、不重新解析、不套改名规则(文件里的节点就是导出前改完名的);账号登录来源的 `account` 不保存。导入只改存着的数据,**不部署、不重启内核**(节点和档案变了,服务状态的 `pendingRestart` 会提示)。
+
+响应 `{ok:true, imported:{profile:true, groups:N, subscriptions:N, nodes:N, subscriptionsMode:"replace"|"append"|null, panelSettings?:N, backgroundImage?:true, renamedNodes?:N}, warnings?:[中文]}`:`groups` 是写入后的节点组数(含内置的直连 / 拒绝);`append` 时 `subscriptions` / `nodes` 只算新加的;`renamedNodes` 和 `warnings` 是前端不读的额外字段——`warnings` 列出导入成功但需要留意的地方(追加时有节点改了名、节点组里有成员现在找不到、有节点组会因成环被丢弃)。节点组整份写入,**不做**保存接口里的「按 id 对旧档改名迁移」(备份里的引用本来就是自洽的)。
 
 ## `/api/openbox/chain-proxies`
 
@@ -213,6 +217,10 @@
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
 |---|---|---|---|---|
 | POST | `/api/openbox/factory-reset` | `factoryReset` (api/openbox.ts:1645) | OpenboxFactoryResetResult | () |
+
+实现约定(M5,`internal/factoryreset`、`internal/api/factoryreset`):无请求体,需要登录。响应 `{ok, seeded, profileSeeded, kernelStopped}`:`seeded` 固定是 2(档案、节点组;它们没存过就按随包默认算,所以「重新播种」就是删掉存的文件,不写任何默认内容;前端不读这个字段),`profileSeeded` 恒为 true,`kernelStopped` 为真表示清完时内核服务确认不在运行(没有服务管理器、管不了内核时是 false)。
+顺序:一、同一时刻只做一次,并且和部署互斥(另一次在进行 / 部署在进行 → 409,什么都没动);二、**先停内核**:先撤销 DNS 接管,再停服务,再确认真的停了,任何一步不成功就**一份数据都不删**,回 500「为安全起见没有清除任何数据:…」,数据和密码原样,可以排查后重试(读不到服务管理器 = 没有 procd / systemd 时跳过这一步);三、逐项清:DNS 查询记录、每日流量、故障转移(检测管理器的计划和 `failover.json`)、生成的内核配置(`config.json`、`config.prev.json`)、规则集目录和 DNS 过滤名单缓存(目录本身留着)、内核缓存 `cache.db`、状态目录里全部 `.json`(订阅、节点、节点组、档案、面板设置、背景图、共享网络、客户端 App、延迟历史、部署记录……;新增的状态文件自动包含)。一项失败不拦后面的;四、**访问密码和登录会话放最后**:前面只要有一项失败就不清密码,回 500 并写明已清和失败的项(面板不能在旧数据还留着时变成没有密码,再点一次即可重试)。
+不删:`dns-takeover.json`(DNS 接管的撤销记录)、`certs/`(自签证书和密钥,是设备身份,不是用户设置)、内核服务的开机自启设置、后端自己的程序和随包规则库。重置完内核是停止状态,配置文件已删,要「部署」一次才会重新生成并启动。整个过程不随请求断开而中断(总时限 5 分钟)。
 
 ## `/api/openbox/failover`
 
@@ -428,6 +436,8 @@
 | GET | `/api/openbox/update/notes${latest ? ` | `fetchUpdateNotes` (api/openbox.ts:1667) | OpenboxUpdateNotes | (latest = '') |
 | POST | `/api/openbox/update/run` | `runUpdate` (api/openbox.ts:1242) | { ok: boolean; output: string } | (channel: 'auto' \| 'direct' \| 'mirror') |
 | GET | `/api/openbox/update/status` | `fetchUpdateStatus` (api/openbox.ts:1238) | OpenboxUpdateStatus | () |
+
+实现约定(M5,第一部分):`status` 的 `version` 是本程序版本(编译时注入,开发构建是 `dev`),`builtAt` 是构建时间(没注入是空串),`singboxVersion` 读 sing-box 内核(读不到是空串),`channel` 是安装通道(`-update-mirror` / `OPENBOX_UPDATE_MIRROR` 配了前缀是 `{mode:"mirror",prefix}`,否则 `{mode:"direct",prefix:""}`),`status.stage` 没有在升级时是 `idle`;`geoVersion` / `geoDate` / `geoCounts` 暂不给(可选字段)。`check` 读仓库公开发布列表,`latest` 是版本号能认出来的最大的一个,`via` 是 `api`(直连 GitHub API)或镜像前缀,读不到回 502 `{error}`;`hasUpdate` 在本程序版本认不出来(开发构建)时恒为 `false`。`notes` 永远回 200,取不到时 `note:null`、`error` 写原因,`url` 是发布列表页,说明超过 2 万字截断,`latest` 要是 `vX.Y.Z` 或 `vX.Y.Z-main.N`,别的写法后端忽略、自己再探一次最新版。`run`:`channel` 不是 `auto` / `direct` / `mirror` 回 400,否则暂回 501(在线升级依赖 M6 定下的发布包格式);`cancel` 暂回 `{result:"not-running"}`。
 
 ## `/api/storage`
 

@@ -1,6 +1,7 @@
 package groups
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/timeflysoon/Open-Box/core/internal/jsx"
@@ -21,6 +22,25 @@ type Outbound struct {
 	Default                   string   `json:"default,omitempty"`
 	InterruptExistConnections bool     `json:"interrupt_exist_connections,omitempty"`
 	ExpectedStatus            string   `json:"expected_status,omitempty"` // 可接受状态码,放最后(JS 里是 { ...outbound, expected_status })
+}
+
+// MarshalJSON:负载均衡的 outbounds 即使是空的也要写出来(与上游一致,不能被 omitempty 吞掉);其它类型照旧。
+func (o Outbound) MarshalJSON() ([]byte, error) {
+	if o.Type == "loadbalance" {
+		if o.Outbounds == nil {
+			o.Outbounds = []string{}
+		}
+		return json.Marshal(struct {
+			Type           string   `json:"type"`
+			Tag            string   `json:"tag"`
+			Outbounds      []string `json:"outbounds"`
+			URL            string   `json:"url,omitempty"`
+			Interval       string   `json:"interval,omitempty"`
+			ExpectedStatus string   `json:"expected_status,omitempty"`
+		}{o.Type, o.Tag, o.Outbounds, o.URL, o.Interval, o.ExpectedStatus})
+	}
+	type plain Outbound
+	return json.Marshal(plain(o))
 }
 
 type Dropped struct {
@@ -160,7 +180,7 @@ func dropCycles(groups []*Group) []*Group {
 		for i := 0; i < len(pending); i++ {
 			g := pending[i]
 			blocked := false
-			if g.Mode != "dynamic" && g.Type != "failover" {
+			if g.Mode != "dynamic" && g.Type != "failover" && g.Type != "loadbalance" { // 负载均衡只收真实节点,不依赖别的组
 				for _, m := range g.Members {
 					if m != g.Name && allNames[m] && !acceptedNames[m] {
 						blocked = true
@@ -394,7 +414,20 @@ func EmitUserGroups(groupsRaw any, nodesRaw any, options any) (*EmitResult, erro
 			continue
 		}
 		members := resolveMembers(g, dynamicTags, nodeTagSet, memberNames, matchText)
-		if len(members) == 0 {
+		if g.Type == "loadbalance" {
+			// 负载均衡只接真实节点:引用的组、不存在的名字一律不写进出站
+			nodesOnly := make([]string, 0, len(members))
+			for _, m := range members {
+				if nodeTagSet[m] {
+					nodesOnly = append(nodesOnly, m)
+				}
+			}
+			members = nodesOnly
+			if len(members) > LoadBalanceMaxNodes {
+				return nil, fmt.Errorf("load balance supports at most %d nodes", LoadBalanceMaxNodes)
+			}
+		}
+		if len(members) == 0 && g.Type != "loadbalance" { // 负载均衡与上游一致:空成员原样写出,不挂占位
 			// 空组不能原样写进配置(内核会 FATAL),也不该整个丢掉:挂一个直连占位
 			members = []string{builtin.Direct}
 			placeholders = append(placeholders, g.Name)
@@ -405,6 +438,11 @@ func EmitUserGroups(groupsRaw any, nodesRaw any, options any) (*EmitResult, erro
 			outbounds = append(outbounds, Outbound{
 				Type: "urltest", Tag: g.Name, Outbounds: members, URL: orStr(g.TestURL, testURL),
 				Interval: interval, Tolerance: &tol, IdleTimeout: idleTimeoutFor(g.IdleTimeout, interval), ExpectedStatus: expectedOf(g),
+			})
+		} else if g.Type == "loadbalance" {
+			outbounds = append(outbounds, Outbound{
+				Type: "loadbalance", Tag: g.Name, Outbounds: members, URL: orStr(g.TestURL, testURL),
+				Interval: orStr(g.Interval, DefaultLoadBalanceInterval), ExpectedStatus: expectedOf(g),
 			})
 		} else {
 			outbounds = append(outbounds, Outbound{Type: "selector", Tag: g.Name, Outbounds: members})

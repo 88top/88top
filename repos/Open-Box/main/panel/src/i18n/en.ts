@@ -831,6 +831,7 @@ const en = {
   groupAutoSuffixUrltest: 'Auto',
   groupAutoSuffixSelector: 'Manual',
   groupAutoSuffixFailover: 'Failover',
+  groupAutoSuffixLoadBalance: 'Balanced',
   groupAutoAddCountry: 'Add country',
   groupAutoEmpty: 'No country picked yet — add one from the dropdown above.',
   groupAutoCreate: 'Create {count} group(s)',
@@ -890,6 +891,10 @@ const en = {
   groupUnitMinute: 'min',
   groupType_failover: 'Failover',
   groupType_failover_short: 'failover',
+  groupType_loadbalance: 'Load balance',
+  loadBalanceHint:
+    'Distribute new connections across available nodes, preferring fewer active connections and rotating ties. Parallel connections can combine throughput; established connections keep their outbound.',
+  loadBalanceNodesOnly: 'Select up to 64 real proxy nodes. Remove groups or missing members.',
   groupUnitSecond: 's',
   failoverSummary: 'Failover · {lanes} lanes · {count} nodes',
   failoverStaticHint:
