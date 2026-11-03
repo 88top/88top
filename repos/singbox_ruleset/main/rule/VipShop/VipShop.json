@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "appvipshop.com",
-        "vip.com",
         "vipstatic.com",
-        "appsimg.com"
+        "appsimg.com",
+        "appvipshop.com",
+        "vip.com"
       ]
     }
   ],

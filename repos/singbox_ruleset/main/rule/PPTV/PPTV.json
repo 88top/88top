@@ -2,25 +2,25 @@
   "rules": [
     {
       "domain_suffix": [
-        "pplive.net",
-        "kidsn.cn",
-        "pplive.com.cn",
-        "jiwunote.com.cn",
-        "kidkk.cn",
+        "synacast.com",
         "g1d.net",
-        "pptvyun.com",
-        "pplive.com",
-        "pplive.cn",
-        "pptvimg.com",
-        "pptv.com",
+        "iptv.com.cn",
+        "pptvnet.com",
+        "kidyy.cn",
+        "snrent.cn",
         "bkrent.cn",
         "kidpp.cn",
+        "pptvyun.com",
+        "pplive.cn",
+        "pplive.com.cn",
+        "kidkk.cn",
+        "pptv.com",
+        "pplive.com",
+        "kidsn.cn",
+        "pplive.net",
         "pptvdata.com",
-        "pptvnet.com",
-        "snrent.cn",
-        "kidyy.cn",
-        "iptv.com.cn",
-        "synacast.com"
+        "pptvimg.com",
+        "jiwunote.com.cn"
       ]
     }
   ],

@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "apifox.com",
-        "apifox.cn"
+        "apifox.cn",
+        "apifox.com"
       ]
     }
   ],

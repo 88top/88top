@@ -2,18 +2,18 @@
   "rules": [
     {
       "domain_suffix": [
-        "hemaapi.cn",
-        "marioall.com",
-        "hemaopen.cn",
-        "rexpos.cn",
-        "marioin.com",
-        "rextech.cn",
-        "hemamax.com",
         "hemaos.com",
+        "hemaopen.cn",
         "hemashare.cn",
-        "shyhhema.com",
+        "marioall.com",
+        "hemaapi.cn",
+        "rextech.cn",
+        "marioin.com",
         "mariowap.com",
-        "freshhema.com"
+        "freshhema.com",
+        "shyhhema.com",
+        "hemamax.com",
+        "rexpos.cn"
       ]
     }
   ],

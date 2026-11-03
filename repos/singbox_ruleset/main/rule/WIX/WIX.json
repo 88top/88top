@@ -2,15 +2,15 @@
   "rules": [
     {
       "domain_suffix": [
-        "wixmp.com",
-        "editorx.com",
-        "wixstatic.com",
-        "wix.com",
-        "wixapps.net",
-        "wix-code.com",
-        "wixanswers.com",
         "parastorage.com",
-        "wixsite.com"
+        "wix.com",
+        "editorx.com",
+        "wixanswers.com",
+        "wixmp.com",
+        "wixapps.net",
+        "wixsite.com",
+        "wixstatic.com",
+        "wix-code.com"
       ]
     }
   ],

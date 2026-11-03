@@ -2,26 +2,26 @@
   "rules": [
     {
       "domain_suffix": [
-        "mathoverflow.net",
-        "codeforaliving.io",
-        "serverfault.com",
-        "tex-talk.net",
-        "askubuntu.com",
-        "stackoverflow.blog",
-        "blogoverflow.com",
         "stackoverflowcareers.com",
-        "stackoverflow.co",
-        "stackapps.com",
-        "stackoverflow.com",
-        "stackoverflow.email",
-        "stackoverflowbusiness.com",
         "stacksnippets.net",
-        "stackexchange.com",
-        "superuser.com",
         "sstatic.net",
+        "tex-talk.net",
+        "superuser.com",
+        "stackoverflow.com",
         "stackauth.com",
+        "stackapps.com",
+        "stackexchange.com",
+        "stackoverflow.blog",
+        "askubuntu.com",
+        "blogoverflow.com",
+        "codeforaliving.io",
+        "stackoverflow.email",
         "thesffblog.com",
-        "stackmod.blog"
+        "stackoverflowbusiness.com",
+        "mathoverflow.net",
+        "stackoverflow.co",
+        "stackmod.blog",
+        "serverfault.com"
       ]
     }
   ],

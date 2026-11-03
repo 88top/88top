@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
-        "amazontrust.com",
+        "ss2.us",
         "awstrust.com",
-        "ss2.us"
+        "amazontrust.com"
       ]
     }
   ],

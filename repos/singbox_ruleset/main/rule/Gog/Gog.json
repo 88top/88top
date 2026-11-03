@@ -5,9 +5,9 @@
         "gog.salesmanago.com"
       ],
       "domain_suffix": [
-        "gog-statics.com",
         "gog.com",
-        "gog.qtlglb.com"
+        "gog.qtlglb.com",
+        "gog-statics.com"
       ]
     }
   ],

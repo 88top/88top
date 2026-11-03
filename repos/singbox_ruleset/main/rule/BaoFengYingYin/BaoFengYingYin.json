@@ -2,14 +2,14 @@
   "rules": [
     {
       "domain_suffix": [
-        "stormshow.cn",
-        "baofengtv.com",
-        "baofeng.net",
-        "bjtndao.org",
-        "baofeng.mobi",
-        "bfshow.cn",
         "bfimg.com",
-        "baofeng.com"
+        "baofeng.mobi",
+        "stormshow.cn",
+        "bfshow.cn",
+        "bjtndao.org",
+        "baofeng.net",
+        "baofeng.com",
+        "baofengtv.com"
       ]
     }
   ],

@@ -2,15 +2,15 @@
   "rules": [
     {
       "domain_suffix": [
-        "pixplug.in",
-        "pixinsight.com.tw",
-        "pixnet.net",
         "pixnet.tw",
-        "pixfs.net",
-        "pimg.tw",
+        "pixnet.net",
         "pixanalytics.com",
+        "pixfs.net",
+        "pixinsight.com.tw",
+        "pixnet.cc",
+        "pimg.tw",
         "pixnet.pro",
-        "pixnet.cc"
+        "pixplug.in"
       ]
     }
   ],

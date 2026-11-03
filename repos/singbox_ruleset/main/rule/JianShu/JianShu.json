@@ -2,11 +2,11 @@
   "rules": [
     {
       "domain_suffix": [
-        "shengmingfa.com",
-        "baijii.com",
         "jianshu.com",
+        "baijii.com",
         "jianshu.io",
-        "jianshuapi.com"
+        "jianshuapi.com",
+        "shengmingfa.com"
       ]
     }
   ],

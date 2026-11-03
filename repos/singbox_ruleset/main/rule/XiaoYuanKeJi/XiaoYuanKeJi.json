@@ -2,11 +2,11 @@
   "rules": [
     {
       "domain_suffix": [
-        "5gimos.com",
+        "10010mx.com",
         "mfexcel.com",
         "bizport.cn",
-        "10010mx.com",
-        "microfountain.com"
+        "microfountain.com",
+        "5gimos.com"
       ]
     }
   ],

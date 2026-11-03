@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
-        "jsdelivr.com",
+        "esm.run",
         "jsdelivr.net",
-        "esm.run"
+        "jsdelivr.com"
       ]
     }
   ],

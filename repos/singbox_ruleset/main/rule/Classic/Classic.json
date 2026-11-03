@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain": [
-        "europe.battle.net",
-        "uswest.battle.net",
         "asia.battle.net",
-        "useast.battle.net"
+        "useast.battle.net",
+        "uswest.battle.net",
+        "europe.battle.net"
       ]
     }
   ],

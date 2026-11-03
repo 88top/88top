@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "identrust.com",
         "identrust.net",
+        "identrust.com",
         "identrust.co.uk"
       ]
     }

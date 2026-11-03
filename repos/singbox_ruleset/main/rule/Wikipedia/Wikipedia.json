@@ -3,17 +3,17 @@
     {
       "domain_suffix": [
         "wiktionary.org",
-        "wikinews.org",
-        "wikiquote.org",
-        "wikisource.org",
-        "mediawiki.org",
         "wikipedia.org",
         "wikileaks.org",
-        "wikidata.org",
+        "mediawiki.org",
+        "wikisource.org",
+        "wikivoyage.org",
         "wikiversity.org",
-        "wikimedia.org",
         "wikibooks.org",
-        "wikivoyage.org"
+        "wikinews.org",
+        "wikiquote.org",
+        "wikidata.org",
+        "wikimedia.org"
       ]
     }
   ],

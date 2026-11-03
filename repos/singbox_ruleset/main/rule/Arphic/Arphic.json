@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "ifontcloud.com",
-        "arphic.com",
         "arphic.com.tw",
-        "arphic.com.cn"
+        "arphic.com.cn",
+        "ifontcloud.com",
+        "arphic.com"
       ]
     }
   ],

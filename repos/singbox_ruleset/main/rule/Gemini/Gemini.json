@@ -14,10 +14,10 @@
       "domain_suffix": [
         "bard.google.com",
         "gemini.google.com",
-        "deepmind.google",
-        "deepmind.com",
-        "apis.google.com",
         "generativeai.google",
+        "apis.google.com",
+        "deepmind.com",
+        "deepmind.google",
         "proactivebackend-pa.googleapis.com"
       ]
     }

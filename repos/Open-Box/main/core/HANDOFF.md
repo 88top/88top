@@ -54,6 +54,7 @@ openbox-core 交接笔记(第 5 版,只管 core;后端另见 backend/HANDOFF.md)
 [x] emit(节点转 sing-box 出站 / endpoint)、clientroutes、dns(含 upstream 与热切换 flip)、route
 [x] 叶子模块:dnsfilter、ipx、servers、directhosts、dnsrewrite、idna、urlx
 [x] config:configDetailed 装配(站点直连、链式节点核对、节点组 / 站点集、dns / route / tun 入站、入口旁路、共享网络、FakeIP 缓存)
+[x] 带宽择优(core 层):组的 bandwidth 开关 → urltest / loadbalance 出站和故障转移多节点自动页签的内部 urltest 写 bandwidth:true;选项 disableBandwidth(客户端配置)不写。测速调度、校验、接口在后端,见 backend/STATUS.md
 [x] 授权三个方法(checkActivationCode、activationState、authorizationState):固定的"未限制"返回
 [x] go.mod 对齐 Go 1.25.12
 [~] 真机验证:真实路由器上经后端调用 core、sing-box 启动成功(由维护者做,记录在 backend/STATUS.md 的真机条目)
@@ -98,6 +99,7 @@ openbox-core 交接笔记(第 5 版,只管 core;后端另见 backend/HANDOFF.md)
 - 与上游的差异:没有有意保留的差异。成员为空时同样原样写出空的 outbounds(不挂占位);超过 64 个的报错文字、保存校验的提示语、界面文案都与上游一致。2026-11-02 用 1500 组随机输入(含 64/65/70 个节点、非法间隔、动态关键词、与其它组类型混排)对 normalizeGroups / emitGroups 做过差分,输出和报错文字零差异;差分脚本和上游二进制不入库。
 - 注意:成员为空的负载均衡组会让内核拿到空 outbounds,内核是否接受取决于它自己,如遇启动失败请告诉维护者再决定处理方式。
 - 这条授权只针对负载均衡这一项;其它功能仍按上面的规则做。
+- 追加授权(2026-11-02):维护者要求把前端 i18n 键名、三语文案和键的引用关系对齐上游(v0.1.388 起),并按批次补齐上游新增功能的配套代码。范围:panel/src 的文案键、引用和对应界面;允许读上游前端产物来确认键集和引用,文案以上游为准,代码自己写。已有的有意例外保持不变:激活码、教程、comingSoon 等不引用;链式代理空状态不带安格超市链接(chainProxyEmptyHint 文案保持 main 现状)。
 
 
 # 六、来源与合规:现状与需要维护者处理的事

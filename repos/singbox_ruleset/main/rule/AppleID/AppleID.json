@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain": [
-        "appleid.apple.com",
         "gsa.apple.com",
-        "appleid.cdn-apple.com",
-        "idmsa.apple.com"
+        "idmsa.apple.com",
+        "appleid.apple.com",
+        "appleid.cdn-apple.com"
       ]
     }
   ],

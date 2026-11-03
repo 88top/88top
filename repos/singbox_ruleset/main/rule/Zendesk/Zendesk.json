@@ -2,12 +2,12 @@
   "rules": [
     {
       "domain_suffix": [
+        "zdusercontent.com",
         "zopim.com",
         "zndsk.com",
-        "outbound.io",
         "zdassets.com",
         "zendesk.com",
-        "zdusercontent.com"
+        "outbound.io"
       ]
     }
   ],

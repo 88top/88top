@@ -5,15 +5,15 @@
         "wmff.warnermediacdn.com"
       ],
       "domain_suffix": [
-        "max.com",
-        "cinemax.com",
-        "discomax.com",
-        "maxgo.com",
         "hbomax.com",
         "hbonow.com",
         "hbomaxdash.s.llnwi.net",
+        "discomax.com",
+        "max.com",
+        "cinemax.com",
+        "hbomaxcdn.com",
         "h264.io",
-        "hbomaxcdn.com"
+        "maxgo.com"
       ]
     },
     {

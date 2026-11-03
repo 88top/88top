@@ -3,13 +3,13 @@
     {
       "domain_suffix": [
         "videopress.com",
-        "wp-themes.com",
-        "wp.com",
-        "w.org",
-        "wordpress.org",
         "wordpress.tv",
+        "wordpress.org",
+        "wp.com",
+        "wp-themes.com",
         "wpvip.com",
-        "wordpress.com"
+        "wordpress.com",
+        "w.org"
       ]
     }
   ],

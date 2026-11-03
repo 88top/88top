@@ -2,26 +2,26 @@
   "rules": [
     {
       "domain_suffix": [
-        "ljimg.com",
-        "xhwhouse.cn",
-        "houseimg.com",
-        "dichan.com",
-        "esfimg.com",
-        "sousea.com",
-        "xhaiwai.com",
+        "yiqisooimg.com",
         "jiajuimg.com",
-        "quanup.com",
-        "91leju.cn",
-        "ileju.cn",
-        "fangdudu.com",
+        "xhwhouse.cn",
         "91leju.com.cn",
+        "houseimg.com",
         "dichan.net",
-        "xhwhouse.com",
+        "91leju.cn",
+        "fangdudu.com",
+        "quanup.com",
         "ileju.com",
-        "91leju.net",
-        "leju.com",
+        "esfimg.com",
+        "ljimg.com",
+        "dichan.com",
+        "xhaiwai.com",
+        "ileju.cn",
+        "xhwhouse.com",
         "leju.cn",
-        "yiqisooimg.com"
+        "91leju.net",
+        "sousea.com",
+        "leju.com"
       ]
     }
   ],

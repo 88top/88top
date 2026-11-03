@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "comum.cn",
-        "comox.cn",
+        "mlj130.cn",
         "ifanfou.cn",
-        "mlj130.cn"
+        "comox.cn",
+        "comum.cn"
       ]
     }
   ],

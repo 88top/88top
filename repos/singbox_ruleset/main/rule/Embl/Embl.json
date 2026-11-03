@@ -2,13 +2,13 @@
   "rules": [
     {
       "domain_suffix": [
-        "embl.de",
-        "embl-hamburg.de",
-        "ebi.ac.uk",
         "embl.fr",
+        "ebi.ac.uk",
+        "embl-hamburg.de",
+        "embl.de",
         "embl.org",
-        "emblstatic.net",
-        "embl.it"
+        "embl.it",
+        "emblstatic.net"
       ]
     }
   ],

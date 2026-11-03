@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
+        "sourceforge.com",
         "sourceforge.net",
-        "fsdn.com",
         "sf.net",
-        "sourceforge.com"
+        "fsdn.com"
       ]
     }
   ],

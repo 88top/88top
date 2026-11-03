@@ -3,19 +3,19 @@
     {
       "domain_suffix": [
         "grazie.ai",
-        "intellij.net",
-        "jetbrains.com",
-        "jetbrains.ai",
-        "jetbrains.net",
-        "jetbrains.space",
-        "kotlinconf.com",
-        "jetbrains.team",
-        "kotlinlang.org",
-        "intellij.org",
         "jetbrains.org",
-        "jetbrains.io",
+        "intellij.net",
+        "jetbrains.net",
+        "kotlinconf.com",
+        "kotlinlang.org",
+        "datalore.io",
+        "jetbrains.space",
         "intellij.com",
-        "datalore.io"
+        "jetbrains.ai",
+        "jetbrains.io",
+        "jetbrains.com",
+        "jetbrains.team",
+        "intellij.org"
       ]
     }
   ],

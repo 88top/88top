@@ -2,24 +2,24 @@
   "rules": [
     {
       "domain_suffix": [
+        "3wnet.cn",
+        "grpindex.com",
+        "admonitor.org",
+        "mzhen.com",
+        "touchjoint.com",
         "miaozhen.com",
         "xueto.com",
-        "momentad.com",
-        "touchjoin.com",
-        "mzhen.com",
-        "mzfile.com",
-        "admonitor.org",
         "withwinds.com",
-        "3wnet.cn",
         "mzsvn.com",
         "withdata.cn",
-        "touchjoint.com",
-        "mzhen.cn",
+        "momentad.com",
         "stfile.com",
-        "mlt.pub",
-        "miaozhen.cn",
+        "mzfile.com",
         "supertool.net.cn",
-        "grpindex.com"
+        "touchjoin.com",
+        "miaozhen.cn",
+        "mzhen.cn",
+        "mlt.pub"
       ]
     }
   ],

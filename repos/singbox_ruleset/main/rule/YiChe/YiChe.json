@@ -2,11 +2,11 @@
   "rules": [
     {
       "domain_suffix": [
-        "yccdn.com",
         "cheyisou.com",
-        "bitauto.com",
         "bitautoimg.com",
-        "yiche.com"
+        "yiche.com",
+        "yccdn.com",
+        "bitauto.com"
       ]
     }
   ],

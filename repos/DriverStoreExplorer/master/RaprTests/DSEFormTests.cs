@@ -505,6 +505,182 @@ namespace Rapr.Tests
         }
 
         [TestMethod]
+        public void CheckActionsLeaveDriversHiddenBySearchUnchanged()
+        {
+            WithSelectionForm((form, list) =>
+            {
+                var first = CreateDriver("first.inf", 1);
+                var second = CreateDriver("second.inf", 1);
+                var hiddenChecked = CreateDriver("hidden-checked.inf", 1);
+                var hiddenUnchecked = CreateDriver("hidden-unchecked.inf", 1);
+                list.CreateControl();
+                list.UseFiltering = true;
+                list.SetObjects(new[] { first, second, hiddenChecked, hiddenUnchecked });
+                list.CheckedObjects = new[] { hiddenChecked };
+                list.ModelFilter = new ModelFilter(model => !((DriverStoreEntry)model).DriverInfName.StartsWith("hidden", StringComparison.Ordinal));
+
+                void AssertHiddenUnchanged()
+                {
+                    Assert.IsTrue(list.IsChecked(hiddenChecked));
+                    Assert.IsFalse(list.IsChecked(hiddenUnchecked));
+                }
+
+                Invoke(form, "CtxMenuSelectAll_Click", null, EventArgs.Empty);
+                CollectionAssert.AreEquivalent(new[] { first, second }, list.CheckedObjects.ToArray());
+                AssertHiddenUnchanged();
+
+                Invoke(form, "CtxMenuSelectAll_Click", null, EventArgs.Empty);
+                Assert.AreEqual(0, list.CheckedObjects.Count);
+                AssertHiddenUnchanged();
+
+                list.CheckedObjects = new[] { first, hiddenChecked };
+                Invoke(form, "CtxMenuInvertSelection_Click", null, EventArgs.Empty);
+                CollectionAssert.AreEquivalent(new[] { second }, list.CheckedObjects.ToArray());
+                AssertHiddenUnchanged();
+
+                list.SelectedObjects = new[] { first };
+                Invoke(form, "CtxMenuSelect_Click", null, EventArgs.Empty);
+                CollectionAssert.AreEquivalent(new[] { first, second }, list.CheckedObjects.ToArray());
+                AssertHiddenUnchanged();
+
+                list.ModelFilter = null;
+                CollectionAssert.AreEquivalent(new[] { first, second, hiddenChecked }, list.CheckedObjects.ToArray());
+            });
+        }
+
+        [TestMethod]
+        [DataRow("CtxMenuSelectOldDrivers_Click")]
+        [DataRow("CtxMenuSelectUnusedDrivers_Click")]
+        public void StoreWideSelectionClearsTheSearchFirst(string handler)
+        {
+            WithOperationForm((form, list) =>
+            {
+                var active = CreateDriver("driver.inf", 2);
+                active.DeviceName = "Active device";
+                var unused = CreateDriver("driver.inf", 1);
+                list.CreateControl();
+                list.UseFiltering = true;
+                list.SetObjects(new[] { active, unused });
+                var search = (Control)typeof(DSEForm)
+                    .GetField("textBoxSearch", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(form);
+                search.Text = "Active device";
+                Invoke(form, "UpdateSearchFilter");
+                Assert.AreEqual(1, list.GetItemCount());
+
+                Invoke(form, handler, null, EventArgs.Empty);
+
+                Assert.IsNull(list.ModelFilter);
+                Assert.AreEqual(string.Empty, search.Text);
+                Assert.AreEqual(2, list.GetItemCount());
+                CollectionAssert.AreEquivalent(new[] { unused }, list.CheckedObjects.ToArray());
+            });
+        }
+
+        [TestMethod]
+        [DataRow("CtxMenuSelectOldDrivers_Click")]
+        [DataRow("CtxMenuSelectUnusedDrivers_Click")]
+        public void StoreWideSelectionClearsASearchThatIsNotAppliedYet(string handler)
+        {
+            WithOperationForm((form, list) =>
+            {
+                var active = CreateDriver("driver.inf", 2);
+                active.DeviceName = "Active device";
+                var unused = CreateDriver("driver.inf", 1);
+                list.CreateControl();
+                list.UseFiltering = true;
+                list.SetObjects(new[] { active, unused });
+
+                using (var debounce = new Timer { Interval = 300 })
+                {
+                    SetField(form, "searchDebounceTimer", debounce);
+                    var search = (Control)typeof(DSEForm)
+                        .GetField("textBoxSearch", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(form);
+
+                    // Text was typed and the debounce timer is running, but the filter is not applied yet.
+                    search.Text = "Active device";
+                    debounce.Start();
+                    Assert.IsNull(list.ModelFilter);
+
+                    Invoke(form, handler, null, EventArgs.Empty);
+
+                    Assert.IsFalse(debounce.Enabled);
+                    Assert.AreEqual(string.Empty, search.Text);
+
+                    // A late debounce tick must not hide the drivers that were just checked.
+                    Invoke(form, "UpdateSearchFilter");
+                    Assert.AreEqual(2, list.GetItemCount());
+                    CollectionAssert.AreEquivalent(new[] { unused }, list.CheckedObjects.ToArray());
+                    SetField(form, "searchDebounceTimer", null);
+                }
+            });
+        }
+
+        [TestMethod]
+        public void CancelledUnusedDriverSelectionKeepsTheSearch()
+        {
+            // Settings is internal to Rapr, so reach it through ApplicationSettingsBase.
+            var settings = (ApplicationSettingsBase)typeof(DSEForm).Assembly
+                .GetType("Rapr.Properties.Settings")
+                .GetProperty("Default", BindingFlags.Static | BindingFlags.Public)
+                .GetValue(null);
+            object previous = settings["WarnBeforeSelectingUnusedDrivers"];
+            settings["WarnBeforeSelectingUnusedDrivers"] = true;
+
+            WithOperationForm((form, list) =>
+            {
+                ((SelectionTestForm)form).SelectionConfirmed = false;
+                try
+                {
+                    var active = CreateDriver("driver.inf", 2);
+                    active.DeviceName = "Active device";
+                    list.CreateControl();
+                    list.UseFiltering = true;
+                    list.SetObjects(new[] { active, CreateDriver("driver.inf", 1) });
+                    var search = (Control)typeof(DSEForm)
+                        .GetField("textBoxSearch", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(form);
+                    search.Text = "Active device";
+                    Invoke(form, "UpdateSearchFilter");
+
+                    Invoke(form, "CtxMenuSelectUnusedDrivers_Click", null, EventArgs.Empty);
+
+                    Assert.AreEqual("Active device", search.Text);
+                    Assert.IsNotNull(list.ModelFilter);
+                    Assert.AreEqual(0, list.CheckedObjects.Count);
+                }
+                finally
+                {
+                    settings["WarnBeforeSelectingUnusedDrivers"] = previous;
+                }
+            });
+        }
+
+        [TestMethod]
+        public void OperationButtonsShareTheNativeButtonStyle()
+        {
+            // Build only the designer controls; the real constructor requires elevation.
+            var form = (DSEForm)FormatterServices.GetUninitializedObject(typeof(DSEForm));
+            typeof(Form).GetConstructor(Type.EmptyTypes).Invoke(form, null);
+            try
+            {
+                Invoke(form, "InitializeComponent");
+                var panel = (FlowLayoutPanel)typeof(DSEForm)
+                    .GetField("flowLayoutPanel1", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(form);
+                var buttons = panel.Controls.OfType<Button>().ToList();
+
+                Assert.IsGreaterThanOrEqualTo(7, buttons.Count);
+                foreach (var button in buttons)
+                {
+                    // Mixed styles give some buttons the Windows hover effect and others a different one.
+                    Assert.AreEqual(FlatStyle.System, button.FlatStyle, button.Name);
+                }
+            }
+            finally
+            {
+                form.Dispose();
+            }
+        }
+
+        [TestMethod]
         public void TypedDriverListRestoresUntypedViewState()
         {
             using (var previous = new ObjectListView())
@@ -527,6 +703,100 @@ namespace Rapr.Tests
                 Assert.AreSame(current.AllColumns[0], current.PrimarySortColumn);
                 Assert.AreEqual(SortOrder.Descending, current.PrimarySortOrder);
                 Assert.IsFalse(current.ShowGroups);
+            }
+        }
+
+        [TestMethod]
+        [DataRow(false, CloseReason.UserClosing, false, false, 0)]
+        [DataRow(true, CloseReason.UserClosing, false, true, 1)]
+        [DataRow(true, CloseReason.UserClosing, true, false, 1)]
+        [DataRow(true, CloseReason.WindowsShutDown, false, false, 0)]
+        [DataRow(true, CloseReason.TaskManagerClosing, false, false, 0)]
+        public void ClosingDuringAnOperationAsksFirst(
+            bool operationRunning, CloseReason reason, bool confirmed, bool keepOpen, int confirmations)
+        {
+            WithSelectionForm((form, list) =>
+            {
+                var testForm = (SelectionTestForm)form;
+                testForm.CloseConfirmed = confirmed;
+                SetField(form, "operationInProgress", operationRunning);
+
+                var result = (bool)typeof(DSEForm)
+                    .GetMethod("ShouldKeepOpenForOperation", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .Invoke(form, new object[] { reason });
+
+                Assert.AreEqual(keepOpen, result);
+                Assert.AreEqual(confirmations, testForm.CloseConfirmationCount);
+            });
+        }
+
+        [TestMethod]
+        public void DeclinedCloseDuringAnOperationKeepsTheFormOpen()
+        {
+            WithOperationForm((form, list) =>
+            {
+                ((SelectionTestForm)form).CloseConfirmed = false;
+                Invoke(form, "StartOperation");
+                Assert.IsFalse(IsActionEnabled(form, "exitToolStripMenuItem"));
+
+                var args = new FormClosingEventArgs(CloseReason.UserClosing, false);
+                Invoke(form, "DSEForm_FormClosing", form, args);
+                Assert.IsTrue(args.Cancel);
+
+                Invoke(form, "EndOperation");
+                Assert.IsTrue(IsActionEnabled(form, "exitToolStripMenuItem"));
+            });
+        }
+
+        [TestMethod]
+        public void AboutUpdateIsUnavailableDuringAnOperation()
+        {
+            // Updating from Help > About exits the app, which would stop the operation partway.
+            WithOperationForm((form, list) =>
+            {
+                Invoke(form, "StartOperation");
+                Assert.IsFalse(IsActionEnabled(form, "helpToolStripMenuItem"));
+
+                Invoke(form, "EndOperation");
+                Assert.IsTrue(IsActionEnabled(form, "helpToolStripMenuItem"));
+            });
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public void UnusedDriverSelectionFollowsTheBootCriticalOption(bool includeBootCritical)
+        {
+            // Settings is internal to Rapr, so reach it through ApplicationSettingsBase.
+            var settings = (ApplicationSettingsBase)typeof(DSEForm).Assembly
+                .GetType("Rapr.Properties.Settings")
+                .GetProperty("Default", BindingFlags.Static | BindingFlags.Public)
+                .GetValue(null);
+            object previous = settings["IncludeBootCriticalInOldDriverSelection"];
+            settings["IncludeBootCriticalInOldDriverSelection"] = includeBootCritical;
+
+            try
+            {
+                WithSelectionForm((form, list) =>
+                {
+                    var bootCritical = CreateDriver("storage.inf", 1);
+                    bootCritical.BootCritical = true;
+                    var unknown = CreateDriver("unknown.inf", 1);
+                    var regular = CreateDriver("regular.inf", 1);
+                    regular.BootCritical = false;
+                    list.SetObjects(new[] { bootCritical, unknown, regular });
+
+                    Invoke(form, "CtxMenuSelectUnusedDrivers_Click", null, EventArgs.Empty);
+
+                    var expected = includeBootCritical
+                        ? new[] { bootCritical, unknown, regular }
+                        : new[] { unknown, regular };
+                    CollectionAssert.AreEquivalent(expected, list.CheckedObjects.Cast<DriverStoreEntry>().ToArray());
+                });
+            }
+            finally
+            {
+                settings["IncludeBootCriticalInOldDriverSelection"] = previous;
             }
         }
 
@@ -624,6 +894,16 @@ namespace Rapr.Tests
                 this.ConfirmationCount++;
                 this.OnConfirmation?.Invoke();
                 return this.SelectionConfirmed;
+            }
+
+            public bool CloseConfirmed { get; set; }
+
+            public int CloseConfirmationCount { get; private set; }
+
+            protected override bool ConfirmCloseDuringOperation()
+            {
+                this.CloseConfirmationCount++;
+                return this.CloseConfirmed;
             }
         }
 

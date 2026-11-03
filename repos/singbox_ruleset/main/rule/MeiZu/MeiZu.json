@@ -2,21 +2,21 @@
   "rules": [
     {
       "domain_suffix": [
-        "flymeauto.com",
-        "flyme.com",
-        "mzssp.cn",
-        "meizuapi.com",
-        "mzres.com",
-        "meizu.cn",
-        "meiklife.cn",
-        "flyme.cn",
-        "meizu.com.hk",
-        "lipro.net",
         "meizu.com",
-        "flyme.net",
-        "mklink.com.cn",
+        "meizuapi.com",
+        "mblu.com",
+        "meiklife.cn",
+        "flyme.com",
+        "lipro.net",
+        "mzres.com",
         "lipro.com",
-        "mblu.com"
+        "flyme.net",
+        "mzssp.cn",
+        "flyme.cn",
+        "flymeauto.com",
+        "meizu.com.hk",
+        "mklink.com.cn",
+        "meizu.cn"
       ]
     }
   ],

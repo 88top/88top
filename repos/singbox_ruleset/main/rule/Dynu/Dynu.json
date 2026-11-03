@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "freeddns.org",
         "dynu.com",
+        "freeddns.org",
         "dynu.net"
       ]
     }

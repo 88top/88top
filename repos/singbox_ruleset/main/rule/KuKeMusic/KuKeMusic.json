@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
+        "kukey.com.cn",
         "kuke.com",
-        "naxos.cn",
-        "kukey.com.cn"
+        "naxos.cn"
       ]
     }
   ],

@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "ctfile.com",
         "n802.com",
-        "tv002.com",
-        "ctfile.net"
+        "ctfile.net",
+        "ctfile.com",
+        "tv002.com"
       ]
     }
   ],

@@ -5,8 +5,8 @@
         "servd-anthropic-website.b-cdn.net"
       ],
       "domain_suffix": [
-        "claude.ai",
-        "anthropic.com"
+        "anthropic.com",
+        "claude.ai"
       ]
     }
   ],

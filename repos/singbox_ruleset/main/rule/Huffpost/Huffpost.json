@@ -2,24 +2,24 @@
   "rules": [
     {
       "domain_suffix": [
-        "huffpostarabi.com",
-        "huffingtonpost.co.za",
-        "huffpostbrasil.com",
+        "huffpost.com",
+        "huffingtonpost.gr",
+        "huffingtonpost.fr",
+        "huffingtonpost.it",
+        "huffingtonpost.ca",
         "huffpostmaghreb.com",
+        "huffingtonpost.co.za",
+        "huffingtonpost.de",
+        "huffingtonpost.com.mx",
+        "huffingtonpost.es",
+        "huffingtonpost.com",
         "huffingtonpost.com.au",
         "huffingtonpost.co.uk",
+        "huffingtonpost.in",
+        "huffpostarabi.com",
         "huffingtonpost.kr",
         "huffingtonpost.jp",
-        "huffingtonpost.com",
-        "huffingtonpost.gr",
-        "huffingtonpost.in",
-        "huffingtonpost.es",
-        "huffingtonpost.it",
-        "huffingtonpost.com.mx",
-        "huffpost.com",
-        "huffingtonpost.de",
-        "huffingtonpost.fr",
-        "huffingtonpost.ca"
+        "huffpostbrasil.com"
       ]
     }
   ],

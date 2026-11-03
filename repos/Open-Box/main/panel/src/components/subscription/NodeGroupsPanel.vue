@@ -216,8 +216,8 @@
                 class="select select-sm max-sm:w-full"
                 @change="onTypeChange"
               >
-                <option value="urltest">{{ $t('groupType_urltest') }}</option>
                 <option value="selector">{{ $t('groupType_selector') }}</option>
+                <option value="urltest">{{ $t('groupType_urltest') }}</option>
                 <option value="failover">{{ $t('groupType_failover') }}</option>
                 <option value="loadbalance">{{ $t('groupType_loadbalance') }}</option>
               </select>
@@ -303,30 +303,6 @@
                   </div>
                 </div>
               </div>
-              <!-- 测速地址 + 可接受状态码:单独排一整行,不挤在规则 / 间隔 / 容差那一行里 -->
-              <div class="flex min-w-0 basis-full gap-3 max-sm:flex-col">
-                <div class="flex min-w-0 flex-1 flex-col gap-1">
-                  <label class="text-xs font-medium">{{ $t('groupTestUrl') }}</label>
-                  <input
-                    v-model="draft.testUrl"
-                    type="url"
-                    class="input input-sm w-full font-mono text-xs"
-                    :placeholder="$t('groupTestUrlPlaceholder')"
-                  />
-                </div>
-                <div class="flex shrink-0 flex-col gap-1 sm:w-40">
-                  <label
-                    class="text-xs font-medium"
-                    v-tip="$t('groupExpectedStatusHint')"
-                  >{{ $t('groupExpectedStatus') }}</label>
-                  <input
-                    v-model="draft.expectedStatus"
-                    type="text"
-                    class="input input-sm w-full font-mono text-xs"
-                    :placeholder="$t('groupExpectedStatusPlaceholder')"
-                  />
-                </div>
-              </div>
             </template>
             <!-- 检测间隔/容差只对 urltest 有意义:selector 是手动选,不会自己去测;负载均衡会测速但没有容差 -->
             <template v-else-if="draft.type === 'urltest' || isLoadBalance">
@@ -359,36 +335,58 @@
                   <span class="text-base-content/60 text-xs">{{ $t('groupUnitMs') }}</span>
                 </div>
               </div>
-              <!-- 测速地址 + 可接受状态码:单独排一整行,不挤在规则 / 间隔 / 容差那一行里 -->
-              <div class="flex min-w-0 basis-full gap-3 max-sm:flex-col">
-                <div class="flex min-w-0 flex-1 flex-col gap-1">
-                  <label class="text-xs font-medium">{{ $t('groupTestUrl') }}</label>
-                  <input
-                    v-model="draft.testUrl"
-                    type="url"
-                    class="input input-sm w-full font-mono text-xs"
-                    :placeholder="$t('groupTestUrlPlaceholder')"
-                  />
-                </div>
-                <div class="flex shrink-0 flex-col gap-1 sm:w-40">
-                  <label
-                    class="text-xs font-medium"
-                    v-tip="$t('groupExpectedStatusHint')"
-                  >{{ $t('groupExpectedStatus') }}</label>
-                  <input
-                    v-model="draft.expectedStatus"
-                    type="text"
-                    class="input input-sm w-full font-mono text-xs"
-                    :placeholder="$t('groupExpectedStatusPlaceholder')"
-                  />
-                </div>
-              </div>
             </template>
+            <!-- 带宽择优:selector 是手动选,没有这项;周期是所有启用的组共用的,在「内核」页统一改 -->
+            <div
+              v-if="draft.type !== 'selector'"
+              class="flex min-h-8 min-w-0 flex-wrap items-center gap-2"
+            >
+              <label class="flex min-h-8 cursor-pointer items-center gap-2 text-xs font-medium">
+                <span>{{ $t('bandwidthEnable') }}</span>
+                <input
+                  v-model="draft.bandwidth"
+                  type="checkbox"
+                  class="toggle toggle-sm"
+                />
+              </label>
+              <button
+                type="button"
+                class="btn btn-circle btn-ghost btn-sm"
+                :aria-label="$t('bandwidthHelpTitle')"
+                @click.stop="showBandwidthHelp = true"
+              >
+                <QuestionMarkCircleIcon class="h-4 w-4" />
+              </button>
+              <span class="text-base-content/60 text-xs">{{ $t('bandwidthPeriodSummary', { hours: bandwidthSettings.intervalHours }) }}</span>
+            </div>
           </div>
-          <p
-            v-if="isLoadBalance"
-            class="text-base-content/60 text-xs"
-          >{{ $t('loadBalanceHint') }}</p>
+          <!-- 测速地址 + 可接受状态码:单独排一整行,不挤在规则 / 间隔 / 容差那一行里 -->
+          <div
+            v-if="draft.type !== 'selector'"
+            class="flex min-w-0 gap-3 max-sm:flex-col"
+          >
+            <div class="flex min-w-0 flex-1 flex-col gap-1">
+              <label class="text-xs font-medium">{{ $t('groupTestUrl') }}</label>
+              <input
+                v-model="draft.testUrl"
+                type="url"
+                class="input input-sm w-full font-mono text-xs"
+                :placeholder="$t('groupTestUrlPlaceholder')"
+              />
+            </div>
+            <div class="flex shrink-0 flex-col gap-1 sm:w-40">
+              <label
+                class="text-xs font-medium"
+                v-tip="$t('groupExpectedStatusHint')"
+              >{{ $t('groupExpectedStatus') }}</label>
+              <input
+                v-model="draft.expectedStatus"
+                type="text"
+                class="input input-sm w-full font-mono text-xs"
+                :placeholder="$t('groupExpectedStatusPlaceholder')"
+              />
+            </div>
+          </div>
           <!-- 从普通组切成故障转移时,原来引用了组的成员进不了页签(页签只放真实节点):列出来、拦住保存,
                由用户决定是移除它们还是切回原类型;不悄悄展开也不悄悄丢 -->
           <div
@@ -775,6 +773,13 @@
       </div>
     </DialogWrapper>
 
+    <BandwidthHelpDialog
+      v-model="showBandwidthHelp"
+      :mode="draft?.type || 'urltest'"
+      :hours="bandwidthSettings.intervalHours"
+      :max-m-b="bandwidthSettings.maxDownloadMB"
+    />
+
     <!-- 删有成员的页签先确认(草稿内的动作,取消整个弹窗也不会落库) -->
     <DialogWrapper
       v-model="showLaneDelete"
@@ -991,6 +996,7 @@
 
 <script setup lang="ts">
 import type {
+  OpenboxBandwidthSettings,
   OpenboxFailoverLane,
   OpenboxFailoverSettings,
   OpenboxGroupType,
@@ -1008,6 +1014,7 @@ import { keywordMatches, normalizeForMatch } from '@/helper/keywordMatch'
 import { showNotification } from '@/helper/notification'
 import { fetchProxies } from '@/store/proxies'
 import DialogWrapper from '@/components/common/DialogWrapper.vue'
+import BandwidthHelpDialog from '@/components/subscription/BandwidthHelpDialog.vue'
 import {
   Bars3Icon,
   ChevronLeftIcon,
@@ -1015,6 +1022,7 @@ import {
   PencilSquareIcon,
   PlusIcon,
   PowerIcon,
+  QuestionMarkCircleIcon,
   TrashIcon,
   XMarkIcon,
 } from '@heroicons/vue/24/outline'
@@ -1030,6 +1038,9 @@ const availableNodes = ref<Array<{ name: string; subscription: string; subscript
 // 动态组的「订阅范围」下拉:订阅 id + 名字
 const groupSubscriptions = ref<Array<{ id: string; name: string }>>([])
 const loading = ref(false)
+// 带宽择优的统一测速参数(档案里的 bandwidth),只读:帮助弹窗和开关旁的周期说明用,改它去「内核」页
+const bandwidthSettings = ref<OpenboxBandwidthSettings>({ intervalHours: 2, maxDownloadMB: 64 })
+const showBandwidthHelp = ref(false)
 // 提示一律走右上角那套 toast(zashboard 自带的 showNotification),不在页面里挂
 // 内联文字:内联的会把列表往下顶、切走再回来还在,而且同一屏里两种提示样式看着
 // 像两套东西。
@@ -1062,6 +1073,7 @@ const load = async () => {
     groups.value = data.groups
     availableNodes.value = data.availableNodes
     groupSubscriptions.value = data.subscriptions || []
+    bandwidthSettings.value = data.bandwidth || { intervalHours: 2, maxDownloadMB: 64 }
   } catch (err) {
     notifyError(err)
   } finally {
@@ -1343,6 +1355,8 @@ const onTypeChange = () => {
   }
   // 负载均衡:检测间隔默认 120s(与上游 v0.1.387 一致)
   if (next === 'loadbalance') d.interval = '120s'
+  // 手动选择不会自己测速,没有带宽择优这项:切过去就清掉,免得带着旧开关存下去
+  if (next === 'selector') delete d.bandwidth
   checkedAvailable.value = []
   checkedSelected.value = []
 }
@@ -1722,6 +1736,7 @@ const saveDraft = async (typeChangeConfirmed = false) => {
   if (!draft.value || saving.value) return
   // 保存时再做一次范围校正,避免输入框尚未触发 blur 时把临时值写进配置。
   if (draft.value.type === 'urltest' || draft.value.type === 'failover' || draft.value.type === 'loadbalance') normalizeIntervalSeconds()
+  if (draft.value.type === 'selector') delete draft.value.bandwidth
   const name = draft.value.name.trim()
   if (!name) {
     showNotification({ content: 'groupNameRequired', type: 'alert-error' })

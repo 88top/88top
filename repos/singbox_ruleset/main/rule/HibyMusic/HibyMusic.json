@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
-        "hibymusic.com",
         "hiby.cd",
-        "hiby.com"
+        "hiby.com",
+        "hibymusic.com"
       ]
     }
   ],

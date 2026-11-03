@@ -5,10 +5,10 @@
         "amp.akamaized.net"
       ],
       "domain_suffix": [
-        "ampproject.org",
         "amp.dev",
-        "ampproject.com",
-        "ampproject.net"
+        "ampproject.org",
+        "ampproject.net",
+        "ampproject.com"
       ]
     }
   ],

@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "ocnttv.com",
-        "5itv.tv"
+        "5itv.tv",
+        "ocnttv.com"
       ]
     }
   ],

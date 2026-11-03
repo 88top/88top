@@ -3,18 +3,18 @@
     {
       "domain_suffix": [
         "zoho.eu",
-        "zoho.com",
-        "zoho.com.au",
-        "zohomeetups.com",
-        "zohocdn.com",
-        "zohostatic.com",
-        "zohostatic.in",
         "zohopublic.com",
         "zohoschools.com",
-        "zohowebstatic.com",
         "zoho.in",
+        "zohostatic.in",
         "zohouniversity.com",
-        "zohomerchandise.com"
+        "zohomeetups.com",
+        "zohocdn.com",
+        "zohomerchandise.com",
+        "zoho.com",
+        "zohostatic.com",
+        "zoho.com.au",
+        "zohowebstatic.com"
       ]
     }
   ],

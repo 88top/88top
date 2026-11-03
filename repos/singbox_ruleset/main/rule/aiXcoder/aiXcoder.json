@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "aixcoder.com",
-        "nnthink.com"
+        "nnthink.com",
+        "aixcoder.com"
       ]
     }
   ],

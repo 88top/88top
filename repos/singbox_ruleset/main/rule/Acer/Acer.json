@@ -2,11 +2,11 @@
   "rules": [
     {
       "domain_suffix": [
-        "acer.com",
-        "founderpc.cn",
         "acer.com.cn",
-        "acer-group.com",
-        "founderpc.com"
+        "founderpc.cn",
+        "founderpc.com",
+        "acer.com",
+        "acer-group.com"
       ]
     }
   ],

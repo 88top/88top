@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "conda.io",
         "anaconda.org",
-        "anaconda.com",
-        "anaconda.cloud"
+        "anaconda.cloud",
+        "conda.io",
+        "anaconda.com"
       ]
     }
   ],

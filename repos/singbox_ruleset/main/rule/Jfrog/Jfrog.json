@@ -3,8 +3,8 @@
     {
       "domain_suffix": [
         "jfrog.org",
-        "jfrog.com",
-        "bintray.com"
+        "bintray.com",
+        "jfrog.com"
       ]
     }
   ],

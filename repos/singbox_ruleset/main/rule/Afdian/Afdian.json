@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "afdian.net",
-        "afdiancdn.com"
+        "afdiancdn.com",
+        "afdian.net"
       ]
     }
   ],

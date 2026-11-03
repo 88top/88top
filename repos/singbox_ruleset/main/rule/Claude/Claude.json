@@ -5,8 +5,8 @@
         "cdn.usefathom.com"
       ],
       "domain_suffix": [
-        "claude.ai",
-        "anthropic.com"
+        "anthropic.com",
+        "claude.ai"
       ]
     }
   ],

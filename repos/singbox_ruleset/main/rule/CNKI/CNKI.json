@@ -2,23 +2,23 @@
   "rules": [
     {
       "domain_suffix": [
-        "cnkidoi.com",
-        "cnki.net",
-        "bbf.org.cn",
-        "cnkidoi.org",
-        "cnkidoi.cn",
         "chndoi.com",
-        "cnkidoi.net",
         "wuxizazhi.com",
-        "wuxizazhi.net.cn",
-        "chndoi.com.cn",
-        "wuxizazhi.cn",
         "wuxizazhi.com.cn",
-        "wuxizazhi.net",
-        "chndoi.net",
-        "bjsbnet.com",
         "chndoi.cn",
-        "chndoi.org"
+        "chndoi.com.cn",
+        "cnkidoi.cn",
+        "cnkidoi.net",
+        "chndoi.net",
+        "cnkidoi.org",
+        "wuxizazhi.net",
+        "wuxizazhi.net.cn",
+        "chndoi.org",
+        "bbf.org.cn",
+        "cnki.net",
+        "bjsbnet.com",
+        "wuxizazhi.cn",
+        "cnkidoi.com"
       ]
     }
   ],

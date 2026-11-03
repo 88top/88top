@@ -2,15 +2,15 @@
   "rules": [
     {
       "domain_suffix": [
-        "dmc.nico",
         "nicodic.jp",
-        "nicovideo.jp",
         "nicoseiga.jp",
         "socdm.com",
         "simg.jp",
-        "niconico.com",
+        "dmc.nico",
+        "nicomanga.jp",
         "nimg.jp",
-        "nicomanga.jp"
+        "niconico.com",
+        "nicovideo.jp"
       ]
     }
   ],

@@ -2,12 +2,12 @@
   "rules": [
     {
       "domain_suffix": [
-        "cnnlabs.com",
-        "cnn.it",
-        "cnnarabic.com",
-        "cnn.com",
+        "cnn.io",
         "cnnmoney.ch",
-        "cnn.io"
+        "cnnlabs.com",
+        "cnn.com",
+        "cnn.it",
+        "cnnarabic.com"
       ]
     }
   ],

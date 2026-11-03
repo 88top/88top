@@ -3,12 +3,12 @@
     {
       "domain_suffix": [
         "deepin.cn",
-        "chinauos.com",
-        "deepin.org",
         "uniontech.com",
+        "deepin.io",
+        "deepin.org",
         "linglong.dev",
-        "deepin.com",
-        "deepin.io"
+        "chinauos.com",
+        "deepin.com"
       ]
     }
   ],

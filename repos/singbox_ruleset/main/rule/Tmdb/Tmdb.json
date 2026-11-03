@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "themoviedb.org",
-        "tmdb.org"
+        "tmdb.org",
+        "themoviedb.org"
       ]
     }
   ],

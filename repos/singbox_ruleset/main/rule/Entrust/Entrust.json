@@ -2,13 +2,13 @@
   "rules": [
     {
       "domain_suffix": [
-        "certificat2.com",
-        "affirmtrust.com",
-        "myatos.net",
-        "trendmicro.com",
         "atos.net",
+        "affirmtrust.com",
+        "trendmicro.com",
         "entrustdatacard.com",
-        "entrust.net"
+        "certificat2.com",
+        "entrust.net",
+        "myatos.net"
       ]
     }
   ],
