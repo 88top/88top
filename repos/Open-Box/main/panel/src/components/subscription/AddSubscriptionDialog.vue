@@ -286,6 +286,30 @@
             <p class="text-base-content/50 text-xs">{{ $t('subscriptionContentHint') }}</p>
           </div>
 
+          <!-- 带宽定期检查(和 v0.1.389 一样):开关 + 统一周期 + 说明按钮,三种来源都有 -->
+          <div
+            class="flex flex-wrap items-center gap-2 text-xs"
+            data-subscription-bandwidth
+          >
+            <label class="flex items-center gap-2 font-medium">
+              {{ $t('subscriptionBandwidthCheck') }}
+              <input
+                v-model="bandwidthCheck"
+                type="checkbox"
+                class="toggle toggle-sm toggle-primary"
+              />
+            </label>
+            <span class="text-base-content/60">{{ $t('subscriptionBandwidthEvery', { hours: bandwidthSettings.intervalHours }) }}</span>
+            <button
+              type="button"
+              class="btn btn-ghost btn-circle btn-xs"
+              :aria-label="$t('subscriptionBandwidthHelpTitle')"
+              @click="bandwidthHelpOpen = true"
+            >
+              <InformationCircleIcon class="h-4 w-4" />
+            </button>
+          </div>
+
           <!-- 订阅 DNS 解析:机场要求节点域名用它自己的 DoH 解析时填(相当于 OpenClash 的
                proxy-server-nameserver / nameserver-policy)。只解析这份订阅的节点服务器域名;
                三种来源都能配 -->
@@ -294,8 +318,31 @@
               v-if="nodeDnsOpen"
               class="flex flex-col gap-1"
             >
-              <label class="text-xs font-medium">{{ $t('subscriptionNodeDnsLabel') }}</label>
-              <div class="flex flex-col gap-2 sm:flex-row">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <label class="text-xs font-medium">{{ $t('subscriptionNodeDnsLabel') }}</label>
+                <div
+                  role="tablist"
+                  class="tabs-box tabs tabs-xs"
+                  :aria-label="$t('subscriptionNodeDnsLabel')"
+                >
+                  <button
+                    v-for="item in NODE_DNS_PROTOCOLS"
+                    :key="item.key"
+                    type="button"
+                    role="tab"
+                    class="tab"
+                    :class="nodeDnsProtocol === item.key && 'tab-active'"
+                    :aria-selected="nodeDnsProtocol === item.key"
+                    @click="nodeDnsProtocol = item.key"
+                  >
+                    {{ item.label }}
+                  </button>
+                </div>
+              </div>
+              <div
+                v-if="nodeDnsProtocol === 'https'"
+                class="flex flex-col gap-2 sm:flex-row"
+              >
                 <input
                   v-model="nodeDnsUrl"
                   type="text"
@@ -311,11 +358,33 @@
                   autocomplete="off"
                 />
               </div>
+              <div
+                v-else
+                class="flex flex-col gap-2 sm:flex-row"
+              >
+                <input
+                  v-model="nodeDnsPlainCurrent.server"
+                  type="text"
+                  class="input input-sm min-w-0 flex-1 font-mono text-xs"
+                  :placeholder="$t('subscriptionNodeDnsIpPlaceholder')"
+                  :aria-label="$t('subscriptionNodeDnsIpPlaceholder')"
+                  autocomplete="off"
+                />
+                <input
+                  v-model.number="nodeDnsPlainCurrent.port"
+                  type="number"
+                  min="1"
+                  max="65535"
+                  class="input input-sm w-full font-mono text-xs sm:w-48"
+                  :placeholder="$t('port')"
+                  :aria-label="$t('port')"
+                />
+              </div>
               <p
                 v-if="nodeDnsError"
                 class="text-error text-xs"
               >{{ $t(nodeDnsError) }}</p>
-              <p class="text-base-content/50 text-xs">{{ $t('subscriptionNodeDnsHint') }}</p>
+              <p class="text-base-content/50 text-xs">{{ $t(nodeDnsProtocol === 'https' ? 'subscriptionNodeDnsHint' : 'subscriptionNodeDnsPlainHint') }}</p>
             </div>
           </ExpandTransition>
         </div>
@@ -380,6 +449,30 @@
       </div>
     </template>
   </DialogWrapper>
+
+  <DialogWrapper
+    v-model="bandwidthHelpOpen"
+    :title="$t('subscriptionBandwidthHelpTitle')"
+    box-class="w-full max-w-2xl"
+    modal-class="z-[100]"
+    header-class="pr-10!"
+  >
+    <template #footer>
+      <button
+        type="button"
+        class="btn btn-primary btn-sm"
+        @click="bandwidthHelpOpen = false"
+      >
+        {{ $t('close') }}
+      </button>
+    </template>
+    <div class="flex flex-col gap-4 text-sm leading-relaxed">
+      <p>{{ $t('subscriptionBandwidthHelp', { hours: bandwidthSettings.intervalHours, maxMB: bandwidthSettings.maxDownloadMB }) }}</p>
+      <p>{{ $t('subscriptionBandwidthDedupe') }}</p>
+      <p>{{ $t('subscriptionBandwidthBudget') }}</p>
+      <p class="text-base-content/70">{{ $t('bandwidthClientDisabled') }}</p>
+    </div>
+  </DialogWrapper>
 </template>
 
 <script setup lang="ts">
@@ -391,15 +484,16 @@ import type {
   OpenboxSubscriptionPreview,
   OpenboxSubscriptionUsage,
 } from '@/api/openbox'
-import { createSubscription, loginSubscription, previewSubscription, updateSubscription } from '@/api/openbox'
+import { createSubscription, fetchProfile, loginSubscription, previewSubscription, updateSubscription } from '@/api/openbox'
 import DialogWrapper from '@/components/common/DialogWrapper.vue'
 import ExpandTransition from '@/components/common/ExpandTransition.vue'
-import { ChevronDownIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/outline'
+import { ChevronDownIcon, InformationCircleIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import { debounce } from 'lodash'
 import { showNotification } from '@/helper/notification'
 import { prettyBytesHelper } from '@/helper/utils'
 import { notifySubscriptionSaved } from '@/store/openboxSubscriptions'
 import dayjs from 'dayjs'
+import * as ipaddr from 'ipaddr.js'
 import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import RenameRulesEditor from './RenameRulesEditor.vue'
@@ -550,24 +644,65 @@ const autoUpdateInterval = computed({
   },
 })
 
-// 订阅 DNS 解析(DoH):没配就都留空。展开状态:已经配过就展开,否则收起(和 v0.1.317 一样)
-const nodeDnsUrl = ref(props.subscription?.nodeDns?.url ?? '')
+// 订阅 DNS 解析:没配就都留空。展开状态:已经配过就展开,否则收起(和 v0.1.317 一样)
+// 带宽定期检查:开关跟着订阅存(bandwidthCheck);周期和单次上限是后端统一设置,这里只读来显示
+const bandwidthCheck = ref(props.subscription?.bandwidthCheck === true)
+const bandwidthHelpOpen = ref(false)
+const bandwidthSettings = ref({ intervalHours: 12, maxDownloadMB: 64 })
+// 订阅 DNS 解析有三种写法:DoH(https 地址 + 可选的引导 DNS)、UDP、TCP(明文 DNS,只填 IP 和端口)。
+// 保存时 UDP/TCP 拼成 udp://ip[:port] / tcp://ip[:port] 放进 nodeDns.url
+const NODE_DNS_PROTOCOLS = [
+  { key: 'https', label: 'DoH' },
+  { key: 'udp', label: 'UDP' },
+  { key: 'tcp', label: 'TCP' },
+] as const
+type NodeDnsProtocol = (typeof NODE_DNS_PROTOCOLS)[number]['key']
+const parseNodeDns = (url: string): { protocol: NodeDnsProtocol; server: string; port: number } => {
+  try {
+    const parsed = new URL(url)
+    if (parsed.protocol === 'udp:' || parsed.protocol === 'tcp:') {
+      return {
+        protocol: parsed.protocol.slice(0, -1) as NodeDnsProtocol,
+        server: parsed.hostname.replace(/^\[|\]$/g, ''),
+        port: Number(parsed.port) || 53,
+      }
+    }
+  } catch {
+    // 不是 udp/tcp 地址就按 DoH 处理
+  }
+  return { protocol: 'https', server: '', port: 53 }
+}
+const initialNodeDns = parseNodeDns(props.subscription?.nodeDns?.url || '')
+const nodeDnsProtocol = ref<NodeDnsProtocol>(initialNodeDns.protocol)
+const nodeDnsPlain = reactive({
+  udp: { server: '', port: 53 },
+  tcp: { server: '', port: 53 },
+})
+if (nodeDnsProtocol.value !== 'https') {
+  Object.assign(nodeDnsPlain[nodeDnsProtocol.value], { server: initialNodeDns.server, port: initialNodeDns.port })
+}
+const nodeDnsPlainCurrent = computed(() => nodeDnsPlain[nodeDnsProtocol.value === 'tcp' ? 'tcp' : 'udp'])
+const nodeDnsUrl = ref(nodeDnsProtocol.value === 'https' ? (props.subscription?.nodeDns?.url ?? '') : '')
 const nodeDnsBootstrap = ref(props.subscription?.nodeDns?.bootstrap ?? '')
 const nodeDnsOpen = ref(Boolean(props.subscription?.nodeDns?.url))
 
-// 填写校验:DoH 地址必须是 https://(不带账号密码);主机名是域名时,必须同时给出解析它用的 DNS(IP)。
-// 有错就不能保存,并自动展开输入框把提示显示出来。
-const IPV4_RE = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/
-const isIpAddress = (value: string) =>
-  IPV4_RE.test(value) || (/^[0-9a-f:]+$/i.test(value) && value.includes(':'))
+// 填写校验:DoH 地址必须是 https://(不带账号密码和 #);主机名是域名时,必须同时给出解析它用的 DNS(IP)。
+// UDP/TCP 只能填有效的 IPv4/IPv6 地址,端口 1-65535。有错就不能保存,并自动展开输入框把提示显示出来。
+const isIpAddress = (value: string) => ipaddr.IPv4.isValidFourPartDecimal(value) || ipaddr.IPv6.isValid(value)
 const nodeDnsError = computed(() => {
+  if (nodeDnsProtocol.value !== 'https') {
+    const { server, port } = nodeDnsPlainCurrent.value
+    if (!server.trim()) return ''
+    if (!isIpAddress(server.trim())) return 'subscriptionNodeDnsInvalidIp'
+    return Number.isInteger(port) && port >= 1 && port <= 65535 ? '' : 'dnsUpstreamInvalidPort'
+  }
   const url = nodeDnsUrl.value.trim()
   const bootstrap = nodeDnsBootstrap.value.trim()
   if (!url) return bootstrap ? 'subscriptionNodeDnsNeedUrl' : ''
   let host = ''
   try {
     const parsed = new URL(url)
-    if (parsed.protocol !== 'https:' || parsed.username || parsed.password) {
+    if (parsed.protocol !== 'https:' || !parsed.hostname || parsed.username || parsed.password || parsed.hash) {
       return 'subscriptionNodeDnsInvalidUrl'
     }
     host = parsed.hostname.replace(/^\[|\]$/g, '')
@@ -583,6 +718,12 @@ watch(nodeDnsError, (error) => {
 })
 // 实际发出去的值:地址留空或校验没过就是 null(服务端存成没有)
 const effectiveNodeDns = computed<{ url: string; bootstrap?: string } | null>(() => {
+  if (nodeDnsProtocol.value !== 'https') {
+    const { server, port } = nodeDnsPlainCurrent.value
+    const host = server.trim()
+    if (!host || nodeDnsError.value) return null
+    return { url: `${nodeDnsProtocol.value}://${host.includes(':') ? `[${host}]` : host}${port === 53 ? '' : `:${port}`}` }
+  }
   const url = nodeDnsUrl.value.trim()
   if (!url || nodeDnsError.value) return null
   const bootstrap = nodeDnsBootstrap.value.trim()
@@ -747,7 +888,14 @@ const resetForm = () => {
   name.value = props.subscription?.name ?? ''
   urls.value = initialUrls()
   autoUpdate.value = initialAutoUpdate()
-  nodeDnsUrl.value = props.subscription?.nodeDns?.url ?? ''
+  bandwidthCheck.value = props.subscription?.bandwidthCheck === true
+  bandwidthHelpOpen.value = false
+  const dns = parseNodeDns(props.subscription?.nodeDns?.url || '')
+  nodeDnsProtocol.value = dns.protocol
+  nodeDnsPlain.udp = { server: '', port: 53 }
+  nodeDnsPlain.tcp = { server: '', port: 53 }
+  if (dns.protocol !== 'https') Object.assign(nodeDnsPlain[dns.protocol], { server: dns.server, port: dns.port })
+  nodeDnsUrl.value = dns.protocol === 'https' ? (props.subscription?.nodeDns?.url ?? '') : ''
   nodeDnsBootstrap.value = props.subscription?.nodeDns?.bootstrap ?? ''
   content.value = props.subscription?.content ?? ''
   overrides.value = { ...(props.subscription?.renameOptions?.overrides || {}) }
@@ -766,8 +914,14 @@ const resetForm = () => {
 }
 
 watch(isOpen, (open) => {
-  if (open) resetForm()
-  else {
+  if (open) {
+    resetForm()
+    fetchProfile()
+      .then((profile) => {
+        if (isOpen.value && profile.bandwidth) bandwidthSettings.value = profile.bandwidth
+      })
+      .catch(() => {})
+  } else {
     // 关掉就别让密码留在内存里,也别让还在飞的登录结果落回表单
     loginSeq += 1
     loginForm.password = ''
@@ -796,6 +950,7 @@ const handleSave = async () => {
       autoUpdate: sourceMode.value !== 'paste' ? autoUpdate.value : { enabled: false, days: 1, hour: 4 },
       // 地址留空或没通过校验 = 不用专用解析器(服务端存成没有);「订阅」「节点」两种来源都能配
       nodeDns: effectiveNodeDns.value,
+      bandwidthCheck: bandwidthCheck.value,
     }
     const res = props.subscription
       ? await updateSubscription(props.subscription.id, payload)

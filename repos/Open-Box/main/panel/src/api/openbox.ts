@@ -352,6 +352,8 @@ export interface OpenboxSubscription {
   id: string
   name: string
   url: string
+  // 启用带宽定期检查:路由器按统一周期给本订阅的有效节点测下载带宽;没有这个字段 = 关
+  bandwidthCheck?: boolean
   // 停用(false)的订阅节点不进内核,重启内核生效;没有这个字段 = 启用
   enabled?: boolean
   autoUpdate?: OpenboxSubscriptionAutoUpdate | null
@@ -844,10 +846,54 @@ export interface OpenboxBandwidthStatus {
   running: boolean
   lastError: string
   updatedAt: number
+  // 每个节点最近的带宽实测(键是节点名);只有所属订阅开了定期检查的节点才有 enabled
+  measurements?: Record<string, OpenboxBandwidthMeasurement>
+  // 订阅 id → 还有几个节点在排队检测(0 / 没有 = 空闲)
+  pendingBySubscription?: Record<string, number>
+}
+
+export interface OpenboxBandwidthSample {
+  at: number
+  mbps: number
+  failed?: boolean
+  // 下载被上限截断,真实带宽不低于这个值(显示成「≥ 数值」)
+  lowerBound?: boolean
+}
+
+export interface OpenboxBandwidthMeasurement extends OpenboxBandwidthSample {
+  enabled?: boolean
+  pending?: boolean
+  // 手动重测:这次请求排队的时间、测完的时间(后者没有就是还没测完),用来认出「我点的这次」测完了没有
+  requestedAt?: number
+  completedAt?: number
+  // 失败时的原始报错和归类原因(reason 同延时失败原因:timeout / dns / tls …)
+  error?: string
+  reason?: string
+  // 最近的样本,旧的在前
+  history?: OpenboxBandwidthSample[]
+}
+
+export interface OpenboxBandwidthQueueResult {
+  queued: number
+  joined?: number
+  // 这次排队的时间戳,和测量里的 requestedAt 对上才算「这一次」测完
+  requestedAt?: number
+  pendingBySubscription: Record<string, number>
 }
 
 export const fetchBandwidthStatus = async (): Promise<OpenboxBandwidthStatus> =>
   requestJson<OpenboxBandwidthStatus>('/api/openbox/bandwidth')
+
+// 手动重测整条订阅 / 单个节点的带宽:只是把节点排进队,结果靠轮询 fetchBandwidthStatus 取
+export const queueSubscriptionBandwidth = async (id: string): Promise<OpenboxBandwidthQueueResult> =>
+  requestJson<OpenboxBandwidthQueueResult>(`/api/openbox/bandwidth/subscriptions/${encodeURIComponent(id)}`, {
+    method: 'POST',
+  })
+
+export const queueNodeBandwidth = async (name: string): Promise<OpenboxBandwidthQueueResult> =>
+  requestJson<OpenboxBandwidthQueueResult>(`/api/openbox/bandwidth/nodes/${encodeURIComponent(name)}`, {
+    method: 'POST',
+  })
 
 export interface OpenboxGroupsPayload {
   groups: OpenboxUserGroup[]
@@ -1866,7 +1912,7 @@ export const testStoredLatencyStream = async (
   return state.final
 }
 
-// 节点信息(服务端 panel/server/api/node-info.mjs):入口地址解析、出口 IP 归属和风控值。
+// 节点信息(服务端 panel/server/api/node-info.mjs):入口地址解析、出口 IP 归属和 Net.Coffee 风险评估。
 export interface OpenboxNodeInfo {
   tag: string
   type: string
@@ -1881,6 +1927,29 @@ export interface OpenboxNodeInfo {
   resolveError?: string
 }
 
+// 出口 IP 的风险评估(source 为 ip.net.coffee 时才有)
+export interface OpenboxNodeRiskAssessment {
+  // 滥用评分(0~1,越大越差);没有就看 abuseLevel
+  abuseScore?: number | null
+  abuseLevel?: string
+  // HTTP 黑名单命中分(0~255)
+  httpBlacklist?: number | null
+  threats?: { label: string; severity: string }[] | null
+  rpki?: string
+  rpkiReported?: string
+  vpn?: boolean | null
+  proxy?: boolean | null
+  tor?: boolean | null
+  crawler?: boolean | null
+}
+
+export interface OpenboxNodeHumanTraffic {
+  // 真人流量占比(0~100)
+  human: number
+  // asn-28d:按 ASN 近 28 天的统计;其它是按 IP 估算
+  basis?: string
+}
+
 export interface OpenboxNodeExit {
   ok: boolean
   at: number
@@ -1892,12 +1961,15 @@ export interface OpenboxNodeExit {
   asnOwner?: string
   ipType: string
   proxyType: string
-  risk: number | null
-  devices: number | null
+  // 信任分(0~100,越高越可信)
+  trustScore: number | null
   registeredCountry: string
   native: boolean | null
+  source?: string
+  riskAssessment?: OpenboxNodeRiskAssessment
+  humanTraffic?: OpenboxNodeHumanTraffic
   // 某一路没查到的来源,值是失败原因
-  errors?: { proxycheck?: string; rdap?: string }
+  errors?: { netcoffee?: string }
   cached?: boolean
 }
 
@@ -1905,4 +1977,67 @@ export const fetchNodeInfo = (tag: string) => requestJson<OpenboxNodeInfo>(`/api
 export const fetchNodeEntryCountry = (tag: string) => requestJson<{ ip: string; country: string }>(`/api/openbox/node-info/${encodeURIComponent(tag)}/entry-country`)
 // refresh = true 跳过 6 小时缓存重新查(服务端 15 秒内的重复刷新仍按缓存答)
 export const fetchNodeExit = (tag: string, refresh = false) =>
-  requestJson<OpenboxNodeExit>(`/api/openbox/node-info/${encodeURIComponent(tag)}/exit`, { method: 'POST', body: JSON.stringify({ refresh }) })
+  requestJson<OpenboxNodeExit>(`/api/openbox/node-info/${encodeURIComponent(tag)}/exit`, {
+    method: 'POST',
+    body: JSON.stringify({ refresh }),
+    signal: AbortSignal.timeout(60_000),
+  })
+
+// ===== 节点质量(概览页「节点质量」卡,对齐上游 v0.1.391) =====
+export type OpenboxQualityState = 'healthy' | 'down' | 'unknown' | 'stale'
+export type OpenboxQualityGrade = 'pending' | 'attention' | 'fair' | 'good' | 'excellent'
+export type OpenboxQualitySample = { at: number | string; value: number; failed?: boolean }
+export type OpenboxQualityStats = {
+  availability: number | null
+  latency: number | null
+  jitter: number | null
+  download: number | null
+  upload: number | null
+  activeMs: number
+  up: number
+  down: number
+  lastAt: number | string | null
+  checks?: number
+}
+export type OpenboxQualityNode = OpenboxQualityStats & {
+  tag: string
+  region: string
+  protocol: string
+  state: OpenboxQualityState
+  score: number | null
+  charts?: { latency?: OpenboxQualitySample[]; bandwidth?: OpenboxQualitySample[] }
+}
+export type OpenboxQualitySubscription = OpenboxQualityStats & {
+  id: string
+  name: string
+  mode: 'login' | 'subscription' | 'node'
+  usable: number
+  total: number
+  failed: number
+  unknown: number
+  assessed: number
+  coverage: number
+  score: number | null
+  grade: OpenboxQualityGrade
+  provisional?: boolean
+  bandwidthCount: number
+  nodes?: OpenboxQualityNode[]
+}
+export type OpenboxNodeQuality = { subscriptions: OpenboxQualitySubscription[] }
+export type OpenboxNodeQualityQuery = {
+  allSubscriptions?: boolean
+  search?: string
+  details?: string
+  nodePageSize?: number
+  allNodes?: boolean
+  node?: string
+}
+export const fetchNodeQuality = (query: OpenboxNodeQualityQuery, signal?: AbortSignal) =>
+  requestJson<OpenboxNodeQuality>(
+    `/api/openbox/node-quality?${new URLSearchParams(
+      Object.entries(query)
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [k, String(v)]),
+    )}`,
+    { signal },
+  )

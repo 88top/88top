@@ -1,0 +1,68 @@
+import * as fs from 'fs';
+
+'use strict';
+
+let ubus = require('ubus').connect();
+
+let mtk_wed_modules = [ "mt7915e", "mt7996e" ];
+
+function readfile(path) {
+    s = fs.readfile(path);
+    return trim(s);
+}
+
+function has_mtkwed_module(kernel) {
+    for (let mod in mtk_wed_modules) {
+        if (fs.access("/lib/modules/" + kernel + "/" + mod + ".ko")) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Same as the offloading_hw feature of the lede luci-base
+function has_supported_hw_offloading_target(target) {
+    if (target == "ipq40xx/generic")
+        return fs.access("/sys/module/qca_ssdk") == true &&
+            fs.access("/sys/module/essedma") == true;
+
+    return type(target) == "string" &&
+        match(target, /^(ramips\/mt7621|mediatek\/mt76..|mediatek\/filogic|airoha\/an758[0-9])$/) != null;
+}
+
+function has_hw_flow_offloading(target) {
+    let has_fw3 = fs.access("/sbin/fw3") == true;
+    let has_fw4 = fs.access("/sbin/fw4") == true || fs.access("/usr/sbin/fw4") == true;
+    let has_mt7621_vendor_hnat = target == "ramips/mt7621" && fs.access("/sys/module/mtkhnat") == true;
+
+    return !has_mt7621_vendor_hnat && has_supported_hw_offloading_target(target) &&
+        ((has_fw3 && fs.access("/sys/module/xt_FLOWOFFLOAD/refcnt") == true) ||
+         (has_fw4 && fs.access("/sys/module/nft_flow_offload/refcnt") == true));
+}
+
+return {
+        "luci.turboacc": {
+                getSystemFeatures: {
+                        call: function() {
+                                boardinfo = ubus.call("system", "board", {});
+                                kernel = boardinfo.kernel;
+
+                                features  = {
+                                        hasIPV6           : fs.access("/proc/net/ipv6_route"),
+                                        hasFLOWOFFLOADING : fs.access("/lib/modules/" + boardinfo.kernel + "/xt_FLOWOFFLOAD.ko") || fs.access("/lib/modules/" + boardinfo.kernel + "/nft_flow_offload.ko"),
+                                        hasHWFLOWOFFLOADING : has_hw_flow_offloading(boardinfo.release?.target),
+                                        hasFASTCLASSIFIER : fs.access("/lib/modules/" + boardinfo.kernel + "/fast-classifier.ko"),
+                                        hasSHORTCUTFECM   : fs.access("/lib/modules/" + boardinfo.kernel + "/shortcut-fe-cm.ko"),
+                                        hasNSSECM         : fs.access("/etc/init.d/qca-nss-ecm"),
+                                        hasMEDIATEKHNAT   : fs.access("/lib/modules/" + boardinfo.kernel + "/mtkhnat.ko"),
+                                        hasMTKWEDWO       : (system("grep -Eq 'mediatek' /etc/openwrt_release") == 0) && has_mtkwed_module(boardinfo.kernel),
+                                        hasXTFULLCONENAT  : fs.access("/lib/modules/" + boardinfo.kernel + "/xt_FULLCONENAT.ko"),
+                                        hasNFTFULLCONENAT  : fs.access("/lib/modules/" + boardinfo.kernel + "/nft_fullcone.ko"),
+                                        hasTCPCCA         : readfile("/proc/sys/net/ipv4/tcp_available_congestion_control")
+                                };
+
+                                return features;
+                        }
+                }
+        }
+};
