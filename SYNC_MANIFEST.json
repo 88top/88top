@@ -100,7 +100,7 @@
   },
   "timeflysoon/LAVFilters": {
     "master": {
-      "remote_sha": "2ed926071aa6c489ce0b6e650361297fb21bc2d5"
+      "remote_sha": "d8d8a0cecb79fae2689ee5776eed9cbf82c3961c"
     }
   },
   "timeflysoon/Microsoft-Activation-Scripts": {
@@ -203,7 +203,7 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "84ab785c2d90791848c38d5f7f66ffa8a0873d64"
+      "remote_sha": "dd571a2eaad45b0ac150539377ef381e5081c060"
     }
   },
   "timeflysoon/dae": {
@@ -228,7 +228,7 @@
   },
   "timeflysoon/gopeed": {
     "main": {
-      "remote_sha": "5bd57608d228ee237f319d99413804d419323243"
+      "remote_sha": "9e9bcd4b01581775fc4e6e25d6195736cb494803"
     }
   },
   "timeflysoon/img-installer": {
@@ -288,7 +288,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "726b042085776846c6aea36e7557031ca4bc8143"
+      "remote_sha": "3bf28f6ae2bcef14c6ad7fbba6be96d8987216f3"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -309,13 +309,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "ea0125e318b019267a12ff8294689e2f997991a9"
+      "remote_sha": "bc735930f7942f1159094650f55012ff7e9644a0"
     },
     "release": {
-      "remote_sha": "61f465401cfec731ba4abfd9a5abcee235fa0ebc"
+      "remote_sha": "fb6bd25ca61dd918d36b0f61b4bad67dfc278bcf"
     },
     "sing": {
-      "remote_sha": "3b12862d8ca1d31c30a36db14945c8a370356cfb"
+      "remote_sha": "f78aeb1c01f3f7e020d9e7fcfa4f7198120a10be"
     }
   },
   "timeflysoon/quickstart": {
@@ -358,7 +358,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "61336d513afd85a33904834f0bd5d15afacb01c7"
+      "remote_sha": "96d98c91fcced7aa41a68c93e386a0f8b4610e04"
     }
   },
   "timeflysoon/store": {
@@ -381,10 +381,10 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "ea0125e318b019267a12ff8294689e2f997991a9"
+      "remote_sha": "bc735930f7942f1159094650f55012ff7e9644a0"
     },
     "release": {
-      "remote_sha": "61f465401cfec731ba4abfd9a5abcee235fa0ebc"
+      "remote_sha": "fb6bd25ca61dd918d36b0f61b4bad67dfc278bcf"
     }
   },
   "timeflysoon/turboacc": {
@@ -397,7 +397,7 @@
   },
   "timeflysoon/v2rayN": {
     "master": {
-      "remote_sha": "749a7312d7899890b2dfedf635af4b03ddb1aa44"
+      "remote_sha": "9a029a3f7eee1ef549718b57de601f7131263653"
     },
     "v7_16": {
       "remote_sha": "654d7d83d09d1683c60501c9fa853a19c3dd9d6b"
@@ -413,7 +413,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "0ada9f5ee156e0b65be65f53d7e0695f244ea013"
+      "remote_sha": "019303063f273f49887b68fc4c7405df11bed8f8"
     }
   },
   "timeflysoon/weasel": {
@@ -459,7 +459,7 @@
   },
   "timeflysoon/DriverStoreExplorer": {
     "master": {
-      "remote_sha": "bcd226df19074ba4eeaa374f2dcbef735a5ee994"
+      "remote_sha": "5ae5f6a2f0927e342be6a5899204eb96e750b22c"
     }
   },
   "timeflysoon/dlssg_for_sm86": {
@@ -469,10 +469,10 @@
   },
   "timeflysoon/Open-Box": {
     "catch-up-upstream": {
-      "remote_sha": "09758c6c8bf6a88bfebf8703ec506ad15732e4a8"
+      "remote_sha": "97f658fd9bb70de47d2e517adeeaee81a9da6729"
     },
     "main": {
-      "remote_sha": "cd44dc9ea1b25368c6adbd68dc8fd014ee123adf"
+      "remote_sha": "22c7bfa0a3cddb51d98ac5022e4b414967a347c5"
     },
     "backup": {
       "remote_sha": "f42122e8b1b6e49d6ac88a84fc26ebb2480d17db"
@@ -485,7 +485,7 @@
   },
   "timeflysoon/honk": {
     "main": {
-      "remote_sha": "88d470c662e0ee7a3de3e67afc6129f67e66c1bf"
+      "remote_sha": "9e31cc0bd28825afdc0e384dc989bc3f076e69cf"
     }
   }
 }
