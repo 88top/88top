@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/timeflysoon/Open-Box/backend/internal/clientapp"
 )
@@ -227,6 +228,167 @@ func TestEgressCountryHandler(t *testing.T) {
 	for _, m := range []string{http.MethodGet, http.MethodPut, http.MethodDelete} {
 		if rec := callPath(t, Deps{Egress: ok}, m, path, ""); rec.Code != 405 {
 			t.Errorf("%s: %d", m, rec.Code)
+		}
+	}
+}
+
+type fakeFile struct {
+	gotLan, gotPub string
+	calls          int
+	b              clientapp.Bundle
+	err            error
+}
+
+func (f *fakeFile) ExportFile(_ context.Context, lan, pub string) (clientapp.Bundle, error) {
+	f.calls++
+	f.gotLan, f.gotPub = lan, pub
+	return f.b, f.err
+}
+
+func TestClientConfigFile(t *testing.T) {
+	f := &fakeFile{b: clientapp.Bundle{Format: clientapp.BundleFormat, Version: 1,
+		Router: clientapp.BundleRouter{ID: "r", Name: "n"},
+		KDF:    clientapp.KDFParams{Alg: clientapp.SealKDF, Iterations: 200000, Salt: "s"}, Data: "d", ExportedAt: 7}}
+	rec := callPath(t, Deps{File: f}, http.MethodPost, "/api/openbox/client-config/file", `{"lan":"192.168.5.1","publicBase":"https://h/"}`)
+	if rec.Code != 200 || !strings.Contains(rec.Header().Get("Cache-Control"), "no-store") {
+		t.Fatalf("%d %v %s", rec.Code, rec.Header(), rec.Body)
+	}
+	if f.gotLan != "192.168.5.1" || f.gotPub != "https://h/" {
+		t.Fatalf("参数没传到: %q %q", f.gotLan, f.gotPub)
+	}
+	var got map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &got); err != nil {
+		t.Fatal(err)
+	}
+	kdf, _ := got["kdf"].(map[string]any)
+	if got["format"] != "open-box-client-sealed" || got["version"] != float64(1) || got["exportedAt"] != float64(7) ||
+		got["data"] != "d" || kdf["alg"] != "pbkdf2-sha256" || kdf["iterations"] != float64(200000) || kdf["salt"] != "s" {
+		t.Fatalf("响应形状: %s", rec.Body)
+	}
+	// 两个参数都可以不传
+	f.calls = 0
+	if rec := callPath(t, Deps{File: f}, http.MethodPost, "/api/openbox/client-config/file", `{}`); rec.Code != 200 || f.gotLan != "" || f.gotPub != "" {
+		t.Fatalf("空参数: %d %s", rec.Code, rec.Body)
+	}
+}
+
+func TestClientConfigFileErrors(t *testing.T) {
+	// 没接服务 503;GET 405
+	if rec := callPath(t, Deps{}, http.MethodPost, "/api/openbox/client-config/file", `{}`); rec.Code != 503 {
+		t.Errorf("没接服务: %d", rec.Code)
+	}
+	if rec := callPath(t, Deps{File: &fakeFile{}}, http.MethodGet, "/api/openbox/client-config/file", ""); rec.Code != 405 {
+		t.Errorf("GET: %d", rec.Code)
+	}
+	// 请求体不是 JSON / 后面还跟东西 / 太大:400 或 413,且没调用服务
+	f := &fakeFile{}
+	for _, body := range []string{`nope`, `{} {}`, `{"lan":"` + strings.Repeat("a", 9000) + `"}`} {
+		rec := callPath(t, Deps{File: f}, http.MethodPost, "/api/openbox/client-config/file", body)
+		if rec.Code != 400 && rec.Code != 413 {
+			t.Errorf("坏请求体 %.20q: %d", body, rec.Code)
+		}
+	}
+	if f.calls != 0 {
+		t.Errorf("坏请求体不该调用服务: %d", f.calls)
+	}
+	// 参数不合格 400,带中文原因;别的错误 500 且不回显内部细节以外的东西
+	rec := callPath(t, Deps{File: &fakeFile{err: &clientapp.InputError{Msg: "lan 必须是 IP 地址或主机名"}}}, http.MethodPost, "/api/openbox/client-config/file", `{"lan":"a b"}`)
+	if rec.Code != 400 || !strings.Contains(rec.Body.String(), "lan 必须是") {
+		t.Errorf("InputError: %d %s", rec.Code, rec.Body)
+	}
+	rec = callPath(t, Deps{File: &fakeFile{err: errors.New("boom")}}, http.MethodPost, "/api/openbox/client-config/file", `{}`)
+	if rec.Code != 500 || !strings.Contains(rec.Body.String(), "导出客户端配置失败") {
+		t.Errorf("内部错误: %d %s", rec.Code, rec.Body)
+	}
+	// 启用的内容过滤规则超过同步上限:409,带中文原因(多大、上限多少、怎么办),不是 500;登录后的接口可以说清楚
+	rec = callPath(t, Deps{File: &fakeFile{err: &clientapp.ContentFilterTooLargeError{Size: 5 << 20, Max: 4 << 20}}}, http.MethodPost, "/api/openbox/client-config/file", `{}`)
+	if rec.Code != 409 || !strings.Contains(rec.Body.String(), "5.0 MiB") || !strings.Contains(rec.Body.String(), "4.0 MiB") || !strings.Contains(rec.Body.String(), "停用或删除") {
+		t.Errorf("内容过滤太大: %d %s", rec.Code, rec.Body)
+	}
+}
+
+type fakeSync struct {
+	gotNonce, gotIP string
+	res             clientapp.SyncResult
+	err             error
+}
+
+func (f *fakeSync) Sync(_ context.Context, nonce, ip string) (clientapp.SyncResult, error) {
+	f.gotNonce, f.gotIP = nonce, ip
+	return f.res, f.err
+}
+
+func syncCall(t *testing.T, f *fakeSync, path string) *httptest.ResponseRecorder {
+	t.Helper()
+	mux := http.NewServeMux()
+	Register(mux, Deps{Sync: f})
+	req := httptest.NewRequest(http.MethodGet, path, nil)
+	req.RemoteAddr = "192.168.5.20:51234"
+	req.Header.Set("X-Forwarded-For", "6.6.6.6") // 不能被信任
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+	return rec
+}
+
+func TestSyncConfigOK(t *testing.T) {
+	f := &fakeSync{res: clientapp.SyncResult{Format: clientapp.BundleFormat, Version: 1,
+		Router: clientapp.BundleRouter{ID: "r", Name: "n"},
+		KDF:    clientapp.KDFParams{Alg: clientapp.SealKDF, Iterations: 200000, Salt: "s"}, Data: "d", ExportedAt: 9}}
+	rec := syncCall(t, f, "/client/v1/config?p=0123456789abcdef")
+	if rec.Code != 200 || !strings.Contains(rec.Header().Get("Cache-Control"), "no-store") {
+		t.Fatalf("%d %v %s", rec.Code, rec.Header(), rec.Body)
+	}
+	if f.gotNonce != "0123456789abcdef" || f.gotIP != "192.168.5.20" {
+		t.Fatalf("nonce 和来源 IP(取连接对端,不信 X-Forwarded-For): %q %q", f.gotNonce, f.gotIP)
+	}
+	var got map[string]any
+	json.Unmarshal(rec.Body.Bytes(), &got)
+	router, _ := got["router"].(map[string]any)
+	kdf, _ := got["kdf"].(map[string]any)
+	if router["id"] != "r" || got["exportedAt"] != float64(9) || got["data"] != "d" || kdf["alg"] != "pbkdf2-sha256" {
+		t.Fatalf("形状: %s", rec.Body)
+	}
+}
+
+func TestSyncConfigErrors(t *testing.T) {
+	cases := []struct {
+		name string
+		err  error
+		code int
+		want string
+	}{
+		{"关着", clientapp.ErrDisabled, 403, `{"error":"disabled"}`},
+		{"nonce 不对", clientapp.ErrSyncNotFound, 404, `"error":"not found"`},
+		{"限速", &clientapp.LimitedError{After: 61500 * time.Millisecond}, 429, ""},
+		{"内容过滤太大", &clientapp.ContentFilterTooLargeError{Size: 5 << 20, Max: 4 << 20}, 409, `{"error":"content filter too large"}`},
+		{"内部错误", errors.New("db 路径 /secret 坏了"), 500, `"error":"同步失败"`},
+	}
+	for _, c := range cases {
+		rec := syncCall(t, &fakeSync{err: c.err}, "/client/v1/config?p=x")
+		if rec.Code != c.code || !strings.Contains(rec.Body.String(), c.want) {
+			t.Errorf("%s: %d %s", c.name, rec.Code, rec.Body)
+		}
+		if strings.Contains(rec.Body.String(), "/secret") {
+			t.Errorf("%s: 不能把内部细节回给匿名调用方", c.name)
+		}
+	}
+	rec := syncCall(t, &fakeSync{err: &clientapp.LimitedError{After: 61500 * time.Millisecond}}, "/client/v1/config?p=x")
+	if rec.Header().Get("Retry-After") != "62" {
+		t.Errorf("Retry-After 应向上取整: %q", rec.Header().Get("Retry-After"))
+	}
+	// 没接服务 503;POST 405;别的路径回 JSON 404
+	mux := http.NewServeMux()
+	Register(mux, Deps{})
+	for _, c := range []struct {
+		method, path string
+		code         int
+	}{
+		{http.MethodGet, "/client/v1/config", 503}, {http.MethodPost, "/client/v1/config", 405}, {http.MethodGet, "/client/v1/other", 404},
+	} {
+		rec := httptest.NewRecorder()
+		mux.ServeHTTP(rec, httptest.NewRequest(c.method, c.path, nil))
+		if rec.Code != c.code {
+			t.Errorf("%s %s: %d", c.method, c.path, rec.Code)
 		}
 	}
 }

@@ -16,8 +16,10 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/timeflysoon/Open-Box/backend/internal/contentfilter"
 	"github.com/timeflysoon/Open-Box/backend/internal/store"
 )
 
@@ -34,6 +36,10 @@ type state struct {
 	Config *configState `json:"clientConfig,omitempty"`
 	// Egress 是上一次按出口 IP 判出的国家,见 egress.go。
 	Egress *EgressCountry `json:"egressCountry,omitempty"`
+	// Shares 是共享网络服务器的 App 码状态(服务器 id → 配对码、代数、封好的节点分享链接),见 sharecodes.go。
+	Shares map[string]*shareState `json:"shareCodes,omitempty"`
+	// Devices 是 App 在线配对后的设备(token 哈希 + 密钥),见 devices.go。
+	Devices []*device `json:"clientDevices,omitempty"`
 }
 
 // ServerInfo 是档案里的路由器标识(serverInfo),四个字段都可以空。原样回给前端。
@@ -72,7 +78,8 @@ type serverDefault struct {
 
 // Service 组装 Info。字段都是依赖,测试里换假的。
 type Service struct {
-	Store *store.Store
+	pairLimit *pairLimiter
+	Store     *store.Store
 	// Profile 读完整档案(*profile.Service.Get 的包装)。
 	Profile func(ctx context.Context) (map[string]any, error)
 	// LAN 返回局域网地址和 IPv4 网段(system.LAN)。为空时两项都回空数组。
@@ -87,6 +94,29 @@ type Service struct {
 	Running func(ctx context.Context) (bool, error)
 	// Now 取当前时间,默认 time.Now(测试里换假的)。
 	Now func() time.Time
+	// KDFIter 是配对码封包的 PBKDF2 迭代次数,0 = DefaultSealIter(60 万次);只有测试会改小。
+	KDFIter int
+	// ContentFilter 取启用的内容过滤集合的快照(*contentfilter.Service.Snapshot 的包装),并进导出文件和公开同步接口共用的明文。
+	// nil = 明文里不带 contentFilter 这一项;返回 *contentfilter.TooLargeError 时导出和同步如实报 *ContentFilterTooLargeError。
+	ContentFilter func(ctx context.Context) (contentfilter.Snapshot, error)
+
+	// GeoDir 是随包规则库目录(<分类名>.srs);RulesetDir 是用户规则集链接编出的本地规则集目录(list-<hash>.srs)。
+	// App 经 config/:token/rule-set/:tag 取规则集文件时按这两处找;空 = 对应的一类回 404。
+	GeoDir     string
+	RulesetDir string
+
+	// UpdateServer 在档案里原子地改一台共享服务器:读出 id 对应的那一台(副本)交给 change 修改再写回,没有这台回 ErrServerNotFound
+	// (profile.Service.UpdateServer 的包装,把它的错误换成本包的)。nil = 不支持,share-codes/{x}/rotate 回 503。
+	UpdateServer func(ctx context.Context, id string, change func(server map[string]any) error) (map[string]any, error)
+	// Deploy 做一次部署(deploystate.Service.Run 的包装);换了共享服务器的密码后用它让新密码生效。nil = 只存不部署。
+	Deploy func(ctx context.Context) DeployResult
+
+	keys      keyCache    // 当前这一代配对码派生出的密钥,只在内存里
+	syncLimit syncLimiter // 公开同步接口按来源 IP 的失败限速
+	sealOnce  sync.Once
+	sealSem   chan struct{} // 同一时刻最多几份封包在生成,见 acquireSeal
+
+	shareMu sync.Mutex // 串行化共享服务器 App 码的所有写(POST share-codes 等),也让 20 万次派生一次只跑一份
 }
 
 // PortOf 取 "host:port" 里的端口;格式不对或不在 1~65535 返回 0。

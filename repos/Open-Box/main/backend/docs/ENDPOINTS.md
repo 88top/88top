@@ -110,9 +110,11 @@
 | POST | `/api/openbox/client-app/share-codes` | `fetchShareCodeSeals` (api/clientApp.ts:215) | Record<string, OpenboxShareCodeSeal> | (links: Record<string, string>) |
 | POST | `/api/openbox/client-app/share-codes/{x}/rotate` | `rotateShareCode` (api/clientApp.ts:232) | OpenboxShareCodeRotated | (id: string) |
 
-实现约定(M2,只列已做的 `info`):`GET /client-app/info` 返回 `OpenboxClientAppInfo` 全部字段。`routerId` 第一次读时生成(32 位小写十六进制)并保存,之后不变,不提供更换;`lanAddresses` / `lanSubnets` 只含私有地址(跳过回环 / 隧道 / 容器网桥),IPv4 在前、LAN 口在前,`lanSubnets` 只有 IPv4;`panelPort` 是本后端监听的端口;`shareRegions` 没存或存了空数组 = 默认三组且 `shareRegionsCustomized` 为 false,`defaultShareRegions` 恒为默认三组;`serverInfo` 原样,`routerName` = `serverInfo.name`(去首尾空白)或「Open-Box」;`egressCountry` 是上一次 `POST egress-country` 判出的 `{ip, country, at}`,没判过或缓存不合格时为 `null`。`share-codes*`、`client-config/file` 的封包格式前端没有规定,未做,见 STATUS.md。
+实现约定(M2,只列已做的 `info`):`GET /client-app/info` 返回 `OpenboxClientAppInfo` 全部字段。`routerId` 第一次读时生成(32 位小写十六进制)并保存,之后不变,不提供更换;`lanAddresses` / `lanSubnets` 只含私有地址(跳过回环 / 隧道 / 容器网桥),IPv4 在前、LAN 口在前,`lanSubnets` 只有 IPv4;`panelPort` 是本后端监听的端口;`shareRegions` 没存或存了空数组 = 默认三组且 `shareRegionsCustomized` 为 false,`defaultShareRegions` 恒为默认三组;`serverInfo` 原样,`routerName` = `serverInfo.name`(去首尾空白)或「Open-Box」;`egressCountry` 是上一次 `POST egress-country` 判出的 `{ip, country, at}`,没判过或缓存不合格时为 `null`。`share-codes`(POST)已做,见下面;`share-codes/{x}/rotate`(换这台服务器的配对码和密码并部署)已做,见下面;封包格式和密钥派生见下面 `client-config` 的 `file` 一段。
 
 `POST /client-app/egress-country`(M2):无请求体,返回 `{ip, country, at}`(`country` 两位大写国家代码,`at` 毫秒,是「最后确认的时刻」)。只在内核服务在运行时才判(复用 `dns/region-detect` 的三家 https IP 接口,顺序问、第一家给出合法 IP 和国家代码的为准,只查询不改设置);出口 IP 和上次相同就沿用上次的国家、只刷新 `at`(前端一天内不再重判,不刷新的话过一天每次打开页面都会重判),不同才换国家;结果存在 `client-app.json` 的 `egressCountry`。内核没在运行 / 没有 procd 或 systemd(面板不在路由器上)503,读不出服务状态 500,三家接口都问不到 502(带「主机: 原因」),请求被取消 / 超时 503。
+
+`POST /client-app/share-codes`(M2,共享网络服务器的 App 码;依据 DESIGN 第 8 节、前端 `OpenboxShareCodeSeal` 的注释和 `helper/clientAppCode.ts` 对 share 码的说明,封包沿用 `client-config` 的封包,share 码本身的格式没有参照上游):请求体 `{links: {服务器 id: 节点分享链接}}`(上限 1 MiB,`links` 必须是对象、值必须是字符串,否则 400;一次最多 64 台,超了 400)。链接由前端按服务器档案拼好交来,后端不自己拼。返回 `{服务器 id: {pairCode, gen, sealed}}`:id 不合格(字母 / 数字 / `_` / `-`,1–64 个字符)、档案 `servers` 里没有的、链接为空或超过 4096 个字符(或不是合法文本)的,回包里没有、也不建状态;一台都没有时回 `{}`。**每台服务器有自己的配对码**(长度和字母表同 `client-config`),第一次为它出码时生成并存进 `client-app.json` 的 `shareCodes`,之后不变(直到换码);`gen` 是 16 位小写十六进制的代数,第一次是 `0000000000000001`,换码时加一(前端只认这个格式的 `gen` 才拼码);`sealed` 是封包 `{kdf:{alg,iterations,salt}, data}` 的 JSON 文本(前端当不透明字符串,v=3 的码里已不带它)。封包与 `client-config/file` 同一套(PBKDF2-SHA256 + AES-256-GCM,salt 每个封包随机,无 AAD),明文 `{"v":1,"kind":"share-link","generatedAt":毫秒,"routerId":…,"sid":…,"gen":…,"link":…}`:路由器 ID、服务器 id、代数写在明文里,解开后核对,对不上按解不开处理。状态里**不存明文链接**,只存封包和链接的 HMAC-SHA256(密钥由路由器 ID、服务器 id、代数和配对码派生):同一条链接再交一次(面板每次打开页面都会交)认得出来,配对码、代数、封包原样返回、不写盘;链接变了(服务器改了密码)配对码和代数不变、封包换新。所有写串行化,同一时刻只有一份 PBKDF2 在跑。每次出码顺带清掉档案里已经没有的服务器的状态。响应 no-store,配对码不写日志。`POST /client-app/share-codes/{id}/rotate`(M2,换这台服务器的配对码,密码一起换并立即应用;依据前端 `rotateShareCode` / `OpenboxShareCodeRotated` 的注释和 DESIGN 第 8 节,没有参照上游):无请求体,`{id}` 是服务器 id。一、**换密码**:在档案里原子地改这一台(读出、改、整份 `servers` 按保存校验写回都在档案的存储锁里,不会和面板别处的保存互相覆盖),哪个字段算「密码」按协议定(`internal/shareservers` 的 `Rekey`):shadowsocks 换 `password`(2022 系列按所需字节数生成 base64,普通 AEAD 生成 24 个字符的随机串)、vless 换 `uuid`(随机 v4)、tuic 和 hysteria2 换 `password`(tuic 的 `uuid` 只是用户标识、hysteria2 的 `obfs` 是另一个口令,都不动)、mixed(SOCKS5 / HTTP)用户名和密码都设了才换 `password`——没设认证的入站没有凭据可换,也不会凭空加上认证(会断掉现有使用者),只换配对码、不改配置、不部署。二、**换配对码**:生成新配对码,`gen` 加一(这台服务器从没出过码时按第一次的 `0000000000000001` 加一,即 `0000000000000002`),并**丢掉旧封包**:旧代数的 `GET /client/v1/share` 立刻 404,新代数在面板拿新密码拼出新链接、再调一次 `share-codes` 之前也是 404(没有封包),再交链接时沿用换好的配对码和代数、重新封包。三、**应用**(锁外):服务器停用(`enabled` 为 `false`)、没有可换的凭据、内核没在运行、没有服务管理器、没接部署 → `applied:"saved"`(新密码在下次启动时生效);内核在运行 → 走一次部署(与面板「部署」同一条路径、记进最近一次部署结果),成功 `"restarted"`,失败或已有部署在进行或读不出内核状态 → `"failed"` 且 `message` 写原因(**仍是 200**;密码和配对码已经换了,不回滚,前端据此提示;部署自己有「校验或启动失败自动换回旧配置」的保护)。返回 `{pairCode, gen, server, applied, message?}`,`server` 是换完的整条(前端用它替换列表里的那条),`message` 只在 `failed` 时出现。服务器不存在(含 id 不合格)404 `{error}`;档案里别的共享服务器有不合格的项、整份写回被校验拦下 400 带原因,什么都不改;没接档案修改能力 503。配对码和新密码是凭据:响应 no-store,不写日志。同一把锁串行化所有共享服务器 App 码的写(两次 rotate、rotate 与 `share-codes` 不会互相踩);部署在锁外,不挡 `share-codes`。**需真机**:换密码并重启内核后,旧码 / 旧链接连不上、新码能连上。
 
 ## `/api/openbox/client-config`
 
@@ -123,7 +125,25 @@
 | POST | `/api/openbox/client-config/file` | `fetchClientConfigFile` (api/clientApp.ts:199) | OpenboxClientBundle | (lan: string, publicBase: string) |
 | POST | `/api/openbox/client-config/rotate` | `rotateClientConfig` (api/clientApp.ts:186) | OpenboxClientConfigIssue | () |
 
-实现约定(M2,只列已做的三条;`file` 未做):状态存在 `client-app.json`(与路由器 ID 同一文件)。`GET` 第一次读时生成配对码(8 个字符,取自去掉 I / O / 0 / 1 的 32 字符表,大写)和 nonce(16 位小写十六进制)并保存,**同步开关默认关**;其余字段 `routerId` / `routerName` / `lanAddresses` / `panelPort` 与 `client-app/info` 同源。`PUT enabled` 请求体必须是 `{"enabled": true|false}`(其它一律 400,上限 1 KiB),返回 `{enabled}`,不动配对码。`POST rotate` 换配对码和 nonce、`lastSyncAt` 清零、开关保持,返回换完的整份。三条响应都带 `Cache-Control: no-store`,配对码不写日志、错误响应里不出现。`lastSyncAt` 要等 App 用的公开同步接口(未做)来更新,现在恒为 0。`file` 和 App 用的公开接口的封包格式前端没有规定,见 STATUS.md。
+实现约定(M2,前三条):状态存在 `client-app.json`(与路由器 ID 同一文件)。`GET` 第一次读时生成配对码(8 个字符,取自去掉 I / O / 0 / 1 的 32 字符表,大写)和 nonce(16 位小写十六进制)并保存,**同步开关默认关**;其余字段 `routerId` / `routerName` / `lanAddresses` / `panelPort` 与 `client-app/info` 同源。`PUT enabled` 请求体必须是 `{"enabled": true|false}`(其它一律 400,上限 1 KiB),返回 `{enabled}`,不动配对码。`POST rotate` 换配对码和 nonce、`lastSyncAt` 清零、开关保持,返回换完的整份。三条响应都带 `Cache-Control: no-store`,配对码不写日志、错误响应里不出现。`lastSyncAt` 要等 App 用的公开同步接口(未做)来更新,现在恒为 0。App 用的公开同步接口见下面 `/client/v1/config`。
+
+`POST /client-config/file`(M2):请求体 `{lan, publicBase}`,两项都可以不传或为空,前后空白去掉;`lan` 只收空、IP 或主机名(字母数字 . - _,最长 253),`publicBase` 只收空或 http(s) 地址(要有主机名、不带账号密码、最长 2048),不合格 400(中文原因)且什么都不写,请求体上限 8 KiB。返回导出文件(前端当 `Record<string, unknown>` 原样存成 .json):`{format:"open-box-client-sealed", version:1, router:{id,name}, kdf:{alg:"pbkdf2-sha256",iterations,salt}, data, exportedAt?}`。**对齐上游 v0.1.402**:密钥 = PBKDF2-HMAC-SHA256(配对码, salt, iterations, 32 字节),`iterations` 默认 20 万次;`salt` 每个封包随机 16 字节(base64url);`data` = base64url(iv(12) || ciphertext || tag(16)),AES-256-GCM,无 AAD。明文含 `{v, kind:"client-config", generatedAt, router, shareRegions, contentFilter?, importCode?}` 等,见实现;`importCode` 是 `openbox://import?v=2&r=&n=&lan=&port=[&pub=]&p=nonce`,与前端 `buildClientImportCode` 一致。内容过滤快照口径与下列公开同步相同。导出不看同步开关。响应 no-store。**与上游 App 互通**。
+
+## `/client/v1/config`(App 用的公开同步接口,不在 `/api/` 下)
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/client/v1/config?p=<nonce>` | App 同步本地分流配置;不需要登录,凭 nonce(导入码里的 `p`)访问 |
+
+前端没有这个接口的调用(它是给 App 的)。路由在 `/api/` 之外,不过登录鉴权。判断顺序:同步开关关着 403 `{error:"disabled"}` → 来源 IP 限速 429 → nonce 不对 404 → 成功返回与 `client-config/file` 同一套上游对齐封包(`open-box-client-sealed`),并更新 `lastSyncAt`。内容过滤过大 409。来源 IP 取连接对端,**不信任 `X-Forwarded-For`**。响应 no-store。配对码 4 位、20 万次 PBKDF2,文件被拿走后仍可离线尝试,故 nonce 对上才给封包。
+
+## `/client/v1/share`(App 取回共享服务器节点配置的公开接口,不在 `/api/` 下)
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/client/v1/share?sid=<服务器 id>&g=<代数>` | App 扫了 share 码(`openbox://share?...&g=代数&sid=服务器ID`)后取回封包;不需要登录,凭 sid 和代数访问,封包要用这台服务器的配对码才解得开 |
+
+前端没有这个接口的调用(它是给 App 的),口径照 `/client/v1/config`,外壳自己定的部分:同一个同步开关(`client-config/enabled`)、同一份按来源 IP 的限速、同样的 `Retry-After` 和「不信任 `X-Forwarded-For`」。判断顺序:一、同步开关关着 403 `{error:"disabled"}`,只读状态文件,不进密码运算、不记失败;二、来源 IP 被锁 429 加 `Retry-After`;三、`sid` 不合格 / 这台服务器还没出过码 / `g` 和当前代数(常数时间比较)对不上 / 这台服务器已不在档案里,一律 404 `{error:"not found"}` 并给这个 IP 记一次失败(同一个失败计数,与 `/client/v1/config` 共用);四、通过后 200 `{format:"open-box-share", v:1, routerId, sid, gen, exportedAt, seal}`,`seal` 是最近一次 `share-codes` 封好的那份(`exportedAt` 是封的时刻),不重新封、不进密码运算,也不更新 `lastSyncAt`(那是本地分流的)。链接停留在最近一次面板交来的版本:服务器改了而面板没再打开过「共享网络」页时,这里还是旧的;换码(`rotate`)会立刻让旧 `gen` 失效。内部错误只回「取回失败」,不带细节。响应 no-store,日志只记方法、路径和状态,query 不进日志。
 
 ## `/api/openbox/clients`
 
@@ -152,6 +172,20 @@
 | DELETE | `/api/openbox/content-filter/{x}` | `deleteContentFilter` (api/clientApp.ts:304) | OpenboxContentFilterList | (id: string) |
 | PATCH | `/api/openbox/content-filter/{x}` | `setContentFilterEnabled` (api/clientApp.ts:298) | OpenboxContentFilterList | (id: string, enabled: boolean) |
 | GET | `/api/openbox/content-filter/{x}/source` | `fetchContentFilterSource` (api/clientApp.ts:278) | { text: string } | (id: string) |
+
+实现约定(M2,自己的设计,依据前端 `OpenboxContentFilter*` 类型和 `ContentFilterCard.vue`、Surge / Loon / Shadowrocket 的公开文档,没有参照上游;路由器只存快照,不执行规则):
+- 存储:记录在 `content-filter.json`,每份规则文本单独存 `<数据目录>/content-filter/<id>.txt`(存盘前规整:去 BOM、换行统一 `\n`、行尾去空白、结尾只留一个换行)。列表接口不读全部文本;`GET /content-filter/{id}/source` 取单份。上限:50 份、单份文本 512 KiB(与前端上传一致)、必须是 UTF-8。恢复出厂会连文本目录一起清。
+- 列表 `{sets, sha256, size}`:`sha256` / `size` 对「启用的集合按 id 排序后的规范化内容」算(每份依次是 id、格式、文本,带长度前缀),算一次缓存,新建 / 更新 / 启停 / 删除 / 恢复默认时失效;没有启用的集合时是空内容的摘要、`size` 为 0。`sets[]` 的 `updatedAt` 是 RFC3339(UTC);`skipped` 为 0 时不输出;`arguments` 只在有值时输出,形如 `{values:{名字:值}}`。
+- `POST /content-filter`(新建 / 更新,回整份列表):`id` 空 = 新建(默认启用),有 id = 更新(不存在 404,启用状态不变);`name` 必填(最长 80 个字符),`dialect` 取 `surge` / `quantumultx` / `loon` / `shadowrocket` / `stash`。文本来源按顺序:`text` 非空白 → 直接用(不再代入参数);否则 `sourceUrl` 有值 → 后端抓取并代入参数;否则更新时沿用已存的文本(只改名 / 格式);都没有 400。`arguments` 没传 = 更新时沿用已存的值(前端「立即更新」不带参数),传了(含 `{}`)= 整个替换;值只能是字符串 / 数字 / 布尔,最多 50 个,名字不含花括号。至少要认出一条规则或脚本,否则 400「没有认得出的规则或脚本」。
+- `POST /content-filter/preview`:抓取 `sourceUrl`(http(s),8 MiB 上限,超限报错不截断)、代入参数、规整、按格式校验,回 `{text}`,不保存。抓取失败 502,链接不合法 400。
+- 参数代入:只做文本里的 `{{{名字}}}` → 值(名字两侧空白忽略);没给值的、值不是标量的保持原样,不做默认值、条件或别的语法。
+- 计数(逐行、按段落,认不出的行不报错,注释 `#` `;` `//`、空行、元信息行和不关心的段 MITM / General 等不计):`ruleCount` = 规则段里认得出的行,`scriptCount` = 脚本条目或带脚本的重写,`skipped` = 这些段里认不出的行。Surge / Shadowrocket:`[Rule]`(规则类型名认得才算)、`[URL Rewrite]`(末词是 reject* / 302 / 307 / header)、`[Header Rewrite]` / `[Body Rewrite]`(`http-*` 开头)、`[Map Local]`(带 `data=` / `data-type=` / `data-path=`)算规则,`[Script]` 里带 `script-path=` 的算脚本;Loon:`[Rule]`、`[Rewrite]`(第二个词是 reject* / 302 / 307 / header* / mock-* / request-* / response-* 算规则,`script-*` 算脚本)、`[Script]`(带 `script-path=`)。第一个段头之前的行按规则行算(纯规则集文件没有段头)。
+- Quantumult X:`[filter_local]`(`host` / `host-suffix` / `host-keyword` / `host-wildcard` / `ip-cidr` / `ip6-cidr` / `ip-asn` / `geoip` / `user-agent` / `url-regex` / `final`)算规则;`[rewrite_local]` 的行形如 `<正则> url <类型> [值]`,类型是 reject* / 302 / 307 / header / request-* / response-* / echo-* / jsonjq-* / mock-* 算规则,`script-*` 算脚本;`[task_local]` 里带 `.js` 的 cron 行(5 段时间 + 脚本路径)或 `event-*` 行算脚本。`[rewrite_remote]`(别的文件的链接)、`[mitm]`、`[general]` 整段忽略;没有段头的文件按 `[filter_local]` 的规则行算。
+- Stash(YAML 覆写文件,不做完整 YAML 解析,只按缩进逐行认):顶层 `rules:` 的每个 `- 规则` 认得出的算规则;`http:` 下 `url-rewrite` / `header-rewrite` / `body-rewrite` 是字符串列表,口径同 Surge;`map-local` 每个条目算一条规则,`script` 每个条目算一个脚本(条目是多行映射,只数 `- key:` 开头的那一行,条目里嵌套的列表不数);`cron:` 下 `script` 的每个条目算一个脚本。`mitm`、`script-providers`、`name` / `desc` 等其它键整段忽略。
+- 五种格式都已支持;格式字符串不是这五种之一回 400。
+- 同步给 App:启用的集合连文本一起并进本地分流的同步明文(`client-config/file` 和 `/client/v1/config` 共用,字段、上限与 409 见上面 `client-config` 一节);实现是 `contentfilter.Service.Snapshot`,持着服务的锁一次读出记录、文本和摘要,所以拿到的是同一时刻的内容。
+- 恢复默认:随包默认放在内嵌的 `internal/contentfilter/defaults.json`(对齐上游 v0.1.402 三份:综合省流 / Youtube-Surge / Youtube-补丁)。每份默认回到随包内容和启用状态、被删的补回、自己加的保留;若将来 defaults 为空则 = 列表清空(按钮不报错)。
+- 错误:400 参数 / 内容不合法,404 没有这份规则集,502 抓取失败,500 其它;`{error}` 为中文信息。
 
 ## `/api/openbox/defaults`
 
@@ -222,13 +256,15 @@
 顺序:一、同一时刻只做一次,并且和部署互斥(另一次在进行 / 部署在进行 → 409,什么都没动);二、**先停内核**:先撤销 DNS 接管,再停服务,再确认真的停了,任何一步不成功就**一份数据都不删**,回 500「为安全起见没有清除任何数据:…」,数据和密码原样,可以排查后重试(读不到服务管理器 = 没有 procd / systemd 时跳过这一步);三、逐项清:DNS 查询记录、每日流量、故障转移(检测管理器的计划和 `failover.json`)、生成的内核配置(`config.json`、`config.prev.json`)、规则集目录和 DNS 过滤名单缓存(目录本身留着)、内核缓存 `cache.db`、状态目录里全部 `.json`(订阅、节点、节点组、档案、面板设置、背景图、共享网络、客户端 App、延迟历史、部署记录……;新增的状态文件自动包含)。一项失败不拦后面的;四、**访问密码和登录会话放最后**:前面只要有一项失败就不清密码,回 500 并写明已清和失败的项(面板不能在旧数据还留着时变成没有密码,再点一次即可重试)。
 不删:`dns-takeover.json`(DNS 接管的撤销记录)、`certs/`(自签证书和密钥,是设备身份,不是用户设置)、内核服务的开机自启设置、后端自己的程序和随包规则库。重置完内核是停止状态,配置文件已删,要「部署」一次才会重新生成并启动。整个过程不随请求断开而中断(总时限 5 分钟)。
 
-## `/api/openbox/bandwidth`
+## `/api/openbox/bandwidth`(未实现)
 
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
 |---|---|---|---|---|
 | GET | `/api/openbox/bandwidth` | `fetchBandwidthStatus` (api/openbox.ts) | OpenboxBandwidthStatus | () |
+| POST | `/api/openbox/bandwidth/subscriptions/{id}` | `queueSubscriptionBandwidth` (api/openbox.ts) | OpenboxBandwidthQueueResult | (id) |
+| POST | `/api/openbox/bandwidth/nodes/{name}` | `queueNodeBandwidth` (api/openbox.ts) | OpenboxBandwidthQueueResult | (name) |
 
-实现约定(带宽择优,后端第一部分):`{settings:{intervalHours,maxDownloadMB}, nodes, dailyBytes, running, lastError, updatedAt}`。`settings` 来自档案的 `bandwidth`(缺省 2 小时 / 64 MB,取值夹进 1~24 / 1~1024);`nodes` 从**已部署的内核配置**算:`bandwidth` 为 `true` 的 `urltest` / `loadbalance` 出站,它们的真实节点成员(`selector` / 组 / `direct` / `block` / 不存在的不算),按「节点配置(含前置链)+ DNS 服务器 + 网络 + 测速地址」的指纹合并,同一条线路出现在多个组里只算一个;`dailyBytes = nodes × maxDownloadMB × 1e6 × ceil(24 / intervalHours)`(估算上限,不含握手等额外开销)。没部署过或读不到配置时 `nodes` 为 0。`running` / `lastError` / `updatedAt` 是测速调度的运行情况,**调度器还没做,目前恒为 `false` / 空串 / 0**。档案 `PUT /profile` 校验 `bandwidth.intervalHours` 1~24、`bandwidth.maxDownloadMB` 1~1024 的整数(越界报 400,不夹);`PUT /groups` 要求每个组的 `bandwidth` 若出现必须是布尔(否则 400);`GET /groups` 多回一个 `bandwidth` 字段(同 `settings`),组编辑里显示周期用。`bandwidth` 不触发「需要重启」提示(不进 sing-box 配置)。
+**目前后端没有这些路由,一律 404**(2026-11-04 维护者授权:带宽择优整体回退,按前端 `BandwidthSettingsCard` 和 sing-box 公开文档重写,见 STATUS 的 M4「带宽择优」条目)。回退期间带宽卡片不可用;前端已存的档案 `bandwidth` 键作为未知键保留,不校验范围。重写时在这一节写实现约定。
 
 ## `/api/openbox/failover`
 
@@ -461,3 +497,14 @@
 | 方法 | 路径 | 说明 |
 |---|---|---|
 | GET | `/api/health` | 健康检查,免登录,返回 `{ "ok": true, "version": "..." }`,给 procd / systemd / 监控用 |
+
+
+### App 在线配对与按 token 拉配置(对齐上游 v0.1.402)
+
+- `GET /client/v1/:routerId/pair` → `{nonce}`;routerId 不对 `404 {"error":"unpaired"}`;同步关 `403 {"error":"disabled"}`。
+- `POST /client/v1/:routerId/pair` body `{nonce,proof}` → `{sealed}`(base64url(iv||ct||tag),明文 `{token,key}`);proof 错 `403 {"error":"bad_code","remaining"}`;nonce 过期 `410 expired`;限速 `429 locked`。
+- `GET /client/v1/:routerId/config/:token` → `{v:1,iv,data}`(标准 base64,设备 key AES-GCM)。设备校验(本节 `config/:token` 及下面的子资源共用):路由器 ID 不对、token 格式不对、库里没有这个 token,一律 `404 {"error":"unpaired"}`;认出设备之后同步开关关着才回 `403 {"error":"disabled"}`(只有拿着有效 token 的看得到这个状态)。响应都带 `Cache-Control: no-store`。
+- `GET /client/v1/:routerId/config/:token/rule-set/:tag`(App 取规则集文件):`tag` 可带 `.srs` 后缀;只认随包规则库的 `geosite-*` / `geoip-*`(从规则库目录取)和用户规则集链接编出的 `list-<8 位十六进制>[-ip]`(从 `<数据目录>/rules` 取),别的名字(含路径穿越)和不存在的文件都是 `404 {"error":"not found"}`;成功回 `application/octet-stream`,支持 `Range`。
+- `GET /client/v1/:routerId/config/:token/background`(App 取面板背景图,就是 `/api/background-image` 存的那一张):成功回原图字节,`Content-Type` 取自 data URL(`image/<子类型>`),响应头 `X-Openbox-Background-Version` 是内容的 16 位十六进制摘要;没设置背景图 `404 {"error":"not found"}`。上游背景图还可以是一个远程链接(回 302),自研只存上传的图片,没有这一支。
+- 面板侧 `GET /client/v1/config?p=<nonce>` 暂留兼容。
+

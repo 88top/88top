@@ -2,7 +2,7 @@
 
 ## 1. 目标与非目标
 **目标**:实现 `docs/ENDPOINTS.md` 列出的全部接口,让 `panel/` 前端在真实路由器上完整可用;单个静态二进制,能在 OpenWrt(arm64/amd64)和 Debian 上运行,内存占用小。
-**非目标**:与上游后端逐接口、逐字段一致;激活码、会员、授权相关的一切;上游的闭源行为。前端是规格,上游后端不是。
+**非目标**:激活码、会员、授权相关的一切;把上游闭源程序当运行时依赖。**对齐目标**:在无激活的前提下,接口行为、默认值、校验与封包外形尽量对齐上游同版本(参考方式见 HANDOFF 第五、六节);前端是规格,实现自写。
 
 ## 2. 已定的决定(接手者不用再问)
 | # | 决定 | 理由 |
@@ -62,9 +62,8 @@
 
 ## 7. 来源与合规
 - 允许参考:`panel/src`、`core/`(含 `core/README.md` 描述的基线说明)、sing-box 官方文档、OpenWrt / Debian 文档、各协议规范。
-- 禁止:读取、复制或反编译上游闭源后端和核心(见 `README.md` 硬性规则);实现任何授权 / 激活 / 校验绕过。
-- v0.1.318 快照(tag `engine-snapshot`)里有可读的旧版 Node 服务端。**我检查过该快照的许可文件:里面只有 Node.js 和 sing-box 的许可,没有 Open-Box 自己的许可文本**,所以它的使用条件不明确。
-  在维护者明确确认之前,把它当作**不可用**,不要复制其中任何代码,也不要照着它逐行改写。
+- 禁止:把上游闭源源码或 native 二进制搬进 backend 当依赖;实现任何授权 / 激活 / 校验绕过。允许只读参考 catch-up-upstream 与随包默认以对齐行为(见 HANDOFF 第五、六节)。
+- v0.1.318 快照(tag `engine-snapshot`)等历史材料:可作只读行为/格式参考;禁止整文件复制进 backend 当运行时组件。
 - 前端里有几处是按上游新版的编译产物对齐出来的(订阅「登录」来源、教程视频等)。它们对应的接口 `subscriptions/login`、`tutorial-videos` 在后端按下面的默认处理,不要为它们去研究上游行为。
 
 ## 8. 待维护者确认(接手者直接按默认做,不用停下来问)
@@ -82,3 +81,14 @@
 | 客户端 App 的默认地区分流(`client-app/info` 的 `defaultShareRegions`,「恢复默认」= 存空数组) | 三组:「中国大陆」(`CN`;geosite cn、geoip cn 本地直连,其余经路由器;DNS 直连系统 DNS、代理 TCP 1.1.1.1)、「港澳」(`HK`、`MO`)、「其他地区」(默认组,`CN` / `HK` / `MO` 之外);后两组本地直连、只把 geosite cn、geoip cn 送回路由器,DNS 两侧都是系统 DNS(与前端 `regionDnsDefaults` 一致)。自研定的起点,没有参照上游;用户可随时改 |
 | 档案默认值 | `region` 默认 `cn`;DNS 上游按前端 `regionDefaultsPatch`;`testUrl` 用 gstatic 204,`directTestUrl` 用华为 connectivitycheck 204;流量保留 12 个月 |
 | DNS 查询日志位置(`-dns-query-log`) | 默认 `/var/run/openbox-dnsmasq.log`(内存盘,不写闪存 / SD 卡),DNS 接管时让 dnsmasq 写到这里;`off` = 不开不读;用户自己设了日志去向就不覆盖 |
+| 热切换开关状态(`flipFlags`) | core 在 `configDetailed` 的返回里多带 `flipFlags`(`{tag: bool}`),不新增方法;core 的金标准只手写期望值或用自己的测试向量,不用官方二进制 / 压缩 bundle 重新生成;后端不改 core,core 做完后在 `WriteLocalSets` 写 `obflip-*` 的初始状态,运行中热切换留到真机阶段 |
+| core 现有金标准 | 保留只读,不再重新生成,逐步换成自己写的测试向量(core/HANDOFF 第四节 2) |
+| 内容过滤的三份默认规则(`content-filter*`) | 对齐上游 v0.1.402 随包 `panel/server/defaults/content-filter.json`:「综合省流」(quantumultx)、「Youtube-Surge」(surge)、「Youtube-补丁」(surge);内嵌 `defaults.json`,以后只改数据;「恢复默认」= 三份回到随包内容与启用状态、补回被删的、保留用户自加 |
+| 内容过滤列表的 `sha256` / `size` | 对「启用的集合按 id 排序后的规范化内容」算,算一次缓存,增删改时失效;每个集合的规则文本单独存文件,列表接口不读全部文本 |
+| 内容过滤五种格式的计数与 `arguments` | 按段落逐行计数:`ruleCount` 规则行、`scriptCount` 脚本或带脚本的重写、`skipped` 认不出的行(不报错);`arguments` 只做 `{{{名字}}}` 的文本代入,没给值的保持原样;先做 surge / loon / shadowrocket,再 quantumultx 和 stash;抓取复用 `rulelist.Fetch`(http(s),8 MiB) |
+| 配对码封包(`client-config/file`、公开同步) | 对齐上游 v0.1.402:`format=open-box-client-sealed` / `version=1` / `router` / `kdf:{alg:pbkdf2-sha256,iterations:200000,salt}` / `data=base64url(iv\|\|ct\|\|tag)`;配对码 4 位 `A-Z0-9`,nonce 24 位十六进制;AES-256-GCM 无 AAD;同步开关关着回 403,按 IP 限速;**与上游 App 互通** |
+| 订阅分享的对外链接 `/sub/<token>` | 按 User-Agent 或 `?format=` 选格式,默认 base64 分享链接,先做 base64 + `singbox`、后做 `clash`;路由在 `/api/` 鉴权之外;存 token 的 SHA-256、先哈希再查表;失败一律同样的 404,按 IP 对失败限速、超限 429;内容按「分享 id + 节点池版本 + 订阅更新时间」缓存,`ETag` / 304,最多并发生成 2 份;`no-store`,带 `subscription-userinfo`,日志不打 token |
+| 带宽择优(3414adff) | 整体回退(`git revert`,不改写历史),按前端 `BandwidthSettingsCard` 和 sing-box 公开文档重写;core 层 e5f8d5ab 保留。回退期间 `GET /api/openbox/bandwidth` 返回 404 |
+| `route-test` 的 `dns.stale` / `debug`、`penetration` 的 `firstLayer` / `preMatch` | 不做:前端没规定含义,或依据的是上游部署产物。`route-test` 的 `context` 留到 `terminal-test` 做探测时一起做 |
+| Docker 平台 | 不在范围(目标平台只有 OpenWrt 和 Debian) |
+| M6 发布包设计 | 由后端起草,另出文档(`docs/M6.md`)交维护者过目;确认前不动 `update*` 第二部分和打包的代码。发布签名 v1 不做(只做 SHA256 加 HTTPS),需要签名时由维护者生成密钥并放进 Actions secrets |

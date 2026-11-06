@@ -17,10 +17,10 @@ import (
 	activationapi "github.com/timeflysoon/Open-Box/backend/internal/api/activation"
 	authapi "github.com/timeflysoon/Open-Box/backend/internal/api/auth"
 	backupapi "github.com/timeflysoon/Open-Box/backend/internal/api/backup"
-	bandwidthapi "github.com/timeflysoon/Open-Box/backend/internal/api/bandwidth"
 	clientappapi "github.com/timeflysoon/Open-Box/backend/internal/api/clientapp"
 	clientsapi "github.com/timeflysoon/Open-Box/backend/internal/api/clients"
 	configpreviewapi "github.com/timeflysoon/Open-Box/backend/internal/api/configpreview"
+	contentfilterapi "github.com/timeflysoon/Open-Box/backend/internal/api/contentfilter"
 	controllerapi "github.com/timeflysoon/Open-Box/backend/internal/api/controller"
 	deployapi "github.com/timeflysoon/Open-Box/backend/internal/api/deploy"
 	diagnosticsapi "github.com/timeflysoon/Open-Box/backend/internal/api/diagnostics"
@@ -49,8 +49,8 @@ import (
 	updateapi "github.com/timeflysoon/Open-Box/backend/internal/api/update"
 	"github.com/timeflysoon/Open-Box/backend/internal/auth"
 	"github.com/timeflysoon/Open-Box/backend/internal/backup"
-	"github.com/timeflysoon/Open-Box/backend/internal/bandwidth"
 	"github.com/timeflysoon/Open-Box/backend/internal/clientapp"
+	"github.com/timeflysoon/Open-Box/backend/internal/contentfilter"
 	"github.com/timeflysoon/Open-Box/backend/internal/controllerproxy"
 	"github.com/timeflysoon/Open-Box/backend/internal/core"
 	"github.com/timeflysoon/Open-Box/backend/internal/deploystate"
@@ -182,10 +182,7 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	subsSvc := subs.New(st, nil)
 	profileapi.Register(srv.Mux(), profileapi.Deps{Profile: profileSvc})
 	subsapi.Register(srv.Mux(), subsapi.Deps{Subs: subsSvc})
-	groupsSvc := nodegroups.New(st, groupsCore, subsSvc, nodegroups.ChainsFromProfile(profileSvc)).WithBandwidth(func(ctx context.Context) any {
-		p, _ := profileSvc.Get(ctx)
-		return bandwidth.SettingsFrom(p)
-	})
+	groupsSvc := nodegroups.New(st, groupsCore, subsSvc, nodegroups.ChainsFromProfile(profileSvc))
 	groupsapi.Register(srv.Mux(), groupsapi.Deps{Groups: groupsSvc})
 
 	// 备份:导出(档案 + 节点组,可选订阅和节点,外加面板设置和背景图)和导入;两者共用一个服务(导入同一时刻只做一次)
@@ -411,13 +408,6 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 
 	// 延迟历史:每个节点 / 组最近 10 次测速,后端记、各浏览器共享;sync 读一次内核的 /proxies 把成功的结果记下来
 	latencyhistoryapi.Register(srv.Mux(), latencyhistoryapi.Deps{Service: nodeHistory})
-	// 带宽择优:状态接口(设置、要测的节点数、每日下载量上限)。设置存在档案的 bandwidth 里,节点从已部署配置里算
-	bandwidthapi.Register(srv.Mux(), bandwidthapi.Deps{Service: &bandwidth.Service{
-		Profile: profileSvc.Get,
-		Config: func() (map[string]any, error) {
-			return routetest.ReadConfig(filepath.Join(cfg.ConfigDir, "config.json"))
-		},
-	}})
 	failoverapi.Register(srv.Mux(), failoverapi.Deps{
 		Manager: failoverMgr,
 		Plan:    func() (failover.Plan, error) { return failover.LoadPlan(failoverPlanPath) },
@@ -595,7 +585,7 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 		factoryreset.Step{Name: "故障转移检测", Run: func(context.Context) error { failoverMgr.SetPlan(nil); return nil }},
 		factoryreset.RemoveFiles("故障转移计划", failoverPlanPath),
 		factoryreset.RemoveFiles("生成的内核配置", filepath.Join(cfg.ConfigDir, "config.json"), deployer.PrevPath()),
-		factoryreset.ClearDirs("规则集和过滤名单缓存", rulesDir, filepath.Join(cfg.DataDir, "dns-filter")),
+		factoryreset.ClearDirs("规则集、过滤名单和内容过滤文本", rulesDir, filepath.Join(cfg.DataDir, "dns-filter"), filepath.Join(cfg.DataDir, "content-filter")),
 		factoryreset.RemoveFiles("内核缓存", filepath.Join(cfg.DataDir, "cache.db")),
 		// 订阅、节点、节点组、档案、面板设置、背景图、各种状态……全部 .json;访问密码留到最后,DNS 接管和虚拟终端的记录是撤销用的、不删
 		factoryreset.Step{Name: "已保存的数据", Run: func(context.Context) error { _, err := st.Clear("auth", "dns-takeover", "terminal-net"); return err }},
@@ -643,8 +633,28 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	// 客户端 App 页的信息:路由器标识、局域网地址与网段、地区分流、路由器名称。只读网卡和档案,
 	// 路由器 ID 第一次读时生成并存进状态目录。本地分流的同步状态(client-config:开关、配对码、换码)也在这里;封包、App 用的公开同步接口等私有约定另列条目,还没做
 	egressDetector := &regiondetect.Detector{} // 与 dns/region-detect 各用各的:互不占用「判断中」状态
+	// 内容过滤:规则集和脚本的快照(记录在 content-filter.json,每份文本另存 content-filter/<id>.txt),路由器只存不执行。
+	// 同一个实例既给 content-filter* 接口用,也给本地分流的同步明文取启用集合的快照(同一把锁,拿到的是同一时刻的内容)
+	contentFilterSvc := &contentfilter.Service{Store: st, Dir: filepath.Join(cfg.DataDir, "content-filter")}
 	clientAppSvc := &clientapp.Service{
-		Store: st, Profile: profileSvc.Get, LAN: system.LAN, PanelPort: clientapp.PortOf(cfg.Listen),
+		Store: st, GeoDir: cfg.GeoDir, RulesetDir: filepath.Join(cfg.DataDir, "rules"), Profile: profileSvc.Get, LAN: system.LAN, PanelPort: clientapp.PortOf(cfg.Listen),
+		ContentFilter: func(ctx context.Context) (contentfilter.Snapshot, error) { return contentFilterSvc.Snapshot(ctx, 0) },
+		// 共享服务器换配对码:密码在档案里原子地换(读改写在档案的存储锁里),再走部署让新密码生效;部署和面板的「部署」共用同一份「最近一次部署」记录
+		UpdateServer: func(ctx context.Context, id string, change func(map[string]any) error) (map[string]any, error) {
+			out, err := profileSvc.UpdateServer(ctx, id, change)
+			var ve *profile.ValidationError
+			switch {
+			case errors.Is(err, profile.ErrServerNotFound):
+				return nil, clientapp.ErrServerNotFound
+			case errors.As(err, &ve):
+				return nil, &clientapp.InputError{Msg: ve.Msg}
+			}
+			return out, err
+		},
+		Deploy: func(ctx context.Context) clientapp.DeployResult {
+			r := deploySvc.Run(ctx)
+			return clientapp.DeployResult{OK: r.OK, Busy: r.Busy, Message: r.Message}
+		},
 		// 出口国家:内核在运行时才判(只查询,不改任何设置),结果缓存在状态目录里
 		DetectEgress: func(ctx context.Context) (string, string, error) {
 			r := egressDetector.Detect(ctx)
@@ -661,7 +671,10 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 			return info.Running, err
 		},
 	}
-	clientappapi.Register(srv.Mux(), clientappapi.Deps{Service: clientAppSvc, Config: clientAppSvc, Egress: clientAppSvc})
+	clientappapi.Register(srv.Mux(), clientappapi.Deps{Service: clientAppSvc, Config: clientAppSvc, File: clientAppSvc, Sync: clientAppSvc, Pair: clientAppSvc, Share: clientAppSvc, Egress: clientAppSvc})
+	go clientAppSvc.Warm(context.Background()) // 把当前配对码的密钥预先派生好,第一次同步不用现算
+
+	contentfilterapi.Register(srv.Mux(), contentfilterapi.Deps{Service: contentFilterSvc})
 
 	// 订阅分享(只管记录和 token;对外的 /sub/<token> 下发内容是另一条,还没做):新选的订阅必须存在
 	subsharesapi.Register(srv.Mux(), subsharesapi.Deps{Service: &subshare.Service{
