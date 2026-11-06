@@ -6,7 +6,7 @@
   },
   "timeflysoon/3x-ui": {
     "main": {
-      "remote_sha": "b54325dcc9d1dd640d5d11482e0a121c698c54a3"
+      "remote_sha": "e535df03745c5ad003ae48e812024eb5fdc2124d"
     }
   },
   "timeflysoon/Are-u-ok": {
@@ -203,7 +203,7 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "91e2ec224ace69d53b4ebacbfff3c051753caf55"
+      "remote_sha": "b6f2e6983b655db0092e3a0b92273aa1080ff3a5"
     }
   },
   "timeflysoon/dae": {
@@ -228,7 +228,7 @@
   },
   "timeflysoon/gopeed": {
     "main": {
-      "remote_sha": "9e9bcd4b01581775fc4e6e25d6195736cb494803"
+      "remote_sha": "8ef3b63e8d93f34e9f6c161823ff2bdfe50f1f0b"
     }
   },
   "timeflysoon/img-installer": {
@@ -288,7 +288,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "27d57eb13cf3061b2b5fdc823fd167f7e7a00967"
+      "remote_sha": "64ade04f236685faea047b8092ca38245c278fbf"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -309,13 +309,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "461790d18a151728e834979aad03cb29e256d181"
+      "remote_sha": "1fc5de325d54d3b77d6b86a1db900c5e48ae1003"
     },
     "release": {
-      "remote_sha": "4046bac4e064f047210ed43cd187fa32df7bace7"
+      "remote_sha": "ae128ce26d85ee327379a837d0f3bbab5556d3ae"
     },
     "sing": {
-      "remote_sha": "5b6a856677c66def75c9a53da2dd3f3d4553b8b3"
+      "remote_sha": "7da04853058c4a8858f339b266353fc905ef4eb4"
     }
   },
   "timeflysoon/quickstart": {
@@ -350,7 +350,7 @@
       "remote_sha": "d1ffe2b87a9c57b53088ab9aee1f4f679096b640"
     },
     "main": {
-      "remote_sha": "cac8e0472b0b6289f547ba247df9a9381be64e9f"
+      "remote_sha": "f68dffa669aff3f47c4f4b69ee519c859866a038"
     },
     "translations-deadend": {
       "remote_sha": "e483486dff5deef147fed8605b5dfaa1010649f6"
@@ -358,7 +358,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "3cedc8df20db99eb86d7321606bfce108c945496"
+      "remote_sha": "da88bea2fd94ad7a154f68b0c8e801eca6f8d208"
     }
   },
   "timeflysoon/store": {
@@ -381,10 +381,10 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "461790d18a151728e834979aad03cb29e256d181"
+      "remote_sha": "1fc5de325d54d3b77d6b86a1db900c5e48ae1003"
     },
     "release": {
-      "remote_sha": "4046bac4e064f047210ed43cd187fa32df7bace7"
+      "remote_sha": "ae128ce26d85ee327379a837d0f3bbab5556d3ae"
     }
   },
   "timeflysoon/turboacc": {
@@ -392,12 +392,12 @@
       "remote_sha": "ae412f5dffb2199bdd6c0a02a7bcba31ae0e544e"
     },
     "auto-sync/upstream": {
-      "remote_sha": "09a20861d4371b8e1684ef728bdb99231ec034b0"
+      "remote_sha": "05d65113a8af4c6d3a37199fd5c96ffc8bfa87b1"
     }
   },
   "timeflysoon/v2rayN": {
     "master": {
-      "remote_sha": "2010477f38b811d7120086e704a12ee91da16d51"
+      "remote_sha": "c01224c37d6958a795bce6e0edfdf4f3265af29e"
     },
     "v7_16": {
       "remote_sha": "654d7d83d09d1683c60501c9fa853a19c3dd9d6b"
@@ -413,7 +413,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "ff5fe67369db49048803fe0242f687a0bc10f7e2"
+      "remote_sha": "845c916345a1cc756634cf77188c16187f37535a"
     }
   },
   "timeflysoon/weasel": {
@@ -459,7 +459,7 @@
   },
   "timeflysoon/DriverStoreExplorer": {
     "master": {
-      "remote_sha": "43e58b44af0b9a3769c3f68ffad03e1094aab489"
+      "remote_sha": "ac7f4dfb36fead69daf452464bf2f0b96eab98db"
     }
   },
   "timeflysoon/dlssg_for_sm86": {
@@ -469,10 +469,10 @@
   },
   "timeflysoon/Open-Box": {
     "catch-up-upstream": {
-      "remote_sha": "eceffa04f9544f123963903a59a30a5ad8118076"
+      "remote_sha": "0cc903750ffccbd9f3a0c7c743c48deb3640be22"
     },
     "main": {
-      "remote_sha": "5f126e6b2694a20f8e8618a30e104727f805dd5d"
+      "remote_sha": "1eda2b1e1db27ec3317f84184d6ebe2b2a761729"
     },
     "backup": {
       "remote_sha": "f42122e8b1b6e49d6ac88a84fc26ebb2480d17db"
@@ -485,7 +485,7 @@
   },
   "timeflysoon/honk": {
     "main": {
-      "remote_sha": "9e31cc0bd28825afdc0e384dc989bc3f076e69cf"
+      "remote_sha": "73b1077bf9cdb639899f0447994cf8980abc0752"
     }
   }
 }

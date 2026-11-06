@@ -68,6 +68,8 @@ type Record struct {
 	UserAgent  string         `json:"userAgent,omitempty"`
 	Account    map[string]any `json:"account"`
 	Skipped    []sub.Skipped  `json:"skipped,omitempty"` // 最近一次解析没能导入的条目(前端不读,留给诊断)
+	// BandwidthCheck 是「定期带宽检查」(前端 bandwidthCheck)。只影响自动测速入队,不进 sing-box 配置。
+	BandwidthCheck bool `json:"bandwidthCheck,omitempty"`
 }
 
 type subsFile struct {
@@ -253,6 +255,7 @@ func (s *Service) PoolNodes(ctx context.Context) ([]sub.Node, error) {
 type CatalogNode struct {
 	SubscriptionID   string
 	SubscriptionName string
+	BandwidthCheck   bool
 	Node             sub.Node
 }
 
@@ -271,7 +274,7 @@ func (s *Service) Catalog(ctx context.Context) ([]Record, []CatalogNode, error) 
 			continue
 		}
 		for _, n := range nodes[r.ID] {
-			out = append(out, CatalogNode{SubscriptionID: r.ID, SubscriptionName: r.Name, Node: n})
+			out = append(out, CatalogNode{SubscriptionID: r.ID, SubscriptionName: r.Name, BandwidthCheck: r.BandwidthCheck, Node: n})
 		}
 	}
 	return recs, out, nil
@@ -387,15 +390,16 @@ type SaveResult struct {
 
 // Input 是新增 / 修改的字段;指针和 nil 表示「没传」(PATCH 只改传了的)。
 type Input struct {
-	Name       *string
-	Source     *Source // 传了 url / urls / content 之一才非 nil
-	UserAgent  *string
-	Rename     map[string]any // nil = 没传
-	AutoUpdate map[string]any
-	AutoSet    bool
-	NodeDNS    map[string]any
-	NodeDNSSet bool
-	Enabled    *bool
+	Name           *string
+	Source         *Source // 传了 url / urls / content 之一才非 nil
+	UserAgent      *string
+	Rename         map[string]any // nil = 没传
+	AutoUpdate     map[string]any
+	AutoSet        bool
+	NodeDNS        map[string]any
+	NodeDNSSet     bool
+	Enabled        *bool
+	BandwidthCheck *bool // nil = 没传
 }
 
 func validateName(n string) (string, error) {
@@ -533,6 +537,9 @@ func (s *Service) Create(ctx context.Context, in Input) (*SaveResult, error) {
 	if in.Enabled != nil {
 		rec.Enabled = *in.Enabled
 	}
+	if in.BandwidthCheck != nil {
+		rec.BandwidthCheck = *in.BandwidthCheck
+	}
 	rec.setSource(r)
 	nodes[rec.ID] = ap.Nodes
 	recs = append(recs, rec)
@@ -662,6 +669,9 @@ func (s *Service) Update(ctx context.Context, id string, in Input) (*SaveResult,
 	}
 	if in.Enabled != nil {
 		rec.Enabled = *in.Enabled
+	}
+	if in.BandwidthCheck != nil {
+		rec.BandwidthCheck = *in.BandwidthCheck
 	}
 	after := before
 	if rebuild {
@@ -800,4 +810,61 @@ func (s *Service) Reorder(ctx context.Context, ids []string) ([]Record, bool, er
 		return nil, false, err
 	}
 	return out, true, nil
+}
+
+// NodesForShare 按订阅 id 列表收集**启用**订阅的节点,并合并 usage(给 /sub/<token> 用)。
+func (s *Service) NodesForShare(ctx context.Context, ids []string) ([]sub.Node, *sub.Usage, error) {
+	recs, nodes, err := s.loadAll()
+	if err != nil {
+		return nil, nil, err
+	}
+	want := map[string]bool{}
+	for _, id := range ids {
+		want[id] = true
+	}
+	out := []sub.Node{}
+	var usage *sub.Usage
+	for _, r := range recs {
+		if !want[r.ID] || !r.Enabled {
+			continue
+		}
+		out = append(out, nodes[r.ID]...)
+		if r.Usage != nil {
+			usage = mergeUsage(usage, r.Usage)
+		}
+	}
+	return out, usage, nil
+}
+
+func mergeUsage(a, b *sub.Usage) *sub.Usage {
+	if a == nil {
+		if b == nil {
+			return nil
+		}
+		c := *b
+		return &c
+	}
+	if b == nil {
+		return a
+	}
+	c := *a
+	add := func(dst **int64, src *int64) {
+		if src == nil {
+			return
+		}
+		if *dst == nil {
+			v := *src
+			*dst = &v
+			return
+		}
+		**dst += *src
+	}
+	add(&c.Upload, b.Upload)
+	add(&c.Download, b.Download)
+	add(&c.Total, b.Total)
+	if b.Expire != nil && (c.Expire == nil || *b.Expire < *c.Expire) {
+		v := *b.Expire
+		c.Expire = &v
+	}
+	return &c
 }

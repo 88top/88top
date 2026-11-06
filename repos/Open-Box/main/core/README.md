@@ -54,8 +54,7 @@ HTTPS / SVCB 空应答、dnsmasq 模式本地主机名、FakeIP(198.19.0.0/16)�
 **urlx**(`internal/urlx`,从 `routing/urlhost.go` 抽出,directhosts 订阅链接主机、dns 的 extractHost、dnsupstream 共用):金标准 `testdata/urlx_golden.json`(4000 条,Node 内置 URL 当标准答案),
 另对 Node 做过 10 万条随机差分(语料避开下面的已知缺口)0 条不一致;当时的变异测试 28 个抓到 24 个,存活的 4 个是等价变异(空变异、IPv4 超长被末段上限覆盖、域名已小写所以 0X 到不了、punycode 溢出保护在 64 位下被后面的码点上限覆盖)。之后 xn-- 校验按 Node 实测改过一次(解出来只有 ASCII 的如 xn--a- 照收),该规则的变异测试没有重跑。
 **urlx.Parse**(`internal/urlx/parse.go`):除主机外还给出用户名 / 密码 / 端口(缺省端口省掉)/ 路径(点段、百分号编码)/ 查询 / 片段,供 node-dns 的 DoH 地址解析用。金标准 `testdata/urlx_parts_golden.json`(3000 条,`gen-urlx-parts-golden.mjs` 生成),对 Node 另做过 10 万条随机差分 0 条不一致;变异测试 29 个抓到 25 个,存活 4 个都是等价变异或不支持项(空变异、前导零端口(digits 已去零)、路径编码集里的 `?`(切路径前已按查询分隔)、file 协议的权威部分(file 只填 Scheme / Hostname,DoH 只收 https))。非特殊协议下点段吃光路径时序列化成空串(Node 实测),特殊协议补 `/`。
-**urlx / idna 的已知缺口**:没有 UTS46 字符映射表和双向规则。把这类字符(ﬁ、ǆ、ẞ、²、软连字符、零宽字符、希伯来字母混拉丁字母)放进随机语料(`gen-urlx-golden.mjs --wide`)约 3.7% 的条数与 Node 不一致,
-表现是:Node 会映射或拒绝的写法 Go 放行并按原字符编码。实际影响只是订阅链接 / 上游地址里出现这种主机名时「站点直连」多收或漏收一个域名;补齐需要引入 Unicode 表(见 idna 包注释),目前没做。
+**urlx / idna UTS46**:已内置轻量映射表（忽略字符、兼容分解如 ﬁ→fi / ²→2 / ǆ→dž / ẞ→ss、全角、简易双向检查）。完整 NFKC 全表不做。gen-urlx-golden.mjs --wide 语料主要条目已覆盖。
 **configDetailed**(`internal/config/build.go`,对应基线 `engine/config.mjs` 的 buildConfigDetailed,按原文件顺序逐段移植):
 订阅和节点站点直连、链式节点并表、节点组 / 站点集 selector、节点出站与 endpoint、出站重名检查、终端分流、出口类别(v6 / QUIC 拒绝)、域名过滤、dns、route、
 tun 入站(排除表挖洞、MAC 过滤、dns_mode)、入口原生旁路与热切换动态集、入站(dns-in / 名单外终端 dns-in-direct / 共享网络)、guardTerminalRules、experimental(clash_api / cache_file / FakeIP 缓存)。
@@ -66,7 +65,7 @@ tun 入站(排除表挖洞、MAC 过滤、dns_mode)、入口原生旁路与热�
 - 变异测试 40 个抓到 38 个:漏网的是空变异(预期)和「自定义规则与排除段有无交集」的判断(等价变异:落在排除表之外的洞不影响挖洞结果)。
 - **阶段 D**:`testdata/tools/sbcheck.py` 用官方 sing-box 1.13.14 对金标准里的配置跑 `sing-box check`,300 条全过。检查前要剥掉官方版不认的字段(1.14 才有的 `dns_mode` / `dns_address` / `*_mac_address` / `source_mac_address`,以及上游补丁字段 `expected_status`),并把语料里的假 uuid / 密钥 / 证书换成合法值 —— 这是语料和版本差异,不是装配错误。
 - **已知缺口**(基线里没有、只能从 Node 消费处推断,没有明文可对照):
-  1. `clientBindings`:新版 Node 调 `normalizeClientRoutes(..., {ipv6Bindings})`(IPv6 开着且模式不是 bypass 时带上),核心现在收下但不用,终端分流不按 IPv6 绑定扩展来源。
+  1. `clientBindings`:新版 Node 调 `normalizeClientRoutes(..., {ipv6Bindings})`(IPv6 开着且模式不是 bypass 时带上);核心已按绑定表把 IPv4 来源扩展出对应 IPv6 /128（见 `clientroutes.ExpandSourcesWithBindings`）。绑定形状 `{ "192.168.1.10": ["fd00::10"] }` 或值单字符串。
   2. `platform`:只有 `container` 有行为(2026-10 已对官方 v0.1.353 的 openbox-core 差分核对):`dns-in` 后面多一个监听 `0.0.0.0:53` 的 `dns-in-lan` 入站,`route.rules[0]` 是 `{"action":"hijack-dns","inbound":["dns-in-lan"]}`(在 guardTerminalRules 之后插入);`openwrt` / `systemd` 和不传一样。
   3. `ignoreProxyClients`(bypassPlan 选项)已对官方包核对:有终端走代理时不再关旁路,reason 末尾补一句「有终端被指定走代理:这些集合只用于入口按来源旁路,代理终端本身由入口 guard 拦下」(排在 FakeIP / DNS 提示之后)。
   4. 上游 sing-box 补丁字段(如 urltest 的 `expected_status`)按基线 / groups 对齐的输出写,**不在核心里按内核版本降级**(已定):需要配套的 Open-Box 内核;换成原版 sing-box 时遇到不认识的字段,内核会在启动 / `check` 时直接报错。以后要支持其他内核,再单独做内核版本探测,不改现有输出。

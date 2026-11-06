@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/timeflysoon/Open-Box/backend/internal/clientapp"
@@ -46,6 +47,12 @@ type PairService interface {
 	// RuleSetPath / Background 是 config/:token 下面的子资源:规则集文件路径、面板背景图。
 	RuleSetPath(ctx context.Context, routerID, token, tag string) (string, error)
 	Background(ctx context.Context, routerID, token string) (*clientapp.BackgroundImage, error)
+	TokenContentFilterMeta(ctx context.Context, routerID, token string) (clientapp.TokenBundle, error)
+	TokenContentFilterDoc(ctx context.Context, routerID, token, hash string) (clientapp.TokenBundle, error)
+	Home(ctx context.Context, routerID string) error
+	Regions(ctx context.Context, routerID string) (clientapp.RegionsPayload, error)
+	PublicBackground(ctx context.Context, routerID string) (*clientapp.BackgroundImage, error)
+	PublicGeoPath(ctx context.Context, routerID, tag string) (string, error)
 }
 
 // ShareService 是共享网络服务器的 App 码要用的功能(*clientapp.Service 满足)。
@@ -53,6 +60,8 @@ type ShareService interface {
 	ShareCodes(ctx context.Context, links map[string]string) (map[string]clientapp.ShareSeal, error)
 	Share(ctx context.Context, sid, gen, ip string) (clientapp.ShareResult, error)
 	RotateShare(ctx context.Context, sid string) (clientapp.ShareRotated, error)
+	SharePairGet(ctx context.Context, routerID, serverID string) (nonce string, err error)
+	SharePairPost(ctx context.Context, routerID, serverID, nonce, proof string) (sealed string, err error)
 }
 
 // EgressService 是按出口 IP 判国家要用的功能(*clientapp.Service 满足)。
@@ -98,6 +107,10 @@ func Register(mux *http.ServeMux, d Deps) {
 	mux.HandleFunc("/client/v1/share", httpx.Methods(map[string]http.HandlerFunc{
 		http.MethodGet: d.shareGet,
 	}))
+	mux.HandleFunc("/client/v1/{routerId}/share/{serverId}/pair", httpx.Methods(map[string]http.HandlerFunc{
+		http.MethodGet:  d.sharePairGet,
+		http.MethodPost: d.sharePairPost,
+	}))
 	// 对齐上游 v0.1.402 App 路径
 	mux.HandleFunc("/client/v1/{routerId}/pair", httpx.Methods(map[string]http.HandlerFunc{
 		http.MethodGet:  d.pairGet,
@@ -112,7 +125,23 @@ func Register(mux *http.ServeMux, d Deps) {
 	mux.HandleFunc("/client/v1/{routerId}/config/{token}/background", httpx.Methods(map[string]http.HandlerFunc{
 		http.MethodGet: d.backgroundGet,
 	}))
-	mux.HandleFunc("/client/v1/", httpx.NotFound) // 别的路径回 JSON 404,不落到前端的 index.html
+	mux.HandleFunc("/client/v1/{routerId}/config/{token}/content-filter", httpx.Methods(map[string]http.HandlerFunc{
+		http.MethodGet: d.contentFilterMeta,
+	}))
+	mux.HandleFunc("/client/v1/{routerId}/config/{token}/content-filter/{hash}", httpx.Methods(map[string]http.HandlerFunc{
+		http.MethodGet: d.contentFilterDoc,
+	}))
+	mux.HandleFunc("/client/v1/{routerId}/regions", httpx.Methods(map[string]http.HandlerFunc{
+		http.MethodGet: d.regionsGet,
+	}))
+	mux.HandleFunc("/client/v1/{routerId}/background", httpx.Methods(map[string]http.HandlerFunc{
+		http.MethodGet: d.publicBackgroundGet,
+	}))
+	mux.HandleFunc("/client/v1/{routerId}/geodata/{tag}", httpx.Methods(map[string]http.HandlerFunc{
+		http.MethodGet: d.publicGeodataGet,
+	}))
+	// home 与 {routerId}/… 通配冲突,放进回落处理:GET /client/v1/home/:routerId
+	mux.HandleFunc("/client/v1/", d.clientV1Fallback)
 	mux.HandleFunc("/api/openbox/client-config/rotate", httpx.Methods(map[string]http.HandlerFunc{
 		http.MethodPost: d.configRotate,
 	}))
@@ -508,7 +537,138 @@ func writePairErr(w http.ResponseWriter, err error) {
 		httpx.JSON(w, http.StatusForbidden, map[string]any{"error": "bad_code", "remaining": bad.Remaining})
 	case errors.Is(err, clientapp.ErrTokenNotFound):
 		httpx.Error(w, http.StatusNotFound, "not found")
+	case errors.Is(err, clientapp.ErrSnapshotChanged):
+		httpx.Error(w, http.StatusNotFound, "snapshot changed")
 	default:
 		httpx.Error(w, http.StatusInternalServerError, "同步失败")
 	}
+}
+
+func (d Deps) contentFilterMeta(w http.ResponseWriter, r *http.Request) {
+	httpx.NoStore(w)
+	if d.Pair == nil {
+		httpx.Error(w, http.StatusServiceUnavailable, "客户端配置服务不可用")
+		return
+	}
+	out, err := d.Pair.TokenContentFilterMeta(r.Context(), r.PathValue("routerId"), r.PathValue("token"))
+	if err != nil {
+		writePairErr(w, err)
+		return
+	}
+	httpx.JSON(w, http.StatusOK, out)
+}
+
+func (d Deps) contentFilterDoc(w http.ResponseWriter, r *http.Request) {
+	httpx.NoStore(w)
+	if d.Pair == nil {
+		httpx.Error(w, http.StatusServiceUnavailable, "客户端配置服务不可用")
+		return
+	}
+	out, err := d.Pair.TokenContentFilterDoc(r.Context(), r.PathValue("routerId"), r.PathValue("token"), r.PathValue("hash"))
+	if err != nil {
+		writePairErr(w, err)
+		return
+	}
+	httpx.JSON(w, http.StatusOK, out)
+}
+
+func (d Deps) sharePairGet(w http.ResponseWriter, r *http.Request) {
+	httpx.NoStore(w)
+	if d.Share == nil {
+		httpx.Error(w, http.StatusServiceUnavailable, "客户端配置服务不可用")
+		return
+	}
+	nonce, err := d.Share.SharePairGet(r.Context(), r.PathValue("routerId"), r.PathValue("serverId"))
+	if err != nil {
+		writePairErr(w, err)
+		return
+	}
+	httpx.JSON(w, http.StatusOK, map[string]string{"nonce": nonce})
+}
+
+func (d Deps) sharePairPost(w http.ResponseWriter, r *http.Request) {
+	httpx.NoStore(w)
+	if d.Share == nil {
+		httpx.Error(w, http.StatusServiceUnavailable, "客户端配置服务不可用")
+		return
+	}
+	var body struct {
+		Nonce string `json:"nonce"`
+		Proof string `json:"proof"`
+	}
+	if !httpx.DecodeJSON(w, r, &body, 2<<10) {
+		return
+	}
+	sealed, err := d.Share.SharePairPost(r.Context(), r.PathValue("routerId"), r.PathValue("serverId"), body.Nonce, body.Proof)
+	if err != nil {
+		writePairErr(w, err)
+		return
+	}
+	httpx.JSON(w, http.StatusOK, map[string]string{"sealed": sealed})
+}
+
+func (d Deps) clientV1Fallback(w http.ResponseWriter, r *http.Request) {
+	httpx.NoStore(w)
+	// GET /client/v1/home/:routerId
+	if r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/client/v1/home/") {
+		id := strings.Trim(strings.TrimPrefix(r.URL.Path, "/client/v1/home/"), "/")
+		if id != "" && !strings.Contains(id, "/") {
+			if d.Pair == nil {
+				httpx.Error(w, http.StatusServiceUnavailable, "客户端配置服务不可用")
+				return
+			}
+			if err := d.Pair.Home(r.Context(), id); err != nil {
+				writePairErr(w, err)
+				return
+			}
+			httpx.JSON(w, http.StatusOK, map[string]bool{"ok": true})
+			return
+		}
+	}
+	httpx.Error(w, http.StatusNotFound, "not found")
+}
+
+func (d Deps) regionsGet(w http.ResponseWriter, r *http.Request) {
+	httpx.NoStore(w)
+	if d.Pair == nil {
+		httpx.Error(w, http.StatusServiceUnavailable, "客户端配置服务不可用")
+		return
+	}
+	out, err := d.Pair.Regions(r.Context(), r.PathValue("routerId"))
+	if err != nil {
+		writePairErr(w, err)
+		return
+	}
+	httpx.JSON(w, http.StatusOK, out)
+}
+
+func (d Deps) publicBackgroundGet(w http.ResponseWriter, r *http.Request) {
+	httpx.NoStore(w)
+	if d.Pair == nil {
+		httpx.Error(w, http.StatusServiceUnavailable, "客户端配置服务不可用")
+		return
+	}
+	img, err := d.Pair.PublicBackground(r.Context(), r.PathValue("routerId"))
+	if err != nil {
+		writePairErr(w, err)
+		return
+	}
+	w.Header().Set("X-Openbox-Background-Version", img.Version)
+	w.Header().Set("Content-Type", img.Type)
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(img.Bytes)
+}
+
+func (d Deps) publicGeodataGet(w http.ResponseWriter, r *http.Request) {
+	httpx.NoStore(w)
+	if d.Pair == nil {
+		httpx.Error(w, http.StatusServiceUnavailable, "客户端配置服务不可用")
+		return
+	}
+	path, err := d.Pair.PublicGeoPath(r.Context(), r.PathValue("routerId"), r.PathValue("tag"))
+	if err != nil {
+		writePairErr(w, err)
+		return
+	}
+	http.ServeFile(w, r, path)
 }

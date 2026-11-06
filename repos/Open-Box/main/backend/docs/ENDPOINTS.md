@@ -415,7 +415,7 @@
 
 ## `/api/openbox/subscription-shares`
 
-实现约定(M2,管理部分):记录存 `subscription-shares.json`;列表 `{ shares }`,新建 / 修改 / 换 token `{ share }`,删除 `{ ok: true }`。新建带的 `token` 合格(32–128 位字母数字 `-` `_`)且没被占用才用,否则换新;PATCH 只改传了的字段,`regenerate: true` 才换 token,不收客户端指定的 token;新选的订阅必须存在,这条分享里已有的订阅 id 照旧保留。对外的 `/sub/<token>` 下发不在本分组,尚未实现(见 STATUS.md)。
+实现约定(M2,管理部分):记录存 `subscription-shares.json`;列表 `{ shares }`,新建 / 修改 / 换 token `{ share }`,删除 `{ ok: true }`。新建带的 `token` 合格(32–128 位字母数字 `-` `_`)且没被占用才用,否则换新;PATCH 只改传了的字段,`regenerate: true` 才换 token,不收客户端指定的 token;新选的订阅必须存在,这条分享里已有的订阅 id 照旧保留。对外的 `GET /sub/<token>` 已实现:按 User-Agent 或 `?format=` 选 base64/singbox/clash;token 存 SHA-256 查找;失败统一 404;IP 限速 429;ETag/304;`Subscription-Userinfo`;`Cache-Control: no-store`。
 
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
 |---|---|---|---|---|
@@ -508,3 +508,17 @@
 - `GET /client/v1/:routerId/config/:token/background`(App 取面板背景图,就是 `/api/background-image` 存的那一张):成功回原图字节,`Content-Type` 取自 data URL(`image/<子类型>`),响应头 `X-Openbox-Background-Version` 是内容的 16 位十六进制摘要;没设置背景图 `404 {"error":"not found"}`。上游背景图还可以是一个远程链接(回 302),自研只存上传的图片,没有这一支。
 - 面板侧 `GET /client/v1/config?p=<nonce>` 暂留兼容。
 
+
+
+### App token 内容过滤子资源(对齐上游 v0.1.402)
+
+- `GET /client/v1/:routerId/config/:token/content-filter` → `{v,iv,data}`(设备 key 封),明文 `{contentFilter: 元数据}`。
+- `GET /client/v1/:routerId/config/:token/content-filter/:hash` → 同上封包,明文 `{document: 文档}`;hash 不等于当前 sha256 时 `404 {"error":"snapshot changed"}`。
+- 设备不认得 `404 unpaired`;同步关 `403 disabled`。
+
+
+### App 分享配对路径(对齐上游 v0.1.402)
+
+- `GET /client/v1/:routerId/share/:serverId/pair` → `{nonce}`(当前代数 gen)。
+- `POST .../pair` body `{nonce,proof}` → `{sealed}`(base64url,明文 `{link,gen}`);proof 用 `openbox-share:routerId:serverId` 派生密钥。
+- 与 `GET /client/v1/share?sid=&g=` 并存。router/服务器不存在 → `404 unpaired`。

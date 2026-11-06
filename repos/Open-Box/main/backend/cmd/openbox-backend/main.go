@@ -11,12 +11,14 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
 	activationapi "github.com/timeflysoon/Open-Box/backend/internal/api/activation"
 	authapi "github.com/timeflysoon/Open-Box/backend/internal/api/auth"
 	backupapi "github.com/timeflysoon/Open-Box/backend/internal/api/backup"
+	bandwidthapi "github.com/timeflysoon/Open-Box/backend/internal/api/bandwidth"
 	clientappapi "github.com/timeflysoon/Open-Box/backend/internal/api/clientapp"
 	clientsapi "github.com/timeflysoon/Open-Box/backend/internal/api/clients"
 	configpreviewapi "github.com/timeflysoon/Open-Box/backend/internal/api/configpreview"
@@ -41,6 +43,7 @@ import (
 	serviceapi "github.com/timeflysoon/Open-Box/backend/internal/api/service"
 	sitelatencyapi "github.com/timeflysoon/Open-Box/backend/internal/api/sitelatency"
 	storageapi "github.com/timeflysoon/Open-Box/backend/internal/api/storage"
+	subpublicapi "github.com/timeflysoon/Open-Box/backend/internal/api/subpublic"
 	subsapi "github.com/timeflysoon/Open-Box/backend/internal/api/subscriptions"
 	subsharesapi "github.com/timeflysoon/Open-Box/backend/internal/api/subshares"
 	terminaltestapi "github.com/timeflysoon/Open-Box/backend/internal/api/terminaltest"
@@ -49,6 +52,7 @@ import (
 	updateapi "github.com/timeflysoon/Open-Box/backend/internal/api/update"
 	"github.com/timeflysoon/Open-Box/backend/internal/auth"
 	"github.com/timeflysoon/Open-Box/backend/internal/backup"
+	"github.com/timeflysoon/Open-Box/backend/internal/bandwidth"
 	"github.com/timeflysoon/Open-Box/backend/internal/clientapp"
 	"github.com/timeflysoon/Open-Box/backend/internal/contentfilter"
 	"github.com/timeflysoon/Open-Box/backend/internal/controllerproxy"
@@ -291,6 +295,41 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 			return singbox.KernelProxies(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
 		},
 	}
+	bandwidthSvc := &bandwidth.Service{
+		Store:   st,
+		Profile: func(ctx context.Context) (map[string]any, error) { return profileSvc.Get(ctx) },
+		Nodes: func(ctx context.Context) ([]bandwidth.NodeRef, error) {
+			_, cat, err := subsSvc.Catalog(ctx)
+			if err != nil {
+				return nil, err
+			}
+			out := make([]bandwidth.NodeRef, 0, len(cat))
+			for _, c := range cat {
+				out = append(out, bandwidth.NodeRef{Name: c.Node.Tag, SubscriptionID: c.SubscriptionID, Enabled: c.BandwidthCheck})
+			}
+			return out, nil
+		},
+		Measure: bandwidth.NewProbeMeasurer(
+			bandwidth.MaterialFunc(func(ctx context.Context, tags []string) (*probe.Material, error) {
+				built, err := gen.Build(ctx)
+				if err != nil {
+					return nil, err
+				}
+				return probe.Subset(built.Config, tags), nil
+			}),
+			probeRunner,
+			func(ctx context.Context) string {
+				if p, err := profileSvc.Get(ctx); err == nil {
+					if u, _ := p["testUrl"].(string); strings.TrimSpace(u) != "" {
+						return strings.TrimSpace(u)
+					}
+				}
+				return ""
+			},
+		),
+	}
+	bandwidthapi.Register(srv.Mux(), bandwidthapi.Deps{Service: bandwidthSvc})
+
 	latencyapi.Register(srv.Mux(), latencyapi.Deps{Gen: gen, Subs: subsSvc, Profiles: profileSvc, Runner: probeRunner, History: nodeHistory})
 	// 节点信息:类型 / 协议层 / 服务器 / 链式上游 / 入口地址解析 / 入口国家 / 出口归属和风控值
 	entryDetector := &regiondetect.Detector{} // 只用它的按 IP 查国家,不占用其它两处的「判断中」状态
@@ -638,7 +677,8 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	contentFilterSvc := &contentfilter.Service{Store: st, Dir: filepath.Join(cfg.DataDir, "content-filter")}
 	clientAppSvc := &clientapp.Service{
 		Store: st, GeoDir: cfg.GeoDir, RulesetDir: filepath.Join(cfg.DataDir, "rules"), Profile: profileSvc.Get, LAN: system.LAN, PanelPort: clientapp.PortOf(cfg.Listen),
-		ContentFilter: func(ctx context.Context) (contentfilter.Snapshot, error) { return contentFilterSvc.Snapshot(ctx, 0) },
+		ContentFilter:      func(ctx context.Context) (contentfilter.Snapshot, error) { return contentFilterSvc.Snapshot(ctx, 0) },
+		ContentFilterBuilt: func(ctx context.Context) (*contentfilter.Built, error) { return contentFilterSvc.BuiltSnapshot(ctx, 0) },
 		// 共享服务器换配对码:密码在档案里原子地换(读改写在档案的存储锁里),再走部署让新密码生效;部署和面板的「部署」共用同一份「最近一次部署」记录
 		UpdateServer: func(ctx context.Context, id string, change func(map[string]any) error) (map[string]any, error) {
 			out, err := profileSvc.UpdateServer(ctx, id, change)
@@ -676,8 +716,8 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 
 	contentfilterapi.Register(srv.Mux(), contentfilterapi.Deps{Service: contentFilterSvc})
 
-	// 订阅分享(只管记录和 token;对外的 /sub/<token> 下发内容是另一条,还没做):新选的订阅必须存在
-	subsharesapi.Register(srv.Mux(), subsharesapi.Deps{Service: &subshare.Service{
+	// 订阅分享记录 + 公开 /sub/<token> 下发
+	subShareSvc := &subshare.Service{
 		Store: st,
 		SubscriptionIDs: func(ctx context.Context) ([]string, error) {
 			recs, err := subsSvc.List(ctx)
@@ -690,6 +730,11 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 			}
 			return ids, nil
 		},
+	}
+	subsharesapi.Register(srv.Mux(), subsharesapi.Deps{Service: subShareSvc})
+	subpublicapi.Register(srv.Mux(), subpublicapi.Deps{Public: &subshare.Public{
+		Shares: subShareSvc,
+		Nodes:  subsSvc.NodesForShare,
 	}})
 
 	// 前端静态文件与前端路由回落;最后挂,/api 下的路径由各接口分组优先处理
@@ -809,6 +854,7 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 		}
 		done := make(chan struct{})
 		go func() { defer close(done); subs.NewScheduler(subsSvc).Run(ctx) }()
+		go bandwidthSvc.Loop(ctx)
 		return func() { wait(); <-done }
 	}
 

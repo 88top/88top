@@ -79,6 +79,7 @@ type serverDefault struct {
 // Service 组装 Info。字段都是依赖,测试里换假的。
 type Service struct {
 	pairLimit *pairLimiter
+	sharePairLimit *pairLimiter
 	Store     *store.Store
 	// Profile 读完整档案(*profile.Service.Get 的包装)。
 	Profile func(ctx context.Context) (map[string]any, error)
@@ -99,6 +100,8 @@ type Service struct {
 	// ContentFilter 取启用的内容过滤集合的快照(*contentfilter.Service.Snapshot 的包装),并进导出文件和公开同步接口共用的明文。
 	// nil = 明文里不带 contentFilter 这一项;返回 *contentfilter.TooLargeError 时导出和同步如实报 *ContentFilterTooLargeError。
 	ContentFilter func(ctx context.Context) (contentfilter.Snapshot, error)
+	// ContentFilterBuilt 取合并文档(含 Body),给 token 子资源 .../content-filter/:hash;nil 时从 ContentFilter 重编码文档字段。
+	ContentFilterBuilt func(ctx context.Context) (*contentfilter.Built, error)
 
 	// GeoDir 是随包规则库目录(<分类名>.srs);RulesetDir 是用户规则集链接编出的本地规则集目录(list-<hash>.srs)。
 	// App 经 config/:token/rule-set/:tag 取规则集文件时按这两处找;空 = 对应的一类回 404。
