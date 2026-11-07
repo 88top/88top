@@ -1,8 +1,8 @@
 import { disconnectAllAPI, disconnectByIdAPI } from '@/api'
-import { normalizeRuleTarget } from '@/store/rules'
 import { useCtrlsBar } from '@/composables/useCtrlsBar'
 import { SORT_DIRECTION, SORT_TYPE } from '@/constant'
 import { useTooltip } from '@/helper/tooltip'
+import { isMiddleScreen } from '@/helper/utils'
 import {
   connectionFilter,
   connections,
@@ -13,6 +13,7 @@ import {
   quickFilterEnabled,
   renderConnections,
 } from '@/store/connections'
+import { normalizeRuleTarget } from '@/store/rules'
 import { useConnectionCard, useConnectionCardMobile, useConnectionCardPC } from '@/store/settings'
 import {
   ArrowDownCircleIcon,
@@ -21,8 +22,10 @@ import {
   LinkSlashIcon,
   PauseIcon,
   PlayIcon,
+  SparklesIcon,
   WrenchScrewdriverIcon,
-  XMarkIcon, SparklesIcon } from '@heroicons/vue/24/outline'
+  XMarkIcon,
+} from '@heroicons/vue/24/outline'
 import { defineComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import DialogWrapper from '../common/DialogWrapper.vue'
@@ -57,14 +60,28 @@ export default defineComponent({
     const { isLargeCtrlsBar } = useCtrlsBar(useConnectionCard.value ? 860 : 720)
 
     return () => {
+      // 窄屏用「排序」,宽屏用「排序方式」;窄屏的紧凑样式与上游 v0.1.413 一致
+      const sortLabel = t(isMiddleScreen.value ? 'connectionSort' : 'sortBy')
       const sortForCards = (
         <div
-          class={`flex items-center gap-1 text-sm ${isLargeCtrlsBar.value ? 'w-auto' : 'w-full'}`}
+          class={[
+            'flex items-center gap-1 text-sm',
+            isMiddleScreen.value
+              ? 'min-w-0 flex-1 max-[360px]:gap-0.5 max-[360px]:text-xs'
+              : isLargeCtrlsBar.value
+                ? 'w-auto'
+                : 'w-full',
+          ]}
         >
-          <span class="shrink-0">{t('sortBy')}</span>
-          <div class={`join flex-1 ${isLargeCtrlsBar.value ? 'min-w-46' : ''}`}>
+          <span class="shrink-0">{sortLabel}</span>
+          <div class={`join min-w-0 flex-1 ${isLargeCtrlsBar.value ? 'min-w-46' : ''}`}>
             <select
-              class="join-item select select-sm flex-1"
+              class={[
+                'join-item select select-sm min-w-0 flex-1',
+                isMiddleScreen.value &&
+                  'px-2 max-[360px]:ps-1 max-[360px]:pe-5 max-[360px]:text-xs!',
+              ]}
+              aria-label={sortLabel}
               v-model={connectionSortType.value}
             >
               {(Object.values(SORT_TYPE) as string[]).map((opt) => (
@@ -77,7 +94,7 @@ export default defineComponent({
               ))}
             </select>
             <button
-              class="btn join-item btn-sm"
+              class={['btn join-item btn-sm shrink-0', isMiddleScreen.value && 'btn-square']}
               onClick={() => {
                 connectionSortDirection.value =
                   connectionSortDirection.value === SORT_DIRECTION.ASC
@@ -127,7 +144,9 @@ export default defineComponent({
                       class="select select-sm w-20 max-w-28 min-w-0 flex-1"
                       aria-label={t(labelKey)}
                       value={style.value ? 'card' : 'table'}
-                      onChange={(e) => (style.value = (e.target as HTMLSelectElement).value === 'card')}
+                      onChange={(e) =>
+                        (style.value = (e.target as HTMLSelectElement).value === 'card')
+                      }
                     >
                       <option value="card">{t('card')}</option>
                       <option value="table">{t('table')}</option>
@@ -140,14 +159,18 @@ export default defineComponent({
                   type="checkbox"
                   class="toggle toggle-primary toggle-sm"
                   checked={hideDnsConnections.value}
-                  onChange={(e) => (hideDnsConnections.value = (e.target as HTMLInputElement).checked)}
+                  onChange={(e) =>
+                    (hideDnsConnections.value = (e.target as HTMLInputElement).checked)
+                  }
                 />
                 <span class="flex flex-col">
                   <span>{t('hideDnsConnections')}</span>
                   <span class="text-base-content/60 text-xs">{t('hideDnsConnectionsHint')}</span>
                 </span>
               </label>
-              {(useConnectionCardPC.value || useConnectionCardMobile.value) && <ConnectionCardSettings />}
+              {(useConnectionCardPC.value || useConnectionCardMobile.value) && (
+                <ConnectionCardSettings />
+              )}
               {(!useConnectionCardPC.value || !useConnectionCardMobile.value) && <TableSettings />}
               <div class="flex flex-col gap-2">
                 <SourceIPLabels />
@@ -169,7 +192,12 @@ export default defineComponent({
           <button
             class="btn btn-circle btn-sm shrink-0"
             // 连接表按主机名匹配,端口不要:board.ok1248.cn:4433 → board.ok1248.cn
-            onClick={() => (connectionFilter.value = normalizeRuleTarget(connectionFilter.value).replace(/:\d+$/, ''))}
+            onClick={() =>
+              (connectionFilter.value = normalizeRuleTarget(connectionFilter.value).replace(
+                /:\d+$/,
+                '',
+              ))
+            }
             onMouseenter={(e) => showTip(e, t('ruleFormatQuery'))}
           >
             <SparklesIcon class="h-4 w-4" />
@@ -214,24 +242,39 @@ export default defineComponent({
         </>
       )
 
+      // 窄屏(isMiddleScreen):「活跃 / 已关闭」页签已经挪到页签行右侧(ConnectionsPage 的 mobile-actions 插槽),
+      // 这里不再放;布局和上游 v0.1.413 一致
       const content = !isLargeCtrlsBar.value ? (
-        <div class="app-card-padding flex flex-wrap items-center gap-2">
-          <div class="flex w-full min-w-0 items-center justify-between gap-2">
-            <div class="min-w-0 flex-1">
-              <ConnectionTabs />
+        <div class="app-card-padding flex flex-wrap items-center gap-x-2 gap-y-[var(--app-card-space)]">
+          {(!isMiddleScreen.value || !useConnectionCard.value) && (
+            <div class="flex w-full min-w-0 items-center justify-between gap-2">
+              <div class="min-w-0 flex-1">{!isMiddleScreen.value && <ConnectionTabs />}</div>
+              {!useConnectionCard.value && (
+                <div class="flex shrink-0 items-center gap-2">
+                  {settingsModal}
+                  {buttons}
+                </div>
+              )}
             </div>
-            {!useConnectionCard.value && (
-              <div class="flex shrink-0 items-center gap-1">
+          )}
+          {useConnectionCard.value && (
+            <div
+              class={[
+                'flex w-full min-w-0 items-center gap-x-2 gap-y-[var(--app-card-space)]',
+                isMiddleScreen.value ? 'max-[360px]:gap-x-1' : 'flex-wrap',
+              ]}
+            >
+              {sortForCards}
+              <div
+                class={
+                  isMiddleScreen.value
+                    ? 'ml-auto flex shrink-0 items-center gap-2 max-[360px]:gap-1'
+                    : 'contents'
+                }
+              >
                 {settingsModal}
                 {buttons}
               </div>
-            )}
-          </div>
-          {useConnectionCard.value && (
-            <div class="flex w-full items-center gap-2">
-              {sortForCards}
-              {settingsModal}
-              {buttons}
             </div>
           )}
           <div class="join w-full">
@@ -241,7 +284,7 @@ export default defineComponent({
         </div>
       ) : (
         <div class="app-card-padding flex items-center gap-2">
-          <ConnectionTabs />
+          {!isMiddleScreen.value && <ConnectionTabs />}
           {useConnectionCard.value && sortForCards}
           <SourceIPFilter class="w-40" />
           <div class="flex flex-1">{searchInput}</div>

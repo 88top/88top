@@ -1,21 +1,21 @@
 <template>
-  <div class="settings-section flex flex-col gap-2 app-card-inset text-sm">
+  <div class="settings-section flex flex-col app-card-gap app-card-inset text-sm">
     <template v-if="hasVisibleLatencyItems">
       <div class="settings-title">
-        {{ $t('nodeTipLatency') }}
+        {{ $t('latencyThresholds') }}
       </div>
       <div class="settings-grid">
         <div
-          v-if="isVisibleSpeedtestTimeout"
+          v-if="isVisibleMediumLatency"
           class="setting-item"
         >
           <div class="setting-item-label">
-            {{ $t('speedtestTimeout') }}
+            {{ $t('mediumLatencyDesc') }}
           </div>
           <input
             type="number"
             class="input input-sm w-20"
-            v-model="speedtestTimeout"
+            v-model="mediumLatency"
           />
           ms
         </div>
@@ -34,16 +34,16 @@
           ms
         </div>
         <div
-          v-if="isVisibleMediumLatency"
+          v-if="isVisibleSpeedtestTimeout"
           class="setting-item"
         >
           <div class="setting-item-label">
-            {{ $t('mediumLatencyDesc') }}
+            {{ $t('speedtestTimeout') }}
           </div>
           <input
             type="number"
             class="input input-sm w-20"
-            v-model="mediumLatency"
+            v-model="speedtestTimeout"
           />
           ms
         </div>
@@ -60,21 +60,11 @@
             v-model="IPv6test"
           />
         </div>
-        <div class="setting-item">
-          <div class="setting-item-label">
-            {{ $t('hideUnavailableProxies') }}
-          </div>
-          <input
-            class="toggle"
-            type="checkbox"
-            v-model="hideUnavailableProxies"
-          />
-        </div>
       </div>
     </template>
-    <!-- 带宽着色阈值:不足(红)/一般(橙)可改,优秀(绿)是高于两者的部分,只读(与上游 v0.1.391 一致) -->
+    <!-- 带宽着色阈值:不足(红)/一般(橙)可改,高于两者为绿 -->
     <div class="settings-title">
-      {{ $t('nodeTipBandwidth') }}
+      {{ $t('bandwidthThresholds') }}
     </div>
     <div class="settings-grid">
       <div class="setting-item">
@@ -106,60 +96,48 @@
         />
         Mbps
       </div>
-      <div class="setting-item">
-        <div class="setting-item-label">
-          {{ $t('bandwidthExcellentDesc') }}
-        </div>
-        <span class="text-primary tabular-nums">&gt; {{ bandwidthExcellentFloor }} Mbps</span>
-      </div>
     </div>
-    <!-- 布局:代理组分几列(GitHub #10) -->
-    <template v-if="isVisibleProxyGroupColumnsPC || isVisibleProxyGroupColumnsMobile">
+    <!-- CPU 负载着色阈值(硬件负载的曲线和数字按它变色):低于第一个为绿,低于第二个为橙,更高为红 -->
+    <template v-if="isVisibleCpuLoadLow || isVisibleCpuLoadMedium">
       <div class="settings-title">
-        {{ $t('proxyGroupLayout') }}
+        {{ $t('cpuLoadThresholds') }}
       </div>
       <div class="settings-grid">
         <div
-          v-if="isVisibleProxyGroupColumnsPC"
+          v-if="isVisibleCpuLoadLow"
           class="setting-item"
         >
           <div class="setting-item-label">
-            {{ $t('proxyGroupColumnsPC') }}
+            {{ $t('cpuLoadLowDesc') }}
           </div>
-          <select
-            class="select select-sm w-28"
-            :aria-label="$t('proxyGroupColumnsPC')"
-            v-model.number="proxyGroupColumnsPC"
-          >
-            <option
-              v-for="n in [1, 2, 3]"
-              :key="n"
-              :value="n"
-            >
-              {{ $t(`proxyGroupColumns${n}`) }}
-            </option>
-          </select>
+          <input
+            type="number"
+            class="input input-sm w-20"
+            min="0"
+            :max="cpuLoadThresholds[1] - 1"
+            :value="cpuLoadThresholds[0]"
+            :aria-label="$t('cpuLoadLowDesc')"
+            @change="onCpuThresholdChange(0, $event)"
+          />
+          %
         </div>
         <div
-          v-if="isVisibleProxyGroupColumnsMobile"
+          v-if="isVisibleCpuLoadMedium"
           class="setting-item"
         >
           <div class="setting-item-label">
-            {{ $t('proxyGroupColumnsMobile') }}
+            {{ $t('cpuLoadMediumDesc') }}
           </div>
-          <select
-            class="select select-sm w-28"
-            :aria-label="$t('proxyGroupColumnsMobile')"
-            v-model.number="proxyGroupColumnsMobile"
-          >
-            <option
-              v-for="n in [1, 2]"
-              :key="n"
-              :value="n"
-            >
-              {{ $t(`proxyGroupColumns${n}`) }}
-            </option>
-          </select>
+          <input
+            type="number"
+            class="input input-sm w-20"
+            :min="cpuLoadThresholds[0] + 1"
+            max="100"
+            :value="cpuLoadThresholds[1]"
+            :aria-label="$t('cpuLoadMediumDesc')"
+            @change="onCpuThresholdChange(1, $event)"
+          />
+          %
         </div>
       </div>
     </template>
@@ -171,13 +149,12 @@ import { useIsSettingVisible } from '@/composables/settings'
 import { PROXIES_ITEM_KEYS } from '@/config/settingsItems'
 import {
   bandwidthAdequateThreshold,
+  cpuLoadThresholds,
   bandwidthPoorThreshold,
-  hideUnavailableProxies,
   IPv6test,
   lowLatency,
   mediumLatency,
-  proxyGroupColumnsMobile,
-  proxyGroupColumnsPC,
+  setCpuLoadThreshold,
   speedtestTimeout,
 } from '@/store/settings'
 import { computed } from 'vue'
@@ -187,13 +164,15 @@ const isVisibleSpeedtestTimeout = useIsSettingVisible(k.speedtestTimeout)
 const isVisibleLowLatency = useIsSettingVisible(k.lowLatencyDesc)
 const isVisibleMediumLatency = useIsSettingVisible(k.mediumLatencyDesc)
 const isVisibleIpv6Test = useIsSettingVisible(k.ipv6Test)
-const isVisibleProxyGroupColumnsPC = useIsSettingVisible(k.proxyGroupColumnsPC)
-const isVisibleProxyGroupColumnsMobile = useIsSettingVisible(k.proxyGroupColumnsMobile)
+const isVisibleCpuLoadLow = useIsSettingVisible(k.cpuLoadLowDesc)
+const isVisibleCpuLoadMedium = useIsSettingVisible(k.cpuLoadMediumDesc)
 
-// 优秀 = 高于不足和一般两个阈值中较大的那个
-const bandwidthExcellentFloor = computed(() =>
-  Math.max(Number(bandwidthPoorThreshold.value) || 0, Number(bandwidthAdequateThreshold.value) || 0),
-)
+// 输入框改完后按合法范围写回(0 ≤ 低 < 高 ≤ 100),再把框里的值同步成实际存下的值
+const onCpuThresholdChange = (index: 0 | 1, event: Event) => {
+  const input = event.target as HTMLInputElement
+  setCpuLoadThreshold(index, input.valueAsNumber)
+  input.value = String(cpuLoadThresholds.value[index])
+}
 
 const hasVisibleLatencyItems = computed(() => {
   return (

@@ -2,7 +2,7 @@
   <!-- dashboard -->
   <div
     v-if="hasVisibleItems"
-    class="settings-section relative flex flex-col gap-2 app-card-inset text-sm"
+    class="settings-section relative flex flex-col app-card-gap app-card-inset text-sm"
   >
     <!-- 标题就是「通用」:这块(语言/圆角/背景/主题)和下面 GeneralSettings 的几行合成一组 -->
     <div class="settings-title">
@@ -147,6 +147,8 @@
       <!-- GeneralSettings 把它的几行(空闲 UDP / 修改密码 / IP 信息 API)放进来,和上面同一个网格 -->
       <slot />
     </div>
+    <!-- 「布局」小节由 GeneralSettings 通过具名插槽放进来,和「通用」同在一张卡片里(v0.1.413) -->
+    <slot name="layout" />
     <!-- 「更新面板 / 自动更新」已去掉:面板由 Open-Box 自己发布,sing-box 也没有 /upgrade/ui 接口 -->
   </div>
 </template>

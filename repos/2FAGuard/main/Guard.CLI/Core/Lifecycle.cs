@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using Guard.Core;
+﻿using Guard.Core;
 using Guard.Core.Security;
 using Guard.Core.Storage;
 using Spectre.Console;
@@ -12,18 +11,11 @@ namespace Guard.CLI.Core
 
         public static async Task Init()
         {
-            InstallationType installationType = InstallationContext.GetInstallationType();
-            string mutexName = "2FAGuard";
-            if (installationType == InstallationType.CLASSIC_PORTABLE)
-            {
-                mutexName += "Portable";
-            }
-            else if (installationType == InstallationType.MICROSOFT_STORE)
-            {
-                mutexName += "Store";
-            }
-
-            singleInstanceMutex = new Mutex(true, mutexName, out bool createdNewMutex);
+            singleInstanceMutex = new Mutex(
+                true,
+                InstallationContext.GetMutexName(),
+                out bool createdNewMutex
+            );
 
             Console.CancelKeyPress += (sender, args) =>
             {
@@ -43,6 +35,8 @@ namespace Guard.CLI.Core
                 Environment.Exit(1);
             }
 
+            SettingsManager.Init();
+
             if (Environment.OSVersion.Version.Build < 18362)
             {
                 AnsiConsole.MarkupLine(
@@ -51,7 +45,7 @@ namespace Guard.CLI.Core
                 Environment.Exit(1);
             }
 
-            if (RuntimeInformation.ProcessArchitecture != Architecture.X64)
+            if (!InstallationContext.IsSupportedArchitecture())
             {
                 AnsiConsole.MarkupLine(
                     "[red]Error:[/] 2FAGuard requires a 64-bit processor architecture and operating system."
@@ -62,36 +56,15 @@ namespace Guard.CLI.Core
             if (!EncryptionHelper.IsSupported())
             {
                 AnsiConsole.MarkupLine(
-                    "[red]Error:[/] The Microsoft Visual C++ Redistributable 2015-2022 is required to run 2FAGuard. Please install the package to be able to use 2FAGuard. If you have used the 2FAGuard installer or have just installed the package, you may need to restart your device. You can download the redistributable [link=https://aka.ms/vs/17/release/vc_redist.x64.exe]here[/]."
+                    $"[red]Error:[/] The Microsoft Visual C++ Redistributable 2015-2022 is required to run 2FAGuard. Please install the package to be able to use 2FAGuard. If you have used the 2FAGuard installer or have just installed the package, you may need to restart your device. You can download the redistributable [link={InstallationContext.GetVcRedistUrl()}]here[/]."
                 );
                 Environment.Exit(1);
             }
 
             Version currentVersion = InstallationContext.GetVersion();
 
-            if (
-                SettingsManager.Settings.LastUsedAppVersion.Major == 0
-                && SettingsManager.Settings.LastUsedAppVersion.Minor == 0
-            )
+            if (!await VersionCompatibility.Check(currentVersion))
             {
-                SettingsManager.Settings.LastUsedAppVersion = currentVersion;
-                await SettingsManager.Save();
-            }
-            int versionCompare = SettingsManager.Settings.LastUsedAppVersion.CompareTo(
-                currentVersion
-            );
-            if (versionCompare < 0)
-            {
-                SettingsManager.Settings.LastUsedAppVersion = currentVersion;
-                await SettingsManager.Save();
-            }
-            else if (versionCompare > 0)
-            {
-                Log.Logger.Error(
-                    "Preventing app start: Current version is older than last used version: {0} < {1}",
-                    currentVersion,
-                    SettingsManager.Settings.LastUsedAppVersion
-                );
                 AnsiConsole.MarkupLine(
                     "[red]Error:[/] 2FAGuard cannot start because the app data was opened with a newer version of 2FAGuard. Please update 2FAGuard to the latest version and try again."
                 );
@@ -109,7 +82,6 @@ namespace Guard.CLI.Core
                 }
             });
 
-            SettingsManager.Init();
             await Auth.Init();
 
             await CLIAuth.Login();

@@ -46,6 +46,7 @@ import (
 	subpublicapi "github.com/timeflysoon/Open-Box/backend/internal/api/subpublic"
 	subsapi "github.com/timeflysoon/Open-Box/backend/internal/api/subscriptions"
 	subsharesapi "github.com/timeflysoon/Open-Box/backend/internal/api/subshares"
+	sysresapi "github.com/timeflysoon/Open-Box/backend/internal/api/sysres"
 	terminaltestapi "github.com/timeflysoon/Open-Box/backend/internal/api/terminaltest"
 	timezoneapi "github.com/timeflysoon/Open-Box/backend/internal/api/timezone"
 	trafficapi "github.com/timeflysoon/Open-Box/backend/internal/api/traffic"
@@ -88,6 +89,7 @@ import (
 	"github.com/timeflysoon/Open-Box/backend/internal/store"
 	"github.com/timeflysoon/Open-Box/backend/internal/subs"
 	"github.com/timeflysoon/Open-Box/backend/internal/subshare"
+	"github.com/timeflysoon/Open-Box/backend/internal/sysres"
 	"github.com/timeflysoon/Open-Box/backend/internal/system"
 	"github.com/timeflysoon/Open-Box/backend/internal/timezone"
 	"github.com/timeflysoon/Open-Box/backend/internal/traffic"
@@ -462,6 +464,23 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 		KernelVersion: func(ctx context.Context) string { return singbox.ReadKernelVersion(ctx, cfg.SingBox).Version },
 	}})
 
+	// 系统资源(概览页「硬件负载」、侧边栏卡片、概览的「活跃终端」):CPU / 内存读 /proc,活跃终端取内核连接的来源 IP 并按邻居表的 MAC 合并
+	sysresapi.Register(srv.Mux(), sysresapi.Deps{Service: &sysres.Service{
+		Sources: func(ctx context.Context) ([]string, error) {
+			snap, err := singbox.KernelConnections(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
+			if err != nil {
+				return nil, err
+			}
+			out := make([]string, 0, len(snap.Conns))
+			for _, c := range snap.Conns {
+				out = append(out, c.Source)
+			}
+			return out, nil
+		},
+		Neighbors:  sysres.Neighbors("/proc", system.ExecRunner),
+		LocalAddrs: sysres.LocalAddrs,
+	}})
+
 	// 站点延迟(概览页):请求经内核的面板入站走一遍路由,从内核连接列表认出线路;历史单独存 site-latency-history,不和节点历史混
 	sitelatencyapi.Register(srv.Mux(), sitelatencyapi.Deps{Service: &sitelatency.Service{
 		Hist: &latencyhistory.Service{Store: st, File: "site-latency-history"},
@@ -520,6 +539,22 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 		},
 		Sets: func(c map[string]any) routedecide.Sets { return penetrationSets.Bind(dnsdecide.SetDefsFromConfig(c)) },
 		DNS:  dnsPredictor,
+		// 命中前置自定义分流时要它的名字:取档案的路由交给核心规范化(和 policies/entries 同一条路径);核心不可用就不给 owner
+		CustomName: func(ctx context.Context) string {
+			if peCore == nil {
+				return ""
+			}
+			prof, err := profileSvc.Get(ctx)
+			if err != nil {
+				return ""
+			}
+			routing, _ := prof["routing"].(map[string]any)
+			rt, err := peCore.NormalizeRouting(ctx, routing)
+			if err != nil {
+				return ""
+			}
+			return rt.Custom.Name
+		},
 		// 域名目标先经内核的 DNS 入站解析:给 resolved 字段用,真实地址当作终端会连的目的 IP 去比 IP 规则
 		Resolver: routeSvc,
 		Proxies: func(ctx context.Context) ([]singbox.KernelProxy, error) {

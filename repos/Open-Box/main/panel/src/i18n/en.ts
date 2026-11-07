@@ -1,7 +1,7 @@
-// 文案对齐上游 v0.1.391(中 / 繁 / 英),并入原先拆在 dns-filter / dns-page / client-app-page 等文件里的补充文案。
+// 文案对齐上游 v0.1.413(中 / 繁 / 英),并入原先拆在 dns-filter / dns-page / client-app-page 等文件里的补充文案。
 // 键名与键值和上游 panel/dist 逐键一致,不另设 main 自有键。
 const en = {
-  // ===== 上游 v0.1.391 文案(取自上游 panel/dist,逐键与上游一致)=====
+  // ===== 上游 v0.1.413 文案(取自上游 panel/dist,逐键与上游一致)=====
   cfTitle: 'Content filtering',
   cfDescription:
     'Manage rule and script snapshots here. iOS runs the synced copy offline. HTTPS filtering requires a trusted certificate on the phone.',
@@ -141,7 +141,26 @@ const en = {
   dfTimingHint:
     'Observed completed queries, including cache hits; excludes filter blocks and unmeasured queries.',
   overview: 'Overview',
-  overviewCardTitle: 'Panel overview',
+  overviewCardTitle: 'Network status',
+  systemCpuCoreLoad: '{core} usage',
+  systemMemoryRemaining: 'Available memory',
+  systemMemoryUsedFull: 'Used memory',
+  systemMemoryOpenbox: 'Open-Box',
+  systemCpuTotal: 'Total CPU usage',
+  latencyThresholds: 'Latency thresholds',
+  bandwidthThresholds: 'Bandwidth thresholds',
+  cpuLoadThresholds: 'Load thresholds',
+  cpuLoadLowDesc: 'Low load (green)',
+  cpuLoadMediumDesc: 'Moderate load (amber)',
+  systemMemoryHint: 'Used includes Open-Box and other applications. Bar: green is available memory, amber is other used memory, blue is the resident memory (RSS) of the Open-Box panel and core.',
+  statActiveTerminals: 'Active devices',
+  statActiveTerminalsHint: 'Devices observed in current Open-Box connections. Known MAC addresses combine IPv4 / IPv6. Excludes the router and test probes; bypassed devices may not be counted.',
+  showPassword: 'Show password',
+  hidePassword: 'Hide password',
+  hardwareLoad: 'Hardware load',
+  sidebarDisplay: 'Sidebar display',
+  sidebarDisplayOff: 'Off',
+  connectionSort: 'Sort',
   proxies: 'Proxies',
   rules: 'Rules',
   connections: 'Connections',
@@ -280,7 +299,7 @@ const en = {
     'Sync is off: turn it on with the power icon before the app imports or syncs.',
   clientConfigPowerFailed: 'Could not switch local routing sync: {message}',
   clientConfigScanHint:
-    'Scan with the Open-Box app, or copy the link to the phone and import it. Enter the pairing code below when importing.',
+    'Scan with the Open-Box app or import the copied link, then enter the pairing code below. Connect to the same local network as the router, or make sure its panel is reachable over the internet.',
   clientConfigNoLan:
     "Could not read the router's LAN address: open the panel by its public address (domain) and scan again, or the app cannot reach the panel.",
   clientConfigExportFile: 'Export config file',
@@ -302,7 +321,7 @@ const en = {
     'Pairing code changed to {code}, but the new password could not be applied: {message}',
   pairCodeLoadFailed: 'Could not load the pairing codes: {message}',
   trafficRetentionDescription:
-    'How long daily traffic records stay on the router; expired ones are cleaned daily. Hourly detail is kept for 7 days only. Days older than 30 days keep only the 300 destinations with the most traffic that day; the rest are merged into one "Other" row (totals, clients and nodes are unaffected).',
+    'How long daily traffic records and node bandwidth test history stay on the router; expired ones are cleaned daily. Hourly detail is kept for 7 days only. Days older than 30 days keep only the 300 destinations with the most traffic that day; the rest are merged into one "Other" row (totals, clients and nodes are unaffected).',
   trafficOtherMerged: 'Other (older data merged)',
   trafficRetentionUnit: 'months',
   trafficRetentionRange: '1 to 36, default 3',
@@ -410,7 +429,7 @@ const en = {
   siteLatencyVia: 'via {chain}',
   siteLatencyAutoTest: 'Auto test on open',
   siteLatencyAutoTestHint:
-    'Test all four sites whenever the overview opens. Same switch as “Check connection on start” in panel settings.',
+    'Test all four sites whenever the overview opens. Same switch as “Check connection on start” in Common Settings.',
   siteLatencyTestAll: 'Retest all four sites',
   testSitesSettings: 'Test sites',
   testSitesTip:
@@ -454,8 +473,7 @@ const en = {
   nodeTipBandwidth: 'Bandwidth',
   nodeInfoTrust: 'Trust score',
   bandwidthPoorDesc: 'Insufficient bandwidth (red)',
-  bandwidthAdequateDesc: 'Moderate bandwidth (orange)',
-  bandwidthExcellentDesc: 'Excellent bandwidth (green)',
+  bandwidthAdequateDesc: 'Moderate bandwidth (amber)',
   nodeInfoCoffeeReport: 'Net.Coffee report',
   qualityNodeLatency: 'Node latency',
   qualityEntry: 'Entry',
@@ -810,7 +828,7 @@ const en = {
   geoUpdateEvery: 'every',
   geoUpdateDays: '{days} days',
   geoUpdateHours: '{hours} hours',
-  zashboardSettings: 'Dashboard Settings',
+  zashboardSettings: 'Common Settings',
   backendSettings: 'Backend Settings',
   generalSettings: 'General Settings',
   overviewCard: 'Overview Card',
@@ -2068,7 +2086,7 @@ const en = {
   shareCodeButton: 'QR code',
   shareCodeTitle: 'Scan to connect "{name}"',
   shareCodeAppHint:
-    'Scan with the updated Open-Box app to use region routing. The router panel must be reachable when importing; enter the pairing code to fetch the configuration.',
+    'Scan with the updated Open-Box app and enter the pairing code to use region routing. Connect to the same local network as the router, or make sure its panel is reachable over the internet.',
   shareCodeLinkHint: 'Plain node link for other apps.',
   shareCodeLocalAddress:
     'The connect address {address} only works at home; use a public IP or domain.',
@@ -2360,36 +2378,6 @@ const en = {
   qualityTitle: 'Node quality',
 
   // ===== 对齐上游 catch-up v0.1.412 缺失键 =====
-  backupImportedNeedRestart: 'Imported. Restart the core to apply.',
-  clientRouteMacsLabel: 'MAC addresses',
-  dfPending: 'Restart pending',
-  dfApply: 'Restart kernel now',
-  dfApplyHint: 'Some changes are saved but not active yet. Restart the kernel to apply them.',
-  dfApplying: 'Restarting the kernel…',
-  failoverThreshold: 'Failed rounds',
-  failoverThresholdHint: 'Only after the current lane is confirmed to have no usable nodes for this many consecutive rounds does it move to the next candidate; unfinished rounds and probe service errors do not count as failures',
-  failoverUnitRound: 'rounds',
-  ipv6OffWarning: 'Off: DNS resolves IPv4 only and outbound IPv6 is blocked — it cannot bypass the tunnel.',
-  ipv6OnNote: 'On: your devices can use IPv6 alongside IPv4, both following the rules on the routing page.',
-  nodeDirectOffNote: 'Off: these hosts are routed like any other traffic; a node server may be routed into a proxy.',
-  nodeDirectOnNote: 'On: these hosts go direct with local DNS. Takes effect after restarting the core.',
-  obUpdateTitle: 'Open-Box Update',
-  proxyGroupColumns: 'Proxy group columns',
-  routeDnsRecords: 'Records',
-  routeDnsRuleDetail: 'Rule details',
-  routeEntryBypassConfigured: 'Entry bypass configured: {sets}',
-  routeEntryInboundDiff: 'Inbound difference',
-  routeEntryReason: 'Reason',
-  routeExitDetails: 'Connection details',
-  routeRuleDetail: 'Rule details',
-  routeStartSourceTitle: 'Test origin',
-  routeTermEvidence: 'Forwarding evidence',
-  ruleLookupNoMatch: 'No rule matched, falls to the fallback site set',
-  splitOverviewPage: 'Split overview page',
-  subscriptionLatencyFailed: 'failed',
-  subscriptionRefreshedNeedRestart: 'Refreshed; restart the core to apply',
-  subscriptionSavedNeedRestart: 'Saved; restart the core to apply',
-  testFailedTip: '{name}\nTest failed',
 
 }
 

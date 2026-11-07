@@ -256,7 +256,7 @@
 顺序:一、同一时刻只做一次,并且和部署互斥(另一次在进行 / 部署在进行 → 409,什么都没动);二、**先停内核**:先撤销 DNS 接管,再停服务,再确认真的停了,任何一步不成功就**一份数据都不删**,回 500「为安全起见没有清除任何数据:…」,数据和密码原样,可以排查后重试(读不到服务管理器 = 没有 procd / systemd 时跳过这一步);三、逐项清:DNS 查询记录、每日流量、故障转移(检测管理器的计划和 `failover.json`)、生成的内核配置(`config.json`、`config.prev.json`)、规则集目录和 DNS 过滤名单缓存(目录本身留着)、内核缓存 `cache.db`、状态目录里全部 `.json`(订阅、节点、节点组、档案、面板设置、背景图、共享网络、客户端 App、延迟历史、部署记录……;新增的状态文件自动包含)。一项失败不拦后面的;四、**访问密码和登录会话放最后**:前面只要有一项失败就不清密码,回 500 并写明已清和失败的项(面板不能在旧数据还留着时变成没有密码,再点一次即可重试)。
 不删:`dns-takeover.json`(DNS 接管的撤销记录)、`certs/`(自签证书和密钥,是设备身份,不是用户设置)、内核服务的开机自启设置、后端自己的程序和随包规则库。重置完内核是停止状态,配置文件已删,要「部署」一次才会重新生成并启动。整个过程不随请求断开而中断(总时限 5 分钟)。
 
-## `/api/openbox/bandwidth`(未实现)
+## `/api/openbox/bandwidth`
 
 | 方法 | 路径 | 前端函数(文件:行) | 响应类型 | 参数 |
 |---|---|---|---|---|
@@ -264,7 +264,27 @@
 | POST | `/api/openbox/bandwidth/subscriptions/{id}` | `queueSubscriptionBandwidth` (api/openbox.ts) | OpenboxBandwidthQueueResult | (id) |
 | POST | `/api/openbox/bandwidth/nodes/{name}` | `queueNodeBandwidth` (api/openbox.ts) | OpenboxBandwidthQueueResult | (name) |
 
-**目前后端没有这些路由,一律 404**(2026-11-04 维护者授权:带宽择优整体回退,按前端 `BandwidthSettingsCard` 和 sing-box 公开文档重写,见 STATUS 的 M4「带宽择优」条目)。回退期间带宽卡片不可用;前端已存的档案 `bandwidth` 键作为未知键保留,不校验范围。重写时在这一节写实现约定。
+实现约定(`internal/bandwidth`、`internal/api/bandwidth`;2026-11-04 回退旧实现后按前端 `BandwidthSettingsCard`、`OpenboxBandwidth*` 类型和 sing-box 公开文档重写,STATUS 的 M4「带宽择优」条目记着前五刀)。三个接口都需要登录,响应都带 `no-store`。
+
+- **`GET`**:返回 `{settings, nodes, dailyBytes, running, lastError, updatedAt, measurements, pendingBySubscription}`。`settings` 是档案 `bandwidth` 规整后的值(没设就用默认);`nodes` 是「所在订阅启用、且开了定期带宽检查」的节点数;`dailyBytes` 是估算的每日用量 = `24 / intervalHours × maxDownloadMB × nodes`(换成字节);`measurements` 以节点名为键,含最近一次样本(`at`、`mbps`、`failed`、`lowerBound`)、`enabled`(订阅开了定期检查)、`pending`、`requestedAt`、`completedAt`、`error`、`reason` 和 `history`;排队中的节点会合并进来并标 `pending`。读档案或节点列表出错回 500。
+- **`POST /subscriptions/{id}`**:把这个订阅下的全部节点排进队(不看订阅有没有开定期检查,手动触发都算)。已经在队里的不重复排,计入 `joined`。响应 `{queued, joined, requestedAt, pendingBySubscription}`。**只认已启用订阅的节点**:订阅 id 不存在或订阅已停用时不报错,`queued` 都是 0。
+- **`POST /nodes/{name}`**:把单个节点排进队,响应同上。**节点名在节点列表里找不到时也照样排队**(订阅 id 记为空串),为的是前端不空转;真正测的时候才会失败。
+- 方法不对由 `httpx.Methods` 回 405;带宽服务没装配时三个接口回 503「带宽服务不可用」。
+
+测速与调度:
+
+- 排队只是记在内存里,真正测速由后台循环做:`Loop` 每 15 秒一轮,先按周期入队、再取队里一个节点测一次(同一时刻只测一个)。进程启动时先读回上次保存的测量。
+- **按周期入队**(`EnqueueDue`):只排「订阅启用 + 订阅开了 `bandwidthCheck`」的节点,且距上次完成已超过 `intervalHours`(从没测过的直接排);已在队里的跳过。
+- **怎么测**:临时起一个 sing-box 出站,经被测节点下载,读满 `maxDownloadMB` 就停;下载地址取档案 `testUrl`,没有就用默认的 Cloudflare 测速地址。超时按上限估算,最少 30 秒、最多 3 分钟。读满上限时 `lowerBound` 为 true,表示真实速度不低于 `mbps`。节点找不到、配置生成失败、探测失败都记成一次失败样本(`failed`,带 `error` 和 `reason`),并写进 `lastError`;下一次成功会清掉 `lastError`。没有装配测速器时一律记失败(`measurer not configured`),不会悄悄直连外网。
+- **历史**:每个节点最多保留 48 条样本,落盘到状态目录的 `bandwidth-history.json`。保留时长跟随档案 `traffic.keepMonths`(按每月 30 天,取 1~24 个月,最少 24 小时),不写死 24 小时(对齐上游 v0.1.405 的口径)。
+
+相关的校验和字段(不在这三个接口里,但配套):
+
+- **档案 `bandwidth`**:`{intervalHours, maxDownloadMB}`,`intervalHours` 是 1~24 的整数、`maxDownloadMB` 是 1~1024 的整数,默认 6 小时和 50 MB;缺哪个键就补默认;不是对象或超出范围回 400。保存时会规整成这两个键。这个键是测速参数,不进 sing-box 配置,已列入 `profileKeyIgnored`,改它不会让服务状态误报「需要重启」。
+- **节点组 `bandwidth`**:必须是布尔(启用带宽择优),可以不带;其他类型回 400「节点组 … 的 bandwidth 必须是布尔」。组上为真时由 core 把 `bandwidth: true` 写进 urltest / loadbalance 出站(和故障转移多节点自动页签里的内部 urltest),内核自己择优,**后端不改组成员顺序**。客户端配置的 `disableBandwidth` 选项不写。
+- **订阅 `bandwidthCheck`**:创建和修改订阅时落盘,只决定自动入队,不进 sing-box 配置。
+
+没做、需真机:测速经临时 sing-box 出站走节点,沙箱里没法验真实速度;`lowerBound`、超时和失败样本的表现、`dailyBytes` 的估算是否合理,都要在路由器上挂一个开了带宽择优的组、再给订阅打开定期检查后观察。
 
 ## `/api/openbox/failover`
 
@@ -337,7 +357,7 @@
 |---|---|---|---|---|
 | POST | `/api/openbox/penetration` | `queryPenetration` (api/openbox.ts:1174) | OpenboxPenetrationResult | (target: string) |
 
-> 实现约定(M3,第一部分):请求 `{"target":"域名或 IP"}`,目标不合法 400,读不到已部署配置 500。按已部署 `config.json` 的 `route.rules` 推算(`internal/routedecide`)。已给:`matched`(`index` / `rule` / `outbound` / `action`)、`owner`(只认得出的)、`assumed`(`needs` / `leaf` / `sameOutcome`)、`preResolve`、`dns`、`chain`(永远是数组,reject 时为空)、`finalOutbound`(拿不到为 null)、`chainError`、`matchError`(规则集没能检查:`matched` 为 null、不给线路)、`routingStale`。`matched.entries`(最多 20 条,来源是规则集名或 `custom`)/ `entriesTotal` 已做。`resolved` 和 `matched.viaIp` 已做:域名目标先经内核的 DNS 入站解析(档案开了 IPv6 才再问 AAAA),响应里 `resolved` 是 `{fakeIp?, addresses, error?}`(`addresses` 永远是数组;解析失败不算接口错误,原因写在 `error`;IP 目标不解析、没有这个字段)。推算时把「第一个真实 IPv4(没有就第一个 IPv6)」当终端会连的目的 IP:终端自己解析后按真实地址连进内核、内核再嗅探出域名,连接同时带域名和目的 IP,所以 `ip_is_private`、`ip_cidr`、`ip_version` 和规则集里的 IP 条目按这个地址判;core 给「看 IP 的规则」带了「连接没有域名」的前提(`domain_regex` 取反),有域名的连接不会被它们命中,这一点推算里照样成立。靠地址命中的规则,`matched.viaIp` 是那个地址,`entries` 也把规则集里命中它的 IP 条目列出来。解析到的是占位地址(`fakeIp: true`,连接进内核后按域名找回目标)或解析失败时没有目的 IP,IP 条件仍记成 `assumed` 的前提(与原来一致)。**未做**:`preMatch`、`firstLayer`、前置自定义分流的 `ownerName`。
+> 实现约定(M3,第一部分):请求 `{"target":"域名或 IP"}`,目标不合法 400,读不到已部署配置 500。按已部署 `config.json` 的 `route.rules` 推算(`internal/routedecide`)。已给:`matched`(`index` / `rule` / `outbound` / `action`)、`owner`(只认得出的)、`assumed`(`needs` / `leaf` / `sameOutcome`)、`preResolve`、`dns`、`chain`(永远是数组,reject 时为空)、`finalOutbound`(拿不到为 null)、`chainError`、`matchError`(规则集没能检查:`matched` 为 null、不给线路)、`routingStale`。`matched.entries`(最多 20 条,来源是规则集名或 `custom`)/ `entriesTotal` 已做。`resolved` 和 `matched.viaIp` 已做:域名目标先经内核的 DNS 入站解析(档案开了 IPv6 才再问 AAAA),响应里 `resolved` 是 `{fakeIp?, addresses, error?}`(`addresses` 永远是数组;解析失败不算接口错误,原因写在 `error`;IP 目标不解析、没有这个字段)。推算时把「第一个真实 IPv4(没有就第一个 IPv6)」当终端会连的目的 IP:终端自己解析后按真实地址连进内核、内核再嗅探出域名,连接同时带域名和目的 IP,所以 `ip_is_private`、`ip_cidr`、`ip_version` 和规则集里的 IP 条目按这个地址判;core 给「看 IP 的规则」带了「连接没有域名」的前提(`domain_regex` 取反),有域名的连接不会被它们命中,这一点推算里照样成立。靠地址命中的规则,`matched.viaIp` 是那个地址,`entries` 也把规则集里命中它的 IP 条目列出来。解析到的是占位地址(`fakeIp: true`,连接进内核后按域名找回目标)或解析失败时没有目的 IP,IP 条件仍记成 `assumed` 的前提(与原来一致)。前置自定义分流的归属已做:命中的规则落在自定义分流那一段(core 生成顺序固定:bypass → sniff → DNS 劫持 → tun 防回环 → 前置自定义分流 → `ip_is_private` 私网直连,开头那串基础规则之后、第一条私网直连之前就是它)时,`owner` 是 `{kind:"custom", name}`,`matched.ownerName` 同名;名字取档案路由经 core `normalizeRouting` 规范化后的 `custom.name`,只在命中这一段时才取;位置优先于形状(自定义分流的 IP 段拒绝版带 `ip_cidr`,不会被认成内核占位段 `kernel`);取不到名字(核心不可用 / 名字为空)就不给 `owner`,不猜。没有启用前置自定义分流时这一段是空的,其它规则的认法不变。**不做**:`preMatch`、`firstLayer`(DESIGN 第 8 节已定)。
 
 ## `/api/openbox/policies`
 
@@ -448,6 +468,9 @@
 |---|---|---|---|---|
 | GET | `/api/openbox/system/timezone` | `fetchTimezone` (api/openbox.ts:1680) | OpenboxTimezoneState | () |
 | PUT | `/api/openbox/system/timezone` | `saveTimezone` (api/openbox.ts:1683) | OpenboxTimezoneState | (zone: string) |
+| GET | `/api/openbox/system/resources` | `fetchSystemResources` (api/openbox.ts:2063) | SystemResources | (signal?: AbortSignal) |
+
+`system/resources`(概览页「硬件负载」、侧边栏卡片、概览的「活跃终端」共用,前端每 2 秒取一次,取不到就当没有):响应 `{at, cpu:{usage, cores:[{id, usage}]}, memory?:{total, available, used, openbox?}, activeTerminals?}`,`at` 毫秒,CPU 单位 % 一位小数,内存单位字节。实现约定(`internal/sysres`,自己的设计,形状取自前端 `SystemResources` 和各组件的用法,没有参照上游):CPU 读 `/proc/stat`,用两次采样的差算(第一次调用隔 200ms 再采;距上一次采样不到 500ms 的调用直接用上一次的结果),`cores[].id` 形如 `cpu0`;内存读 `/proc/meminfo`,`used = total − available`(没有 `MemAvailable` 的老内核用 `MemFree + Buffers + Cached`),`openbox` = 后端自己 + comm 为 `sing-box` 的内核进程的 `VmRSS` 之和,读不到就不给;`activeTerminals` = 内核当前连接里出现的来源 IP 去掉本机地址 / 回环 / 未指定地址,已知 MAC 的(IPv4 读 `/proc/net/arp`,IPv6 读 `ip -6 neigh show`)合并成一个,没有邻居表项的各算一个;内核没在运行(读不到连接)就不给这个字段。读不到 `/proc/stat`(不是 Linux)回 503;内存 / 终端读不到只是少对应字段。**没做**:从终端里排除「真实路由测试」的虚拟终端地址(测试进行的几秒里它会多算一台)。需要在真机上核对:每核和总负载的读数、内存三项、`activeTerminals` 和路由器后台里的在线设备数是否合理。
 
 实现约定(M5,仅时区):`zones` / `countries` 来自内置的 IANA 时区表(419 个时区,国家代码取自 `zone.tab`,UTC 没有);`zone` 读不到(没有服务管理器、命令失败)是空串,名单照给,不报错;`offset`(+08:00)和 `local`(路由器本地时间)问系统的 `date`,读不到也是空串;`platform` 是 `openwrt` / `systemd` / `none`。`PUT` 请求体 `{ zone }`:别名先换成名单里的名字(如 `Asia/Chongqing` → `Asia/Shanghai`,`Etc/UTC` / `GMT` → `UTC`),不认识 400;OpenWrt 上 system 配置里有别人暂存的修改时拒绝(500,说明原因),改失败会恢复原值;没有受支持的服务管理器 501;改完读回来与请求不一致 500。
 
