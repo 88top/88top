@@ -55,7 +55,6 @@ impl DnsClientAnswer {
         }
     }
 
-    #[cfg(feature = "native-api")]
     pub(crate) fn outcome(&self) -> Option<&crate::dns::outcome::DnsOutcome> {
         self.0.as_ref().ok()
     }
@@ -175,8 +174,12 @@ impl DnsController {
 
     /// Resolve a domain (A + AAAA) through the *currently installed*
     /// forwarder — reload-safe, unlike holding a resolver from startup.
-    /// Used by the health-check resolver hook.
+    /// Used by the health-check resolver hook. Raw TCP probes resolve node
+    /// server hosts here, so a claiming `subtag()` rule applies first.
     pub async fn resolve_domain(&self, domain: &str) -> anyhow::Result<Vec<std::net::IpAddr>> {
+        if let Some(addresses) = self.dns_service.resolve_node_host(domain).await? {
+            return Ok(addresses);
+        }
         let resolved = self.dns_service.resolve_name(domain).await?;
         Ok(resolved.ipv4.into_iter().chain(resolved.ipv6).collect())
     }
@@ -185,6 +188,11 @@ impl DnsController {
         self.dns_service
             .provider()
             .unwrap_or_else(|| unreachable!("controller always uses runtime DNS service"))
+    }
+
+    #[inline]
+    pub(crate) fn dns_audit(&self) -> &crate::audit::DnsAudit {
+        &self.dns_service.audit
     }
 
     pub(crate) fn dns_service(&self) -> crate::dns::DnsService {

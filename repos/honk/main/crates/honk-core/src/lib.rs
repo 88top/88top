@@ -9,6 +9,11 @@
 //! in dae netns"). Trait-based backends (real aya + mock) for testing
 //! without kernel eBPF support.
 
+#[cfg_attr(not(feature = "dns-syslog"), path = "audit/inert.rs")]
+mod audit;
+#[cfg(all(test, not(feature = "dns-syslog")))]
+#[path = "audit/inert_tests.rs"]
+mod audit_feature_tests;
 #[cfg(feature = "clash-api")]
 pub mod clash_api;
 pub mod config_diagnostics;
@@ -780,7 +785,6 @@ pub async fn run(cli: Cli) -> anyhow::Result<()> {
     let startup = (|| -> anyhow::Result<_> {
         #[cfg(feature = "native-api")]
         let mut config = if cli.store == ConfigStore::Db {
-            std::fs::create_dir_all(&cli.data_dir)?;
             // DbStore needs an absolute, lexically normal entry; a missing -c
             // is fine once the db holds a revision.
             let entry =
@@ -807,6 +811,8 @@ pub async fn run(cli: Cli) -> anyhow::Result<()> {
             !config.experimental.native_api.enabled,
             "native-api feature is required"
         );
+        #[cfg(not(feature = "dns-syslog"))]
+        audit::validate_config(&config.global)?;
         let requested_data_dir = PathBuf::from(&config.global.data_dir);
         let (runtime_data_dir, data_dir_creation_error) =
             prepare_runtime_data_dir(&requested_data_dir)?;
@@ -1267,7 +1273,8 @@ pub async fn run(cli: Cli) -> anyhow::Result<()> {
         .with_cache_ttl(config.dns.cache.ttl.min(u64::from(u32::MAX)) as u32)
         .with_stale_reply_ttl(config.dns.cache.stale_reply_ttl)
         .with_policy_id(dns_policy)
-        .with_hosts_snapshot(hosts_snapshot),
+        .with_hosts_snapshot(hosts_snapshot)
+        .with_node_hosts(dns::node_host::index(&config)),
     );
     info!("DNS forwarder ready");
 
@@ -1283,6 +1290,9 @@ pub async fn run(cli: Cli) -> anyhow::Result<()> {
         resource_budget,
         Arc::clone(&degradations),
     )?;
+    honk_outbound::bootstrap::set_node_host_resolver(Some(dns::node_host::resolver(
+        &control_plane.dns_service(),
+    )));
     if nfqueue_unavailable {
         control_plane
             .startup_downgrades()
