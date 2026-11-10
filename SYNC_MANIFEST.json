@@ -203,12 +203,12 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "fe078e0b78fee175f7340938ff8e6ce8e63c9e2c"
+      "remote_sha": "5ac2661545832fa07b619223862ea98147606d02"
     }
   },
   "timeflysoon/dae": {
     "main": {
-      "remote_sha": "8722db01fca702818ea85cefde46a84dd755f44a"
+      "remote_sha": "e2b090a98012d0a53fb04b6262650723d2d342e2"
     }
   },
   "timeflysoon/daed": {
@@ -228,7 +228,7 @@
   },
   "timeflysoon/gopeed": {
     "main": {
-      "remote_sha": "8ef3b63e8d93f34e9f6c161823ff2bdfe50f1f0b"
+      "remote_sha": "a34383a7e226b47207085c953c6f899bc4869637"
     }
   },
   "timeflysoon/img-installer": {
@@ -288,7 +288,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "2edd46179e566f0004ea88d5b4af3ea498632c87"
+      "remote_sha": "6fe9f917bc8c8e3fb3ea62fb3004fbdb494b4513"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -309,13 +309,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "26cf4440307754d2c2f65cf2f0457c0ae814900f"
+      "remote_sha": "7861772837d405921b48f911f458546b849b7e66"
     },
     "release": {
-      "remote_sha": "d5574ea0ab3358ebaae2991d28d09a0f8178b0ed"
+      "remote_sha": "468be1e94b3e96660c298eff46eb2205746badb8"
     },
     "sing": {
-      "remote_sha": "1df33612b1ccc2346e4dbe47a69facf7d1c780bf"
+      "remote_sha": "553607380d68f223cbcc70a101dc80b9b2285df1"
     }
   },
   "timeflysoon/quickstart": {
@@ -350,7 +350,7 @@
       "remote_sha": "d1ffe2b87a9c57b53088ab9aee1f4f679096b640"
     },
     "main": {
-      "remote_sha": "f68dffa669aff3f47c4f4b69ee519c859866a038"
+      "remote_sha": "ecbe81b0093b3f0ccadcb231a06be405e73fe9eb"
     },
     "translations-deadend": {
       "remote_sha": "e483486dff5deef147fed8605b5dfaa1010649f6"
@@ -358,7 +358,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "2f54b83eceb03f42019219bd3c5ae5c077621ade"
+      "remote_sha": "ef71df1936e10820dcd003ec5109fd5571d271ef"
     }
   },
   "timeflysoon/store": {
@@ -381,10 +381,10 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "26cf4440307754d2c2f65cf2f0457c0ae814900f"
+      "remote_sha": "7861772837d405921b48f911f458546b849b7e66"
     },
     "release": {
-      "remote_sha": "d5574ea0ab3358ebaae2991d28d09a0f8178b0ed"
+      "remote_sha": "468be1e94b3e96660c298eff46eb2205746badb8"
     }
   },
   "timeflysoon/turboacc": {
@@ -413,7 +413,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "8ddaf62ad30b920801f67ae0f691f90dac9194a2"
+      "remote_sha": "39a959852fdaa90e47fa6a712694ccfde4de9f51"
     }
   },
   "timeflysoon/weasel": {
@@ -449,7 +449,7 @@
   },
   "timeflysoon/Prism-Browser-Free": {
     "main": {
-      "remote_sha": "08a7a7beca37c4991277b521002cf7e187936a18"
+      "remote_sha": "704843b0116064ac2ca04ca0bdd3860a4725fb34"
     }
   },
   "timeflysoon/ungoogled-chromium-windows": {
@@ -469,10 +469,10 @@
   },
   "timeflysoon/Open-Box": {
     "catch-up-upstream": {
-      "remote_sha": "6bef7fb40d7bcd01d55ce40b28e36b7654846886"
+      "remote_sha": "203edc9bf9234785a44065caf235de582811186c"
     },
     "main": {
-      "remote_sha": "91ded3c0f9e1b5fe6b242030f1a677adfd70621c"
+      "remote_sha": "20f4dcfe697221cbb71525b38e7b6804f1cfd058"
     },
     "backup": {
       "remote_sha": "f42122e8b1b6e49d6ac88a84fc26ebb2480d17db"
@@ -485,7 +485,7 @@
   },
   "timeflysoon/honk": {
     "main": {
-      "remote_sha": "02b62334d91b5c2712eb0c6d58ed516482613882"
+      "remote_sha": "64848881b7304e250e7a25422f4f1d86a5975eca"
     }
   }
 }

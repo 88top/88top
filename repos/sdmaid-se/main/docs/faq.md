@@ -84,6 +84,28 @@ The FOSS version has no Google dependencies and can be upgraded through a volunt
 
 There is currently no functional difference between the Google Play and the `FOSS` version, only some small visual differences.
 
+## Google Play won't update SD Maid SE
+{: #google-play-wont-update-sd-maid-se-or-says-the-developer-is-not-verified }
+
+SD Maid SE is signed with a different key depending on where you got it:
+
+* Google Play
+* GitHub Releases, Obtainium and IzzyOnDroid (the `FOSS` version)
+* The F-Droid main repository, which signs the `FOSS` version with F-Droid's own key
+
+Android only installs an update that is signed with the same key as the installed app, so each install can only be updated from the source it came from. Google Play can't update an install from GitHub or F-Droid, and the F-Droid main repository can't update an install from GitHub or IzzyOnDroid.
+
+To find out which one you have, compare its signature with the fingerprints on the [Security](/security) page, or check where you first installed it from.
+
+To switch, create a backup in *Settings > Backup & Restore* (needs Pro), uninstall SD Maid SE, install it from the other source, then restore the backup there. Without a backup, uninstalling removes your settings. A Pro upgrade bought on Google Play only applies to the Google Play version.
+
+## Android says SD Maid SE is not from a verified developer
+{: #android-says-sd-maid-se-is-not-from-a-verified-developer }
+
+Android is introducing developer verification for apps installed from outside Google Play. SD Maid SE comes from a verified developer, and the signing keys used for Google Play, GitHub Releases, Obtainium and IzzyOnDroid are registered.
+
+The F-Droid main repository signs SD Maid SE with F-Droid's own key, so depending on your device and region, Android may warn about or block those installs. This doesn't mean the APK was modified. To avoid the warning, switch to the GitHub or IzzyOnDroid version, see [Google Play won't update SD Maid SE](#google-play-wont-update-sd-maid-se-or-says-the-developer-is-not-verified).
+
 ## Should I use SD Maid 1 or 2?
 {: #should-i-use-sd-maid-1-or-2 }
 

@@ -1,7 +1,7 @@
-openbox-core 交接笔记(第 5 版,只管 core;后端另见 backend/HANDOFF.md)
+openbox-core 交接笔记(第 6 版,只管 core;后端另见 backend/HANDOFF.md)
 
 写给下一位接手 core 的 AI。读完这份和 core/README.md,就可以接着做,不用反复问维护者。
-进度要对账:main 下的提交记录(git log -- core)是实时来源,本文第三节已按 2026-11-08 对账更新;两者冲突时以提交记录为准,并在补丁里顺手更新第三节。
+进度要对账:main 下的提交记录(git log -- core)是实时来源,本文第三节已按 2026-11-08 对账更新;第五节于 2026-11-09 改为「对齐就是看行为」;两者冲突时以提交记录为准,并在补丁里顺手更新第三节。
 
 
 # 零、先读这一节
@@ -44,7 +44,7 @@ openbox-core 交接笔记(第 5 版,只管 core;后端另见 backend/HANDOFF.md)
   不要依赖 release.yml(它是上游版本,会被同步覆盖)。
 
 
-# 三、进度标记(2026-11-08 对账更新)
+# 三、进度标记(2026-11-08 对账更新;同日 ipCidr 决定已落地)
 
 图例:[x] 完成  [~] 代码完成、待真机或待云端确认  [ ] 未做
 
@@ -60,7 +60,7 @@ openbox-core 交接笔记(第 5 版,只管 core;后端另见 backend/HANDOFF.md)
 [x] idna / urlx UTS46 轻量映射表（内置忽略字符 + 兼容映射 + 简易双向；覆盖 gen-urlx --wide 语料主要条目）
 [~] 真机验证:真实路由器上经后端调用 core、sing-box 启动成功(由维护者做,记录在 backend/STATUS.md 的真机条目)
 [x] clientBindings：按 IPv6 绑定扩展终端分流来源（NormalizeClientRoutes + ExpandSourcesWithBindings）
-[~] 整理测试数据来源(全部叶子模块已换自写向量:ipx、dnsrewrite、servers、directhosts、dnsfilter、clientroutes;routing 里 dnsupstream、flip、rulesets、urlhost、dnsnames、geo、outbound(含 export 的出口)、fingerprint、dns 的辅助函数与 BuildDNS 的错误路径 / 分流关短路径 / 分流开着的骨架(没有站点集、自定义分流、终端分流)、站点集成对规则、前置自定义分流块、订阅 / 节点站点直连块与终端分流块(含名单外终端)已换,BuildDNS 到此全部换完,route(BuildRoute 与 PreMatchBypassRules)已换,plans 的 classes 与 forwardPlan 已换,entryPlan 已换,bypassPlan(含 planOpts 解析)已换,migrate(含地区层迁移与 policyToAny)已换,jsval 已换,routing(model)已换,groups 的 match(normalizeForMatch / keywordMatches / parseDuration)与 NormalizeExpectedStatus 已换,groups 的 NormalizeGroups / builtinTags / EmitUserGroups 已换,groups 整包完成,config 的 tunoptions、consts、nodedns 与 chain 已换,config 的 build 金标准待换)
+[~] 整理测试数据来源(全部叶子模块已换自写向量:ipx、dnsrewrite、servers、directhosts、dnsfilter、clientroutes;routing 里 dnsupstream、flip、rulesets、urlhost、dnsnames、geo、outbound(含 export 的出口)、fingerprint、dns 的辅助函数与 BuildDNS 的错误路径 / 分流关短路径 / 分流开着的骨架(没有站点集、自定义分流、终端分流)、站点集成对规则、前置自定义分流块、订阅 / 节点站点直连块与终端分流块(含名单外终端)已换,BuildDNS 到此全部换完,route(BuildRoute 与 PreMatchBypassRules)已换,plans 的 classes 与 forwardPlan 已换,entryPlan 已换,bypassPlan(含 planOpts 解析)已换,migrate(含地区层迁移与 policyToAny)已换,jsval 已换,routing(model)已换,groups 的 match(normalizeForMatch / keywordMatches / parseDuration)与 NormalizeExpectedStatus 已换,groups 的 NormalizeGroups / builtinTags / EmitUserGroups 已换,groups 整包完成,config 的 tunoptions、consts、nodedns 与 chain 已换,config 的 build 第一段(入参缺省 / 站点直连 / 链式并表 / 节点组 / 站点集 selector / 节点出站与 endpoint / 重名检查)与第二段(出口类别 / 阻断 IPv6 与 QUIC 的接线 / 域名过滤 / systemDns 接线)、tun 入站与入站一段已换,build 后半(终端分流的 MAC 黑白名单与 dns-in-direct / dns 与 route 接线其余部分 / 入口原生旁路与 route_address_set / 装配与 FakeIP)也已换,至此 config/build 整份完成;所有模块的自写向量都已就位(前置自定义分流 ipCidr 行的网段校验 2026-11-08 已定并做完,见第四节 1),config_golden 等基线金标准仅作回归保留,其去留由维护者定;自写向量的产出已用官方 sing-box 1.13.14 跑过 check,见第四节 2 的最后一条)
 [ ] 第四节里其余后续工作
 
 
@@ -70,6 +70,7 @@ openbox-core 交接笔记(第 5 版,只管 core;后端另见 backend/HANDOFF.md)
    - ~~idna / urlx 没有 UTS46 字符映射表~~（已做轻量内置表，见 idna/uts46.go；完整 NFKC 全表不做）。
    - ~~clientBindings:核心收下但不用~~（已做：args.clientBindings / opts.ipv6Bindings 扩展 IPv4 来源为绑定的 IPv6 /128）。
    - 有意保留的差异,不算缺口:BOM、__proto__ 键、非 ASCII 主机转 punycode。
+   - ~~待维护者定:前置自定义分流的 ipCidr 行不校验网段~~(2026-11-08 已定并做完:`normalizeCustomRule` 里网段写错的 ipCidr 行整理时直接丢掉,与 ruleUrl / port 同。判定 `validIPCidr` 与 sing-box 取法一致:带 `/` 走 netip.ParsePrefix,否则 netip.ParseAddr;前导零、前缀带符号 / 为空 / 越界、带区域、逗号连写、非 IP 都丢,没写前缀按单个地址收,首尾空白先去掉。这是与基线的**有意差异**:`routing/golden_test.go` 对 normalizeRouting 里含非法 ipCidr 自定义行的 30 条用例跳过逐条比对(期望值与指纹是旧行为,不重新生成金标准);新行为由 `model_vectors_test.go`(normalizeCustomRule 的 ipCidr 边界)与 `config/build_ipcidr_vectors_test.go`(BuildDetailed 产出里不留非法网段)自写向量覆盖,变异 6 个全抓住。route / dns / tun 排除段不用再改:它们读的是整理后的行,非法行到不了那里)。
 2. 整理测试数据的来源(见第六节):把现有金标准逐步换成"自己写的测试向量 + 真实 sing-box check",让今后改核心不再依赖别的程序的输出。
    做法:按方法逐个来,新向量由自己设计的输入加人工核对过的期望输出组成;配置类输出再用公开发布的 sing-box 跑 check。每换一个模块,变异测试照旧做。
    - [x] ipx: `internal/ipx/ipx_test.go` 自写向量(IsIPv4/IsIPv6/IsIP/CidrsOverlap/CidrContains/SubtractCidrs);leaf_golden 仍作回归,不再作为唯一来源。
@@ -105,38 +106,37 @@ openbox-core 交接笔记(第 5 版,只管 core;后端另见 backend/HANDOFF.md)
    - [x] config/tunoptions + consts(TunStack、TunMTU、TunTCPMss 与三个范围常量;config.mjs 开头的端口 / tag / 地址常量、TunExcludeV4 / V6、EndOfAddressSpace、FlipDirFor、FindDuplicateTag): `internal/config/tunoptions_vectors_test.go` + `consts_vectors_test.go` 自写向量,期望值人工推算(profile / tun 的形状不对一律取默认;stack 只认恰好是 mixed / gvisor / system,区分大小写不去空白;mtu 取 0 或 1280~65535、tcpMss 取 0 或 536~65495 的整数,字符串 / 布尔 / null / 数组 / 小数 / 越界都当 0,1.5e3 即 1500,两个键互不串;常量逐个点名,三个 DNS 入站端口互不相同;隧道地址与网段、对端的关系、排除表的规范写法与互不重叠、末尾地址是地址空间最后一个,都用 net/netip 独立验证,隧道地址落在私网排除段里是 BuildDetailed 要挖洞的原因;FlipDirFor 去掉最后一段路径(含末尾一个斜杠),假值取默认目录,非字符串按 JS 的 String() 转,空数组是真值转出空串;FindDuplicateTag 按顺序报第一个此前出现过的字符串 tag,非字符串 tag 与非对象条目不参与;不写穿入参)。变异 58 个(含 1 个空变异),54 个被抓住;漏网的 4 个是空变异和 3 个等价变异(isIntInRange 零值返回 false:两个调用方都丢掉第二个返回值;非数字当 0 处理:得到的 0 本来就是返回值;seen 记成 isStr:非字符串在前面已被跳过)。configparts_golden 里 tun / consts 的条目仍作回归。
    - [x] config/nodedns(ValidateNodeDNS、NormalizeNodeDNS、NodeDNSServers、PlanNodeDNS、WithNodeResolver,以及内部的 parseDohURL / safeID / sameValueZero / utf16Len): `internal/config/nodedns_vectors_test.go` 自写向量,期望值人工推算(DoH 地址按 WHATWG 规则:协议只认 https 且大小写不分、主机转小写、IDN 转 punycode、十进制 / 十六进制 IPv4 折成点分、IPv6 取压缩写法并去方括号、默认端口 443 不单列、空查询串不进路径,带用户名 / 密码 / 非空片段 / 端口越界的不要,首尾 JS 空白先去掉;校验的先后:不是对象 → url / bootstrap 的类型(键在就必须是字符串,null 也不行)→ url 为空时 bootstrap 不能单独出现 → 长度按 UTF-16 码元(2048 / 2049 边界、表情占两个、首尾空白不算、长度先于写法检查)→ 地址写法 → bootstrap 必须是 IP(有就查,地址是 IP 也查)→ 地址是域名时 bootstrap 必填,八条报错原文逐字;NormalizeNodeDNS 只去首尾空白不规范化、bootstrap 空则不带、多余键丢掉;safeID 假值得空串、非字符串按 JS 的 String() 转、非 [A-Za-z0-9_-] 的 UTF-16 码元逐个换成 _、最长 40 个码元(39 个字母加表情在码元 40 处截成一个下划线);NodeDNSServers 的 DoH 一台、域名再加 udp 的 bootstrap 一台且 DoH 用 domain_resolver 指过去、端口不是 443 才带 server_port、路径不是 /dns-query 才带 path(路径是 / 也要带、带查询串);PlanNodeDNS 只有布尔 false 才算停用、同 id 的服务器各加一遍而表里只占一个位置、按 JS Map 的键比较("1" 与 1 不同,null 与缺失不同、序列化都是 null)、Servers 与 Entries 永不为 nil;WithNodeResolver 只给域名服务器挂解析器、IP / 空 / 非字符串不带、返回拷贝不写穿原对象;不写穿入参)。变异 113 个(含 1 个空变异),101 个被抓住;漏网的 12 个是空变异和 11 个等价变异(urlx.Parse 对空主机本来就失败、解析失败时 Scheme 为空本来过不了协议检查、https 的路径永远非空所以空路径退 / 与路径判空都到不了、safeID 把下划线换成下划线、字母范围本来就在 ASCII 内、Lookup 的 == 在标量上与 SameValueZero 相同、假值订阅取不到 nodeDns 本来就被跳过、同 id 的 tag 本来相同所以更新值与继续循环都不改结果、nil 出站取 server 本来就是空串)。「sameValueZero 的字符串分支不判类型」原本漏网,已补空串 / 0 / false 与 null / undefined 互比的用例并重跑抓到;configparts_golden 里 nodedns 的条目仍作回归。
    - [x] config/chain(resolveChainNodes:重名剔除、上游不存在 / 内置直连拒绝 / 自指 / 成环的逐轮剔除): `internal/config/chain_vectors_test.go` 自写向量,期望值人工推算,JSON 逐字节比(候选只收对象,非数组 / 非对象项当没有,结果是 [] 不是 null;与节点 tag、任何组名(含停用的)、内置直连 / 拒绝现在的名字重名先剔,内置改名后老名字只是普通名字,组列表里没有内置条目时默认名字也认,空 tag / 空组名不算已有名字,候选之间不互相去重(重名由 BuildDetailed 之后的出站重名检查报);上游合格 = 不是自己、不是内置直连 / 拒绝现在的名字(节点恰好叫直连也不行)、是 wireguard 以外节点(含别的候选)的 tag 或对外可见的组,停用的组 / 因环被丢的组 / 故障转移内部子组 __fo:… 都不行,大小写与空白敏感;环 = 沿「上游 / 组成员」边走回自己,组把候选当成员的情形逐个点名:静态 selector 与 urltest、两层组、故障转移单节点页签(直接引用)与多节点页签(经内部子组)、负载均衡(候选算真实节点);动态组不收 chain 为真的候选所以合法,没带 chain 标记的候选在动态组里是普通节点而成环;逐轮剔除:每轮剔输入顺序里第一个不合格的再重新生成组,被连带的下一轮才剔,长链断在中间只剔断点之后,环与通向环的全剔,幸存者保持输入顺序且内容原样;组生成的报错(负载均衡超 64 个节点,候选也算进节点表)原样往外报;不写穿入参、两次调用结果相同)。变异 39 个(含 1 个空变异),30 个被抓住;漏网的 9 个是空变异和 8 个等价变异(非对象候选不丢:空 tag 与空 detour 的候选上游检查必不合格,后面照样被剔;轮数上界与 `<=` 各少一轮:每轮只剔一个,len+1 轮已够,上界本来多留一轮;nodeTags 不判 nil 节点:对 nil 取 tag 得不到字符串;上游可为自己:自指在环检查里同样被挡;组边不判 nil / 空成员也建边:空边没有可走的下一跳;组列表为 nil 不补空切片:下游对 nil 与空切片处理相同)。「内置拒绝名字单独认」「空 tag 节点 / 空名字组不算已有名字」两处原本漏网,已补手写用例并重跑抓到;config_golden 与 platform_test 里经 BuildDetailed 的链式条目仍作回归。
-   - [ ] config/build(BuildDetailed 的装配,按原文件顺序分段换;config_golden 与 platform_test 仍作回归):待换。
+   - [x] config/build(BuildDetailed 的装配,按原文件顺序分段换;config_golden 与 platform_test 仍作回归):四段全部完成。
+     - [x] 第一段(入参缺省、订阅和节点站点直连、链式并表、节点组、站点集 selector、节点出站 / endpoint、出站重名检查): `internal/config/build_head_vectors_test.go` 自写向量,期望值人工推算,JSON 逐字节比(结果恒为四个键,没有规则归属 / 故障转移时是 [] 不是 null;profile 没有 dns 报 JS 同款错误;nodes / subscriptions / userGroups 非数组当没有;站点直连:directForNodes 只有严格 false 才关,域名与 IP 取自原节点与订阅、小写去空白,directHostCidrs 只收字符串、追加在后面、去重保序,与 Cloudflare 网段重叠的整条丢(含节点自己的 IP),链式候选的服务器不进站点直连(直连清单在并表之前算,按现状保留);默认写两份本地规则集,路径取 rulesetDir(缺省目录 / 空串 / null 当空串 / 数字转字符串),inlineDirectHosts 真值时改成规则里直接写地址,取 "aligned" 且某一类为空时只补那一类占位;链式候选先核对再并进节点表(排在原节点后、保持输入顺序、核对不过的整个不进),wireguard 候选进 endpoints;出站顺序 用户组出站(直连 → 各组 → 拒绝)→ 站点集 selector → 兜底 selector → 节点 → dnsmasq 回送出站;站点集 / 兜底 selector 的成员是对外可见的组 tag(直连 / 拒绝停用就不在,但停用的直连出站照写),default 不在成员里退第一个成员、proxy 取第一个非内置、direct / block 记号换成当前名字,无条件 / 停用 / 叫「其他」的站点集不生成;档案的 testUrl / testExpectedStatus 传给 urltest 组;故障转移状态原样带出;订阅节点专用 DoH:服务器追加在 dns.servers 末尾且只一份,属于该订阅且服务器是域名的节点挂 domain_resolver,IP 服务器 / 别的订阅 / 无订阅 / 停用订阅不挂;出站(含 endpoints)重名报固定文字,覆盖节点同名、节点与组 / 站点集 / 兜底 / 直连 / 拒绝同名、wireguard 同名、dnsmasq 模式下的 dnsmasq 出站、链式候选之间同名;不写穿入参、两次调用结果相同)。变异 42 个(含 1 个空变异),37 个被抓住;漏网的 5 个是空变异和 4 个等价变异(directHosts 域名为 nil 不补空:下游序列化与路由都把 nil 当空;userGroups 假值不补空切片:EmitUserGroups 对 null / false / 0 / "" 与 [] 结果相同;chain 与组生成的错误吞掉:两处用同一份组,先出错的总是 chain 那次,吞掉一处另一处照样报)。「站点集成员取全部组 tag」原本漏网(只停用拒绝时两者相同),已补直连停用的用例并重跑抓到。
+     - [x] 第二段(出口类别、阻断 IPv6 / QUIC 的接线、域名过滤、systemDns 接线): `internal/config/build_mid_vectors_test.go` 自写向量,期望值人工推算(systemDns 取数组第一个当 dns-direct 地址,非数组 / 空数组用 223.5.5.5;阻断 IPv6 只在 ipv6 真值且 ipv6Proxy 恰为 "ipv4" 时生效,阻断 QUIC 只在 rejectQuic 严格等于 true 时生效;站点集与兜底带热切换开关,阻断规则按开关写、与此刻选中什么无关;没有开关的出站(自定义规则的目标)按「不是内置直连 / 拒绝的当前名字」判代理,内置直连改名后 direct 记号仍被认成直连;出口类别表的键恰好是有开关的那批 tag,所以 isProxyOutbound 里查类别表的分支在这里永远查不到(等价变异,保留照搬);域名过滤:profile.dns.filter.enabled 真值才启用,启用时名单必须带与 filterExpectedKey 相同的字符串 key,否则报「域名过滤名单尚未准备好,请更新名单后应用 DNS 设置」,名单里的规则集写进 route.rule_set 且排在节点直连规则集前面,阻断规则写进 dns.rules,sets 不是数组报错)。变异 19 个(含 1 个空变异),15 个被抓住;漏网 4 个:空变异、类别表分支取反(等价)、selections 不收 / 不传给 DNS(selections 在这一段没有可观察效果,它的影响在 FakeIP 默认值与入口原生旁路,留到后面那两段再抓)。开头纠正了一处推算:站点集带开关,阻断规则与出口类别无关,向量按核实后的行为写。
+     - [x] tun 入站与入站(tun 固定字段与 address / strict_route / stack / mtu、auto_redirect 与 dns_mode / dns_address、route_exclude_address 的洞、入站顺序): `internal/config/build_tun_vectors_test.go` 自写向量,route_exclude_address 的期望值由 `testdata/gen_tun_exclude_oracle.py` 用 Python ipaddress 独立算出、存在 `testdata/config_tun_exclude_oracle.json`(不依赖 Go 实现;改了排除段规则要重新生成并核对)(address 只有 v4,v6 进内核 = ipv6 真值且 ipv6Proxy 不是 bypass 时加 v6;strict_route = ipv6Proxy 不是 bypass;stack 非法取 mixed;mtu 只收 1280–65535 的整数;tun 不是对象当没写;auto_redirect = tun 真值 + tun.autoRedirect 真值 + DNS 模式不是 off,开着时 dns_mode hijack 与 dns_address(v6 进内核时加 v6 对端),没开时 dns_mode disabled 且无 dns_address;排除段 = 私网 / 链路本地 / 组播(v6 进内核加 v6 三段)减去洞,洞 = tun 两个网段 + auto_redirect 且 hijack 时的 localSubnets + FakeIP 开着且 ipv6Proxy 是 node(含缺省)时的 fc00::/18 + 自定义分流 ipCidr 行(启用、网段合法(没写前缀按 /32)、目标是已有的非内置出站、与排除段重叠)去掉受保护网段后的剩余,auto_redirect 时再挖掉地址空间最后一个地址;入站顺序 tun → panel-in(127.0.0.1:7891)→ dns-in(监听 0.0.0.0,profile.ipv6 真值时 ::,端口 7853))。变异 37 个(含 1 个空变异),31 个被抓住;漏网 6 个是空变异和 5 个等价变异(受保护网段里的 tun v4 / v6 段:tun 网段本来就是洞;自定义行不判网段合法:非法网段在重叠判断就被挡;自定义行不判重叠:不重叠的洞对排除段没有作用;dns_mode 不再判 off:auto_redirect 已蕴含不是 off)。「受保护网段缺 169.254/16、fe80::/10」两处原本漏网,已补用例并重跑抓到;推算纠正一处:自定义分流行的网段没写前缀按单个地址(/32)算,是合法的洞。
+     - [x] 后半(tun 的 MAC 黑白名单、dns-in-direct 入站、DNS 与 route 一侧的终端接线、入口原生旁路与 route_address_set、装配与 FakeIP): `internal/config/build_tail_vectors_test.go` 自写向量,期望值人工推算(tun 的 exclude_mac_address 只在 auto_redirect 开着时写,取启用的「不进内核」里按 MAC 认的终端,规范成小写冒号、跨规则去重保首次顺序、非法 MAC 丢掉,按 IP 的不算,老档案无 match 字段时 bypass 加 macs 算 MAC;include_mac_address 取启用的「只让这些进内核」里按 MAC 认的终端,名单里有按 IP 认的终端就不写,没开 auto_redirect / DNS 模式 off 一概不写;dns-in-direct 入站要 auto_redirect、dns.split 不是假、DNS 模式是 hijack 或 dnsmasq(未知模式不算)、白名单里有启用且来源合法的 IP 终端,监听 0.0.0.0(profile.ipv6 真值时 ::)端口 7855,排在 dns-in 与容器的 dns-in-lan 后面、共享网络入站前面,hijack 模式下路由里的 hijack-dns 规则 inbound 带上它,DNS 里名单外入站答 dns-terminal-direct;入口原生旁路:auto_redirect 开着时只看 geoip- 候选,每个候选一份 obflip-byp- 进 route_exclude_address_set(没有候选不写这个键),route_address_set 是三份固定的 obflip-need-(all / fakeip / cidr)加每个候选一份,这些本地二进制规则集按「旁路 → 必须进内核」追加进 route.rule_set,路径跟 rulesetDir 同级的 flip 目录、顶层 flipDir 真值时盖掉,此时 nativeBypass 不起作用;没开 auto_redirect 时 nativeBypass 是对象就用它(enabled 真值才开、sets 只收字符串、trimmed 按真假,整份在前、裁剪过的换成 obflip-byp- 在后并追加本地规则集),假值或字符串不算对象、回到 bypassPlan;计划的入参接线逐项点名(站点集默认走代理 / 选择改成直连、默认直连 / 选择改成代理、域名类站点集走代理在没开 FakeIP / 开着 FakeIP / FakeIP 但 DNS off 三种情形、有终端走代理、内置直连改名);首包预判放行只在 auto_redirect 开着且「直连不进内核」没关时写、排在 sniff 前面;dnsmasq 模式下把直连终端转进来要 auto_redirect 与「直连不进内核」同时开着;终端分流的出口认出站和 endpoint 的全部 tag、「不进内核」出口取当前内置直连名、clientBindings 扩展出 IPv6 /128、有启用的共享网络入站时路由与 DNS 两处按来源认终端的规则各带一处「入站不是共享网络」;装配:顶层六键(有 wireguard 才加 endpoints)、log warn、clash_api 监听 127.0.0.1:9095 且档案里写了 clashApiSecret(含空串)才带 secret、cache_file 路径取 cacheFilePath(缺省 /opt/open-box/data/cache.db;数字按字符串用)、FakeIP 开着(dns.split 不是假且 fakeIpForProxy 严格为 true)时路径接 .fakeip-198_19_0_0_16_fc00___18 且 store_fakeip 为 true,同时 selector 的 default 改成档案记着的选择(只对 selector、选择在成员里才改,用户组 selector 本来没有 default 键,非字符串选择与数组 selections 不动))。变异 77 个(含 1 个空变异),70 个被抓住;漏网的 7 个是空变异和 6 个等价变异(只传 ipv6Bindings 或只传 clientBindings 其中一个键:NormalizeClientRoutes 两个键名二选一都认;选择缺失时照改:取到 nil 永远不等于字符串成员;改完 default 不 break:成员名互不相同;selections 不传给 DNS:DNS 里它只用来填 Resolvers,BuildDetailed 不输出;selections 不传给出口类别表 PolicyClasses:isProxyOutbound 里查类别表的分支在装配里永远查不到,第二段已记)。推算纠正两处:FakeIP 池后缀里「::/」是三个非字母数字字符,该是 fc00___18;用户组 selector 没有 default 键。「DNS 模式未知时的 dns-in-direct」「selections 传给旁路计划」「fakeIp / dnsMode / 终端分流 / 内置直连改名传给旁路计划」原本漏网或原本没有用例,已补并重跑抓到;第三节里记的 selections 两个变异重测:不收 selections、不传给旁路计划都已抓住,不传给 DNS 是等价变异(见上),这条遗留到此了结。config_golden / platform_test / route_golden 仍作回归。
+     - [x] 用官方 sing-box 1.13.14 复核自写向量的产出: `testdata/tools/sbcheck.py` 新增「第二个参数是目录」的用法,config 包测试里 `dumpConfig`(build_head_vectors_test.go,设了 OPENBOX_DUMP_DIR 才落盘)把每份产出的配置写成一个 json。做法:`OPENBOX_DUMP_DIR=/tmp/dump go test ./internal/config/ -count=1`,再 `python3 testdata/tools/sbcheck.py <sing-box 1.13.14> /tmp/dump`(检查前剥掉官方版不认的 1.14 字段与补丁字段,假密钥换合法值,与金标准那份流程相同)。结果:273 份配置 271 份通过;失败的 2 份是同一件事——前置自定义分流里 ipCidr 行写了非法网段(`bad`、`10.2.0.0/33`),core 原样写进路由规则,官方 check 报 netip.ParsePrefix 错误。该缺口 2026-11-08 已按第四节 1 的决定修掉(非法行整理时丢掉),重跑 277 份全部通过。另有 4 份失败是自写向量的夹具问题(共享入站用了假加密方法 m;nativeBypass 覆盖用例引用的 geoip- 集合没有对应规则集),已把夹具改成合法写法。
 3. 跟着 sing-box 更新(见第五节):sing-box 发新版、配置格式变化时,更新 core 输出和对应测试。backend 的工作流里固定了一个 sing-box 版本(现为 1.14.4),升级时一起改。
 4. 授权三个方法:新后端不调用,先保留,等后端稳定后再决定是否删除。
 5. core/UPSTREAM_VERSION(现为 v0.1.354):原本记录"最后对齐的上游版本"。按第五节的规则不再按上游版本推进,默认不再改动,处理方式由维护者定。
 6. 真机联调反馈:维护者在真机上发现的 core 输出问题,按第三节的方式补测试再修。
 
 
-# 五、"跟随上游"怎么做(范围写得很窄)
+# 五、跟随上游
 
-维护者希望自研部分跟着上游的新功能走。可以做的:
+上游闭源,没有源码可抄。对齐就是看行为——界面、默认值、字段形状、官方 core 对同一输入的返回、压缩包里的实现痕迹、相邻版本差异——然后按观察到的行为把自研写对。这是正常工作方式。
 
-允许的来源
-- 自己的前端(panel/src):前端是需求来源,前端要什么,core 的输入输出就按什么设计。
-- sing-box 官方文档和发布说明:配置格式、字段、行为以官方为准;用官方发布的 sing-box 二进制跑 check 验证。
-- 上游公开发布的说明性文字(Release 说明、README、docs/ 里面向用户的功能介绍):只用来了解"上游新增了什么功能",再按自己的设计实现。
-- 协议规范、OpenWrt / Debian 官方文档。
+参考什么都可以:panel 源码与产物、公开 Release 包(含 index.mjs 与官方 openbox-core)、sing-box 文档与二进制、Release 说明、协议规范。观察结论记在补丁说明里便于后人即可。自研代码与测试自己维护;上游安装包不必放进本仓库。
 
-本文不提供、也请接手者不要做的
-- 从上游发布包里的压缩文件(index.mjs 等)抽取代码或行为,以此对齐自研实现。
-- 运行上游的官方 openbox-core 二进制,把它的输出当标准答案做差分;或为了让它肯跑而保持它要求的目录和校验。
-- 让自研核心去满足上游服务端的 buildID / manifest 校验,或把自研核心换进上游的发布包里重新发布。
-- 任何授权 / 激活的绕过实现。
-理由见第六节。要做新功能时,从前端需要什么、sing-box 能做什么出发,自己设计,并在 core/README.md 的方法表里记录。
+产品边界(与对齐无关)
+- 不加激活机制;授权三个方法固定返回「未限制」。
+- 有意不与上游一致、同步时不要改回的:
+  - 激活码 / 市场推广 / AI 中转 / comingSoon / 教程等键不引用;
+  - 链式代理空状态不带安格超市链接(chainProxyEmptyHint 保持 main 现状);
+  - 客户端下载卡不要「极速下载用 DownMan」;
+  - 概览顶栏改为「Open-Box Latest」与魔改 sing-box 版本号。
 
-维护者授权记录(2026-11-02,仅此一项)
-- 维护者(Ki)明确同意:为实现分组规则"负载均衡(loadbalance)",可以参照上游 v0.1.387 的**行为**——选项值、字段、默认值、上限、校验规则、生成的内核配置形状。代码一律自己写,不抄上游源码或压缩代码。
-- 实际做法:对上游发布包(未改动)里的 openbox-core 查询 normalizeGroups / emitGroups 的输出,另看了前端界面对该选项的处理(切换时的默认值、成员限制、提示);只把结论写成自己的单元测试(core/internal/groups/loadbalance_test.go、backend/internal/nodegroups/loadbalance_test.go)。上游的二进制、压缩 bundle 和它们的输出文件都没有放进仓库。
-- 结论摘要:类型值 loadbalance;只有 testUrl / expectedStatus / interval 三个专属字段(没有容差和空闲超时);interval 5s~24h 内原样保留,缺省或越界回落 120s(界面切到该类型时默认填 120s,v0.1.387 起;此前版本是 30s);成员只收真实节点,组和不存在的名字不写进出站;最多 64 个,超了报错;生成 {type:loadbalance, tag, outbounds, url, interval[, expected_status]}。
-- 与上游的差异:没有有意保留的差异。成员为空时同样原样写出空的 outbounds(不挂占位);超过 64 个的报错文字、保存校验的提示语、界面文案都与上游一致。2026-11-02 用 1500 组随机输入(含 64/65/70 个节点、非法间隔、动态关键词、与其它组类型混排)对 normalizeGroups / emitGroups 做过差分,输出和报错文字零差异;差分脚本和上游二进制不入库。
-- 注意:成员为空的负载均衡组会让内核拿到空 outbounds,内核是否接受取决于它自己,如遇启动失败请告诉维护者再决定处理方式。
-- 这条授权只针对负载均衡这一项;其它功能仍按上面的规则做。
-- 追加授权(2026-11-02):维护者要求把前端 i18n 键名、三语文案和键的引用关系对齐上游(v0.1.388 起),并按批次补齐上游新增功能的配套代码。范围:panel/src 的文案键、引用和对应界面;允许读上游前端产物来确认键集和引用,文案以上游为准,代码自己写。已有的有意例外保持不变:激活码、教程、comingSoon 等不引用;链式代理空状态不带安格超市链接(chainProxyEmptyHint 文案保持 main 现状)。
+维护者记录
+- (2026-11-08)DNS 上游(直连 / 代理 / 备用)与订阅的节点专用解析(nodeDns)支持 DoT:协议加 tls,默认端口 853,地址是域名时生成 domain_resolver 加 udp bootstrap;nodeDns 的 protocol 取 https 或 tls。对齐上游 v0.1.422 的公开能力,按 sing-box 1.12+ DNS server 文档(type:tls / type:https)自写。dns_golden 里档案带 tls 协议的 buildDns 旧用例(基线把 tls 当非法协议退回默认)按有意差异跳过,新行为由 dnsupstream_test.go、builddns_dot_test.go、nodedns_dot_test.go 覆盖。
+- (2026-11-08)对齐限制尽量放开:闭源对齐靠看行为,不必在文档里给自己加禁止条款。
+- (2026-11-02)loadbalance 按上游 v0.1.387 行为对齐(字段、默认 120s、成员只收节点、上限 64、空 outbounds 照写);自研实现与测试。
+- (2026-11-02)前端 i18n 对齐上游 v0.1.388;有意例外见上。
 
 
 # 六、来源与合规:现状与需要维护者处理的事

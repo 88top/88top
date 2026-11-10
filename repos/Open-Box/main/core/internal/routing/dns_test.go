@@ -100,11 +100,12 @@ func TestDNSGoldenAgainstUpstream(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	b = doHToUnknownProtocol(b)
 	var g dnsGolden
 	if err := json.Unmarshal(b, &g); err != nil {
 		t.Fatal(err)
 	}
-	bad, n := 0, map[string]int{}
+	bad, skipped, n := 0, 0, map[string]int{}
 	report := func(i int, fn string, args any, got, want any) {
 		if bad++; bad <= 4 {
 			gb, _ := json.Marshal(got)
@@ -117,6 +118,12 @@ func TestDNSGoldenAgainstUpstream(t *testing.T) {
 		n[c.Fn]++
 		switch c.Fn {
 		case "buildDns":
+			// 有意的差异:v0.1.422 起 DNS 上游协议多了 tls(DoT)。基线 v0.1.318 把 tls 当非法协议退回默认,
+			// 档案里带 tls 的旧用例期望值是旧行为,不再逐条比对;新行为由 dnsupstream_test.go / builddns_dot_test.go 自写向量覆盖。
+			if hasDoTProtocol(c.Args[0]) {
+				skipped++
+				continue
+			}
 			result, err := BuildDNS(c.Args[0], dnsOptionsFromJSON(c.Args[1]))
 			if c.Error != "" {
 				if err == nil {
@@ -235,5 +242,41 @@ func TestDNSGoldenAgainstUpstream(t *testing.T) {
 	if bad > 0 {
 		t.Fatalf("共 %d 条不一致", bad)
 	}
-	t.Logf("通过:%v", n)
+	t.Logf("通过:%v(另有 %d 条 buildDns 档案带 tls 协议,按有意差异跳过)", n, skipped)
+}
+
+// hasDoTProtocol 判断 buildDns 入参的档案里,dns 上游(主上游或备用上游)的协议是否写了 tls。
+func hasDoTProtocol(arg any) bool {
+	dns := jsx.Get(arg, "dns")
+	for _, key := range []string{"directProtocol", "proxyProtocol"} {
+		if jsx.Get(dns, key) == "tls" {
+			return true
+		}
+	}
+	for _, key := range []string{"directExtras", "proxyExtras"} {
+		list, _ := jsx.Get(dns, key).([]any)
+		for _, item := range list {
+			if jsx.Truthy(item) && jsx.Get(item, "protocol") == "tls" {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// doHToUnknownProtocol 把夹具里的 "https" 换成 "quic"。基线 v0.1.318 的上游引擎不认 DoH(https),把它当非法协议退回默认;
+// main 自己加了 DoH,新行为由 dnsupstream_test.go / dnsupstream_doh_test.go 覆盖。换成同样非法的 "quic",其余输出仍逐条和上游比对。
+func doHToUnknownProtocol(b []byte) []byte {
+	from, to := []byte(`"https"`), []byte(`"quic"`)
+	out := make([]byte, 0, len(b))
+	for i := 0; i < len(b); {
+		if i+len(from) <= len(b) && string(b[i:i+len(from)]) == string(from) {
+			out = append(out, to...)
+			i += len(from)
+			continue
+		}
+		out = append(out, b[i])
+		i++
+	}
+	return out
 }
