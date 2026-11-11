@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
+        "fiio.com.cn",
         "fiio.net",
         "fiio.cn",
-        "fiio.com.cn",
         "fiio.com"
       ]
     }

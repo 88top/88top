@@ -2,16 +2,16 @@
   "rules": [
     {
       "domain_suffix": [
-        "funshion.net",
+        "jvcsmart.com.cn",
+        "fun.tv",
+        "9ixiuxiu.com",
         "fspcdn.com",
+        "funshion.com",
+        "funshion.net",
+        "ibidian.com",
         "9iwanwan.com",
         "funshion.tv",
-        "funshion.com",
-        "ibidian.com",
-        "jvcsmart.cn",
-        "fun.tv",
-        "jvcsmart.com.cn",
-        "9ixiuxiu.com"
+        "jvcsmart.cn"
       ]
     }
   ],

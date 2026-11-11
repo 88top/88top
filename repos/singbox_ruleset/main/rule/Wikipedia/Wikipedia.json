@@ -2,18 +2,18 @@
   "rules": [
     {
       "domain_suffix": [
-        "wiktionary.org",
-        "wikipedia.org",
-        "wikileaks.org",
-        "mediawiki.org",
-        "wikisource.org",
-        "wikivoyage.org",
         "wikiversity.org",
-        "wikibooks.org",
-        "wikinews.org",
         "wikiquote.org",
+        "wikileaks.org",
         "wikidata.org",
-        "wikimedia.org"
+        "wiktionary.org",
+        "wikimedia.org",
+        "wikisource.org",
+        "wikibooks.org",
+        "wikipedia.org",
+        "wikinews.org",
+        "wikivoyage.org",
+        "mediawiki.org"
       ]
     }
   ],

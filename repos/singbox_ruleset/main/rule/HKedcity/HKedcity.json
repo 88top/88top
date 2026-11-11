@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
-        "edcity.hk",
         "hkreadingcity.net",
-        "hkedcity.net"
+        "hkedcity.net",
+        "edcity.hk"
       ]
     }
   ],

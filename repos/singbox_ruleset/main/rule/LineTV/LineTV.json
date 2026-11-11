@@ -3,15 +3,15 @@
     {
       "domain": [
         "d3vm9lcxb6xcm4.cloudfront.net",
-        "d3pgb93pk7bvxj.cloudfront.net",
-        "d17lx9ucc6k9fc.cloudfront.net"
+        "d17lx9ucc6k9fc.cloudfront.net",
+        "d3pgb93pk7bvxj.cloudfront.net"
       ],
       "domain_suffix": [
-        "linetv.tw",
         "line-cdn.net",
         "line-scdn.net",
-        "chocotv.com.tw",
-        "d3c7rimkq79yfu.cloudfront.net"
+        "d3c7rimkq79yfu.cloudfront.net",
+        "linetv.tw",
+        "chocotv.com.tw"
       ]
     },
     {

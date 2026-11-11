@@ -2,15 +2,15 @@
   "rules": [
     {
       "domain_suffix": [
-        "56che.com",
-        "cainiaoyizhan.com",
-        "xiaog.xyz",
         "cainiao-inc.cn",
-        "cainiao.com.cn",
         "guoguo-app.com",
-        "cainiao-inc.com",
+        "xiaog.xyz",
+        "56che.com",
+        "cainiao.com",
+        "cainiao.com.cn",
+        "cainiaoyizhan.com",
         "cainiao-inc.net",
-        "cainiao.com"
+        "cainiao-inc.com"
       ]
     }
   ],

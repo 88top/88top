@@ -12,6 +12,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/timeflysoon/Open-Box/backend/internal/conntrack"
+	"github.com/timeflysoon/Open-Box/backend/internal/dnsforward"
+	"github.com/timeflysoon/Open-Box/backend/internal/nsprobe"
 	"github.com/timeflysoon/Open-Box/backend/internal/system"
 )
 
@@ -138,6 +141,8 @@ type fakeTerm struct {
 	reused      bool
 	acquireHold time.Duration // 取址时多等一会儿,模拟耗时
 	teardowns   int
+	pointCalls  []string // PointGatewayAt 的网关参数
+	pointErr    error
 	running     int
 	maxRunning  int
 	torn        chan struct{}
@@ -158,6 +163,13 @@ func (f *fakeTerm) Ensure(_ context.Context, lan string) (system.VirtualTerminal
 		return system.VirtualTerminal{}, f.ensureErr
 	}
 	return system.VirtualTerminal{Namespace: "obterm", HostIf: "obtv-h", PeerIf: "obtv-t", LANDevice: lan, MAC: "02:00:00:aa:bb:cc", Reused: f.reused}, nil
+}
+
+func (f *fakeTerm) PointGatewayAt(_ context.Context, _ system.VirtualTerminal, gw string) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.pointCalls = append(f.pointCalls, gw)
+	return f.pointErr
 }
 
 func (f *fakeTerm) AcquireDHCP(_ context.Context, _ system.VirtualTerminal) (system.DHCPLease, error) {
@@ -432,5 +444,391 @@ func TestNewRunRestartsIdleClock(t *testing.T) {
 	}
 	if !waitTorn(t, f, 2*time.Second) {
 		t.Fatal("最终应当拆除")
+	}
+}
+
+// ---------- 在虚拟终端里发探测 ----------
+
+type fakeProber struct {
+	mu     sync.Mutex
+	ns     []string
+	reqs   []nsprobe.Request
+	res    nsprobe.Result
+	stderr string
+	err    error
+}
+
+func (f *fakeProber) Probe(_ context.Context, ns string, req nsprobe.Request) (nsprobe.Result, string, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.ns = append(f.ns, ns)
+	f.reqs = append(f.reqs, req)
+	return f.res, f.stderr, f.err
+}
+
+func iptr(v int) *int { return &v }
+
+func TestRunProbesInsideTerminalAndFillsDNSAndExit(t *testing.T) {
+	f := newFakeTerm()
+	f.lease.DNS = []string{"192.168.5.1", "223.5.5.5"}
+	pr := &fakeProber{res: nsprobe.Result{
+		OK: true, Status: iptr(204), MS: iptr(88), ConnectMs: iptr(31), LocalPort: 40123, ConnectTo: "93.184.216.34", Challenge: "cloudflare",
+		DNS: &nsprobe.DNSResult{Server: "192.168.5.1", OK: true, Answers: []string{"93.184.216.34"}, MS: 12},
+	}, stderr: "note"}
+	d := capableDeps(f)
+	d.Prober = pr
+	got := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"example.com","port":443,"method":"head"}`))
+	if len(pr.ns) != 1 || pr.ns[0] != "obterm" {
+		t.Fatalf("要在虚拟终端的命名空间里探测:%v", pr.ns)
+	}
+	r := pr.reqs[0]
+	if r.Target != "example.com" || r.Port != 443 || r.Method != "HEAD" || len(r.DNS) != 2 || r.DNS[0] != "192.168.5.1" || r.DNS[1] != "223.5.5.5" {
+		t.Fatalf("请求不对:%+v", r)
+	}
+	dns, _ := got["dns"].(map[string]any)
+	if dns["server"] != "192.168.5.1" || dns["ok"] != true || dns["ms"] != float64(12) || dns["error"] != nil {
+		t.Fatalf("dns:%v", dns)
+	}
+	if a, _ := dns["answers"].([]any); len(a) != 1 || a[0] != "93.184.216.34" {
+		t.Fatalf("answers:%v", dns["answers"])
+	}
+	ex, _ := got["exit"].(map[string]any)
+	want := map[string]any{"url": "https://example.com/", "port": float64(443), "method": "HEAD", "ok": true, "status": float64(204), "ms": float64(88),
+		"connectMs": float64(31), "localPort": float64(40123), "connectTo": "93.184.216.34", "challenge": "cloudflare"}
+	for k, v := range want {
+		if ex[k] != v {
+			t.Errorf("exit.%s = %v,要 %v", k, ex[k], v)
+		}
+	}
+	if ex["error"] != nil {
+		t.Errorf("成功不该有 error:%v", ex["error"])
+	}
+	if got["probeStderr"] != "note" {
+		t.Errorf("probeStderr:%v", got["probeStderr"])
+	}
+	// 还没做的部分不带
+	for _, k := range []string{"entry", "dnsEvidence", "kernelDns", "kernel", "firstLayer", "dnsForward"} {
+		if _, has := got[k]; has {
+			t.Errorf("不该有 %s", k)
+		}
+	}
+	if _, has := ex["forward"]; has {
+		t.Error("不该有 exit.forward")
+	}
+}
+
+func TestRunProbeIPTargetAndTCPShape(t *testing.T) {
+	f := newFakeTerm()
+	pr := &fakeProber{res: nsprobe.Result{OK: true, MS: iptr(5), ConnectMs: iptr(5), LocalPort: 5555}}
+	d := capableDeps(f)
+	d.Prober = pr
+	got := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"1.1.1.1","method":"TCP"}`))
+	if dns, _ := got["dns"].(map[string]any); dns["skipped"] != true || len(dns) != 1 {
+		t.Fatalf("目标是 IP:dns 应是 {skipped:true}:%v", got["dns"])
+	}
+	ex, _ := got["exit"].(map[string]any)
+	if ex["url"] != "1.1.1.1:443" || ex["port"] != float64(443) || ex["method"] != "TCP" || ex["ok"] != true || ex["status"] != nil || ex["connectTo"] != nil {
+		t.Fatalf("exit:%v", ex)
+	}
+	if _, has := got["probeStderr"]; has {
+		t.Error("没有 stderr 就不带 probeStderr")
+	}
+}
+
+func TestRunProbeFailureIsReportedNotHidden(t *testing.T) {
+	f := newFakeTerm()
+	pr := &fakeProber{res: nsprobe.Result{Error: "超时(8 秒内没有响应)", DNS: &nsprobe.DNSResult{Server: "192.168.5.1", OK: true, Answers: nil, MS: 3}}}
+	d := capableDeps(f)
+	d.Prober = pr
+	got := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"example.com"}`))
+	ex, _ := got["exit"].(map[string]any)
+	if ex["ok"] != false || ex["error"] != "超时(8 秒内没有响应)" || ex["url"] != "https://example.com/" || ex["method"] != "GET" {
+		t.Fatalf("exit:%v", ex)
+	}
+	if dns, _ := got["dns"].(map[string]any); dns == nil || dns["answers"] == nil {
+		t.Fatalf("answers 要是数组不是 null:%v", got["dns"])
+	}
+	if got["source"] == nil {
+		t.Error("探测失败也要带 source")
+	}
+}
+
+func TestRunProberErrorBecomesExitError(t *testing.T) {
+	f := newFakeTerm()
+	pr := &fakeProber{err: errors.New("探测进程失败:exec format error"), stderr: "exec format error"}
+	d := capableDeps(f)
+	d.Prober = pr
+	got := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"example.com","port":80}`))
+	ex, _ := got["exit"].(map[string]any)
+	if ex["ok"] != false || !strings.Contains(ex["error"].(string), "探测进程失败") || ex["url"] != "http://example.com/" || ex["port"] != float64(80) {
+		t.Fatalf("exit:%v", ex)
+	}
+	if got["probeStderr"] != "exec format error" || got["setupError"] != nil {
+		t.Fatalf("%v", got)
+	}
+}
+
+func TestRunSetupFailureNeverProbes(t *testing.T) {
+	f := newFakeTerm()
+	f.acquireErr = errors.New("没取到地址")
+	pr := &fakeProber{}
+	d := capableDeps(f)
+	d.Prober = pr
+	got := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"example.com"}`))
+	if got["setupError"] == nil || len(pr.ns) != 0 {
+		t.Fatalf("取不到地址不该探测:%v %v", got, pr.ns)
+	}
+	if _, has := got["exit"]; has {
+		t.Error("不该有 exit")
+	}
+}
+
+// ---- dnsForward:只在终端问的是本机 LAN 地址、且接管把握十足时才给 ----
+
+func fwdKernelAll(context.Context) *dnsforward.Result {
+	return &dnsforward.Result{Forward: "kernel", Plan: "all", To: "127.0.0.1:7853"}
+}
+
+func fwdProber(server string) *fakeProber {
+	return &fakeProber{res: nsprobe.Result{OK: true, DNS: &nsprobe.DNSResult{Server: server, OK: true, Answers: []string{"93.184.216.34"}, MS: 3}}}
+}
+
+func TestRunFillsDNSForwardWhenAskedLocalDnsmasq(t *testing.T) {
+	d := capableDeps(newFakeTerm()) // LAN 地址 192.168.5.1
+	d.Prober = fwdProber("192.168.5.1")
+	d.DNSForward = fwdKernelAll
+	got := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"example.com"}`))
+	f, _ := got["dnsForward"].(map[string]any)
+	if f["forward"] != "kernel" || f["plan"] != "all" || f["to"] != "127.0.0.1:7853" || f["suffix"] != nil || len(f) != 3 {
+		t.Fatalf("dnsForward:%v", got["dnsForward"])
+	}
+}
+
+func TestRunDNSForwardOmittedWhenNotSure(t *testing.T) {
+	// 终端问的是别的 DNS(旁路由 / 公共 DNS):dnsmasq 没参与
+	d := capableDeps(newFakeTerm())
+	d.Prober = fwdProber("223.5.5.5")
+	d.DNSForward = fwdKernelAll
+	if _, has := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"example.com"}`))["dnsForward"]; has {
+		t.Error("问的不是本机 LAN 地址,不该带 dnsForward")
+	}
+	// 拿不准(DNSForward 返回 nil)
+	d = capableDeps(newFakeTerm())
+	d.Prober = fwdProber("192.168.5.1")
+	d.DNSForward = func(context.Context) *dnsforward.Result { return nil }
+	if _, has := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"example.com"}`))["dnsForward"]; has {
+		t.Error("拿不准不该带 dnsForward")
+	}
+	// 没接线
+	d = capableDeps(newFakeTerm())
+	d.Prober = fwdProber("192.168.5.1")
+	if _, has := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"example.com"}`))["dnsForward"]; has {
+		t.Error("没接线不该带 dnsForward")
+	}
+	// 目标是 IP:没有 DNS 查询,也就没有转发可说
+	d = capableDeps(newFakeTerm())
+	d.Prober = &fakeProber{res: nsprobe.Result{OK: true}}
+	d.DNSForward = fwdKernelAll
+	if _, has := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"1.1.1.1"}`))["dnsForward"]; has {
+		t.Error("目标是 IP 不该带 dnsForward")
+	}
+}
+
+func TestRunDNSForwardComparesAddressesNotStrings(t *testing.T) {
+	d := capableDeps(newFakeTerm())
+	d.Prober = fwdProber("192.168.005.001") // 写法不同的同一个地址不会被当成同一个(ParseIP 不认前导零),不带字段
+	d.DNSForward = fwdKernelAll
+	if _, has := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"example.com"}`))["dnsForward"]; has {
+		t.Error("解析不出来的地址不能算命中")
+	}
+}
+
+// ---- dnsEvidence:按终端这次 DNS 查询的 UDP 源端口认 conntrack 记录 ----
+
+type fakeCT struct {
+	mu      sync.Mutex
+	entries []conntrack.Entry
+	err     error
+	queries []conntrack.Query
+}
+
+func (f *fakeCT) Find(_ context.Context, q conntrack.Query) ([]conntrack.Entry, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.queries = append(f.queries, q)
+	return f.entries, f.err
+}
+
+func ctEntry(t *testing.T, line string) conntrack.Entry {
+	t.Helper()
+	e, ok := conntrack.Parse(line)
+	if !ok {
+		t.Fatalf("解析不了:%s", line)
+	}
+	return e
+}
+
+func evProber(server string, ports ...int) *fakeProber {
+	return &fakeProber{res: nsprobe.Result{OK: true, DNS: &nsprobe.DNSResult{Server: server, OK: true, Answers: []string{"93.184.216.34"}, MS: 3, LocalPorts: ports}}}
+}
+
+const ctNormal = "ipv4 2 udp 17 25 src=192.168.5.77 dst=192.168.5.1 sport=39000 dport=53 src=192.168.5.1 dst=192.168.5.77 sport=53 dport=39000 mark=0 use=2"
+const ctRedirected = "ipv4 2 udp 17 25 src=192.168.5.77 dst=8.8.8.8 sport=39002 dport=53 src=192.168.5.1 dst=192.168.5.77 sport=7853 dport=39002 mark=0 use=1"
+
+func TestRunFillsDNSEvidence(t *testing.T) {
+	ct := &fakeCT{entries: []conntrack.Entry{ctEntry(t, ctNormal)}}
+	d := capableDeps(newFakeTerm()) // 终端地址 192.168.5.77
+	d.Prober = evProber("192.168.5.1", 39000)
+	d.Conntrack = ct
+	got := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"example.com"}`))
+	ev, _ := got["dnsEvidence"].(map[string]any)
+	if ev["flows"] != float64(1) || ev["hijacked"] != false || ev["answeredBy"] != "192.168.5.1" || ev["line"] != ctNormal || len(ev) != 4 {
+		t.Fatalf("dnsEvidence:%v", got["dnsEvidence"])
+	}
+	if len(ct.queries) != 1 || ct.queries[0] != (conntrack.Query{Proto: "udp", Src: "192.168.5.77", Dst: "192.168.5.1", Dport: 53}) {
+		t.Fatalf("查询条件:%+v", ct.queries)
+	}
+}
+
+func TestRunDNSEvidenceHijackedAndCustomPort(t *testing.T) {
+	ct := &fakeCT{entries: []conntrack.Entry{ctEntry(t, ctRedirected)}}
+	d := capableDeps(newFakeTerm())
+	d.Prober = evProber("8.8.8.8", 39002)
+	d.Conntrack = ct
+	ev, _ := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"example.com"}`))["dnsEvidence"].(map[string]any)
+	if ev["hijacked"] != true || ev["answeredBy"] != "192.168.5.1:7853" || ev["flows"] != float64(1) {
+		t.Fatalf("回复方被改写要判劫持:%v", ev)
+	}
+	// DHCP 给的服务器带端口
+	ct = &fakeCT{}
+	d = capableDeps(newFakeTerm())
+	d.Prober = evProber("192.168.5.1:5353", 4000)
+	d.Conntrack = ct
+	decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"example.com"}`))
+	if len(ct.queries) != 1 || ct.queries[0].Dst != "192.168.5.1" || ct.queries[0].Dport != 5353 {
+		t.Fatalf("端口要跟着服务器写法走:%+v", ct.queries)
+	}
+}
+
+func TestRunDNSEvidenceNoMatchingFlowIsZeroNotMissing(t *testing.T) {
+	d := capableDeps(newFakeTerm())
+	d.Prober = evProber("192.168.5.1", 39000)
+	d.Conntrack = &fakeCT{entries: []conntrack.Entry{ctEntry(t, ctRedirected)}} // 表里有别的记录,没有这次的
+	ev, ok := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"example.com"}`))["dnsEvidence"].(map[string]any)
+	if !ok || ev["flows"] != float64(0) || ev["hijacked"] != false || ev["line"] != "" {
+		t.Fatalf("读得到表、表里没有这次的记录:flows 应是 0:%v", ev)
+	}
+}
+
+func TestRunDNSEvidenceOmittedWhenCannotTell(t *testing.T) {
+	post := func(d Deps, target string) map[string]any {
+		return decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"`+target+`"}`))
+	}
+	// 读不到表:不能说成「没有记录」
+	d := capableDeps(newFakeTerm())
+	d.Prober = evProber("192.168.5.1", 39000)
+	d.Conntrack = &fakeCT{err: errors.New("permission denied")}
+	if _, has := post(d, "example.com")["dnsEvidence"]; has {
+		t.Error("读不到连接跟踪表不该带 dnsEvidence")
+	}
+	// 没拿到源端口(旧的探测进程 / 没发出查询)
+	d = capableDeps(newFakeTerm())
+	d.Prober = evProber("192.168.5.1")
+	ct := &fakeCT{}
+	d.Conntrack = ct
+	if _, has := post(d, "example.com")["dnsEvidence"]; has || len(ct.queries) != 0 {
+		t.Error("没有源端口就认不出这次的记录,不该带、也不用去查")
+	}
+	// 没接线
+	d = capableDeps(newFakeTerm())
+	d.Prober = evProber("192.168.5.1", 39000)
+	if _, has := post(d, "example.com")["dnsEvidence"]; has {
+		t.Error("没接线不该带 dnsEvidence")
+	}
+	// 目标是 IP:没有 DNS 查询
+	d = capableDeps(newFakeTerm())
+	d.Prober = &fakeProber{res: nsprobe.Result{OK: true}}
+	d.Conntrack = &fakeCT{}
+	if _, has := post(d, "1.1.1.1")["dnsEvidence"]; has {
+		t.Error("目标是 IP 不该带 dnsEvidence")
+	}
+	// DNS 服务器写法认不出
+	d = capableDeps(newFakeTerm())
+	d.Prober = evProber("not-an-ip", 39000)
+	ct = &fakeCT{}
+	d.Conntrack = ct
+	if _, has := post(d, "example.com")["dnsEvidence"]; has || len(ct.queries) != 0 {
+		t.Error("认不出服务器地址不该查、不该带")
+	}
+}
+
+func TestSplitDNSServer(t *testing.T) {
+	cases := []struct {
+		in   string
+		host string
+		port int
+	}{
+		{"192.168.5.1", "192.168.5.1", 53}, {"192.168.5.1:5353", "192.168.5.1", 5353}, {"fd00::1", "fd00::1", 53},
+		{"[fd00::1]:53", "fd00::1", 53}, {"", "", 0}, {"dns.example", "", 0}, {"1.1.1.1:0", "", 0}, {"1.1.1.1:70000", "", 0},
+	}
+	for _, c := range cases {
+		if h, p := splitDNSServer(c.in); h != c.host || p != c.port {
+			t.Errorf("%q → %q %d,要 %q %d", c.in, h, p, c.host, c.port)
+		}
+	}
+}
+
+// ---- source.override:DHCP 给的网关不是本机时,网关和 DNS 改指到本机 ----
+
+func TestRunOverridesGatewayAndDNSWhenDHCPGatewayIsNotThisDevice(t *testing.T) {
+	f := newFakeTerm()
+	f.lease = system.DHCPLease{IP: "192.168.5.77", Mask: 24, Gateway: "192.168.5.2", DNS: []string{"192.168.5.2", "223.5.5.5"}, Ms: 42}
+	d := capableDeps(f) // 本机 LAN 地址 192.168.5.1
+	p := &fakeProber{res: nsprobe.Result{OK: true}}
+	d.Prober = p
+	got := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"1.1.1.1"}`))
+	src := got["source"].(map[string]any)
+	ov, _ := src["override"].(map[string]any)
+	dns, _ := src["dns"].([]any)
+	if ov["gateway"] != "192.168.5.1" || len(ov) != 1 || src["gateway"] != "192.168.5.1" || len(dns) != 1 || dns[0] != "192.168.5.1" {
+		t.Fatalf("source:%v", src)
+	}
+	if len(f.pointCalls) != 1 || f.pointCalls[0] != "192.168.5.1" {
+		t.Fatalf("改网关的调用:%v", f.pointCalls)
+	}
+	if len(p.reqs) != 1 || len(p.reqs[0].DNS) != 1 || p.reqs[0].DNS[0] != "192.168.5.1" {
+		t.Fatalf("探测要用改指后的 DNS:%+v", p.reqs)
+	}
+}
+
+func TestRunNoOverrideWhenGatewayIsThisDeviceOrMissing(t *testing.T) {
+	for name, gw := range map[string]string{"网关就是本机": "192.168.5.1", "DHCP 没给网关": ""} {
+		f := newFakeTerm()
+		f.lease = system.DHCPLease{IP: "192.168.5.77", Mask: 24, Gateway: gw, DNS: []string{"223.5.5.5"}, Ms: 1}
+		d := capableDeps(f)
+		src := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"example.com"}`))["source"].(map[string]any)
+		if _, has := src["override"]; has || len(f.pointCalls) != 0 {
+			t.Errorf("%s:不该改指:%v %v", name, src, f.pointCalls)
+		}
+		if src["gateway"] != gw || src["dns"].([]any)[0] != "223.5.5.5" {
+			t.Errorf("%s:要原样报 DHCP 给的:%v", name, src)
+		}
+	}
+}
+
+func TestRunOverrideFailureIsSetupErrorAndNoProbe(t *testing.T) {
+	f := newFakeTerm()
+	f.lease = system.DHCPLease{IP: "192.168.5.77", Mask: 24, Gateway: "192.168.5.2", DNS: []string{"192.168.5.2"}, Ms: 1}
+	f.pointErr = errors.New("Nexthop has invalid gateway")
+	d := capableDeps(f)
+	p := &fakeProber{res: nsprobe.Result{OK: true}}
+	d.Prober = p
+	got := decode(t, serve(t, d, "POST", "/api/openbox/terminal-test", `{"target":"1.1.1.1"}`))
+	se, _ := got["setupError"].(string)
+	if !strings.Contains(se, "Nexthop has invalid gateway") || len(p.reqs) != 0 {
+		t.Fatalf("改不成要如实报,不能照旧去测:%v reqs=%d", got["setupError"], len(p.reqs))
+	}
+	if _, has := got["source"]; has {
+		t.Error("没改成功就不该给 source(它说的是改指后的状态)")
 	}
 }

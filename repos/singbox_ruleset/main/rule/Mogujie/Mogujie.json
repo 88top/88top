@@ -2,16 +2,16 @@
   "rules": [
     {
       "domain_suffix": [
-        "mogucdn.com",
-        "juangua.com",
-        "mogu.com",
-        "styledata.cn",
-        "linkeye.net",
-        "uniny.com",
-        "mogujielive.com",
-        "mogujie.com",
         "meili-inc.com",
-        "xdgogogo.com"
+        "linkeye.net",
+        "juangua.com",
+        "mogujie.com",
+        "mogucdn.com",
+        "mogujielive.com",
+        "xdgogogo.com",
+        "uniny.com",
+        "styledata.cn",
+        "mogu.com"
       ]
     }
   ],

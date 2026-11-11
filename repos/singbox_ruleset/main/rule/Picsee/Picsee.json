@@ -2,12 +2,12 @@
   "rules": [
     {
       "domain_suffix": [
-        "pse.is",
-        "pros.ee",
-        "pics.ee",
-        "pise.pw",
         "picsee.pro",
-        "picsee.co"
+        "pros.ee",
+        "pise.pw",
+        "picsee.co",
+        "pse.is",
+        "pics.ee"
       ]
     }
   ],

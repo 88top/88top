@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
-        "disqusservice.com",
+        "disqus.com",
         "disquscdn.com",
-        "disqus.com"
+        "disqusservice.com"
       ]
     }
   ],

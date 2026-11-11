@@ -34,6 +34,7 @@ import (
 	latencyapi "github.com/timeflysoon/Open-Box/backend/internal/api/latency"
 	latencyhistoryapi "github.com/timeflysoon/Open-Box/backend/internal/api/latencyhistory"
 	nodeinfoapi "github.com/timeflysoon/Open-Box/backend/internal/api/nodeinfo"
+	nodequalityapi "github.com/timeflysoon/Open-Box/backend/internal/api/nodequality"
 	penetrationapi "github.com/timeflysoon/Open-Box/backend/internal/api/penetration"
 	policiesapi "github.com/timeflysoon/Open-Box/backend/internal/api/policies"
 	profileapi "github.com/timeflysoon/Open-Box/backend/internal/api/profile"
@@ -55,6 +56,7 @@ import (
 	"github.com/timeflysoon/Open-Box/backend/internal/backup"
 	"github.com/timeflysoon/Open-Box/backend/internal/bandwidth"
 	"github.com/timeflysoon/Open-Box/backend/internal/clientapp"
+	"github.com/timeflysoon/Open-Box/backend/internal/conntrack"
 	"github.com/timeflysoon/Open-Box/backend/internal/contentfilter"
 	"github.com/timeflysoon/Open-Box/backend/internal/controllerproxy"
 	"github.com/timeflysoon/Open-Box/backend/internal/core"
@@ -63,6 +65,7 @@ import (
 	"github.com/timeflysoon/Open-Box/backend/internal/dnscache"
 	"github.com/timeflysoon/Open-Box/backend/internal/dnsdecide"
 	"github.com/timeflysoon/Open-Box/backend/internal/dnsfilter"
+	"github.com/timeflysoon/Open-Box/backend/internal/dnsforward"
 	"github.com/timeflysoon/Open-Box/backend/internal/dnsqlog"
 	"github.com/timeflysoon/Open-Box/backend/internal/dnsrewrite"
 	"github.com/timeflysoon/Open-Box/backend/internal/dnssync"
@@ -74,6 +77,8 @@ import (
 	"github.com/timeflysoon/Open-Box/backend/internal/nodeexit"
 	"github.com/timeflysoon/Open-Box/backend/internal/nodegroups"
 	"github.com/timeflysoon/Open-Box/backend/internal/nodeinfo"
+	"github.com/timeflysoon/Open-Box/backend/internal/nodequality"
+	"github.com/timeflysoon/Open-Box/backend/internal/nsprobe"
 	"github.com/timeflysoon/Open-Box/backend/internal/penetration"
 	"github.com/timeflysoon/Open-Box/backend/internal/policyentries"
 	"github.com/timeflysoon/Open-Box/backend/internal/portcheck"
@@ -81,6 +86,7 @@ import (
 	"github.com/timeflysoon/Open-Box/backend/internal/profile"
 	"github.com/timeflysoon/Open-Box/backend/internal/regiondetect"
 	"github.com/timeflysoon/Open-Box/backend/internal/routedecide"
+	"github.com/timeflysoon/Open-Box/backend/internal/routeget"
 	"github.com/timeflysoon/Open-Box/backend/internal/routetest"
 	"github.com/timeflysoon/Open-Box/backend/internal/rulelist"
 	"github.com/timeflysoon/Open-Box/backend/internal/server"
@@ -105,6 +111,11 @@ var builtAt = ""
 func main() { os.Exit(run(os.Args[1:])) }
 
 func run(args []string) int {
+	// 隐藏子命令:terminal-test 在虚拟终端的命名空间里用 `ip netns exec` 调起本程序跑一次探测(internal/nsprobe)。
+	// 它不读配置、不碰数据目录,只发一次探测、打一份 JSON。
+	if len(args) >= 1 && args[0] == "ns-probe" {
+		return nsprobe.Main(args[1:], os.Stdout, os.Stderr)
+	}
 	if len(args) == 1 && (args[0] == "-version" || args[0] == "--version") {
 		fmt.Println("openbox-backend", version)
 		return 0
@@ -332,6 +343,60 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	}
 	bandwidthapi.Register(srv.Mux(), bandwidthapi.Deps{Service: bandwidthSvc})
 
+	// 节点质量(概览页「节点质量」卡):延迟 / 带宽样本由两个服务的观察钩子送进来,
+	// 使用时长与业务流量由 nqSvc.Run 每 10 秒读一次内核连接攒
+	nqSvc := &nodequality.Service{
+		Store: st,
+		Catalog: func(ctx context.Context) ([]nodequality.Subscription, error) {
+			recs, cat, err := subsSvc.Catalog(ctx)
+			if err != nil {
+				return nil, err
+			}
+			byID := map[string]*nodequality.Subscription{}
+			out := make([]nodequality.Subscription, 0, len(recs))
+			for _, r := range recs {
+				if !r.Enabled {
+					continue
+				}
+				mode := "subscription"
+				switch {
+				case len(r.Account) > 0:
+					mode = "login"
+				case r.URL == "" && len(r.URLs) == 0:
+					mode = "node"
+				}
+				out = append(out, nodequality.Subscription{ID: r.ID, Name: r.Name, Mode: mode})
+			}
+			for i := range out {
+				byID[out[i].ID] = &out[i]
+			}
+			for _, c := range cat {
+				if sb := byID[c.SubscriptionID]; sb != nil {
+					sb.Nodes = append(sb.Nodes, nodequality.NodeInfo{Tag: c.Node.Tag, Region: strings.ToUpper(c.Node.RegionCode), Protocol: c.Node.Type})
+				}
+			}
+			return out, nil
+		},
+		Conns: func(ctx context.Context) (singbox.KernelSnapshot, error) {
+			return singbox.KernelConnections(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
+		},
+		// 带宽样本超过两个统一周期就不参与当前评分
+		BandwidthWindow: func(ctx context.Context) time.Duration {
+			p, err := profileSvc.Get(ctx)
+			if err != nil {
+				return 0
+			}
+			set, err := bandwidth.NormalizeSettings(p["bandwidth"])
+			if err != nil {
+				return 0
+			}
+			return 2 * time.Duration(set.IntervalHours) * time.Hour
+		},
+	}
+	nodeHistory.Observe = nqSvc.ObserveLatency
+	bandwidthSvc.Observe = nqSvc.ObserveBandwidth
+	nodequalityapi.Register(srv.Mux(), nodequalityapi.Deps{Service: nqSvc})
+
 	latencyapi.Register(srv.Mux(), latencyapi.Deps{Gen: gen, Subs: subsSvc, Profiles: profileSvc, Runner: probeRunner, History: nodeHistory})
 	// 节点信息:类型 / 协议层 / 服务器 / 链式上游 / 入口地址解析 / 入口国家 / 出口归属和风控值
 	entryDetector := &regiondetect.Detector{} // 只用它的按 IP 查国家,不占用其它两处的「判断中」状态
@@ -529,7 +594,16 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	// 记账文件 terminal-net.json 是撤销用的,恢复出厂设置不删(见 factoryWipes)
 	terminalProbe := system.RealTerminalProbe()
 	vterm := &system.VTermNet{Run: system.ExecRunner, StateFile: filepath.Join(cfg.StateDir(), "terminal-net.json")}
-	terminaltestapi.Register(srv.Mux(), terminaltestapi.Deps{Capability: terminalProbe.Capability, Terminal: vterm, Log: log})
+	dnsFwd := &dnsforward.Service{
+		Mode:       dnssync.ModeFromProfile(profileSvc.Get),
+		Applied:    func(ctx context.Context) bool { return takeover.Status(ctx).Applied },
+		KernelAddr: takeover.KernelAddress(),
+	}
+	terminaltestapi.Register(srv.Mux(), terminaltestapi.Deps{Capability: terminalProbe.Capability, Terminal: vterm, Prober: &nsprobe.Exec{}, Conntrack: &conntrack.Reader{}, DNSForward: dnsFwd.Describe,
+		Kernel: func(ctx context.Context) (singbox.KernelSnapshot, error) {
+			return singbox.KernelConnections(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
+		},
+		Route: &routeget.Getter{}, Log: log})
 
 	// 域名穿透:按已部署配置里的路由规则推算一个域名 / IP 会命中哪条规则、走哪条线路(DNS 判定和真实路由测试共用一个预测器)
 	penetrationSets := &dnsdecide.FileSets{SingBox: cfg.SingBox, TmpDir: probeDir}
@@ -890,7 +964,9 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 		done := make(chan struct{})
 		go func() { defer close(done); subs.NewScheduler(subsSvc).Run(ctx) }()
 		go bandwidthSvc.Loop(ctx)
-		return func() { wait(); <-done }
+		nqDone := make(chan struct{})
+		go func() { defer close(nqDone); nqSvc.Run(ctx) }() // 退出前会再写一次盘,要等它
+		return func() { wait(); <-done; <-nqDone }
 	}
 
 	// 再加一项:定时读内核把自动择优组测出的新结果记进延迟历史(只读内核、只在有新结果时写盘)

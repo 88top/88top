@@ -2,20 +2,20 @@
   "rules": [
     {
       "domain": [
-        "e122475.dscg.akamaiedge.net",
         "licdn.cn.cdn20.com",
-        "linkedin.sc.omtrdc.net"
+        "linkedin.sc.omtrdc.net",
+        "e122475.dscg.akamaiedge.net"
       ],
       "domain_suffix": [
+        "linkedin.cn",
         "l-0005.l-msedge.net",
         "l-0005.dc-msedge.net",
-        "lnkd.in",
-        "linkedin.cn",
-        "linkedin.at",
         "linkedin.com",
         "licdn.com",
+        "lnkd.in",
         "licdn.cn",
-        "bizographics.com"
+        "bizographics.com",
+        "linkedin.at"
       ]
     }
   ],

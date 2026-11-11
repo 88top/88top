@@ -2,16 +2,16 @@
   "rules": [
     {
       "domain_suffix": [
-        "picacomic.com",
-        "manhuabika.com",
-        "picacomic.xyz",
-        "bikaios.xyz",
-        "picacgp.com",
-        "bikaa.xyz",
-        "picacgy.com",
         "picacn.xyz",
+        "picacgp.com",
+        "picacomic.xyz",
+        "picacomic.com",
+        "bikaios.xyz",
         "bikac.xyz",
-        "wikawika.xyz"
+        "picacgy.com",
+        "wikawika.xyz",
+        "manhuabika.com",
+        "bikaa.xyz"
       ]
     }
   ],

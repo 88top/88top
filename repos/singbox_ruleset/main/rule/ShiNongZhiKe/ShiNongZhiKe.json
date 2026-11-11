@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
+        "senseagro.com",
         "senseagro.com.cn",
-        "senseagro.cn",
-        "senseagro.com"
+        "senseagro.cn"
       ]
     }
   ],

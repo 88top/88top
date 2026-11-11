@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "momomall.com.tw",
-        "momo.dm",
+        "momoshop.com.tw",
         "momo5188.com",
-        "momoshop.com.tw"
+        "momomall.com.tw",
+        "momo.dm"
       ]
     }
   ],

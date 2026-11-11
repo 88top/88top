@@ -2,12 +2,12 @@
   "rules": [
     {
       "domain_suffix": [
+        "sarajevopodopsadom.com",
         "aljazeera.net",
         "aljazeera.com",
         "ajplus.net",
-        "sarajevopodopsadom.com",
-        "syhacked.com",
         "srebrenica360.com",
+        "syhacked.com",
         "palestineremix.com"
       ]
     }

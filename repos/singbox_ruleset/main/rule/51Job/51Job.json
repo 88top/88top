@@ -2,25 +2,25 @@
   "rules": [
     {
       "domain_suffix": [
-        "zhiding.com.cn",
-        "51laiqiang.com",
-        "51jingying.com",
-        "correlation-one.cn",
-        "myyjs.com",
-        "51job.com",
-        "yingjiesheng.org",
-        "xinghua.org.cn",
-        "maketion.com",
         "51mdd.com",
-        "coolping.com",
-        "51jobcdn.com",
         "ibmcampus.com",
-        "51hr.com",
         "yingjiesheng.com",
-        "51miduoduo.com",
-        "wuyoudagong.com",
+        "maketion.com",
         "51ideal.com",
-        "yingjiesheng.net"
+        "51miduoduo.com",
+        "xinghua.org.cn",
+        "51laiqiang.com",
+        "51job.com",
+        "yingjiesheng.net",
+        "51hr.com",
+        "myyjs.com",
+        "51jobcdn.com",
+        "correlation-one.cn",
+        "coolping.com",
+        "wuyoudagong.com",
+        "yingjiesheng.org",
+        "51jingying.com",
+        "zhiding.com.cn"
       ]
     }
   ],

@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
+        "tidal.com",
         "tidal-cms.s3.amazonaws.com",
         "wimpmusic.com",
-        "tidal.com",
         "tidalhifi.com"
       ]
     }

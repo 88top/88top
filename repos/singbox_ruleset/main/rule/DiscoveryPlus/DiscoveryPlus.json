@@ -10,17 +10,17 @@
         "discovery.uplynk.com"
       ],
       "domain_suffix": [
-        "discovery.com",
-        "mobile-collector.newrelic.com",
-        "litix.io",
-        "getblueshift.com",
-        "disco-api.com",
+        "discoveryplus.co.uk",
         "discoveryplus.in",
         "uplynk.com",
-        "discoveryplus.co.uk",
-        "dnitv.com",
+        "mobile-collector.newrelic.com",
+        "disco-api.com",
+        "litix.io",
         "discoveryplus.com",
-        "fwmrm.net"
+        "discovery.com",
+        "fwmrm.net",
+        "getblueshift.com",
+        "dnitv.com"
       ]
     }
   ],

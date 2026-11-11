@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "applovin.com",
-        "applvn.com"
+        "applvn.com",
+        "applovin.com"
       ]
     }
   ],

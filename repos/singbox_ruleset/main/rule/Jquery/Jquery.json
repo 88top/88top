@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
+        "jquerymobile.com",
         "jquery.com",
-        "jqueryui.com",
-        "jquerymobile.com"
+        "jqueryui.com"
       ]
     }
   ],

@@ -2,11 +2,11 @@
   "rules": [
     {
       "domain_suffix": [
-        "matpool.net",
-        "chainnode.com",
-        "8btc.com",
+        "matpool.com",
         "bystack.com",
-        "matpool.com"
+        "chainnode.com",
+        "matpool.net",
+        "8btc.com"
       ]
     }
   ],

@@ -2,11 +2,11 @@
   "rules": [
     {
       "domain_suffix": [
-        "amplitude.com",
-        "smartmailcloud.com",
-        "firebaseio.com",
         "readdle.com",
-        "hockeyapp.net"
+        "hockeyapp.net",
+        "firebaseio.com",
+        "amplitude.com",
+        "smartmailcloud.com"
       ]
     }
   ],

@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "addthis.com",
         "addthiscdn.com",
+        "addthis.com",
         "addthisedge.com"
       ]
     }

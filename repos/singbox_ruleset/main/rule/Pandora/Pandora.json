@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "p-cdn.us",
-        "pandora.com"
+        "pandora.com",
+        "p-cdn.us"
       ]
     }
   ],

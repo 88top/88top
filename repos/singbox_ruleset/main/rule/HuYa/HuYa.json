@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "peiwanlu.com",
         "snapplay.com",
-        "huyagame.cn",
-        "huya.com"
+        "huya.com",
+        "peiwanlu.com",
+        "huyagame.cn"
       ]
     }
   ],

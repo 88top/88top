@@ -2,12 +2,12 @@
   "rules": [
     {
       "domain_suffix": [
-        "openaboc.cn",
         "95599.cn",
+        "openaboc.com.cn",
         "abchina.com",
-        "openaboc.com",
         "bscabank.com",
-        "openaboc.com.cn"
+        "openaboc.cn",
+        "openaboc.com"
       ]
     }
   ],

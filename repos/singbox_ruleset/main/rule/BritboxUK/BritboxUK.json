@@ -2,16 +2,16 @@
   "rules": [
     {
       "domain": [
-        "itvpnp.stage.ott.irdeto.com",
-        "itvpnp.live.ott.irdeto.com"
+        "itvpnp.live.ott.irdeto.com",
+        "itvpnp.stage.ott.irdeto.com"
       ],
       "domain_suffix": [
-        "massive-itv.com",
-        "britbox.co.uk",
         "britbox.com",
-        "bb-static.com",
         "bbc.co.uk",
-        "itv.com"
+        "britbox.co.uk",
+        "itv.com",
+        "bb-static.com",
+        "massive-itv.com"
       ]
     }
   ],

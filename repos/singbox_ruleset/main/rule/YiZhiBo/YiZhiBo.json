@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "sndks.com",
-        "yzbo.tv",
         "hifengli.com",
         "yizhibo.com",
+        "yzbo.tv",
+        "sndks.com",
         "liexiulive.com"
       ]
     }

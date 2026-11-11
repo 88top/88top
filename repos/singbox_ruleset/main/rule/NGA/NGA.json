@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "178.com",
         "ngacn.cc",
+        "nga.cn",
         "ngabbs.com",
-        "nga.cn"
+        "178.com"
       ]
     }
   ],

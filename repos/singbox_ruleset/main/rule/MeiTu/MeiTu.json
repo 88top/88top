@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "meitudata.com",
         "meipai.com",
-        "meitustat.com",
-        "meitu.com"
+        "meitu.com",
+        "meitudata.com",
+        "meitustat.com"
       ]
     }
   ],

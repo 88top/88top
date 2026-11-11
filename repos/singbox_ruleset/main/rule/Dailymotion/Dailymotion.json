@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "dai.ly",
         "dm-event.net",
-        "dmxleo.com",
         "dmcdn.net",
+        "dmxleo.com",
+        "dai.ly",
         "dailymotion.com"
       ]
     }

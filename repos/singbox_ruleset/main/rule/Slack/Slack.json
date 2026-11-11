@@ -2,17 +2,17 @@
   "rules": [
     {
       "domain_suffix": [
-        "slack-files.com",
-        "slack-edge.com",
         "slackcertified.com",
-        "slack-redir.net",
-        "slack-core.com",
-        "slackhq.com",
         "slack-imgs.com",
+        "slack-core.com",
+        "slack-edge.com",
+        "slack-redir.net",
+        "slackdemo.com",
         "slack-msgs.com",
-        "slackb.com",
+        "slack-files.com",
         "slack.com",
-        "slackdemo.com"
+        "slackhq.com",
+        "slackb.com"
       ]
     }
   ],

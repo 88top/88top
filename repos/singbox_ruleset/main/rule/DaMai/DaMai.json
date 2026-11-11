@@ -2,17 +2,17 @@
   "rules": [
     {
       "domain_suffix": [
-        "piaogroup.com",
-        "jtwsm.cn",
+        "yanchupiaojia.com",
         "maitix.net",
-        "baotoo.com",
         "damai.cn",
         "maitix.com",
-        "maikr.com",
-        "yanchupiaojia.com",
-        "dmcdn.cn",
+        "jtwsm.cn",
         "piao.com.cn",
-        "damaicdn.cn"
+        "piaogroup.com",
+        "baotoo.com",
+        "dmcdn.cn",
+        "damaicdn.cn",
+        "maikr.com"
       ]
     }
   ],

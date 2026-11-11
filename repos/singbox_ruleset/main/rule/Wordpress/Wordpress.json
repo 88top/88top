@@ -2,14 +2,14 @@
   "rules": [
     {
       "domain_suffix": [
-        "videopress.com",
-        "wordpress.tv",
         "wordpress.org",
-        "wp.com",
         "wp-themes.com",
         "wpvip.com",
+        "videopress.com",
         "wordpress.com",
-        "w.org"
+        "w.org",
+        "wp.com",
+        "wordpress.tv"
       ]
     }
   ],

@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
-        "phpcomposer.com",
         "bootcdn.cn",
-        "bootcss.com"
+        "bootcss.com",
+        "phpcomposer.com"
       ]
     }
   ],

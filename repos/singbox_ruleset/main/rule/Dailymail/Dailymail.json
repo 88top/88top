@@ -2,23 +2,23 @@
   "rules": [
     {
       "domain_suffix": [
-        "thismon.ee",
-        "dailymail.com.au",
-        "mailonsunday.co.uk",
-        "dailym.ai",
-        "mol.im",
-        "mailonline.com",
-        "mailonline.co.uk",
-        "dailymail.com",
-        "metro.co.uk",
-        "dailymailonline.com",
         "mailonsunday.ie",
         "thisismoney.co.uk",
-        "dmgmediaprivacy.co.uk",
-        "dailymail.dk",
+        "metro.co.uk",
         "mailhealth.com",
+        "mol.im",
         "dailymail.co.uk",
-        "anm.co.uk"
+        "dailym.ai",
+        "mailonline.co.uk",
+        "thismon.ee",
+        "dmgmediaprivacy.co.uk",
+        "dailymailonline.com",
+        "dailymail.dk",
+        "mailonsunday.co.uk",
+        "mailonline.com",
+        "anm.co.uk",
+        "dailymail.com",
+        "dailymail.com.au"
       ]
     }
   ],

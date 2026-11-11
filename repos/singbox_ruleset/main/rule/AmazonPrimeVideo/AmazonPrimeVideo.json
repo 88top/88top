@@ -2,34 +2,34 @@
   "rules": [
     {
       "domain": [
-        "d22qjgkvxw22r6.cloudfront.net",
         "d1v5ir2lpwr8os.cloudfront.net",
-        "d25xi40x97liuc.cloudfront.net",
+        "d22qjgkvxw22r6.cloudfront.net",
+        "d27xxe7juh1us6.cloudfront.net",
         "dmqdd6hw24ucf.cloudfront.net",
-        "d27xxe7juh1us6.cloudfront.net"
+        "d25xi40x97liuc.cloudfront.net"
       ],
       "domain_keyword": [
         "avoddashs"
       ],
       "domain_suffix": [
-        "pv-cdn.net",
-        "primevideo.cc",
-        "aiv-delivery.net",
-        "amazonvideo.com",
-        "aiv-cdn.net",
-        "primevideo.info",
-        "primevideo.org",
-        "media-amazon.com",
-        "llnwd.net",
-        "amazonprimevideo.com.cn",
-        "amazonprimevideo.cn",
-        "primevideo.com",
-        "atv-ps.amazon.com",
-        "amazonvideo.cc",
-        "amazonprimevideos.com",
-        "fls-na.amazon.com",
-        "prime-video.com",
         "avodmp4s3ww-a.akamaihd.net",
+        "primevideo.com",
+        "amazonvideo.cc",
+        "aiv-delivery.net",
+        "amazonprimevideos.com",
+        "amazonprimevideo.com.cn",
+        "pv-cdn.net",
+        "aiv-cdn.net",
+        "primevideo.org",
+        "primevideo.cc",
+        "amazonprimevideo.cn",
+        "llnwd.net",
+        "primevideo.info",
+        "atv-ps.amazon.com",
+        "fls-na.amazon.com",
+        "amazonvideo.com",
+        "media-amazon.com",
+        "prime-video.com",
         "primevideo.tv"
       ]
     },

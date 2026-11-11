@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "maoyun.com",
         "maoyuncloud.com",
+        "maoyun.com",
         "maoyuncloud.cn"
       ]
     }

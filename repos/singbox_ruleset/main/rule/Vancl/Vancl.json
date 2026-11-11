@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
-        "vanclimg.com",
+        "vancl.com",
         "vcimg.com",
-        "vancl.com"
+        "vanclimg.com"
       ]
     }
   ],

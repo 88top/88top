@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "boxofficemojo.com",
-        "imdb.com",
         "imdb.to",
-        "media-imdb.com"
+        "imdb.com",
+        "media-imdb.com",
+        "boxofficemojo.com"
       ]
     }
   ],

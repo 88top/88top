@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "imgsmail.ru",
         "mail.ru",
+        "imgsmail.ru",
         "mycdn.me"
       ]
     }

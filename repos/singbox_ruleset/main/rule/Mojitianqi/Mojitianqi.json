@@ -2,13 +2,13 @@
   "rules": [
     {
       "domain_suffix": [
-        "airnut.com",
-        "xiaomo.cn",
-        "mojitest.com",
         "mojicb.com",
-        "mojichina.com",
+        "moji.com",
         "moweather.com",
-        "moji.com"
+        "airnut.com",
+        "mojichina.com",
+        "xiaomo.cn",
+        "mojitest.com"
       ]
     }
   ],

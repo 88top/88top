@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "2k.com",
-        "take2games.com",
         "2kcoretech.online",
-        "2kgames.com"
+        "take2games.com",
+        "2kgames.com",
+        "2k.com"
       ]
     }
   ],

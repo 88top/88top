@@ -2,17 +2,17 @@
   "rules": [
     {
       "domain_suffix": [
-        "avlyun.net",
-        "avlyun.com",
-        "antiy.com",
-        "antiy.cn",
         "avlyun.cn",
-        "cloud-backup.com.cn",
-        "antiycloud.com",
+        "antiy.com",
         "avlinsight.com",
+        "avlyun.com",
         "avlyun.org",
+        "antiy.net.cn",
+        "avlyun.net",
+        "cloud-backup.com.cn",
         "avlsec.com",
-        "antiy.net.cn"
+        "antiycloud.com",
+        "antiy.cn"
       ]
     }
   ],

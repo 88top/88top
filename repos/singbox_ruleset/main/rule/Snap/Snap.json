@@ -2,12 +2,12 @@
   "rules": [
     {
       "domain_suffix": [
-        "snapads.com",
-        "snapkit.co",
-        "snap-dev.net",
         "snap.com",
-        "sc-cdn.net",
-        "snapchat.com"
+        "snap-dev.net",
+        "snapkit.co",
+        "snapchat.com",
+        "snapads.com",
+        "sc-cdn.net"
       ]
     }
   ],

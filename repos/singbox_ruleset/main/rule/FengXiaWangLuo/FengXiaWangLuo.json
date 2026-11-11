@@ -2,14 +2,14 @@
   "rules": [
     {
       "domain_suffix": [
-        "fhyx.com",
-        "wy213.net",
-        "158c.com",
-        "wy213.com",
-        "ali213.net",
         "iyouxia.com",
+        "ali213.net",
+        "wy213.com",
         "fengyx.com",
-        "qu2345.com"
+        "qu2345.com",
+        "wy213.net",
+        "fhyx.com",
+        "158c.com"
       ]
     }
   ],
