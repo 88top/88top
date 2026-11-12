@@ -3,6 +3,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -38,6 +39,7 @@ import (
 	penetrationapi "github.com/timeflysoon/Open-Box/backend/internal/api/penetration"
 	policiesapi "github.com/timeflysoon/Open-Box/backend/internal/api/policies"
 	profileapi "github.com/timeflysoon/Open-Box/backend/internal/api/profile"
+	rollbackapi "github.com/timeflysoon/Open-Box/backend/internal/api/rollback"
 	routetestapi "github.com/timeflysoon/Open-Box/backend/internal/api/routetest"
 	rulesetsapi "github.com/timeflysoon/Open-Box/backend/internal/api/rulesets"
 	serversapi "github.com/timeflysoon/Open-Box/backend/internal/api/servers"
@@ -73,6 +75,7 @@ import (
 	"github.com/timeflysoon/Open-Box/backend/internal/factoryreset"
 	"github.com/timeflysoon/Open-Box/backend/internal/failover"
 	"github.com/timeflysoon/Open-Box/backend/internal/geodata"
+	"github.com/timeflysoon/Open-Box/backend/internal/kerneldns"
 	"github.com/timeflysoon/Open-Box/backend/internal/latencyhistory"
 	"github.com/timeflysoon/Open-Box/backend/internal/nodeexit"
 	"github.com/timeflysoon/Open-Box/backend/internal/nodegroups"
@@ -347,6 +350,7 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	// 使用时长与业务流量由 nqSvc.Run 每 10 秒读一次内核连接攒
 	nqSvc := &nodequality.Service{
 		Store: st,
+		// 所有订阅(含停用的,节点只有启用的订阅才有);停用的订阅在响应里 enabled=false、节点 inactive
 		Catalog: func(ctx context.Context) ([]nodequality.Subscription, error) {
 			recs, cat, err := subsSvc.Catalog(ctx)
 			if err != nil {
@@ -355,9 +359,6 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 			byID := map[string]*nodequality.Subscription{}
 			out := make([]nodequality.Subscription, 0, len(recs))
 			for _, r := range recs {
-				if !r.Enabled {
-					continue
-				}
 				mode := "subscription"
 				switch {
 				case len(r.Account) > 0:
@@ -365,7 +366,7 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 				case r.URL == "" && len(r.URLs) == 0:
 					mode = "node"
 				}
-				out = append(out, nodequality.Subscription{ID: r.ID, Name: r.Name, Mode: mode})
+				out = append(out, nodequality.Subscription{ID: r.ID, Name: r.Name, Mode: mode, Enabled: r.Enabled, BandwidthCheck: r.BandwidthCheck})
 			}
 			for i := range out {
 				byID[out[i].ID] = &out[i]
@@ -380,8 +381,8 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 		Conns: func(ctx context.Context) (singbox.KernelSnapshot, error) {
 			return singbox.KernelConnections(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
 		},
-		// 带宽样本超过两个统一周期就不参与当前评分
-		BandwidthWindow: func(ctx context.Context) time.Duration {
+		// 测速周期:下载样本超过两个周期就不参与当前评分
+		Period: func(ctx context.Context) time.Duration {
 			p, err := profileSvc.Get(ctx)
 			if err != nil {
 				return 0
@@ -390,14 +391,40 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 			if err != nil {
 				return 0
 			}
-			return 2 * time.Duration(set.IntervalHours) * time.Hour
+			return time.Duration(set.IntervalHours) * time.Hour
+		},
+		// 下载测速历史查询时直接从带宽服务读,不另存
+		Bandwidth: func(tag string) []nodequality.BWSample {
+			list := bandwidthSvc.Samples(tag)
+			out := make([]nodequality.BWSample, 0, len(list))
+			for _, x := range list {
+				out = append(out, nodequality.BWSample{At: x.At, Mbps: x.Mbps, Failed: x.Failed, LowerBound: x.LowerBound})
+			}
+			return out
+		},
+		// 节点图表里并入延迟历史(只要节点自己的样本,不含节点组选中某个节点的记录)
+		History: func(ctx context.Context, tag string) []nodequality.HistSample {
+			h, _, err := nodeHistory.Get(ctx)
+			if err != nil {
+				return nil
+			}
+			var out []nodequality.HistSample
+			for _, x := range h[tag] {
+				if x.Node != "" {
+					continue
+				}
+				if t, err := time.Parse(time.RFC3339Nano, x.Time); err == nil {
+					out = append(out, nodequality.HistSample{At: t.UnixMilli(), Delay: x.Delay})
+				}
+			}
+			return out
 		},
 	}
 	nodeHistory.Observe = nqSvc.ObserveLatency
-	bandwidthSvc.Observe = nqSvc.ObserveBandwidth
 	nodequalityapi.Register(srv.Mux(), nodequalityapi.Deps{Service: nqSvc})
 
-	latencyapi.Register(srv.Mux(), latencyapi.Deps{Gen: gen, Subs: subsSvc, Profiles: profileSvc, Runner: probeRunner, History: nodeHistory})
+	latencyapi.Register(srv.Mux(), latencyapi.Deps{Gen: gen, Subs: subsSvc, Profiles: profileSvc, Runner: probeRunner, History: nodeHistory,
+		Kernel: controllerproxy.FileResolver(filepath.Join(cfg.ConfigDir, "config.json"))})
 	// 节点信息:类型 / 协议层 / 服务器 / 链式上游 / 入口地址解析 / 入口国家 / 出口归属和风控值
 	entryDetector := &regiondetect.Detector{} // 只用它的按 IP 查国家,不占用其它两处的「判断中」状态
 	nodeinfoapi.Register(srv.Mux(), nodeinfoapi.Deps{Service: &nodeinfo.Service{
@@ -600,10 +627,32 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 		KernelAddr: takeover.KernelAddress(),
 	}
 	terminaltestapi.Register(srv.Mux(), terminaltestapi.Deps{Capability: terminalProbe.Capability, Terminal: vterm, Prober: &nsprobe.Exec{}, Conntrack: &conntrack.Reader{}, DNSForward: dnsFwd.Describe,
+		FirstLayer: terminaltestapi.NewFirstLayer(func() (map[string]any, error) {
+			return routetest.ReadConfig(filepath.Join(cfg.ConfigDir, "config.json"))
+		}, dnsFwd.Mode, dnsFwd.Describe),
 		Kernel: func(ctx context.Context) (singbox.KernelSnapshot, error) {
 			return singbox.KernelConnections(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
 		},
-		Route: &routeget.Getter{}, Log: log})
+		Route: &routeget.Getter{},
+		KernelLog: func(ctx context.Context) (terminaltestapi.LogTap, error) {
+			tap, err := singbox.OpenKernelLogs(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
+			if err != nil {
+				return nil, err
+			}
+			return tap, nil
+		},
+		KernelDNSConfig: func() (*kerneldns.Config, error) {
+			b, err := os.ReadFile(filepath.Join(cfg.ConfigDir, "config.json"))
+			if err != nil {
+				return nil, err
+			}
+			var m map[string]any
+			if err := json.Unmarshal(b, &m); err != nil {
+				return nil, err
+			}
+			return kerneldns.ConfigFrom(m), nil
+		},
+		Log: log})
 
 	// 域名穿透:按已部署配置里的路由规则推算一个域名 / IP 会命中哪条规则、走哪条线路(DNS 判定和真实路由测试共用一个预测器)
 	penetrationSets := &dnsdecide.FileSets{SingBox: cfg.SingBox, TmpDir: probeDir}
@@ -751,6 +800,18 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 		Final: factoryreset.Step{Name: "访问密码和登录会话", Run: func(context.Context) error { return authMgr.Reset() }},
 		Log:   log,
 	}})
+
+	// 紧急回滚到直连:撤销 DNS 接管 → 停内核 → 关开机自启,和部署互斥(前端没有调用,命令行 / 外部脚本用)
+	rollbackapi.Register(srv.Mux(), rollbackapi.Deps{
+		Services: svcCtl, DNS: dnsSync, Kind: initKind, CoreService: cfg.CoreService,
+		Exclusive: func(fn func() error) error {
+			err := deployer.Exclusive(fn)
+			if errors.Is(err, singbox.ErrDeployBusy) {
+				return rollbackapi.ErrBusy
+			}
+			return err
+		},
+	})
 
 	// 激活和教程视频:没有对应概念,只回固定内容(DESIGN D9 和第 8 节),不保存任何东西
 	activationapi.Register(srv.Mux(), activationapi.Deps{

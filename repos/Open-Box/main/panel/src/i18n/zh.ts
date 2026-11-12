@@ -158,6 +158,8 @@ const zh: LANG_MESSAGE = {
   sidebarDisplay: '左侧栏显示',
   sidebarDisplayOff: '关闭',
   connectionSort: '排序',
+  connectionSortAscending: '升序',
+  connectionSortDescending: '降序',
   proxies: '代理',
   rules: '规则',
   connections: '连接',
@@ -224,9 +226,9 @@ const zh: LANG_MESSAGE = {
   expectedStatusInvalid: '可接受状态码写法不对:状态码或范围,用 / 隔开,如 200-299 或 204',
   groupTestUrl: '测速地址',
   directTestUrlHint: '只给内置直连用；支持 HTTP / HTTPS，默认使用 HTTP。',
-  testUrlHint: '自动择优、手动测速和故障转移使用；支持 HTTP / HTTPS，默认使用 HTTP。',
+  testUrlHint: '自动优选、手动测速和故障转移使用；支持 HTTP / HTTPS，默认使用 HTTP。',
   testUrlLabel: '测速地址',
-  testUrlDescription: '自动择优组和代理页的延迟测试用这两个地址;每个自动择优组也可以单独指定。',
+  testUrlDescription: '自动优选组和代理页的延迟测试用这两个地址;每个自动优选组也可以单独指定。',
   trafficRetentionTitle: '分析数据保留时长',
   diagnosticsTitle: '导出诊断包',
   diagnosticsDescription:
@@ -318,8 +320,6 @@ const zh: LANG_MESSAGE = {
   connectionStyleMobile: '移动端样式',
   card: '卡片',
   table: '表格',
-  customTableColumns: '自定义表格列',
-  customCardLines: '自定义卡片行',
   close: '关闭',
   theme: '主题',
   themeMode_system: '跟随系统',
@@ -373,6 +373,9 @@ const zh: LANG_MESSAGE = {
   connectionSettings: '连接设置',
   proxySettings: '策略设置',
   connectionDetails: '连接详情',
+  connectionFormatted: '格式化显示',
+  connectionJSON: 'JSON 数据',
+  connectionStarted: '连接时间',
   unavailableProxy: '隐藏不可用节点',
   global: '全局',
   direct: '直连',
@@ -510,17 +513,18 @@ const zh: LANG_MESSAGE = {
   qualityTraffic: '业务流量（采样估算）',
   qualityTime: '{hours} 小时 {minutes} 分',
   qualityNotMeasured: '未检测',
-  qualityDetailScope: '延时、抖动和带宽显示当前有效样本的中位数。',
+  qualityDetailScope:
+    '延时取最近最多 10 次成功探测的中位数。抖动和下载带宽各取最近最多 10 个有效值的均值。',
   qualityHealthHelp:
     '节点健康是第一前提。确认失败的节点在订阅整体质量中按 0 分计入；未检测、已过期节点降低覆盖率。覆盖率不足 80% 时，主位置显示“待补数据”。',
   qualityModelHelp:
-    '单节点评分：可用率 35%、延时 20%、HTTP 探测波动 15%、下载带宽 20%、上传带宽 10%。至少观察 1 小时、20 次检测、10 次成功并有近期下载样本才给暂估分。上传缺测时按其余已测权重归一，不标完整评分。',
+    '健康节点使用和带宽择优相同的评分标准。延时占 40%、下载带宽占 30%、HTTP 探测抖动占 30%。缺测项跳过，其余权重按比例折算。缺测或任一项不足 10 个样本时标为暂估。',
   qualityExampleHelp:
     '例如：1 个 95 分节点与 9 个失败节点，整体约 10 分；1 个 95 分节点与 9 个未测节点，显示“待补数据”，不能评为优秀。',
   qualityMeasurementHelp:
     '按当前有效连接、网络环境和全局测速目标统计，保留最近 24 个小时桶。抖动指连续成功 HTTP 探测耗时之差的均值，不等同于 UDP 抖动或 IP 丢包率。时长与业务流量为采样估算，排除面板探测，不参与加分；并发使用时长只计一次。',
   qualityBandwidthHelp:
-    '带宽取有效已测节点的中位数，不把节点带宽相加。超过两个统一周期的带宽不参与当前评分。尚无上传测速时显示未检测，不以业务上传流量冒充上传带宽。',
+    '订阅带宽显示各已测节点带宽均值的中位数。最新带宽样本达到两个统一周期后，该节点的带宽均值不再参与评分。上传带宽暂未检测，业务上传流量单独显示。',
   qualityFailedHelp: '历史下载结果不代表当前可用；当前检测失败的节点，在订阅评估中按 0 分计入。',
   qualityMode_login: '登录',
   qualityMode_subscription: '订阅',
@@ -532,8 +536,7 @@ const zh: LANG_MESSAGE = {
   nodeInfoEntryIpv6: '入口 IPv6',
   nodeInfoIpv4Unverified: '未检测到 IPv4 出口',
   nodeInfoUpstream: '链式上游',
-  nodeInfoSupported: '支持',
-  nodeInfoUnsupported: '不支持',
+  nodeInfoRelay: '中转',
   nodeInfoHasIpv6: '有 IPv6 地址',
   nodeInfoNoIpv6: '没有 IPv6 地址',
   nodeInfoExitIp: '出口 IPv4',
@@ -581,7 +584,7 @@ const zh: LANG_MESSAGE = {
   latencyReasonError: '连接失败',
   latencyReasonStatus: '状态码不符',
   urlTestManualSelectTip:
-    '「{name}」是自动择优组,走哪个节点由内核按测速自己定,不能手动指定。想换线路就点它的闪电重测一次。',
+    '「{name}」是自动优选组,走哪个节点由内核按测速自己定,不能手动指定。想换线路就点它的闪电重测一次。',
   updateFinishedTip: '{number} 更新完成',
   refreshing: '刷新中',
   independentLatencyTest: '独立延迟测试',
@@ -601,8 +604,6 @@ const zh: LANG_MESSAGE = {
   label: '标签',
   swipeInTabs: '滑动切换页面二级标签',
   swipeInPages: '滑动切换页面',
-  simpleCardPreset: '简洁预设',
-  detailedCardPreset: '详细预设',
   refresh: '刷新',
   reset: '重置',
   delete: '删除',
@@ -915,11 +916,12 @@ const zh: LANG_MESSAGE = {
   groupEdit: '修改分组',
   groupNameLabel: '分组名称',
   groupTypeLabel: '分组规则',
-  groupType_urltest: '自动择优（url-test）',
+  groupType_urltest: '自动优选（url-test）',
   groupType_selector: '手动选择（select）',
   groupInterval: '检测间隔',
-  groupTolerance: '容差',
-  groupUrltestHint: '定期测延迟并切到最快的;快出「容差」这么多毫秒才切,避免抖动。',
+  groupTolerance: '延时容差',
+  groupUrltestHint:
+    '按延时选择时，新节点快出设定的容差才切换。启用带宽择优且健康候选有有效带宽时，改用综合评分。',
   groupMembersLabel: '成员',
   groupFilterAllSubscriptions: '全部',
   groupSubscriptionMissing: '已删除的订阅',
@@ -963,14 +965,14 @@ const zh: LANG_MESSAGE = {
   groupType_loadbalance: '负载均衡（load balance）',
   loadBalanceHint:
     '按连接分配到可用节点，优先选择连接较少的节点，同等负载时轮换。多个并发连接可叠加总带宽；已建立的连接保持原出口。',
-  loadBalanceNodesOnly: '负载均衡最多可选择 64 个真实节点，请移除节点组或失效成员。',
+  loadBalanceNodesOnly: '负载均衡只能选择真实节点，请移除节点组或失效成员。',
   groupUnitSecond: '秒',
   failoverSummary: '故障转移 · {lanes} 个页签 · {count} 个节点',
   failoverStaticHint:
     '从左侧选节点加入当前页签;最前面的页签是主用,后面依次备用。单节点页签直接使用;多节点页签可选自动优选(按测速选)或手动选择(在代理页点选)。',
-  failoverTolerance: '组内延迟容差',
+  failoverTolerance: '组内延时容差',
   failoverToleranceHint:
-    '只给多节点页签里的内部自动择优用:比当前节点快出这么多毫秒才换;与页签之间的主备顺序无关',
+    '仅在自动页签按延时选节点时使用。开启带宽择优且该页签有有效带宽数据时跳过此项，主备顺序照常生效。',
   failoverToleranceUnused: '所有页签都只有一个有效节点,组内没有可择优的对象,这项暂时用不上',
   failoverAdvanced: '高级设置',
   failoverTimeout: '单次检测超时',
@@ -991,7 +993,7 @@ const zh: LANG_MESSAGE = {
   failoverLaneIconInherit: '继承分组图标',
   failoverModeEmpty: '没有有效节点',
   failoverModeSingle: '单节点',
-  failoverModeAuto: '自动择优',
+  failoverModeAuto: '自动优选',
   failoverModeManual: '手动选择',
   failoverLaneModeAuto: '自动优选',
   failoverLaneModeManual: '手动选择',
@@ -1132,15 +1134,16 @@ const zh: LANG_MESSAGE = {
   subscriptionNodeDnsToggle: '订阅 DNS 解析',
   subscriptionNodeDnsLabel: '节点域名解析（可选）',
   subscriptionNodeDnsUrlPlaceholder: 'DoH 地址,如 https://dns.example.net:2096/路径',
-  subscriptionNodeDnsBootstrapPlaceholder: '解析 DoH 的 DNS(IP)',
+  subscriptionNodeDnsBootstrapPlaceholder: '引导 DNS（IP）',
   subscriptionNodeDnsIpPlaceholder: 'DNS IP,如 223.5.5.5 或 2001:4860:4860::8888',
   subscriptionNodeDnsInvalidIp: 'DNS 地址只能填有效的 IPv4 或 IPv6 地址',
   subscriptionNodeDnsPlainHint: '仅解析这份订阅的节点服务器域名,普通网站和局域网 DNS 不受影响;节点检测使用相同解析器。',
+  subscriptionNodeDnsDotHint: 'DoT 默认使用 853 端口。填域名时需要引导 DNS（IP）。此设置用于解析这份订阅的节点服务器域名，节点检测也使用同一解析器。',
   subscriptionNodeDnsHint:
     '机场要求节点域名用它自己的 DoH 解析时填(相当于 OpenClash 的 proxy-server-nameserver / nameserver-policy)。只用来解析这份订阅的节点服务器域名,普通网站和局域网的 DNS 不受影响;测速也按它解析。DoH 地址是域名时,右边要填解析它用的 DNS(IP)。',
   subscriptionNodeDnsInvalidUrl: 'DoH 地址要以 https:// 开头',
-  subscriptionNodeDnsInvalidBootstrap: '解析 DoH 的 DNS 只能填 IP 地址',
-  subscriptionNodeDnsNeedBootstrap: 'DoH 地址是域名,右边要填解析它用的 DNS(IP)',
+  subscriptionNodeDnsInvalidBootstrap: '引导 DNS 要填有效的 IP 地址',
+  subscriptionNodeDnsNeedBootstrap: '上游地址是域名，请填写解析它用的引导 DNS（IP）',
   subscriptionNodeDnsNeedUrl: '填了解析 DoH 的 DNS,还要填 DoH 地址',
   subscriptionContentPlaceholder:
     '粘贴 ss:// / trojan:// / hysteria2:// 等链接,或 Clash/sing-box 配置…',
@@ -1419,6 +1422,8 @@ const zh: LANG_MESSAGE = {
   dnsUpstreamSaveBlocked: '{side}没有通过测试,没有保存:{message}',
   dnsUpstreamInvalid: '地址只填 IPv4 / IPv6。',
   dnsUpstreamInvalidPort: '端口填 1~65535。',
+  dnsUpstreamInvalidDotHost: '请填写有效的 DoT 域名或 IP 地址',
+  smartBlockConnection: '拦截连接',
   dnsUpstreamSaved: '{side}已保存（{detail}）。',
   dnsRewriteTitle: 'DNS 重写',
   dnsRewriteDescription:
@@ -2189,23 +2194,23 @@ const zh: LANG_MESSAGE = {
   bandwidthOff_urltest:
     '按延时稳定选择一个节点，保留原有延时容差，避免小幅波动导致频繁切换。',
   bandwidthOn_urltest:
-    '根据实测带宽和有限的延时修正稳定选择一个节点。初选或必须恢复重选时，分数接近的节点再参考其他业务占用；本组自己的下载不会将当前节点挤走。正常改选需综合分数至少高出 25%，且当前节点至少保持 60 秒；故障按原有健康确认规则处理。',
+    '至少一个健康候选有有效下载带宽时，按延时 40%、下载带宽 30%、抖动 30% 评分。此时跳过延时容差。同分保留当前节点，健康节点至少保持 60 秒。健康候选均无有效带宽时，按延时和容差选节点。',
   bandwidthExample_urltest:
-    'A 为 200 Mbps、300 ms，B 为 50 Mbps、50 ms。假设延时容差为 100 ms，关闭时按延时优先 B；开启带宽择优后，A 的综合分数更高。A 开始承载大下载，不会仅因本组连接变多就切去 B。',
+    'A 当前为 150 ms、10 Mbps，B 为 100 ms、300 Mbps，抖动相同。容差为 100 ms 时，按延时可保留 A。开启带宽择优且样本有效时，保持期结束后选 B。',
   bandwidthOff_failover:
     '先遵守主用、备用页签顺序，以及原有故障确认和恢复回切设置；自动页签内部按延时选择，手动页签保持用户指定的节点。',
   bandwidthOn_failover:
-    '只改变自动页签内部的节点择优，综合考虑带宽与有限的延时修正。主备优先级、故障确认、恢复后切回开关和恢复等待均不变；备用再快也不能越过健康主用，手动页签不会被覆盖。',
+    '自动页签内沿用 40/30/30 评分。有健康候选具备有效带宽时，跳过组内延时容差。否则按延时和容差选择。主备顺序、恢复确认、回切设置及手动选择继续生效。',
   bandwidthExample_failover:
     '主用健康、带宽 50 Mbps，备用带宽 500 Mbps，仍使用主用。如果主用的自动页签内有两个同延时的健康节点，分别为 200 Mbps 和 50 Mbps，则在这个页签内优先 200 Mbps 的节点。',
   bandwidthOff_loadbalance:
     '每个新连接优先分配给健康且连接/拨号较少的节点；占用相同时在低延时范围内轮换。',
   bandwidthOn_loadbalance:
-    '每个新连接选择“（活动连接数＋正在拨号数＋1）÷（带宽×有限的延时修正）”最小的节点。各组共享节点占用并同时预占；高带宽节点可以多承担连接，忙起来后逐步分给其他节点。已建立连接保持原出口。',
+    '新连接使用同一套 40/30/30 质量分加权。先用空闲节点，占用相同时优先质量更高的节点。各组共享活动连接与正在拨号的占用。健康候选均无有效带宽时，恢复原分配规则。',
   bandwidthExample_loadbalance:
-    '同样延时，A 为 200 Mbps，B 为 50 Mbps。两者空闲时优先 A；A 已有 3 个连接、B 没有连接时，下一个连接的成本相同：4÷200＝1÷50，可以轮换给 B。A 不可用时，无论历史带宽多高，都只考虑 B。',
+    'A 得 93 分、B 得 64 分。都空闲时先选 A，A 仍有活动连接时下一条先给空闲的 B。A 确认故障后，新连接交给 B。',
   bandwidthSharedHelp:
-    '路由器按统一周期 {hours} 小时测试，同一实际节点跨订阅与分组去重，每次下载最多 {maxMB} MB。读取分数不会再下载；测试失败保留上一次有效结果；记录缺失或过期后采用中性记录或原有算法。下载测速失败不会直接判节点故障。',
+    '每 {hours} 小时每个实际节点共用一次带宽测试，每次最多下载 {maxMB} MB。带宽取最近最多 10 次成功结果的均值。最新结果达到两个周期时，整组样本停止参与评分。缺测候选暂用其他候选实测带宽的中位数。计算评分无需增加探测。',
   bandwidthClientDisabled:
     'Android、iOS、Windows、macOS、Linux 客户端不启用带宽择优及下载测速；节点分流仍可由路由器执行自身策略。实测值反映当时条件，不保证总带宽叠加比例。',
   nodeInfoExpandText: '展开{field}',
@@ -2245,6 +2250,12 @@ const zh: LANG_MESSAGE = {
 
   // ===== 对齐上游 catch-up v0.1.412 缺失键 =====
 
+  // ===== 对齐上游 v0.1.423 连接页(卡片 / 表格自定义)=====
+  connectionCardCustomize: '卡片自定义',
+  connectionTableCustomize: '表格自定义',
+  connectionCardAddRow: '添加一行',
+  connectionDevice: '终端',
+  connectionTarget: '目标',
 }
 
 export default zh

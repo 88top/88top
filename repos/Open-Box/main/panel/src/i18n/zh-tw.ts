@@ -158,6 +158,8 @@ const zhTW: LANG_MESSAGE = {
   sidebarDisplay: '左側欄顯示',
   sidebarDisplayOff: '關閉',
   connectionSort: '排序',
+  connectionSortAscending: '遞增',
+  connectionSortDescending: '遞減',
   proxies: '代理',
   rules: '規則',
   connections: '連接',
@@ -224,9 +226,9 @@ const zhTW: LANG_MESSAGE = {
   expectedStatusInvalid: '可接受狀態碼寫法不對:狀態碼或範圍,用 / 隔開,如 200-299 或 204',
   groupTestUrl: '測速位址',
   directTestUrlHint: '只給內建直連用；支援 HTTP / HTTPS，預設使用 HTTP。',
-  testUrlHint: '自動擇優、手動測速和故障轉移使用；支援 HTTP / HTTPS，預設使用 HTTP。',
+  testUrlHint: '自動優選、手動測速和故障轉移使用；支援 HTTP / HTTPS，預設使用 HTTP。',
   testUrlLabel: '測速位址',
-  testUrlDescription: '自動擇優群組和代理頁的延遲測試用這兩個位址;每個自動擇優群組也可以單獨指定。',
+  testUrlDescription: '自動優選群組和代理頁的延遲測試用這兩個位址;每個自動優選群組也可以單獨指定。',
   trafficRetentionTitle: '分析資料保留時長',
   diagnosticsTitle: '匯出診斷包',
   diagnosticsDescription:
@@ -319,8 +321,6 @@ const zhTW: LANG_MESSAGE = {
   connectionStyleMobile: '行動端樣式',
   card: '卡片',
   table: '表格',
-  customTableColumns: '自訂表格列',
-  customCardLines: '自訂卡片行',
   close: '關閉',
   theme: '主題',
   themeMode_system: '跟隨系統',
@@ -374,6 +374,9 @@ const zhTW: LANG_MESSAGE = {
   connectionSettings: '連接設定',
   proxySettings: '策略設定',
   connectionDetails: '連接詳情',
+  connectionFormatted: '格式化顯示',
+  connectionJSON: 'JSON 資料',
+  connectionStarted: '連線時間',
   unavailableProxy: '隱藏不可用節點',
   global: '全域',
   direct: '直連',
@@ -511,17 +514,18 @@ const zhTW: LANG_MESSAGE = {
   qualityTraffic: '業務流量（取樣估算）',
   qualityTime: '{hours} 小時 {minutes} 分',
   qualityNotMeasured: '未檢測',
-  qualityDetailScope: '延遲、抖動及頻寬顯示目前有效樣本的中位數。',
+  qualityDetailScope:
+    '延遲取最近最多 10 次成功探測的中位數。抖動和下載頻寬各取最近最多 10 個有效值的平均值。',
   qualityHealthHelp:
     '節點健康是第一前提。確認失敗的節點在訂閱整體品質中按 0 分計入；未檢測、已過期節點降低涵蓋率。涵蓋率不足 80% 時，主位置顯示「待補資料」。',
   qualityModelHelp:
-    '單節點評分：可用率 35%、延遲 20%、HTTP 探測波動 15%、下載頻寬 20%、上傳頻寬 10%。至少觀察 1 小時、20 次檢測、10 次成功並有近期下載樣本才給暫估分。上傳缺測時按其餘已測權重歸一，不標完整評分。',
+    '健康節點使用和頻寬擇優相同的評分標準。延遲佔 40%、下載頻寬佔 30%、HTTP 探測抖動佔 30%。缺測項跳過，其餘權重按比例換算。缺測或任一項不足 10 個樣本時標為暫估。',
   qualityExampleHelp:
     '例如：1 個 95 分節點與 9 個失敗節點，整體約 10 分；1 個 95 分節點與 9 個未測節點，顯示「待補資料」，不能評為優秀。',
   qualityMeasurementHelp:
     '按目前有效連線、網路環境及全域測速目標統計，保留最近 24 個小時桶。抖動指連續成功 HTTP 探測耗時之差的平均，不等同於 UDP 抖動或 IP 丟包率。時長與業務流量為取樣估算，排除面板探測，不參與加分；並發使用時長只計一次。',
   qualityBandwidthHelp:
-    '頻寬取有效已測節點的中位數，不把節點頻寬相加。超過兩個統一週期的頻寬不參與目前評分。尚無上傳測速時顯示未檢測，不以業務上傳流量冒充上傳頻寬。',
+    '訂閱頻寬顯示各已測節點頻寬平均值的中位數。最新頻寬樣本達到兩個統一週期後，該節點的頻寬平均值不再參與評分。上傳頻寬暫未檢測，業務上傳流量另行顯示。',
   qualityFailedHelp: '歷史下載結果不代表目前可用；目前檢測失敗的節點，在訂閱評估中按 0 分計入。',
   qualityMode_login: '登入',
   qualityMode_subscription: '訂閱',
@@ -533,8 +537,7 @@ const zhTW: LANG_MESSAGE = {
   nodeInfoEntryIpv6: '入口 IPv6',
   nodeInfoIpv4Unverified: '未檢測到 IPv4 出口',
   nodeInfoUpstream: '鏈式上游',
-  nodeInfoSupported: '支援',
-  nodeInfoUnsupported: '不支援',
+  nodeInfoRelay: '中轉',
   nodeInfoHasIpv6: '有 IPv6 位址',
   nodeInfoNoIpv6: '沒有 IPv6 位址',
   nodeInfoExitIp: '出口 IPv4',
@@ -582,7 +585,7 @@ const zhTW: LANG_MESSAGE = {
   latencyReasonError: '連線失敗',
   latencyReasonStatus: '狀態碼不符',
   urlTestManualSelectTip:
-    '「{name}」是自動擇優組,走哪個節點由核心按測速自己定,不能手動指定。想換線路就點它的閃電重測一次。',
+    '「{name}」是自動優選組,走哪個節點由核心按測速自己定,不能手動指定。想換線路就點它的閃電重測一次。',
   updateFinishedTip: '{number} 更新完成',
   refreshing: '刷新中',
   independentLatencyTest: '獨立延遲測試',
@@ -602,8 +605,6 @@ const zhTW: LANG_MESSAGE = {
   label: '標籤',
   swipeInTabs: '滑動切換頁面二級標籤',
   swipeInPages: '滑動切換頁面',
-  simpleCardPreset: '簡潔預設',
-  detailedCardPreset: '詳細預設',
   refresh: '重新整理',
   reset: '重設',
   delete: '刪除',
@@ -916,11 +917,12 @@ const zhTW: LANG_MESSAGE = {
   groupEdit: '修改分組',
   groupNameLabel: '分組名稱',
   groupTypeLabel: '分組規則',
-  groupType_urltest: '自動擇優（url-test）',
+  groupType_urltest: '自動優選（url-test）',
   groupType_selector: '手動選擇（select）',
   groupInterval: '檢測間隔',
-  groupTolerance: '容差',
-  groupUrltestHint: '定期測延遲並切到最快的;快出「容差」這麼多毫秒才切,避免抖動。',
+  groupTolerance: '延遲容差',
+  groupUrltestHint:
+    '按延遲選擇時，新節點快出設定的容差才切換。啟用帶寬擇優且健康候選有有效帶寬時，改用綜合評分。',
   groupMembersLabel: '成員',
   groupFilterAllSubscriptions: '全部',
   groupSubscriptionMissing: '已刪除的訂閱',
@@ -964,14 +966,14 @@ const zhTW: LANG_MESSAGE = {
   groupType_loadbalance: '負載均衡（load balance）',
   loadBalanceHint:
     '按連線分配至可用節點，優先選擇連線較少的節點，同等負載時輪替。多條並行連線可疊加總頻寬；已建立的連線維持原出口。',
-  loadBalanceNodesOnly: '負載均衡最多可選擇 64 個真實節點，請移除節點群組或失效成員。',
+  loadBalanceNodesOnly: '負載均衡只能選擇真實節點，請移除節點群組或失效成員。',
   groupUnitSecond: '秒',
   failoverSummary: '故障轉移 · {lanes} 個頁籤 · {count} 個節點',
   failoverStaticHint:
     '從左側選節點加入目前頁籤;最前面的頁籤是主用,後面依次備用。單節點頁籤直接使用;多節點頁籤可選自動優選(按測速選)或手動選擇(在代理頁點選)。',
   failoverTolerance: '組內延遲容差',
   failoverToleranceHint:
-    '只給多節點頁籤裡的內部自動擇優用:比目前節點快出這麼多毫秒才換;與頁籤之間的主備順序無關',
+    '僅在自動頁籤按延遲選節點時使用。啟用帶寬擇優且該頁籤有有效帶寬資料時跳過此項，主備順序照常生效。',
   failoverToleranceUnused: '所有頁籤都只有一個有效節點,組內沒有可擇優的對象,這項暫時用不上',
   failoverAdvanced: '進階設定',
   failoverTimeout: '單次檢測逾時',
@@ -992,7 +994,7 @@ const zhTW: LANG_MESSAGE = {
   failoverLaneIconInherit: '繼承分組圖示',
   failoverModeEmpty: '沒有有效節點',
   failoverModeSingle: '單節點',
-  failoverModeAuto: '自動擇優',
+  failoverModeAuto: '自動優選',
   failoverModeManual: '手動選擇',
   failoverLaneModeAuto: '自動優選',
   failoverLaneModeManual: '手動選擇',
@@ -1133,15 +1135,16 @@ const zhTW: LANG_MESSAGE = {
   subscriptionNodeDnsToggle: '訂閱 DNS 解析',
   subscriptionNodeDnsLabel: '節點網域解析（可選）',
   subscriptionNodeDnsUrlPlaceholder: 'DoH 位址,如 https://dns.example.net:2096/路徑',
-  subscriptionNodeDnsBootstrapPlaceholder: '解析 DoH 的 DNS(IP)',
+  subscriptionNodeDnsBootstrapPlaceholder: '引導 DNS（IP）',
   subscriptionNodeDnsIpPlaceholder: 'DNS IP,如 223.5.5.5 或 2001:4860:4860::8888',
   subscriptionNodeDnsInvalidIp: 'DNS 位址只能填有效的 IPv4 或 IPv6 位址',
   subscriptionNodeDnsPlainHint: '僅解析這份訂閱的節點伺服器網域,一般網站和區域網路 DNS 不受影響;節點檢測使用相同解析器。',
+  subscriptionNodeDnsDotHint: 'DoT 預設使用 853 連接埠。填寫網域時需要引導 DNS（IP）。此設定用於解析這份訂閱的節點伺服器網域，節點檢測也使用相同解析器。',
   subscriptionNodeDnsHint:
     '機場要求節點網域用它自己的 DoH 解析時填(相當於 OpenClash 的 proxy-server-nameserver / nameserver-policy)。只用來解析這份訂閱的節點伺服器網域,一般網站和區域網路的 DNS 不受影響;測速也按它解析。DoH 位址是網域時,右邊要填解析它用的 DNS(IP)。',
   subscriptionNodeDnsInvalidUrl: 'DoH 位址要以 https:// 開頭',
-  subscriptionNodeDnsInvalidBootstrap: '解析 DoH 的 DNS 只能填 IP 位址',
-  subscriptionNodeDnsNeedBootstrap: 'DoH 位址是網域,右邊要填解析它用的 DNS(IP)',
+  subscriptionNodeDnsInvalidBootstrap: '引導 DNS 要填有效的 IP 位址',
+  subscriptionNodeDnsNeedBootstrap: '上游位址是網域，請填寫解析它用的引導 DNS（IP）',
   subscriptionNodeDnsNeedUrl: '填了解析 DoH 的 DNS,還要填 DoH 位址',
   subscriptionContentPlaceholder:
     '貼上 ss:// / trojan:// / hysteria2:// 等連結,或 Clash/sing-box 設定…',
@@ -1420,6 +1423,8 @@ const zhTW: LANG_MESSAGE = {
   dnsUpstreamSaveBlocked: '{side}沒有通過測試,沒有儲存:{message}',
   dnsUpstreamInvalid: '位址只填 IPv4 / IPv6。',
   dnsUpstreamInvalidPort: '連接埠填 1~65535。',
+  dnsUpstreamInvalidDotHost: '請填寫有效的 DoT 網域或 IP 位址',
+  smartBlockConnection: '攔截連線',
   dnsUpstreamSaved: '{side}已儲存（{detail}）。',
   dnsRewriteTitle: 'DNS 重寫',
   dnsRewriteDescription:
@@ -2190,23 +2195,23 @@ const zhTW: LANG_MESSAGE = {
   bandwidthOff_urltest:
     '按延時穩定選擇一個節點，保留原有延時容差，避免小幅波動導致頻繁切換。',
   bandwidthOn_urltest:
-    '根據實測帶寬和有限的延時修正穩定選擇一個節點。初選或必須恢復重選時，分數接近的節點再參考其他業務佔用；本組自己的下載不會將當前節點擠走。正常改選需綜合分數至少高出 25%，且當前節點至少保持 60 秒；故障按原有健康確認規則處理。',
+    '至少一個健康候選有有效下載帶寬時，按延遲 40%、下載帶寬 30%、抖動 30% 評分。此時跳過延遲容差。同分保留目前節點，健康節點至少保持 60 秒。健康候選均無有效帶寬時，按延遲和容差選節點。',
   bandwidthExample_urltest:
-    'A 為 200 Mbps、300 ms，B 為 50 Mbps、50 ms。假設延時容差為 100 ms，關閉時按延時優先 B；開啟帶寬擇優後，A 的綜合分數更高。A 開始承載大下載，不會僅因本組連接變多就切去 B。',
+    'A 目前為 150 ms、10 Mbps，B 為 100 ms、300 Mbps，抖動相同。容差為 100 ms 時，按延遲可保留 A。啟用帶寬擇優且樣本有效時，保持期結束後選 B。',
   bandwidthOff_failover:
     '先遵守主用、備用頁籤順序，以及原有故障確認和恢復回切設置；自動頁籤內部按延時選擇，手動頁籤保持用戶指定的節點。',
   bandwidthOn_failover:
-    '只改變自動頁籤內部的節點擇優，綜合考慮帶寬與有限的延時修正。主備優先級、故障確認、恢復後切回開關和恢復等待均不變；備用再快也不能越過健康主用，手動頁籤不會被覆蓋。',
+    '自動頁籤內沿用 40/30/30 評分。有健康候選具備有效帶寬時，跳過組內延遲容差。否則按延遲和容差選擇。主備順序、恢復確認、回切設定及手動選擇繼續生效。',
   bandwidthExample_failover:
     '主用健康、帶寬 50 Mbps，備用帶寬 500 Mbps，仍使用主用。如果主用的自動頁籤內有兩個同延時的健康節點，分別為 200 Mbps 和 50 Mbps，則在這個頁籤內優先 200 Mbps 的節點。',
   bandwidthOff_loadbalance:
     '每個新連接優先分配給健康且連接/撥號較少的節點；佔用相同時在低延時範圍內輪換。',
   bandwidthOn_loadbalance:
-    '每個新連接選擇“（活動連接數＋正在撥號數＋1）÷（帶寬×有限的延時修正）”最小的節點。各組共享節點佔用並同時預佔；高帶寬節點可以多承擔連接，忙起來後逐步分給其他節點。已建立連接保持原出口。',
+    '新連線使用同一套 40/30/30 品質分加權。先用空閒節點，佔用相同時優先品質更高的節點。各組共享活動連線與正在撥號的佔用。健康候選均無有效帶寬時，恢復原分配規則。',
   bandwidthExample_loadbalance:
-    '同樣延時，A 為 200 Mbps，B 為 50 Mbps。兩者空閒時優先 A；A 已有 3 個連接、B 沒有連接時，下一個連接的成本相同：4÷200＝1÷50，可以輪換給 B。A 不可用時，無論歷史帶寬多高，都只考慮 B。',
+    'A 得 93 分、B 得 64 分。都空閒時先選 A，A 仍有活動連線時下一條先給空閒的 B。A 確認故障後，新連線交給 B。',
   bandwidthSharedHelp:
-    '路由器按統一週期 {hours} 小時測試，同一實際節點跨訂閱與群組去重，每次下載最多 {maxMB} MB。讀取分數不會再下載；測試失敗保留上一次有效結果；記錄缺失或過期後採用中性記錄或原有算法。下載測速失敗不會直接判節點故障。',
+    '每 {hours} 小時每個實際節點共用一次帶寬測試，每次最多下載 {maxMB} MB。帶寬取最近最多 10 次成功結果的平均值。最新結果達到兩個週期時，整組樣本停止參與評分。缺測候選暫用其他候選實測帶寬的中位數。計算評分無需增加探測。',
   bandwidthClientDisabled:
     'Android、iOS、Windows、macOS、Linux 客戶端不啟用帶寬擇優及下載測速；節點分流仍可由路由器執行自身策略。實測值反映當時條件，不保證總帶寬疊加比例。',
   nodeInfoExpandText: '展開{field}',
@@ -2246,6 +2251,12 @@ const zhTW: LANG_MESSAGE = {
 
   // ===== 对齐上游 catch-up v0.1.412 缺失键 =====
 
+  // ===== 对齐上游 v0.1.423 连接页(卡片 / 表格自定义)=====
+  connectionCardCustomize: '卡片自訂',
+  connectionTableCustomize: '表格自訂',
+  connectionCardAddRow: '新增一行',
+  connectionDevice: '終端',
+  connectionTarget: '目標',
 }
 
 export default zhTW
