@@ -1,8 +1,8 @@
 import { blockConnectionByIdAPI, disconnectByIdAPI } from '@/api'
+import ConnectionTargetRoutingButton from '@/components/connections/ConnectionTargetRoutingButton.vue'
 import { useBounceOnVisible } from '@/composables/bouncein'
 import { useConnections } from '@/composables/connections'
 import {
-  CONNECTION_TAB_TYPE,
   CONNECTIONS_TABLE_ACCESSOR_KEY,
   PROXY_CHAIN_DIRECTION,
   TARGET_ROUTING_COLUMN,
@@ -17,10 +17,9 @@ import {
   getNetworkTypeFromConnection,
   getProcessFromConnection,
 } from '@/helper'
-import { i18n } from '@/i18n'
-import { getIPLabelFromMap } from '@/helper/sourceip'
+import { getDeviceLabel } from '@/helper/sourceip'
 import { fromNow, isMiddleScreen, prettyBytesHelper } from '@/helper/utils'
-import { connectionTabShow } from '@/store/connections'
+import { i18n } from '@/i18n'
 import { connectionCardLines, proxyChainDirection } from '@/store/settings'
 import type { Connection } from '@/types'
 import {
@@ -66,12 +65,18 @@ export default defineComponent<{
       const nodeChain = [...(routingPolicy ? conn.chains.slice(0, -1) : conn.chains)].reverse()
       const componentMap: Record<ConnectionCardColumn, JSX.Element> = {
         [TARGET_ROUTING_COLUMN]: (
-          <div class="min-w-0 truncate">
-            {routingPolicy && <ProxyName name={routingPolicy} />}
-          </div>
+          <div class="min-w-0 truncate">{routingPolicy && <ProxyName name={routingPolicy} />}</div>
         ),
         [CONNECTIONS_TABLE_ACCESSOR_KEY.Host]: (
-          <span class="text-main w-80 grow truncate">{getHostFromConnection(conn)}</span>
+          <span class="inline-flex w-80 min-w-0 grow items-center gap-1">
+            <span
+              class="text-main truncate"
+              title={getHostFromConnection(conn)}
+            >
+              {getHostFromConnection(conn)}
+            </span>
+            <ConnectionTargetRoutingButton target={metadata.host || metadata.sniffHost || metadata.destinationIP || ''} />
+          </span>
         ),
         [CONNECTIONS_TABLE_ACCESSOR_KEY.Destination]: (
           <span class="w-80 grow truncate break-all">{getDestinationFromConnection(conn)}</span>
@@ -84,7 +89,7 @@ export default defineComponent<{
             class="w-40 grow truncate break-all"
             title={metadata.sourceIP || undefined}
           >
-            {getIPLabelFromMap(metadata.sourceIP)}
+            {getDeviceLabel(metadata.sourceIP)}
           </span>
         ),
         [CONNECTIONS_TABLE_ACCESSOR_KEY.SourcePort]: (
@@ -115,7 +120,9 @@ export default defineComponent<{
           >
             {chains.map((name, index) => (
               <>
-                {index > 0 && <ArrowRightCircleIcon class="h-4 w-4 shrink-0"></ArrowRightCircleIcon>}
+                {index > 0 && (
+                  <ArrowRightCircleIcon class="h-4 w-4 shrink-0"></ArrowRightCircleIcon>
+                )}
                 <ProxyName name={name} />
               </>
             ))}
@@ -217,7 +224,9 @@ export default defineComponent<{
         )
 
       // 每行固定三列;整行都是空的就跳过,全空时只显示目标
-      const filledRows = connectionCardLines.value.filter((row) => row.some((column) => column.length))
+      const filledRows = connectionCardLines.value.filter((row) =>
+        row.some((column) => column.length),
+      )
       const rows: ConnectionCardRow[] = filledRows.length
         ? filledRows
         : [[[], [], [CONNECTIONS_TABLE_ACCESSOR_KEY.Host]]]
@@ -228,7 +237,7 @@ export default defineComponent<{
           class="card app-card-inset flex cursor-pointer flex-row items-center gap-[var(--app-card-space)]"
           onClick={() => handlerInfo(conn)}
         >
-          {connectionTabShow.value !== CONNECTION_TAB_TYPE.CLOSED && actions}
+          {actions}
           <div
             class={[
               'min-w-0 flex-1 gap-y-1',
