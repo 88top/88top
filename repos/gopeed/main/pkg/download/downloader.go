@@ -2412,7 +2412,9 @@ func (d *Downloader) doStart(task *Task) (err error) {
 				return err
 			}
 		}
-		d.triggerOnStart(task)
+		if err := d.triggerOnStart(task); err != nil {
+			return err
+		}
 		if !d.taskIsRunningGeneration(task, generation) {
 			return nil
 		}
@@ -2659,11 +2661,12 @@ func logPanic(logDir string) {
 	if err := util.CreateDirIfNotExist(logDir); err != nil {
 		return
 	}
-	f, err := os.Create(filepath.Join(logDir, "crash.log"))
+	f, err := os.OpenFile(filepath.Join(logDir, "crash.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	if err != nil {
 		return
 	}
-	debug.SetCrashOutput(f, debug.CrashOptions{})
+	defer f.Close() // SetCrashOutput duplicates the descriptor.
+	_ = debug.SetCrashOutput(f, debug.CrashOptions{})
 }
 
 func (d *Downloader) assignFetcherManager(task *Task) error {
