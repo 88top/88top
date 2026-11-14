@@ -226,7 +226,7 @@ sudo install -d -m 0700 /etc/honk /var/lib/honk
 sudo install -m 0600 /path/to/config.dae /etc/honk/config.dae
 ```
 
-默认运行时根目录是 `/var/lib/honk`。旧根目录 `/var/share/honk` 中的已有资源会按各路径规则继续使用；旧缓存和订阅导入会将符合条件的状态复制到 `state/honk.db`。自定义 `data_dir` 也遵循相同的回退顺序。相对缓存、订阅存储、ECH/UI 与其他只读依赖依次检查配置目录、`/var/share/honk`，再检查调用方的旧候选路径；相对日志只会在配置目录下创建。
+默认运行时根目录是 `/var/lib/honk`。旧根目录 `/var/share/honk` 中的已有资源会按各路径规则继续使用；旧缓存和订阅导入会将符合条件的状态复制到 `state/honk.db`。自定义 `data_dir` 也遵循相同的回退顺序。相对缓存、订阅存储、ECH/UI 与其他只读依赖依次检查 `global.data_dir` 选定的运行时目录、`/var/share/honk`，再检查调用方的旧候选路径。相对日志只会在该运行时目录下创建，而不是配置文件所在目录。
 
 前台启动：
 
@@ -293,6 +293,25 @@ sysctl net.ipv4.conf.all.send_redirects net.ipv4.conf.br-lan.send_redirects net.
 ```
 
 已经收到重定向的客户端可能会继续沿用学到的路由一段时间；测试前先让它重新连接网络。
+
+#### 直连流量不通
+
+症状是客户端能打开走代理的网站，打不开直连的网站，`ping` 也不通，而 honk 主机本身访问正常。走代理的 TCP 和 UDP 由 honk 在主机上接管，再由主机另建连接；直连流量和 ICMP 则由主机转发，因此丢弃转发流量的防火墙只影响后者。以下两种防火墙设置会造成这种情况。
+
+Docker 通常会把 iptables `FORWARD` 链的默认策略设为 `DROP`，所有转发流量都会被丢弃。先检查默认策略，如果第一条命令输出 `-P FORWARD DROP`，就在 Docker 的 `DOCKER-USER` 链中放行从 LAN 接口进出的流量：
+
+```shell
+sudo iptables -S FORWARD | head -1
+sudo iptables -I DOCKER-USER -i br-lan -o br-lan -j ACCEPT
+```
+
+另一些防火墙会丢弃连接跟踪标记为 `INVALID` 的数据包，OpenWrt 的默认区域就是如此。上游路由器与客户端在同一网段，会直接回复客户端，主机因此只看到直连连接的一个方向，连接跟踪会把该连接后续的数据包标记为 `INVALID`。对转发流量做地址伪装，回复就会经过主机返回；代价是上游路由器看到的所有客户端都是主机的地址：
+
+```shell
+sudo iptables -t nat -A POSTROUTING -o br-lan -j MASQUERADE
+```
+
+OpenWrt 上改为在 LAN 区域开启 IP 动态伪装。以上 iptables 规则重启后都会失效，请把需要的那条写入主机的防火墙配置。
 
 ### 网页界面与 API
 
@@ -560,7 +579,7 @@ cargo run --release -p honk-core -- \
 | NFQUEUE disabled 或 queue busy | 检查 nftables/NFQUEUE 内核支持、队列 320 占用者和残留 honk 实例；确实不需要时设置 `nfqueue_enable: false`。 |
 | LAN 流量未被代理 | `lan_interface` 为空或接口名错误；它不会自动使用 `lo`。接口名无误时见下一行。 |
 | `GET /runtime` 出现 `interface_binding` 降级 | 某个已配置的接口尚未绑定；日志中有接口名。`pending`：接口不存在，或 `auto` 条目没有 IPv4 默认路由。`unsupported_type`：链路类型被拒绝（例如 `lo`、VRF 设备或 `dae0`）；请改配受支持的接口或其成员。`attach_failed`：TCX link 无法创建、更新或校验；日志中的警告会给出原因。接口状态字段见[原生 API 参考](./reference/api.md#原生-api)。 |
-| 旁路由的客户端绕过 honk，或转发的流量被丢弃 | 把 `all` 与 LAN 接口的 `send_redirects` 设为 `0`，并把 `net.ipv4.conf.all.rp_filter` 设为 `0`，见[旁路由](#旁路由)。 |
+| 旁路由的客户端绕过 honk，或转发的流量被丢弃 | 把 `all` 与 LAN 接口的 `send_redirects` 设为 `0`，并把 `net.ipv4.conf.all.rp_filter` 设为 `0`，见[旁路由](#旁路由)；直连流量仍不通时，见[直连流量不通](#直连流量不通)。 |
 | VLESS/VMess 报 `No handler for protocol` | 构建缺少 `rprx`；使用默认特性，或显式加入 `rprx`。 |
 | Geo 规则加载失败 | 将 `geoip.dat`/`geosite.dat` 放入配置的 `data_dir`，或检查文档所列的旧目录/共享目录搜索位置；不需要时删除未使用的 Geo 规则。 |
 | GNU 二进制在 VyOS/精简系统无法执行 | 改用同架构的 musl 发布版本。 |
