@@ -161,9 +161,10 @@ for (const fileName of runtimeScripts) {
                 /currentPageType !== 'repository'/,
                 `${fileName} should not insert before React takes over repository pages`,
             );
-            assert.ok(
-                !source.includes('batchTouchesDesc'),
-                `${fileName} should not keep the mutation-batch remount`,
+            assert.match(
+                source,
+                /currentPageType === 'repository'[\s\S]{0,160}?batchAddedDesc\(batch, CONFIG\.DESC_SELECTORS\.repository\)/,
+                `${fileName} should mount later-rendered descriptions only on repository pages`,
             );
             assert.ok(
                 !source.includes('enable_descRearm'),
