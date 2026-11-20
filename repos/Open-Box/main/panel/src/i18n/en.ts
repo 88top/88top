@@ -62,13 +62,13 @@ const en = {
   dfUpdating: 'Downloading lists…',
   dfApplied: 'Lists updated.',
   dfDescription:
-    'Off by default. When enabled, forwarded DNS queries are checked before normal resolution. DNS rewrites take priority. Supports domain, Hosts and basic Adblock rules; unsupported syntax is counted. Enabled lists follow the automatic update plan below; downloads that fail keep the last valid list.',
+    'Filter DNS queries by list. Rewrites take priority.',
   dfAuto: 'Automatic updates',
   dfAutoEvery: 'Every',
   dfAutoAt: 'at',
   dfAutoDays: '{days} days',
   dfAutoHint:
-    'Lists update once at the selected hour; the kernel loads new content itself, no restart.',
+    'Updated lists take effect automatically.',
   dfAdd: 'Add list',
   dfUpdate: 'Update lists',
   dfUpdateList: 'Update this list',
@@ -95,7 +95,7 @@ const en = {
   dfPreviewFilterBlock: 'Block',
   dfAllow: 'Allow domains',
   dfAllowHint:
-    'One domain per line. example.com matches exactly; *.example.com matches subdomains only. These exceptions override all filter lists and still use your existing DNS routing.',
+    'One domain per line. Use *.example.com for subdomains.',
   dfSaveAllow: 'Save allowed domains',
   dfRecords: 'Domain resolution queries',
   dfSearch: 'Search domain…',
@@ -108,7 +108,7 @@ const en = {
   dfPolicy: 'DNS policy',
   dfQuery: 'Search / refresh',
   dfRecordHint:
-    "Last 24 hours, up to 20,000 records. Covers queries passing through Open-Box; in dnsmasq mode, answers served by dnsmasq itself are included and the device is taken from dnsmasq's query log (unidentified ones show as Router forwarding). Client caches, bypassed traffic and encrypted DNS outside Open-Box are not included.",
+    'Open-Box DNS queries from the last 24 hours, up to 20,000.',
   dfCollectDisabled: 'Filtering is off; new records are not collected.',
   dfDisconnected: 'Waiting for the core DNS event stream; statistics may be incomplete.',
   dfTime: 'Time',
@@ -195,6 +195,45 @@ const en = {
   rule: 'Rule',
   sourceIP: 'Source IP',
   logLevel: 'Log level',
+  logAllLevels: 'All levels',
+  logSeverityTrace: 'TRACE',
+  logSeverityDebug: 'DEBUG',
+  logSeverityInfo: 'INFO',
+  logSeverityWarning: 'WARNING',
+  logSeverityError: 'ERROR',
+  logSeverityFatal: 'FATAL',
+  logSeverityPanic: 'PANIC',
+  logSeveritySilent: 'SILENT',
+  logReceiveLevel: 'Receive level',
+  logSettings: 'Log settings',
+  logGrouping: 'Log grouping',
+  logUngrouped: 'Ungrouped',
+  logOriginal: 'Original log',
+  logTime: 'Time',
+  logOutboundOrModule: 'Outbound chain / module',
+  logMessage: 'Message',
+  logDetails: 'Log details',
+  logCopy: 'Copy log',
+  logUnknownDevice: 'Unknown device',
+  logUnknownTarget: 'Unknown target',
+  logCount: '{count} logs',
+  logPause: 'Pause reception',
+  logResume: 'Resume reception',
+  logDownload: 'Download logs',
+  logClear: 'Clear logs',
+  logMessageMatched: '{connection} matches {rule} and uses {outbound}',
+  logMessageUnmatched: '{connection} matches no rule and uses {outbound}',
+  logMessageVia: '{connection} uses {outbound}',
+  logMessageInbound: 'Inbound {connection} {relation} {endpoint}',
+  logMessageOutbound: 'Outbound {connection} {relation} {endpoint}',
+  logMessageFrom: 'from',
+  logMessageTo: 'to',
+  logMessageConnection: 'connection',
+  logMessagePacketConnection: 'packet connection',
+  logMessageRedirectConnection: 'redirected connection',
+  logMessageRedirectPacketConnection: 'redirected packet connection',
+  logNodeProbe: 'Node test',
+  logLocalRouter: 'Local router',
   logType: 'Log type',
   proxyGroupLayout: 'Layout',
   proxyGroupColumnsPC: 'PC proxy group columns',
@@ -439,7 +478,7 @@ const en = {
   siteLatencyVia: 'via {chain}',
   siteLatencyAutoTest: 'Auto test on open',
   siteLatencyAutoTestHint:
-    'Test all four sites whenever the overview opens. Same switch as “Check connection on start” in Common Settings.',
+    'Test all four sites whenever the overview opens. Same switch as “Check connection on start” in Frontend Panel.',
   siteLatencyTestAll: 'Retest all four sites',
   testSitesSettings: 'Test sites',
   testSitesTip:
@@ -593,8 +632,6 @@ const en = {
   nativeRegistered: 'reg. {country}',
   nodeInfoDevices: 'Subnet devices',
   nodeInfoSourceRegistry: 'by registry',
-  nodeInfoNativeHint:
-    'Native/broadcast compares Net.Coffee registered country with geolocation; missing data remains unknown.',
   nodeInfoQuerying: 'Checking through this node…',
   nodeInfoCheckedAt: 'Checked {time}',
   nodeInfoUnknown: 'Unknown',
@@ -626,6 +663,7 @@ const en = {
   independentLatencyTestTip:
     "When enabled, the latency test will use URLs specified in the configuration file instead of zashboard's URL settings. Latency will be displayed independently based on the URLs set in policy groups.",
   search: 'Search',
+  clearInput: 'Clear input',
   searchMultiple: 'Space-separated keywords',
   importing: 'Importing...',
   hideConnection: 'Hide connection',
@@ -836,7 +874,7 @@ const en = {
   geoUpdateEvery: 'every',
   geoUpdateDays: '{days} days',
   geoUpdateHours: '{hours} hours',
-  zashboardSettings: 'Common Settings',
+  zashboardSettings: 'Frontend Panel',
   backendSettings: 'Backend Settings',
   generalSettings: 'General Settings',
   overviewCard: 'Overview Card',
@@ -1020,7 +1058,6 @@ const en = {
     'Applies to latency selection inside automatic lanes. Skip it when bandwidth preference is enabled and a healthy candidate in the lane has valid bandwidth data. Lane priority is preserved.',
   failoverToleranceUnused:
     'Every lane has a single valid node, so there is nothing to pick between inside a lane; not used for now',
-  failoverAdvanced: 'Advanced',
   failoverTimeout: 'Probe timeout',
   failoverRestore: 'Return to primary once recovered',
   failoverRestoreHint:
@@ -1197,8 +1234,8 @@ const en = {
   subscriptionNodeDnsHint:
     "Fill this in when the provider requires its own DoH to resolve node domains (like OpenClash's proxy-server-nameserver / nameserver-policy). It only resolves this subscription's node server domains; regular sites and LAN DNS are unaffected, and speed tests use it too. When the DoH URL uses a domain, enter an IP on the right to resolve it.",
   subscriptionNodeDnsInvalidUrl: 'The DoH URL must start with https://',
-  subscriptionNodeDnsInvalidBootstrap: 'Enter a valid IP address for bootstrap DNS',
-  subscriptionNodeDnsNeedBootstrap: 'Enter a bootstrap DNS IP to resolve the upstream hostname',
+  subscriptionNodeDnsInvalidBootstrap: 'Enter a valid IP address for the DoH/DoT resolver',
+  subscriptionNodeDnsNeedBootstrap: 'Enter a DNS IP to resolve the DoH/DoT server hostname',
   subscriptionNodeDnsNeedUrl: 'Enter the DoH URL too',
   subscriptionContentPlaceholder:
     'Paste ss:// / trojan:// / hysteria2:// lines, or a Clash/sing-box config…',
@@ -1211,7 +1248,6 @@ const en = {
   subscriptionDefaultName: 'Subscription',
   subscriptionPreviewEmptyHint: 'Enter a link or paste content to see a live preview here.',
   subscriptionPreviewLoading: 'Loading…',
-  subscriptionPreviewSummary: 'Found {count} nodes',
   subscriptionSkippedSummary: '{count} skipped',
   subscriptionSkippedReason: '{name} — unrecognized type ({type})',
   subscriptionSkippedPlugin:
@@ -1223,9 +1259,6 @@ const en = {
   subscriptionDroppedMore: ', and {count} more',
   subscriptionLatencyTestAll: 'Test all',
   subscriptionLatencyTestOne: 'Test',
-  subscriptionLatencyUntested: 'untested',
-  subscriptionLatencyHint:
-    'Fetches the test URL through the node once (test URL and timeout from panel settings) — the same test as the subscription card and the Proxies page. Wrong passwords or closed ports fail as they should.',
   subscriptionPreviewTabKept: 'Kept ({count})',
   subscriptionPreviewTabExcluded: 'Filtered ({count})',
   subscriptionPreviewNotImported: 'not imported',
@@ -1251,7 +1284,6 @@ const en = {
   groupDanglingMembers:
     'Group "{group}" references "{members}", which is neither a node nor a group; it will be ignored in the config',
   subscriptionResetNames: 'Reset names',
-  subscriptionResetNamesHint: 'Revert {count} manually edited name(s) to the rule-generated ones',
   subscriptionRenameCountrySearch: 'Search country/region',
   geoEntriesLink: 'Details',
   geoEntriesSearch: 'Search domains or IPs in this category',
@@ -1277,8 +1309,6 @@ const en = {
   subscriptionRenameCountryNoMatch: 'No matching country/region',
   subscriptionRenamePrefixLabel:
     'Prefix node names with the subscription name (e.g. "Airport {sep} HK-01")',
-  subscriptionRenameDisabledHint:
-    'Off: nodes keep the provider’s original names; regions are still detected by keyword for flags and region-based groups.',
   subscriptionRenameTokensHint: 'Drag to reorder:',
   subscriptionRenameUnknownLabel: 'Label for unrecognized region',
   subscriptionRenameSeqPadHint:
@@ -1411,22 +1441,21 @@ const en = {
   ipv6Title: 'IPv6',
   dnsModeTitle: 'DNS hijack',
   dnsModePort: 'DNS port {port}',
-  dnsModeDescription: 'How LAN DNS queries reach the kernel for split resolution.',
   dnsModeDnsmasq: 'dnsmasq forwarding',
   dnsModeHijack: 'Firewall hijack',
   dnsModeOff: 'Off',
   dnsModeDnsmasqNote:
-    'dnsmasq stays the LAN resolver; only its upstream points to the kernel. Local hostnames keep working. Recommended.',
+    'dnsmasq forwards external DNS queries to the core.',
   dnsModeHijackNote:
-    'The firewall rewrites every LAN query to port 53 straight to the kernel, bypassing dnsmasq.',
+    'The firewall sends port 53 queries to the core.',
   dnsModeOffNote:
-    'The kernel rewrites no DNS. Point clients at AdGuard Home / Pi-hole and point their upstream at the kernel DNS address.',
+    'Global DNS interception is off.',
   dnsModeUpstreamHint:
-    'Kernel DNS address {addr}, available in every mode; point AdGuard Home / Pi-hole upstream at it. Flush DNS caches after switching modes.',
+    'AdGuard Home / Pi-hole can use {addr}.',
   dnsModeSaved: 'DNS hijack mode saved.',
   dnsUpstreamTitle: 'DNS upstreams',
   dnsUpstreamDescription:
-    'Choose UDP, TCP or DoH for each resolver. UDP / TCP use an IP address and port; DoH uses an HTTPS URL with a DNS server to resolve its hostname. You can also pick "Upstream DNS" (the DNS assigned by DHCP or set manually on the router’s interfaces). Changes save immediately: the kernel really queries the server over the chosen protocol first and nothing is saved if that fails. Which line the proxy DNS goes through is decided by Destination routing from its address; the upstream DNS always goes direct.',
+    'Set direct and proxy DNS. Saving requires a test.',
   dnsUpstreamDirect: 'Direct DNS',
   dnsUpstreamDirectNote: 'Resolves direct domains. Defaults to the upstream DNS.',
   dnsUpstreamWan: 'Upstream DNS',
@@ -1435,7 +1464,7 @@ const en = {
   dnsUpstreamSourceIp: 'IP address',
   dnsUpstreamSourceWan: 'Upstream DNS',
   dnsUpstreamWanNotInCn:
-    'While the router is in mainland China, proxy DNS cannot use the upstream DNS: DNS in mainland China poisons foreign domains',
+    'Proxy DNS needs an explicit address in mainland China.',
   dnsUpstreamWanDirectTag: 'direct, not via proxy',
   dnsUpstreamWanProxyNote:
     'With the upstream DNS, proxy DNS queries it directly, not through the proxy',
@@ -1443,12 +1472,12 @@ const en = {
   dnsRegionCn: 'Mainland China',
   dnsRegionIntl: 'Outside mainland China',
   dnsRegionCnNote:
-    'DNS in mainland China poisons foreign domains, so proxied domains must be resolved by the proxy DNS',
+    'Use proxy DNS for domains outside mainland China.',
   dnsRegionDetecting:
-    'Working out from the public egress IP where the router is; it switches automatically when done. Click "Restore defaults" to check right now.',
+    'Detecting region from the egress IP.',
   dnsRegionDetected: 'Checked the public egress IP: router is in “{region}”',
   dnsRegionIntlNote:
-    'Hong Kong, Macao and Taiwan all count as outside mainland China. No DNS poisoning: by default proxy DNS also queries the upstream DNS directly, not through the proxy; with FakeIP on, proxied domains are resolved by the node',
+    'Both sides use upstream DNS by default.',
   dnsRegionDefaultsCn: 'direct uses the upstream DNS, proxy uses TCP 1.1.1.1',
   dnsRegionDefaultsIntl: 'both sides use the upstream DNS',
   dnsRegionScopeCn:
@@ -1459,11 +1488,11 @@ const en = {
   dnsRegionSwitched: 'Switched to “{region}”',
   dnsUpstreamProxy: 'Proxy DNS',
   dnsUpstreamProxyNote:
-    'Proxied domains use this resolver. Destination routing picks the line from its address, and the test uses the same line. DoT and DoH use encrypted connections. UDP needs a line that carries UDP.',
+    'Destination rules route proxy DNS queries.',
   dnsUpstreamProtocol: 'Protocol',
   dnsUpstreamPort: 'Port',
   dnsUpstreamDohUrl: 'DoH URL',
-  dnsUpstreamEncryptedBootstrap: 'Bootstrap DNS',
+  dnsUpstreamEncryptedBootstrap: 'DoH/DoT resolver DNS',
   dnsUpstreamDotHost: 'DoT hostname or IP address',
   dnsUpstreamTest: 'Test',
   dnsUpstreamRestore: 'Restore defaults',
@@ -1496,7 +1525,7 @@ const en = {
   dnsUpstreamProxyExtras: 'Extra proxy DNS upstreams',
   dnsUpstreamAddExtra: 'Add upstream',
   dnsUpstreamExtrasNote:
-    'One row per upstream: side, protocol, address and port. The first row of each side is the primary, the rest are backups — queried concurrently with it, whichever answers first wins, so one stalled upstream no longer blocks the client. Up to 4 per side: an IP address for UDP / TCP, an HTTPS URL for DoH, or the upstream DNS. Before saving, the kernel queries it once over the chosen protocol; it is not saved if that fails.',
+    'Each side uses the first successful DNS reply.',
   dnsUpstreamExtraDuplicate: 'That address is already in the list',
   dnsUpstreamTestVia: 'via “{policy}” → {node}',
   dnsUpstreamTestOk: '{side} is working ({detail}).',
@@ -1510,9 +1539,9 @@ const en = {
   dnsUpstreamSaved: '{side} saved ({detail}).',
   dnsRewriteTitle: 'DNS rewrites',
   dnsRewriteDescription:
-    'Answer a domain with another domain or fixed IPs; two Google rewrites are included by default to fix Google Play app download problems.',
+    'Resolve a domain to a different domain or IP.',
   dnsRewriteNote:
-    'Target / address changes reach the panel service at once, but existing answers stay until DNS caches expire. *.example.com matches subdomains only, not example.com itself.',
+    'Updates apply immediately as cached replies expire.',
   dnsRewriteEmpty: 'No rewrite rules.',
   dnsRewriteAdd: 'Add',
   dnsRewriteRestore: 'Restore defaults',
@@ -1520,14 +1549,14 @@ const en = {
   dnsRewriteEditTitle: 'Edit DNS rewrite',
   dnsRewriteSource: 'Queried domain',
   dnsRewriteSourceHint:
-    'An exact domain matches itself only; *.example.com matches a.example.com and a.b.example.com but not example.com.',
+    'Use *.example.com to match subdomains at any depth.',
   dnsRewriteTarget: 'Rewrite to',
   dnsRewriteKindDomain: 'Another domain',
   dnsRewriteKindIp: 'Fixed IPs',
   dnsRewriteDomainHint:
-    'Resolved through the current DNS policy. With *. on both sides, the entire subdomain prefix is preserved, e.g. a.b.googleapis.cn → a.b.googleapis.com. A plain target sends all matches to that one domain.',
+    'Use * on both sides to preserve the subdomain.',
   dnsRewriteIpHint:
-    'One per line, IPv4 and IPv6 may be mixed; A returns IPv4 only, AAAA returns IPv6 only (empty while IPv6 is off).',
+    'Enter one IPv4 or IPv6 address per tag.',
   dnsRewriteSavedRestart: 'DNS rewrites saved.',
   dnsRewriteSavedLive: 'DNS rewrites saved and active; cached answers update once they expire.',
   dnsRewriteBadSource: 'Invalid queried domain: use an exact domain or *.example.com.',
@@ -1541,9 +1570,9 @@ const en = {
   dnsRewriteAlreadyDefault: 'Both default rewrites are already present.',
   routeDnsRewrite: 'DNS rewrite',
   routeDnsRewriteHit: 'Rewrite: {source} → {target}',
-  dnsFakeIpTitle: 'Enable FakeIP (let the node resolve proxied domains)',
+  dnsFakeIpTitle: 'Enable FakeIP',
   dnsFakeIpNote:
-    'On by default. Proxied domains are not resolved locally: the kernel answers with a placeholder (198.19.0.0/16) and hands the domain to the node on connect. Only outbounds that carry domains (SOCKS5 / vless / vmess / trojan / hysteria…) benefit; IP-based rules ahead of the proxied sets will not match these connections.',
+    'Compatible proxy nodes resolve proxied domains.',
   bypassPortsTitle: 'Ports that skip the kernel',
   bypassPortsDescription:
     'Ports used by self-hosted services (RustDesk, NAS services behind port forwarding, etc.): TCP / UDP traffic whose destination or source port is one of these is let through before it reaches the kernel, as if Open-Box were not installed, so port forwarding and hole punching keep working. Unlike a "port → direct" row in the custom rules, which has already entered the kernel and is re-dialed by it, scrambling NAT. The blacklist and whitelist are kept separately; only the selected one applies.',
@@ -1629,7 +1658,6 @@ const en = {
   proxiesGoToKernel: 'Go to kernel settings',
   kernelActionStart: 'Start',
   kernelActionStop: 'Stop',
-  kernelActionStopHint: 'Also turns off autostart, so the core stays stopped after a reboot.',
   kernelActionRestart: 'Restart',
   kernelActionEnable: 'Enable autostart',
   kernelActionDisable: 'Disable autostart',
@@ -2275,19 +2303,19 @@ const en = {
     'This node is not dialed directly; it is reached through the upstream chosen below. A domain server is fine: the upstream resolves it. Residential http:// https:// or host:port:user:pass credentials are used as an HTTP proxy.',
   chainProxyUpstreamLabel: 'Upstream',
   chainProxyHint:
-    'Pick a node or node group as the upstream. After saving, the node shows up among node candidates (source "Chain proxy"): add it to a node group, or pick it directly as the outbound in pre-routing rules / client routing. Dynamic node groups never pick it up automatically. Takes effect on save, no kernel restart.',
+    'Connect through the selected node or group.',
   chainProxyTest: 'Test',
   chainProxyTestFailed: 'Unreachable',
   chainProxyIpUnknown: 'IP location unknown',
   chainProxyLatencyNotInKernel:
-    'Not in the core (disabled, or its upstream is unavailable): latency comes from a separate request through this chain and includes one core start, so it reads high',
+    'Starting a test core may increase latency.',
   chainProxyTestVia: 'via {via}',
   chainProxyExitIp: 'Exit IP',
   chainProxyIpDetail: 'IP details',
   chainProxyIpDetailTip: 'View this exit IP on {site} (new tab)',
   chainProxyIpFailed: 'Could not get IP info: {error}',
   chainProxyTestHint:
-    'Tests what is filled in above, no need to save first: sends one real request through the node the upstream currently uses (same method as the node test in subscription preview; the latency includes one core start, so it reads a bit higher than in the list). Test URL, timeout and IP info API come from panel settings.',
+    'Test through the upstream before saving.',
   chainProxyVia: 'via {upstream}',
   chainProxyUpstreamMissing: 'Upstream "{name}" no longer exists',
   chainProxyErrName: 'Name is required',
@@ -2355,10 +2383,6 @@ const en = {
   nodeInfoExpandText: 'Expand {field}',
   nodeInfoCollapseText: 'Collapse {field}',
   nodeTrafficEstimate: 'Human / bot (estimate)',
-  nodeTrafficAsnHelp:
-    'Net.Coffee: 28-day ASN aggregate adjusted by this IP’s risk signals; not measured router traffic.',
-  nodeTrafficEstimateHelp:
-    'Net.Coffee network-type and IP risk estimate; not measured router traffic.',
   nodeTrafficRatio: 'Human {human}%, bot {bot}%',
   nodeTrafficHuman: 'Human',
   nodeTrafficBot: 'Bot',
@@ -2372,8 +2396,6 @@ const en = {
   nodeRiskBlacklist: 'HTTP honeypot blacklist',
   nodeRiskRpki: 'RPKI status',
   nodeRiskUnverified: 'Unverified',
-  nodeRiskRpkiReported:
-    'Net.Coffee reports {value}, but does not provide the announced BGP prefix and matching ROA evidence. This is not a verified validity verdict.',
   nodeRiskDeep: 'Risk detection',
   nodeRiskVpn: 'VPN',
   nodeRiskProxy: 'Proxy',
