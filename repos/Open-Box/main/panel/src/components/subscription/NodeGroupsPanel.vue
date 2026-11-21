@@ -222,90 +222,24 @@
                 <option value="loadbalance">{{ $t('groupType_loadbalance') }}</option>
               </select>
             </div>
-            <!-- 故障转移:检测间隔按秒填(按设定间隔进行健康检查,不是分钟级的择优测速);容差只给多节点页签里的
-                 内部自动择优用,页签全是单节点时没有用武之地,置灰说明;超时 / 回切直接排在同一行右侧 -->
-            <template v-if="isFailover">
-              <div class="flex flex-col gap-1">
-                <label class="text-xs font-medium">{{ $t('groupInterval') }}</label>
-                <div class="flex items-center gap-1">
-                  <input
-                    v-model.number="intervalSeconds"
-                    type="number"
-                    min="5"
-                    max="86400"
-                    class="input input-sm w-20 max-sm:w-14"
-                    @blur="normalizeIntervalSeconds"
-                  />
-                  <span class="text-base-content/60 text-xs">{{ $t('groupUnitSecond') }}</span>
-                </div>
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  class="text-xs font-medium"
-                  v-tip="allLanesSingle ? $t('failoverToleranceUnused') : $t('failoverToleranceHint')"
-                >{{ $t('failoverTolerance') }}</label>
-                <div class="flex items-center gap-1">
-                  <input
-                    v-model.number="draft.tolerance"
-                    type="number"
-                    min="0"
-                    class="input input-sm w-20 max-sm:w-14"
-                    :disabled="allLanesSingle"
-                  />
-                  <span class="text-base-content/60 text-xs">{{ $t('groupUnitMs') }}</span>
-                </div>
-              </div>
-              <div
-                v-if="failoverSettings"
-                class="group-advanced ml-auto flex min-w-0 flex-nowrap items-end gap-3 max-sm:basis-full max-sm:gap-2"
-              >
-                <div class="flex flex-col gap-1">
-                  <label class="text-xs font-medium">{{ $t('failoverTimeout') }}</label>
-                  <div class="flex items-center gap-1">
-                    <input
-                      v-model.number="timeoutSeconds"
-                      type="number"
-                      min="1"
-                      max="60"
-                      class="input input-sm w-20 max-sm:w-14"
-                    />
-                    <span class="text-base-content/60 text-xs">{{ $t('groupUnitSecond') }}</span>
-                  </div>
-                </div>
-                <label class="flex h-8 cursor-pointer items-center gap-2">
-                  <input
-                    v-model="failoverSettings.restorePrimary"
-                    type="checkbox"
-                    class="toggle toggle-sm"
-                  />
-                  <span
-                    class="text-xs font-medium"
-                    v-tip="$t('failoverRestoreHint')"
-                  >{{ $t('failoverRestore') }}</span>
-                </label>
-                <div
-                  v-if="failoverSettings.restorePrimary"
-                  class="flex flex-col gap-1"
-                >
-                  <label
-                    class="text-xs font-medium"
-                    v-tip="$t('failoverHoldHint')"
-                  >{{ $t('failoverHold') }}</label>
-                  <div class="flex items-center gap-1">
-                    <input
-                      v-model.number="recoveryHoldSeconds"
-                      type="number"
-                      min="0"
-                      max="86400"
-                      class="input input-sm w-20 max-sm:w-14"
-                    />
-                    <span class="text-base-content/60 text-xs">{{ $t('groupUnitSecond') }}</span>
-                  </div>
-                </div>
-              </div>
-            </template>
+            <!-- 故障转移:检测间隔 / 容差 / 超时 / 回切收进「参数设定」弹窗,点确认才写回草稿 -->
+            <button
+              v-if="isFailover"
+              ref="failoverParamsButton"
+              type="button"
+              class="btn btn-ghost btn-xs h-8 shrink-0 font-normal"
+              aria-haspopup="dialog"
+              :aria-expanded="showFailoverParams"
+              @click="openFailoverParams"
+            >
+              {{ $t('failoverParameters') }}
+              <Cog6ToothIcon
+                class="h-4 w-4"
+                aria-hidden="true"
+              />
+            </button>
             <!-- 检测间隔/容差只对 urltest 有意义:selector 是手动选,不会自己去测;负载均衡会测速但没有容差 -->
-            <template v-else-if="draft.type === 'urltest' || isLoadBalance">
+            <template v-if="draft.type === 'urltest' || isLoadBalance">
               <div class="flex flex-col gap-1">
                 <label class="text-xs font-medium">{{ $t('groupInterval') }}</label>
                 <div class="flex items-center gap-1">
@@ -358,12 +292,28 @@
               >
                 <QuestionMarkCircleIcon class="h-4 w-4" />
               </button>
-              <span class="text-base-content/60 text-xs">{{ $t('bandwidthPeriodSummary', { hours: bandwidthSettings.intervalHours }) }}</span>
             </div>
+            <button
+              v-if="draft.type !== 'selector'"
+              type="button"
+              class="btn btn-ghost btn-xs ml-auto h-8 shrink-0 font-normal"
+              :aria-controls="customTestUrlId"
+              :aria-expanded="showCustomTestUrl"
+              @click="showCustomTestUrl = !showCustomTestUrl"
+            >
+              {{ $t('groupCustomTestUrl') }}
+              <ChevronDownIcon
+                class="h-4 w-4 transition-transform"
+                :class="{ 'rotate-180': showCustomTestUrl }"
+                aria-hidden="true"
+              />
+            </button>
           </div>
-          <!-- 测速地址 + 可接受状态码:单独排一整行,不挤在规则 / 间隔 / 容差那一行里 -->
+          <!-- 测速地址 + 可接受状态码:默认折叠,点「自定义测速地址」展开;单独排一整行 -->
           <div
             v-if="draft.type !== 'selector'"
+            v-show="showCustomTestUrl"
+            :id="customTestUrlId"
             class="flex min-w-0 gap-3 max-sm:flex-col"
           >
             <div class="flex min-w-0 flex-1 flex-col gap-1">
@@ -404,13 +354,9 @@
             </button>
           </div>
           <!-- 成员怎么来:动态组按关键词现算,静态组手工挑。放在这儿是因为下面整块
-               (穿梭框 / 关键词框)都归它管。故障转移只有静态一种,不给切换 -->
-          <p
-            v-if="isFailover"
-            class="text-base-content/60 text-xs"
-          >{{ $t('failoverStaticHint') }}</p>
+               (穿梭框 / 关键词框)都归它管。故障转移只有静态一种,不给切换(也没有说明文字,与上游 v0.1.473 一致) -->
           <div
-            v-else
+            v-if="!isFailover"
             class="flex flex-wrap items-center justify-between gap-2"
           >
             <div
@@ -604,6 +550,7 @@
                     ghost-class="opacity-40"
                     item-key="id"
                     role="tablist"
+                    :aria-label="$t('failoverLaneOrderHint')"
                     class="tabs-box tabs tabs-xs min-w-0 flex-nowrap overflow-x-auto overflow-y-hidden"
                   >
                     <template #item="{ element: lane, index }">
@@ -739,11 +686,34 @@
           class="grid min-h-0 flex-1 grid-rows-[minmax(0,max-content)_minmax(4rem,1fr)] gap-2"
         >
           <div class="flex min-h-0 flex-col gap-1 overflow-y-auto overscroll-contain [&>*]:shrink-0">
-            <label class="text-xs font-medium">{{ $t('groupKeywordsLabel') }}</label>
-            <input
-              v-model="keywordsText"
-              type="text"
-              class="input input-sm w-full"
+            <div class="flex min-w-0 flex-wrap items-baseline gap-1 text-xs">
+              <label class="font-medium">{{ $t('groupKeywordsLabel') }}</label>
+              <div class="ms-auto flex min-w-0 flex-wrap items-baseline justify-end gap-1">
+                <span
+                  v-if="excludeSummary"
+                  class="text-base-content/70 min-w-0 break-words"
+                >{{ $t('groupExcludeKeywordsSummary', { keywords: excludeSummary }) }}</span>
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-xs shrink-0 font-normal"
+                  @click="showExclude = true"
+                >
+                  {{ $t(excludeSummary ? 'groupExcludeKeywordsEdit' : 'groupExcludeKeywords') }}
+                  <PencilSquareIcon
+                    class="size-3.5"
+                    aria-hidden="true"
+                  />
+                </button>
+              </div>
+            </div>
+            <TagInput
+              v-if="draft"
+              ref="keywordInput"
+              v-model="draft.keywords"
+              v-model:pending="keywordPending"
+              unique
+              clearable
+              :label="$t('groupKeywordsLabel')"
               :placeholder="$t('groupKeywordsPlaceholder')"
             />
             <p class="text-base-content/50 text-xs">
@@ -774,12 +744,164 @@
       </div>
     </DialogWrapper>
 
+    <!-- 排除关键词:动态组先按关键词选节点,再把命中排除词的移出去 -->
+    <DialogWrapper
+      v-model="showExclude"
+      :title="$t('groupExcludeKeywords')"
+      box-class="w-full max-w-lg"
+    >
+      <div
+        v-if="draft"
+        class="flex flex-col gap-3 p-2"
+      >
+        <div
+          role="tablist"
+          :aria-label="$t('groupExcludeKeywordsMode')"
+          class="tabs-box tabs tabs-xs w-fit"
+        >
+          <button
+            v-for="m in (['or', 'and'] as const)"
+            :key="m"
+            type="button"
+            role="tab"
+            :aria-selected="(draft.excludeKeywordMode === 'and') === (m === 'and')"
+            :class="['tab', (draft.excludeKeywordMode === 'and') === (m === 'and') && 'tab-active']"
+            @click="draft.excludeKeywordMode = m"
+          >
+            {{ m.toUpperCase() }}
+          </button>
+        </div>
+        <TagInput
+          ref="excludeInput"
+          v-model="draft.excludeKeywords"
+          v-model:pending="excludePending"
+          unique
+          clearable
+          :label="$t('groupExcludeKeywords')"
+          :placeholder="$t('groupKeywordsPlaceholder')"
+        />
+        <p class="text-base-content/50 text-xs">
+          {{ $t(draft.excludeKeywordMode === 'and' ? 'groupExcludeKeywordsAllHint' : 'groupExcludeKeywordsHint') }}
+        </p>
+      </div>
+      <template #footer>
+        <button
+          type="button"
+          class="btn btn-sm"
+          @click="showExclude = false"
+        >
+          {{ $t('close') }}
+        </button>
+      </template>
+    </DialogWrapper>
+
     <BandwidthHelpDialog
       v-model="showBandwidthHelp"
       :mode="draft?.type || 'urltest'"
       :hours="bandwidthSettings.intervalHours"
       :max-m-b="bandwidthSettings.maxDownloadMB"
     />
+
+    <!-- 故障转移「参数设定」:在副本上改,确认才写回草稿;取消 / 关闭不留痕 -->
+    <DialogWrapper
+      v-model="showFailoverParams"
+      :title="$t('failoverParameters')"
+      box-class="w-full max-w-md"
+    >
+      <template #footer>
+        <button
+          type="button"
+          class="btn btn-sm"
+          @click="showFailoverParams = false"
+        >
+          {{ $t('cancel') }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          @click="applyFailoverParams"
+        >
+          {{ $t('confirm') }}
+        </button>
+      </template>
+      <div
+        v-if="paramsDraft"
+        class="flex flex-col gap-3"
+      >
+        <label class="flex flex-col gap-1">
+          <span class="text-xs font-medium">{{ $t('groupInterval') }}</span>
+          <span class="flex items-center gap-1">
+            <input
+              ref="failoverIntervalInput"
+              v-model.number="paramsIntervalSeconds"
+              type="number"
+              min="5"
+              max="86400"
+              class="input input-sm min-w-0 flex-1"
+            />
+            <span class="text-base-content/60 text-xs">{{ $t('groupUnitSecond') }}</span>
+          </span>
+        </label>
+        <label
+          v-tip="allLanesSingle ? $t('failoverToleranceUnused') : $t('failoverToleranceHint')"
+          class="flex flex-col gap-1"
+        >
+          <span class="text-xs font-medium">{{ $t('failoverTolerance') }}</span>
+          <span class="flex items-center gap-1">
+            <input
+              v-model.number="paramsDraft.tolerance"
+              type="number"
+              min="0"
+              max="60000"
+              class="input input-sm min-w-0 flex-1"
+              :disabled="allLanesSingle"
+            />
+            <span class="text-base-content/60 text-xs">{{ $t('groupUnitMs') }}</span>
+          </span>
+        </label>
+        <label class="flex flex-col gap-1">
+          <span class="text-xs font-medium">{{ $t('failoverTimeout') }}</span>
+          <span class="flex items-center gap-1">
+            <input
+              v-model.number="paramsTimeoutSeconds"
+              type="number"
+              min="1"
+              max="60"
+              class="input input-sm min-w-0 flex-1"
+            />
+            <span class="text-base-content/60 text-xs">{{ $t('groupUnitSecond') }}</span>
+          </span>
+        </label>
+        <label
+          v-if="paramsDraft.failover.restorePrimary"
+          v-tip="$t('failoverHoldHint')"
+          class="flex flex-col gap-1"
+        >
+          <span class="text-xs font-medium">{{ $t('failoverHold') }}</span>
+          <span class="flex items-center gap-1">
+            <input
+              v-model.number="paramsHoldSeconds"
+              type="number"
+              min="0"
+              max="86400"
+              class="input input-sm min-w-0 flex-1"
+            />
+            <span class="text-base-content/60 text-xs">{{ $t('groupUnitSecond') }}</span>
+          </span>
+        </label>
+        <label class="flex cursor-pointer items-center gap-2">
+          <input
+            v-model="paramsDraft.failover.restorePrimary"
+            type="checkbox"
+            class="toggle toggle-sm"
+          />
+          <span
+            v-tip="$t('failoverRestoreHint')"
+            class="text-xs font-medium"
+          >{{ $t('failoverRestore') }}</span>
+        </label>
+      </div>
+    </DialogWrapper>
 
     <!-- 删有成员的页签先确认(草稿内的动作,取消整个弹窗也不会落库) -->
     <DialogWrapper
@@ -788,7 +910,7 @@
     >
       <div class="flex flex-col gap-4 p-2">
         <p class="text-sm">
-          {{ $t('failoverDeleteLaneConfirm', { lane: pendingLane ? laneLabelOf(pendingLane) : '', count: pendingLane?.members.length ?? 0 }) }}
+          {{ $t('failoverDeleteLaneConfirm', { lane: pendingLane ? laneLabelOf(pendingLane) : '' }) }}
         </p>
         <div class="flex justify-end gap-2">
           <button
@@ -1006,6 +1128,7 @@ import type {
 import { fetchDefaultNodeGroups, fetchNodeGroups, saveNodeGroups } from '@/api/openbox'
 import BulkPick from '@/components/subscription/BulkPick.vue'
 import SubscriptionFilter from '@/components/subscription/SubscriptionFilter.vue'
+import TagInput from '@/components/common/TagInput.vue'
 import CountryFlag from '@/components/common/CountryFlag.vue'
 import CountrySelect from '@/components/common/CountrySelect.vue'
 import { kernelTestUrl } from '@/helper/testUrl'
@@ -1018,8 +1141,10 @@ import DialogWrapper from '@/components/common/DialogWrapper.vue'
 import BandwidthHelpDialog from '@/components/subscription/BandwidthHelpDialog.vue'
 import {
   Bars3Icon,
+  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  Cog6ToothIcon,
   PencilSquareIcon,
   PlusIcon,
   PowerIcon,
@@ -1042,6 +1167,20 @@ const loading = ref(false)
 // 带宽择优的统一测速参数(档案里的 bandwidth),只读:帮助弹窗和开关旁的周期说明用,改它去「内核」页
 const bandwidthSettings = ref<OpenboxBandwidthSettings>({ intervalHours: 2, maxDownloadMB: 64 })
 const showBandwidthHelp = ref(false)
+
+// 关键词标签输入:还没回车提交的文字放在 pending 里,保存 / 关弹窗时由 commit() 收进标签
+const keywordInput = ref<InstanceType<typeof TagInput> | null>(null)
+const excludeInput = ref<InstanceType<typeof TagInput> | null>(null)
+const keywordPending = ref('')
+const excludePending = ref('')
+const showExclude = ref(false)
+watch(showExclude, (open) => {
+  if (!open) excludeInput.value?.commit()
+})
+// 编辑器标题行里的排除词摘要:OR / AND 连接
+const excludeSummary = computed(() =>
+  (draft.value?.excludeKeywords || []).join(draft.value?.excludeKeywordMode === 'and' ? ' AND ' : ' OR '),
+)
 // 提示一律走右上角那套 toast(zashboard 自带的 showNotification),不在页面里挂
 // 内联文字:内联的会把列表往下顶、切走再回来还在,而且同一屏里两种提示样式看着
 // 像两套东西。
@@ -1120,12 +1259,19 @@ const matchedNodes = (group: OpenboxUserGroup) => {
   const scoped = scopeIds.length
     ? matchableNodes.value.filter((n) => n.subscriptionId && scopeIds.includes(n.subscriptionId))
     : matchableNodes.value
-  if (!keywords.length) return scoped.map((n) => n.name)
+  // 排除词:全是空词时不排除任何节点(与 core 一致);or 命中任一就移出,and 要全部命中才移出
+  const excludes = (group.excludeKeywords || []).filter((kw) => kw.trim())
+  const excluded = (text: string) =>
+    excludes.length > 0 &&
+    (group.excludeKeywordMode === 'and'
+      ? excludes.every((kw) => keywordMatches(text, kw))
+      : excludes.some((kw) => keywordMatches(text, kw)))
+  if (!keywords.length) return scoped.filter((n) => !excluded(n.text)).map((n) => n.name)
   return scoped
     .filter((n) =>
-      group.keywordMode === 'and'
+      (group.keywordMode === 'and'
         ? keywords.every((kw) => keywordMatches(n.text, kw))
-        : keywords.some((kw) => keywordMatches(n.text, kw)),
+        : keywords.some((kw) => keywordMatches(n.text, kw))) && !excluded(n.text),
     )
     .map((n) => n.name)
 }
@@ -1178,6 +1324,11 @@ const openEditor = (group: OpenboxUserGroup | null) => {
   if (draft.value) {
     if (!draft.value.mode) draft.value.mode = 'static'
     if (!draft.value.keywords) draft.value.keywords = []
+    if (!draft.value.excludeKeywords) draft.value.excludeKeywords = []
+    if (draft.value.excludeKeywordMode !== 'and') draft.value.excludeKeywordMode = 'or'
+    keywordPending.value = ''
+    excludePending.value = ''
+    showExclude.value = false
     draft.value.subscriptionIds = scopeIdsOf(draft.value)
     delete draft.value.subscriptionId
     if (draft.value.icon === undefined) draft.value.icon = ''
@@ -1219,7 +1370,6 @@ const ensureFailoverFields = (d: OpenboxUserGroup) => {
   if (d.expectedStatus === undefined) d.expectedStatus = ''
   d.failover = { ...FAILOVER_DEFAULTS, ...(d.failover || {}) }
 }
-const failoverSettings = computed(() => (draft.value?.type === 'failover' ? draft.value.failover ?? null : null))
 const activeLaneId = ref('')
 const activeLane = computed(() => draft.value?.lanes?.find((l) => l.id === activeLaneId.value) ?? null)
 const nodeNameSet = computed(() => new Set(availableNodes.value.map((n) => n.name)))
@@ -1290,38 +1440,70 @@ const confirmDeleteLane = () => {
   pendingLane.value = null
   showLaneDelete.value = false
 }
-// 界面上按秒填,存的是 sing-box 认的 "Ns"。输入过程中不套最小值,
-// 否则输入 120 会先经过 1、12,每一步都被钳成 5,失焦时再统一校正。
-const intervalSeconds = computed<number>({
+// 故障转移「参数设定」弹窗:界面按秒填,存的是 sing-box 认的 "Ns"。弹窗里改的是副本,确认才写回草稿。
+// 输入过程中不套最小值,否则输入 120 会先经过 1、12,每一步都被钳成 5;确认时再统一校正。
+type FailoverParamsDraft = { interval: string; tolerance: number; failover: OpenboxFailoverSettings }
+const showFailoverParams = ref(false)
+const paramsDraft = ref<FailoverParamsDraft | null>(null)
+const failoverParamsButton = ref<HTMLButtonElement | null>(null)
+const failoverIntervalInput = ref<HTMLInputElement | null>(null)
+const clampInt = (v: number, min: number, max: number, fallback: number) =>
+  Number.isFinite(v) ? Math.min(max, Math.max(min, Math.floor(v))) : fallback
+const openFailoverParams = () => {
+  const d = draft.value
+  if (d?.type !== 'failover' || !d.failover) return
+  paramsDraft.value = { interval: d.interval ?? '', tolerance: d.tolerance, failover: { ...d.failover } }
+  showFailoverParams.value = true
+}
+const applyFailoverParams = () => {
+  const d = draft.value
+  const p = paramsDraft.value
+  if (d?.type !== 'failover' || !p) return
+  d.interval = p.interval
+  d.tolerance = clampInt(p.tolerance ?? 100, 0, 60000, 100)
+  d.failover = { ...p.failover }
+  normalizeIntervalSeconds()
+  showFailoverParams.value = false
+}
+// 弹窗打开时焦点落在第一个输入框,关闭后回到「参数设定」按钮
+watch(
+  showFailoverParams,
+  (open) => {
+    if (open) failoverIntervalInput.value?.focus()
+    else failoverParamsButton.value?.focus()
+  },
+  { flush: 'post' },
+)
+const paramsIntervalSeconds = computed<number>({
   get: () => {
-    const m = /^(\d+)s$/.exec(draft.value?.interval || '')
+    const m = /^(\d+)s$/.exec(paramsDraft.value?.interval || '')
     return m ? Number(m[1]) : 300
   },
   set: (v: number) => {
-    if (!draft.value) return
-    const n = Number.isFinite(v) ? Math.min(86400, Math.max(0, Math.floor(v))) : 300
-    draft.value.interval = `${n}s`
+    if (!paramsDraft.value) return
+    paramsDraft.value.interval = `${clampInt(v, 0, 86400, 300)}s`
   },
 })
-const timeoutSeconds = computed<number>({
-  get: () => Math.round((failoverSettings.value?.timeoutMs ?? 5000) / 1000),
+const paramsTimeoutSeconds = computed<number>({
+  get: () => Math.round((paramsDraft.value?.failover.timeoutMs ?? 5000) / 1000),
   set: (v: number) => {
-    if (!failoverSettings.value) return
-    failoverSettings.value.timeoutMs = (Number.isFinite(v) ? Math.min(60, Math.max(1, Math.floor(v))) : 5) * 1000
+    if (paramsDraft.value) paramsDraft.value.failover.timeoutMs = clampInt(v, 1, 60, 5) * 1000
   },
 })
-const recoveryHoldSeconds = computed<number>({
-  get: () => Math.round((failoverSettings.value?.recoveryHoldMs ?? 60000) / 1000),
+const paramsHoldSeconds = computed<number>({
+  get: () => Math.round((paramsDraft.value?.failover.recoveryHoldMs ?? 60000) / 1000),
   set: (v: number) => {
-    if (!failoverSettings.value) return
-    failoverSettings.value.recoveryHoldMs = (Number.isFinite(v) ? Math.min(86400, Math.max(0, Math.floor(v))) : 60) * 1000
+    if (paramsDraft.value) paramsDraft.value.failover.recoveryHoldMs = clampInt(v, 0, 86400, 60) * 1000
   },
 })
+// 「自定义测速地址」折叠区:默认收起
+const showCustomTestUrl = ref(false)
+const customTestUrlId = `group-test-url-${Math.random().toString(36).slice(2, 8)}`
 
 // 类型切换:普通 ↔ 故障转移之间成员形状不同,两边各留一份草稿便于切回;组成员进不了页签的列出来拦住保存
 const lastType = ref<OpenboxGroupType>('urltest')
 const blockedMembers = ref<string[]>([])
-let normalBackup: { mode: OpenboxUserGroup['mode']; members: string[]; keywords: string[]; interval?: string } | null = null
+let normalBackup: { mode: OpenboxUserGroup['mode']; members: string[]; keywords: string[]; excludeKeywords: string[]; interval?: string } | null = null
 let failoverBackup: { lanes: OpenboxFailoverLane[] } | null = null
 const onTypeChange = () => {
   const d = draft.value
@@ -1331,7 +1513,7 @@ const onTypeChange = () => {
   lastType.value = next
   if (prev === next) return
   if (next === 'failover') {
-    normalBackup = { mode: d.mode, members: [...d.members], keywords: [...(d.keywords || [])], interval: d.interval }
+    normalBackup = { mode: d.mode, members: [...d.members], keywords: [...(d.keywords || [])], excludeKeywords: [...(d.excludeKeywords || [])], interval: d.interval }
     if (failoverBackup) {
       d.lanes = failoverBackup.lanes.map((l) => ({ ...l, members: [...l.members] }))
     } else {
@@ -1351,6 +1533,7 @@ const onTypeChange = () => {
     d.mode = normalBackup?.mode ?? 'static'
     d.members = normalBackup ? [...normalBackup.members] : []
     d.keywords = normalBackup ? [...normalBackup.keywords] : []
+    d.excludeKeywords = normalBackup ? [...normalBackup.excludeKeywords] : []
     d.interval = normalBackup?.interval && /^(\d+)(s|m|h)$/.test(normalBackup.interval) ? normalBackup.interval : '300s'
     if (typeof d.tolerance !== 'number') d.tolerance = 100
   }
@@ -1532,18 +1715,6 @@ const moveLeft = () => {
   members.value = members.value.filter((n) => !drop.has(n))
   checkedSelected.value = []
 }
-
-// 关键词在界面上是一行逗号分隔的文本,存下去是数组
-const keywordsText = computed({
-  get: () => (draft.value?.keywords || []).join(','),
-  set: (v: string) => {
-    if (!draft.value) return
-    draft.value.keywords = v
-      .split(',')
-      .map((k) => k.trim())
-      .filter(Boolean)
-  },
-})
 
 // 按当前节点实时算一遍:关键词写完能立刻看到会选中谁,不用保存了再回来看
 const dynamicMatched = computed(() => (draft.value ? matchedNodes(draft.value) : []))
@@ -1735,6 +1906,9 @@ const normalizeExpectedStatus = (raw: string | undefined): string | null => {
 const showTypeChangeConfirm = ref(false)
 const saveDraft = async (typeChangeConfirmed = false) => {
   if (!draft.value || saving.value) return
+  // 还停在输入框里没回车的关键词先收进标签,免得保存时丢掉
+  keywordInput.value?.commit()
+  excludeInput.value?.commit()
   // 保存时再做一次范围校正,避免输入框尚未触发 blur 时把临时值写进配置。
   if (draft.value.type === 'urltest' || draft.value.type === 'failover' || draft.value.type === 'loadbalance') normalizeIntervalSeconds()
   if (draft.value.type === 'selector') delete draft.value.bandwidth
@@ -1792,6 +1966,15 @@ const saveDraft = async (typeChangeConfirmed = false) => {
   try {
     // 组自己的测速地址保留用户选择的 HTTP / HTTPS 协议
     const base: OpenboxUserGroup = { ...draft.value, name, id: draft.value.id || `g-${Date.now()}`, testUrl: kernelTestUrl(draft.value.testUrl), expectedStatus: expectedStatus ?? '' }
+    // 排除词只对动态组有意义;空数组不写,和服务端 / 上游的序列化一致
+    const excludes = (base.excludeKeywords || []).map((k) => k.trim()).filter(Boolean)
+    if (base.mode === 'dynamic' && !isFailover.value && excludes.length) {
+      base.excludeKeywords = excludes
+      base.excludeKeywordMode = base.excludeKeywordMode === 'and' ? 'and' : 'or'
+    } else {
+      delete base.excludeKeywords
+      delete base.excludeKeywordMode
+    }
     let item: OpenboxUserGroup
     if (isFailover.value) {
       // 页签是唯一的成员来源:members / keywords 清空;页签名去掉首尾空白

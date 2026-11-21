@@ -147,9 +147,20 @@ const en = {
   systemMemoryUsedFull: 'Used memory',
   systemMemoryOpenbox: 'Open-Box',
   systemCpuTotal: 'Total CPU usage',
-  latencyThresholds: 'Latency thresholds',
-  bandwidthThresholds: 'Bandwidth thresholds',
-  cpuLoadThresholds: 'Load thresholds',
+  detectionThresholds: 'Detection thresholds',
+  latencyThresholds: 'Latency',
+  bandwidthThresholds: 'Bandwidth',
+  cpuLoadThresholds: 'Load',
+  latencyLowShort: 'Low',
+  latencyModerateShort: 'Moderate',
+  latencySevereShort: 'Severe',
+  latencyTimeoutShort: 'Timeout',
+  bandwidthPoorShort: 'Insufficient',
+  bandwidthAdequateShort: 'Moderate',
+  bandwidthGoodShort: 'Sufficient',
+  cpuLoadLowShort: 'Low',
+  cpuLoadMediumShort: 'Moderate',
+  cpuLoadHighShort: 'High',
   cpuLoadLowDesc: 'Low load (green)',
   cpuLoadMediumDesc: 'Moderate load (amber)',
   statActiveTerminals: 'Active devices',
@@ -265,6 +276,7 @@ const en = {
   expectedStatusInvalid:
     'Invalid accepted status: codes or ranges joined by "/", e.g. 200-299 or 204',
   groupTestUrl: 'Test URL',
+  groupCustomTestUrl: 'Custom test URL',
   directTestUrlHint:
     'Only for the built-in direct outbound. Supports HTTP / HTTPS; HTTP by default.',
   testUrlHint:
@@ -407,6 +419,7 @@ const en = {
   latencydesc: 'Latency descending',
   latencyasc: 'Latency ascending',
   language: 'Language',
+  languageLoadFailed: 'Could not load the selected language.',
   automaticDisconnection: 'Auto disconnect on node switch',
   backend: 'Backend',
   tunMode: 'Tun mode',
@@ -491,9 +504,12 @@ const en = {
   globalIP: 'Global IP',
   networkInfo: 'Network info',
   customBackgroundURL: 'Background',
+  showPanelBackground: 'Show panel background',
   manageHiddenGroup: 'Manage hidden groups',
   transparent: 'Transparency',
   globalRadius: 'Global corner radius',
+  numberDecrease: 'Decrease {label}',
+  numberIncrease: 'Increase {label}',
   proxyGroupIconSize: 'Proxy group icon size',
   proxyGroupIconMargin: 'Proxy group icon margin',
   allowLan: 'Allow LAN',
@@ -538,7 +554,7 @@ const en = {
   qualityUsable: '{usable} / {total} nodes available',
   qualityPoints: 'points',
   qualityMeasuredScore: 'Measured average {score}',
-  qualityGrade_pending: 'More data needed',
+  qualityGrade_pending: 'No score yet',
   qualityGrade_attention: 'Needs attention',
   qualityGrade_excellent: 'Excellent',
   qualityGrade_good: 'Good',
@@ -549,14 +565,15 @@ const en = {
   bandwidthManualFailed: 'Bandwidth check failed: {message}',
   bandwidthManualComplete: '{name}: {value} Mbps',
   subscriptionBandwidthCheck: 'Enable periodic bandwidth checks',
-  subscriptionBandwidthEvery: 'Every {hours} h',
+  subscriptionDirectUrl: 'Direct subscription URL',
+  subscriptionDirectNodes: 'Direct nodes',
   subscriptionBandwidthHelpTitle: 'Periodic bandwidth checks',
   subscriptionBandwidthHelp:
-    'The router checks this subscription’s eligible nodes at the shared interval from backend settings: {hours} hours, up to {maxMB} MB per download. Only healthy nodes are admitted; health and manual probes have priority.',
+    'The router checks eligible nodes in this subscription on the shared bandwidth schedule. Only healthy nodes are tested. Health checks and manual probes have priority.',
   subscriptionBandwidthDedupe:
     'Identical effective connections share one durable measurement across subscriptions and bandwidth-enabled groups. Renaming, reordering or restarting does not start a duplicate download. Disabling this subscription does not cancel a test still needed by another subscription or group.',
   subscriptionBandwidthBudget:
-    'The backend bandwidth settings show the daily upper bound for all unique eligible nodes. It is download payload only; protocol overhead, initial/new-node tests and provider multipliers may add traffic. This switch does not enable bandwidth preference or change routing.',
+    'The backend bandwidth settings show the daily upper bound for all unique eligible nodes. It is download payload only; protocol overhead, initial/new-node tests and provider multipliers may add traffic. This switch does not enable node scoring or change routing.',
   qualityState_down: 'Probe failed',
   qualityState_unknown: 'Not tested',
   qualityState_stale: 'Outdated',
@@ -572,16 +589,16 @@ const en = {
   qualityCollapse: 'Collapse {name} nodes',
   qualityShowAllNodes: 'Show all',
   qualityShowFirstNodes: 'Show first 10',
-  qualityHelp: 'Node quality explained',
+  qualityHelp: 'Node scoring explained',
   qualityNever: 'Not tested',
   qualityTime: '{hours} h {minutes} min',
   qualityNotMeasured: 'Not tested',
   qualityDetailScope:
     'Latency is the median of up to ten successful probes. Timing variation and download bandwidth use the average of up to ten valid values.',
   qualityHealthHelp:
-    'Availability comes first. Confirmed failed nodes count as zero in subscription quality. Unmeasured or outdated nodes lower coverage. Below 80% coverage, the main label shows “More data needed”.',
+    'Confirmed failures count as zero in subscription quality. Current coverage counts nodes with fresh assessments. Below 80% coverage, the previous score is shown when available.',
   qualityModelHelp:
-    'Healthy nodes use the same score as bandwidth-aware routing. Latency counts for 40%, download bandwidth for 30% and HTTP timing variation for 30%. Missing metrics are omitted and the remaining weights are normalized. Missing data or fewer than ten samples in a metric marks the score provisional.',
+    'Healthy nodes use the same score as bandwidth-aware routing. Latency, download bandwidth and HTTP jitter use the weights from Backend Settings. Missing metrics are omitted and the remaining weights are normalized. Missing data or fewer than ten samples in a weighted metric marks the score provisional.',
   qualityExampleHelp:
     'Example: one 95-point node and nine failed nodes score about 10 overall. One 95-point node and nine unmeasured nodes require more data instead of an excellent rating.',
   qualityMeasurementHelp:
@@ -591,7 +608,7 @@ const en = {
   qualityMode_login: 'Login',
   qualityMode_subscription: 'Subscription',
   qualityMode_node: 'Node',
-  qualityLoadFailed: 'Failed to load node quality: {message}',
+  qualityLoadFailed: 'Failed to load node scores: {message}',
   nodeInfoProtocol: 'Protocol',
   nodeInfoServer: 'Server',
   nodeInfoEntryIp: 'Entry IPv4',
@@ -640,9 +657,11 @@ const en = {
   latencyReasonUnreachable: 'network unreachable',
   latencyReasonInvalid: 'invalid node config',
   latencyReasonNotFound: 'no longer in subscription',
+  latencyReasonMihomoOnly: 'requires Mihomo',
   latencyReasonUnstable: 'intermittent',
   latencyReasonError: 'connection failed',
   latencyReasonStatus: 'unexpected status',
+  policyOutboundSwitching: 'Switching {group} to {outbound}…',
   urlTestManualSelectTip:
     '"{name}" is an auto-select group: the kernel picks the node by latency, so it cannot be set manually. Tap its lightning icon to retest and pick again.',
   updateFinishedTip: '{number} update(s) finished',
@@ -988,7 +1007,7 @@ const en = {
   groupInterval: 'Test interval',
   groupTolerance: 'Latency tolerance',
   groupUrltestHint:
-    'Latency selection switches only when the new node is faster by the tolerance. Bandwidth preference uses the combined score when a healthy candidate has valid bandwidth data.',
+    'Latency selection switches only when the new node is faster by the tolerance. Node scoring uses the combined score when a healthy candidate has valid bandwidth data.',
   groupMembersLabel: 'Members',
   groupFilterAllSubscriptions: 'All subscriptions',
   groupSubscriptionMissing: 'Deleted subscription',
@@ -1014,12 +1033,21 @@ const en = {
   groupModeDynamic: 'Dynamic',
   groupModeStatic: 'Static',
   groupKeywordsLabel: 'Keywords',
-  groupKeywordsPlaceholder: 'Comma-separated, e.g. Hong Kong,hk',
+  groupKeywordsPlaceholder: 'Add keywords with a comma or Enter',
   groupKeywordsHint:
-    'Separate keywords with commas (,). OR matches any keyword. Empty = all nodes in the subscription scope; new nodes follow this rule. Chain proxies are excluded.',
+    'OR matches any keyword. With no keywords, exclusions apply to the selected sources.',
   groupKeywordsAllHint:
-    'Separate keywords with commas (,). AND matches every keyword. Empty = all nodes in the subscription scope; new nodes follow this rule. Chain proxies are excluded.',
+    'AND matches every keyword. With no keywords, exclusions apply to the selected sources.',
   groupKeywordsMode: 'Keyword matching mode',
+  tagRemove: 'Remove {item}',
+  tagExpand: 'Expand tags',
+  tagCollapse: 'Collapse tags',
+  groupExcludeKeywords: 'Exclude keywords',
+  groupExcludeKeywordsSummary: 'Excluded keywords: {keywords},',
+  groupExcludeKeywordsEdit: 'Edit',
+  groupExcludeKeywordsMode: 'Exclusion matching mode',
+  groupExcludeKeywordsHint: 'OR excludes nodes matching any exclusion keyword.',
+  groupExcludeKeywordsAllHint: 'AND excludes nodes matching every exclusion keyword.',
   groupDynamicMatched: '{count} node(s) match right now',
   groupDynamicNoMatch: 'No node matches these keywords right now',
   groupDynamicSummary: 'Dynamic · {count} node(s) now',
@@ -1036,11 +1064,9 @@ const en = {
     'Select real proxy nodes. Remove groups or missing members.',
   groupUnitSecond: 's',
   failoverSummary: 'Failover · {lanes} lanes · {count} nodes',
-  failoverStaticHint:
-    'Pick nodes on the left into the current lane; the first lane is primary, the rest are backups in order. A single-node lane is used directly; a multi-node lane is either Auto (picks by latency) or Manual (you choose on the Proxies page).',
   failoverTolerance: 'In-lane latency tolerance',
   failoverToleranceHint:
-    'Applies to latency selection inside automatic lanes. Skip it when bandwidth preference is enabled and a healthy candidate in the lane has valid bandwidth data. Lane priority is preserved.',
+    'Applies to latency selection inside automatic lanes. Skip it when node scoring is enabled and a healthy candidate in the lane has valid bandwidth data. Lane priority is preserved.',
   failoverToleranceUnused:
     'Every lane has a single valid node, so there is nothing to pick between inside a lane; not used for now',
   failoverTimeout: 'Probe timeout',
@@ -1057,7 +1083,9 @@ const en = {
   failoverMaxLanes: 'At most {n} lanes',
   failoverDeleteLane: 'Delete lane',
   failoverDeleteLaneConfirm:
-    'Delete "{lane}"? Its {count} nodes are removed from this lane (cancelling the dialog discards everything).',
+    'Delete “{lane}” and its member settings?',
+  failoverLaneOrderHint: 'Drag tabs to set priority. The leftmost tab is primary, followed by backups.',
+  failoverParameters: 'Parameters',
   failoverLaneNamePlaceholder: 'Lane name (optional)',
   failoverLaneIconInherit: 'Inherit group icon',
   failoverModeEmpty: 'no valid node',
@@ -1074,8 +1102,8 @@ const en = {
   failoverDropBlocked: 'Remove them',
   failoverBlockedMembersRequired:
     'Some members still reference groups: remove them or switch the rule back.',
-  failoverLanesRequired: 'A failover group needs at least two lanes with one valid node each.',
-  failoverLanesRequiredOne: 'At least one lane must contain a valid node.',
+  failoverLanesRequired: 'Configure members in at least two failover tabs.',
+  failoverLanesRequiredOne: 'Configure members in at least one failover tab.',
   failoverTypeChangeTitle: 'Change to a normal group',
   failoverTypeChangeConfirm:
     'Saving this failover group as a normal group drops the lane hierarchy; only the members from before the switch are kept. Save anyway?',
@@ -1098,10 +1126,6 @@ const en = {
   failoverFailItem: '{reason} ({n})',
   failoverFailStatusCode: 'status {code}',
   failoverChecking: 'Checking {done}/{total}',
-  failoverRecheck: 'Re-check',
-  failoverRecheckHint: 'Test every node in this group again now',
-  failoverRecheckStarted: 'Re-checking "{name}"',
-  failoverRecheckFailed: 'Could not start the re-check: {error}',
   probeOverloaded:
     'Tests cannot keep up: about {demand} needed per second, the core finishes about {done}. Checks will lag; use fewer nodes or longer intervals.',
   groupUnitMs: 'ms',
@@ -1191,6 +1215,8 @@ const en = {
   subscriptionNamePlaceholder: 'e.g. "My subscription"',
   subscriptionUrlLabel: 'Subscription link',
   subscriptionUrlAdd: 'Add link',
+  subscriptionUrlDisable: 'Disable this link',
+  subscriptionUrlEnable: 'Enable this link',
   subscriptionAutoUpdate: 'Auto update',
   subscriptionEnabledToggle: 'Enable this subscription; when off its nodes stay out of the kernel',
   subscriptionDisabledBadge: 'Disabled',
@@ -1210,18 +1236,11 @@ const en = {
     'One node link per line (ss:// / trojan:// / vless:// / socks5:// …); a whole Clash or sing-box config also works.',
   subscriptionNodeDnsToggle: 'Subscription DNS',
   subscriptionNodeDnsLabel: 'Node domain resolver (optional)',
-  subscriptionNodeDnsUrlPlaceholder: 'DoH URL, e.g. https://dns.example.net:2096/path',
-  subscriptionNodeDnsBootstrapPlaceholder: 'Bootstrap DNS (IP)',
   subscriptionNodeDnsIpPlaceholder: 'DNS IP, e.g. 223.5.5.5 or 2001:4860:4860::8888',
   subscriptionNodeDnsInvalidIp: 'Enter a valid IPv4 or IPv6 DNS address',
   subscriptionNodeDnsPlainHint: 'Resolves only server names in this subscription. Website and LAN DNS are unchanged; node checks use the same resolver.',
-  subscriptionNodeDnsDotHint: 'DoT defaults to port 853. Enter a bootstrap DNS IP when using a hostname. The resolver is used for this subscription’s node hostnames and node checks.',
-  subscriptionNodeDnsHint:
-    "Fill this in when the provider requires its own DoH to resolve node domains (like OpenClash's proxy-server-nameserver / nameserver-policy). It only resolves this subscription's node server domains; regular sites and LAN DNS are unaffected, and speed tests use it too. When the DoH URL uses a domain, enter an IP on the right to resolve it.",
-  subscriptionNodeDnsInvalidUrl: 'The DoH URL must start with https://',
   subscriptionNodeDnsInvalidBootstrap: 'Enter a valid IP address for the DoH/DoT resolver',
   subscriptionNodeDnsNeedBootstrap: 'Enter a DNS IP to resolve the DoH/DoT server hostname',
-  subscriptionNodeDnsNeedUrl: 'Enter the DoH URL too',
   subscriptionContentPlaceholder:
     'Paste ss:// / trojan:// / hysteria2:// lines, or a Clash/sing-box config…',
   subscriptionSave: 'Save',
@@ -1233,7 +1252,7 @@ const en = {
   subscriptionDefaultName: 'Subscription',
   subscriptionPreviewEmptyHint: 'Enter a link or paste content to see a live preview here.',
   subscriptionPreviewLoading: 'Loading…',
-  subscriptionSkippedSummary: '{count} skipped',
+  subscriptionSkippedSummary: 'Skipped {count} nodes\n{list}',
   subscriptionSkippedReason: '{name} — unrecognized type ({type})',
   subscriptionSkippedPlugin:
     '{name} — plugin "{plugin}" is not supported by the kernel (obfs and v2ray-plugin are)',
@@ -1253,13 +1272,17 @@ const en = {
   subscriptionPreviewNoNodes: 'No nodes parsed from this yet.',
   subscriptionRenameOriginalColumn: 'Original name',
   subscriptionRenameNewColumn: 'New name',
-  subscriptionRenameEditorTitle: 'Rename rules',
+  subscriptionRenameEditorTitle: 'Rename nodes',
   subscriptionRenameTokenRegion: 'Region',
   subscriptionRenameTokenFeature: 'Feature',
   subscriptionRenameTokenSeq: 'Number',
   subscriptionRenameTemplateExample: 'Result: {example}',
   subscriptionRenameSampleRegion: 'US',
   subscriptionRenameSampleFeature: 'IEPL',
+  subscriptionSkippedPreviewMore: '{count} more nodes were skipped',
+  subscriptionLatencyNodeFailed: '{name} · Test failed ({reason})',
+  subscriptionRenameRestoreDefaults: 'Restore defaults',
+  subscriptionRenameSampleOriginal: 'US IEPL 1',
   groupDroppedEmpty:
     'These groups have no usable members and will not be written to the config: {names}',
   groupDroppedCycle:
@@ -1292,8 +1315,7 @@ const en = {
   iconCategoryBrands: 'Brands',
   iconCategoryMisc: 'Other',
   subscriptionRenameCountryNoMatch: 'No matching country/region',
-  subscriptionRenamePrefixLabel:
-    'Prefix node names with the subscription name (e.g. "Airport {sep} HK-01")',
+  subscriptionRenamePrefixLabel: 'Prefix node names with the subscription name',
   subscriptionRenameTokensHint: 'Drag to reorder:',
   subscriptionRenameUnknownLabel: 'Label for unrecognized region',
   subscriptionRenameSeqPadHint:
@@ -1476,7 +1498,6 @@ const en = {
     'Destination rules route proxy DNS queries.',
   dnsUpstreamProtocol: 'Protocol',
   dnsUpstreamPort: 'Port',
-  dnsUpstreamDohUrl: 'DoH URL',
   dnsUpstreamEncryptedBootstrap: 'DoH/DoT resolver DNS',
   dnsUpstreamDotHost: 'DoT hostname or IP address',
   dnsUpstreamTest: 'Test',
@@ -1520,6 +1541,8 @@ const en = {
   dnsUpstreamInvalid: 'IPv4 / IPv6 addresses only.',
   dnsUpstreamInvalidPort: 'Port must be 1–65535.',
   dnsUpstreamInvalidDotHost: 'Enter a valid DoT hostname or IP address',
+  dnsUpstreamDohHost: 'DoH hostname or IP address',
+  dnsUpstreamInvalidDohHost: 'Enter a valid DoH hostname or IP address',
   smartBlockConnection: 'Block connection',
   dnsUpstreamSaved: '{side} saved ({detail}).',
   dnsRewriteTitle: 'DNS rewrites',
@@ -1609,7 +1632,6 @@ const en = {
   kernel: 'Kernel',
   kernelLoadFailed: "Couldn't load service status: {message}",
   kernelServiceTitle: 'Core & panel service',
-  openboxGithubHint: 'Open-Box on GitHub (opens in a new tab)',
   tutorialButton: 'Tutorials',
   tutorialHint:
     'Videos on the Ange Digital Life channel with Open-Box in the title, oldest first; they open in a new tab.',
@@ -1626,10 +1648,8 @@ const en = {
     '{names} and Open-Box were running at the same time, and two proxy tools conflict with each other, so the Open-Box kernel was stopped automatically. To use Open-Box, stop {names} first (turn off its main switch or uninstall it), then start it.',
   kernelVersionLabel: 'Kernel version',
   kernelVersionUnknown: 'Unknown',
-  singboxGithubLabel: 'sing-box GitHub',
-  singboxGithubHint: 'View the official sing-box project on GitHub (opens in a new tab)',
+  kernelGithubLabel: '{kernel} GitHub',
   geoGithubLabel: 'Geo data GitHub',
-  geoGithubHint: 'View the MetaCubeX rule data used here, including gfw (opens in a new tab)',
   geoSiteCount: 'GeoSite {count}',
   geoIpCount: 'GeoIP {count}',
   removeItemConfirm: 'Remove this item?',
@@ -2231,7 +2251,7 @@ const en = {
   clientRouteNameLabel: 'Name',
   clientRouteNamePlaceholder: 'e.g. Living room TV',
   clientRouteSourcesLabel: 'Clients',
-  clientRouteSourcesPlaceholder: 'One IP or CIDR per line, e.g. 10.0.0.209 or 10.0.0.0/24',
+  clientRouteSourcesPlaceholder: 'Enter an IP or CIDR, e.g. 10.0.0.209 or 10.0.0.0/24',
   clientRouteKnownLabel: 'Add a known client',
   clientRouteKnownPlaceholder: 'Pick from DHCP leases / recent traffic',
   clientRouteOutboundLabel: 'Outbound',
@@ -2249,8 +2269,7 @@ const en = {
   clientRouteBypassLabel: 'Bypass the kernel (direct)',
   clientRouteBypassHint:
     'Like an OpenClash blacklist: traffic from these devices is let through at the entry and never enters the kernel, so NAT behaves as if nothing were installed - use it for game accelerators and NAT-sensitive devices. Requires auto_redirect; in the pure-tun fallback mode it is handled as the direct outbound.',
-  clientRouteMacsPlaceholder:
-    'One per line, e.g. aa:bb:cc:dd:ee:ff; picking a known device fills it in',
+  clientRouteMacsPlaceholder: 'Enter a MAC address, e.g. aa:bb:cc:dd:ee:ff',
   clientRouteErrMacs: 'Invalid MAC address: {value}',
   clientRouteErrNoMacs: 'Matching by MAC: add at least one MAC address',
   clientRouteBypassBadge: 'Bypass kernel',
@@ -2283,13 +2302,14 @@ const en = {
   chainProxyNameLabel: 'Name',
   chainProxyNamePlaceholder: 'e.g. Residential-US',
   chainProxyLinkLabel: 'Node',
-  chainProxyLinkPlaceholder:
-    'Paste one share link (socks5:// ss:// vless:// trojan:// …), an HTTP proxy (http:// https:// or a residential host:port:user:pass), or a Clash / sing-box node snippet',
-  chainProxyLinkHint:
-    'This node is not dialed directly; it is reached through the upstream chosen below. A domain server is fine: the upstream resolves it. Residential http:// https:// or host:port:user:pass credentials are used as an HTTP proxy.',
+  chainProxyLinkPlaceholder: 'username:password{\'@\'}host:port',
+  chainProxyLinkHint: 'You can also paste a share link or node config.',
   chainProxyUpstreamLabel: 'Upstream',
   chainProxyHint:
     'Connect through the selected node or group.',
+  clientRouteDnsLabel: 'Custom DNS',
+  clientRouteDnsHint: 'These devices use the DNS server specified here. Leave it blank to use the default settings. Requires DNS interception.',
+  chainProxyDnsHint: 'Used by devices that select this node directly. Device DNS takes priority.',
   chainProxyTest: 'Test',
   chainProxyTestFailed: 'Unreachable',
   chainProxyIpUnknown: 'IP location unknown',
@@ -2326,44 +2346,41 @@ const en = {
   outboundPickerTestOne: 'Test latency',
   outboundPickerTestGroupNow: "Test the group's current node",
 
-  bandwidthEnable: 'Prefer bandwidth',
-  bandwidthHelpTitle: 'Bandwidth preference',
+  bandwidthEnable: 'Node scoring',
+  bandwidthHelpTitle: 'Node scoring',
   bandwidthSettingsTitle: 'Bandwidth testing',
   bandwidthPeriod: 'Shared bandwidth test interval',
   bandwidthHours: 'hours',
-  bandwidthPeriodSummary: 'Shared bandwidth test interval: {hours} h',
   bandwidthDownloadCap: 'Download limit per test',
   bandwidthDaily:
-    '{count} unique eligible nodes × {times} tests/day: up to {size}/day at the current limit.',
-  bandwidthBudgetHint:
-    'Only enabled subscriptions and groups are tested. Each effective node shares one test across subscriptions and groups. This estimates periodic download payload; initial/new-node tests, protocol overhead and provider multipliers are additional. Clients never run bandwidth tests.',
+    '{count} unique eligible nodes, at most {times} tests per node on any day. Up to {size}/day at the current limit.',
   bandwidthHealthFirst:
     'Availability comes first. Confirmed failed nodes and nodes awaiting recovery confirmation are excluded regardless of past bandwidth. Missing bandwidth data does not mean a node is unavailable.',
   bandwidthOff: 'When disabled',
   bandwidthOn: 'When enabled',
   bandwidthExample: 'Example',
   bandwidthOff_urltest:
-    'Keep one node selected by latency, with the existing latency tolerance to avoid unnecessary switches.',
+    'Choose the default node by latency, with the existing latency tolerance to avoid unnecessary switches.',
   bandwidthOn_urltest:
-    'If at least one healthy candidate has fresh download data, rank by latency 40%, download bandwidth 30% and timing variation 30%. Latency tolerance is skipped in this mode. Keep the current node on ties and hold a healthy selection for 60 seconds. If no healthy candidate has valid bandwidth data, use latency and tolerance.',
+    'Rank healthy candidates by the weights in Backend Settings. When download bandwidth has a positive weight, at least one candidate needs fresh download data. Latency tolerance is skipped in this mode. Keep the current node on ties and hold a healthy selection for 60 seconds. Without usable scores, use latency and tolerance.',
   bandwidthExample_urltest:
-    'A is selected at 150 ms and 10 Mbps. B offers 100 ms and 300 Mbps with the same timing variation. A 100 ms tolerance can keep A in latency mode. With bandwidth preference and fresh samples, B wins after the hold.',
+    'A is selected at 150 ms and 10 Mbps. B offers 100 ms and 300 Mbps with the same timing variation. A 100 ms tolerance can keep A in latency mode. With node scoring and fresh samples, B wins after the hold.',
   bandwidthOff_failover:
     'Keep primary/backup tab priority, failure confirmation and failback settings. Automatic tabs choose internally by latency; manual tabs keep the user’s selection.',
   bandwidthOn_failover:
-    'Automatic tabs use the same 40/30/30 score and skip latency tolerance when a healthy candidate in that tab has valid bandwidth data. Otherwise they use latency tolerance. Tab priority, recovery confirmation, failback and manual selections are preserved.',
+    'Automatic tabs use the configured score and skip latency tolerance when scores are available. Otherwise they use latency tolerance. Tab priority, recovery confirmation, failback and manual selections are preserved.',
   bandwidthExample_failover:
     'A healthy primary offers 50 Mbps and a backup offers 500 Mbps: keep the primary. Inside an automatic primary tab, two healthy nodes have the same latency and offer 200 Mbps and 50 Mbps: prefer the 200 Mbps node within that tab.',
   bandwidthOff_loadbalance:
     'Each new connection goes to a healthy node with fewer active connections/pending dials. Among equally loaded nodes, prefer the low-latency range and rotate ties.',
   bandwidthOn_loadbalance:
-    'Use the same 40/30/30 score to weight new connections. Prefer idle nodes first. Among equally busy nodes, favor higher quality. Groups share active connections and pending dials. When all healthy candidates lack bandwidth data, use the original distribution rule.',
+    'Use the configured scores to weight new connections. Prefer idle nodes first. Among equally busy nodes, favor higher quality. Groups share active connections and pending dials. Without usable scores, use the original distribution rule.',
   bandwidthExample_loadbalance:
     'A scores 93 and B scores 64. Both idle, the first connection goes to A and the next goes to B if A is still busy. If A fails, B receives new connections regardless of past bandwidth.',
   bandwidthSharedHelp:
-    'One shared test per effective node every {hours} hours, with up to {maxMB} MB per task. Average up to ten successful samples. If the newest is two intervals old, the average expires. An unmeasured candidate temporarily uses the median of the other measured candidates. Reading scores adds no probes.',
+    'Each effective node shares one test across subscriptions and groups. The score uses the average of up to ten successful samples, which expires when the newest sample is two intervals old. An unmeasured candidate temporarily uses the median of the other measured candidates. Reading scores adds no probes.',
   bandwidthClientDisabled:
-    'Android, iOS, Windows, macOS and Linux clients do not enable bandwidth preference or download testing. In node mode the router can still apply its own policy. Measurements estimate current conditions; combined throughput is not guaranteed.',
+    'Android, iOS, Windows, macOS and Linux clients do not enable node scoring or download testing. In node mode the router can still apply its own policy. Measurements estimate current conditions; combined throughput is not guaranteed.',
   nodeInfoExpandText: 'Expand {field}',
   nodeInfoCollapseText: 'Collapse {field}',
   nodeTrafficEstimate: 'Human / bot (estimate)',
@@ -2393,7 +2410,7 @@ const en = {
   nodeRiskVeryClean: 'Very clean',
   nodeRiskVeryLow: 'Very low risk',
   nodeRiskVeryHigh: 'Very high risk',
-  qualityTitle: 'Node quality',
+  qualityTitle: 'Node scoring',
 
   // ===== 对齐上游 catch-up v0.1.412 缺失键 =====
 
@@ -2451,6 +2468,55 @@ const en = {
   nodeInfoIpTypeSource: 'IP type source',
   qualityPreviousScore: 'Previous score',
   nodeScoreWeightJitter: 'Jitter',
+  nodeScoreWeights: 'Node scoring weights',
+  nodeScoreWeightLatency: 'Latency',
+  nodeScoreWeightDownload: 'Bandwidth',
+  nodeScoreWeightFirstDivider: 'Divider between latency and bandwidth',
+  nodeScoreWeightSecondDivider: 'Divider between bandwidth and jitter',
+  nodeScoreWeightValues: 'Latency {latency}%, bandwidth {download}%, jitter {jitter}%',
+  businessPreference: 'Business preference',
+  businessReliabilityHalfLife: 'Reliability decay',
+  businessPerformanceTtl: 'Confidence lifetime',
+  businessPreferenceMinutes: 'min',
+  bandwidthDays: 'days',
+  bandwidthPeriodUnit: 'Bandwidth test interval unit',
+  bandwidthPeriodInvalid: 'Enter a valid interval of at least one hour.',
+  bandwidthSettingsHelpLabel: '{title} help',
+  bandwidthHelpCurrent: 'Current settings',
+  bandwidthHelpCurrentTest: 'Bandwidth test every {hours} h, up to {maxMB} MB per test',
+  bandwidthHelpCurrentBusiness: 'Reliability decay {minutes} min, confidence lifetime {seconds} s',
+  bandwidthHelpEditLocation: 'Edit in Settings → Backend Settings → {section}',
+  bandwidthHelpLoading: 'Loading…',
+  bandwidthHelpUnavailable: 'Could not load saved values',
+  bandwidthSettingsHelpExampleHeading: 'Example',
+  bandwidthSettingsHelpIntro:
+    'The router downloads test data through eligible nodes to estimate download speed. Subscriptions with periodic bandwidth checks and groups with node scoring can add nodes to the test schedule. The same node shares one test across subscriptions and groups.',
+  bandwidthSettingsHelpInterval: 'How often the router schedules a test for each eligible node.',
+  bandwidthSettingsHelpCap:
+    'The maximum amount of data one test may download. A test can end before reaching the limit.',
+  bandwidthSettingsHelpExample:
+    'With a 2-hour interval and a 64 MB limit, 99 unique nodes can run 12 tests each per day. If every test reaches the limit, that is about 76.03 GB/day. Initial tests, tests of newly added nodes, protocol overhead and provider multipliers are additional.',
+  nodeScoreWeightsHelpIntro:
+    'The router converts latency, download bandwidth and HTTP timing variation to scores from 0 to 100, then combines them using these weights. The defaults are 40%, 30% and 30%. A weight of 0% excludes that metric from the score.',
+  nodeScoreWeightsHelpDrag:
+    'Drag either divider to adjust the two neighboring weights. The total stays at 100%. Use the arrow keys to adjust by 1 percentage point, or Shift + arrow keys to adjust by 0.1.',
+  nodeScoreWeightsHelpExample:
+    'Both nodes are healthy and have valid measurements. In an automatic group with node scoring enabled, B ranks higher with the default weights. Raising the latency weight to 70% puts A ahead.',
+  nodeScoreWeightMetric: 'Metric',
+  nodeScoreWeightsDefaultExample: 'Score (40 / 30 / 30)',
+  nodeScoreWeightsAdjustedExample: 'Score (70 / 15 / 15)',
+  businessSettingsHelpIntro:
+    'Automatic selection, automatic failover tabs and load balancing can use real TCP connection evidence for the same destination. For a new destination without enough evidence, they use their normal selection rules. Choices affect new connections; existing connections keep their route.',
+  businessSettingsHelpScope:
+    'Evidence is scoped to the destination host/IP, port and address family. UDP/QUIC and requests reusing an established connection do not trigger this TCP selection. Timing includes connection setup and the first write-to-reply interval, excluding client idle time before that write. A first transport reply may be part of TLS negotiation; it does not measure HTTP content success or sustained download speed. Local client routing does not enable this router feature.',
+  businessSettingsHelpReliability:
+    'Controls how fast consecutive observed connection failures lose influence. With the default 1-hour half-life, a failure has half its original weight after 1 hour and a quarter after 2 hours. A successful reply resets the failure streak. Client cancellation is not a node failure.',
+  businessSettingsHelpReliabilityExample:
+    'A recently failed twice in a row when connecting to a destination. Eligible B recently received a reply from the same destination. New connections to that destination can prefer B. A first connection to another site follows the group’s normal rules.',
+  businessSettingsHelpPerformance:
+    'Controls how fresh the evidence for a new performance comparison must be; the default is 60 seconds. Replacing a healthy node requires repeated, comparable reply samples. Expiry alone does not send an automatic group’s destination back to its default while the current node remains healthy and keeps succeeding.',
+  businessSettingsHelpPerformanceExample:
+    'Under comparable conditions, A repeatedly takes about 200 ms to reply and B takes about 120 ms. An automatic group can keep using B for this destination. Once the comparison expires, it needs fresh evidence to promote another node; B’s continued success is not discarded just because A has not been used recently.',
 }
 
 export type LANG_MESSAGE = typeof en

@@ -55,9 +55,9 @@ var profileKeyReason = map[string]string{
 }
 
 // profileKeyIgnored:确定不会进 sing-box 配置的档案键。改它们不该提示重启。
-// updates 是自动更新计划,traffic 是流量保留月数,shareRegions / serverInfo 是给手机 App 的,clashApiSecret 是后端自己加的。
+// updates 是自动更新计划,traffic 是流量保留月数,shareRegions / serverInfo 是给手机 App 的,clashApiSecret 是后端自己加的,bandwidth / nodeScoreWeights 是测速与评分参数(目前只在后端算分,未写进内核配置),businessPreference 是业务优选的两个时间参数(目前只存档案,未写进内核配置)。
 var profileKeyIgnored = map[string]bool{
-	"updates": true, "traffic": true, "shareRegions": true, "serverInfo": true, "clashApiSecret": true, "bandwidth": true,
+	"updates": true, "traffic": true, "shareRegions": true, "serverInfo": true, "clashApiSecret": true, "bandwidth": true, "nodeScoreWeights": true, "businessPreference": true,
 }
 
 func profileReason(key string) (reason string, ignored bool) {
@@ -91,6 +91,10 @@ type subInput struct {
 	URL     string         `json:"url"`
 	URLs    []string       `json:"urls,omitempty"`
 	NodeDNS map[string]any `json:"nodeDns"`
+	// 下面三个影响「订阅和节点站点直连」的主机集合
+	URLEntries         []subs.URLEntry `json:"urlEntries,omitempty"`
+	DirectSubscription *bool           `json:"directSubscription,omitempty"`
+	DirectNodes        *bool           `json:"directNodes,omitempty"`
 }
 
 // ComputeFingerprint 按原因分组算指纹。同样的输入永远得到同样的结果(map 键由 encoding/json 排序)。
@@ -115,7 +119,7 @@ func ComputeFingerprint(in FingerprintInput) Fingerprint {
 	var subList []subInput
 	for _, r := range in.Subs {
 		if r.Enabled {
-			subList = append(subList, subInput{ID: r.ID, Name: r.Name, URL: r.URL, URLs: r.URLs, NodeDNS: r.NodeDNS})
+			subList = append(subList, subInput{ID: r.ID, Name: r.Name, URL: r.URL, URLs: r.URLs, NodeDNS: r.NodeDNS, URLEntries: r.URLEntries, DirectSubscription: r.DirectSubscription, DirectNodes: r.DirectNodes})
 		}
 	}
 	parts[ReasonNodes]["subscriptions"] = subList

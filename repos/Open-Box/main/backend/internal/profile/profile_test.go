@@ -405,3 +405,72 @@ func TestPatchConcurrent(t *testing.T) {
 		}
 	}
 }
+
+func TestPatchNodeScoreWeightsAndIntervalUnit(t *testing.T) {
+	svc, _ := newSvc(t, nil)
+	ctx := context.Background()
+	got, err := svc.Patch(ctx, j(t, `{"nodeScoreWeights":{"latency":70,"download":15,"jitter":15},"bandwidth":{"intervalHours":48,"intervalUnit":"days"}}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	w, _ := got["nodeScoreWeights"].(map[string]any)
+	if w["latency"] != 70.0 || w["download"] != 15.0 || w["jitter"] != 15.0 {
+		t.Fatalf("权重没存上: %v", got["nodeScoreWeights"])
+	}
+	b, _ := got["bandwidth"].(map[string]any)
+	if b["intervalHours"] != 48.0 || b["intervalUnit"] != "days" {
+		t.Fatalf("周期没存上: %v", got["bandwidth"])
+	}
+	for _, bad := range []string{
+		`{"nodeScoreWeights":{"latency":50,"download":30,"jitter":30}}`,
+		`{"nodeScoreWeights":{"latency":50,"download":50}}`,
+		`{"nodeScoreWeights":"40/30/30"}`,
+		`{"bandwidth":{"intervalUnit":"weeks"}}`,
+	} {
+		var ve *ValidationError
+		if _, err := svc.Patch(ctx, j(t, bad)); !errors.As(err, &ve) {
+			t.Fatalf("%s 应返回 *ValidationError,得到 %v", bad, err)
+		}
+	}
+	again, _ := svc.Get(ctx)
+	if w2, _ := again["nodeScoreWeights"].(map[string]any); w2["latency"] != 70.0 {
+		t.Fatalf("校验失败不该改动已保存的权重: %v", again["nodeScoreWeights"])
+	}
+}
+
+func TestPatchBusinessPreference(t *testing.T) {
+	svc, _ := newSvc(t, nil)
+	ctx := context.Background()
+	got, err := svc.Patch(ctx, j(t, `{"businessPreference":{"reliabilityHalfLifeMinutes":120,"performanceTtlSeconds":30,"junk":1}}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, _ := got["businessPreference"].(map[string]any)
+	if b["reliabilityHalfLifeMinutes"] != 120.0 || b["performanceTtlSeconds"] != 30.0 {
+		t.Fatalf("业务优选没存上: %v", got["businessPreference"])
+	}
+	if _, has := b["junk"]; has {
+		t.Fatalf("不认得的字段应被丢掉: %v", b)
+	}
+	// 边界值合法
+	if _, err := svc.Patch(ctx, j(t, `{"businessPreference":{"reliabilityHalfLifeMinutes":1440,"performanceTtlSeconds":1}}`)); err != nil {
+		t.Fatalf("边界值应合法: %v", err)
+	}
+	for _, bad := range []string{
+		`{"businessPreference":{"reliabilityHalfLifeMinutes":0,"performanceTtlSeconds":60}}`,
+		`{"businessPreference":{"reliabilityHalfLifeMinutes":1441,"performanceTtlSeconds":60}}`,
+		`{"businessPreference":{"reliabilityHalfLifeMinutes":60,"performanceTtlSeconds":3601}}`,
+		`{"businessPreference":{"reliabilityHalfLifeMinutes":1.5,"performanceTtlSeconds":60}}`,
+		`{"businessPreference":{"performanceTtlSeconds":"60"}}`,
+		`{"businessPreference":"60/60"}`,
+	} {
+		var ve *ValidationError
+		if _, err := svc.Patch(ctx, j(t, bad)); !errors.As(err, &ve) {
+			t.Fatalf("%s 应返回 *ValidationError,得到 %v", bad, err)
+		}
+	}
+	again, _ := svc.Get(ctx)
+	if b2, _ := again["businessPreference"].(map[string]any); b2["reliabilityHalfLifeMinutes"] != 1440.0 || b2["performanceTtlSeconds"] != 1.0 {
+		t.Fatalf("校验失败不该改动已保存的值: %v", again["businessPreference"])
+	}
+}

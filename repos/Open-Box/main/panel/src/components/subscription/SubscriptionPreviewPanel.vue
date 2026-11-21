@@ -51,25 +51,6 @@
           </span>
         </div>
 
-        <!-- Skipped entries -->
-        <div
-          v-if="preview.skipped.length"
-          class="border-warning/30 bg-warning/10 flex flex-col gap-1 rounded-lg border px-3 py-2"
-        >
-          <p class="text-warning text-xs font-medium">
-            {{ $t('subscriptionSkippedSummary', { count: preview.skipped.length }) }}
-          </p>
-          <ul class="text-base-content/70 flex max-h-24 flex-col gap-0.5 overflow-y-auto text-xs">
-            <li
-              v-for="(item, index) in preview.skipped"
-              :key="`${item.name}-${index}`"
-              class="truncate"
-            >
-              {{ skippedText(item) }}
-            </li>
-          </ul>
-        </div>
-
         <!-- 有效 / 过滤 合并成同一张表的两个页签:它们是同一份订阅的两种去向,
              分成两个方框看要来回找,而且过滤那块原本挤在表格上面把表压得更矮。 -->
         <div class="flex flex-wrap items-center justify-between gap-2">
@@ -243,10 +224,11 @@
 </template>
 
 <script setup lang="ts">
-import type { OpenboxLatencyResult, OpenboxRenameOptions, OpenboxSubscriptionNodeDns, OpenboxSubscriptionPreview, OpenboxSkippedNode } from '@/api/openbox'
+import type { OpenboxLatencyResult, OpenboxRenameOptions, OpenboxSubscriptionNodeDns, OpenboxSubscriptionPreview, OpenboxSubscriptionUrlEntry, OpenboxSkippedNode } from '@/api/openbox'
 import { testNodeLatency } from '@/api/openbox'
 import LatencyPill from '@/components/common/LatencyPill.vue'
 import { latencyReasonText } from '@/helper/latencyReason'
+import { showNotification } from '@/helper/notification'
 import {
   ArrowRightIcon,
   ArrowUturnLeftIcon,
@@ -255,7 +237,7 @@ import {
   MagnifyingGlassIcon,
   NoSymbolIcon,
 } from '@heroicons/vue/24/outline'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
@@ -265,7 +247,7 @@ const props = defineProps<{
   preview: OpenboxSubscriptionPreview | null
   overrides?: Record<string, string>
   // 测速要重新解析订阅,所以要把来源和当前规则一并带上
-  source?: { url?: string; urls?: string[]; content?: string; name?: string; loginId?: string; userAgent?: string } | null
+  source?: { url?: string; urls?: string[]; urlEntries?: OpenboxSubscriptionUrlEntry[]; content?: string; name?: string; loginId?: string; userAgent?: string } | null
   renameOptions?: OpenboxRenameOptions
   // 这份订阅的节点域名专用解析;测速要按同样的解析重新拉订阅
   nodeDns?: OpenboxSubscriptionNodeDns | null
@@ -290,6 +272,26 @@ const skippedText = (item: OpenboxSkippedNode) => {
   if (item.reason === 'invalid') return t('subscriptionSkippedInvalid', { name: item.name, type: item.type, detail: item.detail || '' })
   return t('subscriptionSkippedReason', { name: item.name, type: item.type })
 }
+
+// 跳过的节点不再占预览区一块:列表变了(且非空)就弹一条提示,最多列 5 个,剩下的写「另有 N 个」
+const SKIPPED_PREVIEW_MAX = 5
+watch(
+  () => props.preview?.skipped,
+  (next, prev) => {
+    if (!next?.length || JSON.stringify(next) === JSON.stringify(prev)) return
+    const lines = next.slice(0, SKIPPED_PREVIEW_MAX).map(skippedText)
+    if (next.length > SKIPPED_PREVIEW_MAX) {
+      lines.push(t('subscriptionSkippedPreviewMore', { count: next.length - SKIPPED_PREVIEW_MAX }))
+    }
+    showNotification({
+      content: 'subscriptionSkippedSummary',
+      params: { count: String(next.length), list: lines.join('\n') },
+      type: 'alert-warning',
+      timeout: 10000,
+    })
+  },
+  { immediate: true },
+)
 
 const listTab = ref<'kept' | 'excluded' | 'disabled'>('kept')
 
@@ -324,14 +326,25 @@ const latencyTitle = (originalTag: string) => {
   if (!r || r.ok) return ''
   return [latencyReasonText(r.reason), r.error].filter(Boolean).join(' ')
 }
+// 单个节点测速失败弹一条提示(名字用预览里显示的新名,没有就用原名);一键测速不逐条弹
+const notifyLatencyFailed = (originalTag: string, reason?: string) => {
+  const name = (props.preview?.preview || []).find((row) => row.originalTag === originalTag)?.newTag || originalTag
+  showNotification({
+    content: 'subscriptionLatencyNodeFailed',
+    params: { name, reason: latencyReasonText(reason || 'error') },
+    type: 'alert-error',
+  })
+}
 const testOne = async (originalTag: string) => {
   if (!props.source || testing.value.has(originalTag)) return
   testing.value = new Set(testing.value).add(originalTag)
   try {
     const [result] = await testNodeLatency({ ...props.source, renameOptions: props.renameOptions, nodeDns: props.nodeDns, tags: [originalTag] })
     latency.value = { ...latency.value, [originalTag]: result }
+    if (!result.ok) notifyLatencyFailed(originalTag, result.reason)
   } catch {
     latency.value = { ...latency.value, [originalTag]: { ok: false, error: 'request failed' } }
+    notifyLatencyFailed(originalTag, 'error')
   } finally {
     const next = new Set(testing.value)
     next.delete(originalTag)

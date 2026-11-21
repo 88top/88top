@@ -226,6 +226,8 @@ export interface OpenboxClientRoute {
   match?: 'ip' | 'mac'
   // 只让这些终端进内核(白名单):不指定出口,只决定谁进内核
   admit?: boolean
+  // 自定义 DNS:这些终端的 DNS 查询用这台服务器;没有就沿用默认(需开启 DNS 接管)
+  dns?: { url: string; bootstrap?: string }
 }
 
 // 链式代理:一个节点不直接拨号,而是经另一个节点 / 节点组去连(内核里的 detour),见 server/engine/chain-proxy.mjs。
@@ -238,6 +240,8 @@ export interface OpenboxChainProxy {
   link: string
   // 上游:某个节点或节点组的名字
   upstream: string
+  // 自定义 DNS:终端直选这个节点时,DNS 查询用这台服务器(终端 DNS 优先);没有就沿用默认
+  dns?: { url: string; bootstrap?: string }
   // 保存时服务端按 link 解析出来的摘要,只读(界面列表显示用)
   node?: { type: string; server: string; port: number }
 }
@@ -272,8 +276,12 @@ export interface OpenboxProfile {
   testExpectedStatus?: string
   // 每日流量这些分析数据留多久(月,1~36)
   traffic?: { keepMonths?: number }
-  // 带宽择优的统一测速参数:周期(小时,1~24,默认 2)、单次下载流量上限(MB,1~1024,默认 64)
+  // 带宽测试的统一参数:周期(小时,1~720)、周期的显示单位、单次下载流量上限(MB,1~1024)
   bandwidth?: OpenboxBandwidthSettings
+  // 节点评分权重(百分点,三项合计 100,可以为 0);没设置时是 40 / 30 / 30
+  nodeScoreWeights?: OpenboxNodeScoreWeights
+  // 业务优选的两个时间参数(对齐上游 v0.1.473);没设置时都是 60
+  businessPreference?: OpenboxBusinessPreference
   rulesetDir?: string
 }
 
@@ -355,6 +363,11 @@ export interface OpenboxSubscriptionAccount {
   expiryKnown?: boolean
 }
 
+export interface OpenboxSubscriptionUrlEntry {
+  url: string
+  enabled: boolean
+}
+
 export interface OpenboxSubscription {
   id: string
   name: string
@@ -364,8 +377,14 @@ export interface OpenboxSubscription {
   // 停用(false)的订阅节点不进内核,重启内核生效;没有这个字段 = 启用
   enabled?: boolean
   autoUpdate?: OpenboxSubscriptionAutoUpdate | null
-  // 全部订阅地址(可以有多个,节点合在一起);url 是其中第一条,老记录只有 url
+  // 全部订阅地址(可以有多个,节点合在一起);url 是其中第一条,老记录只有 url。
+  // 有 urlEntries 时 url / urls 只剩启用的那些
   urls?: string[]
+  // 带「启用 / 停用」的链接列表;停用的链接留在列表里,但不拉取、也不进直连
+  urlEntries?: OpenboxSubscriptionUrlEntry[]
+  // 订阅链接直连 / 节点直连:关了就不把这条订阅的链接主机 / 节点服务器地址加进直连;没有这个字段 = 开
+  directSubscription?: boolean
+  directNodes?: boolean
   // 「节点」模式(粘贴保存)的订阅没有 url,内容存在这里
   content?: string
   format: string
@@ -592,6 +611,8 @@ export const deleteSubscriptionShare = async (id: string): Promise<void> => {
 export const previewSubscription = async (payload: {
   url?: string
   urls?: string[]
+  urlEntries?: OpenboxSubscriptionUrlEntry[]
+  directSubscription?: boolean
   content?: string
   userAgent?: string
   loginId?: string
@@ -626,6 +647,9 @@ export const loginSubscription = async (payload: {
 export const createSubscription = async (payload: {
   url?: string
   urls?: string[]
+  urlEntries?: OpenboxSubscriptionUrlEntry[]
+  directSubscription?: boolean
+  directNodes?: boolean
   content?: string
   userAgent?: string
   loginId?: string
@@ -645,7 +669,7 @@ export const createSubscription = async (payload: {
 // so a plain rename works even while the provider is unreachable (see subscriptions.mjs PATCH).
 export const updateSubscription = async (
   id: string,
-  payload: { name?: string; url?: string; urls?: string[]; content?: string; userAgent?: string; loginId?: string; renameOptions?: OpenboxRenameOptions; autoUpdate?: OpenboxSubscriptionAutoUpdate; nodeDns?: OpenboxSubscriptionNodeDns | null; enabled?: boolean },
+  payload: { name?: string; url?: string; urls?: string[]; urlEntries?: OpenboxSubscriptionUrlEntry[]; directSubscription?: boolean; directNodes?: boolean; content?: string; userAgent?: string; loginId?: string; renameOptions?: OpenboxRenameOptions; autoUpdate?: OpenboxSubscriptionAutoUpdate; nodeDns?: OpenboxSubscriptionNodeDns | null; enabled?: boolean },
 ): Promise<OpenboxSubscriptionSaveResult> => {
   return requestJson(`/api/openbox/subscriptions/${encodeURIComponent(id)}`, {
     method: 'PATCH',
@@ -667,6 +691,7 @@ export interface OpenboxLatencyResult {
 export const testNodeLatency = async (payload: {
   url?: string
   urls?: string[]
+  urlEntries?: OpenboxSubscriptionUrlEntry[]
   content?: string
   userAgent?: string
   loginId?: string
@@ -736,6 +761,10 @@ export interface OpenboxUserGroup {
   keywords?: string[]
   // dynamic 用:关键词组合方式,缺省 = or
   keywordMode?: OpenboxKeywordMode
+  // dynamic 用:排除关键词(命中的节点移出组)及其组合方式(or 命中任一 / and 命中全部),缺省 = or;
+  // 先按 keywords 选、再剔除;只在非空时随组保存(对齐上游 v0.1.472)
+  excludeKeywords?: string[]
+  excludeKeywordMode?: OpenboxKeywordMode
   // dynamic 用:只在这些订阅(订阅 id,可多选)的节点里按关键词匹配;空 = 全部订阅
   subscriptionIds?: string[]
   // 旧版单选字段,只读兼容:载入时折进 subscriptionIds,保存时不再写
@@ -838,9 +867,23 @@ export const recheckFailover = async (id: string, signal?: AbortSignal): Promise
 }
 
 // 带宽择优:所有启用的组共用一套测速参数,设置卡片改的就是档案里的 bandwidth
+export interface OpenboxNodeScoreWeights {
+  latency: number
+  download: number
+  jitter: number
+}
+
+// 业务优选:可靠性衰减(分钟,1~1440,默认 60)、可信度效期(秒,1~3600,默认 60)
+export interface OpenboxBusinessPreference {
+  reliabilityHalfLifeMinutes: number
+  performanceTtlSeconds: number
+}
+
 export interface OpenboxBandwidthSettings {
-  // 统一测速周期(小时,1~24)
+  // 统一测速周期(小时,1~720);界面按「天」输入时也折成小时存
   intervalHours: number
+  // 周期在界面上的显示单位,只影响怎么显示,不影响实际周期
+  intervalUnit?: 'hours' | 'days'
   // 单次测试最多下载多少 MB(1~1024)
   maxDownloadMB: number
 }
@@ -1098,6 +1141,8 @@ export interface OpenboxServiceActionResult {
 }
 
 export interface OpenboxKernelVersion {
+  // 当前运行的内核;没报就是 sing-box
+  kernel?: 'sing-box' | 'mihomo'
   version: string
   raw: string
   // false 表示没读到版本(sing-box 缺失或无法执行),此时 version 为空字符串。
@@ -2043,6 +2088,9 @@ export type OpenboxQualitySubscription = OpenboxQualityStats & {
   assessed: number
   coverage: number
   score: number | null
+  // 覆盖率不足 80% 时沿用上一次的订阅整体评分,scoreAt 是那一次的时间
+  scoreStale?: boolean
+  scoreAt?: number | string | null
   grade: OpenboxQualityGrade
   provisional?: boolean
   bandwidthCount: number

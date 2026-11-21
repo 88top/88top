@@ -87,26 +87,39 @@
               </div>
               <!-- 一行一个地址:镜像、备用、几个机场合成一条都行,节点合在一起。只剩一行时不能删——至少要留一个输入框。 -->
               <div
-                v-for="index in urls.keys()"
+                v-for="(entry, index) in urlEntries"
                 :key="index"
                 class="flex items-center gap-2"
               >
                 <input
-                  v-model="urls[index]"
+                  v-model="entry.url"
                   data-subscription-url
                   type="text"
                   class="input input-sm min-w-0 flex-1"
+                  :class="!entry.enabled && 'text-base-content/50'"
                   placeholder="https://"
                   autocomplete="off"
                 />
+                <!-- 停用的链接留在列表里,但不拉取、也不进订阅直连 -->
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-square btn-sm shrink-0"
+                  :class="entry.enabled ? 'text-success' : 'text-base-content/40'"
+                  :disabled="!entry.url.trim()"
+                  v-tip="$t(entry.enabled ? 'subscriptionUrlDisable' : 'subscriptionUrlEnable')"
+                  :aria-label="$t(entry.enabled ? 'subscriptionUrlDisable' : 'subscriptionUrlEnable')"
+                  @click="entry.enabled = !entry.enabled"
+                >
+                  <PowerIcon class="h-4 w-4" />
+                </button>
                 <button
                   type="button"
                   class="btn btn-ghost btn-square btn-sm"
-                  :class="urls.length === 1 ? 'text-base-content/30 cursor-not-allowed' : 'hover:text-error'"
-                  :disabled="urls.length === 1"
+                  :class="urlEntries.length === 1 ? 'text-base-content/30 cursor-not-allowed' : 'hover:text-error'"
+                  :disabled="urlEntries.length === 1"
                   v-tip="$t('delete')"
                   :aria-label="$t('delete')"
-                  @click="urls.splice(index, 1)"
+                  @click="urlEntries.splice(index, 1)"
                 >
                   <TrashIcon class="h-4 w-4" />
                 </button>
@@ -285,116 +298,68 @@
             <p class="text-base-content/50 text-xs">{{ $t('subscriptionContentHint') }}</p>
           </div>
 
-          <!-- 带宽定期检查(和 v0.1.389 一样):开关 + 统一周期 + 说明按钮,三种来源都有 -->
+          <!-- 带宽定期检查(和 v0.1.389 一样):开关 + 统一周期 + 说明按钮,三种来源都有。
+               右边是「订阅链接直连 / 节点直连」两个开关,粘贴节点的来源没有链接,不显示 -->
           <div
-            class="flex flex-wrap items-center gap-2 text-xs"
+            class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs"
             data-subscription-bandwidth
           >
-            <label class="flex items-center gap-2 font-medium">
-              {{ $t('subscriptionBandwidthCheck') }}
-              <input
-                v-model="bandwidthCheck"
-                type="checkbox"
-                class="toggle toggle-sm toggle-primary"
-              />
-            </label>
-            <span class="text-base-content/60">{{ $t('subscriptionBandwidthEvery', { hours: bandwidthSettings.intervalHours }) }}</span>
-            <button
-              type="button"
-              class="btn btn-ghost btn-circle btn-xs"
-              :aria-label="$t('subscriptionBandwidthHelpTitle')"
-              @click="bandwidthHelpOpen = true"
+            <div class="flex items-center gap-2">
+              <label class="flex items-center gap-2 font-medium">
+                {{ $t('subscriptionBandwidthCheck') }}
+                <input
+                  v-model="bandwidthCheck"
+                  type="checkbox"
+                  class="toggle toggle-sm toggle-primary"
+                />
+              </label>
+              <button
+                type="button"
+                class="btn btn-ghost btn-circle btn-xs"
+                :aria-label="$t('subscriptionBandwidthHelpTitle')"
+                @click="bandwidthHelpOpen = true"
+              >
+                <InformationCircleIcon class="h-4 w-4" />
+              </button>
+            </div>
+            <div
+              v-if="sourceMode !== 'paste'"
+              class="flex flex-wrap items-center gap-4"
+              data-subscription-direct
             >
-              <InformationCircleIcon class="h-4 w-4" />
-            </button>
+              <label class="flex items-center gap-2 font-medium">
+                {{ $t('subscriptionDirectUrl') }}
+                <input
+                  :checked="directSubscription"
+                  :disabled="directSaving || saving"
+                  type="checkbox"
+                  class="toggle toggle-sm toggle-primary"
+                  @change="setDirect('directSubscription', ($event.target as HTMLInputElement).checked)"
+                />
+              </label>
+              <label class="flex items-center gap-2 font-medium">
+                {{ $t('subscriptionDirectNodes') }}
+                <input
+                  :checked="directNodes"
+                  :disabled="directSaving || saving"
+                  type="checkbox"
+                  class="toggle toggle-sm toggle-primary"
+                  @change="setDirect('directNodes', ($event.target as HTMLInputElement).checked)"
+                />
+              </label>
+            </div>
           </div>
 
-          <!-- 订阅 DNS 解析:机场要求节点域名用它自己的 DoH 解析时填(相当于 OpenClash 的
-               proxy-server-nameserver / nameserver-policy)。只解析这份订阅的节点服务器域名;
-               三种来源都能配 -->
+          <!-- 订阅 DNS 解析:只解析这份订阅的节点服务器域名,协议、地址、端口、引导 DNS 用共用的
+               CustomDnsFields 填;三种来源都能配 -->
           <ExpandTransition>
             <div
               v-if="nodeDnsOpen"
               class="flex flex-col gap-1"
             >
-              <div class="flex flex-wrap items-center justify-between gap-2">
-                <label class="text-xs font-medium">{{ $t('subscriptionNodeDnsLabel') }}</label>
-                <div
-                  role="tablist"
-                  class="tabs-box tabs tabs-xs"
-                  :aria-label="$t('subscriptionNodeDnsLabel')"
-                >
-                  <button
-                    v-for="item in NODE_DNS_PROTOCOLS"
-                    :key="item.key"
-                    type="button"
-                    role="tab"
-                    class="tab"
-                    :class="nodeDnsProtocol === item.key && 'tab-active'"
-                    :aria-selected="nodeDnsProtocol === item.key"
-                    @click="nodeDnsProtocol = item.key"
-                  >
-                    {{ item.label }}
-                  </button>
-                </div>
-              </div>
-              <div
-                v-if="nodeDnsProtocol === 'https'"
-                class="flex flex-col gap-2 sm:flex-row"
-              >
-                <input
-                  v-model="nodeDnsUrl"
-                  type="text"
-                  class="input input-sm min-w-0 flex-1 font-mono text-xs"
-                  :placeholder="$t('subscriptionNodeDnsUrlPlaceholder')"
-                  autocomplete="off"
-                />
-                <input
-                  v-model="nodeDnsBootstrap"
-                  type="text"
-                  class="input input-sm w-full font-mono text-xs sm:w-48"
-                  :placeholder="$t('subscriptionNodeDnsBootstrapPlaceholder')"
-                  autocomplete="off"
-                />
-              </div>
-              <div
-                v-else
-                class="flex flex-col gap-2 sm:flex-row"
-              >
-                <input
-                  v-model="nodeDnsPlainCurrent.server"
-                  type="text"
-                  class="input input-sm min-w-0 flex-1 font-mono text-xs"
-                  :placeholder="nodeDnsProtocol === 'tls' ? 'dns.example.net' : $t('subscriptionNodeDnsIpPlaceholder')"
-                  :aria-label="$t(nodeDnsProtocol === 'tls' ? 'dnsUpstreamDotHost' : 'subscriptionNodeDnsIpPlaceholder')"
-                  autocomplete="off"
-                  spellcheck="false"
-                />
-                <input
-                  v-model.number="nodeDnsPlainCurrent.port"
-                  type="number"
-                  min="1"
-                  max="65535"
-                  class="input input-sm w-full font-mono text-xs sm:w-48"
-                  :placeholder="$t('port')"
-                  :aria-label="$t('port')"
-                />
-                <input
-                  v-if="nodeDnsDotNeedsBootstrap"
-                  v-model="nodeDnsBootstrap"
-                  type="text"
-                  class="input input-sm w-full font-mono text-xs sm:w-48"
-                  :placeholder="$t('subscriptionNodeDnsBootstrapPlaceholder')"
-                  :aria-label="$t('subscriptionNodeDnsBootstrapPlaceholder')"
-                  autocomplete="off"
-                  spellcheck="false"
-                />
-              </div>
-              <p
-                v-if="nodeDnsError"
-                class="text-error text-xs"
-              >{{ $t(nodeDnsError) }}</p>
-              <p class="text-base-content/50 text-xs">{{ $t(nodeDnsProtocol === 'https' ? 'subscriptionNodeDnsHint' : nodeDnsProtocol === 'tls' ? 'subscriptionNodeDnsDotHint' : 'subscriptionNodeDnsPlainHint') }}</p>
+              <label class="text-xs font-medium">{{ $t('subscriptionNodeDnsLabel') }}</label>
+              <CustomDnsFields :draft="nodeDnsDraft" />
+              <p class="text-base-content/50 text-xs">{{ $t('subscriptionNodeDnsPlainHint') }}</p>
             </div>
           </ExpandTransition>
         </div>
@@ -409,6 +374,7 @@
         <RenameRulesEditor
           :key="subscription?.id || 'new'"
           :initial="subscription?.renameOptions"
+          :subscription-name="name"
           @change="handleRenameOptionsChange"
         />
       </div>
@@ -492,19 +458,21 @@ import type {
   OpenboxSubscriptionAccount,
   OpenboxSubscriptionAutoUpdate,
   OpenboxSubscriptionPreview,
+  OpenboxSubscriptionUrlEntry,
   OpenboxSubscriptionUsage,
 } from '@/api/openbox'
 import { createSubscription, fetchProfile, loginSubscription, previewSubscription, updateSubscription } from '@/api/openbox'
+import CustomDnsFields from '@/components/common/CustomDnsFields.vue'
 import DialogWrapper from '@/components/common/DialogWrapper.vue'
 import ExpandTransition from '@/components/common/ExpandTransition.vue'
 import PasswordInput from '@/components/common/PasswordInput.vue'
-import { ChevronDownIcon, InformationCircleIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/outline'
+import { ChevronDownIcon, InformationCircleIcon, PlusIcon, PowerIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import { debounce } from 'lodash'
+import { createDnsDraft, dnsDraftError, dnsDraftValue } from '@/helper/customDns'
 import { showNotification } from '@/helper/notification'
 import { prettyBytesHelper } from '@/helper/utils'
 import { notifySubscriptionSaved } from '@/store/openboxSubscriptions'
 import dayjs from 'dayjs'
-import * as ipaddr from 'ipaddr.js'
 import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import RenameRulesEditor from './RenameRulesEditor.vue'
@@ -518,6 +486,8 @@ const isOpen = defineModel<boolean>({ required: true })
 
 const emit = defineEmits<{
   saved: []
+  // 编辑时直连开关是点一下就存的,只让父级刷新列表(saved 会关掉弹窗)
+  refresh: []
 }>()
 
 const { t } = useI18n()
@@ -531,7 +501,7 @@ const sourceModes: { key: SourceMode; label: string }[] = [
   { key: 'paste', label: 'subscriptionTabNodes' },
 ]
 // 编辑已有订阅时,按它到底是"有链接"还是"粘贴来的"决定初始模式
-const hasUrlSource = (s?: OpenboxSubscription | null) => Boolean(s?.url || s?.urls?.length)
+const hasUrlSource = (s?: OpenboxSubscription | null) => Boolean(s?.urlEntries?.length || s?.url || s?.urls?.length)
 // 有账号 = 登录来源;没地址也没账号 = 粘贴来源;其余是订阅地址
 const initialSourceMode = (): SourceMode =>
   props.subscription?.account ? 'login' : props.subscription && !hasUrlSource(props.subscription) ? 'paste' : 'url'
@@ -549,16 +519,16 @@ const activeTab = ref<DialogTab>('source')
 // isOpen 已经是 true,而 watch(isOpen) 不是 immediate —— 它一次都不会触发,字段
 // 会停在空字符串上(实测:打开「修改订阅」名称和链接都是空的)。
 const name = ref(props.subscription?.name ?? '')
-// 地址可以有多个;老记录只有 url。新建时给一个空输入框
-const initialUrls = () => {
+// 地址可以有多个,每条带启用开关;老记录只有 url / urls,都按启用读。新建时给一个空输入框
+const initialUrls = (): OpenboxSubscriptionUrlEntry[] => {
   const s = props.subscription
-  const list = s?.urls?.length ? s.urls : s?.url ? [s.url] : []
-  return list.length ? [...list] : ['']
+  if (s?.urlEntries?.length) return s.urlEntries.map((e) => ({ ...e }))
+  return (s?.urls?.length ? s.urls : [s?.url || '']).map((url) => ({ url, enabled: true }))
 }
-const urls = ref<string[]>(initialUrls())
+const urlEntries = ref<OpenboxSubscriptionUrlEntry[]>(initialUrls())
 const urlRowsRef = ref<HTMLElement | null>(null)
 const addUrlRow = async () => {
-  urls.value.push('')
+  urlEntries.value.push({ url: '', enabled: true })
   await nextTick()
   if (!isOpen.value) return
   const inputs = urlRowsRef.value?.querySelectorAll<HTMLInputElement>('[data-subscription-url]')
@@ -658,130 +628,46 @@ const autoUpdateInterval = computed({
 // 订阅 DNS 解析:没配就都留空。展开状态:已经配过就展开,否则收起(和 v0.1.317 一样)
 // 带宽定期检查:开关跟着订阅存(bandwidthCheck);周期和单次上限是后端统一设置,这里只读来显示
 const bandwidthCheck = ref(props.subscription?.bandwidthCheck === true)
+
+// 订阅链接直连 / 节点直连:默认开;关了就不把这条订阅的链接主机 / 节点服务器地址加进直连。
+// 编辑已有订阅时点一下就存(失败了开关弹回去);新建时只记在这里,跟着保存一起提交。
+const directSubscription = ref(props.subscription?.directSubscription !== false)
+const directNodes = ref(props.subscription?.directNodes !== false)
+const directSaving = ref(false)
+const setDirect = async (key: 'directSubscription' | 'directNodes', value: boolean) => {
+  const target = key === 'directSubscription' ? directSubscription : directNodes
+  const previous = target.value
+  target.value = value
+  const sub = props.subscription
+  if (!sub) return
+  directSaving.value = true
+  try {
+    await updateSubscription(sub.id, { [key]: value })
+    emit('refresh')
+  } catch (error) {
+    target.value = previous
+    showNotification({
+      content: 'subscriptionSaveFailed',
+      type: 'alert-error',
+      params: { message: error instanceof Error ? error.message : String(error) },
+    })
+  } finally {
+    directSaving.value = false
+  }
+}
 const bandwidthHelpOpen = ref(false)
 const bandwidthSettings = ref({ intervalHours: 12, maxDownloadMB: 64 })
-// 订阅 DNS 解析有四种写法:DoH(https 地址 + 可选的引导 DNS)、UDP、TCP(明文 DNS,只填 IP 和端口)、
-// DoT(IP 或域名 + 端口,默认 853;填域名时要给引导 DNS)。
-// 保存时 UDP/TCP/DoT 拼成 udp://host[:port] / tcp://host[:port] / tls://host[:port] 放进 nodeDns.url
-const NODE_DNS_PROTOCOLS = [
-  { key: 'https', label: 'DoH' },
-  { key: 'udp', label: 'UDP' },
-  { key: 'tcp', label: 'TCP' },
-  { key: 'tls', label: 'DoT' },
-] as const
-type NodeDnsProtocol = (typeof NODE_DNS_PROTOCOLS)[number]['key']
-type NodeDnsPlainProtocol = Exclude<NodeDnsProtocol, 'https'>
-const NODE_DNS_DEFAULT_PORTS: Record<NodeDnsPlainProtocol, number> = { udp: 53, tcp: 53, tls: 853 }
-const parseNodeDns = (url: string): { protocol: NodeDnsProtocol; server: string; port: number } => {
-  try {
-    const parsed = new URL(url)
-    if (parsed.protocol === 'udp:' || parsed.protocol === 'tcp:' || parsed.protocol === 'tls:') {
-      const protocol = parsed.protocol.slice(0, -1) as NodeDnsPlainProtocol
-      return {
-        protocol,
-        server: parsed.hostname.replace(/^\[|\]$/g, ''),
-        port: Number(parsed.port) || NODE_DNS_DEFAULT_PORTS[protocol],
-      }
-    }
-  } catch {
-    // 不是 udp/tcp/tls 地址就按 DoH 处理
-  }
-  return { protocol: 'https', server: '', port: 53 }
-}
-const initialNodeDns = parseNodeDns(props.subscription?.nodeDns?.url || '')
-const nodeDnsProtocol = ref<NodeDnsProtocol>(initialNodeDns.protocol)
-const nodeDnsPlain = reactive({
-  udp: { server: '', port: NODE_DNS_DEFAULT_PORTS.udp },
-  tcp: { server: '', port: NODE_DNS_DEFAULT_PORTS.tcp },
-  tls: { server: '', port: NODE_DNS_DEFAULT_PORTS.tls },
-})
-if (nodeDnsProtocol.value !== 'https') {
-  Object.assign(nodeDnsPlain[nodeDnsProtocol.value], { server: initialNodeDns.server, port: initialNodeDns.port })
-}
-const nodeDnsPlainCurrent = computed(() => nodeDnsPlain[nodeDnsProtocol.value === 'https' ? 'udp' : nodeDnsProtocol.value])
-const nodeDnsUrl = ref(nodeDnsProtocol.value === 'https' ? (props.subscription?.nodeDns?.url ?? '') : '')
-// 引导 DNS:DoH 和域名 DoT 各记各的,切协议不串
-const nodeDnsBootstraps = reactive({ https: '', tls: '' })
-nodeDnsBootstraps[initialNodeDns.protocol === 'tls' ? 'tls' : 'https'] = props.subscription?.nodeDns?.bootstrap ?? ''
-const nodeDnsBootstrap = computed({
-  get: () => nodeDnsBootstraps[nodeDnsProtocol.value === 'tls' ? 'tls' : 'https'],
-  set: (value: string) => {
-    nodeDnsBootstraps[nodeDnsProtocol.value === 'tls' ? 'tls' : 'https'] = value
-  },
-})
+// 订阅 DNS 解析:协议 / 地址 / 端口 / 引导 DNS 的输入和校验都在 CustomDnsFields 和 helper/customDns 里。
+// 存的仍是 nodeDns.url(https:// tls:// tcp:// udp://)+ 可选的 bootstrap。
+// 填写有错就不能保存,并自动展开输入框把提示显示出来。
+const nodeDnsDraft = reactive(createDnsDraft(props.subscription?.nodeDns))
 const nodeDnsOpen = ref(Boolean(props.subscription?.nodeDns?.url))
-
-// 填写校验:DoH 地址必须是 https://(不带账号密码和 #);主机名是域名时,必须同时给出解析它用的 DNS(IP)。
-// UDP/TCP 只能填有效的 IPv4/IPv6 地址,端口 1-65535。有错就不能保存,并自动展开输入框把提示显示出来。
-const isIpAddress = (value: string) => ipaddr.IPv4.isValidFourPartDecimal(value) || ipaddr.IPv6.isValid(value)
-// DoT 的地址:IP,或者带点的有效域名(每段 ≤63、总长 ≤253、只含字母数字和连字符)
-const isDotHost = (value: string) => {
-  const host = value.trim()
-  if (!host || host.length > 253) return false
-  if (isIpAddress(host)) return true
-  if (!host.includes('.')) return false
-  return host.split('.').every((label) => label.length <= 63 && /^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?$/.test(label))
-}
-// DoT 填的是域名(不是 IP)时,要有引导 DNS(IP)来解析它
-const nodeDnsDotNeedsBootstrap = computed(
-  () =>
-    nodeDnsProtocol.value === 'tls' &&
-    isDotHost(nodeDnsPlainCurrent.value.server) &&
-    !isIpAddress(nodeDnsPlainCurrent.value.server.trim()),
-)
-const nodeDnsError = computed(() => {
-  if (nodeDnsProtocol.value !== 'https') {
-    const { server, port } = nodeDnsPlainCurrent.value
-    const host = server.trim()
-    if (!host) return ''
-    if (nodeDnsProtocol.value === 'tls') {
-      if (!isDotHost(host)) return 'dnsUpstreamInvalidDotHost'
-      const bootstrap = nodeDnsBootstrap.value.trim()
-      if (nodeDnsDotNeedsBootstrap.value && !isIpAddress(bootstrap)) {
-        return bootstrap ? 'subscriptionNodeDnsInvalidBootstrap' : 'subscriptionNodeDnsNeedBootstrap'
-      }
-    } else if (!isIpAddress(host)) {
-      return 'subscriptionNodeDnsInvalidIp'
-    }
-    return Number.isInteger(port) && port >= 1 && port <= 65535 ? '' : 'dnsUpstreamInvalidPort'
-  }
-  const url = nodeDnsUrl.value.trim()
-  const bootstrap = nodeDnsBootstrap.value.trim()
-  if (!url) return bootstrap ? 'subscriptionNodeDnsNeedUrl' : ''
-  let host = ''
-  try {
-    const parsed = new URL(url)
-    if (parsed.protocol !== 'https:' || !parsed.hostname || parsed.username || parsed.password || parsed.hash) {
-      return 'subscriptionNodeDnsInvalidUrl'
-    }
-    host = parsed.hostname.replace(/^\[|\]$/g, '')
-  } catch {
-    return 'subscriptionNodeDnsInvalidUrl'
-  }
-  if (bootstrap && !isIpAddress(bootstrap)) return 'subscriptionNodeDnsInvalidBootstrap'
-  if (!bootstrap && !isIpAddress(host)) return 'subscriptionNodeDnsNeedBootstrap'
-  return ''
-})
+const nodeDnsError = computed(() => dnsDraftError(nodeDnsDraft))
 watch(nodeDnsError, (error) => {
   if (error) nodeDnsOpen.value = true
 })
 // 实际发出去的值:地址留空或校验没过就是 null(服务端存成没有)
-const effectiveNodeDns = computed<{ url: string; bootstrap?: string } | null>(() => {
-  if (nodeDnsProtocol.value !== 'https') {
-    const { server, port } = nodeDnsPlainCurrent.value
-    const host = server.trim()
-    if (!host || nodeDnsError.value) return null
-    const protocol = nodeDnsProtocol.value
-    return {
-      url: `${protocol}://${host.includes(':') ? `[${host}]` : host}${port === NODE_DNS_DEFAULT_PORTS[protocol] ? '' : `:${port}`}`,
-      ...(nodeDnsDotNeedsBootstrap.value ? { bootstrap: nodeDnsBootstrap.value.trim() } : {}),
-    }
-  }
-  const url = nodeDnsUrl.value.trim()
-  if (!url || nodeDnsError.value) return null
-  const bootstrap = nodeDnsBootstrap.value.trim()
-  return { url, ...(bootstrap ? { bootstrap } : {}) }
-})
+const effectiveNodeDns = computed<{ url: string; bootstrap?: string } | null>(() => dnsDraftValue(nodeDnsDraft))
 
 const renameOptions = ref<OpenboxRenameOptions>({})
 const handleRenameOptionsChange = (value: OpenboxRenameOptions) => {
@@ -827,7 +713,7 @@ const saving = ref(false)
 // 预览里的前缀和保存后的不一样。
 const effectiveName = computed(() => name.value.trim() || t('subscriptionDefaultName'))
 
-const effectiveSource = computed<{ urls?: string[]; content?: string; name?: string; loginId?: string; userAgent?: string } | null>(() => {
+const effectiveSource = computed<{ urlEntries?: OpenboxSubscriptionUrlEntry[]; directSubscription?: boolean; content?: string; name?: string; loginId?: string; userAgent?: string } | null>(() => {
   // 只有开了前缀,名字才影响解析结果;否则不带上,免得改个名字就重新拉一次订阅。
   const withName = renameOptions.value.usePrefix ? { name: effectiveName.value } : {}
   if (sourceMode.value === 'login') return loginId.value ? { loginId: loginId.value, ...withName } : null
@@ -835,10 +721,12 @@ const effectiveSource = computed<{ urls?: string[]; content?: string; name?: str
     const trimmedContent = content.value.trim()
     return trimmedContent ? { content: trimmedContent, ...withName } : null
   }
-  // 空行和重复的地址不算;顺序保留,服务端拿第一条当老字段 url
-  const list = [...new Set(urls.value.map((u) => u.trim()).filter(Boolean))]
+  // 空行不算;顺序保留,重复的地址服务端按字面去重。带上订阅链接直连的开关,预览跟保存用同一份
+  const list = urlEntries.value.map(({ url, enabled }) => ({ url: url.trim(), enabled })).filter(({ url }) => url)
   const userAgent = props.subscription?.userAgent
-  return list.length ? { urls: list, ...(userAgent ? { userAgent } : {}), ...withName } : null
+  return list.length
+    ? { urlEntries: list, directSubscription: directSubscription.value, ...(userAgent ? { userAgent } : {}), ...withName }
+    : null
 })
 const hasSource = computed(() => effectiveSource.value !== null)
 
@@ -939,19 +827,14 @@ const resetForm = () => {
   activeTab.value = 'source'
   // 编辑模式下用现存值预填;新建时清空
   name.value = props.subscription?.name ?? ''
-  urls.value = initialUrls()
+  urlEntries.value = initialUrls()
+  directSubscription.value = props.subscription?.directSubscription !== false
+  directNodes.value = props.subscription?.directNodes !== false
+  directSaving.value = false
   autoUpdate.value = initialAutoUpdate()
   bandwidthCheck.value = props.subscription?.bandwidthCheck === true
   bandwidthHelpOpen.value = false
-  const dns = parseNodeDns(props.subscription?.nodeDns?.url || '')
-  nodeDnsProtocol.value = dns.protocol
-  nodeDnsPlain.udp = { server: '', port: NODE_DNS_DEFAULT_PORTS.udp }
-  nodeDnsPlain.tcp = { server: '', port: NODE_DNS_DEFAULT_PORTS.tcp }
-  nodeDnsPlain.tls = { server: '', port: NODE_DNS_DEFAULT_PORTS.tls }
-  if (dns.protocol !== 'https') Object.assign(nodeDnsPlain[dns.protocol], { server: dns.server, port: dns.port })
-  nodeDnsUrl.value = dns.protocol === 'https' ? (props.subscription?.nodeDns?.url ?? '') : ''
-  nodeDnsBootstraps.https = dns.protocol === 'https' ? (props.subscription?.nodeDns?.bootstrap ?? '') : ''
-  nodeDnsBootstraps.tls = dns.protocol === 'tls' ? (props.subscription?.nodeDns?.bootstrap ?? '') : ''
+  Object.assign(nodeDnsDraft, createDnsDraft(props.subscription?.nodeDns))
   content.value = props.subscription?.content ?? ''
   overrides.value = { ...(props.subscription?.renameOptions?.overrides || {}) }
   disabledTags.value = [...(props.subscription?.renameOptions?.disabled || [])]
@@ -1006,6 +889,10 @@ const handleSave = async () => {
       // 地址留空或没通过校验 = 不用专用解析器(服务端存成没有);「订阅」「节点」两种来源都能配
       nodeDns: effectiveNodeDns.value,
       bandwidthCheck: bandwidthCheck.value,
+      // 粘贴来的订阅没有链接,不带这两个开关
+      ...(sourceMode.value !== 'paste'
+        ? { directSubscription: directSubscription.value, directNodes: directNodes.value }
+        : {}),
     }
     const res = props.subscription
       ? await updateSubscription(props.subscription.id, payload)
