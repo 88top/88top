@@ -7,14 +7,14 @@
         "espn.api.edge.bamgrid.com"
       ],
       "domain_suffix": [
-        "espn.com",
-        "espn.net",
-        "espncdn.com",
-        "dtci.co",
-        "espnqa.com",
-        "watchespn.com",
         "espn.co.uk",
-        "dtci.technology"
+        "watchespn.com",
+        "espnqa.com",
+        "dtci.co",
+        "espncdn.com",
+        "espn.net",
+        "dtci.technology",
+        "espn.com"
       ]
     }
   ],

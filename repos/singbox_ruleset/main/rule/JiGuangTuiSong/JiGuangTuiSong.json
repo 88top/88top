@@ -2,24 +2,24 @@
   "rules": [
     {
       "domain_suffix": [
-        "jsurvey.cn",
-        "jpush.cn",
+        "5566ua.com",
+        "japps.cn",
+        "jiguang.cn",
+        "jpush.io",
+        "jpushoa.com",
+        "s0n.cn",
+        "n0q.cn",
+        "kc9.cn",
+        "easytomessage.com",
         "jmlk.co",
         "42r.cn",
         "e0n.cn",
-        "jpushoa.com",
-        "japps.cn",
-        "pushcfg.com",
-        "jchat.io",
+        "jsurvey.cn",
         "aurorapush.cn",
-        "jpush.io",
-        "5566ua.com",
-        "easytomessage.com",
-        "n0q.cn",
-        "s0n.cn",
-        "jiguang.cn",
-        "kc9.cn",
-        "jvoice.cn"
+        "jvoice.cn",
+        "jpush.cn",
+        "pushcfg.com",
+        "jchat.io"
       ]
     }
   ],

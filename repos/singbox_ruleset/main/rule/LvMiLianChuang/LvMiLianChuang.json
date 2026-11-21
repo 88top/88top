@@ -2,12 +2,12 @@
   "rules": [
     {
       "domain_suffix": [
-        "lumiunited.com",
-        "aqara.com.cn",
+        "lumiunited.cn",
         "aqara.com",
-        "lumiunited.com.cn",
+        "lumiunited.com",
         "aqara.cn",
-        "lumiunited.cn"
+        "aqara.com.cn",
+        "lumiunited.com.cn"
       ]
     }
   ],

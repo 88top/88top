@@ -2,11 +2,11 @@
   "rules": [
     {
       "domain_suffix": [
+        "jwplayer.com",
+        "jwplatform.com",
         "jwpltx.com",
         "jwpsrv.com",
-        "jwplatform.com",
-        "jwpcdn.com",
-        "jwplayer.com"
+        "jwpcdn.com"
       ]
     }
   ],

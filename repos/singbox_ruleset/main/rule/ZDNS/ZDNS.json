@@ -2,18 +2,18 @@
   "rules": [
     {
       "domain_suffix": [
-        "zdnscloud.org.cn",
-        "zdnscloud.cn",
-        "zdnscloud.com.cn",
-        "zdnscloud.biz",
-        "zdns.net.cn",
         "zdns.cn",
+        "zdnscloud.biz",
         "zdnscloud.net",
-        "zdnscloud.info",
-        "zdns.org.cn",
+        "zdnscloud.org.cn",
         "zcmbc.com.cn",
+        "zdnscloud.com.cn",
+        "zdnscloud.com",
         "zdnscloud.net.cn",
-        "zdnscloud.com"
+        "zdnscloud.cn",
+        "zdns.org.cn",
+        "zdns.net.cn",
+        "zdnscloud.info"
       ]
     }
   ],

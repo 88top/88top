@@ -2,12 +2,12 @@
   "rules": [
     {
       "domain_suffix": [
-        "regiongold.com",
-        "gucci.com",
-        "chimeforchange.org",
-        "gucci.cn",
         "guccimuseo.com",
-        "guccitimeless.com"
+        "gucci.com",
+        "regiongold.com",
+        "guccitimeless.com",
+        "chimeforchange.org",
+        "gucci.cn"
       ]
     }
   ],

@@ -2,11 +2,11 @@
   "rules": [
     {
       "domain_suffix": [
-        "trello.com",
         "bitbucket.org",
-        "trellocdn.com",
+        "statuspage.io",
         "atlassian.com",
-        "statuspage.io"
+        "trellocdn.com",
+        "trello.com"
       ]
     }
   ],

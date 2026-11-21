@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain": [
-        "apps.apple.com",
-        "itunes.apple.com"
+        "itunes.apple.com",
+        "apps.apple.com"
       ]
     }
   ],

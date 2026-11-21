@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
-        "aerogard.com.cn",
         "aerogardcn.com",
-        "aerogard.com.au"
+        "aerogard.com.au",
+        "aerogard.com.cn"
       ]
     }
   ],

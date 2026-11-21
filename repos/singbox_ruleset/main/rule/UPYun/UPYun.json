@@ -2,22 +2,22 @@
   "rules": [
     {
       "domain_suffix": [
-        "aicdn2.com",
         "upaiyun.com",
-        "oncdp.com",
-        "aicdn.com",
-        "upai.com",
-        "yupoo.com",
-        "sktcdn.com",
-        "upcdn.net",
-        "upyun.com",
-        "zhidian-inc.cn",
-        "shangketang.com",
-        "aicdn5.com",
         "authbus.com",
         "shangzhibo.tv",
         "aicdn3.com",
-        "aicdn4.com"
+        "shangketang.com",
+        "upai.com",
+        "aicdn5.com",
+        "upcdn.net",
+        "oncdp.com",
+        "aicdn2.com",
+        "yupoo.com",
+        "zhidian-inc.cn",
+        "sktcdn.com",
+        "upyun.com",
+        "aicdn4.com",
+        "aicdn.com"
       ]
     }
   ],

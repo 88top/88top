@@ -3,13 +3,13 @@
     {
       "domain_suffix": [
         "fanbox.cc",
+        "pixiv.org",
+        "pixiv.me",
         "pixiv.cat",
         "pixiv.net",
-        "pixiv.me",
-        "pixiv.org",
-        "pixiv.co.jp",
         "pximg.net",
-        "booth.pm"
+        "booth.pm",
+        "pixiv.co.jp"
       ]
     }
   ],

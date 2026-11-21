@@ -2,15 +2,15 @@
   "rules": [
     {
       "domain_suffix": [
-        "oupengcloud.net",
-        "oupeng9.com",
-        "oupengcloud.cn",
-        "oupeng.com",
         "oupeng.net.cn",
-        "opthink.cn",
+        "oupeng.com",
+        "adbxb.com",
+        "oupeng9.com",
         "opfed.com",
         "adbxb.cn",
-        "adbxb.com"
+        "oupengcloud.cn",
+        "oupengcloud.net",
+        "opthink.cn"
       ]
     }
   ],

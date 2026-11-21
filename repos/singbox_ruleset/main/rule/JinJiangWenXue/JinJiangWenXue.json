@@ -2,13 +2,13 @@
   "rules": [
     {
       "domain_suffix": [
-        "robook.com",
-        "jjycw.net",
-        "jjwxc.cn",
-        "jjwxc.net",
         "chaba123.com",
+        "jjwxc.com",
         "jjwxc.org",
-        "jjwxc.com"
+        "jjwxc.net",
+        "robook.com",
+        "jjwxc.cn",
+        "jjycw.net"
       ]
     },
     {

@@ -2,23 +2,23 @@
   "rules": [
     {
       "domain_suffix": [
+        "slyip.com",
         "scieron.com",
-        "flnet.org",
-        "3d-game.com",
         "4irc.com",
-        "slyip.net",
+        "flnet.org",
         "dtdns.com",
-        "b0ne.com",
-        "effers.com",
-        "etowns.org",
+        "slyip.net",
+        "dtdns.net",
+        "gotgeeks.com",
         "chatnook.com",
         "suroot.com",
         "darktech.org",
-        "gotgeeks.com",
+        "effers.com",
         "etowns.net",
         "deaftone.com",
-        "dtdns.net",
-        "slyip.com"
+        "b0ne.com",
+        "3d-game.com",
+        "etowns.org"
       ]
     }
   ],

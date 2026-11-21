@@ -2,15 +2,15 @@
   "rules": [
     {
       "domain_suffix": [
-        "earlymen.com.cn",
-        "bjesound.com",
-        "flymodem.com.cn",
-        "iotboss.cn",
         "flymodem.net",
+        "earlymen.com.cn",
+        "iotboss.cn",
+        "esound.cn",
         "esound.net.cn",
-        "flymodem.cn",
+        "flymodem.com.cn",
         "esound.vip",
-        "esound.cn"
+        "flymodem.cn",
+        "bjesound.com"
       ]
     }
   ],

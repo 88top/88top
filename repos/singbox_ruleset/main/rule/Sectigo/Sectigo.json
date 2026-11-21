@@ -3,12 +3,12 @@
     {
       "domain_suffix": [
         "hackerguardian.com",
-        "optimumssl.com",
         "positivessl.com",
+        "instantssl.com",
         "enterprisessl.com",
-        "usertrust.com",
+        "optimumssl.com",
         "sectigo.com",
-        "instantssl.com"
+        "usertrust.com"
       ]
     }
   ],

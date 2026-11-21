@@ -3,8 +3,8 @@
     {
       "domain_suffix": [
         "disqus.com",
-        "disquscdn.com",
-        "disqusservice.com"
+        "disqusservice.com",
+        "disquscdn.com"
       ]
     }
   ],

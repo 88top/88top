@@ -2,13 +2,13 @@
   "rules": [
     {
       "domain_suffix": [
-        "dianping.com",
         "mtyun.com",
+        "sankuai.com",
         "maoyan.com",
         "meituan.com",
-        "sankuai.com",
         "neixin.cn",
-        "meituan.net"
+        "meituan.net",
+        "dianping.com"
       ]
     }
   ],

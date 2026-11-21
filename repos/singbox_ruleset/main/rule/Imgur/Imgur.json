@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "imgur.com",
-        "imgurinc.com"
+        "imgurinc.com",
+        "imgur.com"
       ]
     }
   ],

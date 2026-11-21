@@ -3,9 +3,9 @@
     {
       "domain_suffix": [
         "imdb.to",
+        "boxofficemojo.com",
         "imdb.com",
-        "media-imdb.com",
-        "boxofficemojo.com"
+        "media-imdb.com"
       ]
     }
   ],

@@ -2,12 +2,12 @@
   "rules": [
     {
       "domain_suffix": [
-        "edge.api.brightcove.com",
         "tver.jp",
-        "tver.co.jp",
+        "gorin.jp",
         "dogatch.jp",
-        "screens-lab.jp",
-        "gorin.jp"
+        "edge.api.brightcove.com",
+        "tver.co.jp",
+        "screens-lab.jp"
       ]
     }
   ],

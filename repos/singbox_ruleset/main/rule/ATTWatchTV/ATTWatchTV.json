@@ -2,12 +2,12 @@
   "rules": [
     {
       "domain_suffix": [
-        "att.tv",
-        "atttvnow.com",
         "dtvce.com",
+        "directv.com",
+        "att.tv",
         "attwatchtv.com",
         "nettyinternet.com",
-        "directv.com"
+        "atttvnow.com"
       ]
     }
   ],

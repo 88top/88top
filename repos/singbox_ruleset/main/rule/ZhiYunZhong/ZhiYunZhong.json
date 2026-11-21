@@ -2,14 +2,14 @@
   "rules": [
     {
       "domain_suffix": [
+        "appgrub.com",
+        "2taobao2jd.com",
+        "iappad.com",
+        "igo52.com",
+        "optaim.com",
         "cloudau.cn",
         "iapprank.com",
-        "optaim.com",
-        "iappad.com",
-        "appgrub.com",
-        "optaim.cn",
-        "2taobao2jd.com",
-        "igo52.com"
+        "optaim.cn"
       ]
     }
   ],

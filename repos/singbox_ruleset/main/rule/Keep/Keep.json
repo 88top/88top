@@ -2,11 +2,11 @@
   "rules": [
     {
       "domain_suffix": [
-        "calorietech.com",
         "keep.com.cn",
         "gotokeep.com",
-        "keepcdn.com",
-        "keep.com"
+        "keep.com",
+        "calorietech.com",
+        "keepcdn.com"
       ]
     }
   ],

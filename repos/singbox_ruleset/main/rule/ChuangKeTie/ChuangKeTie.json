@@ -2,11 +2,11 @@
   "rules": [
     {
       "domain_suffix": [
-        "huoziyin.cn",
-        "huoziyin.com",
+        "chuangkit.com",
         "ckt.cn",
+        "huoziyin.com",
         "byfan.cn",
-        "chuangkit.com"
+        "huoziyin.cn"
       ]
     }
   ],

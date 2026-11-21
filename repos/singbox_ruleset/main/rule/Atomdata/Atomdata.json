@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
-        "atom-data.io",
         "analytics-data.io",
-        "ironbeast.io"
+        "ironbeast.io",
+        "atom-data.io"
       ]
     }
   ],

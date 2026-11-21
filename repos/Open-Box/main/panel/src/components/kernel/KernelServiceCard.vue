@@ -40,13 +40,11 @@
           :key="p.id"
           class="@container/tile app-card-inset bg-base-100 border-base-300/60 rounded-lg border"
           :class="p.current && 'platform-tile-current'"
-          :title="p.hint"
         >
           <span class="flex flex-col items-start gap-1.5 @min-[14rem]/tile:flex-row @min-[14rem]/tile:gap-2">
             <CountryFlag
               :code="p.icon"
               :size="32"
-              :title="p.hint"
               class="shrink-0 @min-[14rem]/tile:mt-0.5"
               :class="!p.current && 'grayscale'"
             />
@@ -232,22 +230,7 @@
           />
           {{ $t('kernelActionStop') }}
         </button>
-        <button
-          type="button"
-          class="btn btn-sm"
-          :disabled="isRestartDisabled"
-          @click="runKernelAction('restart')"
-        >
-          <span
-            v-if="pendingAction === 'restart'"
-            class="loading loading-spinner loading-xs"
-          />
-          <ArrowPathIcon
-            v-else
-            class="h-4 w-4"
-          />
-          {{ $t('kernelActionRestart') }}
-        </button>
+        <KernelRestartButton />
       </div>
 
       <!-- Open-Box 更新:通道 / 检查更新 / 自动更新(档案还在加载时先不显示) -->
@@ -269,9 +252,9 @@ import CountryFlag from '@/components/common/CountryFlag.vue'
 import GithubIcon from '@/components/common/GithubIcon.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import FactoryResetButton from '@/components/kernel/FactoryResetButton.vue'
+import KernelRestartButton from '@/components/kernel/KernelRestartButton.vue'
 import OpenboxUpdateCard from '@/components/kernel/OpenboxUpdateCard.vue'
 import {
-  isRestartDisabled,
   isStartDisabled,
   isStopDisabled,
   pendingAction,
@@ -283,7 +266,6 @@ import { refreshUpdateInfo, updateInfo } from '@/composables/openboxUpdate'
 import { DARK_THEME, theme } from '@/store/settings'
 import logoUrl from '@/assets/logo.png'
 import {
-  ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
   CircleStackIcon,
   CpuChipIcon,
@@ -379,7 +361,6 @@ const platformCards = computed(() => [
     title: 'OpenWrt',
     icon: 'brand:openwrt',
     req: t('routerPlatformReqOpenwrt'),
-    hint: t('routerPlatformHintOpenwrt'),
     current: platformKind.value === 'openwrt',
   },
   {
@@ -387,7 +368,6 @@ const platformCards = computed(() => [
     title: 'Linux',
     icon: theme.value === DARK_THEME ? 'brand:linux-color-light' : 'brand:linux-color',
     req: t('routerPlatformReqLinux'),
-    hint: t('routerPlatformHintLinux'),
     current: platformKind.value === 'systemd',
   },
   {
@@ -395,7 +375,6 @@ const platformCards = computed(() => [
     title: 'Docker',
     icon: 'brand:docker',
     req: 'Linux · x64 / arm64',
-    hint: t('dockerAccessHint', { ip: serviceStatus.value?.container?.lanIp || '' }),
     current: platformKind.value === 'container',
   },
 ])

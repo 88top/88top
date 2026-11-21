@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "amdfanstore.com",
-        "radeon.com",
         "amd.com.cn",
-        "amd.com"
+        "amd.com",
+        "amdfanstore.com",
+        "radeon.com"
       ]
     }
   ],

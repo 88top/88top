@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "walkingpad.com",
         "kingsmith.cn",
+        "walkingpad.com",
         "walkingpad.cn",
         "kingsmith.com.cn"
       ]

@@ -2,27 +2,27 @@
   "rules": [
     {
       "domain_suffix": [
-        "lccnxn.cn",
-        "fldvz.cn",
-        "hj-dog.com",
-        "maozhuar.com",
         "xuanyaodang.cn",
-        "97973.com.cn",
-        "jyjqdn.cn",
-        "xcmy0.cn",
-        "ljnvb.cn",
-        "maozhuar.com.cn",
-        "xuanyaodang.net",
+        "hj-dog.com",
         "xuanyaodang.com",
-        "sylqmn.cn",
-        "shsyfzq.cn",
         "smmdn.cn",
-        "lzcmm9x.cn",
-        "youmengchuangxiang.com",
-        "maozhuar.cn",
+        "jyjqdn.cn",
         "carrydj.com",
+        "xuanyaodang.net",
+        "maozhuar.com",
+        "youmengchuangxiang.com",
         "yblxyp.cn",
-        "97973.com"
+        "97973.com",
+        "maozhuar.com.cn",
+        "ljnvb.cn",
+        "97973.com.cn",
+        "shsyfzq.cn",
+        "sylqmn.cn",
+        "lzcmm9x.cn",
+        "maozhuar.cn",
+        "lccnxn.cn",
+        "xcmy0.cn",
+        "fldvz.cn"
       ]
     }
   ],

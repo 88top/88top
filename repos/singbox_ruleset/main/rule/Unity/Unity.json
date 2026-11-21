@@ -2,15 +2,15 @@
   "rules": [
     {
       "domain_suffix": [
-        "unity.cn",
         "unitychina.cn",
-        "multiplay.cn",
         "unityedu.com",
-        "unity3dusercontent.com",
-        "unity.com",
-        "unityedu.cn",
+        "multiplay.cn",
         "unity3d.com",
-        "unityedu.com.cn"
+        "unity.cn",
+        "unityedu.com.cn",
+        "unityedu.cn",
+        "unity.com",
+        "unity3dusercontent.com"
       ]
     },
     {

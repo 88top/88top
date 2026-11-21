@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "intercom.com",
-        "intercom.io",
         "intercomcdn.com",
-        "intercomassets.com"
+        "intercomassets.com",
+        "intercom.io",
+        "intercom.com"
       ]
     }
   ],

@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "pwnedpasswords.com",
-        "haveibeenpwned.com"
+        "haveibeenpwned.com",
+        "pwnedpasswords.com"
       ]
     }
   ],

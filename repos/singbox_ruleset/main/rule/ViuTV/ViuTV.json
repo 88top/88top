@@ -2,20 +2,20 @@
   "rules": [
     {
       "domain_suffix": [
-        "dfp6rglgjqszk.cloudfront.net",
+        "viu.tv",
         "d1k2us671qcoau.cloudfront.net",
         "mobileanalytics.us-east-1.amazonaws.com",
+        "cognito-identity.us-east-1.amazonaws.com",
+        "dfp6rglgjqszk.cloudfront.net",
         "viu.com",
         "viu.now.com",
-        "cognito-identity.us-east-1.amazonaws.com",
-        "viu.tv",
         "d2anahhhmp1ffz.cloudfront.net"
       ]
     },
     {
       "process_name": [
-        "com.vuclip.viu",
         "com.viu.pad",
+        "com.vuclip.viu",
         "com.viu.phone"
       ]
     }

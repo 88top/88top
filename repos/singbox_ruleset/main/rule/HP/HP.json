@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "hpstore-china.com",
-        "hpstore.corpmerchandise.com",
+        "hp.com",
         "hpstore.com",
-        "hp.com"
+        "hpstore.corpmerchandise.com",
+        "hpstore-china.com"
       ]
     }
   ],

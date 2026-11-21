@@ -2,12 +2,12 @@
   "rules": [
     {
       "domain_suffix": [
-        "kuaidilab.com",
-        "baidiapp.com",
+        "baidinet.com",
         "kuaidi100.com",
-        "ckd.im",
         "kd100.com",
-        "baidinet.com"
+        "ckd.im",
+        "kuaidilab.com",
+        "baidiapp.com"
       ]
     }
   ],

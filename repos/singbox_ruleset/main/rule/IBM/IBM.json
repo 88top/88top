@@ -3,17 +3,17 @@
     {
       "domain_suffix": [
         "appdomain.cloud",
-        "weatherchannel",
-        "s-bluemix.net",
-        "weather.com",
-        "bluemix.com",
-        "ibm",
-        "bluemix.net",
-        "ibm.us",
         "ibm.com",
+        "bluemix.com",
+        "weather.com",
+        "ibm",
         "ibm.net",
+        "weatherchannel",
         "s81c.com",
-        "ibm.eu"
+        "s-bluemix.net",
+        "ibm.us",
+        "ibm.eu",
+        "bluemix.net"
       ]
     }
   ],

@@ -6,9 +6,9 @@
       ],
       "domain_suffix": [
         "wetvinfo.com",
-        "vv.video.qq.com",
         "iflix-images.akamaized.net",
         "iflix.com",
+        "vv.video.qq.com",
         "wetv.vip"
       ],
       "ip_cidr": [
@@ -17,8 +17,8 @@
     },
     {
       "process_name": [
-        "com.tencent.qqlivei18n",
-        "com.tencent.qqlivei18n.us"
+        "com.tencent.qqlivei18n.us",
+        "com.tencent.qqlivei18n"
       ]
     }
   ],

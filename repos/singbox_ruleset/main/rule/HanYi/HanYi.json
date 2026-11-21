@@ -2,17 +2,17 @@
   "rules": [
     {
       "domain": [
-        "hellofontpreview.oss-cn-beijing.aliyuncs.com",
-        "hellowebfonts.oss-cn-beijing.aliyuncs.com"
+        "hellowebfonts.oss-cn-beijing.aliyuncs.com",
+        "hellofontpreview.oss-cn-beijing.aliyuncs.com"
       ],
       "domain_suffix": [
         "fontstar.com.cn",
-        "hanyi.com.cn",
-        "fontstudio.cn",
-        "hellowebfont.com",
         "ifont.cn",
         "joytype.com",
-        "hanyi.com"
+        "hellowebfont.com",
+        "hanyi.com.cn",
+        "hanyi.com",
+        "fontstudio.cn"
       ]
     }
   ],

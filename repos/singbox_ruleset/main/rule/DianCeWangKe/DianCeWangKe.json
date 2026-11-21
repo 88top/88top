@@ -2,14 +2,14 @@
   "rules": [
     {
       "domain_suffix": [
-        "pgyer.im",
-        "testin.im",
-        "qcers.com",
-        "pgyer.cc",
-        "qcers.net",
         "xcxwo.com",
+        "qcers.com",
+        "testin.im",
+        "pgyer.cc",
+        "pgyer.im",
         "tracup.com",
-        "pgyer.com"
+        "pgyer.com",
+        "qcers.net"
       ]
     }
   ],

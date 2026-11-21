@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
-        "fox.com",
         "foxdcg.com",
-        "uplynk.com"
+        "uplynk.com",
+        "fox.com"
       ]
     }
   ],

@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
+        "tumblr.com",
         "tumblr.co",
-        "tmblr.co",
-        "tumblr.com"
+        "tmblr.co"
       ]
     }
   ],

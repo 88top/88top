@@ -2,11 +2,11 @@
   "rules": [
     {
       "domain_suffix": [
-        "hulu.jp",
-        "streaks.jp",
-        "happyon.jp",
         "hjholdings.jp",
-        "yb.uncn.jp"
+        "yb.uncn.jp",
+        "happyon.jp",
+        "streaks.jp",
+        "hulu.jp"
       ]
     }
   ],

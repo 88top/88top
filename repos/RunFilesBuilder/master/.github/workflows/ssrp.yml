@@ -1,0 +1,242 @@
+#=================================================
+# https://github.com/wukongdaily/RunFilesBuilder
+# Description: Build RunFiles using GitHub Actions
+# Lisence: MIT
+# Author: wukongdaily
+# Blog: wkdaily.cpolar.cn
+#=================================================
+name: Make ShadowsocksPlus+ run files
+
+on:
+  workflow_dispatch:
+    inputs:
+      package_version:
+        description: '这里是包版本'
+        required: false
+        default: 'packages-24.10'  
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+   
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create directories for x86_64 and a53 and set PACKAGE_VERSION
+        run: |
+          mkdir -p x86_64/depends a53/depends
+          package_version="${{ github.event.inputs.package_version }}"
+          if [ -z "$package_version" ]; then
+            package_version="packages-24.10"
+          fi
+          echo "PACKAGE_VERSION=$package_version" >> $GITHUB_ENV
+          wget -O x86_64/depends/libopenssl3.ipk https://github.com/wkccd/build/releases/download/pw1/libopenssl3_3.0.16-1_x86_64.ipk
+          wget -O a53/depends/libopenssl3.ipk https://github.com/wkccd/build/releases/download/pw1/libopenssl3_3.0.16-1_aarch64_cortex-a53.ipk
+      - name: Download ipk files for x86_64 and a53
+        run: |
+          echo "Get PACKAGE_VERSION=$PACKAGE_VERSION"
+          
+          FILE_PREFIXES=("shadowsocks-libev-ss-server" "dns2tcp" "lua-neturl" "chinadns-ng" "dns2socks" "hysteria" "ipt2socks" "microsocks" "mosdns" "naiveproxy" "redsocks2" "shadowsocksr-libev" "shadowsocks-rust" "shadow-tls" "simple-obfs-client" "tcping" "trojan" "tuic-client" "v2ray-plugin" "xray-core" "luci-app-ssr-plus")
+          EXCLUDE_PREFIXES=("luci-app-chinadns-ng" "luci-app-microsocks" "luci-app-mosdns" "luci-app-naiveproxy" "luci-app-redsocks2" "luci-app-shadowsocks")
+          
+          BASE_URL_X86="https://dl.openwrt.ai/$PACKAGE_VERSION/x86_64/kiddin9/"
+          echo "Fetching x86 directory page from $BASE_URL_X86"
+          wget -qO- "$BASE_URL_X86" | \
+          while IFS= read -r LINE; do
+              for PREFIX in "${FILE_PREFIXES[@]}"; do
+                  if [[ "$LINE" == *"$PREFIX"* ]]; then
+                      FILE=$(echo "$LINE" | grep -oP 'href="\K[^"]*')
+                      if [[ -z "$FILE" ]]; then
+                          # echo "No file found in line, skipping"
+                          continue
+                      fi
+                      exclude_file=false
+                      for exclude_prefix in "${EXCLUDE_PREFIXES[@]}"; do
+                          if [[ "$FILE" == $exclude_prefix* ]]; then
+                              exclude_file=true
+                              break
+                          fi
+                      done
+                      if $exclude_file; then
+                          echo "Skip file: $FILE"
+                          continue
+                      fi
+                      FILE_URL="${BASE_URL_X86}${FILE}"
+                      echo "Found file: $FILE_URL"
+                      curl -L --fail "$FILE_URL" -o "x86_64/depends/$(basename $FILE_URL)" -#
+                    fi
+              done
+          done
+
+          BASE_URL_A53="https://dl.openwrt.ai/$PACKAGE_VERSION/aarch64_cortex-a53/kiddin9/"
+          echo "Fetching a53 directory page from $BASE_URL_A53"
+          wget -qO- "$BASE_URL_A53" | \
+          while IFS= read -r LINE; do
+              for PREFIX in "${FILE_PREFIXES[@]}"; do
+                  if [[ "$LINE" == *"$PREFIX"* ]]; then
+                      FILE=$(echo "$LINE" | grep -oP 'href="\K[^"]*')
+                      if [[ -z "$FILE" ]]; then
+                          # echo "No file found in line, skipping"
+                          continue
+                      fi
+                      exclude_file=false
+                      for exclude_prefix in "${EXCLUDE_PREFIXES[@]}"; do
+                          if [[ "$FILE" == $exclude_prefix* ]]; then
+                              exclude_file=true
+                              break
+                          fi
+                      done
+                      if $exclude_file; then
+                          echo "Skip file: $FILE"
+                          continue
+                      fi
+                      FILE_URL="${BASE_URL_A53}${FILE}"
+                      echo "Found file: $FILE_URL"
+                      curl -L --fail "$FILE_URL" -o "a53/depends/$(basename $FILE_URL)" -#
+                  fi
+              done
+          done
+        
+      - name: downloads libopenssl3 & libudns ipk
+        run: |
+          echo "downloading libopenssl3 ipk"
+          FILE_PREFIXES=("libopenssl3" "libudns")
+          BASE_URL_X86="https://dl.openwrt.ai/$PACKAGE_VERSION/x86_64/base/"
+          wget -qO- "$BASE_URL_X86" | \
+          while IFS= read -r LINE; do
+              for PREFIX in "${FILE_PREFIXES[@]}"; do
+                  if [[ "$LINE" == *"$PREFIX"* ]]; then
+                      FILE=$(echo "$LINE" | grep -oP 'href="\K[^"]*')
+                      if [[ -z "$FILE" ]]; then
+                          # echo "No file found in line, skipping"
+                          continue
+                      fi
+                      FILE_URL="${BASE_URL_X86}${FILE}"
+                      echo "Found file: $FILE_URL"
+                      curl -L --fail "$FILE_URL" -o "x86_64/depends/$(basename $FILE_URL)" -#
+                    fi
+              done
+          done
+          BASE_URL_A53="https://dl.openwrt.ai/$PACKAGE_VERSION/aarch64_cortex-a53/base/"
+          wget -qO- "$BASE_URL_A53" | \
+          while IFS= read -r LINE; do
+              for PREFIX in "${FILE_PREFIXES[@]}"; do
+                  if [[ "$LINE" == *"$PREFIX"* ]]; then
+                      FILE=$(echo "$LINE" | grep -oP 'href="\K[^"]*')
+                      if [[ -z "$FILE" ]]; then
+                          # echo "No file found in line, skipping"
+                          continue
+                      fi
+                      FILE_URL="${BASE_URL_A53}${FILE}"
+                      echo "Found file: $FILE_URL"
+                      curl -L --fail "$FILE_URL" -o "a53/depends/$(basename $FILE_URL)" -#
+                    fi
+              done
+          done
+          echo "downloading libudns ipk"
+          BASE_URL_X86="https://dl.openwrt.ai/$PACKAGE_VERSION/x86_64/packages/"
+          wget -qO- "$BASE_URL_X86" | \
+          while IFS= read -r LINE; do
+              for PREFIX in "${FILE_PREFIXES[@]}"; do
+                  if [[ "$LINE" == *"$PREFIX"* ]]; then
+                      FILE=$(echo "$LINE" | grep -oP 'href="\K[^"]*')
+                      if [[ -z "$FILE" ]]; then
+                          # echo "No file found in line, skipping"
+                          continue
+                      fi
+                      FILE_URL="${BASE_URL_X86}${FILE}"
+                      echo "Found file: $FILE_URL"
+                      curl -L --fail "$FILE_URL" -o "x86_64/depends/$(basename $FILE_URL)" -#
+                    fi
+              done
+          done
+          BASE_URL_A53="https://dl.openwrt.ai/$PACKAGE_VERSION/aarch64_cortex-a53/packages/"
+          wget -qO- "$BASE_URL_A53" | \
+          while IFS= read -r LINE; do
+              for PREFIX in "${FILE_PREFIXES[@]}"; do
+                  if [[ "$LINE" == *"$PREFIX"* ]]; then
+                      FILE=$(echo "$LINE" | grep -oP 'href="\K[^"]*')
+                      if [[ -z "$FILE" ]]; then
+                          # echo "No file found in line, skipping"
+                          continue
+                      fi
+                      FILE_URL="${BASE_URL_A53}${FILE}"
+                      echo "Found file: $FILE_URL"
+                      curl -L --fail "$FILE_URL" -o "a53/depends/$(basename $FILE_URL)" -#
+                    fi
+              done
+          done
+
+      - name: List depends ipks
+        run: |
+          echo "List x86 depends ipk files"
+          rm x86_64/depends/luci-app-trojan-server*
+          ls -lh x86_64/depends/
+          echo "List a53 depends ipk files"
+          rm a53/depends/luci-app-trojan-server*
+          ls -lh a53/depends/
+          mv x86_64/depends/luci-app-ssr-plus*.ipk x86_64/
+          mv a53/depends/luci-app-ssr-plus*.ipk a53/
+          echo "查看a53目录"
+          ls a53/
+          echo "查看x86_64目录"
+          ls x86_64/
+
+      - name: Parse version from filename
+        id: setver
+        run: |
+          file=$(ls a53/luci-app-ssr-plus*.ipk 2>/dev/null | head -n1)
+          for file in a53/luci-app-ssr-plus*.ipk; do
+              base=${file##*/}         
+              tmp=${base#*_}           
+              tmp=${tmp%_all.ipk}       
+              version=${tmp/-/_}
+              echo "$version"
+              echo "ssrp_version=$version" >> $GITHUB_ENV
+              break
+          done
+          echo "版本号是：${ssrp_version}"
+
+      - name: Create install.sh 
+        run: |
+            echo -e "#!/bin/sh\n\nopkg update\nif [ \$? -ne 0 ]; then\n    echo \"update failed\"\n    exit 1\nfi\nopkg install depends/*.ipk --force-depends\nopkg install *.ipk --force-depends" > x86_64/install.sh
+            chmod +x x86_64/install.sh
+            cp x86_64/install.sh a53/
+
+      - name: Clone makeself repo
+        run: |
+          git clone https://github.com/megastep/makeself.git
+
+      - name: Change Dir
+        run: |
+            mv -f x86_64/ makeself/
+            mv -f a53/ makeself/
+            echo "移动后再查看makeself/的文件"
+            ls -lah makeself/
+
+      
+      - name: Create self-extracting archives
+        run: |
+            cd makeself
+            ./makeself.sh x86_64/ ssrp_x86_64-${ssrp_version}.run "by github action" ./install.sh
+            ./makeself.sh a53/ ssrp_aarch64_cortex-a53-${ssrp_version}.run "by github action" ./install.sh
+                
+      
+      - name: Set tag name
+        id: vars
+        run: |
+          TODAY=$(date -u -d '+8 hour' +'%Y-%m-%d')
+          echo "tag_name=$TODAY" >> $GITHUB_ENV
+          
+      - name: Upload all .run files to GitHub Release
+        uses: softprops/action-gh-release@v2.1.0
+        with:
+          tag_name: "ShadowsocksPlus+"
+          name: SSRP-${{ env.ssrp_version }}
+          body: "![Github](https://img.shields.io/badge/SSRP.run-123456?logo=github&logoColor=fff&labelColor=blue&style=for-the-badge) [![Github](https://img.shields.io/badge/国内加速站下载-FC7C0D?logo=github&logoColor=fff&labelColor=000&style=for-the-badge)](https://wkdaily.cpolar.cn/archives/1) ![GitHub Downloads (all assets, specific tag)](https://img.shields.io/github/downloads/wukongdaily/RunFilesBuilder/ShadowsocksPlus%2B/total?style=for-the-badge&labelColor=black&color=%2325c2a0)"
+          files: makeself/*.run
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -2,11 +2,11 @@
   "rules": [
     {
       "domain_suffix": [
-        "hkbn.com.hk",
         "jos.com",
         "csifund.org",
-        "hkbn.net",
+        "hkbn.com.hk",
         "hkbnes.net",
+        "hkbn.net",
         "speedtest.com.hk"
       ]
     }

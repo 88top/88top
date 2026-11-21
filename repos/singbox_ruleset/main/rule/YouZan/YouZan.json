@@ -2,9 +2,9 @@
   "rules": [
     {
       "domain_suffix": [
-        "yzcdn.cn",
         "youzan.com",
-        "youzanyun.com"
+        "youzanyun.com",
+        "yzcdn.cn"
       ]
     }
   ],

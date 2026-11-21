@@ -6,8 +6,8 @@
       ],
       "domain_suffix": [
         "teams.live.com",
-        "teams.cdn.live.net",
-        "teams.microsoft.com"
+        "teams.microsoft.com",
+        "teams.cdn.live.net"
       ]
     }
   ],

@@ -2,19 +2,19 @@
   "rules": [
     {
       "domain_suffix": [
-        "globalsign.com",
-        "globalsign-media.com",
-        "globalsign.net",
-        "globalsign.es",
-        "globalsign.fr",
-        "globalsign.nl",
-        "globalsign.be",
-        "globalsign.eu",
         "globalsign.co.uk",
+        "globalsign.es",
+        "globalsign-media.com",
         "globalsign.ch",
+        "globalsign.com.au",
+        "globalsign.fr",
+        "globalsign.net",
         "globalsign.com.hk",
         "globalsign.com.sg",
-        "globalsign.com.au"
+        "globalsign.be",
+        "globalsign.eu",
+        "globalsign.com",
+        "globalsign.nl"
       ]
     }
   ],

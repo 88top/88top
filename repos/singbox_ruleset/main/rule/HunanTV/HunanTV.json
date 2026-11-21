@@ -2,13 +2,13 @@
   "rules": [
     {
       "domain_suffix": [
+        "hifuntv.com",
+        "hunantv.com",
+        "tazai.com",
         "hunaniptv.com",
-        "imgo.tv",
         "hitv.com",
         "mgtv.com",
-        "tazai.com",
-        "hunantv.com",
-        "hifuntv.com"
+        "imgo.tv"
       ]
     }
   ],

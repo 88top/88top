@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "actalis.com",
-        "actalis.it"
+        "actalis.it",
+        "actalis.com"
       ]
     }
   ],

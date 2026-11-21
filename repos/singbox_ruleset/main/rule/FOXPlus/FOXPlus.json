@@ -2,10 +2,10 @@
   "rules": [
     {
       "domain": [
+        "foxsports03-i.akamaihd.net",
         "staticasiafox.akamaized.net",
         "cdn-fox-networks-group-green.akamaized.net",
         "d3cv4a9a9wh0bt.cloudfront.net",
-        "foxsports03-i.akamaihd.net",
         "foxsports01-i.akamaihd.net",
         "foxsports02-i.akamaihd.net"
       ],

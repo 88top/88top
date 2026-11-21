@@ -2,14 +2,14 @@
   "rules": [
     {
       "domain_suffix": [
-        "is-a-hunter.com",
-        "dyn.com",
-        "dyndns.org",
         "blogdns.org",
+        "is-a-hunter.com",
         "from-pr.com",
-        "dyndns-pics.com",
+        "dyndns.org",
+        "from-sd.com",
+        "dyn.com",
         "dyndns-ip.com",
-        "from-sd.com"
+        "dyndns-pics.com"
       ]
     }
   ],

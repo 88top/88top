@@ -2,25 +2,25 @@
   "rules": [
     {
       "domain_suffix": [
-        "6rooms.com",
-        "6imgcss.cn",
-        "webimgs.cn",
-        "huanpeng.com",
-        "wwwstatic.cn",
         "6static.cn",
+        "sixresource.cn",
+        "ccpod.com",
+        "6.com.cn",
+        "xiu123.cn",
+        "6rooms.com",
+        "footbig.com",
+        "6webimg.cn",
+        "wwwstatic.cn",
+        "luyanhui.com",
+        "6imgcss.cn",
         "imgjs6.cn",
+        "webimgs.cn",
+        "6.cn",
+        "huanpeng.com",
+        "6staticcdn.cn",
         "6resource.cn",
         "faceroom.cn",
-        "xiu123.cn",
-        "ccpod.com",
-        "luyanhui.com",
-        "footbig.com",
-        "sixstatic.cn",
-        "sixresource.cn",
-        "6staticcdn.cn",
-        "6.cn",
-        "6webimg.cn",
-        "6.com.cn"
+        "sixstatic.cn"
       ]
     }
   ],

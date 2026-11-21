@@ -2,8 +2,8 @@
   "rules": [
     {
       "domain_suffix": [
-        "yangkeduo.com",
         "pinduoduo.com",
+        "yangkeduo.com",
         "pddpic.com"
       ]
     }

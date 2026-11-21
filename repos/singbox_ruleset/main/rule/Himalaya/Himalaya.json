@@ -2,23 +2,23 @@
   "rules": [
     {
       "domain_suffix": [
-        "zhishiv.com",
-        "xima.tv",
-        "ximalaya.com",
-        "tableauxmly.com",
-        "zhishif.com",
-        "himalaya.com",
-        "zhishiu.com",
-        "ximalaya.fm",
         "conchdate.com",
-        "ximalayadata.com",
-        "xmcdn.com",
-        "zhishinn.com",
-        "qingxuetang.com",
-        "ximalaya.tv",
+        "zhishiv.com",
         "soundconch.com",
+        "xima.tv",
+        "himalaya.com",
+        "ximalayadata.com",
         "himalaya.cool",
-        "9nali.com"
+        "ximalaya.com",
+        "xmcdn.com",
+        "ximalaya.fm",
+        "9nali.com",
+        "tableauxmly.com",
+        "zhishinn.com",
+        "ximalaya.tv",
+        "zhishiu.com",
+        "zhishif.com",
+        "qingxuetang.com"
       ]
     }
   ],
