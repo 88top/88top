@@ -3,6 +3,7 @@
     <ProxiesCtrl />
     <div
       ref="proxiesRef"
+      v-tab-content="proxiesTabShow"
       class="max-md:scrollbar-hidden min-h-0 flex-1 overflow-x-hidden"
       :class="disableProxiesPageScroll ? 'overflow-y-hidden' : 'overflow-y-scroll'"
       :style="padding"
@@ -182,7 +183,7 @@ const handleSubscriptionRefresh = async (id: string) => {
   try {
     const res = await refreshSubscription(id)
     await loadOpenboxSubscriptions()
-    notifySubscriptionSaved(res.changed, 'refreshed', res)
+    notifySubscriptionSaved(res.changed, 'refreshed', res.skipped, res.applied)
   } catch {
     // 失败原因在订阅设置页会逐条显示;这里是只读入口,不重复铺错误文案
   } finally {

@@ -361,6 +361,7 @@
           >
             <div
               role="tablist"
+              v-segmented
               class="tabs-box tabs tabs-xs w-fit shrink-0"
             >
               <a
@@ -393,6 +394,7 @@
               <div
                 role="tablist"
                 :aria-label="$t('groupKeywordsMode')"
+                v-segmented
                 class="tabs-box tabs tabs-xs shrink-0"
               >
                 <button
@@ -551,6 +553,7 @@
                     item-key="id"
                     role="tablist"
                     :aria-label="$t('failoverLaneOrderHint')"
+                    v-segmented
                     class="tabs-box tabs tabs-xs min-w-0 flex-nowrap overflow-x-auto overflow-y-hidden"
                   >
                     <template #item="{ element: lane, index }">
@@ -757,6 +760,7 @@
         <div
           role="tablist"
           :aria-label="$t('groupExcludeKeywordsMode')"
+          v-segmented
           class="tabs-box tabs tabs-xs w-fit"
         >
           <button
@@ -795,11 +799,13 @@
       </template>
     </DialogWrapper>
 
-    <BandwidthHelpDialog
+    <BandwidthSettingsHelpDialog
       v-model="showBandwidthHelp"
+      section="nodeScoreWeights"
       :mode="draft?.type || 'urltest'"
-      :hours="bandwidthSettings.intervalHours"
-      :max-m-b="bandwidthSettings.maxDownloadMB"
+      :switch-enabled="draft?.bandwidth === true"
+      :profile="helpProfile"
+      :loading="helpLoading"
     />
 
     <!-- 故障转移「参数设定」:在副本上改,确认才写回草稿;取消 / 关闭不留痕 -->
@@ -1119,13 +1125,13 @@
 
 <script setup lang="ts">
 import type {
-  OpenboxBandwidthSettings,
   OpenboxFailoverLane,
   OpenboxFailoverSettings,
   OpenboxGroupType,
+  OpenboxProfile,
   OpenboxUserGroup,
 } from '@/api/openbox'
-import { fetchDefaultNodeGroups, fetchNodeGroups, saveNodeGroups } from '@/api/openbox'
+import { fetchDefaultNodeGroups, fetchNodeGroups, fetchProfile, saveNodeGroups } from '@/api/openbox'
 import BulkPick from '@/components/subscription/BulkPick.vue'
 import SubscriptionFilter from '@/components/subscription/SubscriptionFilter.vue'
 import TagInput from '@/components/common/TagInput.vue'
@@ -1138,7 +1144,7 @@ import { keywordMatches, normalizeForMatch } from '@/helper/keywordMatch'
 import { showNotification } from '@/helper/notification'
 import { fetchProxies } from '@/store/proxies'
 import DialogWrapper from '@/components/common/DialogWrapper.vue'
-import BandwidthHelpDialog from '@/components/subscription/BandwidthHelpDialog.vue'
+import BandwidthSettingsHelpDialog from '@/components/kernel/BandwidthSettingsHelpDialog.vue'
 import {
   Bars3Icon,
   ChevronDownIcon,
@@ -1160,13 +1166,30 @@ import { useI18n } from 'vue-i18n'
 const { t, locale } = useI18n()
 
 const groups = ref<OpenboxUserGroup[]>([])
-const availableNodes = ref<Array<{ name: string; subscription: string; subscriptionId?: string; chain?: boolean; region?: string }>>([])
+const availableNodes = ref<
+  Array<{ name: string; subscription: string; subscriptionId?: string; chain?: boolean; upstream?: string; region?: string }>
+>([])
 // 动态组的「订阅范围」下拉:订阅 id + 名字
 const groupSubscriptions = ref<Array<{ id: string; name: string }>>([])
 const loading = ref(false)
-// 带宽择优的统一测速参数(档案里的 bandwidth),只读:帮助弹窗和开关旁的周期说明用,改它去「内核」页
-const bandwidthSettings = ref<OpenboxBandwidthSettings>({ intervalHours: 2, maxDownloadMB: 64 })
 const showBandwidthHelp = ref(false)
+// 帮助弹窗要看档案里已保存的评分权重和测速参数;每次打开取一次最新的
+const helpProfile = ref<OpenboxProfile | null>(null)
+const helpLoading = ref(false)
+watch(showBandwidthHelp, (open) => {
+  if (!open) return
+  helpLoading.value = true
+  fetchProfile()
+    .then((profile) => {
+      helpProfile.value = profile
+    })
+    .catch(() => {
+      helpProfile.value = null
+    })
+    .finally(() => {
+      helpLoading.value = false
+    })
+})
 
 // 关键词标签输入:还没回车提交的文字放在 pending 里,保存 / 关弹窗时由 commit() 收进标签
 const keywordInput = ref<InstanceType<typeof TagInput> | null>(null)
@@ -1213,7 +1236,6 @@ const load = async () => {
     groups.value = data.groups
     availableNodes.value = data.availableNodes
     groupSubscriptions.value = data.subscriptions || []
-    bandwidthSettings.value = data.bandwidth || { intervalHours: 2, maxDownloadMB: 64 }
   } catch (err) {
     notifyError(err)
   } finally {
@@ -1224,16 +1246,23 @@ onMounted(load)
 
 // 动态组报"按当前节点算出来是几个",静态组报名单里有几个。动态组的数字会随订阅
 // 变化,这正是它的意义所在,所以列表里就该显示算出来的那个数,而不是关键词条数。
-// 动态组的候选:链式代理不进动态组;匹配文本 = 地区名 + 节点名,和服务端一致
-const matchableNodes = computed(() =>
-  availableNodes.value
-    .filter((n) => !n.chain)
-    .map((n) => ({
-      name: n.name,
-      subscriptionId: n.subscriptionId,
-      text: normalizeForMatch(`${n.region || ''} ${n.name}`),
-    })),
+// 订阅范围里代表「链式代理」的那一项(和服务端、core 的 chain-proxy 一致)
+const CHAIN_PROXY_SCOPE = 'chain-proxy'
+
+// 动态组的候选:没有订阅范围时链式代理不进动态组;范围里选了「链式代理」,链式节点才是候选(见 matchedNodes)。
+// 匹配文本 = 地区名 + 节点名,和服务端一致
+const allMatchNodes = computed(() =>
+  availableNodes.value.map((n) => ({
+    name: n.name,
+    chain: Boolean(n.chain),
+    upstream: n.upstream,
+    // 链式节点的范围 id 统一是 chain-proxy,订阅节点用自己的订阅 id
+    scopeId: n.chain ? CHAIN_PROXY_SCOPE : n.subscriptionId,
+    text: normalizeForMatch(`${n.region || ''} ${n.name}`),
+  })),
 )
+const matchableNodes = computed(() => allMatchNodes.value.filter((n) => !n.chain))
+const hasChainNodes = computed(() => availableNodes.value.some((n) => n.chain))
 
 // 订阅范围:新字段 subscriptionIds(可多选);老记录只有单个 subscriptionId,折成数组
 const scopeIdsOf = (group: OpenboxUserGroup) => [
@@ -1245,19 +1274,55 @@ const scopeIdsOf = (group: OpenboxUserGroup) => [
 ]
 
 // 订阅范围筛选的选项;存的订阅已被删掉时仍保留原值并提示
-const subscriptionScopeOptions = computed(() => [
-  ...groupSubscriptions.value.map((sub) => ({ value: sub.id, label: sub.name })),
-  ...(draft.value ? scopeIdsOf(draft.value) : [])
-    .filter((id) => !groupSubscriptions.value.some((sub) => sub.id === id))
-    .map((id) => ({ value: id, label: t('groupSubscriptionMissing') })),
-])
+const subscriptionScopeOptions = computed(() => {
+  const chosen = draft.value ? scopeIdsOf(draft.value) : []
+  return [
+    ...groupSubscriptions.value.map((sub) => ({ value: sub.id, label: sub.name })),
+    // 「链式代理」:节点池里有链式代理节点,或这个组已经选了它(链式代理删光了也别把选项吞掉)
+    ...(hasChainNodes.value || chosen.includes(CHAIN_PROXY_SCOPE)
+      ? [{ value: CHAIN_PROXY_SCOPE, label: t('groupChainSource') }]
+      : []),
+    ...chosen
+      .filter((id) => id !== CHAIN_PROXY_SCOPE && !groupSubscriptions.value.some((sub) => sub.id === id))
+      .map((id) => ({ value: id, label: t('groupSubscriptionMissing') })),
+  ]
+})
 
-const matchedNodes = (group: OpenboxUserGroup) => {
+// 链式节点的上游线路会不会绕回这个动态组(会成环就不收,和 core 一致):
+// 边 = 链式节点 → 它的上游;静态组 / 故障转移 → 成员;别的动态组 → 它按范围和关键词挑出的节点(不再套环检测,近似)。
+const chainReachesGroup = (chainName: string, group: OpenboxUserGroup) => {
+  const chainUpstream = new Map(allMatchNodes.value.filter((n) => n.chain).map((n) => [n.name, n.upstream ?? '']))
+  const others = groups.value.filter((g) => (group.id ? g.id !== group.id : g.name !== group.name))
+  const edgesOf = (name: string): string[] => {
+    if (chainUpstream.has(name)) return chainUpstream.get(name) ? [chainUpstream.get(name) as string] : []
+    const g = others.find((x) => x.name === name)
+    if (!g) return []
+    if (g.type === 'failover') return (g.lanes || []).flatMap((l) => l.members)
+    if (g.mode === 'dynamic') return scopedMatches(g, false)
+    return g.members || []
+  }
+  const seen = new Set<string>()
+  const walk = (cur: string): boolean => {
+    for (const next of edgesOf(cur)) {
+      if (next === group.name) return true
+      if (seen.has(next)) continue
+      seen.add(next)
+      if (walk(next)) return true
+    }
+    return false
+  }
+  return walk(chainName)
+}
+
+// 动态组按订阅范围和关键词挑出的节点名(skipCycle = false 时不做链式环检测,给 chainReachesGroup 里别的动态组用)
+const scopedMatches = (group: OpenboxUserGroup, skipCycle = true): string[] => {
   const keywords = group.keywords || []
-  // 选了订阅范围就只在这些订阅的节点里匹配;留空 = 全部订阅
+  // 没选订阅范围 = 所有非链式节点;选了就只在范围里的节点里匹配,范围含「链式代理」时链式节点也是候选
   const scopeIds = scopeIdsOf(group)
   const scoped = scopeIds.length
-    ? matchableNodes.value.filter((n) => n.subscriptionId && scopeIds.includes(n.subscriptionId))
+    ? allMatchNodes.value.filter(
+        (n) => n.scopeId && scopeIds.includes(n.scopeId) && !(skipCycle && n.chain && chainReachesGroup(n.name, group)),
+      )
     : matchableNodes.value
   // 排除词:全是空词时不排除任何节点(与 core 一致);or 命中任一就移出,and 要全部命中才移出
   const excludes = (group.excludeKeywords || []).filter((kw) => kw.trim())
@@ -1275,6 +1340,8 @@ const matchedNodes = (group: OpenboxUserGroup) => {
     )
     .map((n) => n.name)
 }
+
+const matchedNodes = (group: OpenboxUserGroup) => scopedMatches(group)
 
 const memberSummary = (group: OpenboxUserGroup) => {
   if (group.type === 'failover') {
@@ -1452,7 +1519,7 @@ const clampInt = (v: number, min: number, max: number, fallback: number) =>
 const openFailoverParams = () => {
   const d = draft.value
   if (d?.type !== 'failover' || !d.failover) return
-  paramsDraft.value = { interval: d.interval ?? '', tolerance: d.tolerance, failover: { ...d.failover } }
+  paramsDraft.value = { interval: d.interval ?? '', tolerance: d.tolerance ?? 100, failover: { ...d.failover } }
   showFailoverParams.value = true
 }
 const applyFailoverParams = () => {

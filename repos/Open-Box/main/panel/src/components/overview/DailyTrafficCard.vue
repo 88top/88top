@@ -50,6 +50,7 @@
         </button>
         <div
           role="tablist"
+          v-segmented="{ content: false }"
           class="tabs-box tabs tabs-xs overflow-hidden"
         >
           <a
@@ -172,6 +173,7 @@
       <!-- 选中那天的明细 -->
       <div
         v-if="selectedDay && detail"
+        v-tab-content="tab"
         class="flex flex-col gap-3"
       >
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold">
@@ -212,6 +214,7 @@
         <div class="flex flex-wrap items-center gap-2">
           <div
             role="tablist"
+            v-segmented
             class="tabs-box tabs tabs-xs"
           >
             <a

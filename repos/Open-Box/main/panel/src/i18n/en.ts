@@ -652,6 +652,7 @@ const en = {
   latencyReasonClosed: 'connection closed',
   latencyReasonRefused: 'connection refused',
   latencyReasonDns: 'DNS lookup failed',
+  latencyReasonEchDns: 'No ECH DNS record (use DoH direct DNS or node DNS)',
   latencyReasonResource: 'system connection resources exhausted',
   latencyReasonTls: 'TLS handshake failed',
   latencyReasonUnreachable: 'network unreachable',
@@ -1011,6 +1012,7 @@ const en = {
   groupMembersLabel: 'Members',
   groupFilterAllSubscriptions: 'All subscriptions',
   groupSubscriptionMissing: 'Deleted subscription',
+  groupChainSource: 'Chain proxies',
   groupFilterAllGroups: 'All groups',
   groupFilterAllNodes: 'All nodes',
   groupMoveRight: 'Add checked',
@@ -1246,7 +1248,12 @@ const en = {
   subscriptionSave: 'Save',
   subscriptionPreviewFailed: "Couldn't preview: {message}",
   subscriptionSavedDone: 'Saved',
+  subscriptionSavedRestartRequired: 'Saved; restart the kernel to apply pending changes',
   subscriptionRefreshedDone: 'Refreshed',
+  subscriptionRefreshedRestartRequired: 'Refreshed; restart the kernel to apply pending changes',
+  subscriptionUnloadedNodesBadge: '{count} unloaded',
+  subscriptionUnloadedNodesTip:
+    '{loaded} of {total} saved nodes are loaded in the active kernel ({unloaded} unloaded, e.g. protocols requiring Mihomo such as XHTTP, or awaiting a kernel restart)',
   subscriptionNodesUnchanged: 'Nodes unchanged',
   subscriptionSaveFailed: "Couldn't save: {message}",
   subscriptionDefaultName: 'Subscription',
@@ -1582,6 +1589,9 @@ const en = {
   dnsFakeIpNote:
     'Compatible proxy nodes resolve proxied domains.',
   bypassPortsTitle: 'Ports that skip the kernel',
+  mihomoTlsSniffPortsTitle: 'Additional Mihomo TLS sniffing ports',
+  mihomoTlsSniffPortsDescription:
+    'Detect domain names from TLS connections handled by the kernel. TCP 443 is enabled by default. Add more ports or ranges as needed.',
   bypassPortsDescription:
     'Ports used by self-hosted services (RustDesk, NAS services behind port forwarding, etc.): TCP / UDP traffic whose destination or source port is one of these is let through before it reaches the kernel, as if Open-Box were not installed, so port forwarding and hole punching keep working. Unlike a "port → direct" row in the custom rules, which has already entered the kernel and is re-dialed by it, scrambling NAT. The blacklist and whitelist are kept separately; only the selected one applies.',
   bypassPortsPlaceholder: 'e.g. 21114-21119, 2233',
@@ -1647,6 +1657,34 @@ const en = {
   kernelConflictToastAutoStopped:
     '{names} and Open-Box were running at the same time, and two proxy tools conflict with each other, so the Open-Box kernel was stopped automatically. To use Open-Box, stop {names} first (turn off its main switch or uninstall it), then start it.',
   kernelVersionLabel: 'Kernel version',
+  routerKernelLabel: 'Switch kernel:',
+  routerKernelSwitch: 'Switch and restart',
+  routerKernelUnavailable: 'This installation does not include Mihomo.',
+  routerKernelConfirm: 'Switch to {kernel}? Active connections will need to reconnect.',
+  routerKernelPreflightLabel: 'Switch conditions',
+  routerKernelPreflightError: 'Could not load check results. Check again.',
+  routerKernelCheckAgain: 'Check again',
+  routerKernelChecks: {
+    target: 'Target kernel availability',
+    system: 'System requirements',
+    conflicts: 'Proxy tool conflicts',
+    compatibility: 'Kernel-specific settings compatibility',
+    rulesets: 'Rule set availability',
+    config: 'Target kernel configuration',
+    firewall: 'Inbound firewall rules',
+    dnsGuard: 'DNS leak protection during the switch',
+  },
+  routerKernelCheckStatus: {
+    waiting: 'Waiting',
+    pending: 'Checking',
+    passed: 'Passed',
+    failed: 'Failed',
+    blocked: 'Not checked',
+    notApplicable: 'Not applicable',
+  },
+  routerKernelSwitching: 'Switching from {from} to {kernel}…',
+  routerKernelSwitched: 'Switched to {kernel}',
+  routerKernelFailed: 'Kernel switch failed: {message}',
   kernelVersionUnknown: 'Unknown',
   kernelGithubLabel: '{kernel} GitHub',
   geoGithubLabel: 'Geo data GitHub',
@@ -2474,18 +2512,15 @@ const en = {
   nodeScoreWeightFirstDivider: 'Divider between latency and bandwidth',
   nodeScoreWeightSecondDivider: 'Divider between bandwidth and jitter',
   nodeScoreWeightValues: 'Latency {latency}%, bandwidth {download}%, jitter {jitter}%',
-  businessPreference: 'Business preference',
-  businessReliabilityHalfLife: 'Reliability decay',
-  businessPerformanceTtl: 'Confidence lifetime',
-  businessPreferenceMinutes: 'min',
   bandwidthDays: 'days',
   bandwidthPeriodUnit: 'Bandwidth test interval unit',
   bandwidthPeriodInvalid: 'Enter a valid interval of at least one hour.',
   bandwidthSettingsHelpLabel: '{title} help',
   bandwidthHelpCurrent: 'Current settings',
   bandwidthHelpCurrentTest: 'Bandwidth test every {hours} h, up to {maxMB} MB per test',
-  bandwidthHelpCurrentBusiness: 'Reliability decay {minutes} min, confidence lifetime {seconds} s',
   bandwidthHelpEditLocation: 'Edit in Settings → Backend Settings → {section}',
+  bandwidthHelpSwitchOn: 'Switch on in this draft',
+  bandwidthHelpSwitchOff: 'Switch off in this draft',
   bandwidthHelpLoading: 'Loading…',
   bandwidthHelpUnavailable: 'Could not load saved values',
   bandwidthSettingsHelpExampleHeading: 'Example',
@@ -2505,18 +2540,6 @@ const en = {
   nodeScoreWeightMetric: 'Metric',
   nodeScoreWeightsDefaultExample: 'Score (40 / 30 / 30)',
   nodeScoreWeightsAdjustedExample: 'Score (70 / 15 / 15)',
-  businessSettingsHelpIntro:
-    'Automatic selection, automatic failover tabs and load balancing can use real TCP connection evidence for the same destination. For a new destination without enough evidence, they use their normal selection rules. Choices affect new connections; existing connections keep their route.',
-  businessSettingsHelpScope:
-    'Evidence is scoped to the destination host/IP, port and address family. UDP/QUIC and requests reusing an established connection do not trigger this TCP selection. Timing includes connection setup and the first write-to-reply interval, excluding client idle time before that write. A first transport reply may be part of TLS negotiation; it does not measure HTTP content success or sustained download speed. Local client routing does not enable this router feature.',
-  businessSettingsHelpReliability:
-    'Controls how fast consecutive observed connection failures lose influence. With the default 1-hour half-life, a failure has half its original weight after 1 hour and a quarter after 2 hours. A successful reply resets the failure streak. Client cancellation is not a node failure.',
-  businessSettingsHelpReliabilityExample:
-    'A recently failed twice in a row when connecting to a destination. Eligible B recently received a reply from the same destination. New connections to that destination can prefer B. A first connection to another site follows the group’s normal rules.',
-  businessSettingsHelpPerformance:
-    'Controls how fresh the evidence for a new performance comparison must be; the default is 60 seconds. Replacing a healthy node requires repeated, comparable reply samples. Expiry alone does not send an automatic group’s destination back to its default while the current node remains healthy and keeps succeeding.',
-  businessSettingsHelpPerformanceExample:
-    'Under comparable conditions, A repeatedly takes about 200 ms to reply and B takes about 120 ms. An automatic group can keep using B for this destination. Once the comparison expires, it needs fresh evidence to promote another node; B’s continued success is not discarded just because A has not been used recently.',
 }
 
 export type LANG_MESSAGE = typeof en
