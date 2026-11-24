@@ -6,7 +6,7 @@ mozilla.map.fastly.net
 +.basilisk-browser.org
 +.brave.com
 +.bromite.org
-+.censorship.no
++.torproject.org
 +.cromite.org
 +.decentr.net
 +.dothq.org
@@ -23,6 +23,8 @@ mozilla.map.fastly.net
 +.vivaldi.com
 +.waterfox.net
 +.zen-browser.app
++.ceno.app
++.censorship.no
 +.epicbrowser.com
 +.extendfirefox.com
 +.firefox-portal-detection.com
@@ -32,6 +34,4 @@ mozilla.map.fastly.net
 +.firefoxusercontent.com
 +.librewolf.dev
 +.librewolf.net
-+.torproject.org
-+.ceno.app
 +.browser.kagi.com

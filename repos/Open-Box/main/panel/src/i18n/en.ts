@@ -1276,6 +1276,9 @@ const en = {
   subscriptionPreviewTabDisabled: 'Disabled ({count})',
   subscriptionNodeDisable: 'Disable',
   subscriptionNodeEnable: 'Enable',
+  subscriptionNodeShare: 'Share',
+  subscriptionNodeShareFailed: 'Failed to generate share link: {message}',
+  subscriptionNodeShareQrTooLong: 'This link is too long for a QR code. Copy it above instead.',
   subscriptionPreviewNoNodes: 'No nodes parsed from this yet.',
   subscriptionRenameOriginalColumn: 'Original name',
   subscriptionRenameNewColumn: 'New name',
@@ -1506,7 +1509,7 @@ const en = {
   dnsUpstreamProtocol: 'Protocol',
   dnsUpstreamPort: 'Port',
   dnsUpstreamEncryptedBootstrap: 'DoH/DoT resolver DNS',
-  dnsUpstreamDotHost: 'DoT hostname or IP address',
+  dnsUpstreamDotHost: 'DoT hostname, IP, or tls:// address',
   dnsUpstreamTest: 'Test',
   dnsUpstreamRestore: 'Restore defaults',
   dnsUpstreamRestoreConfirm:
@@ -1547,7 +1550,7 @@ const en = {
   dnsUpstreamSaveBlocked: '{side} did not pass the test, nothing saved: {message}',
   dnsUpstreamInvalid: 'IPv4 / IPv6 addresses only.',
   dnsUpstreamInvalidPort: 'Port must be 1–65535.',
-  dnsUpstreamInvalidDotHost: 'Enter a valid DoT hostname or IP address',
+  dnsUpstreamInvalidDotHost: 'Enter a valid DoT hostname, IP, or tls:// address',
   dnsUpstreamDohHost: 'DoH hostname or IP address',
   dnsUpstreamInvalidDohHost: 'Enter a valid DoH hostname or IP address',
   smartBlockConnection: 'Block connection',
@@ -2513,11 +2516,14 @@ const en = {
   nodeScoreWeightSecondDivider: 'Divider between bandwidth and jitter',
   nodeScoreWeightValues: 'Latency {latency}%, bandwidth {download}%, jitter {jitter}%',
   bandwidthDays: 'days',
+  bandwidthStartHour: 'Start time',
   bandwidthPeriodUnit: 'Bandwidth test interval unit',
   bandwidthPeriodInvalid: 'Enter a valid interval of at least one hour.',
   bandwidthSettingsHelpLabel: '{title} help',
   bandwidthHelpCurrent: 'Current settings',
   bandwidthHelpCurrentTest: 'Bandwidth test every {hours} h, up to {maxMB} MB per test',
+  bandwidthHelpCurrentTestDaily:
+    'Bandwidth test every {days} d (from {hour}), up to {maxMB} MB per test',
   bandwidthHelpEditLocation: 'Edit in Settings → Backend Settings → {section}',
   bandwidthHelpSwitchOn: 'Switch on in this draft',
   bandwidthHelpSwitchOff: 'Switch off in this draft',
@@ -2526,7 +2532,8 @@ const en = {
   bandwidthSettingsHelpExampleHeading: 'Example',
   bandwidthSettingsHelpIntro:
     'The router downloads test data through eligible nodes to estimate download speed. Subscriptions with periodic bandwidth checks and groups with node scoring can add nodes to the test schedule. The same node shares one test across subscriptions and groups.',
-  bandwidthSettingsHelpInterval: 'How often the router schedules a test for each eligible node.',
+  bandwidthSettingsHelpInterval:
+    'How often the router schedules a test for each eligible node. Daily intervals can choose the start hour.',
   bandwidthSettingsHelpCap:
     'The maximum amount of data one test may download. A test can end before reaching the limit.',
   bandwidthSettingsHelpExample:

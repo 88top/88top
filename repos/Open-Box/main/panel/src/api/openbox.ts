@@ -577,6 +577,18 @@ export const fetchSubscriptions = async (): Promise<OpenboxSubscription[]> => {
   return data.subscriptions
 }
 
+// 订阅页的长轮询:带上上次拿到的 revision,服务端在订阅 / 节点变了(或挂满约 20 秒)时才返回。
+// revision 随订阅列表任何变化而变;nodesRevision 只随节点变(变了才需要重拉节点和服务状态)。
+export interface OpenboxSubscriptionUpdates {
+  revision: string
+  nodesRevision: string
+}
+
+export const fetchSubscriptionUpdates = (since: string, signal?: AbortSignal) =>
+  requestJson<OpenboxSubscriptionUpdates>(`/api/openbox/subscriptions/updates?${new URLSearchParams({ since })}`, {
+    signal,
+  })
+
 export const fetchSubscriptionShares = async (): Promise<OpenboxSubscriptionShare[]> => {
   const data = await requestJson<{ shares: OpenboxSubscriptionShare[] }>('/api/openbox/subscription-shares')
   return Array.isArray(data.shares) ? data.shares : []
@@ -709,6 +721,34 @@ export const testNodeLatency = async (payload: {
   })
   return data.results
 }
+
+export interface OpenboxNodeShare {
+  // 分享链接里用的节点名(服务端按 newTag / 规则算出)
+  name: string
+  link: string
+}
+
+// 订阅预览里单个节点的分享链接。和测速一样把来源和原名交给服务端:含密码的节点配置不经浏览器往返。
+// occurrence:订阅里有重名节点时,是同名里的第几个(从 0 数);newTag 是面板里正显示的名字,空 = 用规则算出来的。
+export const shareSubscriptionNode = (payload: {
+  url?: string
+  urls?: string[]
+  urlEntries?: OpenboxSubscriptionUrlEntry[]
+  directSubscription?: boolean
+  content?: string
+  userAgent?: string
+  loginId?: string
+  name?: string
+  renameOptions?: OpenboxRenameOptions
+  nodeDns?: OpenboxSubscriptionNodeDns | null
+  originalTag: string
+  occurrence?: number
+  newTag?: string
+}) =>
+  requestJson<OpenboxNodeShare>('/api/openbox/subscriptions/node-share', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
 
 // 用户自定义节点组(策略组)。内核只有 urltest / selector 两种——Clash 的 fallback 在 sing-box 里
 // 不存在(实测 1.13.14 报 unknown outbound type)。failover(故障转移)是应用层类型:内核里落成
@@ -882,6 +922,8 @@ export interface OpenboxBandwidthSettings {
   intervalUnit?: 'hours' | 'days'
   // 单次测试最多下载多少 MB(1~1024)
   maxDownloadMB: number
+  // 按「天」测试时每天几点开始(本地时间 0~23,默认 4);按小时测试时不起作用
+  startHour?: number
 }
 
 // GET /api/openbox/bandwidth:后端测速调度的运行情况

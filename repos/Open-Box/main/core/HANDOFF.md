@@ -1,13 +1,13 @@
-openbox-core 交接笔记(第 6 版,只管 core;后端另见 backend/HANDOFF.md)
+openbox-core 交接笔记(第 7 版,只管 core;后端另见 backend/HANDOFF.md)
 
 写给下一位接手 core 的 AI。读完这份和 core/README.md,就可以接着做,不用反复问维护者。
-进度要对账:main 下的提交记录(git log -- core)是实时来源,本文第三节已按 2026-11-08 对账更新;第五节于 2026-11-09 改为「对齐就是看行为」;两者冲突时以提交记录为准,并在补丁里顺手更新第三节。
+进度要对账:main 下的提交记录(git log -- core)是实时来源,本文第三节已按 2026-11-23 对账更新;第五节于 2026-11-09 改为「对齐就是看行为」,2026-11-23 把有意例外整理成 A / B / C 三类;两者冲突时以提交记录为准,并在补丁里顺手更新第三节。
 
 
 # 零、先读这一节
 
 - core 是什么:自己写的、开源的 Go 程序 openbox-core(目录 core/)。无状态的 stdin/stdout JSON 程序,不是服务;调用方每次拉起它一次。
-  协议、方法表、目录结构以 core/README.md 为准。共 17 个方法加 hello(第 16、17 个 mihomoProxies / mihomoGroups 见第三节)。
+  协议、方法表、目录结构以 core/README.md 为准。共 19 个方法加 hello(第 16-19 个 mihomoProxies / mihomoGroups / mihomoTargetRules / mihomoCompatibility 见第三节)。
 - 谁调用它:自研后端(backend/,另一个独立项目,见 backend/HANDOFF.md)以子进程方式调用。core 本身不含 HTTP、存储、订阅解析、部署,这些都在后端。
 - 不加激活机制。授权相关的三个方法保留为"未限制"的固定返回,新后端不调用。
 - 正确性靠"金标准":同一份输入喂一个标准答案程序,得到的输入输出存成 testdata/*.json,Go 测试逐条对照;再用变异测试证明测试有效。
@@ -44,7 +44,7 @@ openbox-core 交接笔记(第 6 版,只管 core;后端另见 backend/HANDOFF.md)
   不要依赖 release.yml(它是上游版本,会被同步覆盖)。
 
 
-# 三、进度标记(2026-11-10 对账更新;nativeBypass 已落地;2026-11-08 的 ipCidr 决定已落地)
+# 三、进度标记(2026-11-23 补:节点评分权重已写进 sing-box 配置;2026-11-23 对账:main 提交记录与本节一致,前后端对账结果见下面最后一条和第四节 7;2026-11-22 对账:提交记录里 3a / 3b / 3c 都已落地,本次补上 3d;2026-11-10 对账更新;nativeBypass 已落地;2026-11-08 的 ipCidr 决定已落地)
 
 图例:[x] 完成  [~] 代码完成、待真机或待云端确认  [ ] 未做
 
@@ -60,13 +60,20 @@ openbox-core 交接笔记(第 6 版,只管 core;后端另见 backend/HANDOFF.md)
 [x] groups:动态组的订阅范围 + 链式代理来源(2026-11-22 维护者授权,对齐上游 v0.1.476 面板的 subscriptionIds / chain-proxy):Group 新增 subscriptionIds,只对动态组保留(静态 / 故障转移 / 内置清空),去空去重,老记录的单个 subscriptionId 折进数组,非空才序列化(紧跟 excludeKeywords;**以前规整时会把它整个丢掉,保存的范围其实从没存下来**)。节点多带 subscriptionId / detour 两个字段。动态组候选:没有范围 = 所有非链式节点(行为不变);有范围 = 只在 subscriptionId 属于范围的节点里挑,范围里写 chain-proxy 链式节点才是候选(链式节点的范围 id 一律是 chain-proxy);链式节点的上游线路绕回这个组(直接指向它,或经静态组 / 故障转移 / 别的动态组再回到它)就不收,别的照收;边按依赖顺序逐个组建。**推断项(上游服务端看不到):没有范围时链式节点仍不进动态组;环检测对别的动态组用已挑出的成员**;自写向量 internal/groups/scope_test.go,金标准文件没动,变异 3 个全抓住
 [x] mihomo/mihomoProxies(2026-11-22 维护者授权,对齐上游 v0.1.477 的双内核;`internal/mihomo/proxies.go`,backend/STATUS.md 双内核第 3a 步):入参 `[nodes]`(面板存的节点数组,形状同 emitGroups 的节点:`type / tag / server / server_port / fields / detour`),返回 Mihomo proxies 数组,`name` 取节点 tag,上游 Node 拿它写成 `{proxies, rules:["MATCH,REJECT"]}` 再 `mihomo -t` 试节点。做法:先走 `emit.EmitOutbound / EmitEndpoint`(字段取舍、传输层与 TLS 规则与 sing-box 配置一致),再逐字段翻成 Mihomo 写法:ss(obfs-local→obfs、v2ray-plugin 的 plugin_opts 文本拆成 plugin-opts)、vmess / vless(ws、httpupgrade→ws+v2ray-http-upgrade、http、grpc;reality-opts、client-fingerprint)、trojan、anytls、hysteria2(obfs、端口跳跃 20000:30000→"20000-30000"、hop-interval 换成整数秒)、tuic、socks→socks5、http、wireguard(单对端);detour→dialer-proxy。Mihomo 表达不了的(quic 传输、socks4、shadow-tls 等未知 ss 插件)整体报错并带节点 tag,不静默改写。自写向量 `proxies_test.go` 17 条,期望值人工写出;设 `OPENBOX_MIHOMO_BIN` 时全部向量交给真实 Mihomo 1.19.34 做 `-t`(通过);变异 21 个全抓住。注意:上游这几个方法的实现在闭源 core 里,看不到,形状只来自 v0.1.462 Node 的调用处(`git show bfd33a70:panel/server/index.mjs` 搜 `mihomoProxies`),输出与上游逐字节是否一致没法核对,以「Mihomo 能加载、字段含义对」为准
 [x] mihomo/mihomoGroups(2026-11-22,`internal/mihomo/groups.go`,backend/STATUS.md 双内核第 3b 步):入参 `{profile, nodes, groups, chainNodes, selections}`,返回 `{proxies, groups, first, targets, builtins, failover}`。做法:链式代理先并进节点表(导出了 `config.ResolveChainNodes`),成员解析、环 / 空组处理、failover 泳道全走 `groups.EmitUserGroups`(与 sing-box 配置一致),再把出站翻成 Mihomo 的组:selector → select(`selections` 里选中的成员排第一,选不到就用默认);urltest / loadbalance → url-test / load-balance,一律带 `openbox` 选项(`bandwidth`,档案里 `nodeScoreWeights` 三项相加 100 时带 `node_score_weights`)和 `openbox-health-check-interval`(Go 时长,写不对按 3m;补丁内核规定它与 `interval` 互斥);`expected-status`、`tolerance`、`interrupt-exist-connections` 照搬;failover → select(成员末尾是拒绝),泳道原样放在返回的 `failover` 里给后端的故障转移管理器切;站点集 selector 和兜底 selector 成员是全部公开组 + 直连 / 拒绝,默认值同 sing-box 配置。`targets` 是「档案里的出口名 → Mihomo 里的名字」的完整映射(节点、公开组、站点集、兜底原样;内置直连 / 拒绝的名字和 `direct` / `block` 两个关键字 → DIRECT / REJECT 或其别名),上游 Node 用它判断终端分流、入口规则里的出口认不认识;节点或组与 Mihomo 内置名(DIRECT、REJECT、REJECT-DROP、COMPATIBLE、PASS、PASS-RULE、GLOBAL)重名时,内置的改成 `__openbox_builtin_<名>__` 别名,写进 `builtins`(内核的 `openbox-builtin-names`)。空组成员换成拒绝。**不做**:`monitoring`(上游返回它给带宽调度读,形状只能在 3e 对着后端带宽模块定)、「业务优选」(例外 C)。**参考内核**:补丁版 Mihomo 的源码和二进制在上游 release(`mihomo-v1.19.34-openbox.21-source.tar.gz`、`open-box-v0.1.477-linux-x64-kernel-mihomo.tar.gz`),组选项的权威定义在源码 `adapter/outboundgroup/parser.go` 和 `openbox_group.go`;设 `OPENBOX_MIHOMO_BIN` 指向该二进制时,3a、3b 的产出都交给它做 `-t`(通过,并有一条「故意写错必须被拒」的对照)。变异测试 20 个全抓住
-[ ] mihomo 其余方法(2026-11-22 对账:整份 mihomo.yaml 由上游 Node 装配,core 只有 4 个方法,没有「整份配置生成」):`mihomoTargetRules`(入参 `{routing,providers,ruleLists,targets,directDomains,directCIDRs,terminalRoutes,sections}`,返回 `{rules,firstTerminal,endTerminal,directTerminal,firstPolicy}`)、`mihomoCompatibility`(入参 `{profile,nodes,groups,chainNodes,selections}`,返回字符串数组 `problems`);对应 backend/STATUS.md 双内核第 3c、3d 步,调用形状取自 v0.1.462 Node
+[x] mihomo/mihomoTargetRules(2026-11-22,`internal/routing/mihomo_rules.go`,backend/STATUS.md 双内核第 3c 步,**规则表分段是推断,待真机核对**):入参 `{routing, providers, ruleLists, targets, directDomains, directCIDRs, terminalRoutes, sections}`(`providers` 是规则集 tag → "domain" / "ipcidr";`targets` 见 mihomoGroups;`terminalRoutes` 每项带 Node 算好的 `strict`),返回 `{rules, firstTerminal, endTerminal, directTerminal, firstPolicy}`。规则翻法:规则集 → `RULE-SET,tag,出口`(ipcidr 的加 `no-resolve`),域名 / 后缀 / 关键字 → `DOMAIN / DOMAIN-SUFFIX / DOMAIN-KEYWORD`,IP 段 → `IP-CIDR / IP-CIDR6` + `no-resolve`,端口 → `DST-PORT`(区间 `a:b` 换成 `a-b`),终端 → `SRC-IP-CIDR` / `OPENBOX-SRC-MAC`(补丁内核的规则类型),内网直连 `GEOIP,LAN`,NTP `AND,((NETWORK,UDP),(DST-PORT,123))`;出口名有逗号 / 括号 / 控制字符 / 首尾空白或以 `~openbox~` 开头时写成 `~openbox~` + base64url(内核解析规则时还原,见 mihomo `config/config.go` 的 parseRules);出口不在 `targets` 里的自定义行 / 站点集 / 终端整行跳过,规则集没有 provider 或兜底出口不认识则整体报错。**分段排法(推断)**:`[0,endTerminal)` 严格终端(strict)→ `[endTerminal,directTerminal)` 前置自定义 → `[directTerminal,firstPolicy)` 内网 / NTP / 订阅节点直连 + 其余终端 → `[firstPolicy,末尾)` 站点集 + `MATCH,兜底`;依据是 Node 对四个下标的用法(分流 DNS 规划跳过 < endTerminal 和 [directTerminal, firstPolicy);前置自定义的域名规则收进终端 DNS 豁免名单,而补丁内核对 bypass / strict 终端不做豁免,说明这两类终端排在自定义之前)。与 sing-box 顺序不同,**严格终端压过前置自定义**这一点需要真机核对;要改只改 `MihomoTargetRules` 里的拼接顺序和下标。不在 core 做:IPv6 / QUIC 拒绝、入口 IN-NAME、fake-ip 前置规则(上游 Node 插)。校验:`OPENBOX_MIHOMO_BIN` 指向补丁内核时整份规则过 `-t`,另有「少一个 provider 必须被拒」的对照;变异 18 个全抓住
+[x] mihomo/mihomoCompatibility(2026-11-22,`internal/mihomo/compat.go`,backend/STATUS.md 双内核第 3d 步,**检查范围是自研按「能不能生成」定的,与上游逐条是否一致没法核对**):入参 `{profile, nodes, groups, chainNodes, selections}`(同 mihomoGroups),返回字符串数组 `problems`(没问题是 `[]`,不是 null;调用形状来自本节原有记录,没有再去查上游压缩 bundle)。只查两类 core 里走一遍就能确定的事实:① 每个节点(含通过链式核对的链式节点)能不能翻成 Mihomo proxies,翻不了的**逐个列全**,写成「节点「tag」Mihomo 不支持:原因」(mihomoProxies 是遇到第一个就整体报错);② 去掉翻不了的节点后,节点组 / 站点集能不能生成 Mihomo 的组,失败写成「节点组:原因」。链式核对(`config.ResolveChainNodes`)会把节点组整套生成一遍,它报错就只记一条「节点组:」并直接返回,不再重复跑组;核对不过的链式节点(上游不存在、成环)本来就进不了配置,不报。**有意不查**(对着补丁版 Mihomo 1.19.34 源码核过):TUN 的 tcpMss(`TunTCPMss` 注释写明由入口 nft 规则实现,与内核无关,Mihomo 的 RawTun 也没有这个选项,不算不兼容)、共享网络入站协议(Mihomo 有 shadowsocks / vless / tuic / hysteria2 / mixed 监听,hysteria2 监听带 obfs)、TUN stack(gvisor / system / mixed 都认)、DNS 协议。规则集缺失的提示由上游 Node 自己合并,core 不管。自写向量 `compat_test.go` 8 条,期望值人工写出(干净档案、空 / 非法入参都是 `[]`、三种 Mihomo 表达不了的节点按输入顺序逐个列出、组引用坏节点不重复报、链式节点 / 孤儿链式节点 / 普通与链式混合的先后、组生成失败只报一条、节点与组问题并存、不写穿入参);变异 16 个(含 1 个空变异),抓到 9 个;漏网 7 个:空变异和 6 个等价变异(「节点组」那一步在链式核对通过之后不可能再失败——核对已经用更多的节点把组生成过一遍,少了坏节点只会更容易生成——所以不跑 Groups、不记录它的报错、改它的前缀、不传 profile / selections、groups 假值不补空这几项都观察不到)。这条防御路径保留,是因为 `Groups` 以后加新校验时需要它兜底
+[x] groups:节点评分权重写进 sing-box 配置(2026-11-23,对应 backend/STATUS.md「需要 core 配合」里的「节点评分权重进内核配置」,对齐上游 v0.1.472 的 nodeScoreWeights;`internal/groups/score_weights.go`):档案的 `nodeScoreWeights {latency, download, jitter}` 经 `config.BuildDetailed` 传给 `EmitUserGroups`(选项键 `nodeScoreWeights`),写成出站的 `node_score_weights`,紧跟 `bandwidth`;只写在开着带宽择优的 urltest / loadbalance 上(含故障转移多节点自动页签的内部 urltest),selector、没开带宽、`disableBandwidth`(客户端配置)都不写;合法才写:对象、三项齐全且是数字、各 0~100、合计 100(误差 1e-9,与 mihomo 侧 `scoreWeights` 同口径),别的一律不写、内核用固定的 40 / 30 / 30;老档案产出不变。**字段名来源(此前 STATUS 记「无公开材料可核对」):上游 release v0.1.478 公开发布的 sing-box 魔改源码 `sing-box-1.14.4-openbox-60-source.tar.gz`**(GPL 的内核源码,与 3b 看 Mihomo 补丁源码同类),`option/openbox_load_balance.go` 的 `NodeScoreWeights`(json 键 latency / download / jitter,`Valid()` 要求各 0~100、合计 100)与 `option/group.go` 的 `URLTestOutboundOptions.NodeScoreWeights`、`LoadBalanceOutboundOptions.NodeScoreWeights`(`node_score_weights`);内核在 `common/urltest/openbox_bandwidth.go` 的 `QualityScores` / `LoadBalanceWeights` 用它,缺省 40 / 30 / 30,下载权重 > 0 时才要求候选有下载数据——这部分是内核的事,core 不管。自写向量 `internal/groups/score_weights_test.go`、`internal/config/build_scoreweights_vectors_test.go`,期望值人工写出;变异 11 个,9 个被抓住,漏网 2 个是等价变异(权重单项上限 100:非负且合计 100 已蕴含各项 ≤ 100;非对象时 `m` 为 nil map,逐项取值得到缺项照样返回 nil)。**没做**:backend/STATUS.md 里那一条的勾选(core 的提交只动 core/),留给后端那边对账时勾;面板调的权重要真正落到内核,还需要后端在生成配置时把档案的 `nodeScoreWeights` 原样传给 `configDetailed` 的 profile(core 这边只认 profile 里的这个键)
 [x] 授权三个方法(checkActivationCode、activationState、authorizationState):固定的"未限制"返回
 [x] go.mod 对齐 Go 1.25.12
 [x] idna / urlx UTS46 轻量映射表（内置忽略字符 + 兼容映射 + 简易双向；覆盖 gen-urlx --wide 语料主要条目）
 [~] 真机验证:真实路由器上经后端调用 core、sing-box 启动成功(由维护者做,记录在 backend/STATUS.md 的真机条目)
 [x] clientBindings：按 IPv6 绑定扩展终端分流来源（NormalizeClientRoutes + ExpandSourcesWithBindings）
 [~] 整理测试数据来源(全部叶子模块已换自写向量:ipx、dnsrewrite、servers、directhosts、dnsfilter、clientroutes;routing 里 dnsupstream、flip、rulesets、urlhost、dnsnames、geo、outbound(含 export 的出口)、fingerprint、dns 的辅助函数与 BuildDNS 的错误路径 / 分流关短路径 / 分流开着的骨架(没有站点集、自定义分流、终端分流)、站点集成对规则、前置自定义分流块、订阅 / 节点站点直连块与终端分流块(含名单外终端)已换,BuildDNS 到此全部换完,route(BuildRoute 与 PreMatchBypassRules)已换,plans 的 classes 与 forwardPlan 已换,entryPlan 已换,bypassPlan(含 planOpts 解析)已换,migrate(含地区层迁移与 policyToAny)已换,jsval 已换,routing(model)已换,groups 的 match(normalizeForMatch / keywordMatches / parseDuration)与 NormalizeExpectedStatus 已换,groups 的 NormalizeGroups / builtinTags / EmitUserGroups 已换,groups 整包完成,config 的 tunoptions、consts、nodedns 与 chain 已换,config 的 build 第一段(入参缺省 / 站点直连 / 链式并表 / 节点组 / 站点集 selector / 节点出站与 endpoint / 重名检查)与第二段(出口类别 / 阻断 IPv6 与 QUIC 的接线 / 域名过滤 / systemDns 接线)、tun 入站与入站一段已换,build 后半(终端分流的 MAC 黑白名单与 dns-in-direct / dns 与 route 接线其余部分 / 入口原生旁路与 route_address_set / 装配与 FakeIP)也已换,至此 config/build 整份完成;所有模块的自写向量都已就位(前置自定义分流 ipCidr 行的网段校验 2026-11-08 已定并做完,见第四节 1),config_golden 等基线金标准仅作回归保留,其去留由维护者定;自写向量的产出已用官方 sing-box 1.13.14 跑过 check,见第四节 2 的最后一条)
+[x] 2026-11-23 对账(基于 origin/main 117c9ae9 与 catch-up-upstream v0.1.478,只读):
+    一、core 自身:`go vet ./...`、`go test ./...` 在 main 上全绿;注册方法 routing 8 + groups 3 + config 1 + mihomo 4 + authz 3 = 19 个加 hello,与第零节一致;git log -- core 里没有第三节漏标的已完成项。
+    二、面板文案:从上游 v0.1.478 的 panel/dist(en / zh / zh-tw 三个语言包)取键,与 main 的 panel/src/i18n 逐键比:上游每种语言 2251 键,main 2213 键,缺的 38 键全部属于例外 C(业务优选),剔除后缺失 0、main 多出 0;值不同的只有 chainProxyEmptyHint(例外 B,有意)。两个对象型键 routerKernelChecks / routerKernelCheckStatus 的子键与上游一致。例外 B 的残留检查:ChainProxyManager.vue、ClientDownloadsCard.vue 里没有 chainProxyEmptyHintSuffix / DOWNMAN_URL 的引用(只剩键和注释);但「概览顶部文案」那条没有落地,见第四节 7。
+    三、面板调用的接口对后端路由:见第四节 7(有 4 个缺口)。
+    四、构建脚本:core/scripts/build.sh 原来必须读 panel/server/index.mjs,而 main 上没有 panel/server,README 里写的构建命令会直接报错;已改成读不到就按 core 源码哈希生成 buildID(后端不校验 buildID,第一节 5)。
 [ ] 第四节里其余后续工作
 
 
@@ -125,6 +132,16 @@ openbox-core 交接笔记(第 6 版,只管 core;后端另见 backend/HANDOFF.md)
 5. core/UPSTREAM_VERSION(现为 v0.1.354):原本记录"最后对齐的上游版本"。按第五节的规则不再按上游版本推进,默认不再改动,处理方式由维护者定。
 6. 真机联调反馈:维护者在真机上发现的 core 输出问题,按第三节的方式补测试再修。
 
+7. 前后端对齐的核对结论(2026-11-23,只读;方法:取 main 的 panel/src 和上游 v0.1.478 panel/dist 里所有 `/api/...` 字面量,按后端 `HandleFunc` 注册的路径逐个匹配,`{x}` 当通配,不含兜底路由;不看上游 index.mjs):
+   - 面板文案与 core 都已对齐,见第三节最后一条。
+   - 后端缺的接口(面板已经在调,调到会得到 404 或被别的通配路由接走;**这些是 backend 的活,已记进 backend/STATUS.md,core 这边不做**,等 backend 设计时若需要 core 方法再按第零节的约定在 STATUS 里记「需要 core 配合」):
+     a. `GET/POST/DELETE /api/openbox/profile/target-routing`(连接页「改分流」,main 的 ConnectionTargetRoutingDialog 和 api/openbox.ts 在用;上游 v0.1.423 起有);
+     b. `GET /api/openbox/node-info/sharing/{ip}`(`?refresh=1`;main 与上游面板都在调,后端只有 node-info/{tag}、entry-country、exit);
+     c. `GET /api/openbox/kernel/switch/preflight` 和内核切换接口(上游 v0.1.477 双内核第 4 步,STATUS 早有记录,未做);
+     d. `GET /api/openbox/subscriptions/updates?since=`(上游订阅页在调;main 面板还没有这个调用,**前、后端都没做**;注意后端的 `subscriptions/{id}` 会把 `updates` 当成订阅 id 接走)。
+   - 面板缺的:上游侧边栏有个 `OverviewCarousel`(非概览页时显示,轮播两条外链,数据来自 `GET /api/openbox/overview-links`,失败时用写死的「机场、VPS 安格超市 | 原生住宅 IP TOPIP」「AI 中转站 · 订阅服务 SUPERDOOR | 按需付费 OPENDOOR」)。例外 B 要求把它们换成「Open-Box Latest」和魔改 sing-box 最新版本号,但 main 的 panel/src 里**没有这个组件也没有替换文案**(grep 不到 Open-Box Latest / overview-links),所以例外 B 这一条还没落地。这是面板的活,不是 core 的;「魔改 sing-box 最新版本号」取自哪里(后端 update/check 还是上游 Release)需要维护者定,所以没有动手。
+   - 没覆盖到的范围:上游面板里不以 `/api/` 开头拼出来的请求(核对时没发现,但字面量法本来就看不到拼接);运行时行为(真机)不在这次核对里。
+
 
 # 五、跟随上游
 
@@ -134,13 +151,23 @@ openbox-core 交接笔记(第 6 版,只管 core;后端另见 backend/HANDOFF.md)
 
 产品边界(与对齐无关)
 - 不加激活机制;授权三个方法固定返回「未限制」。
-- 有意不与上游一致、同步时不要改回的:
-  - 激活码 / 市场推广 / AI 中转 / comingSoon / 教程等键不引用;
-  - 链式代理空状态不带安格超市链接(chainProxyEmptyHint 保持 main 现状);
-  - 客户端下载卡不要「极速下载用 DownMan」;
-  - 概览顶栏改为「Open-Box Latest」与魔改 sing-box 版本号。
+- 有意不与上游一致、同步时不要改回、也不要补回的(2026-11-23 维护者给出的完整清单;除 A / B / C 外,main 里没有别的自有键,也没有别的有意缺失的键):
+  A. 键保留,main 有意不引用:
+    - 激活码类、comingSoon 的键;
+    - 教程类的键:后端设置页顶部的「使用教程」按钮(YouTube 图标,tutorialButton / tutorialHint / tutorialChecking / tutorialCheckFailed)。main 不放这个按钮,也不做教程视频列表相关的面板与后端;
+    - marketPromo、aiRelayLabel、aiRelaySubscription、aiRelayOnDemand(上游已不引用,main 也不引用)。
+  B. 键保留,但 main 的显示或代码有意不同:
+    - 链式代理空状态:不显示「安格超市」链接。ChainProxyManager.vue 若出现 chainProxyEmptyHintSuffix 或该链接,删除;
+    - 客户端下载卡:不要「极速下载用 DownMan」。ClientDownloadsCard.vue 若出现 DOWNMAN_URL 或 clientDownloadFastWith,删除;
+    - 概览页顶部文案:「机场、VPS 安格超市 | 原生住宅 IP TOPIP」改为 Open-Box Latest;「AI 中转站 · 订阅服务 SUPERDOOR | 按需付费 OPENDOOR」改为魔改 sing-box 最新版本号。
+  C. 整体不做:键、面板、后端、core 全部没有(覆盖核心原则第 1 条):
+    - 「业务优选」相关的一切都不要:设置页「业务优选」卡、概览页「业务优选」统计卡、内核按连接证据选路,以及对应的接口、档案字段和三语键;
+    - 键按前缀识别,上游以后新增同类的键也不补:businessOverview*、businessPreference*、businessSettingsHelp*、businessReliabilityHalfLife、businessPerformanceTtl、bandwidthHelpCurrentBusiness;
+    - 注意:ipTypeBusiness(商业宽带)与业务优选无关,照常按上游保留;
+    - 核对键集和引用时,把以上键从「缺失」中剔除。
 
 维护者记录
+- (2026-11-23)有意例外整理成 A / B / C 三类(见上),其中 C「业务优选整体不做」此前只在提交说明和第三节里提到,第五节没写;跟随上游同步面板、后端、core 时一律按这份清单取舍,不用再问。
 - (2026-11-08)DNS 上游(直连 / 代理 / 备用)与订阅的节点专用解析(nodeDns)支持 DoT:协议加 tls,默认端口 853,地址是域名时生成 domain_resolver 加 udp bootstrap;nodeDns 的 protocol 取 https 或 tls。对齐上游 v0.1.422 的公开能力,按 sing-box 1.12+ DNS server 文档(type:tls / type:https)自写。dns_golden 里档案带 tls 协议的 buildDns 旧用例(基线把 tls 当非法协议退回默认)按有意差异跳过,新行为由 dnsupstream_test.go、builddns_dot_test.go、nodedns_dot_test.go 覆盖。
 - (2026-11-08)对齐限制尽量放开:闭源对齐靠看行为,不必在文档里给自己加禁止条款。
 - (2026-11-02)loadbalance 按上游 v0.1.387 行为对齐(字段、默认 120s、成员只收节点、上限 64、空 outbounds 照写);自研实现与测试。
@@ -192,7 +219,7 @@ openbox-core 交接笔记(第 6 版,只管 core;后端另见 backend/HANDOFF.md)
    Go 的 map 序列化按字母序排键;切片一律非 nil,保证序列化成 [] 而不是 null。
 
 
-# 九、提交记录(core,新的在最上面;完整以 git log -- core 为准)
+# 九、提交记录(core,新的在最上面;完整以 git log -- core 为准;下面只列到 d5fb0a0,2026-10 之后的提交不再逐条补,看 git log -- core)
 
 d5fb0a0 go.mod 对齐 Go 1.25.12;3bb9345 去掉 allow_unaligned 与对齐检查;18f5684 groups;cbc9db1 UPSTREAM_VERSION=v0.1.354;235a10b 对齐 v0.1.354;
 b91e295 对齐 v0.1.353;8ff1319 configDetailed 装配;b1e7fcf config 零件;61e9f57 / f9b6ed9 urlx 与叶子模块;7722ae8 route;dea84db dns;1eb1817 routing;

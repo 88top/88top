@@ -6,7 +6,7 @@
   },
   "timeflysoon/3x-ui": {
     "main": {
-      "remote_sha": "5297fd3c8495d80fab97ae511553fa545c69e913"
+      "remote_sha": "5b0cbe64739e8442b0ee8095c9610247cf63bd25"
     }
   },
   "timeflysoon/Are-u-ok": {
@@ -198,7 +198,7 @@
       "remote_sha": "375554e57d1755ef30255cfce9e5bb2d5e606c22"
     },
     "release": {
-      "remote_sha": "ae982cd117a031ef754fffec64bd185358271ced"
+      "remote_sha": "5fb57db64c5ceb9c43b32f1543b4b0c4267c54cf"
     }
   },
   "timeflysoon/dae": {
@@ -223,7 +223,7 @@
   },
   "timeflysoon/gopeed": {
     "main": {
-      "remote_sha": "996685c8478ac055f4842746682b1db2a8b810f8"
+      "remote_sha": "13186e7652aa2cb0b40ba2431870df0dc9bf8565"
     }
   },
   "timeflysoon/img-installer": {
@@ -283,7 +283,7 @@
       "remote_sha": "bfb1276bec2adeadb352ec75853fc7897a9c1da0"
     },
     "master": {
-      "remote_sha": "3636721fa9f2626944f3b98874c7346e6a7038f8"
+      "remote_sha": "9f454e4c214219b53c9f1b461b4d63cac568bc9f"
     },
     "what-a-patch-1": {
       "remote_sha": "bd7ad57350f741532cdcbd7d40c5bc4f9dab9615"
@@ -304,13 +304,13 @@
       "remote_sha": "4178770badecb1b349fbcd62c737e0d7a2079729"
     },
     "meta": {
-      "remote_sha": "ca7d9d641cf31a25d465861d8af0352e6721b6e0"
+      "remote_sha": "13c258bce343dfc81d5600e535a59588386ef4b9"
     },
     "release": {
-      "remote_sha": "f3c812731fa7e0a61000db1f876f508b407364e2"
+      "remote_sha": "5f22a3b3371d1a489fb3d0df25d00db049a6a603"
     },
     "sing": {
-      "remote_sha": "b1f288ee1427724687dc2c08d1d54a5fed2f2ee2"
+      "remote_sha": "12381b9cde2576c8b0bd43bb09af463ec7a75d12"
     }
   },
   "timeflysoon/quickstart": {
@@ -353,7 +353,7 @@
   },
   "timeflysoon/small": {
     "master": {
-      "remote_sha": "44a21d9f509c9d7a2cbc68b8b0ac257cebccb69a"
+      "remote_sha": "9b165bce53b6e39c0ca2d8c5891c081b5aba754c"
     }
   },
   "timeflysoon/store": {
@@ -376,10 +376,10 @@
       "remote_sha": "c77e37013bba49bafb20f3f698eb0be6add9b788"
     },
     "meta": {
-      "remote_sha": "ca7d9d641cf31a25d465861d8af0352e6721b6e0"
+      "remote_sha": "13c258bce343dfc81d5600e535a59588386ef4b9"
     },
     "release": {
-      "remote_sha": "f3c812731fa7e0a61000db1f876f508b407364e2"
+      "remote_sha": "5f22a3b3371d1a489fb3d0df25d00db049a6a603"
     }
   },
   "timeflysoon/turboacc": {
@@ -392,7 +392,7 @@
   },
   "timeflysoon/v2rayN": {
     "master": {
-      "remote_sha": "d31b26971f7703a693a587c3f4f786f41476cdcc"
+      "remote_sha": "91c61b1fe595994c7bcf09739ddb5dc32fde4f04"
     },
     "v7_16": {
       "remote_sha": "654d7d83d09d1683c60501c9fa853a19c3dd9d6b"
@@ -400,7 +400,7 @@
   },
   "timeflysoon/v2rayNG": {
     "master": {
-      "remote_sha": "d3f3d93a809dd7acbb8ff340d1d06066375a265a"
+      "remote_sha": "bdd9bb3893d76b587db0b8f72fff3fb25472d426"
     },
     "v1_10_32": {
       "remote_sha": "bd6b67cbfc71caa7ed94d2c64e8ac7756af61276"
@@ -408,7 +408,7 @@
   },
   "timeflysoon/v2rayfree": {
     "main": {
-      "remote_sha": "28b1bfec142950ca1339dc0b2d912f69723e8ecc"
+      "remote_sha": "3191e76ab81cb8ca1c8e45bef943a62d9f4e05e5"
     }
   },
   "timeflysoon/weasel": {
@@ -454,7 +454,7 @@
   },
   "timeflysoon/DriverStoreExplorer": {
     "master": {
-      "remote_sha": "e959486833aba6ec161deebdced2949fc9d6ff57"
+      "remote_sha": "4be0c1470d1268ebb361abb0bb466dd54a56fdfd"
     }
   },
   "timeflysoon/dlssg_for_sm86": {
@@ -464,10 +464,10 @@
   },
   "timeflysoon/Open-Box": {
     "catch-up-upstream": {
-      "remote_sha": "e23e8d9e1729a328240a66818db0df0017876d65"
+      "remote_sha": "38ff402bf092f8185a1074483849ab336a23adc2"
     },
     "main": {
-      "remote_sha": "d515c81c2449a0320c6bc3c2975fda4ebd1280dc"
+      "remote_sha": "507358357130a1b284e2b7b7388d0d8772e39422"
     },
     "backup": {
       "remote_sha": "f42122e8b1b6e49d6ac88a84fc26ebb2480d17db"
@@ -480,7 +480,7 @@
   },
   "timeflysoon/honk": {
     "main": {
-      "remote_sha": "7cd8b13cd2b71081bd9c554b80a6a0e9a0dbdc04"
+      "remote_sha": "0f54054cb6d4ea1b446d183eb2a57e33e9dc07b0"
     }
   },
   "timeflysoon/RunFilesBuilder": {
