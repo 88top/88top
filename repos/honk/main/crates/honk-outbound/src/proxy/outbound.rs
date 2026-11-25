@@ -49,6 +49,11 @@ pub trait TcpOutbound: Send + Sync {
         connect_timeout: Duration,
     ) -> anyhow::Result<ProxyStream>;
 
+    /// Whether a successful TCP open always includes a proxy reply confirming the target.
+    fn confirms_target_on_open(&self) -> bool {
+        false
+    }
+
     /// The provided `tcp` stream is already connected to the proxy
     /// server. Handlers that support connection pooling override this to
     /// skip `TcpStream::connect()`; the default ignores `tcp` and delegates
@@ -181,6 +186,20 @@ pub trait PacketOutbound: Send + Sync {
             .await
             .map(PreparedUdpTransport::ready)
     }
+
+    /// UDP counterpart of [`TcpOutbound::dial_over`]. The returned transport
+    /// owns the supplied carrier. Exits without tunneled UDP return
+    /// [`TunnelUnsupported`].
+    async fn dial_udp_over(
+        &self,
+        runtime: Arc<crate::runtime::NodeRuntime>,
+        _carrier: Box<dyn AsyncReadWrite>,
+        _target: SocketAddr,
+        _target_domain: Option<&str>,
+        _options: TunnelDialOptions,
+    ) -> anyhow::Result<Arc<dyn PacketTransport>> {
+        Err(TunnelUnsupported(runtime.node.protocol().as_str()).into())
+    }
 }
 
 /// One association carrying every destination of a client source (the core
@@ -197,6 +216,18 @@ pub trait SharedSourceOutbound: Send + Sync {
         connect_timeout: Duration,
         speculative: bool,
     ) -> anyhow::Result<PreparedUdpTransport<dyn MultiTargetTransport>>;
+
+    /// Shared-source counterpart of [`PacketOutbound::dial_udp_over`].
+    async fn prepare_shared_source_over(
+        &self,
+        runtime: Arc<crate::runtime::NodeRuntime>,
+        _carrier: Box<dyn AsyncReadWrite>,
+        _target: SocketAddr,
+        _target_domain: Option<&str>,
+        _options: TunnelDialOptions,
+    ) -> anyhow::Result<Arc<dyn MultiTargetTransport>> {
+        Err(TunnelUnsupported(runtime.node.protocol().as_str()).into())
+    }
 }
 
 /// Which property a warm request must establish. Selector ownership needs

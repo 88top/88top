@@ -115,6 +115,20 @@ export interface OpenboxDnsRewriteRule {
 export type OpenboxDnsProtocol = 'udp' | 'tcp' | 'https' | 'tls'
 export interface OpenboxDnsBootstrap { server: string; protocol: 'udp' | 'tcp'; port: number }
 export interface OpenboxDnsExtra { server: string; protocol?: OpenboxDnsProtocol; port?: number; bootstrap?: OpenboxDnsBootstrap | null }
+// 指定域名 DNS 的一条规则:matchType 为 domain(精确)/ domainSuffix(该域及其子域);同一台上游只写一次地址
+export interface OpenboxDnsDomainUpstreamRule {
+  id: string
+  enabled?: boolean
+  matchType: 'domain' | 'domainSuffix'
+  // 最多 64 个(面板拦着,后端 / core 也按这个上限收)
+  domains: string[]
+  protocol?: OpenboxDnsProtocol
+  server: string
+  port?: number
+  bootstrap?: OpenboxDnsBootstrap | null
+  note?: string
+}
+
 export interface OpenboxProfileDns {
   filter?: DnsFilterSettings
   split?: boolean
@@ -135,6 +149,11 @@ export interface OpenboxProfileDns {
   proxy?: string
   // 走代理的域名由内核发占位地址(FakeIP 原型):域名交给选中的节点解析,解析和连接落在同一个节点
   fakeIpForProxy?: boolean
+  // FakeIP 的 v4 地址池(留空 = 内核默认:sing-box 198.19.0.0/16 / Mihomo 198.18.0.0/16)。
+  // 与别的 TUN / 虚拟网卡网段冲突时改成 /15~/24 的 IPv4 CIDR,改完要重启内核
+  fakeIpRange?: string
+  // 指定域名 DNS(面板「域名分流上游」):为特定域名 / 通配子域指定直连上游,匹配后不进 FakeIP 与代理侧解析
+  domainUpstreams?: { enabled?: boolean; rules: OpenboxDnsDomainUpstreamRule[] }
   // DNS 重写:initialized 记「默认规则补过了」,rules 是整份规则表(空数组 = 用户不要任何重写)
   rewrite?: { enabled?: boolean; initialized?: number; rules: OpenboxDnsRewriteRule[] }
 }
@@ -361,6 +380,9 @@ export interface OpenboxSubscriptionAccount {
   resetDays?: number | null
   resetKnown?: boolean
   expiryKnown?: boolean
+  // 登录密码已经在服务端加密存下来了(定期更新要用它自动登录),只有登录来源才可能为 true。
+  // 后端还没做登录来源(DESIGN 里按 501 处理),现在恒为 undefined,面板按「没存」显示。
+  hasSavedPassword?: boolean
 }
 
 export interface OpenboxSubscriptionUrlEntry {
@@ -473,6 +495,9 @@ export interface OpenboxSubscriptionSaveResult {
   changed?: boolean
   // 变了之后内核用上没有:ok=false 且 pendingRestart.pending=true 时提示"部分变更需重启内核后生效"。节点没变时不带
   applied?: { ok?: boolean; pendingRestart?: { pending: boolean; reasons?: string[] } }
+  // 降级说明:登录来源的定期更新先自动登录、登录失败时退回用原链接刷新,这时带着失败原因。
+  // 有它就按「降级」提示(文案 subscriptionRefreshDegraded),不再说「刷新成功」
+  warning?: string
 }
 
 export interface OpenboxDeployResult {
@@ -1123,6 +1148,8 @@ export const fetchConfigPreview = async (): Promise<OpenboxConfigPreview> => {
 export interface OpenboxServiceInfo {
   running: boolean
   raw: string
+  // 只有内核那份带:此刻选中的内核('sing-box' / 'mihomo';选择文件无效时没有这个字段)
+  kernel?: string
   // 只有内核那份带:开机自启是否开着
   autostart?: boolean
   // 只有内核那份带:进程运行时长(秒),没在跑或拿不到就是 null

@@ -69,8 +69,23 @@ jobs:
       - name: Setup project and build environment
         uses: ./.github/actions/common-setup
 
+      - name: Restore Robolectric android-all jars
+        uses: ./.github/actions/robolectric-jars
+        with:
+          mode: restore
+          group: app
+          instance: ${{ matrix.flavor }}
+
       - name: Test modules
         run: ./gradlew ${{ matrix.flavor }}${{ matrix.variant }}UnitTest
+
+      - name: Save new Robolectric android-all jars
+        if: always()
+        uses: ./.github/actions/robolectric-jars
+        with:
+          mode: save
+          group: app
+          instance: ${{ matrix.flavor }}
 
       - name: Upload test results
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
@@ -98,8 +113,23 @@ jobs:
       - name: Setup project and build environment
         uses: ./.github/actions/common-setup
 
+      - name: Restore Robolectric android-all jars
+        uses: ./.github/actions/robolectric-jars
+        with:
+          mode: restore
+          group: ${{ matrix.task }}
+          instance: ${{ matrix.task }}
+
       - name: Test library modules
         run: ./gradlew ${{ matrix.task }}
+
+      - name: Save new Robolectric android-all jars
+        if: always()
+        uses: ./.github/actions/robolectric-jars
+        with:
+          mode: save
+          group: ${{ matrix.task }}
+          instance: ${{ matrix.task }}
 
       - name: Upload test results
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0

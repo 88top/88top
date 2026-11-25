@@ -3,7 +3,9 @@ package routing
 import (
 	"errors"
 	"fmt"
+	"net/netip"
 	"regexp"
+	"strings"
 
 	"github.com/timeflysoon/Open-Box/core/internal/clientroutes"
 	"github.com/timeflysoon/Open-Box/core/internal/dnsrewrite"
@@ -37,9 +39,28 @@ const (
 var localSuffixes = []string{".lan", ".local", ".home", ".internal", ".home.arpa"}
 
 // FakeIPCachePath:按地址池隔离缓存文件(旧内核清理单栈 FakeIP 缓存时缺失的 IPv6 bucket 会使事务回滚;
-// 升级换池后也不会继续返回旧占位地址)。
-func FakeIPCachePath(base string) string {
-	return base + ".fakeip-" + regexp.MustCompile(`[^a-zA-Z0-9]`).ReplaceAllString(FakeIPV4+"-"+FakeIPV6, "_")
+// 升级换池后也不会继续返回旧占位地址)。池子取档案里此刻生效的那份(见 FakeIPRange)。
+func FakeIPCachePath(base string, profile any) string {
+	pool := FakeIPRange(profile) + "-" + FakeIPV6
+	return base + ".fakeip-" + regexp.MustCompile(`[^a-zA-Z0-9]`).ReplaceAllString(pool, "_")
+}
+
+// FakeIPRange:v4 的 fake-ip 地址池(sing-box 的 inet4_range)。档案 dns.fakeIpRange 合法时用它,
+// 否则用缺省 198.19.0.0/16。合法 = IPv4 CIDR、掩码 /15~/24(与面板校验同一口径),主机位非零的按该掩码
+// 的网络地址写进配置(sing-box 只收网络地址,写错会让整份配置起不来);IPv6 池没有公开材料,不跟着改。
+func FakeIPRange(profile any) string {
+	raw, ok := jsx.Get(jsx.Get(profile, "dns"), "fakeIpRange").(string)
+	if !ok {
+		return FakeIPV4
+	}
+	p, err := netip.ParsePrefix(strings.TrimSpace(raw))
+	if err != nil || !p.Addr().Is4() {
+		return FakeIPV4
+	}
+	if p.Bits() < 15 || p.Bits() > 24 {
+		return FakeIPV4
+	}
+	return p.Masked().String()
 }
 
 // DNSStrategy:内核解析的地址族。没开 IPv6 只要 A(路由器上 v6 出不去)。
@@ -76,6 +97,10 @@ type DNSOptions struct {
 	KnownOutbounds map[string]bool      // nil = 没传(不检查)
 	FilterRules    []any                // 域名过滤产生的 DNS 规则
 	Terminal       TerminalDNS
+	// SkipRuleSetRows 按行下标标记「引用了规则集、出口又不在已知出站表里」的前置自定义行:
+	// 这些行不写 DNS 规则(否则会引用路由里没声明的规则集,sing-box 1.14 起判整份配置非法)。
+	// 行本身不删,下标仍与档案一致,Resolvers.Custom 也照样占位。nil = 不跳(直接调 BuildDNS 的测试不受影响)。
+	SkipRuleSetRows []bool
 }
 
 // Resolvers 是「谁用哪台解析器」:站点集名 → 解析器 tag、前置自定义分流每一行 → tag(拒绝行 / 纯 IP 行为 null)、
@@ -328,11 +353,17 @@ func BuildDNS(profile any, o DNSOptions) (DNSResult, error) {
 		}
 		servers = append(servers, rewriteServers...)
 		servers = append(servers, localServers...)
+		duRules := domainUpstreamRules(profile, dnsConf, o.SystemDNS, func(up upstream, tag string) {
+			for _, e := range dnsServerEntries(up, tag, "", profile, o.SystemDNS) {
+				servers = append(servers, e)
+			}
+		})
 		only := map[string]any{"servers": servers, "final": "dns-direct", "strategy": strategy, "reverse_mapping": true}
-		if len(rewriteRules) > 0 || len(localRules) > 0 || len(filterRules) > 0 || len(terminalCustomRules) > 0 {
+		if len(rewriteRules) > 0 || len(localRules) > 0 || len(duRules) > 0 || len(filterRules) > 0 || len(terminalCustomRules) > 0 {
 			rules := []any{}
 			rules = append(rules, rewriteRules...)
 			rules = append(rules, localRules...)
+			rules = append(rules, duRules...)
 			rules = append(rules, filterRules...)
 			if len(terminalCustomRules) > 0 {
 				ruleOwners = append(ruleOwners, RuleOwner{From: len(rules), To: len(rules) + len(terminalCustomRules), Kind: "client", Index: 0, Name: ""})
@@ -374,9 +405,15 @@ func BuildDNS(profile any, o DNSOptions) (DNSResult, error) {
 	}
 
 	// 规则顺序和连接侧(routing)对齐:DNS 重写 → 本地主机名 → 前置自定义分流 → 订阅 / 节点站点直连 → 终端分流 → 站点集 → 兜底。
+	// 域名指定上游:排在重写与本地主机名之后、其余分流之前(推断,见 domainupstream.go)。
+	duRules := domainUpstreamRules(profile, dnsConf, o.SystemDNS, func(up upstream, tag string) {
+		appendEntries(up, tag, "")
+	})
+
 	rules := []any{}
 	rules = append(rules, rewriteRules...)
 	rules = append(rules, localRules...)
+	rules = append(rules, duRules...)
 	rules = append(rules, terminalLocalRules...)
 	rules = append(rules, httpsRRRule())
 	rules = append(rules, filterRules...)
@@ -515,6 +552,12 @@ func BuildDNS(profile any, o DNSOptions) (DNSResult, error) {
 		for customIndex, rule := range conf.Custom.Rules {
 			customIndex, rule := customIndex, rule
 			own("custom", customIndex, "", func() {
+				// 出口不在已知出站表里、又引用了规则集的行:不写规则(见 DNSOptions.SkipRuleSetRows),
+				// 否则 DNS 会引用路由里没声明的规则集,sing-box 1.14 起拒绝整份配置。
+				if customIndex < len(o.SkipRuleSetRows) && o.SkipRuleSetRows[customIndex] {
+					resolvers.Custom = append(resolvers.Custom, nil)
+					return
+				}
 				match := customDnsMatch(rule, o.RuleLists)
 				if match == nil {
 					resolvers.Custom = append(resolvers.Custom, nil)
@@ -616,7 +659,7 @@ func BuildDNS(profile any, o DNSOptions) (DNSResult, error) {
 	}
 	if fakeIP {
 		// v6 占位段只在「代理也管 v6」(交给节点)时给;降级和不进内核都不给——不进内核时终端拿到占位 v6 会直接往 WAN 发。
-		fs := map[string]any{"type": "fakeip", "tag": fakeIPTag, "inet4_range": FakeIPV4}
+		fs := map[string]any{"type": "fakeip", "tag": fakeIPTag, "inet4_range": FakeIPRange(profile)}
 		if v6mode == "node" {
 			fs["inet6_range"] = FakeIPV6
 		}

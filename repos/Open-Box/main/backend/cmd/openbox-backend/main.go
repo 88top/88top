@@ -32,6 +32,7 @@ import (
 	factoryresetapi "github.com/timeflysoon/Open-Box/backend/internal/api/factoryreset"
 	failoverapi "github.com/timeflysoon/Open-Box/backend/internal/api/failover"
 	groupsapi "github.com/timeflysoon/Open-Box/backend/internal/api/groups"
+	kernelapi "github.com/timeflysoon/Open-Box/backend/internal/api/kernel"
 	latencyapi "github.com/timeflysoon/Open-Box/backend/internal/api/latency"
 	latencyhistoryapi "github.com/timeflysoon/Open-Box/backend/internal/api/latencyhistory"
 	nodeinfoapi "github.com/timeflysoon/Open-Box/backend/internal/api/nodeinfo"
@@ -58,6 +59,7 @@ import (
 	"github.com/timeflysoon/Open-Box/backend/internal/auth"
 	"github.com/timeflysoon/Open-Box/backend/internal/backup"
 	"github.com/timeflysoon/Open-Box/backend/internal/bandwidth"
+	"github.com/timeflysoon/Open-Box/backend/internal/cleanup"
 	"github.com/timeflysoon/Open-Box/backend/internal/clientapp"
 	"github.com/timeflysoon/Open-Box/backend/internal/conntrack"
 	"github.com/timeflysoon/Open-Box/backend/internal/contentfilter"
@@ -77,7 +79,10 @@ import (
 	"github.com/timeflysoon/Open-Box/backend/internal/failover"
 	"github.com/timeflysoon/Open-Box/backend/internal/geodata"
 	"github.com/timeflysoon/Open-Box/backend/internal/kerneldns"
+	"github.com/timeflysoon/Open-Box/backend/internal/kernelgen"
+	"github.com/timeflysoon/Open-Box/backend/internal/kernelswitch"
 	"github.com/timeflysoon/Open-Box/backend/internal/latencyhistory"
+	"github.com/timeflysoon/Open-Box/backend/internal/mihomo"
 	"github.com/timeflysoon/Open-Box/backend/internal/nodeexit"
 	"github.com/timeflysoon/Open-Box/backend/internal/nodegroups"
 	"github.com/timeflysoon/Open-Box/backend/internal/nodeinfo"
@@ -122,6 +127,11 @@ func run(args []string) int {
 	// 它不读配置、不碰数据目录,只发一次探测、打一份 JSON。
 	if len(args) >= 1 && args[0] == "ns-probe" {
 		return nsprobe.Main(args[1:], os.Stdout, os.Stderr)
+	}
+	// 隐藏子命令:卸载脚本先调它把后端对系统的改动收干净(撤销 DNS 接管、停内核、拆虚拟终端),
+	// 退出码非 0 就不继续删文件(M6 第五节)。不建目录、不读档案、不开端口——这时候这些东西可能正在被删。
+	if len(args) >= 1 && args[0] == "cleanup" {
+		return runCleanup(args[1:])
 	}
 	if len(args) == 1 && (args[0] == "-version" || args[0] == "--version") {
 		fmt.Println("openbox-backend", version)
@@ -168,6 +178,50 @@ func run(args []string) int {
 	}
 	waitBackground() // ctx 已结束:等后台任务写完盘再退出
 	log.Info("已退出")
+	return 0
+}
+
+// dnsReverter 把 system.DNSTakeover 接到 cleanup 的接口上,错误文案与停内核那条路一致。
+type dnsReverter struct{ t *system.DNSTakeover }
+
+func (r dnsReverter) BeforeKernelStop(ctx context.Context) error {
+	if err := r.t.Revert(ctx); err != nil {
+		return fmt.Errorf("撤销 DNS 接管失败: %w", err)
+	}
+	return nil
+}
+
+// runCleanup 是 `openbox-backend cleanup` 的实现。成功时往 stdout 打一行结果,失败时原因在 stderr 与日志里。
+func runCleanup(args []string) int {
+	cfg, err := system.LoadConfig(args, os.Getenv, os.Stderr)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "参数错误:", err)
+		return 2
+	}
+	log := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: cfg.LogLevel}))
+	initKind := system.DetectInitHere()
+	svcCtl := &system.Services{Kind: initKind, Run: system.ExecRunner, ProcUptime: system.ReadProcUptime}
+	takeover := &system.DNSTakeover{
+		StateFile: filepath.Join(cfg.StateDir(), "dns-takeover.json"),
+		Services:  svcCtl,
+		QueryLog:  cfg.DNSQueryLog,
+	}
+	vterm := &system.VTermNet{Run: system.ExecRunner, StateFile: filepath.Join(cfg.StateDir(), "terminal-net.json")}
+
+	res, err := (&cleanup.Service{
+		Services:    svcCtl,
+		CoreService: cfg.CoreService,
+		DNS:         dnsReverter{takeover},
+		VTerm:       vterm,
+		Log:         log,
+	}).Run(context.Background())
+	if err != nil {
+		log.Error("卸载前清理失败", "err", err)
+		fmt.Fprintln(os.Stderr, "清理失败:", err)
+		return 1
+	}
+	fmt.Printf("清理完成:撤销 DNS 接管 %v,内核 %v,虚拟终端 %v(服务管理器:%v)\n",
+		res.DNSReverted, res.KernelStopped, res.TerminalRemoved, res.Managed)
 	return 0
 }
 
@@ -473,6 +527,92 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	}
 	rulesetsapi.Register(srv.Mux(), rulesetsapi.Deps{Lists: lists, Geo: geoLib, Refresh: refresher})
 
+	// 双内核切换(第 4、5 步):预检 + 目标内核配置的生成与自检。生成层与切换共用同一套依赖。
+	var mihomoCall mihomo.Call
+	if core.Available(cfg.Core) {
+		mc := core.New(cfg.Core)
+		mihomoCall = func(ctx context.Context, method string, args ...any) (json.RawMessage, error) {
+			return mc.Call(ctx, method, args)
+		}
+	}
+	var mihomoCompiler *mihomo.Compiler
+	if mihomoCall != nil {
+		mihomoCompiler = mihomo.NewCompiler(mihomoCall)
+	}
+	// 面板里各节点组的选中项:切换成功时存快照;装配时先问正在运行的 Mihomo,读不到再用快照。
+	selectionsStore := mihomo.SelectionsStore{Store: st}
+	kg := kernelgen.New(kernelgen.Deps{
+		Profiles: profileSvc, Groups: groupsSvc, Catalog: subsSvc, Lists: lists,
+		Secret:   gen.ClashSecret,
+		Compiler: mihomoCompiler,
+		Platform: platformName(initKind), DataDir: cfg.DataDir, GeoDir: cfg.GeoDir,
+		RulesetDir: filepath.Join(cfg.DataDir, "rules"), SingBox: cfg.SingBox, Mihomo: cfg.Mihomo, ConfigDir: cfg.ConfigDir,
+		SystemDNS: func() []string { return system.ReadResolvers("/etc/resolv.conf") },
+		LANIfaces: func() ([]string, error) { return system.LANDeviceNames(), nil },
+		Selections: func(context.Context) map[string]any {
+			return selectionsStore.Get()
+		},
+		LiveSelections: func(ctx context.Context) (map[string]string, error) {
+			secret, err := gen.ClashSecret()
+			if err != nil {
+				return nil, err
+			}
+			return mihomo.ControllerSelections(ctx, mihomo.MihomoControllerAddr, secret)
+		},
+	})
+	kernelSwitch := kernelswitch.New(kernelswitch.Deps{
+		KernelFile: cfg.RouterKernelFile(), SingBox: cfg.SingBox, Mihomo: cfg.Mihomo,
+		InitdCore: initdPath(initKind, cfg.CoreService), DataDir: cfg.DataDir,
+		Platform: platformName(initKind), Gen: kg, Sbx: gen,
+		Conflicts: func(ctx context.Context) ([]string, error) {
+			found, err := conflictDetector.Find(ctx)
+			if err != nil {
+				return nil, err
+			}
+			names := make([]string, 0, len(found))
+			for _, c := range found {
+				names = append(names, c.Label)
+			}
+			return names, nil
+		},
+		Compat: func(ctx context.Context) ([]string, error) { return kg.MihomoCompat(ctx) },
+		DNSGuard: func(ctx context.Context) (bool, []string, error) {
+			prof, err := profileSvc.Get(ctx)
+			if err != nil {
+				return false, nil, err
+			}
+			dns, _ := prof["dns"].(map[string]any)
+			mode, _ := dns["mode"].(string)
+			if mode != "dnsmasq" {
+				return false, nil, nil
+			}
+			return true, []string{"切换时先撤销 dnsmasq 接管,新内核起来后按 dns.mode 重新对齐"}, nil
+		},
+	})
+	switcher := kernelswitch.SwitchDeps{
+		Engine: kernelSwitch, Gen: kg, Sbx: gen, SbxBin: cfg.SingBox, Profile: profileSvc.Get,
+		Services: svcCtl, ServiceName: cfg.CoreService, DNS: dnsSync,
+		KernelFile: cfg.RouterKernelFile(), SingBoxConfig: filepath.Join(cfg.ConfigDir, "config.json"),
+		MihomoPaths: mihomo.ArtifactPaths{
+			Config: cfg.MihomoConfigFile(), Inputs: cfg.MihomoInputsFile(),
+			EntryBypass: cfg.MihomoEntryBypassFile(), RouterKernel: cfg.RouterKernelFile(),
+			DNSMasq: cfg.MihomoDnsmasqFile(),
+		},
+		Platform: platformName(initKind), GeoDir: cfg.GeoDir,
+		SaveSelections: selectionsStore.Set,
+	}
+	kernelapi.Register(srv.Mux(), kernelapi.Deps{
+		Engine: kernelSwitch,
+		Switch: switcher.Switch,
+		Compatible: func(ctx context.Context) []string {
+			problems, err := kg.MihomoCompat(ctx)
+			if err != nil {
+				return []string{err.Error()}
+			}
+			return problems
+		},
+	})
+
 	// 域名穿透:站点集命中哪些域名 / IP。核心不可用时接口返回 503,其它接口不受影响
 	var peCore policyentries.Core
 	if core.Available(cfg.Core) {
@@ -588,6 +728,8 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	}})
 
 	// 系统资源(概览页「硬件负载」、侧边栏卡片、概览的「活跃终端」):CPU / 内存读 /proc,活跃终端取内核连接的来源 IP 并按邻居表的 MAC 合并
+	// 邻居表也给 route-test 用:请求带 sourceIp 时按那台终端的 MAC 判断 source_mac_address
+	neighbors := sysres.Neighbors("/proc", system.ExecRunner)
 	sysresapi.Register(srv.Mux(), sysresapi.Deps{Service: &sysres.Service{
 		Sources: func(ctx context.Context) ([]string, error) {
 			snap, err := singbox.KernelConnections(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
@@ -600,9 +742,32 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 			}
 			return out, nil
 		},
-		Neighbors:  sysres.Neighbors("/proc", system.ExecRunner),
+		Neighbors:  neighbors,
 		LocalAddrs: sysres.LocalAddrs,
 	}})
+
+	// route-test 判断「DNS 规则是不是旧的」要按档案的站点集认归属(core normalizeRouting 的 activePolicies / fallback)
+	var routePolicies func(ctx context.Context) ([]routetest.Policy, string, error)
+	if mihomoCompiler != nil {
+		routePolicies = func(ctx context.Context) ([]routetest.Policy, string, error) {
+			prof, err := profileSvc.Get(ctx)
+			if err != nil {
+				return nil, "", err
+			}
+			model, err := mihomoCompiler.NormalizeRouting(ctx, prof["routing"])
+			if err != nil {
+				return nil, "", err
+			}
+			out := make([]routetest.Policy, 0, len(model.ActivePolicies))
+			for _, p := range model.ActivePolicies {
+				if p.Name == "" {
+					continue
+				}
+				out = append(out, routetest.Policy{Name: p.Name, Rulesets: p.Rulesets, DomainSuffix: p.DomainSuffix})
+			}
+			return out, model.Fallback.Name, nil
+		}
+	}
 
 	// 站点延迟(概览页):请求经内核的面板入站走一遍路由,从内核连接列表认出线路;历史单独存 site-latency-history,不和节点历史混
 	sitelatencyapi.Register(srv.Mux(), sitelatencyapi.Deps{Service: &sitelatency.Service{
@@ -627,6 +792,8 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 		Proxies: func(ctx context.Context) ([]singbox.KernelProxy, error) {
 			return singbox.KernelProxies(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
 		},
+		// 启用中的站点集与兜底站点(判断 dns.stale 用);core 不可用时为 nil,就不判断
+		Policies: routePolicies,
 	}
 	routeSvc := &routetest.Service{
 		Snapshot: func(ctx context.Context) (singbox.KernelSnapshot, error) {
@@ -641,6 +808,8 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 			on, _ := p["ipv6"].(bool)
 			return err == nil && on
 		},
+		// 请求带 sourceIp 时,按那台终端预测 DNS 判定(邻居表里有 MAC 就一起用来判断 source_mac_address)
+		NeighborMAC: func(ctx context.Context, ip string) string { return neighbors(ctx)[ip] },
 		// DNS 判定:读已部署的 config.json,按它的 DNS 规则预测这个域名问哪台服务器;规则集文件读不到、
 		// 二进制规则集需要 sing-box 解码,判断不了的如实记成前提;代理侧的实际线路读内核的代理列表补上
 		DNS: dnsPredictor,
@@ -672,7 +841,7 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 			}
 			return tap, nil
 		},
-		KernelDNSConfig: func() (*kerneldns.Config, error) {
+		KernelDNSConfig: func(ctx context.Context) (*kerneldns.Config, error) {
 			b, err := os.ReadFile(filepath.Join(cfg.ConfigDir, "config.json"))
 			if err != nil {
 				return nil, err
@@ -681,7 +850,12 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 			if err := json.Unmarshal(b, &m); err != nil {
 				return nil, err
 			}
-			return kerneldns.ConfigFrom(m), nil
+			c := kerneldns.ConfigFrom(m)
+			// 内核此刻的代理列表:把 kernelDns.chain 补成「站点集 → 节点组 → 节点」;读不到就只给 detour
+			if proxies, err := singbox.KernelProxies(ctx, filepath.Join(cfg.ConfigDir, "config.json")); err == nil {
+				c.Proxies = proxies
+			}
+			return c, nil
 		},
 		Log: log})
 
@@ -1090,4 +1264,26 @@ func checkCore(path string, log *slog.Logger) {
 		return
 	}
 	log.Info("openbox-core 可用", "path", path, "implementation", info.Implementation, "protocol", info.Protocol, "build", info.BuildID)
+}
+
+// platformName 把服务管理器类型换成内核装配用的平台名(上游 platform 的取值只有 openwrt / systemd / container)。
+func platformName(kind system.InitKind) string {
+	if kind == system.InitOpenWrt {
+		return "openwrt"
+	}
+	if kind == system.InitSystemd {
+		return "systemd"
+	}
+	return "linux"
+}
+
+// initdPath 给出内核服务脚本的路径,只用来确认它存在(第 4 步的 system 一项)。
+func initdPath(kind system.InitKind, service string) string {
+	switch kind {
+	case system.InitOpenWrt:
+		return filepath.Join("/etc/init.d", service)
+	case system.InitSystemd:
+		return filepath.Join("/etc/systemd/system", service+".service")
+	}
+	return ""
 }

@@ -228,6 +228,8 @@ upstream {
 | DoQ | 支援經出站的 UDP-capable `PacketTransport`。 |
 | DoH3 | 支援經出站的 UDP-capable `PacketTransport`。 |
 
+帶 [`exit`](./groups.md#出口) 的群組會透過路由的 TCP 串流傳輸 TCP、DoT、DoH 與經代理的 UDP 上游。DoQ 和 DoH3 在群組選路前排除由群組出口組成的多跳路由。支援 UDP 且符合條件的節點可以承載這兩種上游，包括支援 UDP 的設定鏈與折疊為一個合格節點的路由。選定的 `block` 仍是終止動作。
+
 ## DNS 路由
 
 `routing` 裡是排好序的 `request` 和 `response` 規則，第一條匹配的生效。同一個條件裡的引數按 OR 組合；用 `&&` 連起來的條件按 AND 組合。條件前加 `!` 表示取反。
@@ -297,6 +299,7 @@ dns {
 }
 ```
 
+- 代理鏈本身沒有伺服器網域；各實體節點的網域保留各自的訂閱標籤。
 - 節點網域只匹配含 `subtag()` 的規則；普通規則、fallback 和沒匹配上的網域仍走 bootstrap 解析。其他查詢不帶訂閱，對它們來說 `subtag()` 和 `!subtag()` 都是 false。
 - 被接管的查詢只發往選中的上游，遵守 `strategy` 和 `use_host`，不走快取和 response 規則，也不回退：查詢失敗就表示實體節點連線或探測連線失敗。
 - 接管按網域生效，不是端到端的下載目標解析策略。下載時為選路而預先解析 URL 網域，只是盡力而為；代理下載的 URL 網域仍由代理解析，而承載代理自身的節點伺服器解析遵守這條規則。明確使用 bootstrap 解析器的下載繞過這個 hook。

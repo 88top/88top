@@ -17,7 +17,8 @@ import (
 // 把「某个组最终落到哪里」归成 direct / reject / proxy(AC,DNS 与入口旁路按它决定要不要走代理)。
 
 // Call 调 core 的一个方法,返回 value 的原始 JSON(接线处把 *core.Client 的 Call 包一下就行)。
-type Call func(ctx context.Context, method string, input any) (json.RawMessage, error)
+// args 按顺序对应 core 方法的参数:多数方法只有一个,bypassPlan / entryPlan 是 (routing, opts) 两个。
+type Call func(ctx context.Context, method string, args ...any) (json.RawMessage, error)
 
 // 缓存容量:与上游一致(组 4 份、规则 16 份)。
 const (
@@ -252,6 +253,91 @@ type RulesModel struct {
 	EndTerminal    int      `json:"endTerminal"`
 	DirectTerminal int      `json:"directTerminal"`
 	FirstPolicy    int      `json:"firstPolicy"`
+}
+
+// CompatInput 是 mihomoCompatibility 的入参。
+type CompatInput struct {
+	Profile    any
+	Nodes      any
+	Groups     any
+	ChainNodes any
+	Selections any
+}
+
+// Compatibility 对应上游 `i("mihomoCompatibility", …)`:返回 Mihomo 表达不了的问题(空 = 没有)。
+func (c *Compiler) Compatibility(ctx context.Context, in CompatInput) ([]string, error) {
+	raw, err := c.call(ctx, "mihomoCompatibility", map[string]any{
+		"profile": in.Profile, "nodes": in.Nodes, "groups": in.Groups,
+		"chainNodes": in.ChainNodes, "selections": in.Selections,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var problems []string
+	if err := json.Unmarshal(raw, &problems); err != nil {
+		return nil, fmt.Errorf("core: 解析 mihomoCompatibility 的返回值失败: %w", err)
+	}
+	return problems, nil
+}
+
+// BuiltinNames 是内置出站的名字与启用开关(上游 Dn / core builtinTags 的返回)。
+// 零值 = 默认的 direct / block,且两个都算启用(DirectEnabled / BlockEnabled 为 nil 时按启用算)。
+type BuiltinNames struct {
+	Direct        string `json:"direct"`
+	Block         string `json:"block"`
+	DirectEnabled *bool  `json:"directEnabled,omitempty"`
+	BlockEnabled  *bool  `json:"blockEnabled,omitempty"`
+}
+
+func (b BuiltinNames) directOn() bool { return b.DirectEnabled == nil || *b.DirectEnabled }
+func (b BuiltinNames) blockOn() bool  { return b.BlockEnabled == nil || *b.BlockEnabled }
+
+// withDefaults 把空名字补成 direct / block。
+func (b BuiltinNames) withDefaults() BuiltinNames {
+	if b.Direct == "" {
+		b.Direct = "direct"
+	}
+	if b.Block == "" {
+		b.Block = "block"
+	}
+	return b
+}
+
+// BuiltinTags 对应上游 Re:调 core 的 builtinTags,拿内置直连 / 拒绝此刻的名字与启用开关。
+func (c *Compiler) BuiltinTags(ctx context.Context, groups any) (BuiltinNames, error) {
+	raw, err := c.call(ctx, "builtinTags", groups)
+	if err != nil {
+		return BuiltinNames{}, err
+	}
+	var b BuiltinNames
+	if err := json.Unmarshal(raw, &b); err != nil {
+		return BuiltinNames{}, fmt.Errorf("core: 解析 builtinTags 的返回值失败: %w", err)
+	}
+	return b.withDefaults(), nil
+}
+
+// EmitResult 是 core emitGroups 里装配时用得到的部分。
+type EmitResult struct {
+	PublicTags []string `json:"publicTags"`
+	Outbounds  []any    `json:"outbounds"`
+}
+
+// PublicTags 对应上游 `Wt(s,o,{}).publicTags`:用户分组的公开成员(能当出站名字用的那些)。
+func (c *Compiler) PublicTags(ctx context.Context, groups, nodes any) (EmitResult, error) {
+	raw, err := c.call(ctx, "emitGroups", groups, nodes, map[string]any{})
+	if err != nil {
+		return EmitResult{}, err
+	}
+	var out EmitResult
+	if err := json.Unmarshal(raw, &out); err != nil {
+		return EmitResult{}, fmt.Errorf("core: 解析 emitGroups 的返回值失败: %w", err)
+	}
+	return out, nil
+}
+
+// NormalizeRouting 调 core 的 normalizeRouting(上游 ke),返回规整后的分流。
+func (c *Compiler) NormalizeRouting(ctx context.Context, routing any) (RoutingModel, error) {
+	return c.routingModel(ctx, routing)
 }
 
 // TargetRules 对应上游 yC。baseKey 非空时,缓存键只看 baseKey 加 providers / ruleLists / directCIDRs / terminalRoutes
