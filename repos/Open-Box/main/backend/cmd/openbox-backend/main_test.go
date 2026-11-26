@@ -76,18 +76,18 @@ func TestAppWiring(t *testing.T) {
 		t.Fatalf("dns/region-detect: %d %s", code, body)
 	}
 
-	// 服务状态已装配:带 pendingRestart(从没部署过 / 内核没在运行时恒为没有,reasons 是空数组而不是 null)
-	if code, body := get(c, ts.URL+"/api/openbox/service/status"); code != 200 || !strings.Contains(body, `"pendingRestart":{"pending":false,"reasons":[]}`) {
+	// 服务状态已装配:带 pendingRestart(从没部署过 / 内核没在运行时恒为没有,reasons / details 是空数组而不是 null)
+	if code, body := get(c, ts.URL+"/api/openbox/service/status"); code != 200 || !strings.Contains(body, `"pendingRestart":{"pending":false,"reasons":[],"details":[]}`) {
 		t.Fatalf("service/status: %d %s", code, body)
 	}
 
 	// 清 DNS 缓存已装配:POST 才有;测试机上没有可清的层时是 503 + error,而不是 404 / 405
-	// 组件更新(只读部分):没联网也能回状态;升级(run)依赖打包,回 501
+	// 组件更新:没联网也能回状态;升级(run)立即返回 200,进度靠轮询 status(提交那一步还没接上,M6-6)
 	if code, body := get(c, ts.URL+"/api/openbox/update/status"); code != 200 || !strings.Contains(body, `"version":"dev"`) || !strings.Contains(body, `"stage":"idle"`) {
 		t.Errorf("update/status: %d %s", code, body)
 	}
-	if resp, err := c.Post(ts.URL+"/api/openbox/update/run", "application/json", strings.NewReader(`{"channel":"auto"}`)); err != nil || resp.StatusCode != 501 {
-		t.Errorf("update/run 应回 501: %v %v", err, resp)
+	if resp, err := c.Post(ts.URL+"/api/openbox/update/run", "application/json", strings.NewReader(`{"channel":"auto"}`)); err != nil || resp.StatusCode != 200 {
+		t.Errorf("update/run 应回 200: %v %v", err, resp)
 	}
 	if code, _ := get(c, ts.URL+"/api/openbox/dns/flush-cache"); code != 405 {
 		t.Fatalf("dns/flush-cache GET: %d", code)

@@ -159,16 +159,6 @@ func NewServer(subLinkProvider service.SubLinkProvider) *Server {
 	}
 }
 
-func (s *Server) isDirectHTTPSConfigured() bool {
-	certFile, certErr := s.settingService.GetCertFile()
-	keyFile, keyErr := s.settingService.GetKeyFile()
-	if certErr != nil || keyErr != nil || certFile == "" || keyFile == "" {
-		return false
-	}
-	_, err := tls.LoadX509KeyPair(certFile, keyFile)
-	return err == nil
-}
-
 // initRouter initializes Gin, registers middleware, templates, static
 // assets, controllers and returns the configured engine.
 func (s *Server) initRouter() (*gin.Engine, error) {
@@ -181,7 +171,7 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	}
 
 	engine := gin.Default()
-	directHTTPS := s.isDirectHTTPSConfigured()
+	directHTTPS := s.settingService.DirectHTTPSConfigured()
 	sendHSTS := directHTTPS && !config.IsSkipHSTS()
 	engine.Use(middleware.SecurityHeadersMiddleware(sendHSTS))
 
@@ -572,11 +562,7 @@ func (s *Server) start(restartXray bool, startTgBot bool) (err error) {
 	// add/update/delete to either the local xray or a remote node panel.
 	// The closures bridge into XrayService (which owns the running xray
 	// process state) without forcing the runtime package to import service.
-	mgr := runtime.NewManager(runtime.LocalDeps{
-		APIPort:          func() int { return s.xrayService.GetXrayAPIPort() },
-		SetNeedRestart:   func() { s.xrayService.SetToNeedRestart() },
-		RequestReconcile: func() { s.xrayService.SetToNeedReconcile() },
-	})
+	mgr := runtime.NewManager(s.xrayService.LocalRuntimeDeps())
 	runtime.SetManager(mgr)
 	mgr.SetNodeEgressResolver(&s.settingService)
 	// Supply the master client certificate for nodes in mtls mode. Issued lazily

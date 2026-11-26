@@ -152,6 +152,9 @@ export interface OpenboxProfileDns {
   // FakeIP 的 v4 地址池(留空 = 内核默认:sing-box 198.19.0.0/16 / Mihomo 198.18.0.0/16)。
   // 与别的 TUN / 虚拟网卡网段冲突时改成 /15~/24 的 IPv4 CIDR,改完要重启内核
   fakeIpRange?: string
+  // 监听 53 端口(仅 systemd 部署;上游 v0.1.485):在保留 7853 的同时额外监听 0.0.0.0:53,旁路由终端可直接把本机 IP 设为 DNS。
+  // 容器部署一直监听、openwrt 的 53 归 dnsmasq,都不看这个字段;改完要重启内核
+  listen53?: boolean
   // 指定域名 DNS(面板「域名分流上游」):为特定域名 / 通配子域指定直连上游,匹配后不进 FakeIP 与代理侧解析
   domainUpstreams?: { enabled?: boolean; rules: OpenboxDnsDomainUpstreamRule[] }
   // DNS 重写:initialized 记「默认规则补过了」,rules 是整份规则表(空数组 = 用户不要任何重写)
@@ -1174,7 +1177,9 @@ export interface OpenboxServiceStatus {
   platform?: string
   osRelease?: string | Record<string, unknown> | null
   arch?: string
-  pendingRestart?: { pending: boolean; reasons: string[] }
+  // details:具体改了什么的明细码(上游 v0.1.486 起;对应 kernelService.ts 的 RESTART_DETAIL_KEYS),
+  // 老服务端或判断不出来时没有 / 为空,界面回退到按 reasons 显示。
+  pendingRestart?: { pending: boolean; reasons: string[]; details?: string[] }
   // 内核因为和别的代理服务冲突被自动停掉了(界面提示「已自动停止」用)
   conflictAutoStopped?: boolean
   // Docker 容器里跑时('container')才有:容器的局域网 IP,以及容器自检结果(Docker 卡片用)

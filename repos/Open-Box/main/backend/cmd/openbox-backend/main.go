@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"net/http"
 	"net/netip"
 	"os"
 	"os/signal"
@@ -65,6 +66,7 @@ import (
 	"github.com/timeflysoon/Open-Box/backend/internal/contentfilter"
 	"github.com/timeflysoon/Open-Box/backend/internal/controllerproxy"
 	"github.com/timeflysoon/Open-Box/backend/internal/core"
+	"github.com/timeflysoon/Open-Box/backend/internal/deploykernel"
 	"github.com/timeflysoon/Open-Box/backend/internal/deploystate"
 	"github.com/timeflysoon/Open-Box/backend/internal/diagnostics"
 	"github.com/timeflysoon/Open-Box/backend/internal/dnscache"
@@ -170,6 +172,8 @@ func run(args []string) int {
 	if background != nil {
 		waitBackground = background(ctx)
 	}
+	// 上次升级留下的日志:提交中崩溃就回滚,刚被重启就自检(M6 第七节)
+	go recoverUpdate(ctx, cfg, ln, log)
 	if err := srv.Serve(ctx, ln); err != nil {
 		log.Error("服务异常退出", "err", err)
 		stop()
@@ -179,6 +183,60 @@ func run(args []string) int {
 	waitBackground() // ctx 已结束:等后台任务写完盘再退出
 	log.Info("已退出")
 	return 0
+}
+
+// restartCommand 是写进看门狗脚本的重启命令:看门狗回滚后用它把旧版本拉起来。
+func restartCommand(cfg system.Config) string {
+	switch system.DetectInitHere() {
+	case system.InitOpenWrt:
+		return "/etc/init.d/" + cfg.PanelService + " restart"
+	case system.InitSystemd:
+		return "systemctl restart " + cfg.PanelService
+	}
+	return ""
+}
+
+// recoverUpdate 处理上次升级留下的日志(M6 第七节):提交中崩溃就回滚,刚被重启就自检。
+// 只在装了安装根(-install-root)时才有意义;自检要打自己的健康接口,所以等监听建好之后再跑。
+func recoverUpdate(ctx context.Context, cfg system.Config, ln net.Listener, log *slog.Logger) {
+	if cfg.InstallRoot == "" {
+		return
+	}
+	addr, ok := ln.Addr().(*net.TCPAddr)
+	if !ok {
+		return
+	}
+	health := fmt.Sprintf("http://127.0.0.1:%d/api/health", addr.Port)
+	client := &http.Client{Timeout: 5 * time.Second}
+	err := update.Recover(ctx, update.RecoverDeps{
+		Journal:  filepath.Join(cfg.DataDir, "update", update.JournalName),
+		Root:     cfg.InstallRoot,
+		StateDir: cfg.StateDir(),
+		Health: func(ctx context.Context) error {
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, health, nil)
+			if err != nil {
+				return err
+			}
+			resp, err := client.Do(req)
+			if err != nil {
+				return err
+			}
+			defer resp.Body.Close()
+			if resp.StatusCode != http.StatusOK {
+				return fmt.Errorf("健康接口回了 %d", resp.StatusCode)
+			}
+			return nil
+		},
+		CoreHello: func(ctx context.Context) error {
+			_, err := core.New(cfg.Core).Hello(ctx)
+			return err
+		},
+		Exit: os.Exit,
+		Log:  log,
+	})
+	if err != nil {
+		log.Error("升级恢复失败", "err", err)
+	}
 }
 
 // dnsReverter 把 system.DNSTakeover 接到 cleanup 的接口上,错误文案与停内核那条路一致。
@@ -505,7 +563,8 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	nodequalityapi.Register(srv.Mux(), nodequalityapi.Deps{Service: nqSvc})
 
 	latencyapi.Register(srv.Mux(), latencyapi.Deps{Gen: gen, Subs: subsSvc, Profiles: profileSvc, Runner: probeRunner, History: nodeHistory,
-		Kernel: controllerproxy.FileResolver(filepath.Join(cfg.ConfigDir, "config.json"))})
+		Kernel: controllerproxy.KernelResolver(cfg.ConfigDir,
+			func() (string, error) { return system.ReadRouterKernel(cfg.RouterKernelFile()) })})
 	// 节点信息:类型 / 协议层 / 服务器 / 链式上游 / 入口地址解析 / 入口国家 / 出口归属和风控值
 	entryDetector := &regiondetect.Detector{} // 只用它的按 IP 查国家,不占用其它两处的「判断中」状态
 	nodeinfoapi.Register(srv.Mux(), nodeinfoapi.Deps{Service: &nodeinfo.Service{
@@ -671,9 +730,58 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 			}
 			return names, err
 		},
+		// 当前选中的内核不是 sing-box 时拒绝部署这份 sing-box 配置(见 Deployer.RouterKernel 的说明)
+		RouterKernel: func() (string, error) { return system.ReadRouterKernel(cfg.RouterKernelFile()) },
+	}
+	// 设备跑 mihomo 时的部署流程:与 sing-box 那条并列,由下面的 KernelDeployer 按 router-kernel 分派。
+	// 两条流程各自做「校验 → 备份 → 原子替换 → 重启 → 健康检查 → 失败回滚」;mihomo 用 `mihomo -t` 校验、
+	// 用 mihomo.yaml 里的 external-controller + secret 做健康检查(与 sing-box 的 clash_api 不是同一个 secret)。
+	dnsModeForMihomo := func(ctx context.Context) string {
+		p, err := profileSvc.Get(ctx)
+		if err != nil {
+			return ""
+		}
+		dns, _ := p["dns"].(map[string]any)
+		m, _ := dns["mode"].(string)
+		return m
+	}
+	mihomoDeployer := &mihomo.Deployer{
+		Build: kernelgen.MihomoBuilder{Gen: kg},
+		Paths: mihomo.ArtifactPaths{
+			Config: cfg.MihomoConfigFile(), Inputs: cfg.MihomoInputsFile(),
+			EntryBypass: cfg.MihomoEntryBypassFile(), RouterKernel: cfg.RouterKernelFile(),
+			DNSMasq: cfg.MihomoDnsmasqFile(),
+		},
+		Meta:     mihomo.ArtifactMeta{DNSMasq: dnsModeForMihomo(context.Background()) == "dnsmasq"},
+		Mihomo:   cfg.Mihomo,
+		Home:     cfg.MihomoHome(),
+		Platform: platformName(initKind),
+		Service:  svcCtl, ServiceName: cfg.CoreService,
+		BeforeApply: dnsSync.BeforeKernelStop,
+		AfterRunning: func(ctx context.Context) string {
+			res, err := dnsSync.AfterKernelStart(ctx)
+			return dnssync.Note(res, err)
+		},
+		Conflicts: func(ctx context.Context) ([]string, error) {
+			found, err := conflictDetector.Find(ctx)
+			var names []string
+			for _, c := range found {
+				if c.Running {
+					names = append(names, c.Label)
+				}
+			}
+			return names, err
+		},
+		SaveSelections: selectionsStore.Set,
+	}
+	// 按 <ConfigDir>/router-kernel 选一条:sing-box 写 config.json,mihomo 写 mihomo.yaml
+	kernelDeployer := &deploykernel.Deployer{
+		Kernel:  func() (string, error) { return system.ReadRouterKernel(cfg.RouterKernelFile()) },
+		SingBox: deployer.Deploy,
+		Mihomo:  mihomoDeployer,
 	}
 	// 每次部署(面板的「部署」按钮、DNS 过滤的应用)都经这里记下最近一次的结果,GET /deploy/state 读它
-	deploySvc := &deploystate.Service{Store: st, Deploy: deployer.Deploy}
+	deploySvc := &deploystate.Service{Store: st, Deploy: kernelDeployer.Deploy}
 	deployapi.Register(srv.Mux(), deployapi.Deps{Service: deploySvc})
 	filterFiles := singbox.FilterFiles{SingBox: cfg.SingBox}
 	filterSvc := &dnsfilter.Service{
@@ -720,12 +828,26 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 		},
 	})
 
-	// 组件更新:目前只有 status / check / notes(读发布信息);下载替换要等 M6 的发布包格式,run 回 501
-	updateapi.Register(srv.Mux(), updateapi.Deps{Service: &update.Service{
+	// 组件更新:status / check / notes 读发布信息;run 走「探测 → 下载并解压到暂存 → 校验 → 冒烟」,
+	// 提交(替换文件并重启)是 M6-6,还没接上,所以跑完会明确回一句「本次没有改动系统」
+	updateSvc := &update.Service{
 		Checker: &update.Checker{MirrorPrefix: cfg.UpdateMirror},
 		Version: version, BuiltAt: builtAt,
-		KernelVersion: func(ctx context.Context) string { return singbox.ReadKernelVersion(ctx, cfg.SingBox).Version },
-	}})
+		KernelVersion:  func(ctx context.Context) string { return singbox.ReadKernelVersion(ctx, cfg.SingBox).Version },
+		DataDir:        cfg.DataDir,
+		GeoDir:         cfg.GeoDir,
+		ConfigFile:     filepath.Join(cfg.ConfigDir, "config.json"),
+		InstallRoot:    cfg.InstallRoot,
+		StateDir:       cfg.StateDir(),
+		RestartCommand: restartCommand(cfg),
+		Restart: func(ctx context.Context) error {
+			if _, err := svcCtl.Do(ctx, cfg.PanelService, "restart"); err != nil {
+				return err
+			}
+			return nil
+		},
+	}
+	updateapi.Register(srv.Mux(), updateapi.Deps{Service: updateSvc})
 
 	// 系统资源(概览页「硬件负载」、侧边栏卡片、概览的「活跃终端」):CPU / 内存读 /proc,活跃终端取内核连接的来源 IP 并按邻居表的 MAC 合并
 	// 邻居表也给 route-test 用:请求带 sourceIp 时按那台终端的 MAC 判断 source_mac_address
@@ -902,6 +1024,24 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	// 每日流量:后台每 10 秒读一次内核的连接快照(/connections),按天、按小时、按终端 / 节点 / 访问目标记进数据目录下的 traffic/;
 	// 这里只读。终端名取 DHCP 租约;保留月数取档案的 traffic.keepMonths
 	var background func(ctx context.Context) func()
+	// 自动升级调度(档案里的 profile.updates.openbox):每分钟看一眼,到点才动手。
+	// 放在这里是因为 background 是在这之后一路被包起来的,先挂上就能一起被调用。
+	background = func(ctx context.Context) func() {
+		sched := &update.Scheduler{
+			Service: updateSvc,
+			Schedule: func(ctx context.Context) update.Schedule {
+				p, err := profileSvc.Get(ctx)
+				if err != nil {
+					return update.Schedule{}
+				}
+				return update.ParseSchedule(p)
+			},
+			StatePath: filepath.Join(cfg.DataDir, "update", "auto.json"),
+			Log:       log,
+		}
+		go sched.Run(ctx)
+		return func() {}
+	}
 	var trafficSource trafficapi.Source
 	var trafficStore *traffic.Store // 恢复出厂设置要清它;创建失败时为空
 	if ts, err := traffic.Open(filepath.Join(cfg.DataDir, "traffic"), nil); err != nil {
@@ -961,7 +1101,9 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 
 	// 内核控制接口(Clash API)的转发:/api/controller/ 是 REST,/api/controller-ws/ 是 WebSocket;
 	// 前端的代理、规则、连接、配置页和实时流量 / 日志都走这里。登录保护由全站的 Require 中间件统一管。
-	controllerapi.Register(srv.Mux(), controllerproxy.New(controllerproxy.FileResolver(filepath.Join(cfg.ConfigDir, "config.json"))))
+	// 按当前内核选配置文件:设备跑 mihomo 时读 mihomo.yaml(否则代理页 / 连接页 / 实时流量整片 502)
+	controllerapi.Register(srv.Mux(), controllerproxy.New(controllerproxy.KernelResolver(cfg.ConfigDir,
+		func() (string, error) { return system.ReadRouterKernel(cfg.RouterKernelFile()) })))
 
 	// 诊断包:版本 / 固件 / 服务状态 / 脱敏的运行配置和档案 / 最近日志,只读
 	diagnosticsapi.Register(srv.Mux(), diagnosticsapi.Deps{Service: &diagnostics.Service{
@@ -1019,11 +1161,16 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	})
 
 	// 激活和教程视频:没有对应概念,只回固定内容(DESIGN D9 和第 8 节),不保存任何东西
+	// 概览顶栏「Open-Box Latest」后面的版本号:按预设决策取 main 上最新的 release tag。
+	// 这里挂一个 10 分钟缓存 + 5 秒超时:面板会频繁轮询这个接口,不能每次都去问 GitHub;
+	// 查不到(离网、限流、仓库没发布)返回空串,由 activation 退回构建时注入的版本。
+	latestTag := latestReleaseTagCached(&update.Checker{MirrorPrefix: cfg.UpdateMirror}, 10*time.Minute)
 	activationapi.Register(srv.Mux(), activationapi.Deps{
 		Version: version,
 		KernelVersion: func(ctx context.Context) string {
 			return singbox.ReadKernelVersion(ctx, cfg.SingBox).Version
 		},
+		LatestTag: latestTag,
 	})
 
 	// 已知终端(只读):DHCP 租约里的设备,给「终端分流」选来源;流量里出现过的来源 IP 等 traffic* 做了再并进来
