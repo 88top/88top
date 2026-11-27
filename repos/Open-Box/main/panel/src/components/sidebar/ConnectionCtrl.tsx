@@ -1,17 +1,19 @@
 import { disconnectAllAPI, disconnectByIdAPI } from '@/api'
 import { useCtrlsBar } from '@/composables/useCtrlsBar'
-import { SORT_DIRECTION, SORT_TYPE } from '@/constant'
+import { CONNECTION_COLUMN_LABEL_MAP, SORT_TYPE, SORT_TYPE_COLUMN } from '@/constant'
 import { useTooltip } from '@/helper/tooltip'
 import { isMiddleScreen } from '@/helper/utils'
 import {
+  activeSortDesc,
+  activeSortType,
   connectionFilter,
   connections,
-  connectionSortDirection,
-  connectionSortType,
   hideDnsConnections,
   isPaused,
   quickFilterEnabled,
   renderConnections,
+  sortTypeOptions,
+  toggleSortDirection,
 } from '@/store/connections'
 import { normalizeRuleTarget } from '@/store/rules'
 import { useConnectionCard, useConnectionCardMobile, useConnectionCardPC } from '@/store/settings'
@@ -36,6 +38,13 @@ import TableSettings from '../settings/TableSettings.vue'
 import ConnectionTabs from './ConnectionTabs.vue'
 import SourceIPFilter from './SourceIPFilter.vue'
 
+// 排序菜单的选项名和表头一致:主机叫「目标」,源 IP 叫「设备」,其余用列名(与上游 v0.1.488 一致)
+const sortOptionLabel = (type: SORT_TYPE) => {
+  const column = SORT_TYPE_COLUMN[type]
+
+  return CONNECTION_COLUMN_LABEL_MAP[column] ?? column
+}
+
 const handlerClickCloseAll = () => {
   if (renderConnections.value.length === connections.value.length) {
     disconnectAllAPI()
@@ -58,63 +67,53 @@ export default defineComponent({
     const settingsModel = ref(false)
     const settingsTab = ref<'card' | 'table'>('card')
     const { showTip, updateTip } = useTooltip()
-    const { isLargeCtrlsBar } = useCtrlsBar(useConnectionCard.value ? 860 : 720)
+    const { isLargeCtrlsBar } = useCtrlsBar(840)
 
     return () => {
       // 排序标签宽窄屏都用「排序」(connectionSort),与上游 v0.1.476 一致;sortBy 键保留但不引用
       const sortLabel = t('connectionSort')
       // 按钮点一下会切到的方向:当前升序 → 提示「降序」,反之亦然(与上游一致)
       const sortDirectionLabel = t(
-        connectionSortDirection.value === SORT_DIRECTION.ASC
-          ? 'connectionSortDescending'
-          : 'connectionSortAscending',
+        activeSortDesc.value ? 'connectionSortAscending' : 'connectionSortDescending',
       )
-      const sortForCards = (
+      // 当前视图里一个能排序的列都没有时,整个排序控件不显示
+      const sortControls = sortTypeOptions.value.length > 0 && (
         <div
           class={[
-            'flex items-center gap-1 text-sm',
-            isMiddleScreen.value
-              ? 'min-w-0 flex-1 max-[360px]:gap-0.5 max-[360px]:text-xs'
-              : isLargeCtrlsBar.value
-                ? 'w-auto'
-                : 'w-full',
+            'flex min-w-0 items-center gap-1 text-sm max-[360px]:text-xs',
+            !isLargeCtrlsBar.value && 'flex-1',
           ]}
         >
           <span class="shrink-0">{sortLabel}</span>
-          <div class={`join min-w-0 flex-1 ${isLargeCtrlsBar.value ? 'min-w-46' : ''}`}>
+          <div class="join min-w-0 flex-1">
             <select
-              class={[
-                'join-item select select-sm min-w-0 flex-1',
-                isMiddleScreen.value &&
-                  'px-2 max-[360px]:ps-1 max-[360px]:pe-5 max-[360px]:text-xs!',
-              ]}
+              class="join-item select select-sm min-w-0 flex-1 truncate max-[360px]:ps-1 max-[360px]:pe-5 max-[360px]:text-xs! max-[360px]:[--app-select-chevron-inset:0.55rem]"
               aria-label={sortLabel}
-              v-model={connectionSortType.value}
+              value={activeSortType.value}
+              onChange={(e) =>
+                (activeSortType.value = (e.target as HTMLSelectElement).value as SORT_TYPE)
+              }
             >
-              {(Object.values(SORT_TYPE) as string[]).map((opt) => (
+              {sortTypeOptions.value.map((opt) => (
                 <option
                   key={opt}
                   value={opt}
                 >
-                  {t(opt) || opt}
+                  {t(sortOptionLabel(opt))}
                 </option>
               ))}
             </select>
             <button
-              class={['btn join-item btn-sm shrink-0', isMiddleScreen.value && 'btn-square']}
+              type="button"
+              class="btn join-item btn-square btn-sm shrink-0"
               aria-label={sortDirectionLabel}
-              title={sortDirectionLabel}
-              onClick={() => {
-                connectionSortDirection.value =
-                  connectionSortDirection.value === SORT_DIRECTION.ASC
-                    ? SORT_DIRECTION.DESC
-                    : SORT_DIRECTION.ASC
-              }}
+              onMouseenter={(e) => showTip(e, sortDirectionLabel)}
+              onClick={toggleSortDirection}
             >
-              {connectionSortDirection.value === SORT_DIRECTION.ASC ? (
-                <ArrowUpCircleIcon class="h-4 w-4" />
+              {activeSortDesc.value ? (
+                <ArrowDownCircleIcon class="size-4" />
               ) : (
-                <ArrowDownCircleIcon class="h-4 w-4" />
+                <ArrowUpCircleIcon class="size-4" />
               )}
             </button>
           </div>
@@ -276,41 +275,28 @@ export default defineComponent({
         </>
       )
 
-      // 窄屏(isMiddleScreen):「活跃 / 已关闭」页签已经挪到页签行右侧(ConnectionsPage 的 mobile-actions 插槽),
-      // 这里不再放;布局和上游 v0.1.413 一致
+      // 窄屏(isMiddleScreen):分组页签已经挪到页签行右侧(ConnectionsPage 的 mobile-actions 插槽),
+      // 这里不再放;布局和上游 v0.1.488 一致:分组页签 / 排序 + 按钮 / 终端筛选 + 搜索,三块各占一行
       const content = !isLargeCtrlsBar.value ? (
         <div class="app-card-padding flex flex-wrap items-center gap-x-2 gap-y-[var(--app-card-space)]">
-          {(!isMiddleScreen.value || !useConnectionCard.value) && (
-            <div class="flex w-full min-w-0 items-center justify-between gap-2">
-              <div class="min-w-0 flex-1">{!isMiddleScreen.value && <ConnectionTabs />}</div>
-              {!useConnectionCard.value && (
-                <div class="flex shrink-0 items-center gap-2">
-                  {settingsModal}
-                  {buttons}
-                </div>
-              )}
-            </div>
-          )}
-          {useConnectionCard.value && (
+          {!isMiddleScreen.value && <ConnectionTabs />}
+          <div
+            class={[
+              'flex w-full min-w-0 items-center gap-x-2 gap-y-[var(--app-card-space)]',
+              isMiddleScreen.value && 'max-[360px]:gap-x-1',
+            ]}
+          >
+            {sortControls}
             <div
               class={[
-                'flex w-full min-w-0 items-center gap-x-2 gap-y-[var(--app-card-space)]',
-                isMiddleScreen.value ? 'max-[360px]:gap-x-1' : 'flex-wrap',
+                'flex shrink-0 items-center gap-2',
+                isMiddleScreen.value && 'max-[360px]:gap-1',
               ]}
             >
-              {sortForCards}
-              <div
-                class={
-                  isMiddleScreen.value
-                    ? 'ml-auto flex shrink-0 items-center gap-2 max-[360px]:gap-1'
-                    : 'contents'
-                }
-              >
-                {settingsModal}
-                {buttons}
-              </div>
+              {settingsModal}
+              {buttons}
             </div>
-          )}
+          </div>
           <div class="join w-full">
             <SourceIPFilter class="w-40" />
             {searchInput}
@@ -319,7 +305,7 @@ export default defineComponent({
       ) : (
         <div class="app-card-padding flex items-center gap-2">
           {!isMiddleScreen.value && <ConnectionTabs />}
-          {useConnectionCard.value && sortForCards}
+          {sortControls}
           <SourceIPFilter class="w-40" />
           <div class="flex flex-1">{searchInput}</div>
           {settingsModal}

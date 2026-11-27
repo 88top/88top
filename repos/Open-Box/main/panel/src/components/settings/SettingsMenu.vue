@@ -8,7 +8,7 @@
   >
     <!-- 页签靠左、各自按内容取宽,不两端拉伸;右侧 #settings-header-actions 是各页签
          把自己的操作按钮(添加订阅、自动分组…)Teleport 过来的位置,位置固定在右上角 -->
-    <div class="app-card-gap flex w-full items-center">
+    <div class="app-inline-gap flex w-full items-center">
       <ul
         ref="listRef"
         v-segmented="{ active: '.menu-active', variant: 'menu' }"
@@ -35,7 +35,12 @@
               :is="item.icon"
               class="h-5 w-5 shrink-0"
             />
-            <span class="hidden truncate text-sm md:block">
+            <!-- 窄屏上只画图标,但**当前选中的那一项要把字显示出来**(上游就是这样:选中的页签展开成
+                 图标 + 文案,其余保持 44px 正方形),不然手机上只剩一排图标,不知道自己在哪一页 -->
+            <span
+              class="truncate text-sm"
+              :class="activeMenuKey === item.key ? 'block' : 'hidden md:block'"
+            >
               {{ $t(item.label) }}
             </span>
           </button>

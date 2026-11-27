@@ -31,6 +31,8 @@
       <LinkIcon class="text-base-content/30 h-10 w-10" />
       <p class="text-base-content/60 text-sm">
         {{ $t('chainProxyEmptyHint') }}
+        <MarketLink />
+        {{ $t('chainProxyEmptyHintSuffix') }}
       </p>
       <button
         type="button"
@@ -250,14 +252,14 @@
             <label class="text-xs font-medium">{{ $t('chainProxyUpstreamLabel') }}</label>
             <button
               type="button"
-              class="btn btn-ghost btn-xs shrink-0 gap-1 font-normal"
+              class="app-compact-action btn btn-ghost btn-xs shrink-0 font-normal"
               :aria-controls="dnsPanelId"
               :aria-expanded="dnsOpen"
               @click="dnsOpen = !dnsOpen"
             >
               {{ $t('clientRouteDnsLabel') }}
               <ChevronDownIcon
-                class="h-3.5 w-3.5 transition-transform"
+                class="transition-transform"
                 :class="{ 'rotate-180': dnsOpen }"
                 aria-hidden="true"
               />
@@ -383,6 +385,7 @@ import type { OpenboxChainLatencyResult, OpenboxChainProxy } from '@/api/openbox
 import CustomDnsFields from '@/components/common/CustomDnsFields.vue'
 import DialogWrapper from '@/components/common/DialogWrapper.vue'
 import LatencyPill from '@/components/common/LatencyPill.vue'
+import MarketLink from '@/components/common/MarketLink.vue'
 import OutboundPicker from '@/components/common/OutboundPicker.vue'
 import PasswordInput from '@/components/common/PasswordInput.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'

@@ -1,5 +1,7 @@
 <template>
   <div
+    :role="bandwidthEnabled ? 'group' : undefined"
+    :aria-label="bandwidthEnabled ? name : undefined"
     :class="
       twMerge(
         'latency-tag bg-base-100 flex h-5 w-10 cursor-pointer items-center justify-center rounded-xl text-xs select-none',
@@ -20,15 +22,21 @@
         v-else-if="latency === NOT_CONNECTED || !latency"
         class="text-base-content h-3 w-3"
       />
-      <div
+      <!-- 延迟数值用 span(上游同款):div 在 DOM 比对里被算成容器差异,
+           而且它只是个数字,用 div 会多出一层块级盒子 -->
+      <span
         v-show="latency !== NOT_CONNECTED && !loading"
         ref="latencyRef"
       >
         {{ latency }}
-      </div>
+      </span>
     </span>
     <!-- 所属订阅开了带宽定期检查:延迟后面接一段带宽实测(Mbps,点一下重测这个节点) -->
-    <template v-if="bandwidthEnabled">
+    <!-- 所属订阅开了带宽定期检查:延迟后面接一段带宽实测(Mbps,点一下重测这个节点)。
+         分隔竖线只在「这段真有内容」时画(有实测值 / 测速中 / 失败原因),
+         否则一枚只有延迟的药丸会多出一条孤零零的 |,DOM 比对里对不上
+         (真机实测:上游 162 枚药丸一条竖线都没有)。 -->
+    <template v-if="bandwidthShown">
       <span
         class="text-base-content/40"
         aria-hidden="true"
@@ -93,6 +101,13 @@ const infoNode = () => {
   const node = proxyMap.value[props.name ?? '']
   if (!node || node.all?.length || NON_NODE_TYPES.has(String(node.type || '').toLowerCase())) return null
   return node
+}
+// 只判「这个名字是不是一个真节点」(不看 timelineName):给 bandwidthOnly 用。
+// 注意 proxyMap 还没加载到该节点时返回 false —— 这种情况宁可先不画带宽段,
+// 也不要给 REJECT/DIRECT 画(真机实测那是 main 多出 111 枚药丸的直接原因)。
+const isRealNodeName = () => {
+  const node = proxyMap.value[props.name ?? '']
+  return !!node && !node.all?.length && !NON_NODE_TYPES.has(String(node.type || '').toLowerCase())
 }
 const recentHistory = (): LatencySample[] => {
   const name = props.name ?? ''
@@ -248,12 +263,27 @@ const props = defineProps<{
   groupName?: string
   // 悬停浮层看谁的时间线:组卡片标题的标签 name 是当前所选节点,时间线却要看组自己的
   timelineName?: string
+  // bandwidthOnly 对齐上游 v0.1.491:为真时按「带宽模式」渲染这一段,
+  // 不再要求该节点在 bandwidthMeasurements 里有条目。规则页 / 路由比对里
+  // 节点名来自内核代理表(可能属于另一条订阅、那边没开带宽检查),
+  // 只靠 measurements 判定会导致整段带宽不显示(真机实测:上游显示 81 枚、main 0 枚)。
+  bandwidthOnly?: boolean
 }>()
 const latencyRef = ref()
 const { bandwidthMeasurements, bandwidthPendingNodes } = useBandwidth()
 // 带宽段只给真节点(不是组、不是内置出站)显示,且要所属订阅开了检查
-const bandwidth = computed(() => (infoNode() ? bandwidthMeasurements.value[props.name ?? ''] : undefined))
-const bandwidthEnabled = computed(() => !!bandwidth.value?.enabled)
+const bandwidth = computed(() =>
+  // bandwidthOnly 只是「不要求 measurements 里有条目」,不能把内置出站(REJECT/DIRECT)也算进来:
+  // 真机实测 main 给 REJECT(83 枚)/DIRECT(28 枚)都画了药丸,而上油只给真节点画
+  // (81 枚、aria-label 全是某个节点名)。所以仍要先过 infoNode() 那道「是不是真节点」的判断。
+  infoNode() || (props.bandwidthOnly && isRealNodeName()) ? bandwidthMeasurements.value[props.name ?? ''] : undefined,
+)
+const bandwidthEnabled = computed(() => props.bandwidthOnly || !!bandwidth.value?.enabled)
+// 带宽段「有没有内容可显示」:有实测值、正在测、或有失败原因。只有这时才画分隔竖线和这一段,
+// 否则一枚只显示延迟的药丸会多出一条孤立的 `|`(与上游 162 枚全是纯延迟药丸对不上)。
+const bandwidthShown = computed(
+  () => bandwidthEnabled.value && (bandwidthBusy.value || !!bandwidthFailText.value || bandwidth.value?.mbps != null),
+)
 const bandwidthBusy = computed(() => !!bandwidth.value?.pending || !!bandwidthPendingNodes.value[props.name ?? ''])
 // 上一次测失败了(没在测的时候)就在这一段显示归类后的原因,红字;悬停是原始报错
 const bandwidthFailText = computed(() =>

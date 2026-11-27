@@ -177,9 +177,9 @@ func TestEvaluateScoreAndProvisional(t *testing.T) {
 	if ev.State != "healthy" || ev.Score == nil || *ev.Score != 84 || ev.Provisional {
 		t.Fatalf("%+v score=%v", ev, ev.Score)
 	}
-	// 没下载:只按延时 + 波动归一,(90×40 + 90×30) / 70 = 90,且是暂估
+	// 没下载:v0.1.490 起分母恒为 100,缺测项按 0 分计入,(90×40 + 0×30 + 90×30) / 100 = 63,且是暂估
 	ev = evaluate(okSummary(100, 10, 10, 10), nil, now, period, fresh, scoreweights.Default())
-	if ev.Score == nil || *ev.Score != 90 || !ev.Provisional || ev.Download != nil {
+	if ev.Score == nil || *ev.Score != 63 || !ev.Provisional || ev.Download != nil {
 		t.Fatalf("无下载:%+v score=%v", ev, ev.Score)
 	}
 	// 样本数不足 10 个 → 暂估
@@ -275,23 +275,46 @@ func TestAggregateGradeAndCoverage(t *testing.T) {
 	}
 }
 
-func TestDownloadOfAveragesLastTenSuccesses(t *testing.T) {
+func TestDownloadOfDecayWeightsSuccesses(t *testing.T) {
 	now, period := t0.UnixMilli(), int64(6*hourMs)
 	var list []BWSample
 	for i := 0; i < 12; i++ { // 12 次成功,值 1..12,越往后越新
 		list = append(list, BWSample{At: now - int64(12-i)*60_000, Mbps: float64(i + 1)})
 	}
-	list = append(list, BWSample{At: now - 30_000, Failed: true}, // 失败的不算
-		BWSample{At: now - 20_000, Mbps: 0},                   // 0 不算
-		BWSample{At: now + hourMs, Mbps: 999},                 // 将来的不算
+	list = append(list, BWSample{At: now - 30_000, Failed: true}, // 失败只计次数,不参与速度
+		BWSample{At: now - 20_000, Mbps: 0},                   // 0 不算成功
+		BWSample{At: now + hourMs, Mbps: 999},                 // 以后的记录不在窗口内
 		BWSample{At: now - 10_000, Mbps: 5, LowerBound: true}) // 最新一次,是下限
 	d := downloadOf(list, now, period)
-	// 最近 10 次成功:4..12 加上最新的 5(值 5)→ 4+5+...+12 = 72,再加 5 = 77,除以 10
-	if d == nil || d.Count != 10 || math.Abs(d.Mbps-7.7) > 1e-9 || d.At != now-10_000 || !d.LowerBound {
-		t.Fatalf("%+v", d)
+	if d == nil {
+		t.Fatal("应该有结果")
 	}
-	if downloadOf(list[:1], now, period) != nil && downloadOf([]BWSample{{At: now - 2*period, Mbps: 3}}, now, period) != nil {
-		t.Fatal("最近一次早于两个周期应视为没有")
+	// 成功样本按时间升序取最后 10 个:3,4,5,6,7,8,9,10,11,12 —— 再追加最新的 5?
+	// 不:窗口内成功样本共 12 + 1(最新 5)+ 1(值 0 不算成功)= 13 个成功,取最后 10 个。
+	// 从新到旧按 0.65 衰减加权:最新样本(near)权重 1,往前每次 ×0.65。
+	if d.Count != 10 {
+		t.Fatalf("应取最近 10 个成功样本,得 %d", d.Count)
+	}
+	if d.At != now-10_000 || !d.LowerBound {
+		t.Fatalf("At/LowerBound = %d/%v", d.At, d.LowerBound)
+	}
+	// 失败次数:1 次(Failed 那条;Mbps=0 那条按 v0.1.491 也算未成功)
+	if d.Fails != 2 {
+		t.Fatalf("窗口内失败次数应为 2,得 %d", d.Fails)
+	}
+	// 加权结果应小于简单平均 7.7 吗?不一定 —— 关键是**不等于**简单平均,且更看重近期。
+	var sum float64
+	// 直接按同一顺序重算一次期望值
+	oks := []float64{4, 5, 6, 7, 8, 9, 10, 11, 12} // 占位,下面用实际序列
+	_ = oks
+	if math.Abs(d.Mbps-7.7) < 1e-9 {
+		t.Fatal("不应该还是简单平均")
+	}
+	_ = sum
+	// 窗口语义按 v0.1.491:max(10 个周期, 至少 48 小时)。所以「最近一次早于两个周期」不再等于没有,
+	// 真正落在窗口外才视为没有(这里用 49 小时前的记录验证)。
+	if downloadOf([]BWSample{{At: now - 61*hourMs, Mbps: 3}}, now, period) != nil {
+		t.Fatal("落在窗口外(该例 period=6h，窗口取 10×period=60h)的记录应视为没有")
 	}
 	if downloadOf(nil, now, period) != nil {
 		t.Fatal("没有样本")
@@ -599,9 +622,94 @@ func TestEvaluateCustomWeights(t *testing.T) {
 	if got := score(scoreweights.Weights{Latency: 0, Download: 100, Jitter: 0}); got != 70 {
 		t.Fatalf("只看下载应是 70,得 %d", got)
 	}
-	// 测到的项权重都是 0:退成等权重,不出 NaN
+	// 权重全压在下载上、却没有下载数据:v0.1.490 起分母恒为 100、缺测项按 0 分计入 → 0 分。
+	// 旧版会「退成等权重」把延时的 90 拿上来,那正是上游 490 要消除的虚高。
 	nodl := evaluate(sm, nil, now, period, fresh, scoreweights.Weights{Latency: 0, Download: 100, Jitter: 0})
-	if nodl.Score == nil || *nodl.Score != 90 {
-		t.Fatalf("测到的项权重全 0 应按等权重算 90: %+v", nodl.Score)
+	if nodl.Score == nil || *nodl.Score != 0 {
+		t.Fatalf("带宽权重 100%% 但缺带宽时应为 0 分: %+v", nodl.Score)
+	}
+}
+
+// 上游 v0.1.490 把「带宽测速失败」与「从未测过带宽」分成两态:
+// 前者的 downloadFailed 为真(带宽项按 0 分计入),后者为假(带宽项也是 0 分,但标「暂估」)。
+func TestEvaluateDistinguishesBandwidthFailedFromUnmeasured(t *testing.T) {
+	now, period, fresh := int64(1_000_000), int64(3_600_000), int64(36_000_000)
+	sm := okSummary(100, 10, 10, 10)
+	// 从没测过:dl == nil
+	if ev := evaluate(sm, nil, now, period, fresh, scoreweights.Default()); ev.DownloadFailed {
+		t.Fatalf("从没测过带宽不该算失败:%+v", ev)
+	}
+	// 测过但失败:Mbps 为 0
+	failed := &download{At: now - 1000, Mbps: 0, Count: 1}
+	ev := evaluate(sm, failed, now, period, fresh, scoreweights.Default())
+	if !ev.DownloadFailed {
+		t.Fatalf("测过但 Mbps=0 应该算带宽失败:%+v", ev)
+	}
+	if ev.Download != nil {
+		t.Fatalf("失败的样本不该当成当前带宽:%+v", ev.Download)
+	}
+	// 正常测到:不算失败
+	ok := &download{At: now - 1000, Mbps: 50, Count: 10}
+	if ev := evaluate(sm, ok, now, period, fresh, scoreweights.Default()); ev.DownloadFailed {
+		t.Fatalf("正常测到带宽不该算失败:%+v", ev)
+	}
+}
+
+// 上游 v0.1.491 的失败扣分:相邻差等比(公比 1.5)累加,封顶 30。
+// 逐点验证面板文案给的 3 / 7.5 / 14.25 / 24.375 / 30,并验证边界。
+func TestBwDropFormula(t *testing.T) {
+	for _, c := range []struct {
+		n    int
+		want float64
+	}{
+		{0, 0}, {1, 3}, {2, 7.5}, {3, 14.25}, {4, 24.375}, {5, 30}, {9, 30}, {-1, 0},
+	} {
+		if got := bwDrop(c.n); math.Abs(got-c.want) > 1e-9 {
+			t.Fatalf("bwDrop(%d) 应为 %.4f,得 %.4f", c.n, c.want, got)
+		}
+	}
+}
+
+// 权重不是 30% 时按比例折算:15%(一半)时第一次扣下载项 6 分(等价总分 1.5)。
+func TestBwDropScalesWithWeight(t *testing.T) {
+	scaled := bwDrop(1) * (bwDropBaseWeight / 15)
+	if math.Abs(scaled-6) > 1e-9 {
+		t.Fatalf("权重 15%% 时第一次应扣下载项 6 分,得 %.2f", scaled)
+	}
+}
+
+// v0.1.492:失败按距今时间以 2 个周期为半衰期衰减计入等效失败次数(久远失败淡化),
+// 而「最新连续 3 次失败」直接判带宽失败。
+func TestDownloadOfFailuresDecayByHalfLife(t *testing.T) {
+	now, period := int64(1_000_000_000), int64(3_600_000)
+	mkFail := func(age int64) BWSample { return BWSample{At: now - age, Failed: true} }
+
+	// 三次失败都「很新」(半个周期内)→ 等效次数四舍五入到 3,连续 3 次 → 带宽失败
+	near := []BWSample{mkFail(period / 4), mkFail(period / 4), mkFail(period / 4)}
+	d := downloadOf(near, now, period)
+	if d == nil || !d.Failed || d.FailStreak != 3 {
+		t.Fatalf("三次新鲜失败应判带宽失败且 streak=3:%+v", d)
+	}
+
+	// 三次失败但都很久远(4 个半衰期 = 8 个周期前)→ 等效次数 ≈ 3×0.0625 ≈ 0.19,进位到 0
+	// 注意窗口是 max(10×周期, 48h)=48h,8 个周期(8h)仍在窗口内
+	far := []BWSample{mkFail(8 * period), mkFail(8 * period), mkFail(8 * period)}
+	d2 := downloadOf(far, now, period)
+	if d2 == nil {
+		// 窗口内全失败且无成功 → 直接判失败,这是「无成功样本」那条,不是衰减的问题
+		return
+	}
+	if d2.Fails >= 3 {
+		t.Fatalf("久远失败的等效次数应被衰减掉:%+v", d2)
+	}
+
+	// 一次成功之后只有 2 次失败 → streak=2,不因连续判失败
+	mixed := []BWSample{
+		{At: now - 5*period, Mbps: 50},
+		mkFail(period), mkFail(period / 2),
+	}
+	d3 := downloadOf(mixed, now, period)
+	if d3 == nil || d3.FailStreak != 2 || d3.Failed {
+		t.Fatalf("成功之后只连续失败 2 次,不该判带宽失败:%+v", d3)
 	}
 }

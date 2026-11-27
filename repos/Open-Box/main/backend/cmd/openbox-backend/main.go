@@ -773,6 +773,9 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 			return names, err
 		},
 		SaveSelections: selectionsStore.Set,
+		// 与 sing-box 那条同:部署成功后记下输入指纹,pendingRestart 才会清零。
+		// 之前 mihomo 这条漏了这个字段,真机上「改配置 → 部署」后 pendingRestart 一直为真。
+		Track: applied,
 	}
 	// 按 <ConfigDir>/router-kernel 选一条:sing-box 写 config.json,mihomo 写 mihomo.yaml
 	kernelDeployer := &deploykernel.Deployer{
@@ -930,6 +933,19 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 			on, _ := p["ipv6"].(bool)
 			return err == nil && on
 		},
+		// 认「内核自己的 fake-ip 池」:两个内核的默认段不同(sing-box 198.19.0.0/16、Mihomo 198.18.0.0/16),
+		// 档案 dns.fakeIpRange 还能改掉 v4 段。设备跑 mihomo 时固定按 sing-box 判会把 198.18.x.x 当成别处的池
+		// (2026-11-26 真机:fakeIpLocal 缺失、fakeIpFrom 补不上)。
+		Kernel: func() (string, error) { return system.ReadRouterKernel(cfg.RouterKernelFile()) },
+		FakeIPRange: func(ctx context.Context) string {
+			p, err := profileSvc.Get(ctx)
+			if err != nil {
+				return ""
+			}
+			dns, _ := p["dns"].(map[string]any)
+			v, _ := dns["fakeIpRange"].(string)
+			return v
+		},
 		// 请求带 sourceIp 时,按那台终端预测 DNS 判定(邻居表里有 MAC 就一起用来判断 source_mac_address)
 		NeighborMAC: func(ctx context.Context, ip string) string { return neighbors(ctx)[ip] },
 		// DNS 判定:读已部署的 config.json,按它的 DNS 规则预测这个域名问哪台服务器;规则集文件读不到、
@@ -941,6 +957,8 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	// 模拟 LAN 终端的真实路由测试:POST 现在做到「建虚拟终端 + DHCP 取址」(命名空间 + veth,探测还没做);
 	// 清理接在下面的 Guard——启动清上次遗留、退出拆掉,另有空闲 5 分钟自动拆(terminaltest.Deps.IdleAfter)。
 	// 记账文件 terminal-net.json 是撤销用的,恢复出厂设置不删(见 factoryWipes)
+	// 当前内核:推算类接口(terminal-test 的 firstLayer、penetration)按它选已部署的配置文件
+	kernelOf := func() (string, error) { return system.ReadRouterKernel(cfg.RouterKernelFile()) }
 	terminalProbe := system.RealTerminalProbe()
 	vterm := &system.VTermNet{Run: system.ExecRunner, StateFile: filepath.Join(cfg.StateDir(), "terminal-net.json")}
 	dnsFwd := &dnsforward.Service{
@@ -950,7 +968,7 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	}
 	terminaltestapi.Register(srv.Mux(), terminaltestapi.Deps{Capability: terminalProbe.Capability, Terminal: vterm, Prober: &nsprobe.Exec{}, Conntrack: &conntrack.Reader{}, DNSForward: dnsFwd.Describe,
 		FirstLayer: terminaltestapi.NewFirstLayer(func() (map[string]any, error) {
-			return routetest.ReadConfig(filepath.Join(cfg.ConfigDir, "config.json"))
+			return routetest.ReadDeployedConfig(cfg.ConfigDir, kernelOf)
 		}, dnsFwd.Mode, dnsFwd.Describe),
 		Kernel: func(ctx context.Context) (singbox.KernelSnapshot, error) {
 			return singbox.KernelConnections(ctx, filepath.Join(cfg.ConfigDir, "config.json"))
@@ -985,7 +1003,7 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	penetrationSets := &dnsdecide.FileSets{SingBox: cfg.SingBox, TmpDir: probeDir}
 	penetrationapi.Register(srv.Mux(), penetrationapi.Deps{Service: &penetration.Service{
 		Config: func() (map[string]any, error) {
-			return routetest.ReadConfig(filepath.Join(cfg.ConfigDir, "config.json"))
+			return routetest.ReadDeployedConfig(cfg.ConfigDir, kernelOf)
 		},
 		Sets: func(c map[string]any) routedecide.Sets { return penetrationSets.Bind(dnsdecide.SetDefsFromConfig(c)) },
 		DNS:  dnsPredictor,

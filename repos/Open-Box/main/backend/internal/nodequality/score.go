@@ -77,12 +77,18 @@ func meanOf(in []float64) *float64 {
 	return &r
 }
 
-// download 是一个节点最近的下载测速汇总(最近最多 10 次成功测速的平均)。
+// download 是一个节点最近的下载测速汇总。
+// v0.1.491 起:Mbps 是成功样本的 0.65 衰减加权值,Fails 是窗口内的失败次数,
+// Failed 表示「已判为带宽失败」(无成功样本 / 累计 5 次失败)。
 type download struct {
 	At         int64
 	Mbps       float64
 	Count      int
 	LowerBound bool
+	Fails      int
+	// FailStreak 是窗口内「最新连续失败」的次数(v0.1.492 起:连续 3 次即判带宽失败)
+	FailStreak int
+	Failed     bool
 }
 
 // evaluated 是一个节点按上游口径算出的结果。
@@ -98,6 +104,9 @@ type evaluated struct {
 	DownloadAt    *int64
 	LowerBound    bool
 	DownloadStale bool
+	// DownloadFailed 对上游 v0.1.490 的 downloadFailed:最近一次带宽测速失败(测过但没拿到正数)。
+	// 与「从未测过」(dl == nil)分开:两者带宽项都按 0 分计入,但前者标「带宽失败」、后者标「未测带宽」。
+	DownloadFailed bool
 }
 
 // evaluate 把一个节点 24 小时的统计和下载汇总折成状态与分数。nowMs 是现在,periodMs 是测速周期,freshMs 是新鲜时限。
@@ -126,6 +135,8 @@ func evaluate(sm summary, dl *download, nowMs, periodMs, freshMs int64, w scorew
 		age = nowMs - dl.At
 		ev.DownloadAt = &dl.At
 		ev.LowerBound = dl.LowerBound
+		// 测过但没拿到正数 Mbps(超时 / 失败)算「带宽失败」;从没测过(dl == nil)不算。
+		ev.DownloadFailed = dl.Mbps <= 0
 		// 下载样本超过两个周期不再算「当前」
 		if dl.Mbps > 0 && age >= 0 && age < 2*periodMs {
 			m := dl.Mbps
@@ -135,31 +146,50 @@ func evaluate(sm summary, dl *download, nowMs, periodMs, freshMs int64, w scorew
 	}
 
 	if ev.State == "healthy" && ev.Latency != nil {
-		var sw, sv float64
-		add := func(v *float64, w float64, k []knot) {
-			if v != nil {
-				sw += w
-				sv += w * interp(*v, k)
+		// v0.1.490 起口径固定:分母恒为总权重(三项之和 = 100),**缺测项按 0 分计入**,
+		// 不再像旧版那样跳过缺测项、把其余维度的权重归一化放大。
+		// 为什么这样改:旧口径下「只测到延时、没测带宽」的节点会因为分母变小而虚高,
+		// 反超真正实测过的节点,选路时把流量引到没验证过的节点上(上游 490 的 release notes
+		// 与面板文案都是这个说法,见 i18n 的 nodeScoreWeightsHelpIntro / bandwidthHealthFirst)。
+		// 只有一项权重为 0% 时该项才真正「不参与」——权重是 0 就不影响分母,与旧版一致。
+		total := w.Latency + w.Download + w.Jitter
+		var sv float64
+		add := func(v *float64, wt float64, k []knot) {
+			if wt <= 0 {
+				return // 权重 0%:该项被排除,不计入分母也不计分
 			}
+			if v != nil {
+				sv += wt * interp(*v, k)
+			}
+			// v 为 nil(缺测 / 测速失败):这一项按 0 分计入,分母仍然包含它
 		}
 		add(ev.Latency, w.Latency, latencyKnots)
 		add(ev.Download, w.Download, downloadKnots)
 		add(ev.Jitter, w.Jitter, jitterKnots)
-		// 权重可以被调成 0:有测到的项权重全是 0 时,按等权重算,避免 0/0。
-		if sw == 0 {
-			sw, sv = 0, 0
-			add2 := func(v *float64, k []knot) {
-				if v != nil {
-					sw++
-					sv += interp(*v, k)
-				}
+		// v0.1.491:窗口内的带宽测速失败次数按 1.5 倍几何阶梯**扣减下载单项分**
+		// (默认 30% 权重下依次扣 3 / 7.5 / 14.25 / 24.375 / 30 分),按带宽权重等比折算,
+		// **不倒扣延时与抖动**——所以这里是从 sv 里减掉「下载那一项已有的分」,
+		// 而不是直接把总分压低。下载分扣到 0 即视为带宽失败(标记由 downloadOf 给出)。
+		if downloadDroppedOut := ev.Download != nil && dl != nil && dl.Fails > 0 && w.Download > 0; downloadDroppedOut {
+			// 扣减量由 bwDrop 给出(封闭公式,见 query.go 里的推导:相邻差的公比 1.5)。
+			// 权重不是 30% 时按比例折算,保证等比缩放。
+			drop := bwDrop(dl.Fails)
+			// 折算:扣的是「下载项分数 ×(权重/100)」,再乘 (100/权重) 还原成下载项自己的分,
+			// 等价于下载项分数减去 drop*(30/权重) 的分,保证按权重等比缩放。
+			scaled := drop * (bwDropBaseWeight / w.Download)
+			cur := interp(*ev.Download, downloadKnots)
+			sv -= w.Download * (cur - math.Max(cur-scaled, 0))
+			if cur <= scaled {
+				ev.DownloadFailed = true
 			}
-			add2(ev.Latency, latencyKnots)
-			add2(ev.Download, downloadKnots)
-			add2(ev.Jitter, jitterKnots)
 		}
-		sc := int(math.Floor(sv/sw + 0.5))
-		ev.Score = &sc
+		if total > 0 {
+			sc := int(math.Floor(sv/total + 0.5))
+			if sc < 0 {
+				sc = 0
+			}
+			ev.Score = &sc
+		}
 		ev.Provisional = ev.Download == nil || ev.Jitter == nil ||
 			sm.LatencyCount < fullSamples || sm.JitterCount < fullSamples ||
 			dl == nil || dl.Count < fullSamples

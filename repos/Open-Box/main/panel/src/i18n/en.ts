@@ -579,7 +579,7 @@ const en = {
   subscriptionBandwidthHelp:
     'The router checks eligible nodes in this subscription on the shared bandwidth schedule. Only healthy nodes are tested. Health checks and manual probes have priority.',
   subscriptionBandwidthDedupe:
-    'Identical effective connections share one durable measurement across subscriptions and bandwidth-enabled groups. Renaming, reordering or restarting does not start a duplicate download. Disabling this subscription does not cancel a test still needed by another subscription or group.',
+    'Identical effective nodes share one durable measurement across subscriptions and node-scoring groups. Renaming, reordering, restarting, changing node DNS or TLS verification settings, or dynamic IPv6 address refreshes will not clear history or trigger duplicate downloads. Disabling this subscription does not cancel a test still needed by another subscription or group.',
   subscriptionBandwidthBudget:
     'The backend bandwidth settings show the daily upper bound for all unique eligible nodes. It is download payload only; protocol overhead, initial/new-node tests and provider multipliers may add traffic. This switch does not enable node scoring or change routing.',
   qualityState_down: 'Probe failed',
@@ -587,8 +587,14 @@ const en = {
   qualityState_stale: 'Outdated',
   qualityInactive: 'Disabled / not deployed',
   qualityProvisional: 'Provisional',
+  qualityProvisionalTip: 'One or more weighted metrics are missing or have fewer than 10 samples',
   qualitySamples: '{count} health checks',
   qualityUploadPending: 'Upload not tested',
+  qualityBandwidthUnmeasured: 'No bandwidth',
+  qualityBandwidthUnmeasuredTip: 'No valid download bandwidth sample yet; bandwidth counts as 0 (provisional)',
+  qualityBandwidthFailed: 'Bandwidth failed',
+  qualityBandwidthFailedTip: 'Recent bandwidth tests have no valid success, 3+ latest consecutive failures, or penalties reduced download score to 0; bandwidth counts as 0',
+  qualityBandwidthFailedUnweightedTip: 'Recent bandwidth tests have no valid success, 3+ latest consecutive failures, or penalties reduced download score to 0; bandwidth weight is 0% and excluded from scoring',
   qualityAssessed: 'Assessed nodes',
   qualityBandwidthSamples: '{count} bandwidth samples',
   qualityEmpty: 'No subscriptions',
@@ -602,17 +608,17 @@ const en = {
   qualityTime: '{hours} h {minutes} min',
   qualityNotMeasured: 'Not tested',
   qualityDetailScope:
-    'Latency is the median of up to ten successful probes. Timing variation and download bandwidth use the average of up to ten valid values.',
+    'Latency is the median of up to ten successful probes; timing variation is the average of up to ten valid values; download bandwidth uses a 0.65 recency-decay weighted average of successful samples within the last ten test records, while failures decay over time with a 2-interval half-life into an effective failure weight and apply a 1.5× geometric stepped penalty.',
   qualityHealthHelp:
-    'Confirmed failures count as zero in subscription quality. Current coverage counts nodes with fresh assessments. Below 80% coverage, the previous score is shown when available. Score color thresholds can be customized under Settings → Frontend Panel → Detection thresholds.',
+    'Confirmed failures count as zero in subscription quality. Current coverage counts nodes with fresh assessments (when large groups queue probes, the health freshness window dynamically extends up to 10 minutes while real probe or dial failures still take effect immediately). Below 80% coverage, the previous score is shown when available. Score color thresholds can be customized under Settings → Frontend Panel → Detection thresholds.',
   qualityModelHelp:
-    'Healthy nodes use the same score as bandwidth-aware routing. Latency, download bandwidth and HTTP jitter use the weights from Backend Settings. Missing metrics are omitted and the remaining weights are normalized. Missing data or fewer than ten samples in a weighted metric marks the score provisional.',
+    'Healthy nodes use the exact same scoring formula as kernel routing. Latency, download bandwidth and HTTP jitter are scored against the fixed 100% total weight from Backend Settings; missing weighted metrics count as 0 without scaling up remaining weights, preventing unmeasured nodes from outscoring measured ones. Failures within the last 10 bandwidth tests decay over time with a 2-interval half-life into an effective failure weight and apply a 1.5× geometric stepped penalty to the download sub-score (scaled proportionally by download weight without reducing latency or jitter; counting as 0 when there are no successful samples, 3+ latest consecutive failures, or the download sub-score reaches 0), and frequent recent probe failures (availability below 85%) apply a smooth score penalty. A metric set to 0% weight is excluded. Missing data or fewer than ten samples in a weighted metric marks the score provisional.',
   qualityExampleHelp:
     'Example: one 95-point node and nine failed nodes score about 10 overall. One 95-point node and nine unmeasured nodes require more data instead of an excellent rating.',
   qualityMeasurementHelp:
     'Metrics use the current connection identity, network and global probe target. The last 24 hourly buckets are retained. HTTP timing variation is the mean difference between consecutive successful probe durations, not UDP jitter or IP packet loss. Active time and traffic are sampled, exclude panel probes, and never add points. Concurrent activity is counted once.',
   qualityBandwidthHelp:
-    'A subscription shows the median of measured node averages. A node’s average expires when its newest bandwidth sample reaches two shared periods. Upload bandwidth is unmeasured and application upload traffic is reported separately.',
+    'A subscription shows the median of measured nodes’ decay-weighted download speeds. Each node evaluates up to its 10 most recent test records within the last 10 shared periods (at least 48 hours, including both successes and failures), weighting successful samples by recency with a 0.65 decay factor; once the newest record reaches two shared periods, it expires from scoring. Failures in that window decay over time with a 2-period half-life into an effective failure weight and apply a 1.5× geometric stepped penalty to the download sub-score (at the default 30% weight, 1 fresh failure deducts 3 points and an effective weight of 2 deducts 7.5 points while older failures fade over time; penalties scale proportionally with download weight and never reduce other metrics); no successful samples, 3+ latest consecutive failures, or a download sub-score reduced to 0 marks bandwidth as failed and removes the node from the primary tier. In daily mode, a failed test triggers at most one background retry after 30 minutes per cycle. Upload bandwidth is unmeasured and application upload traffic is reported separately.',
   qualityMode_login: 'Login',
   qualityMode_subscription: 'Subscription',
   qualityMode_node: 'Node',
@@ -1016,7 +1022,9 @@ const en = {
   groupInterval: 'Test interval',
   groupTolerance: 'Latency tolerance',
   groupUrltestHint:
-    'Latency selection switches only when the new node is faster by the tolerance. Node scoring uses the combined score when a healthy candidate has valid bandwidth data.',
+    'Latency selection switches only when the new node is faster by the tolerance. When node scoring is enabled, healthy candidates use the combined score whenever a score is available (continuing with latency, jitter and availability even without bandwidth data), falling back to tolerance only when no score is available.',
+  groupToleranceDisabledByScoring:
+    'Node scoring is enabled: healthy candidates are ranked by combined score instead of latency tolerance (restored automatically when no score is available).',
   groupMembersLabel: 'Members',
   groupFilterAllSubscriptions: 'All subscriptions',
   groupSubscriptionMissing: 'Deleted subscription',
@@ -1076,9 +1084,11 @@ const en = {
   failoverSummary: 'Failover · {lanes} lanes · {count} nodes',
   failoverTolerance: 'In-lane latency tolerance',
   failoverToleranceHint:
-    'Applies to latency selection inside automatic lanes. Skip it when node scoring is enabled and a healthy candidate in the lane has valid bandwidth data. Lane priority is preserved.',
+    'Applies to latency selection inside automatic lanes. Skipped whenever node scoring is enabled and usable scores are available in the lane (even without bandwidth data, using latency, jitter and availability). Lane priority is preserved.',
   failoverToleranceUnused:
     'Every lane has a single valid node, so there is nothing to pick between inside a lane; not used for now',
+  failoverAutoLaneRequiredHint:
+    'Takes effect only when at least one lane uses Auto mode with multiple nodes.',
   failoverTimeout: 'Probe timeout',
   failoverRestore: 'Return to primary once recovered',
   failoverRestoreHint:
@@ -2399,7 +2409,7 @@ const en = {
     'Match devices by MAC, which survives IP changes; "Bypass the kernel" and the allowlist by MAC are handled natively by the kernel and do not affect multi-WAN.',
   chainProxyTab: 'Chain proxy',
   chainProxyAdd: 'Add chain proxy',
-  chainProxyEmptyHint: 'No chain proxies yet.',
+  chainProxyEmptyHint: 'No residential IP yet? Get one from',
   chainProxyEmptyHintSuffix: '',
   chainUpstreamLayer: 'Upstream',
   chainUpstreamLayerTip: 'Upstream layer: the target node dials out through this route',
@@ -2463,30 +2473,30 @@ const en = {
   bandwidthDaily:
     '{count} unique eligible nodes, at most {times} tests per node on any day. Up to {size}/day at the current limit.',
   bandwidthHealthFirst:
-    'Availability comes first. Confirmed failed nodes and nodes awaiting recovery confirmation are excluded regardless of past bandwidth. Missing bandwidth data does not mean a node is unavailable.',
+    'Availability comes first. Confirmed failed nodes and nodes awaiting recovery confirmation are excluded regardless of past bandwidth (when large groups queue background probes, the health freshness window dynamically extends up to 10 minutes so healthy primaries are not falsely evicted, while real probe or dial failures are still excluded immediately). Missing bandwidth data does not mean a node is unavailable: bandwidth counts as 0 against the fixed 100% weight denominator; unmeasured healthy nodes remain as fallbacks when measured nodes exist, and still rank by latency, jitter and availability when no node in the group has bandwidth data.',
   bandwidthOff: 'When disabled',
   bandwidthOn: 'When enabled',
   bandwidthExample: 'Example',
   bandwidthOff_urltest:
     'Choose the default node by latency, with the existing latency tolerance to avoid unnecessary switches.',
   bandwidthOn_urltest:
-    'Rank healthy candidates by the weights in Backend Settings. When download bandwidth has a positive weight, at least one candidate needs fresh download data. Latency tolerance is skipped in this mode. Keep the current node on ties and hold a healthy selection for 60 seconds. Without usable scores, use latency and tolerance.',
+    'Rank healthy candidates against the fixed 100% total weight from Backend Settings (missing latency, jitter or bandwidth each count as 0, with an availability penalty on frequent probe failures). When download weight is above 0 and measured healthy nodes exist, only measured nodes compete for the default (unmeasured and bandwidth-failed nodes cannot take over); during cold start before initial probes finish, unprobed higher-tier nodes (such as measured high-bandwidth nodes) are never blocked by lower-tier or bandwidth-failed nodes that probed first—they are tried first by bandwidth and penalty while accelerating their probes, falling back safely only if all fail. Without measured nodes, unmeasured healthy nodes outrank bandwidth-failed ones, and even when no node has bandwidth data, scoring continues using latency, jitter and availability—falling back to latency tolerance only under a pure 100% bandwidth weight with no bandwidth samples or loss penalty. When scores are available, latency tolerance is skipped, ties keep the current node, healthy picks are held for 60 seconds, and dial-failure retries step down by tier and score descending against the full healthy set without overwriting the group’s global default.',
   bandwidthExample_urltest:
     'A is selected at 150 ms and 10 Mbps. B offers 100 ms and 300 Mbps with the same timing variation. A 100 ms tolerance can keep A in latency mode. With node scoring and fresh samples, B wins after the hold.',
   bandwidthOff_failover:
     'Keep primary/backup tab priority, failure confirmation and failback settings. Automatic tabs choose internally by latency; manual tabs keep the user’s selection.',
   bandwidthOn_failover:
-    'Automatic tabs use the configured score and skip latency tolerance when scores are available. Otherwise they use latency tolerance. Tab priority, recovery confirmation, failback and manual selections are preserved.',
+    'Automatic tabs score healthy nodes against the fixed 100% total weight from Backend Settings (missing metrics count as 0, with an availability penalty on frequent probe failures). When download weight is above 0 and measured healthy nodes exist in the tab, only measured nodes compete for the default; during cold start before initial probes finish, unprobed higher-tier nodes are never blocked by lower-tier or bandwidth-failed nodes that probed first—they are tried first by bandwidth and penalty while accelerating their probes, falling back safely if all fail. Otherwise unmeasured healthy nodes outrank bandwidth-failed ones, and even when the whole tab lacks bandwidth data, scoring continues via latency, jitter and availability—falling back to in-lane latency tolerance only under a pure 100% bandwidth weight with no samples or loss penalty. When scores are available, in-lane latency tolerance is skipped and dial-failure retries step down by tier and score descending against the full healthy set without overwriting the global default. Tab priority, recovery confirmation, failback and manual selections remain intact.',
   bandwidthExample_failover:
     'A healthy primary offers 50 Mbps and a backup offers 500 Mbps: keep the primary. Inside an automatic primary tab, two healthy nodes have the same latency and offer 200 Mbps and 50 Mbps: prefer the 200 Mbps node within that tab.',
   bandwidthOff_loadbalance:
     'Each new connection goes to a healthy node with fewer active connections/pending dials. Among equally loaded nodes, prefer the low-latency range and rotate ties.',
   bandwidthOn_loadbalance:
-    'Use the configured scores to weight new connections. Prefer idle nodes first. Among equally busy nodes, favor higher quality. Groups share active connections and pending dials. Without usable scores, use the original distribution rule.',
+    'New connections score healthy nodes against the fixed 100% total weight from Backend Settings (missing metrics count as 0, with an availability penalty on frequent probe failures). When download weight is above 0 and measured healthy nodes exist, unmeasured and bandwidth-failed nodes stay out of the main pool; during cold start before initial probes finish, unprobed higher-tier nodes (such as measured high-bandwidth nodes) are never blocked by lower-tier or bandwidth-failed nodes that probed first—they are dialed first by bandwidth and penalty while accelerating their probes, falling back safely if all fail. Slow nodes scoring well below the full healthy set’s best are filtered out, and connection weights skew toward higher-scoring nodes in the qualified primary pool. Hedging and dial retries that exclude already-tried nodes keep the original primary threshold intact rather than lowering it—falling back in lower-scored measured > unmeasured > bandwidth-failed tier order with a score-based weight gradient only once all qualified primaries are exhausted or full-pool escape triggers on faults or severe stalls. Without measured nodes, unmeasured healthy nodes outrank bandwidth-failed ones, and even when no node has bandwidth data, weighted scoring continues using latency, jitter and availability—falling back to least-connection distribution only under a pure 100% bandwidth weight with no samples or loss penalty. Groups share active connections and pending dials.',
   bandwidthExample_loadbalance:
-    'A scores 93 and B scores 64. Both idle, the first connection goes to A and the next goes to B if A is still busy. If A fails, B receives new connections regardless of past bandwidth.',
+    'A scores 95, B scores 82 and throttled C scores 45. Normal connections are distributed across A and B with higher weight on A, while C is excluded unless both A and B fail.',
   bandwidthSharedHelp:
-    'Each effective node shares one test across subscriptions and groups. The score uses the average of up to ten successful samples, which expires when the newest sample is two intervals old. An unmeasured candidate temporarily uses the median of the other measured candidates. Reading scores adds no probes.',
+    'Each effective node shares one test across subscriptions and groups. Bandwidth evaluates up to the 10 most recent test records within the last 10 intervals (at least 48 hours, including both successes and failures, requiring the newest record within two intervals): effective speed weights successful samples by recency with a 0.65 decay factor, while failures decay over time with a 2-interval half-life into an effective failure weight and apply a 1.5× geometric stepped penalty to the download sub-score (scaled proportionally by download weight without reducing latency or jitter; nodes stay in the measured tier with the reduced score unless they have no successful samples, 3+ latest consecutive failures, or their download sub-score drops to 0, in which case they are classified as bandwidth-failed and leave the primary tier). Scores always use the fixed 100% total weight denominator: missing latency, jitter or valid bandwidth count as 0 without scaling up remaining weights, and frequent recent probe failures (availability below 85%) smoothly reduce the score. When download weight is above 0, healthy nodes are tiered as measured > unmeasured (fallback) > bandwidth-failed: measured nodes exclusively compete for primaries when available, and during cold start unprobed higher-tier nodes are prioritized by bandwidth and penalty ahead of lower-tier or bandwidth-failed nodes that probed first while accelerating their initial probes (inactive bandwidth-failed nodes drop to the lowest probe priority); otherwise unmeasured nodes take priority, and even when the whole group lacks bandwidth data, scoring continues via latency, jitter and availability—falling back to normal rules only under a pure 100% bandwidth weight with no samples or loss penalty. Reading scores adds no probes.',
   bandwidthClientDisabled:
     'Android, iOS, Windows, macOS and Linux clients do not enable node scoring or download testing. In node mode the router can still apply its own policy. Measurements estimate current conditions; combined throughput is not guaranteed.',
   nodeInfoExpandText: 'Expand {field}',
@@ -2600,13 +2610,13 @@ const en = {
   bandwidthSettingsHelpIntro:
     'The router downloads test data through eligible nodes to estimate download speed. Subscriptions with periodic bandwidth checks and groups with node scoring can add nodes to the test schedule. The same node shares one test across subscriptions and groups.',
   bandwidthSettingsHelpInterval:
-    'How often the router schedules a test for each eligible node. Daily intervals can choose the start hour.',
+    'How often the router schedules a test for each eligible node. Daily intervals can choose the start hour, an unfinished daily batch automatically resumes after restarts, and if a healthy node fails its test during a daily cycle it automatically retries in the background after 30 minutes (at most once per cycle). Never-tested or newly added eligible nodes run their rate-limited initial test in the background without waiting for the next start hour, while other already-tested nodes follow the interval and start hour.',
   bandwidthSettingsHelpCap:
     'The maximum amount of data one test may download. A test can end before reaching the limit.',
   bandwidthSettingsHelpExample:
     'With a 2-hour interval and a 64 MB limit, 99 unique nodes can run 12 tests each per day. If every test reaches the limit, that is about 76.03 GB/day. Initial tests, tests of newly added nodes, protocol overhead and provider multipliers are additional.',
   nodeScoreWeightsHelpIntro:
-    'The router converts latency, download bandwidth and HTTP timing variation to scores from 0 to 100, then combines them using these weights. The defaults are 40%, 30% and 30%. A weight of 0% excludes that metric from the score.',
+    'The router converts latency, download bandwidth and HTTP timing variation to 0–100 scores and combines them against the fixed 100% total weight. Missing weighted metrics count as 0 without scaling up remaining weights. Bandwidth test failures within the last 10 tests decay over time with a 2-interval half-life into an effective failure weight and apply a 1.5× geometric stepped penalty to the download sub-score (scaled proportionally by download weight without reducing latency or jitter; counting as 0 when there are no successful samples, 3+ latest consecutive failures, or the download sub-score hits 0), and frequent recent probe failures apply an availability penalty. HTTP timing variation reflects latency fluctuation across HTTP probes. Defaults are 40%, 30% and 30%; a metric set to 0% is excluded.',
   nodeScoreWeightsHelpDrag:
     'Drag either divider to adjust the two neighboring weights. The total stays at 100%. Use the arrow keys to adjust by 1 percentage point, or Shift + arrow keys to adjust by 0.1.',
   nodeScoreWeightsHelpExample:

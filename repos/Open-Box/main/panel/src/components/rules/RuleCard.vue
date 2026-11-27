@@ -73,6 +73,8 @@
               <ProxyName
                 :name="routeName"
                 class="text-base-content/80 text-xs md:text-sm"
+                :show-latency="routeIndex === routeNames.length - 1"
+                :bandwidth-only="routeIndex === routeNames.length - 1"
               />
             </template>
           </div>
@@ -80,15 +82,10 @@
             v-else
             :name="rule.proxy"
             class="text-base-content/80 text-xs md:text-sm"
+            show-latency
+            bandwidth-only
           />
         </div>
-        <span
-          v-if="latency !== NOT_CONNECTED"
-          :class="latencyColor"
-          class="ml-1 text-xs"
-        >
-          {{ latency }}
-        </span>
       </div>
     </div>
 
@@ -169,8 +166,6 @@ const isFixedRoute = computed(() => {
 
   return Boolean(proxyNode?.fixed && proxyNode.fixed === proxyNode.now)
 })
-const latency = computed(() => getLatencyByName(props.rule.proxy, props.rule.proxy))
-const latencyColor = computed(() => getColorForLatency(Number(latency.value)))
 
 const size = computed(() => {
   if (props.rule.type === 'RuleSet') {

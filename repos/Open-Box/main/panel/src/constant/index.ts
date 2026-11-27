@@ -89,6 +89,7 @@ export enum PROXY_TAB_TYPE {
 export enum SORT_TYPE {
   HOST = 'host',
   CHAINS = 'chains',
+  OUTBOUND = 'outbound',
   RULE = 'rule',
   TYPE = 'type',
   CONNECT_TIME = 'connectTime',
@@ -105,10 +106,11 @@ export enum SORT_DIRECTION {
   DESC = 'desc',
 }
 
-// 表头点击排序:排序项 → 它对应的表格列(没有对应列的排序项,表格里选不到)
+// 排序项 → 它对应的列:排序菜单只列当前视图里显示着的列,表头在这一列上画升 / 降序箭头
 export const SORT_TYPE_COLUMN: Record<SORT_TYPE, CONNECTIONS_TABLE_ACCESSOR_KEY> = {
   [SORT_TYPE.HOST]: CONNECTIONS_TABLE_ACCESSOR_KEY.Host,
   [SORT_TYPE.CHAINS]: CONNECTIONS_TABLE_ACCESSOR_KEY.Chains,
+  [SORT_TYPE.OUTBOUND]: CONNECTIONS_TABLE_ACCESSOR_KEY.Outbound,
   [SORT_TYPE.RULE]: CONNECTIONS_TABLE_ACCESSOR_KEY.Rule,
   [SORT_TYPE.TYPE]: CONNECTIONS_TABLE_ACCESSOR_KEY.Type,
   [SORT_TYPE.CONNECT_TIME]: CONNECTIONS_TABLE_ACCESSOR_KEY.ConnectTime,
@@ -125,6 +127,9 @@ export enum CONNECTION_GROUP_MODE {
   DEVICE = 'connectionsByDevice',
   TARGET = 'connectionsByTarget',
 }
+
+// 连接页顶部的分组页签:不分组(平铺所有连接)/ 按终端 / 按目标(和上游 v0.1.488 一致)
+export type CONNECTION_VIEW_MODE = 'none' | CONNECTION_GROUP_MODE
 
 // 展开一个分组之后,组内还能再分:不分 / 按分流 / 按另一个维度(终端分组里是目标,目标分组里是终端)
 export type CONNECTION_SUBGROUP_MODE = 'none' | 'routing' | CONNECTION_GROUP_MODE
@@ -360,7 +365,8 @@ export enum SETTINGS_TAB {
   dns = 'dns',
   kernel = 'kernel',
   share = 'share',
-  clientApp = 'clientApp',
+  // 上游这个页签的 data-key / ?tab= 取值是 `apps`(不是 clientApp),深链和缓存状态都按它走
+  apps = 'apps',
 }
 
 export enum SETTINGS_MENU_KEY {

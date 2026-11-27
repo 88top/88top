@@ -59,14 +59,16 @@ type Node struct {
 	DownloadAt    *int64   `json:"downloadAt"`
 	LowerBound    bool     `json:"lowerBound"`
 	DownloadStale bool     `json:"downloadStale"`
-	ActiveMs      int64    `json:"activeMs"`
-	Up            int64    `json:"up"`
-	Down          int64    `json:"down"`
-	Tag           string   `json:"tag"`
-	Protocol      string   `json:"protocol"`
-	Region        string   `json:"region"`
-	Inactive      bool     `json:"inactive"`
-	Charts        *Charts  `json:"charts,omitempty"`
+	// DownloadFailed 对上游 v0.1.490 的 downloadFailed:最近一次带宽测速失败(与「从未测过」分开)。
+	DownloadFailed bool    `json:"downloadFailed"`
+	ActiveMs       int64   `json:"activeMs"`
+	Up             int64   `json:"up"`
+	Down           int64   `json:"down"`
+	Tag            string  `json:"tag"`
+	Protocol       string  `json:"protocol"`
+	Region         string  `json:"region"`
+	Inactive       bool    `json:"inactive"`
+	Charts         *Charts `json:"charts,omitempty"`
 }
 
 // SubscriptionQuality 对应 OpenboxQualitySubscription(字段与上游一致)。
@@ -161,38 +163,108 @@ func availKey(a *float64) float64 {
 	return *a
 }
 
-// downloadOf 取一个节点下载测速的汇总:最近最多 10 次成功(mbps>0)测速的平均,
-// 且最近一次要晚于「现在往前两个周期」,否则视为没有。
+// downloadOf 取一个节点下载测速的汇总。
+//
+// 对齐上游 v0.1.491:最近最多 10 个统一周期(至少 48 小时)内的最近 10 次测速记录(含成功与失败),
+// 有效速度对**成功样本**按「从新到旧 0.65 衰减加权」估算;窗口内**失败次数**另按 1.5 倍几何阶梯
+// 扣减下载单项分(在 score.go 里按带宽权重等比折算,不倒扣延时与抖动)。
+// 最新记录需在两个周期内,否则视为没有(与旧版一致)。
+//
+// 为什么不再用简单平均:简单平均里一次很久以前的高速会把近期的明显下滑掩盖掉,
+// 上游 491 的 release notes 说的就是「更及时反映近期带宽变化」。
 func downloadOf(list []BWSample, nowMs, periodMs int64) *download {
-	var ok []BWSample
+	// 只取窗口内的记录(成功与失败都算),按时间升序
+	var win []BWSample
 	for _, p := range list {
-		if !p.Failed && p.Mbps > 0 && p.At <= nowMs {
-			ok = append(ok, p)
+		if p.At <= nowMs && p.At > nowMs-bwWindowMs(periodMs) {
+			win = append(win, p)
 		}
 	}
-	if len(ok) == 0 {
+	if len(win) == 0 {
 		return nil
 	}
-	sort.SliceStable(ok, func(i, j int) bool { return ok[i].At < ok[j].At })
-	if len(ok) > fullSamples {
-		ok = ok[len(ok)-fullSamples:]
-	}
-	d := &download{Count: len(ok)}
-	var sum float64
-	for _, p := range ok {
-		sum += p.Mbps
-		if p.At > d.At {
-			d.At = p.At
+	sort.SliceStable(win, func(i, j int) bool { return win[i].At < win[j].At })
+
+	var ok []BWSample
+	// v0.1.492:失败不再是简单计数,而是**按距今时间以 2 个周期为半衰期衰减**计入等效失败次数
+	// (久远的失败自然淡化)。等效次数用于扣分阶梯;另外单独记「最新连续失败次数」,
+	// 连续 3 次就判带宽失败(492 新增的判定条件,替代了原来的「累计 5 次」)。
+	var failWeight float64
+	streak := 0
+	for _, p := range win { // win 已按时间升序
+		if !p.Failed && p.Mbps > 0 {
+			ok = append(ok, p)
+			streak = 0
+		} else {
+			age := nowMs - p.At
+			failWeight += math.Pow(0.5, float64(age)/float64(2*periodMs))
+			streak++
 		}
+	}
+	fails := int(math.Round(failWeight))
+	if fails > bwMaxFails {
+		fails = bwMaxFails
+	}
+	d := &download{Count: len(ok), Fails: fails, FailStreak: streak}
+	if len(win) > 0 {
+		d.At = win[len(win)-1].At
+	}
+	for _, p := range win {
 		if p.LowerBound {
 			d.LowerBound = true
 		}
 	}
-	d.Mbps = sum / float64(len(ok))
-	if d.At <= nowMs-2*periodMs {
-		return nil
+	if len(ok) == 0 {
+		// 有记录但一次都没成功:带宽失败,没有有效速度
+		d.Failed = true
+		return d
+	}
+	if len(ok) > fullSamples {
+		ok = ok[len(ok)-fullSamples:]
+	}
+	d.Count = len(ok)
+	// 从新到旧衰减加权:最新的样本权重 1,往前每一条再乘 0.65
+	var sw, sv float64
+	w := 1.0
+	for i := len(ok) - 1; i >= 0; i-- {
+		sw += w
+		sv += w * ok[i].Mbps
+		w *= bwDecay
+	}
+	d.Mbps = sv / sw
+	// v0.1.492 的判定:无成功样本(上面已返回)、**最新连续 3 次失败**、或扣分把下载分扣到 0
+	// 都判带宽失败。原来的「累计 5 次」已由「连续 3 次」替代。
+	if streak >= bwFailStreak {
+		d.Failed = true
 	}
 	return d
+}
+
+// 上游 v0.1.491 的带宽窗口与扣分参数。
+const (
+	// bwDecay 是成功样本从新到旧的衰减系数
+	bwDecay = 0.65
+	// bwMaxFails 是扣分阶梯的上限档数(等效失败次数超过它就不再增加扣分)
+	bwMaxFails = 5
+	// bwFailStreak 是「最新连续失败到这个次数就判带宽失败」(上游 v0.1.492)
+	bwFailStreak = 3
+	// bwFailStep 是失败扣分的几何阶梯底数(1.5 倍)
+	bwFailStep = 1.5
+	// bwDropUnit 是老代码里用过的首项,保留给按权重缩放的换算
+	bwDropUnit = 3.0
+	// bwDropBaseWeight 是 bwDropUnit 对应的权重基准
+	bwDropBaseWeight = 30.0
+	// bwWindowHours 是带宽统计窗口的最小小时数(至少 48 小时)
+	bwWindowHours = 48
+)
+
+// bwWindowMs 是带宽统计窗口:最近 10 个周期与 48 小时取大者。
+func bwWindowMs(periodMs int64) int64 {
+	w := 10 * periodMs
+	if min := int64(bwWindowHours) * 3600 * 1000; w < min {
+		w = min
+	}
+	return w
 }
 
 // latencyChart 把自己攒的探测和延迟历史合并成图表用的序列:同一时刻以自己攒的为准,最近 60 条。
@@ -302,7 +374,7 @@ func (s *Service) Query(ctx context.Context, q Query) (Result, error) {
 				Availability: ev.Availability, Latency: ev.Latency, Jitter: ev.Jitter, Download: ev.Download,
 				State: ev.State, Score: ev.Score, Provisional: ev.Provisional, Checks: ev.Checks,
 				FirstAt: sm.FirstAt, LastAt: sm.LastAt, DownloadAt: ev.DownloadAt,
-				LowerBound: ev.LowerBound, DownloadStale: ev.DownloadStale,
+				LowerBound: ev.LowerBound, DownloadStale: ev.DownloadStale, DownloadFailed: ev.DownloadFailed,
 				ActiveMs: sm.ActiveMs, Up: sm.Up, Down: sm.Down,
 				Tag: ni.Tag, Protocol: ni.Protocol, Region: ni.Region, Inactive: !sub.Enabled,
 			}
@@ -361,4 +433,31 @@ func (s *Service) Query(ctx context.Context, q Query) (Result, error) {
 		out.Subscriptions = append(out.Subscriptions, b.sq)
 	}
 	return out, nil
+}
+
+// bwDrop 是默认 30% 带宽权重下,带宽失败 n 次后扣减下载单项分的值。
+// **推导(维护者 2026-11-27 指出)**:上游文案给的「3 / 7.5 / 14.25 / 24.375 / 30」
+// 不是数值本身等比,而是**相邻两项的差**等比 —— 差依次 3 / 4.5 / 6.75 / 10.125,公比正好 1.5。
+// 所以增量是 3·1.5^(n-1),累加成等比数列求和:
+//
+//	drop(n) = min(30, 3·(1.5ⁿ−1)/(1.5−1)) = min(30, 6·(1.5ⁿ−1))
+//
+// 逐项验证:n=1 → 6×0.5=3;n=2 → 6×1.25=7.5;n=3 → 6×2.375=14.25;
+// n=4 → 6×4.0625=24.375;n=5 → 6×6.59375=39.5625,封顶成 30。**五个点全部吻合**。
+//
+// 推断点 / 待维护者复核:
+//  1. 第 5 个点已被封顶,所以「30 是硬上限」还是「表只有 5 档、之后固定」无法区分;
+//     两者在 n≥5 时取值相同,不影响结果。
+//  2. n 的定义(连续失败还是窗口内累计、是否衰减恢复)看不出,这里沿用原表语义:
+//     调用处传的是**窗口内的失败次数**,不做衰减。
+//  3. n 允许非整数时封闭公式是连续的,原表需插值、两者会不同;当前调用处只传整数。
+func bwDrop(n int) float64 {
+	if n <= 0 {
+		return 0
+	}
+	d := 6 * (math.Pow(1.5, float64(n)) - 1)
+	if d > 30 {
+		return 30
+	}
+	return d
 }

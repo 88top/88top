@@ -185,6 +185,8 @@
               <template v-else-if="exitView.chains.length">
                 <RouteChainHops
                   :chain="exitView.chains"
+                  show-latency
+                  bandwidth-only
                   arrow-class="text-base-content/40 -ml-0.5 h-4 w-4 shrink-0"
                 />
               </template>
