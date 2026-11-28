@@ -340,6 +340,22 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	configpreviewapi.Register(srv.Mux(), configpreviewapi.Deps{Gen: gen})
 	// 「上次成功部署用的输入指纹」:部署成功时记,服务状态的 pendingRestart 用它判断配置改了、内核还没用上
 	applied := &singbox.Applied{Store: st, Source: gen}
+	// 启动时对一次基线:官方面板(或手动)部署过而自研后端没记过指纹时,接管现状当基线,
+	// 免得一启动就报一堆「有改动要重启内核」(真机现象见 pending.go 的 AdoptBaseline 注释)。
+	// 按当前内核选已部署的配置文件;读不到就不猜,保持原行为。
+	go func() {
+		file := filepath.Join(cfg.ConfigDir, "config.json")
+		if k, err := system.ReadRouterKernel(cfg.RouterKernelFile()); err == nil && k == system.KernelMihomo {
+			file = filepath.Join(cfg.ConfigDir, "mihomo.yaml")
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		if adopted, err := applied.AdoptBaseline(ctx, file); err != nil {
+			log.Warn("启动时对齐「已应用」基线失败,「待重启」可能多报", "error", err)
+		} else if adopted {
+			log.Info("已把当前已部署的配置记为「已应用」基线(之前是别的实现部署的)", "file", file)
+		}
+	}()
 
 	// 服务控制:只通过系统自带的服务管理器(OpenWrt init.d / systemd)操作 sing-box
 	initKind := system.DetectInitHere()
@@ -465,9 +481,15 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 			}),
 			probeRunner,
 			func(ctx context.Context) string {
+				// 上游 v0.1.493:带宽测速的下载地址由档案 bandwidth.endpoint 决定
+				// (cloudflare / apple / cachefly / custom),不再借用延迟测速的 testUrl。
 				if p, err := profileSvc.Get(ctx); err == nil {
-					if u, _ := p["testUrl"].(string); strings.TrimSpace(u) != "" {
-						return strings.TrimSpace(u)
+					if raw, ok := p["bandwidth"]; ok {
+						if st, nerr := bandwidth.NormalizeSettings(raw); nerr == nil {
+							if u := st.TestEndpointURL(); u != "" {
+								return u
+							}
+						}
 					}
 				}
 				return ""
@@ -776,6 +798,20 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 		// 与 sing-box 那条同:部署成功后记下输入指纹,pendingRestart 才会清零。
 		// 之前 mihomo 这条漏了这个字段,真机上「改配置 → 部署」后 pendingRestart 一直为真。
 		Track: applied,
+		// 与 sing-box 那条同:部署成功后把故障转移计划存进配置目录。
+		// 之前 mihomo 这条也漏了,真机上配了 failover 组、部署成功,`failover.json` 一直是 `[]`
+		// (2026-11-27 真机再次复现:官方面板日志能认出 1 个组,自研后端这条却写不进去)。
+		SavePlan: func(v any) error {
+			p, err := failover.ParsePlan(v)
+			if err != nil {
+				return err
+			}
+			if err := failover.SavePlan(failoverPlanPath, p); err != nil {
+				return err
+			}
+			failoverMgr.SetPlan(p)
+			return nil
+		},
 	}
 	// 按 <ConfigDir>/router-kernel 选一条:sing-box 写 config.json,mihomo 写 mihomo.yaml
 	kernelDeployer := &deploykernel.Deployer{
@@ -834,7 +870,7 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	// 组件更新:status / check / notes 读发布信息;run 走「探测 → 下载并解压到暂存 → 校验 → 冒烟」,
 	// 提交(替换文件并重启)是 M6-6,还没接上,所以跑完会明确回一句「本次没有改动系统」
 	updateSvc := &update.Service{
-		Checker: &update.Checker{MirrorPrefix: cfg.UpdateMirror},
+		Checker: &update.Checker{MirrorPrefix: cfg.UpdateMirror, APIBase: cfg.UpdateAPI},
 		Version: version, BuiltAt: builtAt,
 		KernelVersion:  func(ctx context.Context) string { return singbox.ReadKernelVersion(ctx, cfg.SingBox).Version },
 		DataDir:        cfg.DataDir,
@@ -1182,7 +1218,7 @@ func newApp(cfg system.Config, log *slog.Logger) (*server.Server, func(ctx conte
 	// 概览顶栏「Open-Box Latest」后面的版本号:按预设决策取 main 上最新的 release tag。
 	// 这里挂一个 10 分钟缓存 + 5 秒超时:面板会频繁轮询这个接口,不能每次都去问 GitHub;
 	// 查不到(离网、限流、仓库没发布)返回空串,由 activation 退回构建时注入的版本。
-	latestTag := latestReleaseTagCached(&update.Checker{MirrorPrefix: cfg.UpdateMirror}, 10*time.Minute)
+	latestTag := latestReleaseTagCached(&update.Checker{MirrorPrefix: cfg.UpdateMirror, APIBase: cfg.UpdateAPI}, 10*time.Minute)
 	activationapi.Register(srv.Mux(), activationapi.Deps{
 		Version: version,
 		KernelVersion: func(ctx context.Context) string {

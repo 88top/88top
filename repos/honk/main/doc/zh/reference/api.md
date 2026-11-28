@@ -50,7 +50,7 @@ listener 默认关闭，要在配置里显式启用 [`experimental.native_api`](
 | POST | `/api/v1/dns/query` | 显式 DNS 诊断。 |
 | GET | `/api/v1/dns/cache`、`/api/v1/dns/log` | 精确缓存快照与客户端查询历史。 |
 | DELETE | `/api/v1/dns/cache/{entry_id}`、`/api/v1/dns/cache` | 删除精确的缓存 incarnation，或按完整名称和可选 type 删除。 |
-| POST | `/api/v1/dns/cache/flush` | 等待内存缓存和已启用的持久化缓存确认失效；不清空域名路由事实。 |
+| POST | `/api/v1/dns/cache/flush` | 等待内存缓存和已启用的持久化缓存确认失效，并将域名上游 bootstrap 缓存标为待刷新；不清空域名路由事实。 |
 | POST | `/api/v1/routing/trace` | 固定当前 generation 的离线路由模拟，只支持 `resolve=none`。 |
 | GET | `/api/v1/rules` | 返回当前 generation 的完整规则字典、回退和可用的来源位置。 |
 | GET | `/api/v1/dns/rules` | 返回当前 generation 的 DNS 请求规则和响应规则，每个列表以回退结尾。 |
@@ -931,7 +931,7 @@ DNS 查询、缓存响应和 DNS 日志分页都会遮蔽用于显示的 listene
 
 超出这份预算时返回 `503 snapshot_unavailable`。游标无法识别时返回 `410 snapshot_expired`；可识别但过滤器或 `limit` 不同的游标返回 `400 invalid_request`。`entry_id` 标识精确的 incarnation，用旧 ID 删不掉替代它的记录。
 
-按 name 删除可以跨精确 key 的各种变体，并用 type 限定范围。删除和 flush 与入库发布串行化，会等已启用的持久化确认失效；确认之后，旧的 foreground 或 refresh 不能把已删的缓存复活。flush 不清空 DNS 路由投影。
+按 name 删除可以跨精确 key 的各种变体，并用 type 限定范围。删除和 flush 与入库发布串行化，会等已启用的持久化确认失效；确认之后，旧的 foreground 或 refresh 不能把已删的缓存复活。flush 还会将域名上游 bootstrap 缓存标为待刷新（保留 stale 回退），不清空 DNS 路由投影。
 
 DNS 查询、缓存和日志的完整 JSON 响应上限都是 262144 字节。缓存和日志分页如果下一条会超出上限，就提前结束并返回 `next_cursor`，所以 `limit` 只是上限，不保证条数。单条记录本身就超限时，会独占一页完整返回，不受这个上限约束。
 
@@ -1440,7 +1440,7 @@ Clash listener 允许任意 CORS 来源，没有原生 API 那样的 Host 和 Or
 | GET | `/logs` | 通过 WebSocket 或分块 JSON 行推送 tracing 事件；所有订阅者共用一个 256 槽位的广播队列，`?level=` 默认为 `info`。 |
 | GET | `/dns/query` | 经 honk DNS 解析 `?name=` 并返回 DoH 风格 JSON；`?type=` 默认为 `A`。 |
 | POST | `/cache/fakeip/flush` | 兼容性 no-op，返回 204；没有持久化 FakeIP 映射可清除。 |
-| POST | `/cache/dns/flush` | 清除存活 DNS 缓存及其持久化 DNS 状态。 |
+| POST | `/cache/dns/flush` | 清除存活 DNS 缓存及其持久化 DNS 状态，并将域名上游 bootstrap 缓存标为待刷新。 |
 | GET | `/providers/proxies` | 将非空组暴露为 Clash proxy provider。每个 provider 是一个代理组，不是订阅；订阅状态见 [Provider 观测与刷新](#provider-观测与刷新)。 |
 | GET | `/providers/rules` | 返回当前空桩文档 `{"providers":[]}`。 |
 | GET | `/ui`, `/ui/*` | 将 `/ui` 重定向到 `/ui/`，并提供已配置的外部 UI 目录。 |
@@ -1457,9 +1457,9 @@ Clash listener 允许任意 CORS 来源，没有原生 API 那样的 Host 和 Or
 
 `GET /configs` 还返回固定的兼容字段，它们不配置任何功能：`mode-list: ["Rule","Global","Direct"]`、值为 0 的 `port`、`socks-port` 与 `mixed-port`、为 `false` 的 `allow-lan` 与 `ipv6`、`bind-address: "*"`、配置的 `log-level`，以及 `tun: {"enable":false}`。
 
-`GET /proxies` 返回 `{"proxies":{"<name>":<document>}}`；`GET /proxies/{name}` 返回单个文档。节点文档含 `name`、`type`、`udp: true` 与 `history`。组文档含 `name`、`type`、成员名列表 `all`、TCP 选择 `now` 与 `history`；Score 另含 `scoreVerification`。`GLOBAL` 含 `type: "selector"`、`all` 与 `now`，没有 `history`。
+`GET /proxies` 返回 `{"proxies":{"<name>":<document>}}`；`GET /proxies/{name}` 返回单个文档。节点文档含 `name`、`type`、`udp: true`、`alive` 与 `history`。组文档含 `name`、`type`、成员名列表 `all`、TCP 选择 `now` 与 `history`；Score 另含 `scoreVerification`。`GLOBAL` 含 `type: "selector"`、`all` 与 `now`，没有 `history`。
 
-节点 `type` 为 `Shadowsocks`、`Trojan`、`Vmess`、`Vless`、`Socks5`、`Hysteria2`、`Tuic`、`Juicity`、`AnyTLS`、`Chain`、`Direct` 或 `Reject`，其中 `Reject` 对应 `block`。组 `type` 为 `selector`、`url_test`、`load_balance` 或 `fallback`；Score 报告为 `url_test`。`history` 条目为 `{time,delay}`，取最近一次真实 TCP IPv4 测量。
+节点 `type` 为 `Shadowsocks`、`Trojan`、`Vmess`、`Vless`、`Socks5`、`Hysteria2`、`Tuic`、`Juicity`、`AnyTLS`、`Chain`、`Direct` 或 `Reject`，其中 `Reject` 对应 `block`。组 `type` 为 `selector`、`url_test`、`load_balance` 或 `fallback`；Score 报告为 `url_test`。`history` 条目为 `{time,delay}`，取最近一次真实 TCP IPv4 测量。节点 `alive` 表示已有合格健康检查或真实流量结果的地址族的 TCP 健康状态：其中任一地址族存活、或尚无任何结果时为 `true`，全部失效时为 `false`；`history` 保留最近一次成功样本，所以 `alive: false` 的节点仍可能显示延迟。
 
 `GET /rules` 返回 `{"rules":[{"type","payload","proxy"}]}`，由配置的路由规则生成，不含原生规则 ID，也没有 fallback 行。
 
@@ -1675,7 +1675,7 @@ B = { businessStarts, sources: { cold, periodic, recovery }, trialStarts,
 
 | 字段 | 含义 |
 | --- | --- |
-| `socketAdmission.refused` | Endpoint 网络 bootstrap 需要两个额度，而整个 DNS socket 分区不足两个时被拒绝的次数。 |
+| `socketAdmission.refused` | Endpoint 网络 bootstrap 所需额度（单族策略 1 个，双栈策略 2 个）超过整个 DNS socket 分区上限时被拒绝的次数。 |
 | `socketAdmission.timeouts` | 因 admission 期限耗尽而返回的必要物理 socket admission 调用。 |
 | `proxyAdmission.timeouts` | 因 admission 期限耗尽而返回的必要代理 stream 或非原始 packet 准备 admission 调用。 |
 | `pressure.retiredUdpPools` | 因压力而选中退役的空闲 UDP socket pool，每个被摘除的 pool 只计一次。 |

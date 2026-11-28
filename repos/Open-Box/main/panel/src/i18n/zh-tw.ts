@@ -149,6 +149,15 @@ const zhTW: LANG_MESSAGE = {
   bandwidthThresholds: '頻寬檢測',
   cpuLoadThresholds: '負載檢測',
   nodeScoreThresholds: '節點評分',
+  nodeScoreTipLabel: '節點評分：',
+  nodeScoreRefresh: '重新整理評分',
+  nodeScoreRefreshStarted: '正在重新整理 {name} 的節點評分…',
+  nodeScoreRefreshQueued: '已重新整理 {name} 延遲，正在排隊檢測頻寬以更新評分',
+  nodeScoreRefreshDone: '{name} 節點評分已更新',
+  nodeScoreRefreshUnavailable: '{name} 延遲檢測未通過，已重新整理節點評分',
+  nodeScoreRefreshSubQueued: '已重新整理 {name} 延遲，已排隊 {queued} 個節點檢測頻寬以更新評分',
+  nodeScoreRefreshSubDone: '{name} 節點評分已重新整理',
+  nodeScoreRefreshFailed: '重新整理節點評分失敗：{message}',
   latencyLowShort: '延時較低',
   latencyModerateShort: '延時一般',
   latencySevereShort: '延時嚴重',
@@ -161,7 +170,7 @@ const zhTW: LANG_MESSAGE = {
   cpuLoadHighShort: '負載較高',
   nodeScorePoorShort: '評分較低',
   nodeScoreFairShort: '評分一般',
-  nodeScoreExcellentShort: '評分優秀',
+  nodeScoreExcellentShort: '評分較高',
   cpuLoadLowDesc: '負載較小（綠色）',
   cpuLoadMediumDesc: '負載一般（橙黃色）',
   nodeScorePoorDesc: '評分較低（紅色）',
@@ -204,6 +213,8 @@ const zhTW: LANG_MESSAGE = {
   chains: '代理鏈',
   outbound: '出站節點',
   sortBy: '排序方式',
+  scoreasc: '按評分升序',
+  scoredesc: '按評分降序',
   proxyNodeSortBy: '節點排序方式',
   rule: '規則',
   sourceIP: '源IP',
@@ -545,6 +556,7 @@ const zhTW: LANG_MESSAGE = {
   bandwidthManualQueued: '已加入 {queued} 個節點重新檢測頻寬，{joined} 個節點已在排隊或檢測中。',
   bandwidthManualFailed: '頻寬檢測失敗：{message}',
   bandwidthManualComplete: '{name}：{value} Mbps',
+  bandwidthManualCompleteRecovering: '{name}：本次 {value} Mbps（仍受近期失敗降權影響，繼續測速可恢復）',
   subscriptionBandwidthCheck: '啟用頻寬定期檢查',
   subscriptionDirectUrl: '訂閱連結直連',
   subscriptionDirectNodes: '節點直連',
@@ -564,9 +576,9 @@ const zhTW: LANG_MESSAGE = {
   qualitySamples: '{count} 次健康檢測',
   qualityUploadPending: '上傳未檢測',
   qualityBandwidthUnmeasured: '未測頻寬',
-  qualityBandwidthUnmeasuredTip: '暫無有效下載頻寬，頻寬項按 0 分計入（暫估）',
+  qualityBandwidthUnmeasuredTip: '暫無有效下載頻寬，下載分按已測延遲與抖動表現保守估算（標為暫估）',
   qualityBandwidthFailed: '頻寬失敗',
-  qualityBandwidthFailedTip: '近期頻寬測速無有效成功紀錄、最新連續 3 次失敗或下載單項扣至 0 分，頻寬項按 0 分計入',
+  qualityBandwidthFailedTip: '近期頻寬測速無有效成功紀錄、最新連續 3 次失敗或下載單項扣至 0 分，頻寬項嚴格按 0 分計入',
   qualityBandwidthFailedUnweightedTip: '近期頻寬測速無有效成功紀錄、最新連續 3 次失敗或下載單項扣至 0 分；目前頻寬權重為 0%，不參與計分',
   qualityAssessed: '已評估節點',
   qualityBandwidthSamples: '{count} 個頻寬樣本',
@@ -585,7 +597,7 @@ const zhTW: LANG_MESSAGE = {
   qualityHealthHelp:
     '確認失敗的節點按 0 分計入訂閱品質。涵蓋率按有效的近期檢測計算（大節點組排隊巡檢時健康有效視窗動態放寬至最長 10 分鐘，真實探測或撥號失敗仍立即計入）。涵蓋率不足 80% 時，優先顯示上一次評分。評分顏色分檔可在「設定 → 前端面板 → 檢測閾值」中調整。',
   qualityModelHelp:
-    '健康節點與雙核心選路使用完全相同的評分標準。延遲、下載頻寬和 HTTP 抖動固定按後端設定中的總權重（100%）計算綜合評分；帶權重的缺測項按 0 分計入（不放大其餘指標權重），避免未測節點虛高反超實測節點。最近 10 次頻寬測速中的失敗紀錄會按距今時間以 2 個週期為半衰期衰減計入等效失敗次數，按 1.5 倍幾何階梯扣減下載單項分（按頻寬權重等比折算，不倒扣延遲與抖動；無成功樣本、最新連續 3 次失敗或下載單項扣至 0 分時該項記 0 分），近期高頻丟包（可用率低於 85%）還會平滑衰減得分。某項權重設為 0% 時不參與計分。參與評分的指標缺測或樣本不足 10 個時標為暫估。',
+    '健康節點與雙核心選路使用完全相同的評分標準。延遲、下載頻寬和 HTTP 抖動固定按後端設定中的總權重（100%）計算綜合評分（不放大其餘維度權重）：缺延遲或缺抖動按 0 分計入；下載頻寬未測時按已測延遲與抖動的綜合表現乘保守係數（0.85）估算（無延遲/抖動基準時記 0 分），避免冷啟動期間把好節點統一壓成低分；而近期頻寬測速失敗則嚴格按 0 分計入。最近 10 次頻寬測速中的失敗紀錄會按距今時間以 2 個週期為半衰期衰減計入等效失敗次數，按 1.5 倍幾何階梯扣減下載單項分（按頻寬權重等比折算，不倒扣延遲與抖動；無成功樣本、最新連續 3 次失敗或下載單項扣至 0 分時該項嚴格記 0 分），近期高頻丟包（可用率低於 85%）還會平滑衰減得分。某項權重設為 0% 時不參與計分。參與評分的指標缺測或樣本不足 10 個時標為暫估。',
   qualityExampleHelp:
     '例如：1 個 95 分節點與 9 個失敗節點，整體約 10 分；1 個 95 分節點與 9 個未測節點，顯示「暫無評分」，不能評為優秀。',
   qualityMeasurementHelp:
@@ -649,6 +661,10 @@ const zhTW: LANG_MESSAGE = {
   latencyReasonUnstable: '時通時斷',
   latencyReasonError: '連線失敗',
   latencyReasonStatus: '狀態碼不符',
+  latencyReasonForbidden: '測速站拒絕存取 (403)',
+  latencyReasonRateLimited: '測速站限流 (429)',
+  latencyReasonPenalized: '歷史失敗降權',
+  latencyReasonUnsupported: '核心版本不支援此測速站點',
   policyOutboundSwitching: '正在將「{group}」切換至「{outbound}」…',
   urlTestManualSelectTip:
     '「{name}」是自動優選組,走哪個節點由核心按測速自己定,不能手動指定。想換線路就點它的閃電重測一次。',
@@ -821,14 +837,14 @@ const zhTW: LANG_MESSAGE = {
   obUpdateAvailable: '有新版本',
   obUpdateCheck: '檢查更新',
   obUpdateNow: '立即更新',
-  obUpdateChannelAuto: '沿用安裝通道',
-  obUpdateChannelDirect: 'GitHub 直連',
-  obUpdateChannelMirror: '鏡像加速',
-  obUpdateInstalledChannel: '安裝時通道:{channel}',
   obUpdateAuto: '自動更新',
   obUpdateAutoAt: '每天',
   obUpdateAutoHint:
     '按所選整點先探最新版，有新版才升級；按設定間隔執行，一天最多一次，修改計劃後立即按新時間生效。鐘點按路由器時區（下面「時區」裡可改）。',
+  obUpdateChannelAuto: '沿用安裝通道',
+  obUpdateChannelDirect: 'GitHub 直連',
+  obUpdateChannelMirror: '鏡像加速',
+  obUpdateInstalledChannel: '安裝時通道：{channel}',
   timezoneTitle: '時區',
   timezoneDescription:
     '路由器的系統時區,和 LuCI「系統 → 時區」是同一個設定。自動更新、訂閱定時更新都按這個時區的鐘點執行。',
@@ -840,7 +856,7 @@ const zhTW: LANG_MESSAGE = {
   timezoneLoadFailed: '讀取時區失敗:{message}',
   timezoneSaveFailed: '修改時區失敗:{message}',
   obUpdateStage_starting: '正在啟動…',
-  obUpdateStage_probing: '正在探測下載通道…',
+  obUpdateStage_probing: '正在自動選擇最快下載源…',
   obUpdateStage_downloading: '正在下載升級包…',
   obUpdateStage_verifying: '正在校驗…',
   obUpdateStage_extracting: '正在解包…',
@@ -1040,6 +1056,9 @@ const zhTW: LANG_MESSAGE = {
   groupType_failover: '故障轉移（failover）',
   groupType_failover_short: '故障轉移',
   groupType_loadbalance: '負載均衡（load balance）',
+  groupType_selector_short: '手動選擇',
+  groupType_urltest_short: '自動優選',
+  groupType_loadbalance_short: '負載均衡',
   loadBalanceHint:
     '按連線分配至可用節點，優先選擇連線較少的節點，同等負載時輪替。多條並行連線可疊加總頻寬；已建立的連線維持原出口。',
   loadBalanceNodesOnly: '負載均衡只能選擇真實節點，請移除節點群組或失效成員。',
@@ -2229,6 +2248,9 @@ const zhTW: LANG_MESSAGE = {
   shareRegionsErrRule: '第 {index} 條規則的值不對:{value}',
   obUpdateDialogTitle: '正在升級 Open-Box',
   obUpdateDialogHint: '升級期間面板會重啟一次,核心隨後再重啟一次;隱藏這個視窗不影響後台繼續升級。',
+  obUpdateSourceLabel: '目前下載源',
+  obUpdateTransferLabel: '下載進度',
+  obUpdateAttemptsLabel: '切源記錄',
   obUpdateDialogHide: '隱藏',
   obUpdateViewProgress: '查看進度',
   clientRoutingTab: '終端分流',
@@ -2341,30 +2363,30 @@ const zhTW: LANG_MESSAGE = {
   bandwidthDownloadCap: '單次下載流量上限',
   bandwidthDaily: '去重後有 {count} 個符合條件的節點，單個節點一天最多測試 {times} 次，按目前上限最多消耗 {size}/天。',
   bandwidthHealthFirst:
-    '節點健康、可用是第一前提。已確認故障及尚未確認恢復的節點繼續排除，歷史頻寬再高也不參與選擇（大節點組背景巡檢排隊期間會動態放寬健康有效視窗至最長 10 分鐘以防誤踢主力，但真實探測或撥號失敗仍立即剔除）。沒有頻寬紀錄不等於節點不可用：頻寬項按 0 分計入固定總權重分母（100%）；組內有已測健康節點時未測節點保留為兜底，全組暫無頻寬資料時仍按延遲、抖動與可用率繼續評分選路。',
+    '節點健康、可用是第一前提。已確認故障及尚未確認恢復的節點繼續排除，歷史頻寬再高也不參與選擇（大節點組背景巡檢排隊期間會動態放寬健康有效視窗至最長 10 分鐘以防誤踢主力，但真實探測或撥號失敗仍立即剔除）。沒有頻寬紀錄不等於節點不可用：頻寬未測時按已測延遲與抖動的綜合表現乘 0.85 保守估算（僅頻寬測速失敗按 0 分計入），並維持固定總權重分母（100%）；組內有已測健康節點時未測節點保留為兜底，全組暫無頻寬資料時仍按延遲、抖動與可用率繼續評分選路。',
   bandwidthOff: '關閉時',
   bandwidthOn: '開啟時',
   bandwidthExample: '選擇例子',
   bandwidthOff_urltest:
     '按延時穩定選擇一個節點，保留原有延時容差，避免小幅波動導致頻繁切換。',
   bandwidthOn_urltest:
-    '固定按後端設定的總權重（100%）給健康候選評分（缺延遲、缺抖動或無頻寬對應項均記 0 分，高頻丟包觸發可用率衰減）。下載頻寬權重大於 0 且組內有已測健康節點時，僅對已測節點評分排名（未測與測速失敗節點不搶佔預設節點）；冷啟動首探未完成時，尚未探通的高梯隊節點（如高頻寬已測節點）同樣不被先探通的低梯隊或測速失敗節點截胡，會優先按頻寬與扣分直撥並加速首探，全部撥號失敗後再安全回退。無已測節點時，未測健康節點優先於測速失敗節點，全組無頻寬資料也會繼續按延遲、抖動與可用率評分（僅純 100% 頻寬權重且全組無頻寬樣本與丟包衰減時回退延遲容差）。有可用評分時跳過延遲容差，同分保留目前節點，健康節點至少保持 60 秒；撥號失敗重試挑選備用節點時同樣基於完整健康候選集按分層與評分由高到低依序回退，且不覆蓋全域預設節點。',
+    '固定按後端設定的總權重（100%）給健康候選評分（缺延遲、缺抖動或頻寬測速失敗記 0 分；未測頻寬按已測維度保守估算，高頻丟包觸發可用率衰減）。下載頻寬權重大於 0 且組內有已測健康節點時，僅對已測節點評分排名（未測與測速失敗節點不搶佔預設節點）；冷啟動首探未完成時，尚未探通的高梯隊節點（如高頻寬已測節點）同樣不被先探通的低梯隊或測速失敗節點截胡，會優先按頻寬與扣分直撥並加速首探，全部撥號失敗後再安全回退。無已測節點時，未測健康節點優先於測速失敗節點，全組無頻寬資料也會繼續按延遲、抖動與可用率評分（僅純 100% 頻寬權重且全組無頻寬樣本與丟包衰減時回退延遲容差）。有可用評分時跳過延遲容差，同分保留目前節點，健康節點至少保持 60 秒；撥號失敗重試挑選備用節點時同樣基於完整健康候選集按分層與評分由高到低依序回退，且不覆蓋全域預設節點。',
   bandwidthExample_urltest:
     'A 目前為 150 ms、10 Mbps，B 為 100 ms、300 Mbps，抖動相同。容差為 100 ms 時，按延遲可保留 A。啟用節點評分且樣本有效時，保持期結束後選 B。',
   bandwidthOff_failover:
     '先遵守主用、備用頁籤順序，以及原有故障確認和恢復回切設置；自動頁籤內部按延時選擇，手動頁籤保持用戶指定的節點。',
   bandwidthOn_failover:
-    '自動頁籤固定按後端設定的總權重（100%）評分（缺測項記 0 分，高頻丟包觸發可用率衰減）。下載頻寬權重大於 0 且頁籤內有已測健康節點時，僅對已測節點評分排名（未測與測速失敗節點不搶佔預設節點）；冷啟動首探未完成時，尚未探通的高梯隊節點同樣不被先探通的低梯隊或測速失敗節點截胡，會優先按頻寬與扣分嘗試並加速首探，全部撥號失敗後再回退。無已測節點時未測健康節點優先於測速失敗節點，整頁籤無頻寬資料時仍繼續按延遲、抖動與可用率評分（僅純 100% 頻寬權重且無可用樣本與丟包衰減時回退組內延遲容差）。有可用評分時跳過組內延遲容差，撥號失敗重試選備用同樣基於完整健康候選集按分層與評分由高到低依序回退，且不覆蓋全域預設節點。主備順序、恢復確認、回切設定及手動選擇繼續生效。',
+    '自動頁籤固定按後端設定的總權重（100%）評分（缺延遲、缺抖動或頻寬測速失敗記 0 分；未測頻寬按已測維度保守估算，高頻丟包觸發可用率衰減）。下載頻寬權重大於 0 且頁籤內有已測健康節點時，僅對已測節點評分排名（未測與測速失敗節點不搶佔預設節點）；冷啟動首探未完成時，尚未探通的高梯隊節點同樣不被先探通的低梯隊或測速失敗節點截胡，會優先按頻寬與扣分嘗試並加速首探，全部撥號失敗後再回退。無已測節點時未測健康節點優先於測速失敗節點，整頁籤無頻寬資料時仍繼續按延遲、抖動與可用率評分（僅純 100% 頻寬權重且無可用樣本與丟包衰減時回退組內延遲容差）。有可用評分時跳過組內延遲容差，撥號失敗重試選備用同樣基於完整健康候選集按分層與評分由高到低依序回退，且不覆蓋全域預設節點。主備順序、恢復確認、回切設定及手動選擇繼續生效。',
   bandwidthExample_failover:
     '主用健康、帶寬 50 Mbps，備用帶寬 500 Mbps，仍使用主用。如果主用的自動頁籤內有兩個同延時的健康節點，分別為 200 Mbps 和 50 Mbps，則在這個頁籤內優先 200 Mbps 的節點。',
   bandwidthOff_loadbalance:
     '每個新連接優先分配給健康且連接/撥號較少的節點；佔用相同時在低延時範圍內輪換。',
   bandwidthOn_loadbalance:
-    '新連線固定按後端設定的總權重（100%）計算綜合評分（缺測項記 0 分，高頻丟包觸發可用率衰減）：下載頻寬權重大於 0 且有已測健康節點時，未測與測速失敗節點不進入主力分流池；冷啟動首探未完成時，尚未探通的高梯隊節點（如高頻寬已測節點）也不會被先探通的低梯隊或測速失敗節點截胡，仍優先按已有頻寬與扣分直撥並加速首探，全部失敗後再回退兜底。同時按完整健康候選集的最優分劃定門檻剔除明顯偏慢的低分節點，再於合格主力子集內按評分拉開連線權重（單次撥號對沖或重試排除已嘗試節點時仍維持原主力門檻不放水，僅在主力池全已嘗試或全員故障/卡頓觸發逃生時，按「已測低分 > 未測 > 測速失敗」分層與評分梯度兜底）。無已測節點時未測健康節點優先於測速失敗節點，全組無頻寬資料也會繼續按延遲、抖動與可用率評分加權分流（僅純 100% 頻寬權重且無樣本與丟包衰減時回退原分配規則）。各組共享活動連線與正在撥號的佔用。',
+    '新連線固定按後端設定的總權重（100%）計算綜合評分（缺延遲、缺抖動或頻寬測速失敗記 0 分；未測頻寬按已測維度保守估算，高頻丟包觸發可用率衰減）：下載頻寬權重大於 0 且有已測健康節點時，未測與測速失敗節點不進入主力分流池；冷啟動首探未完成時，尚未探通的高梯隊節點（如高頻寬已測節點）也不會被先探通的低梯隊或測速失敗節點截胡，仍優先按已有頻寬與扣分直撥並加速首探，全部失敗後再回退兜底。同時按完整健康候選集的最優分劃定門檻剔除明顯偏慢的低分節點，再於合格主力子集內按評分拉開連線權重（單次撥號對沖或重試排除已嘗試節點時仍維持原主力門檻不放水，僅在主力池全已嘗試或全員故障/卡頓觸發逃生時，按「已測低分 > 未測 > 測速失敗」分層與評分梯度兜底）。無已測節點時未測健康節點優先於測速失敗節點，全組無頻寬資料也會繼續按延遲、抖動與可用率評分加權分流（僅純 100% 頻寬權重且無樣本與丟包衰減時回退原分配規則）。各組共享活動連線與正在撥號的佔用。',
   bandwidthExample_loadbalance:
     'A 得 95 分、B 得 82 分，限速節點 C 僅得 45 分。正常流量在 A、B 間按權重傾斜分配（A 承擔更多並行連線），C 被剔除不參與日常分流；僅當 A、B 均故障時才由 C 兜底。',
   bandwidthSharedHelp:
-    '同一實際節點跨訂閱和群組共用一次頻寬測試。頻寬統計最近 10 個週期（至少 48 小時）內最近最多 10 次測速紀錄（含成功與失敗，最新紀錄需在兩個週期內）：有效速度對其中成功樣本按從新到舊 0.65 衰減加權，失敗紀錄按距今時間以 2 個週期為半衰期衰減計入等效失敗次數、按 1.5 倍幾何階梯扣減下載單項分（按頻寬權重等比折算，不倒扣延遲與抖動；無成功樣本、最新連續 3 次失敗或下載單項扣至 0 分時判為測速失敗並移出主力層，其餘保留在主力層僅扣分）。評分固定以總權重（100%）作分母，缺延遲、缺抖動或無有效頻寬對應項均按 0 分計入，不放大其餘維度權重；近期高頻丟包（可用率低於 85%）會平滑衰減得分。下載頻寬權重大於 0 時，健康節點按「已測頻寬 > 未測頻寬（兜底） > 測速失敗」分層：組內有已測健康節點時，僅已測節點參與主力排名；冷啟動首探期間，高梯隊未首探節點也會按頻寬與扣分優先於先探通的低梯隊或測速失敗節點並加速探測（非活躍測速失敗節點降為最低探針優先級）；無已測節點時優先對未測節點評分，全組均無頻寬資料時仍按延遲、抖動與可用率繼續評分，僅純 100% 頻寬權重且無樣本與丟包衰減時回退原規則。計算評分無需增加探測。',
+    '同一實際節點跨訂閱和群組共用一次頻寬測試。頻寬統計最近 10 個週期（至少 48 小時）內最近最多 10 次測速紀錄（含成功與失敗，最新紀錄需在兩個週期內）：有效速度對其中成功樣本按從新到舊 0.65 衰減加權，失敗紀錄按距今時間以 2 個週期為半衰期衰減計入等效失敗次數、按 1.5 倍幾何階梯扣減下載單項分（按頻寬權重等比折算，不倒扣延遲與抖動；無成功樣本、最新連續 3 次失敗或下載單項扣至 0 分時判為測速失敗並移出主力層，其餘保留在主力層僅扣分）。評分固定以總權重（100%）作分母，不放大其餘維度權重：缺延遲、缺抖動及頻寬測速失敗均按 0 分計入；未測頻寬則按已測延遲與抖動的綜合表現乘 0.85 保守估算；近期高頻丟包（可用率低於 85%）會平滑衰減得分。下載頻寬權重大於 0 時，健康節點按「已測頻寬 > 未測頻寬（兜底） > 測速失敗」分層：組內有已測健康節點時，僅已測節點參與主力排名；冷啟動首探期間，高梯隊未首探節點也會按頻寬與扣分優先於先探通的低梯隊或測速失敗節點並加速探測（非活躍測速失敗節點降為最低探針優先級）；無已測節點時優先對未測節點評分，全組均無頻寬資料時仍按延遲、抖動與可用率繼續評分，僅純 100% 頻寬權重且無樣本與丟包衰減時回退原規則。計算評分無需增加探測。',
   bandwidthClientDisabled:
     'Android、iOS、Windows、macOS、Linux 客戶端不啟用節點評分及下載測速；節點分流仍可由路由器執行自身策略。實測值反映當時條件，不保證總帶寬疊加比例。',
   nodeInfoExpandText: '展開{field}',
@@ -2478,10 +2500,22 @@ const zhTW: LANG_MESSAGE = {
     '路由器透過節點下載測試資料，估算節點的下載速度。啟用定期頻寬檢查的訂閱和啟用節點評分的群組會將符合條件的節點納入測速。同一個實際節點出現在多個訂閱或群組裡，也共用一次測試。',
   bandwidthSettingsHelpInterval: '決定每個符合條件的節點隔多久安排一次測速；按天測試時可指定每天幾點開始，面板重新啟動後當天未測完的批次會自動續跑，且健康節點若在當期測速失敗，會在 30 分鐘後在背景自動補測最多 1 次（每週期至多補測 1 次）。從未測過的新增或剛納入計畫的節點會在背景限速補齊首次測速，無須等到隔日開始時間；其餘已測節點仍按週期和開始時間排程。',
   bandwidthSettingsHelpCap: '限制一次測速最多下載多少測試資料。測速可能提前結束。',
+  bandwidthEndpoint: '測速站點',
+  bandwidthEndpointCloudflare: 'Cloudflare（預設，自動降級體積）',
+  bandwidthEndpointApple: 'Apple CDN',
+  bandwidthEndpointCachefly: 'CacheFly CDN',
+  bandwidthEndpointCustom: '自訂',
+  bandwidthCustomUrl: '自訂測速位址',
+  bandwidthCustomUrlPlaceholder: 'https://speed.example.com/100mb.bin',
+  bandwidthCustomUrlInvalid: '請輸入有效的公開 https:// 測速位址（不支援本機或內網位址）。',
+  bandwidthEndpointSaved: '測速站點設定已儲存。',
+  bandwidthEndpointHint: '預設來源遇 403 或限流時會自動降級單次下載體積重試；切換測速站點後將按新基準重新累計節點頻寬樣本；自訂位址僅支援公開 https:// 下載測速連結。',
+  bandwidthHelpCurrentEndpoint: '測速站點：{endpoint}',
+  bandwidthSettingsHelpEndpoint: '選擇頻寬測速使用的下載測速站點。預設 Cloudflare 來源遇到 403 或限流時會自動降級下載體積重試；也可切換為其他內建 CDN 或公開 https:// 自訂位址。不同測速站點的頻寬樣本彼此隔離，切換後會按新站點重新累計；切回原站點可繼續沿用先前樣本。',
   bandwidthSettingsHelpExample:
     '週期設為 2 小時，單次上限設為 64 MB。若有 99 個去重後的節點，每個節點每天安排 12 次。每次都用滿上限時，99 × 12 × 64 MB 約為 76.03 GB/天。首次或新增節點測速、協定開銷和機場流量倍率另計。',
   nodeScoreWeightsHelpIntro:
-    '系統把延遲、下載頻寬和 HTTP 抖動各自換算成 0–100 分，固定按總權重（100%）計算綜合評分；帶權重的缺測項按 0 分計入（不放大其餘維度權重）。最近 10 次頻寬測速內的失敗紀錄按距今時間以 2 個週期為半衰期衰減計入等效失敗次數，按 1.5 倍幾何階梯扣減下載單項分（按頻寬權重等比折算，不倒扣延遲與抖動；無成功樣本、最新連續 3 次失敗或下載單項扣至 0 分時該項記 0 分），近期高頻丟包還會按可用率衰減。HTTP 抖動反映多次 HTTP 探測的耗時波動。預設權重依次為 40%、30%、30%；某項設為 0% 時不參與計分。',
+    '系統把延遲、下載頻寬和 HTTP 抖動各自換算成 0–100 分，固定按總權重（100%）計算綜合評分（不放大其餘維度權重）。缺延遲或缺抖動時按 0 分計入；下載頻寬未測時按已測延遲與抖動的綜合表現乘保守係數（0.85）估算（無延遲/抖動基準時按 0 分計）；而近期測速失敗按 0 分嚴格計入。最近 10 次頻寬測速內的失敗紀錄按距今時間以 2 個週期為半衰期衰減計入等效失敗次數，按 1.5 倍幾何階梯扣減下載單項分（按頻寬權重等比折算，不倒扣延遲與抖動；無成功樣本、最新連續 3 次失敗或下載單項扣至 0 分時判為頻寬失敗並記 0 分），近期高頻丟包還會按可用率衰減。HTTP 抖動反映多次 HTTP 探測的耗時波動。預設權重依次為 40%、30%、30%；某項設為 0% 時不參與計分。',
   nodeScoreWeightsHelpDrag:
     '拖曳任一分界點，會一起調整相鄰的兩項權重，合計始終為 100%。也可用方向鍵調整 1 個百分點，按住 Shift 時可微調 0.1 個百分點。',
   nodeScoreWeightsHelpExample:
